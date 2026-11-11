@@ -1,5 +1,7 @@
 # Stack Research
 
+> **SUPERSEDED (2026-11-12) for the application stack.** The owner chose Laravel (PHP) with Inertia + Vue, PostgreSQL, a Postgres-backed queue, Fortify + Socialite and a custom policy layer (see PROJECT.md Constraints). Everything below about TypeScript, Next.js, Drizzle, pg-boss, Better Auth, next-intl and execa is NOT the chosen stack. **PART 1 (AI provider verdicts) remains valid** and applies unchanged: Codex CLI primary, Copilot CLI fallback, Claude Code and Antigravity excluded from v1. Any library mentioned for PHP must be verified when planning each phase.
+
 **Domain:** Self-hosted multi-user family organization PWA (to-do, wishlist, finance, medical records) with subscription-CLI-driven AI OCR
 **Researched:** 2026-11-12
 **Confidence:** MEDIUM overall. AI-provider facts are HIGH where taken from vendor docs and LOW where only community sources exist (flagged per item). Library versions were read from the npm registry on the research date. Framework recommendations rest on ecosystem knowledge and were not re-verified against Context7.

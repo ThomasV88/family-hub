@@ -14,11 +14,13 @@ A shared web app (responsive, installable as PWA) for an extended family to orga
 - **Privacy**: per-module permissions enforced server-side; health and finance default restricted
 - **Languages**: SK, PL, EN from the start
 - **Devices**: responsive for phone, desktop, iPad (PWA)
-- **Tech stack**: TypeScript/Node 24, Next.js 16, PostgreSQL + Drizzle, pg-boss, Better Auth, next-intl (from research; PHP rejected because CLI jobs need a supervised long-lived worker)
+- **Tech stack** (confirmed by owner 2026-11-12): PHP with Laravel; Inertia + Vue frontend (PWA via vite-plugin-pwa); PostgreSQL; Laravel database queue on Postgres (no Redis) with a separate worker container; Fortify + Socialite for auth (email/password, Google, TOTP); custom policy layer for permissions; Laravel localization + vue-i18n; Symfony Process for AI CLIs; Pest + Vitest; Docker Compose services `app`, `nginx`, `worker`, `scheduler`, `postgres`. The research recommendation (TypeScript/Next.js) was overridden by the owner.
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:research/STACK.md -->
 ## Technology Stack
+
+> **The application stack is Laravel (PHP), not the TypeScript/Next.js stack described in PART 2 below** (superseded by owner decision, see Constraints above). PART 1 (AI provider verdicts) still applies. Ignore the Node, Next.js, Drizzle, pg-boss, Better Auth, next-intl and execa recommendations; use the Laravel equivalents and verify package choices when planning each phase.
 
 ## PART 1: AI PROVIDER VERDICTS (the critical question)
 ### Verdict summary

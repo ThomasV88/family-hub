@@ -47,7 +47,7 @@ The whole family can track shared tasks together in one trusted place, with per-
 - **Privacy**: per-module permissions enforced server-side; health and finance default restricted
 - **Languages**: SK, PL, EN from the start
 - **Devices**: responsive for phone, desktop, iPad (PWA)
-- **Tech stack**: TypeScript/Node 24, Next.js 16, PostgreSQL + Drizzle, pg-boss, Better Auth, next-intl (from research; PHP rejected because CLI jobs need a supervised long-lived worker)
+- **Tech stack** (confirmed by owner 2026-11-12): PHP with Laravel; Inertia + Vue frontend (PWA via vite-plugin-pwa); PostgreSQL; Laravel database queue on Postgres (no Redis) with a separate worker container; Fortify + Socialite for auth (email/password, Google, TOTP); custom policy layer for permissions; Laravel localization + vue-i18n; Symfony Process for AI CLIs; Pest + Vitest; Docker Compose services `app`, `nginx`, `worker`, `scheduler`, `postgres`. The research recommendation (TypeScript/Next.js) was overridden by the owner.
 
 ## Key Decisions
 
@@ -58,6 +58,9 @@ The whole family can track shared tasks together in one trusted place, with per-
 | Subscription-based AI agents instead of paid APIs | Owner's cost requirement | — Pending |
 | Multiple AI agents with settings-based config | Quota limits and provider flexibility | — Pending |
 | Hosted on owner's VPS with staging/prod flow | Existing infrastructure and workflow | — Pending |
+| Laravel (PHP) instead of TypeScript/Next.js | Owner's choice; Laravel covers queues, scheduler, auth and subprocesses. Needs a dedicated queue worker with long timeouts for CLI jobs | — Pending |
+| Inertia + Vue, PostgreSQL, Postgres-backed queue | Rich interactive UI/PWA, JSON support for AI output, one fewer service than Redis | — Pending |
+| Fortify + Socialite, custom policy layer | Invite-only model and row-level rules (hidden reservations, per-person access) need custom logic anyway | — Pending |
 
 ## Evolution
 

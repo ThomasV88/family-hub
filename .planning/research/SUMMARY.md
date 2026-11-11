@@ -24,6 +24,8 @@ AI OCR verdict under the "subscriptions only, no per-token billing" rule:
 
 ### Recommended Stack
 
+> **Superseded by owner decision (2026-11-12):** the application stack is Laravel (PHP) + Inertia/Vue + PostgreSQL with a Postgres-backed queue, Fortify + Socialite and a custom policy layer. The TypeScript recommendation below is kept as research history. The AI provider verdicts above still hold. Since the worker is PHP, run CLI jobs through a dedicated queue worker container with long timeouts and `Symfony Process`; never exec CLIs inside a web request.
+
 TypeScript on Node 24 LTS (TS pinned to 5.9 until ecosystem compatibility with 7.x is verified), Next.js 16.4 / React 19.3 / Tailwind 4 / shadcn/ui, PostgreSQL 17 with Drizzle ORM, pg-boss 12 for jobs and cron, Better Auth 1.7 (email+password and Google), next-intl 4.15, zod 4.6, execa 10 for subprocesses. Docker Compose with `web`, `worker`, `postgres` and an nginx joined to the existing `edge` network.
 
 **Core technologies:**
