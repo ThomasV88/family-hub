@@ -24,7 +24,7 @@ The whole family can track shared tasks together in one trusted place, with per-
 - [ ] **Family accounting:** manual income/expense records with categories, budgets, overviews and charts, CSV bank-statement import; strong focus on tracking recurring expenses (rent, savings, services, kindergarten, energy, etc.)
 - [ ] **Medical records:** doctor visits, medications and allergies, vaccinations, uploaded documents/photos of reports
 - [ ] **AI OCR of medical documents:** upload document, fill basic fields manually or let AI read it; AI returns data in an exact JSON structure via a prepared prompt, which is stored in the DB; bulk re-generation of past documents; handles agent usage limits (quota exhaustion, retry/fallback)
-- [ ] **Multi-agent AI backend:** supports multiple AI agents and model selection; initial candidates Codex, Claude, Antigravity, GitHub Copilot; subscription OAuth tokens/logins configured in app settings; runs headless on the server using subscriptions, NOT per-token paid APIs
+- [ ] **Multi-agent AI backend:** supports multiple AI agents and model selection; v1 agents are Codex CLI (primary) and GitHub Copilot CLI (fallback); CLI subscription login is done once on the server, the settings screen picks agent order/model and shows login health; runs headless on the server using subscriptions, NOT per-token paid APIs (research outcome: Claude Code and Antigravity excluded from v1 on terms grounds, app does not store subscription tokens)
 - [ ] **Medical exports:** export by category (e.g. gastroenterology, internal medicine), or all at once, for doctor consultations and in an AI-friendly format
 
 ### Out of Scope
@@ -47,7 +47,7 @@ The whole family can track shared tasks together in one trusted place, with per-
 - **Privacy**: per-module permissions enforced server-side; health and finance default restricted
 - **Languages**: SK, PL, EN from the start
 - **Devices**: responsive for phone, desktop, iPad (PWA)
-- **Tech stack**: not decided — to be chosen in research (owner mentioned PHP only as an idea for spawning CLIs)
+- **Tech stack**: TypeScript/Node 24, Next.js 16, PostgreSQL + Drizzle, pg-boss, Better Auth, next-intl (from research; PHP rejected because CLI jobs need a supervised long-lived worker)
 
 ## Key Decisions
 
