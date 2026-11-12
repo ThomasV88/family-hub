@@ -11,7 +11,7 @@ vi.mock('@inertiajs/vue3', () => ({
 
 import LanguageSwitcher from '../../resources/js/Components/LanguageSwitcher.vue';
 
-const sk = JSON.parse(readFileSync(new URL('../../lang/sk.json', import.meta.url), 'utf8'));
+const sk = JSON.parse(readFileSync(`${process.cwd()}/lang/sk.json`, 'utf8'));
 
 describe('LanguageSwitcher', () => {
     const mountIt = () => mount(LanguageSwitcher, { global: { plugins: [createAppI18n('sk', sk)] } });

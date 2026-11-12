@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { createAppI18n, SUPPORTED_LOCALES, INTL_LOCALES } from '../../resources/js/i18n.js';
 
-const load = (l) => JSON.parse(readFileSync(new URL(`../../lang/${l}.json`, import.meta.url), 'utf8'));
+const load = (l) => JSON.parse(readFileSync(`${process.cwd()}/lang/${l}.json`, 'utf8'));
 const messages = { sk: load('sk'), pl: load('pl'), en: load('en') };
 
 function make(locale) {

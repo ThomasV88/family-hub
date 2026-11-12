@@ -10,7 +10,7 @@ vi.mock('@inertiajs/vue3', () => ({
     router: { post: (...args) => post(...args) },
 }));
 
-const load = (l) => JSON.parse(readFileSync(new URL(`../../lang/${l}.json`, import.meta.url), 'utf8'));
+const load = (l) => JSON.parse(readFileSync(`${process.cwd()}/lang/${l}.json`, 'utf8'));
 const mountHome = (locale = 'en') => mount(Home, { global: { plugins: [createAppI18n(locale, load(locale))] } });
 
 import Home from '../../resources/js/Pages/Home.vue';
