@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\HeartbeatController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', fn () => Inertia::render('Home'))->name('home');
+Route::get('/', HomeController::class)->name('home');
+Route::post('/heartbeat', [HeartbeatController::class, 'store'])
+    ->middleware('throttle:6,1')
+    ->name('heartbeat.store');
