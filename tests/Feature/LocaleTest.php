@@ -25,7 +25,7 @@ it('rejects an unsupported locale and sets no cookie', function () {
 });
 
 it('uses the locale cookie and exposes messages and html lang', function () {
-    $response = $this->withUnencryptedCookie('locale', 'sk')->get('/');
+    $response = $this->withCookie('locale', 'sk')->get('/');
 
     $response->assertInertia(fn (Assert $page) => $page
         ->where('locale', 'sk')
@@ -44,12 +44,12 @@ it('picks the locale from Accept-Language when there is no cookie', function () 
 });
 
 it('lets the cookie win over Accept-Language', function () {
-    $this->withUnencryptedCookie('locale', 'sk')
+    $this->withCookie('locale', 'sk')
         ->withHeader('Accept-Language', 'pl-PL,pl;q=0.9')->get('/')
         ->assertInertia(fn (Assert $page) => $page->where('locale', 'sk'));
 });
 
 it('ignores a tampered locale cookie value', function () {
-    $this->withUnencryptedCookie('locale', '../../etc/passwd')->get('/')
+    $this->withCookie('locale', '../../etc/passwd')->get('/')
         ->assertInertia(fn (Assert $page) => $page->where('locale', 'en'));
 });

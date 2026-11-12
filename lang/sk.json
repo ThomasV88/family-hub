@@ -1,0 +1,23 @@
+{
+    "app": { "name": "Family Hub" },
+    "banner": { "staging": "Testovacie prostredie - iba vymyslené údaje" },
+    "home": {
+        "title": "Family Hub",
+        "intro": "Jedno dôveryhodné miesto pre každodenný život vašej rodiny.",
+        "status_title": "Stav systému",
+        "last_check": "Posledná kontrola na pozadí: {time}",
+        "no_checks": "Zatiaľ neprebehla žiadna kontrola na pozadí.",
+        "source": { "schedule": "plánovaná", "manual": "ručná" },
+        "checks_count": "{count} kontrola | {count} kontroly | {count} kontroly | {count} kontrol",
+        "checks_24h": "Posledných 24 hodín: {checks} (očakávané {expected})",
+        "coverage": "Pokrytie: {percent}",
+        "run_now": "Spustiť kontrolu teraz",
+        "running": "Spúšťa sa..."
+    },
+    "locale": { "label": "Jazyk" },
+    "pwa": {
+        "update_available": "Je dostupná nová verzia.",
+        "reload": "Načítať znova",
+        "dismiss": "Zavrieť"
+    }
+}

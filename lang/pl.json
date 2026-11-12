@@ -1,0 +1,23 @@
+{
+    "app": { "name": "Family Hub" },
+    "banner": { "staging": "Środowisko testowe - tylko fikcyjne dane" },
+    "home": {
+        "title": "Family Hub",
+        "intro": "Jedno zaufane miejsce na codzienne sprawy Twojej rodziny.",
+        "status_title": "Stan systemu",
+        "last_check": "Ostatnie sprawdzenie w tle: {time}",
+        "no_checks": "Nie wykonano jeszcze żadnego sprawdzenia w tle.",
+        "source": { "schedule": "zaplanowane", "manual": "ręczne" },
+        "checks_count": "{count} sprawdzenie | {count} sprawdzenia | {count} sprawdzeń | {count} sprawdzenia",
+        "checks_24h": "Ostatnie 24 godziny: {checks} (oczekiwane {expected})",
+        "coverage": "Pokrycie: {percent}",
+        "run_now": "Uruchom sprawdzenie teraz",
+        "running": "Uruchamianie..."
+    },
+    "locale": { "label": "Język" },
+    "pwa": {
+        "update_available": "Dostępna jest nowa wersja.",
+        "reload": "Załaduj ponownie",
+        "dismiss": "Zamknij"
+    }
+}

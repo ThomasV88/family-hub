@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -35,8 +36,14 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        // Only allowlisted codes reach lang_path (SetLocale guarantees this).
+        $locale = in_array(app()->getLocale(), SetLocale::SUPPORTED, true) ? app()->getLocale() : 'en';
+
         return [
             ...parent::share($request),
+            'locale' => $locale,
+            'availableLocales' => SetLocale::SUPPORTED,
+            'messages' => json_decode(File::get(lang_path("$locale.json")), true, flags: JSON_THROW_ON_ERROR),
             'app' => [
                 'name' => config('app.name'),
                 'env' => app()->environment(),

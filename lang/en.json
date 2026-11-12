@@ -1,0 +1,23 @@
+{
+    "app": { "name": "Family Hub" },
+    "banner": { "staging": "Staging - synthetic data only" },
+    "home": {
+        "title": "Family Hub",
+        "intro": "One trusted place for your family's everyday life.",
+        "status_title": "System status",
+        "last_check": "Last background check: {time}",
+        "no_checks": "No background check has run yet.",
+        "source": { "schedule": "scheduled", "manual": "manual" },
+        "checks_count": "{count} check | {count} checks",
+        "checks_24h": "Last 24 hours: {checks} (expected {expected})",
+        "coverage": "Coverage: {percent}",
+        "run_now": "Run check now",
+        "running": "Running..."
+    },
+    "locale": { "label": "Language" },
+    "pwa": {
+        "update_available": "A new version is available.",
+        "reload": "Reload",
+        "dismiss": "Dismiss"
+    }
+}
