@@ -10,6 +10,7 @@
   --color-primary: #3b6ea8;
   --color-primary-hover: #2f5c8f;
   --color-primary-soft: #e8f0f8;
+  --color-on-primary: #ffffff;
   --color-accent: #c7893a;
   --color-danger: #c4503f;
   --color-success: #4a8f64;
@@ -57,6 +58,7 @@
   --color-primary: #7aa6d6;
   --color-primary-hover: #93b6de;
   --color-primary-soft: #26323f;
+  --color-on-primary: #0f1b27;
   --color-accent: #d9a05a;
   --color-danger: #e0735f;
   --color-success: #6fb088;
