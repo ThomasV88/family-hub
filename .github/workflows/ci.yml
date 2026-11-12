@@ -1,0 +1,202 @@
+name: ci
+
+# Branch model (docs/ops/server.md): develop deploys to staging, main deploys to production
+# (environment `production` requires the owner's approval). Other branches and pull requests only run `check`.
+# Never add the privileged PR trigger variant: this repository is public and PR code must not see secrets.
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Secret scan
+        run: bash scripts/check-secrets.sh
+
+      - name: Shell syntax
+        run: |
+          for f in scripts/*.sh docker/postgres/init/*.sh; do
+            bash -n "$f" || exit 1
+          done
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Vitest
+        run: npx vitest run
+
+      - name: Asset build
+        run: npm run build
+
+      - name: Environment for the dev stack (ephemeral, no real secrets)
+        run: |
+          cp .env.example .env
+          printf 'UID=%s\nGID=%s\n' "$(id -u)" "$(id -g)" >> .env
+
+      - name: Start dev stack and install PHP dependencies
+        run: |
+          docker compose build app
+          docker compose up -d --wait postgres
+          docker compose run --rm app composer install --no-interaction --prefer-dist
+          docker compose run --rm app php artisan key:generate --force
+
+      - name: Pint
+        run: docker compose run --rm app ./vendor/bin/pint --test
+
+      - name: Pest on Postgres 18 (tests run as fh_owner on family_hub_test)
+        run: docker compose run --rm app ./vendor/bin/pest
+
+      - name: Compose and nginx template checks
+        run: |
+          bash scripts/check-compose.sh
+          bash scripts/check-nginx-template.sh
+
+      - name: Deploy guard tests
+        run: bash scripts/test-deploy-guards.sh
+
+      - name: Install restic
+        run: sudo apt-get update -y && sudo apt-get install -y restic
+
+      - name: Backup and restore drill (throwaway Postgres)
+        run: bash scripts/test-backup-local.sh
+
+      - name: Provisioning dry run
+        run: bash scripts/test-server-provision.sh
+
+      - name: Stop dev stack
+        if: always()
+        run: docker compose down -v
+
+  deploy:
+    needs: check
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+      url: https://${{ vars.APP_DOMAIN }}
+    concurrency:
+      group: deploy-${{ github.ref_name }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy target
+        env:
+          APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+        run: |
+          case "$GITHUB_REF_NAME" in
+            main)
+              { echo "TARGET_DIR=/opt/family-hub"; echo "STACK_ENV=production"; echo "BRANCH_TAG=main"; } >> "$GITHUB_ENV" ;;
+            develop)
+              { echo "TARGET_DIR=/opt/family-hub-staging"; echo "STACK_ENV=staging"; echo "BRANCH_TAG=develop"; } >> "$GITHUB_ENV" ;;
+            *)
+              echo "Branch $GITHUB_REF_NAME is not deployed" >&2; exit 1 ;;
+          esac
+          if [ -z "$APP_DOMAIN" ]; then
+            echo "Environment variable APP_DOMAIN is not set" >&2; exit 1
+          fi
+          echo "APP_DOMAIN=$APP_DOMAIN" >> "$GITHUB_ENV"
+          # Registry paths must be lowercase.
+          echo "PREFIX=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      # docker/* actions are pinned to full commit SHAs.
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push app image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: docker/app/Dockerfile
+          target: prod
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.PREFIX }}-app:sha-${{ github.sha }}
+            ${{ env.PREFIX }}-app:${{ env.BRANCH_TAG }}
+          cache-from: type=gha,scope=app
+          cache-to: type=gha,scope=app,mode=max
+
+      - name: Build and push nginx image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: docker/nginx/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.PREFIX }}-nginx:sha-${{ github.sha }}
+            ${{ env.PREFIX }}-nginx:${{ env.BRANCH_TAG }}
+          cache-from: type=gha,scope=nginx
+          cache-to: type=gha,scope=nginx,mode=max
+
+      - name: SSH setup
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m700 -d ~/.ssh
+          umask 077
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+
+      - name: Deploy
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+        run: |
+          SSH_OPTS="-i $HOME/.ssh/deploy_key -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
+          T="$DEPLOY_USER@$DEPLOY_HOST"
+          # shellcheck disable=SC2086
+          scp $SSH_OPTS compose.server.yaml \
+            scripts/deploy.sh scripts/cert-renew.sh scripts/smoke-server.sh \
+            scripts/backup.sh scripts/restore-drill.sh scripts/backup-freshness.sh \
+            "$T:$TARGET_DIR/"
+          # shellcheck disable=SC2086
+          scp $SSH_OPTS docker/postgres/init/01-roles.sh "$T:$TARGET_DIR/postgres-init/"
+          # Per-stack docker config: logging in for one stack does not touch the other.
+          # shellcheck disable=SC2086,SC2029
+          echo "$GHCR_TOKEN" | ssh $SSH_OPTS "$T" "mkdir -p -m 700 $TARGET_DIR/.docker && DOCKER_CONFIG=$TARGET_DIR/.docker docker login ghcr.io -u $GHCR_USER --password-stdin"
+          # shellcheck disable=SC2086,SC2029
+          rc=0
+          ssh $SSH_OPTS "$T" "cd $TARGET_DIR && DOCKER_CONFIG=$TARGET_DIR/.docker IMAGE_TAG=sha-$GITHUB_SHA bash ./deploy.sh" || rc=$?
+          # The pull token is short-lived; remove it from the server either way.
+          # shellcheck disable=SC2086,SC2029
+          ssh $SSH_OPTS "$T" "DOCKER_CONFIG=$TARGET_DIR/.docker docker logout ghcr.io" || true
+          exit "$rc"
+
+      - name: Smoke test
+        run: bash scripts/smoke-server.sh "$APP_DOMAIN" "$STACK_ENV"
+
+      - name: Remove SSH key
+        if: always()
+        run: rm -rf ~/.ssh/deploy_key ~/.ssh/known_hosts
