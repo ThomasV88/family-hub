@@ -10,7 +10,7 @@ Decided by the owner on 2026-11-13 (option "recommended, no off-site").
 |---|---|---|
 | HOST_PROD | `family-hub.vostack.dev` | 2026-11-13 |
 | HOST_STAGE | `family-hub-stage.vostack.dev` | 2026-11-13 |
-| Repo visibility | private (owner switches it in GitHub, see Task 3 of plan 01-02) | 2026-11-13 |
+| Repo visibility | public (kept: GitHub Free has no required-reviewer `production` environment on private repos; rule: no secrets, real data or private keys ever committed, CI secret scan enforces it; revisit if the plan is upgraded) | 2026-11-13 |
 | mem_limit postgres | 192m (prod), 192m (staging) | 2026-11-13 |
 | mem_limit app | 192m (prod), 192m (staging) | 2026-11-13 |
 | mem_limit worker | 160m (prod), 160m (staging) | 2026-11-13 |
