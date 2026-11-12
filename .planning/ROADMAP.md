@@ -11,6 +11,7 @@ Family Hub is built as a vertical-slice MVP: each phase delivers a usable capabi
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [ ] **Phase 1: Foundation and Infrastructure** - Deployed staging/prod stack with i18n, PWA shell, encrypted tested backups and synthetic staging data
+- [ ] **Phase 01.1: Design System and App Shell (INSERTED)** - Minimalist design tokens, core Vue components, responsive app shell and chosen sketches for all modules
 - [ ] **Phase 2: Identity and Authorization Core** - Invite-only accounts, Google sign-in, per-module permissions with presets, deny-by-default policy layer and audit log
 - [ ] **Phase 3: To-Do** - Shared and personal tasks with assignment, recurrence and email/push reminders
 - [ ] **Phase 4: Wishlist** - Gift wishlists with link images, hidden reservations, occasions, co-buying and giver-only reminders
@@ -36,10 +37,27 @@ Family Hub is built as a vertical-slice MVP: each phase delivers a usable capabi
 **Plans**: TBD
 **UI hint**: yes
 
+### Phase 01.1: Design System and App Shell (INSERTED)
+**Goal**: The whole app shares one minimalist, clean visual language and a responsive shell, so every later module is built from the same components and navigation instead of inventing its own UI.
+**Mode:** mvp
+**Depends on**: Phase 1
+**Requirements**: None new (supports FOUND-02 and FOUND-03 through UX; informed by `/gsd-sketch` findings)
+**Success Criteria** (what must be TRUE):
+  1. A documented set of design tokens (colors, typography, spacing, radius) exists and the UI switches between light and dark theme
+  2. A core Vue component library (buttons, inputs, forms, lists, dialogs, tables, empty and error states) is available and shown on a living style page
+  3. The app shell with navigation works on phone, desktop and iPad, with the module list adapting to each layout and to the Slovak, Polish and English text lengths
+  4. Keyboard navigation, visible focus, contrast and touch target sizes meet the accessibility baseline on the style page and the shell
+  5. A sketch for every module (to-do, wishlist, finance, medical, settings) has been chosen and recorded as the design direction for later phases
+**UI hint**: yes
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 01.1 to break down)
+
 ### Phase 2: Identity and Authorization Core
 **Goal**: Family members can join by invitation and sign in, and every piece of data is guarded server-side by per-member, per-module permissions that the admin controls.
 **Mode:** mvp
-**Depends on**: Phase 1
+**Depends on**: Phase 01.1
 **Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, AUTH-08
 **Success Criteria** (what must be TRUE):
   1. Admin invites a member by email, and the invitee can register only through that invitation
