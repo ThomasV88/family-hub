@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="sk" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch 005: Wishlist</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font-sans); background: #d9d9d6; color: var(--color-text); padding-top: 52px; }
+:root[data-theme="dark"] body { background: #0e0e0d; }
+#variant-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9998; background: #fff; border-bottom: 1px solid #ddd; padding: 8px 16px; display: flex; gap: 8px; font-family: system-ui; flex-wrap: wrap; }
+.variant-tab { border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 13px; transition: all .15s ease; color: #222; }
+.variant-tab:hover { background: #f0f0f0; }
+.variant-tab.active { background: #222; color: #fff; border-color: #222; }
+.stage { display: flex; justify-content: center; padding: 16px; }
+.frame { container-type: inline-size; container-name: frame; width: 100%; max-width: 1280px; height: calc(100vh - 92px); min-height: 560px; background: var(--color-bg); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-lg); position: relative; transition: width .2s ease; }
+
+/* Shell */
+.app { display: flex; height: 100%; color: var(--color-text); position: relative; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); border-bottom: 1px solid var(--color-border); }
+.topbar h1 { font-size: var(--text-lg); font-weight: 600; margin: 0; flex: 1; letter-spacing: -.01em; }
+.body { flex: 1; display: flex; min-height: 0; position: relative; }
+.content { flex: 1; overflow: auto; padding: var(--space-6); padding-bottom: 100px; min-width: 0; container-type: inline-size; container-name: content; }
+.icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.icon.s { width: 14px; height: 14px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); padding: 7px 12px; border-radius: var(--radius-md); font: inherit; font-size: var(--text-sm); cursor: pointer; transition: all .15s ease; min-height: 36px; }
+.btn:hover { background: var(--color-surface-2); }
+.btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
+.btn.primary:hover { background: var(--color-primary-hover); }
+.btn.danger { color: var(--color-danger); border-color: var(--color-danger); background: transparent; }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--color-text-muted); }
+.btn.sm { min-height: 30px; padding: 4px 10px; font-size: var(--text-xs); }
+.avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--color-primary-soft); color: var(--color-primary); display: inline-grid; place-items: center; font-size: 11px; font-weight: 700; flex: none; }
+.side { display: none; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3); border-right: 1px solid var(--color-border); width: 64px; align-items: center; overflow: hidden; transition: width .2s ease; }
+.side .brand { display: flex; align-items: center; gap: 8px; font-weight: 650; padding: 4px 12px 16px; }
+.side .brand .logo { width: 22px; height: 22px; border-radius: 6px; background: var(--color-primary); flex: none; }
+.side .spacer { flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--radius-md); color: var(--color-text-muted); cursor: pointer; border: 0; background: none; font: inherit; font-size: var(--text-sm); width: 44px; justify-content: center; transition: all .15s ease; }
+.nav-item:hover { background: var(--color-surface-2); color: var(--color-text); }
+.nav-item.active { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
+.label, .brand span { display: none; }
+.app.open .side { width: 232px; align-items: stretch; }
+.app.open .label, .app.open .brand span { display: inline; }
+.app.open .nav-item { width: 100%; justify-content: flex-start; padding: 8px 12px; }
+.bottom { display: flex; position: absolute; left: 0; right: 0; bottom: 0; background: var(--color-surface); border-top: 1px solid var(--color-border); padding: 6px 4px 14px; justify-content: space-around; z-index: 10; }
+.bottom .nav-item { flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 11px; width: auto; flex: 1; }
+.bottom .label { display: inline; }
+.fab { position: absolute; right: 16px; bottom: 76px; z-index: 11; width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--color-primary); color: var(--color-on-primary); box-shadow: var(--shadow-md); cursor: pointer; display: grid; place-items: center; }
+.collapse-btn, .add-top { display: none; }
+@container frame (min-width: 640px) { .side { display: flex; } .bottom, .fab { display: none; } .content { padding-bottom: var(--space-6); } .collapse-btn, .add-top { display: inline-flex; } }
+
+/* Wishlist */
+.muted { color: var(--color-text-muted); font-size: var(--text-sm); }
+.people { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--space-3); }
+.chip { display: inline-flex; gap: 8px; align-items: center; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-muted); padding: 5px 12px 5px 6px; border-radius: 99px; font-size: var(--text-sm); cursor: pointer; transition: all .15s ease; }
+.chip:hover { background: var(--color-surface-2); }
+.chip.on { background: var(--color-primary-soft); color: var(--color-primary); border-color: var(--color-primary); font-weight: 600; }
+.occ { display: flex; gap: 10px; align-items: center; padding: 10px 14px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); font-size: var(--text-sm); margin-bottom: var(--space-4); flex-wrap: wrap; }
+.occ b { font-weight: 650; }
+.banner { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: var(--radius-lg); background: var(--color-primary-soft); color: var(--color-primary); font-size: var(--text-sm); margin-bottom: var(--space-4); }
+.tag { font-size: 11px; padding: 2px 9px; border-radius: 99px; background: var(--color-surface-2); color: var(--color-text-muted); white-space: nowrap; }
+.tag.ok { background: var(--color-primary-soft); color: var(--color-primary); }
+.tag.me { background: #e6f2ea; color: var(--color-success); }
+:root[data-theme="dark"] .tag.me { background: #21332a; }
+.tag.taken { background: #f6ecd9; color: #9a6a1c; }
+:root[data-theme="dark"] .tag.taken { background: #3a3120; color: var(--color-accent); }
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
+.img { aspect-ratio: 4/3; display: grid; place-items: center; color: rgba(255,255,255,.9); position: relative; }
+.img .icon { width: 34px; height: 34px; }
+.img.shimmer { background: linear-gradient(90deg, var(--color-surface-2) 25%, var(--color-border) 50%, var(--color-surface-2) 75%); background-size: 200% 100%; animation: sh 1s infinite linear; color: var(--color-text-muted); }
+@keyframes sh { to { background-position: -200% 0; } }
+.grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@container content (min-width: 520px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@container content (min-width: 800px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.w { cursor: pointer; transition: box-shadow .15s ease, transform .15s ease; }
+.w:hover { box-shadow: var(--shadow-md); }
+.w.sel { outline: 2px solid var(--color-primary); }
+.w .info { padding: 10px 12px 12px; display: grid; gap: 6px; }
+.w .t { font-size: var(--text-sm); font-weight: 600; line-height: 1.3; }
+.w .row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: var(--text-xs); color: var(--color-text-muted); }
+.list .li { display: flex; gap: 12px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--color-border); cursor: pointer; transition: background .15s ease; }
+.list .li:first-child { border-top: 0; }
+.list .li:hover { background: var(--color-surface-2); }
+.list .li.sel { background: var(--color-primary-soft); }
+.list .thumb { width: 52px; height: 52px; border-radius: var(--radius-md); display: grid; place-items: center; color: rgba(255,255,255,.9); flex: none; }
+.list .grow { flex: 1; min-width: 0; }
+.list .grow .t { font-size: var(--text-sm); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list .grow .s { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 2px; }
+.price { font-size: var(--text-sm); font-weight: 600; white-space: nowrap; }
+.cart { padding: 12px 14px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); margin-bottom: var(--space-4); }
+.cart h3 { margin: 0 0 6px; font-size: var(--text-sm); color: var(--color-text-muted); }
+.group h3 { margin: var(--space-4) 0 6px; font-size: var(--text-sm); display: flex; gap: 8px; align-items: center; }
+.empty { text-align: center; padding: 32px 8px; color: var(--color-text-muted); font-size: var(--text-sm); }
+
+/* Detail */
+.detail { position: absolute; z-index: 30; background: var(--color-surface); border-left: 1px solid var(--color-border); top: 0; bottom: 0; right: 0; width: 360px; padding: var(--space-4); overflow: auto; transform: translateX(100%); transition: transform .2s ease; box-shadow: var(--shadow-lg); }
+.detail.open { transform: none; }
+@container frame (min-width: 900px) { .detail { position: static; flex: none; width: 360px; transform: none; box-shadow: none; display: none; } .detail.open { display: block; } }
+@container frame (max-width: 639px) { .detail { top: auto; left: 0; width: auto; max-height: 86%; border-left: 0; border-top: 1px solid var(--color-border); border-radius: 16px 16px 0 0; transform: translateY(100%); } .detail.open { transform: none; } }
+.detail h2 { margin: 0 0 var(--space-3); font-size: var(--text-lg); display: flex; align-items: center; gap: 8px; }
+.detail h2 button { margin-left: auto; }
+.detail .img { border-radius: var(--radius-lg); margin-bottom: var(--space-3); }
+label.f { display: grid; gap: 5px; font-size: var(--text-sm); margin-bottom: var(--space-3); }
+label.f > span, .lbl { font-weight: 600; font-size: var(--text-xs); color: var(--color-text-muted); }
+.in { width: 100%; padding: 8px 10px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: var(--text-sm); min-height: 38px; }
+.in:focus { outline: 2px solid var(--color-primary-soft); border-color: var(--color-primary); }
+.urlrow { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; font-size: var(--text-sm); }
+.urlrow a { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-primary); text-decoration: none; padding: 6px 10px; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.resbox { padding: 12px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); margin: var(--space-3) 0; font-size: var(--text-sm); display: grid; gap: 8px; }
+
+#sketch-tools { position: fixed; bottom: 12px; right: 12px; z-index: 9999; font-family: system-ui; font-size: 12px; background: rgba(0,0,0,.75); color: #fff; padding: 8px 12px; border-radius: 8px; opacity: .45; transition: opacity .2s; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 92vw; }
+#sketch-tools:hover { opacity: 1; }
+#sketch-tools button { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 3px 8px; font-size: 12px; cursor: pointer; }
+#sketch-tools button.on { background: #fff; color: #000; }
+</style>
+</head>
+<body>
+<div id="variant-nav">
+  <button class="variant-tab active" onclick="setView('a', this)">A: Galéria kariet s obrázkami</button>
+  <button class="variant-tab" onclick="setView('b', this)">B: Zoznam s miniatúrami</button>
+  <button class="variant-tab" onclick="setView('c', this)">C: Nákupný pohľad (čo som rezervoval, čo ešte chýba)</button>
+  <button class="variant-tab" onclick="setView('d', this)">D: A + súhrn z C navrchu ★ Selected</button>
+</div>
+<div class="stage">
+  <div class="frame" id="frame">
+    <div class="app rail" id="app">
+      <aside class="side" id="side"></aside>
+      <div class="main">
+        <div class="topbar">
+          <button class="btn collapse-btn" onclick="document.getElementById('app').classList.toggle('open')" aria-label="Prepnúť panel"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9 5v14"/></svg></button>
+          <h1>Wishlist darčekov</h1><button class="btn primary add-top" onclick="addWish()">+ Prianie</button><button class="avatar" id="who-avatar">J</button>
+        </div>
+        <div class="body"><div class="content" id="content"></div><aside class="detail" id="detail"></aside></div>
+      </div>
+      <nav class="bottom" id="bottom"></nav>
+      <button class="fab" title="Pridať prianie" onclick="addWish()"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+  </div>
+</div>
+<div id="sketch-tools">
+  <span>Prihlásený:</span>
+  <button class="on" onclick="setMe('Jana', this)">Jana</button>
+  <button onclick="setMe('Peter', this)">Peter</button>
+  <span>Rámec:</span>
+  <button onclick="setW('390px', this)">Mobil 390</button>
+  <button onclick="setW('820px', this)">iPad 820</button>
+  <button class="on" onclick="setW('100%', this)">Desktop</button>
+  <button onclick="toggleDark(this)">Tmavý režim</button>
+</div>
+
+<script>
+const ICONS = {
+  home: '<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  tasks: '<path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>',
+  gift: '<path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7a3 3 0 1 0-3-3c0 2 3 3 3 3zm0 0a3 3 0 1 1 3-3c0 2-3 3-3 3z"/>',
+  money: '<path d="M3 7h18v12H3zM3 11h18M7 15h3"/>',
+  health: '<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  img: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>'
+};
+const ico = (n, c='') => `<svg class="icon ${c}" viewBox="0 0 24 24">${ICONS[n]}</svg>`;
+const NAV = [['home','Prehľad'],['tasks','Úlohy'],['gift','Wishlist'],['money','Financie'],['health','Zdravie']];
+const PEOPLE = ['Jana','Peter','Ema'];
+const OCC = { Jana:'Meniny 17. 12. (o 35 dní)', Peter:'Narodeniny 3. 3.', Ema:'Narodeniny 20. 12. (o 38 dní)' };
+let nextId = 20, me = 'Jana', who = 'Jana', view = 'a', sel = null;
+let wishes = [
+  { id:1, owner:'Jana', title:'Kniha Atómové návyky', price:14, urls:['https://www.martinus.sk/atomove-navyky'], note:'Slovenské vydanie', hue:210, by:null, co:[], img:true },
+  { id:2, owner:'Jana', title:'Parfum Chloé 50 ml', price:78, urls:['https://www.notino.sk/chloe', 'https://www.douglas.sk/chloe'], note:'Rada by som Eau de Parfum', hue:330, by:'Peter', co:[], img:true },
+  { id:3, owner:'Jana', title:'Hrnček na kávu, keramický', price:12, urls:[], note:'', hue:30, by:null, co:[], img:false },
+  { id:4, owner:'Ema', title:'LEGO Technic Bagger', price:59, urls:['https://www.lego.com/sk-sk/technic'], note:'Číslo 42162', hue:50, by:'Jana', co:[], img:true },
+  { id:5, owner:'Ema', title:'Bezdrôtové slúchadlá', price:35, urls:['https://www.alza.sk/slucha'], note:'Modré, nie čierne', hue:200, by:null, co:[], img:true },
+  { id:6, owner:'Ema', title:'Bicykel 24"', price:280, urls:['https://www.bike.sk/24'], note:'Spoločný darček od rodiny', hue:150, by:'Peter', co:['Jana','Peter'], img:true },
+  { id:7, owner:'Peter', title:'Turistické topánky veľ. 44', price:120, urls:['https://www.hudy.sk/topanky'], note:'Nepremokavé', hue:100, by:null, co:[], img:true }
+];
+const color = (h, l=55) => `hsl(${h} 35% ${l}%)`;
+const wl = () => wishes.filter(w => w.owner === who);
+const own = () => who === me;
+
+function status(w) {
+  if (own()) return '';   // secrecy: the owner never sees reservations
+  if (w.co.length) return `<span class="tag taken">spoločný nákup, ${w.co.length} ${w.co.includes(me)?'(aj ty)':''}</span>`;
+  if (!w.by) return `<span class="tag ok">voľné</span>`;
+  return w.by === me ? `<span class="tag me">rezervoval(a) si ty</span>` : `<span class="tag taken">rezervuje ${w.by}</span>`;
+}
+function img(w, small) { return w.img ? `<div class="${small?'thumb':'img'}" style="background:linear-gradient(135deg, ${color(w.hue,58)}, ${color(w.hue+30,42)})">${ico('gift')}</div>` : `<div class="${small?'thumb':'img'}" style="background:var(--color-surface-2);color:var(--color-text-muted)">${ico('img')}</div>`; }
+function head() {
+  const chips = PEOPLE.map(p => `<button class="chip ${who===p?'on':''}" data-who="${p}"><span class="avatar">${p[0]}</span>${p===me?p+' (moje)':p}</button>`).join('');
+  const banner = own() ? `<div class="banner">${ico('gift')}<div>Toto je tvoj zoznam. Ostatní z rodiny z neho vyberajú darčeky. <b>Rezervácie ti nezobrazujeme</b>, aby ostalo prekvapenie.</div></div>` : '';
+  return `<div class="people">${chips}</div><div class="occ"><span>${ico('gift','s')}</span><b>${who}</b><span class="muted">${OCC[who]}</span></div>${banner}`;
+}
+function viewA() { const l = wl(); if (!l.length) return empty(); return `<div class="grid">${l.map(w => `<div class="card w ${sel===w.id?'sel':''}" data-open="${w.id}">${img(w)}<div class="info"><div class="t">${w.title}</div><div class="row"><span class="price">${w.price} €</span>${w.urls.length?`<span>${ico('link','s')} ${w.urls.length}</span>`:''}</div>${status(w)}</div></div>`).join('')}</div>`; }
+function viewB() { const l = wl(); if (!l.length) return empty(); return `<div class="card list">${l.map(w => `<div class="li ${sel===w.id?'sel':''}" data-open="${w.id}">${img(w,true)}<div class="grow"><div class="t">${w.title}</div><div class="s">${w.note||'bez poznámky'}${w.urls.length?` · ${w.urls.length} ${w.urls.length===1?'odkaz':'odkazy'}`:''}</div></div>${status(w)}<span class="price">${w.price} €</span></div>`).join('')}</div>`; }
+function viewC() {
+  const others = wishes.filter(w => w.owner !== me);
+  const mine = others.filter(w => w.by === me || w.co.includes(me));
+  const sum = mine.reduce((s, w) => s + (w.co.length ? w.price / w.co.length : w.price), 0);
+  const free = others.filter(w => !w.by && !w.co.length);
+  const row = w => `<div class="li ${sel===w.id?'sel':''}" data-open="${w.id}">${img(w,true)}<div class="grow"><div class="t">${w.title}</div><div class="s">pre ${w.owner}</div></div>${w.owner===me?'':status(w).replace('rezervoval(a) si ty','mám ja')}<span class="price">${w.price} €</span></div>`;
+  return `<div class="cart"><h3>Môj nákupný zoznam</h3><div style="font-size:var(--text-2xl);font-weight:650">${Math.round(sum)} €</div><div class="muted">${mine.length} ${mine.length===1?'darček':'darčeky'} rezervovaných mnou</div></div>
+  <div class="group"><h3>Rezervované mnou</h3><div class="card list">${mine.length?mine.map(row).join(''):'<div class="empty">Zatiaľ nič.</div>'}</div></div>
+  <div class="group"><h3>Ešte voľné nápady od ostatných</h3><div class="card list">${free.length?free.map(row).join(''):'<div class="empty">Všetko je rozdelené.</div>'}</div></div>`;
+}
+function empty() { return own() ? `<div class="empty">Zatiaľ si nepridal(a) žiadne priania.<br><button class="btn primary" style="margin-top:10px" onclick="addWish()">Pridať prvé prianie</button></div>` : `<div class="empty">${who} zatiaľ nemá žiadne priania.</div>`; }
+// "My shopping list" summary (from sketch variant C): only what I reserved for OTHER people, never reservations on my own wishes
+let cartOpen = false;
+function cartSummary() {
+  const mineItems = wishes.filter(w => w.owner !== me && (w.by === me || w.co.includes(me)));
+  const sum = mineItems.reduce((s, w) => s + (w.co.length ? w.price / w.co.length : w.price), 0);
+  const rows = mineItems.map(w => `<div class="li" data-who="${w.owner}" data-open="${w.id}" style="display:flex;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--color-border);cursor:pointer;font-size:var(--text-sm)"><span class="avatar">${w.owner[0]}</span><span style="flex:1">${w.title}</span><span class="muted">${w.co.length?`podiel ${Math.round(w.price/w.co.length)} €`:`${w.price} €`}</span></div>`).join('');
+  return `<div class="cart"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div><h3>Môj nákupný zoznam</h3><div style="font-size:var(--text-2xl);font-weight:650;line-height:1.1">${Math.round(sum)} €</div><div class="muted">${mineItems.length} ${mineItems.length===1?'darček':mineItems.length>=2&&mineItems.length<=4?'darčeky':'darčekov'} rezervovaných mnou</div></div>${mineItems.length?`<button class="btn sm" style="margin-left:auto" onclick="cartOpen=!cartOpen;render()">${cartOpen?'Skryť':'Zobraziť'}</button>`:''}</div>${cartOpen?`<div style="margin-top:8px">${rows}</div>`:''}</div>`;
+}
+function build() {
+  if (view === 'c') return `<div class="people">${PEOPLE.filter(p=>p!==me).map(p=>`<span class="tag">${p}: ${OCC[p]}</span>`).join('')}</div>` + viewC();
+  if (view === 'd') return cartSummary() + head() + viewA();
+  return head() + (view==='a'?viewA():viewB());
+}
+function render() {
+  const c = document.getElementById('content'), y = c.scrollTop;
+  c.innerHTML = build();
+  c.scrollTop = y;
+  const nav = NAV.map(([id,l]) => `<button class="nav-item ${id==='gift'?'active':''}" title="${l}">${ico(id)}<span class="label">${l}</span></button>`).join('');
+  document.getElementById('side').innerHTML = `<div class="brand"><div class="logo"></div><span>Family Hub</span></div>${nav}<div class="spacer"></div><button class="nav-item" title="Nastavenia">${ico('settings')}<span class="label">Nastavenia</span></button>`;
+  document.getElementById('bottom').innerHTML = nav;
+  document.getElementById('who-avatar').textContent = me[0];
+  renderDetail();
+}
+function renderDetail() {
+  const d = document.getElementById('detail'), w = wishes.find(x => x.id === sel);
+  d.classList.toggle('open', !!w);
+  if (!w) { d.innerHTML = ''; return; }
+  const mine = w.owner === me;
+  const urls = w.urls.map((u, i) => `<div class="urlrow"><a href="#" onclick="return false">${u.replace(/^https?:\/\/(www\.)?/, '')}</a>${mine?`<button class="btn ghost sm" onclick="rmUrl(${i})" aria-label="Odstrániť odkaz">${ico('close','s')}</button>`:''}</div>`).join('') || '<div class="muted" style="margin-bottom:6px">Žiadny odkaz.</div>';
+  let res = '';
+  if (!mine) {
+    if (w.co.length) res = `<div class="resbox"><b>Spoločný nákup</b><span class="muted">Prispievajú: ${w.co.join(', ')}. Každý ${Math.round(w.price / w.co.length)} €.</span>${w.co.includes(me)?`<button class="btn" onclick="coToggle()">Odhlásiť sa zo spoločného nákupu</button>`:`<button class="btn primary" onclick="coToggle()">Pridať sa</button>`}</div>`;
+    else if (!w.by) res = `<div class="resbox"><b>Voľné</b><span class="muted">${w.owner} sa nedozvie, že si ho rezervoval(a).</span><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" onclick="reserve()">Rezervovať, kúpim ja</button><button class="btn" onclick="coStart()">Spoločný nákup</button></div></div>`;
+    else if (w.by === me) res = `<div class="resbox"><b>Rezervoval(a) si ty</b><span class="muted">${w.owner} to nevidí.</span><button class="btn" onclick="unreserve()">Zrušiť rezerváciu</button></div>`;
+    else res = `<div class="resbox"><b>Rezervuje ${w.by}</b><span class="muted">Môžete sa dohodnúť na spoločnom nákupe.</span><button class="btn" onclick="coStart()">Navrhnúť spoločný nákup</button></div>`;
+  } else res = `<div class="banner">${ico('gift')}<div>Stav rezervácie ti nezobrazujeme, aby ostalo prekvapenie.</div></div>`;
+  d.innerHTML = `<h2>Prianie <button class="btn ghost" onclick="closeDetail()" aria-label="Zavrieť">${ico('close')}</button></h2>
+    ${img(w)}
+    ${mine?`<button class="btn" id="fetch-img" style="margin-bottom:12px" onclick="fetchImg()">${ico('img','s')} Načítať obrázok z odkazu</button>`:''}
+    <label class="f"><span>Názov</span><input class="in" value="${w.title.replace(/"/g,'&quot;')}" ${mine?'':'disabled'} oninput="upd('title', this.value)"></label>
+    <label class="f"><span>Cena (€)</span><input class="in" type="number" value="${w.price}" ${mine?'':'disabled'} oninput="upd('price', +this.value)"></label>
+    <div class="lbl" style="margin-bottom:6px">Odkazy</div>${urls}
+    ${mine?`<div style="display:flex;gap:6px;margin-bottom:12px"><input class="in" id="newurl" placeholder="Vložiť odkaz na obchod…"><button class="btn" onclick="addUrl()">Pridať</button></div>`:'<div style="height:8px"></div>'}
+    <label class="f"><span>Poznámka (veľkosť, farba…)</span><textarea class="in" rows="2" ${mine?'':'disabled'} oninput="upd('note', this.value)">${w.note}</textarea></label>
+    ${res}
+    ${mine?`<div style="display:flex;gap:8px"><button class="btn danger" onclick="delWish()">Zmazať</button><button class="btn primary" style="margin-left:auto" onclick="closeDetail()">Hotovo</button></div>`:''}`;
+}
+function upd(k, v) { const w = wishes.find(x => x.id === sel); w[k] = v; softRender(); }
+// Re-render only the list (not the detail panel) so typing in the detail keeps focus
+function softRender() { const c = document.getElementById('content'), y = c.scrollTop; render0(); c.scrollTop = y; }
+function render0() { document.getElementById('content').innerHTML = build(); }
+function addUrl() { const i = document.getElementById('newurl'); if (!i.value.trim()) return; wishes.find(x => x.id === sel).urls.push(i.value.trim()); render(); }
+function rmUrl(i) { wishes.find(x => x.id === sel).urls.splice(i, 1); render(); }
+function fetchImg() { const w = wishes.find(x => x.id === sel); if (!w.urls.length) { alert('Najprv pridajte odkaz.'); return; } const el = document.querySelector('#detail .img'); el.className = 'img shimmer'; el.innerHTML = ico('img'); setTimeout(() => { w.img = true; w.hue = (w.hue + 60) % 360; render(); }, 900); }
+function reserve() { wishes.find(x => x.id === sel).by = me; render(); }
+function unreserve() { const w = wishes.find(x => x.id === sel); w.by = null; w.co = w.co.filter(n => n !== me); render(); }
+function coStart() { const w = wishes.find(x => x.id === sel); w.co = [me]; if (w.by && w.by !== me) w.co.push(w.by); w.by = w.co[0]; render(); }
+function coToggle() { const w = wishes.find(x => x.id === sel); w.co = w.co.includes(me) ? w.co.filter(n => n !== me) : [...w.co, me]; if (w.co.length < 2) { w.by = w.co[0] || null; w.co = []; } render(); }
+function addWish() { who = me; const w = { id: nextId++, owner: me, title: 'Nové prianie', price: 0, urls: [], note: '', hue: 220, by: null, co: [], img: false }; wishes.unshift(w); sel = w.id; render(); }
+function delWish() { wishes = wishes.filter(w => w.id !== sel); sel = null; render(); }
+function closeDetail() { sel = null; render(); }
+document.addEventListener('click', e => {
+  const p = e.target.closest('[data-who]'); if (p) { who = p.dataset.who; sel = p.dataset.open ? +p.dataset.open : null; render(); return; }
+  const o = e.target.closest('[data-open]'); if (o) { sel = +o.dataset.open; render(); }
+});
+function setView(v, btn) { view = v; sel = null; document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); render(); }
+function setMe(n, btn) { me = n; who = n; sel = null; document.querySelectorAll('#sketch-tools button').forEach(b => { if (['Jana','Peter'].includes(b.textContent)) b.classList.remove('on'); }); btn.classList.add('on'); render(); }
+function applySide() { const w = document.getElementById('frame').getBoundingClientRect().width; document.getElementById('app').classList.toggle('open', w >= 1024); }
+new ResizeObserver(applySide).observe(document.getElementById('frame'));
+function setW(w, btn) { document.getElementById('frame').style.width = w; document.querySelectorAll('#sketch-tools button').forEach(b => { if (/Mobil|iPad|Desktop/.test(b.textContent)) b.classList.remove('on'); }); btn.classList.add('on'); }
+function toggleDark(btn) { const r = document.documentElement; const d = r.dataset.theme === 'dark'; r.dataset.theme = d ? 'light' : 'dark'; btn.classList.toggle('on', !d); }
+render();
+</script>
+</body>
+</html>

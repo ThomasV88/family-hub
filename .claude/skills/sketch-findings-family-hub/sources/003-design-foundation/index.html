@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="sk" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch 003: Dizajnový základ</title>
+<link id="theme" rel="stylesheet" href="../themes/default.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font-sans); background: var(--color-bg); color: var(--color-text); padding-top: 52px; transition: background .15s ease; }
+#variant-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9998; background: #fff; border-bottom: 1px solid #ddd; padding: 8px 16px; display: flex; gap: 8px; font-family: system-ui; flex-wrap: wrap; }
+.variant-tab { border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 13px; color: #222; transition: all .15s ease; }
+.variant-tab:hover { background: #f0f0f0; }
+.variant-tab.active { background: #222; color: #fff; border-color: #222; }
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: var(--space-6) var(--space-4) 80px; display: grid; gap: var(--space-6); grid-template-columns: 1fr; }
+@media (min-width: 900px) { .wrap { grid-template-columns: 1fr 1fr; } }
+.col { display: grid; gap: var(--space-6); align-content: start; }
+h2.sec { margin: 0 0 var(--space-3); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); font-weight: 600; }
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); box-shadow: var(--shadow-sm); }
+.muted { color: var(--color-text-muted); font-size: var(--text-sm); }
+.row { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); padding: 8px 14px; border-radius: var(--radius-md); font: inherit; font-size: var(--text-sm); cursor: pointer; transition: all .15s ease; min-height: 38px; }
+.btn:hover { background: var(--color-surface-2); }
+.btn:focus-visible, .input:focus-visible, select:focus-visible, .switch:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
+.btn.primary:hover { background: var(--color-primary-hover); }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--color-text-muted); }
+.btn.ghost:hover { background: var(--color-surface-2); color: var(--color-text); }
+.btn.danger { color: var(--color-danger); border-color: var(--color-danger); background: transparent; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.icon { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Inputs */
+label.field { display: grid; gap: 6px; font-size: var(--text-sm); }
+label.field > span { font-weight: 600; }
+.input, select.input { width: 100%; padding: 9px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: var(--text-sm); min-height: 40px; transition: border-color .15s ease; }
+.input:focus { border-color: var(--color-primary); }
+.input.bad { border-color: var(--color-danger); }
+.err { color: var(--color-danger); font-size: var(--text-xs); min-height: 1em; }
+.check { display: flex; gap: 10px; align-items: center; font-size: var(--text-sm); padding: 6px 0; }
+.check input { width: 18px; height: 18px; accent-color: var(--color-primary); }
+.switch { appearance: none; width: 40px; height: 24px; border-radius: 99px; background: var(--color-border); position: relative; cursor: pointer; border: 0; transition: background .15s ease; flex: none; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--color-surface); box-shadow: var(--shadow-sm); transition: transform .15s ease; }
+.switch.on { background: var(--color-primary); }
+.switch.on::after { transform: translateX(16px); }
+
+/* Tags / avatars / list */
+.tag { font-size: 11px; padding: 2px 9px; border-radius: 99px; background: var(--color-surface-2); color: var(--color-text-muted); }
+.tag.ok { background: var(--color-primary-soft); color: var(--color-primary); }
+.tag.warn { background: color-mix(in srgb, var(--color-danger) 14%, var(--color-surface)); color: var(--color-danger); }
+.avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--color-primary-soft); color: var(--color-primary); display: inline-grid; place-items: center; font-size: 11px; font-weight: 700; }
+.li { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid var(--color-border); font-size: var(--text-sm); }
+.li:first-of-type { border-top: 0; }
+.li .grow { flex: 1; min-width: 0; }
+.li .sub { color: var(--color-text-muted); font-size: var(--text-xs); }
+.li input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--color-primary); }
+.li.done .grow { text-decoration: line-through; color: var(--color-text-muted); }
+.bars { display: flex; align-items: flex-end; gap: 8px; height: 80px; }
+.bars i { flex: 1; background: var(--color-primary-soft); border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+.bars i.cur { background: var(--color-primary); }
+.progress { height: 6px; border-radius: 99px; background: var(--color-surface-2); overflow: hidden; }
+.progress > b { display: block; height: 100%; width: 62%; background: var(--color-primary); }
+.swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.sw { border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; font-size: 11px; }
+.sw i { display: block; height: 34px; }
+.sw span { display: block; padding: 4px 6px; color: var(--color-text-muted); }
+.type h1 { margin: 0; font-size: var(--text-3xl); letter-spacing: -.02em; }
+.type h3 { margin: 4px 0; font-size: var(--text-lg); }
+.type p { margin: 4px 0; font-size: var(--text-base); line-height: 1.5; }
+
+/* Dialog + toast + empty */
+.scrim { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: none; place-items: center; z-index: 9000; }
+.scrim.open { display: grid; }
+.dialog { background: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-6); width: min(420px, 92vw); box-shadow: var(--shadow-lg); border: 1px solid var(--color-border); }
+.dialog h3 { margin: 0 0 8px; }
+.toast { position: fixed; left: 50%; bottom: 70px; transform: translate(-50%, 20px); background: var(--color-text); color: var(--color-bg); padding: 10px 16px; border-radius: var(--radius-md); font-size: var(--text-sm); opacity: 0; pointer-events: none; transition: all .2s ease; z-index: 9500; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.empty { text-align: center; padding: 24px 8px; color: var(--color-text-muted); font-size: var(--text-sm); }
+.empty .icon { width: 28px; height: 28px; margin-bottom: 6px; }
+
+#sketch-tools { position: fixed; bottom: 12px; right: 12px; z-index: 9999; font-family: system-ui; font-size: 12px; background: rgba(0,0,0,.75); color: #fff; padding: 8px 12px; border-radius: 8px; opacity: .45; transition: opacity .2s; display: flex; gap: 8px; align-items: center; }
+#sketch-tools:hover { opacity: 1; }
+#sketch-tools button { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 3px 8px; font-size: 12px; cursor: pointer; }
+#sketch-tools button.on { background: #fff; color: #000; }
+</style>
+</head>
+<body>
+<div id="variant-nav">
+  <button class="variant-tab active" onclick="setTheme('default', this)">A: Neutrálna + modrý akcent ★ Selected</button>
+  <button class="variant-tab" onclick="setTheme('warm', this)">B: Teplá neutrálna + zelený akcent, mäkšie tvary</button>
+  <button class="variant-tab" onclick="setTheme('mono', this)">C: Monochromatická (ako Notion), ostrejšie tvary</button>
+</div>
+
+<div class="wrap">
+  <div class="col">
+    <section><h2 class="sec">Farby</h2><div class="card"><div class="swatches" id="swatches"></div></div></section>
+
+    <section class="type"><h2 class="sec">Typografia</h2><div class="card">
+      <h1>Rodinný prehľad</h1><h3>Dnešné úlohy</h3>
+      <p>Bežný text na čítanie. Dlhšie texty v slovenčine, poľštine a angličtine musia zostať čitateľné aj na telefóne.</p>
+      <span class="muted">Pomocný text, dátumy a popisy</span>
+    </div></section>
+
+    <section><h2 class="sec">Tlačidlá</h2><div class="card"><div class="row">
+      <button class="btn primary" onclick="toast('Uložené')">Uložiť</button>
+      <button class="btn">Zrušiť</button>
+      <button class="btn ghost">Viac</button>
+      <button class="btn danger" onclick="openDlg()">Zmazať</button>
+      <button class="btn primary" disabled>Neaktívne</button>
+      <button class="btn primary"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Pridať</button>
+    </div></div></section>
+
+    <section><h2 class="sec">Formulár</h2><div class="card" style="display:grid;gap:12px">
+      <label class="field"><span>Názov úlohy</span><input class="input" id="f-name" placeholder="Napr. Zaplatiť školku" onblur="validate()"><span class="err" id="f-err"></span></label>
+      <label class="field"><span>Priradiť</span><select class="input"><option>Jana</option><option>Peter</option><option>Ema</option></select></label>
+      <label class="field"><span>Termín</span><input class="input" type="date"></label>
+      <div class="check"><input type="checkbox" checked> Opakovať každý týždeň</div>
+      <div class="row" style="justify-content:space-between"><span style="font-size:var(--text-sm)">Pripomienka e-mailom</span><button class="switch on" role="switch" onclick="this.classList.toggle('on')"></button></div>
+    </div></section>
+  </div>
+
+  <div class="col">
+    <section><h2 class="sec">Zoznam úloh</h2><div class="card">
+      <label class="li"><input type="checkbox"><span class="grow">Zaplatiť školku<div class="sub">do 14. 11.</div></span><span class="tag warn">po termíne</span><span class="avatar">J</span></label>
+      <label class="li"><input type="checkbox"><span class="grow">Objednať Tomáša k zubárovi</span><span class="tag">dnes</span><span class="avatar">P</span></label>
+      <label class="li done"><input type="checkbox" checked><span class="grow">Nákup na víkend</span><span class="tag ok">hotovo</span><span class="avatar">J</span></label>
+    </div></section>
+
+    <section><h2 class="sec">Karta s grafom</h2><div class="card">
+      <div style="font-size:var(--text-sm);font-weight:600;color:var(--color-text-muted);margin-bottom:6px">Financie</div>
+      <div style="font-size:var(--text-3xl);font-weight:650;letter-spacing:-.02em">1 240 €</div>
+      <div class="muted" style="margin-bottom:8px">z rozpočtu 2 000 € v novembri</div>
+      <div class="progress" style="margin-bottom:14px"><b></b></div>
+      <div class="bars"><i style="height:55%"></i><i style="height:70%"></i><i style="height:48%"></i><i style="height:82%"></i><i class="cur" style="height:62%"></i></div>
+    </div></section>
+
+    <section><h2 class="sec">Prázdny stav a oznámenia</h2><div class="card">
+      <div class="empty"><svg class="icon" viewBox="0 0 24 24"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7"/></svg><div>Zatiaľ žiadne priania.</div><button class="btn primary" style="margin-top:10px" onclick="toast('Priania sa pridajú tu')">Pridať prvé prianie</button></div>
+    </div></section>
+  </div>
+</div>
+
+<div class="scrim" id="dlg" onclick="if(event.target===this)closeDlg()"><div class="dialog" role="dialog"><h3>Zmazať úlohu?</h3><p class="muted">Úloha „Zaplatiť školku“ sa natrvalo odstráni.</p><div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn" onclick="closeDlg()">Zrušiť</button><button class="btn danger" onclick="closeDlg();toast('Úloha zmazaná')">Zmazať</button></div></div></div>
+<div class="toast" id="toast"></div>
+
+<div id="sketch-tools"><button onclick="toggleDark(this)">Tmavý režim</button></div>
+
+<script>
+const SW = ['--color-bg','--color-surface','--color-surface-2','--color-border','--color-text','--color-text-muted','--color-primary','--color-primary-soft','--color-accent','--color-danger','--color-success'];
+function swatches() {
+  const cs = getComputedStyle(document.documentElement);
+  document.getElementById('swatches').innerHTML = SW.map(v => `<div class="sw"><i style="background:var(${v})"></i><span>${v.replace('--color-','')}<br>${cs.getPropertyValue(v).trim()}</span></div>`).join('');
+}
+function setTheme(name, btn) {
+  const link = document.getElementById('theme');
+  link.onload = swatches;
+  link.href = `../themes/${name}.css`;
+  document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active')); btn.classList.add('active');
+}
+function toggleDark(btn) { const r = document.documentElement; const d = r.dataset.theme === 'dark'; r.dataset.theme = d ? 'light' : 'dark'; btn.classList.toggle('on', !d); setTimeout(swatches, 50); }
+function openDlg() { document.getElementById('dlg').classList.add('open'); }
+function closeDlg() { document.getElementById('dlg').classList.remove('open'); }
+function toast(t) { const e = document.getElementById('toast'); e.textContent = t; e.classList.add('show'); setTimeout(() => e.classList.remove('show'), 1600); }
+function validate() { const i = document.getElementById('f-name'), e = document.getElementById('f-err'); const bad = !i.value.trim(); i.classList.toggle('bad', bad); e.textContent = bad ? 'Zadajte názov úlohy.' : ''; }
+document.querySelectorAll('.li input').forEach(c => c.addEventListener('change', e => e.target.closest('.li').classList.toggle('done', e.target.checked)));
+swatches();
+</script>
+</body>
+</html>
