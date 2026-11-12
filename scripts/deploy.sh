@@ -176,7 +176,7 @@ main() {
       exit 1
     fi
     if ! dc run --rm --no-deps -T app php artisan staging:audit; then
-      err "staging:audit failed (staging data is not clean). Nothing started."
+      err "Staging audit failed (staging data is not clean). Nothing started."
       exit 1
     fi
   fi
