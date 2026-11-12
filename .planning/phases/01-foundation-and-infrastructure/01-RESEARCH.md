@@ -337,7 +337,9 @@ self.addEventListener('message', (e) => { if (e.data?.type === 'SKIP_WAITING') s
 | A9 | Hostnames `family-hub.vostack.dev` / `family-hub-stage.vostack.dev` | Open Questions | Owner decides |
 | A10 | The Cloudflare token on the server can create/handle DNS-01 TXT records for new names (as it does for work-tracker) | Pitfall 2 | Cert issuance fails; A-record creation likely manual in dashboard |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+RESOLVED: all five questions are turned into owner decisions or checkpoints in plan 01-02 Task 1 (decisions recorded in docs/ops/server.md), 01-08 (GitHub setup) and 01-10 (server provisioning, RAM limits).
 
 1. **Hostnames and DNS records**
    - Known: pattern is `<name>.vostack.dev` and `<name>-stage.vostack.dev`, proxied through Cloudflare.
