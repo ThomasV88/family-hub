@@ -1,0 +1,62 @@
+:root {
+  /* Colors (light) */
+  --color-bg: #fbfbfa;
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f4f2;
+  --color-border: #e8e8e5;
+  --color-text: #1f1f1d;
+  --color-text-muted: #737370;
+  --color-primary: #3b6ea8;
+  --color-primary-hover: #2f5c8f;
+  --color-primary-soft: #e8f0f8;
+  --color-on-primary: #ffffff;
+  --color-accent: #c7893a;
+  --color-danger: #c4503f;
+  --color-success: #4a8f64;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* Shapes */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,0.10);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.layout { max-width: 960px; margin: 0 auto; padding: var(--space-4); }
+.layout__header { font-size: var(--text-lg); font-weight: 600; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border); }
+.layout__main { padding: var(--space-6) 0; }
+.staging-banner { background: var(--color-accent); color: var(--color-on-primary); padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); text-align: center; margin-bottom: var(--space-3); }
