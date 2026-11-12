@@ -14,3 +14,4 @@ Calm and neutral, minimalist and clean. Grey and white surfaces, thin dividers i
 | 001 | app-shell-navigation | How does navigation across 5 modules work on phone, iPad and desktop? | D (A+B): bottom bar on phone, toggleable sidebar on iPad/desktop, short nav labels | layout, navigation, responsive |
 | 002 | dashboard-overview | What does the home dashboard show and in what order? | B: one summary card per module (tasks first), quick add on top | dashboard, layout, home |
 | 003 | design-foundation | How do colors, shapes and core components look, in light and dark? | A: neutral off-white, blue accent, 8 to 12 px radii (themes/default.css) | theme, components, colors, typography |
+| 004 | todo-module | How does the shared to-do list show assignment, due dates, recurrence and personal vs shared? | B: one column per member, quick add, filters, detail panel (docked / sheet) | todo, list, module, detail |
