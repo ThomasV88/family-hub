@@ -12,3 +12,4 @@ Calm and neutral, minimalist and clean. Grey and white surfaces, thin dividers i
 | # | Name | Design Question | Winner | Tags |
 |---|------|----------------|--------|------|
 | 001 | app-shell-navigation | How does navigation across 5 modules work on phone, iPad and desktop? | D (A+B): bottom bar on phone, toggleable sidebar on iPad/desktop, short nav labels | layout, navigation, responsive |
+| 002 | dashboard-overview | What does the home dashboard show and in what order? | B: one summary card per module (tasks first), quick add on top | dashboard, layout, home |
