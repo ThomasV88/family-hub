@@ -1,0 +1,149 @@
+# Server stack (production and staging): one definition, two deployments.
+#   production: /opt/family-hub          (COMPOSE_PROJECT_NAME=family-hub,         EDGE_ALIAS=fh-prod-nginx)
+#   staging:    /opt/family-hub-staging  (COMPOSE_PROJECT_NAME=family-hub-staging, EDGE_ALIAS=fh-stage-nginx)
+# Started by deploy.sh. No published ports: the separately managed edge stack owns 80/443 and reaches
+# nginx through the external network `edge` under the alias EDGE_ALIAS.
+#
+# Secrets are split by who needs them:
+#   .env         compose interpolation and deploy.sh only (project, alias, domain, image, memory), no passwords
+#   app.env      Laravel runtime for app, worker, scheduler: runtime role fh_app only
+#   migrate.env  owner credentials, loaded only by the one-shot `migrate` service
+#   secrets/     database role passwords for first initialisation (Docker secrets, *_FILE)
+name: ${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME missing in .env}
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-app: &app
+  image: ${IMAGE_PREFIX:?}-app:${IMAGE_TAG:?}
+  restart: unless-stopped
+  env_file: app.env
+  environment:
+    TZ: Europe/Bratislava
+  logging: *logging
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_root_password
+      POSTGRES_DB: family_hub
+      TZ: Europe/Bratislava
+    command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=20"]
+    mem_limit: ${MEM_POSTGRES:-192m}
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    secrets:
+      - db_root_password
+      - db_owner_password
+      - db_app_password
+    logging: *logging
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d family_hub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    <<: *app
+    mem_limit: ${MEM_APP:-192m}
+    healthcheck:
+      # php-fpm has no TCP client tools in the alpine image: a successful connect to the pool port is the check
+      test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 9000) ? 0 : 1);"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  worker:
+    <<: *app
+    command: ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--max-time=3600"]
+    mem_limit: ${MEM_WORKER:-160m}
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f queue:work"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+
+  scheduler:
+    <<: *app
+    command: ["php", "artisan", "schedule:work"]
+    mem_limit: ${MEM_SCHEDULER:-128m}
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f schedule:work"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+
+  nginx:
+    image: ${IMAGE_PREFIX:?}-nginx:${IMAGE_TAG:?}
+    restart: unless-stopped
+    environment:
+      # PROXY protocol from the edge; robots header and domain are rendered into the template at start
+      NGINX_PROXY_PROTOCOL: proxy_protocol
+      APP_DOMAIN: ${APP_DOMAIN:?}
+      STACK_ENV: ${STACK_ENV:?}
+    mem_limit: ${MEM_NGINX:-48m}
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt:ro
+    networks:
+      default: {}
+      edge:
+        aliases: ["${EDGE_ALIAS:?EDGE_ALIAS missing in .env}"]
+    logging: *logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8081/nginx-health >/dev/null"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      app:
+        condition: service_healthy
+        restart: true
+
+  # One-shot, on demand from deploy.sh: migrations with the owner role. migrate.env overrides the
+  # runtime credentials from app.env, so only this container ever sees DDL credentials.
+  migrate:
+    <<: *app
+    profiles: ["migrate"]
+    restart: "no"
+    env_file:
+      - app.env
+      - migrate.env
+    command: ["php", "artisan", "migrate", "--force"]
+
+  # On demand: certificate issue and renewal (DNS-01 through Cloudflare).
+  certbot:
+    image: certbot/dns-cloudflare:v5.8.0
+    profiles: ["certbot"]
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./secrets/cloudflare.ini:/cloudflare.ini:ro
+
+networks:
+  default: {}
+  edge:
+    external: true
+    name: edge
+
+volumes:
+  pgdata:
+
+secrets:
+  db_root_password:
+    file: ./secrets/db_root_password
+  db_owner_password:
+    file: ./secrets/db_owner_password
+  db_app_password:
+    file: ./secrets/db_app_password
