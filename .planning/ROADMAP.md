@@ -34,11 +34,11 @@ Family Hub is built as a vertical-slice MVP: each phase delivers a usable capabi
   3. User can install the app to the home screen on phone and iPad and use it on desktop, and the service worker caches only the app shell and never medical or finance data
   4. An encrypted database backup runs on a schedule and a restore from it has been performed successfully
   5. Staging holds only synthetic data, with no real medical or finance records
-**Plans:** 12 plans
+**Plans:** 1/12 plans executed
 **UI hint**: yes
 
 Plans:
-- [ ] 01-01-PLAN.md — Package approval, Laravel/Inertia/Vue scaffold and five-service dev Docker stack
+- [x] 01-01-PLAN.md — Package approval, Laravel/Inertia/Vue scaffold and five-service dev Docker stack
 - [ ] 01-02-PLAN.md — Owner ops decisions (hostnames, RAM, retention, off-site, repo visibility) and DNS records
 - [ ] 01-03-PLAN.md — Heartbeat slice: scheduler -> database queue -> worker -> Postgres -> home page, "Run check now"
 - [ ] 01-04-PLAN.md — Server compose, TLS/PROXY-protocol nginx, cert, deploy.sh with guards and rollback, smoke test
@@ -180,7 +180,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Infrastructure | 0/12 | Planned | - |
+| 1. Foundation and Infrastructure | 1/12 | In Progress|  |
 | 2. Identity and Authorization Core | 0/TBD | Not started | - |
 | 3. To-Do | 0/TBD | Not started | - |
 | 4. Wishlist | 0/TBD | Not started | - |
