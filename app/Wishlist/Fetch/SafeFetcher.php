@@ -160,7 +160,10 @@ final class SafeFetcher
                 'connect_timeout' => 3,
                 'timeout' => 10,
                 'read_timeout' => 5,
+                // No transparent decompression: the byte cap must apply to bytes actually stored (gzip bomb).
+                'decode_content' => false,
                 'headers' => [
+                    'Accept-Encoding' => 'identity',
                     'User-Agent' => 'FamilyHubImageFetcher/1.0',
                     'Accept' => $kind === 'image' ? 'image/*' : 'text/html,application/xhtml+xml',
                 ],

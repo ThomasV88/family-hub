@@ -82,6 +82,15 @@ it('aborts an oversize chunked body without Content-Length and stays within memo
         ->and(memory_get_peak_usage() - $before)->toBeLessThan(20 * 1024 * 1024);
 });
 
+it('does not decompress a gzip bomb: the cap applies to the stored bytes, never the expanded size', function () {
+    $t = microtime(true);
+    $result = fetchSocketFetcher()->get(fetchSocketUrl('/gzip-bomb'), 5 * 1024 * 1024, 'html');
+    // Still gzip on arrival (a few hundred KB), not 256 MB of expanded zeros.
+    expect(strlen($result->body))->toBeLessThan(1024 * 1024)
+        ->and(str_starts_with($result->body, "\x1f\x8b"))->toBeTrue()
+        ->and(microtime(true) - $t)->toBeLessThan(8.0);
+});
+
 it('times out a slow-drip response', function () {
     $t = microtime(true);
     expect(fetchSocketReason('/drip', 1000))->toBe('timeout')

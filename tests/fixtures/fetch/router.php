@@ -42,6 +42,20 @@ switch ($path) {
             }
         }
         break;
+    case '/gzip-bomb':
+        // Hostile server: gzip regardless of Accept-Encoding, ~256 MB of zeros that compress to a few hundred KB.
+        header('Content-Type: text/html');
+        header('Content-Encoding: gzip');
+        $ctx = deflate_init(ZLIB_ENCODING_GZIP);
+        $zeros = str_repeat("\0", 1048576);
+        $out = '';
+        for ($i = 0; $i < 256; $i++) {
+            $out .= deflate_add($ctx, $zeros, ZLIB_NO_FLUSH);
+        }
+        $out .= deflate_add($ctx, '', ZLIB_FINISH);
+        header('Content-Length: '.strlen($out));
+        echo $out;
+        break;
     case '/redirect-private':
         http_response_code(302);
         header('Location: http://private.test:'.$_SERVER['SERVER_PORT'].'/ok');
