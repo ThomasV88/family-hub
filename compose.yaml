@@ -46,7 +46,7 @@ services:
     command: ["sh", "-c", "until php artisan migrate:status >/dev/null 2>&1; do sleep 3; done; exec php artisan queue:work --sleep=3 --tries=3 --max-time=3600"]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pgrep -f queue:work"]
+      test: ["CMD-SHELL", "pgrep -f '[q]ueue:work'"]
       interval: 15s
       timeout: 3s
       retries: 5
@@ -57,7 +57,7 @@ services:
     command: ["sh", "-c", "until php artisan migrate:status >/dev/null 2>&1; do sleep 3; done; exec php artisan schedule:work"]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pgrep -f schedule:work"]
+      test: ["CMD-SHELL", "pgrep -f '[s]chedule:work'"]
       interval: 15s
       timeout: 3s
       retries: 5
