@@ -64,10 +64,10 @@ it('throttles the 6th attempt within a minute with a minute count and fires Lock
     Event::assertDispatched(Lockout::class);
 });
 
-it('throttles one email across different IPs after 10 failures in 15 minutes', function () {
+it('does not let other IPs lock the real owner out of a known email', function () {
     User::factory()->create(['email' => 'anna@example.test']);
 
-    foreach (range(1, 10) as $i) {
+    foreach (range(1, 12) as $i) {
         $this->from('/login')->withServerVariables(['REMOTE_ADDR' => "10.1.0.$i"])
             ->post('/login', ['email' => 'anna@example.test', 'password' => 'wrong-wrong-wrong'])
             ->assertSessionHasErrors('email');
@@ -75,8 +75,38 @@ it('throttles one email across different IPs after 10 failures in 15 minutes', f
 
     $this->from('/login')->withServerVariables(['REMOTE_ADDR' => '10.1.0.99'])
         ->post('/login', ['email' => 'anna@example.test', 'password' => 'password'])
+        ->assertSessionHasNoErrors();
+    $this->assertAuthenticated();
+});
+
+it('throttles one email and IP after 10 failures in 15 minutes', function () {
+    User::factory()->create(['email' => 'anna@example.test']);
+
+    foreach (range(1, 10) as $i) {
+        $this->travelTo(now()->addSeconds(13 * $i));
+        $this->from('/login')->post('/login', ['email' => 'anna@example.test', 'password' => 'wrong-wrong-wrong'])
+            ->assertSessionHasErrors('email');
+    }
+
+    $this->from('/login')->post('/login', ['email' => 'anna@example.test', 'password' => 'password'])
         ->assertSessionHasErrors('throttle');
     $this->assertGuest();
+});
+
+it('applies a high cross-IP per-email ceiling that fires an audited Lockout', function () {
+    User::factory()->create(['email' => 'anna@example.test']);
+    RateLimiter::clear('x');
+
+    foreach (range(1, 50) as $i) {
+        $this->from('/login')->withServerVariables(['REMOTE_ADDR' => '10.2.'.intdiv($i, 250).'.'.$i])
+            ->post('/login', ['email' => 'anna@example.test', 'password' => 'wrong-wrong-wrong'])
+            ->assertSessionHasErrors('email');
+    }
+
+    $this->from('/login')->withServerVariables(['REMOTE_ADDR' => '10.3.0.1'])
+        ->post('/login', ['email' => 'anna@example.test', 'password' => 'password'])
+        ->assertSessionHasErrors('throttle');
+    expect(\App\Models\AuditEntry::where('event', 'lockout')->count())->toBe(1);
 });
 
 it('redirects a guest from home to /login and a signed-in user away from /login', function () {

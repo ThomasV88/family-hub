@@ -61,9 +61,13 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('login', function (Request $request) use ($respond) {
             $email = RequestInput::email($request);
 
+            // The strict limits are keyed on email AND ip, so a stranger hammering a known address from
+            // elsewhere cannot lock the real owner out. Only a much higher cross-IP per-email ceiling
+            // remains (distributed guessing); hitting it fires Lockout, which is audited.
             return [
                 Limit::perMinute(5)->by($email.'|'.$request->ip())->response($respond),
-                Limit::perMinutes(15, 10)->by('email:'.$email)->response($respond),
+                Limit::perMinutes(15, 10)->by('email-ip-15m:'.$email.'|'.$request->ip())->response($respond),
+                Limit::perHour(50)->by('email:'.$email)->response($respond),
                 Limit::perMinute(30)->by('ip:'.$request->ip())->response($respond),
             ];
         });
