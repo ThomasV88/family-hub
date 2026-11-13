@@ -298,7 +298,12 @@ defineExpose({ guard, dirty });
                             <p v-if="searched && results.length === 0" class="occ-panel__hint" role="status">{{ t('occasions.dates.no_match') }}</p>
                             <p v-if="errors.nameday" id="occ-nameday-error" class="occ-panel__error" role="alert" data-invalid tabindex="-1">{{ errors.nameday }}</p>
                         </fieldset>
-                        <p v-if="form.calendar === 'pl'" class="occ-panel__hint">{{ t('occasions.dates.pl_attribution') }}</p>
+                        <p v-if="form.calendar === 'pl'" class="occ-panel__hint" data-testid="pl-attribution">
+                            {{ t('occasions.dates.pl_attribution') }}.
+                            <a href="https://pl.wikipedia.org/wiki/Imieniny" target="_blank" rel="noopener noreferrer">{{ t('occasions.dates.pl_attribution_source') }}</a>,
+                            <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">{{ t('occasions.dates.pl_attribution_licence') }}</a>.
+                            {{ t('occasions.dates.pl_attribution_modified') }}
+                        </p>
                     </template>
                 </div>
 

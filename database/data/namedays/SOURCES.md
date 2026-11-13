@@ -29,7 +29,7 @@ Both calendars are versioned static JSON (`sk.json`, `pl.json`), 366 `MM-DD` key
 | 11 | Imieniny – listopad | 75973502 |
 | 12 | Imieniny – grudzień | 76963015 |
 
-- Licence: CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). Attribution: "Wikipedia contributors", Polish Wikipedia. The in-app attribution string is the lang key `occasions.dates.pl_attribution`. The compiled list is a derived work and stays under CC BY-SA 4.0.
+- Licence: CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). Attribution: "Wikipedia contributors", Polish Wikipedia. The licence notice shipped with the data is `LICENSE-pl.txt`. The in-app attribution is the lang key `occasions.dates.pl_attribution` plus links to the source and licence and a "modified" note (`pl_attribution_source`, `pl_attribution_licence`, `pl_attribution_modified`). The compiled list is a derived work and stays under CC BY-SA 4.0.
 - Parser notes: day headings are `==` or `===` with `[[D <genitive month>]]`; names are comma separated; links, markup and templates are stripped; a parenthetical starting with a capital is an alternative spelling kept as a name; a lowercase parenthetical (for example "w latach nieprzestępnych") is a qualifier and dropped; "Wszyscy, w tym:" on 1 November is not a name and is dropped.
 - The list is best-effort (Wikipedia lists many regional and historical names). A member can always use the custom-occasion fallback.
 - Rebuild from stored sources (no network): `php scripts/namedays/build-pl.php --build database/data/namedays/source/pl database/data/namedays/pl.json`

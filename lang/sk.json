@@ -905,6 +905,9 @@
             "save": "Uložiť dátumy",
             "no_match": "Meno sa nenašlo. Namiesto toho môžete pridať vlastnú príležitosť.",
             "pl_attribution": "Poľské meniny: prispievatelia Wikipédie, CC BY-SA 4.0",
+            "pl_attribution_source": "Zdroj: poľská Wikipédia",
+            "pl_attribution_licence": "licencia CC BY-SA 4.0",
+            "pl_attribution_modified": "Upravené: mená sú spracované zo stránok a zjednotené, poznámky sú vynechané.",
             "save_failed": "Dátumy sa nepodarilo uložiť. Nič sa nezmenilo. Skúste to znova."
         },
         "custom": {

@@ -905,6 +905,9 @@
             "save": "Save dates",
             "no_match": "No name found. You can add a custom occasion instead.",
             "pl_attribution": "Polish name days: Wikipedia contributors, CC BY-SA 4.0",
+            "pl_attribution_source": "Source: Polish Wikipedia",
+            "pl_attribution_licence": "CC BY-SA 4.0 licence",
+            "pl_attribution_modified": "Adapted: names were parsed from the pages and normalised, qualifiers were dropped.",
             "save_failed": "We could not save the dates. Nothing was changed. Try again."
         },
         "custom": {

@@ -178,6 +178,12 @@ describe('dates mode', () => {
         await flushPromises();
         await type(input('Name day calendar'), 'pl');
         expect(document.body.textContent).toContain('Polish name days: Wikipedia contributors, CC BY-SA 4.0');
+        const attribution = document.body.querySelector('[data-testid="pl-attribution"]');
+        expect([...attribution.querySelectorAll('a')].map((a) => a.getAttribute('href'))).toEqual([
+            'https://pl.wikipedia.org/wiki/Imieniny',
+            'https://creativecommons.org/licenses/by-sa/4.0/',
+        ]);
+        expect(attribution.textContent).toContain('Adapted:');
         await type(input('Search a name'), 'a');
         await vi.advanceTimersByTimeAsync(300);
         expect(fetchMock).not.toHaveBeenCalled();

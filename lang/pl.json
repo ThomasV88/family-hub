@@ -905,6 +905,9 @@
             "save": "Zapisz daty",
             "no_match": "Nie znaleziono imienia. Zamiast tego możesz dodać własną okazję.",
             "pl_attribution": "Polskie imieniny: autorzy Wikipedii, CC BY-SA 4.0",
+            "pl_attribution_source": "Źródło: polska Wikipedia",
+            "pl_attribution_licence": "licencja CC BY-SA 4.0",
+            "pl_attribution_modified": "Zmodyfikowane: imiona zostały odczytane ze stron i ujednolicone, uwagi pominięto.",
             "save_failed": "Nie udało się zapisać dat. Nic nie zostało zmienione. Spróbuj ponownie."
         },
         "custom": {

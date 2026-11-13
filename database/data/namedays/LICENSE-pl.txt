@@ -1,0 +1,37 @@
+Polish name-day data (pl.json): licence notice
+==============================================
+
+Material: the list of Polish name days in pl.json is derived from the twelve Polish Wikipedia
+monthly pages "Imieniny - <miesiac>" (https://pl.wikipedia.org/wiki/Imieniny).
+
+Author attribution: Wikipedia contributors (see the page histories of the pages below).
+
+Licence: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+  Deed:        https://creativecommons.org/licenses/by-sa/4.0/
+  Legal code:  https://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+Source revisions used (MediaWiki revision ids, stored wikitext in source/pl/):
+  01 Imieniny - styczen      78166931
+  02 Imieniny - luty         76185468
+  03 Imieniny - marzec       75814485
+  04 Imieniny - kwiecien     80828733
+  05 Imieniny - maj          75814594
+  06 Imieniny - czerwiec     75379089
+  07 Imieniny - lipiec       80150807
+  08 Imieniny - sierpien     77669893
+  09 Imieniny - wrzesien     80826946
+  10 Imieniny - pazdziernik  80443901
+  11 Imieniny - listopad     75973502
+  12 Imieniny - grudzien     76963015
+  Retrieved through the MediaWiki API on 2026-11-13.
+
+Modifications (CC BY-SA 4.0 section 3(a)(1)(B)): the wikitext was parsed into a JSON list per day
+(MM-DD). Links, markup and templates were removed; names were normalised; a capitalised parenthetical
+was kept as an alternative spelling; lowercase parenthetical qualifiers (for example "w latach
+nieprzestepnych") and the line "Wszyscy, w tym:" were dropped. The parser is
+scripts/namedays/build-pl.php.
+
+ShareAlike: pl.json is an adaptation and is distributed under the same licence, CC BY-SA 4.0. The rest of
+the application is not covered by this licence.
+
+No warranties are given; see the legal code for the disclaimer of warranties and limitation of liability.
