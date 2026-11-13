@@ -106,3 +106,27 @@ it('applies list visibility to the image route with a uniform 404', function () 
     // Unknown id looks the same as a hidden wish.
     $this->actingAs($giver)->get('/wishlist/wishes/999999/image/thumb')->assertNotFound();
 });
+
+it('re-checks the manager designation inside the giving transactions and locks the owner row on designation', function () {
+    $owner = User::factory()->withPreset(Preset::Child)->create();
+    $giver = User::factory()->withPreset(Preset::Parent)->create();
+    $wish = Wish::factory()->create(['owner_id' => $owner->id]);
+    $guard = app(\App\Wishlist\Giving\GivingGuard::class);
+
+    \Illuminate\Support\Facades\DB::transaction(fn () => $guard->assertStillGiver($giver, $owner->id));
+
+    // A designation committed after the stale pre-transaction check: the transaction now refuses with 403.
+    \App\Models\WishlistManager::factory()->create(['owner_id' => $owner->id, 'manager_id' => $giver->id]);
+    expect(fn () => \Illuminate\Support\Facades\DB::transaction(fn () => $guard->assertStillGiver($giver, $owner->id)))
+        ->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+    $this->actingAs($giver)->post("/wishlist/wishes/{$wish->id}/reservation")->assertForbidden();
+    expect(\App\Models\WishReservation::query()->count())->toBe(0);
+
+    // Designation holds the exclusive side of the same lock.
+    \App\Models\WishlistManager::query()->delete();
+    $admin = User::factory()->admin()->create();
+    \Illuminate\Support\Facades\DB::enableQueryLog();
+    $this->actingAs($admin)->putJson("/settings/members/{$owner->id}/wishlist-managers", ['manager_ids' => [$giver->id]])->assertRedirect();
+    $sql = collect(\Illuminate\Support\Facades\DB::getQueryLog())->pluck('query')->implode("\n");
+    expect($sql)->toContain('from "users" where "users"."id" = ? limit 1 for update');
+});

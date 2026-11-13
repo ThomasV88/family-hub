@@ -4,6 +4,7 @@ namespace App\Wishlist\Giving;
 
 use App\Models\User;
 use App\Models\Wish;
+use App\Models\WishlistManager;
 use App\Wishlist\ViewerContext;
 use App\Wishlist\WishlistMembers;
 use LogicException;
@@ -22,6 +23,18 @@ final class GivingGuard
         if ($context->isRecipientSideOf($ownerId)) {
             throw new LogicException('Recipient-side viewers have no access to reservations.');
         }
+    }
+
+    /**
+     * Race guard for transactions that create a reservation or contribution. Takes a shared lock on the owner row,
+     * which designating a manager (WishlistManagersController::sync) holds exclusively, then re-reads the manager
+     * table: either the designation committed first and this aborts with 403, or this commits first and the purge
+     * job that follows the designation sees the new reservation. Must run inside the write transaction.
+     */
+    public function assertStillGiver(User $giver, int $ownerId): void
+    {
+        User::query()->whereKey($ownerId)->sharedLock()->value('id');
+        abort_if($ownerId === $giver->id || WishlistManager::query()->where('owner_id', $ownerId)->where('manager_id', $giver->id)->exists(), 403);
     }
 
     /** HTTP entry: 403 for recipient-side callers before any reservation table is touched. */

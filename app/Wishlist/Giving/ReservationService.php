@@ -27,6 +27,7 @@ final class ReservationService
 
         try {
             DB::transaction(function () use ($giver, $wish) {
+                $this->guard->assertStillGiver($giver, $wish->owner_id);
                 $reservation = new WishReservation;
                 $reservation->forceFill(['wish_id' => $wish->id, 'user_id' => $giver->id, 'cobuy_state' => 'none'])->save();
                 WishContribution::query()->create(['reservation_id' => $reservation->id, 'user_id' => $giver->id, 'amount_minor' => null]);

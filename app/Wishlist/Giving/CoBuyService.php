@@ -22,6 +22,7 @@ final class CoBuyService
         $this->guard->assertGiver(ViewerContext::for($giver), $wish->owner_id);
 
         DB::transaction(function () use ($giver, $wish) {
+            $this->guard->assertStillGiver($giver, $wish->owner_id);
             $reservation = $this->lock($wish);
             abort_unless($reservation->user_id === $giver->id, 403);
             abort_unless(in_array($reservation->cobuy_state, ['none', 'closed'], true), 409);
@@ -47,6 +48,7 @@ final class CoBuyService
         $this->guard->assertGiver(ViewerContext::for($giver), $wish->owner_id);
 
         DB::transaction(function () use ($giver, $wish, $amountMinor) {
+            $this->guard->assertStillGiver($giver, $wish->owner_id);
             $reservation = $this->lock($wish);
             abort_unless($reservation->cobuy_state === 'open', 409);
 

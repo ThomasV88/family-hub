@@ -35,6 +35,8 @@ class WishlistManagersController extends Controller
     private function sync(User $owner, array $managerIds, User $admin): array
     {
         return DB::transaction(function () use ($owner, $managerIds, $admin) {
+            // Serializes with reserve/contribute (GivingGuard::assertStillGiver takes the shared side of this lock).
+            User::query()->whereKey($owner->id)->lockForUpdate()->value('id');
             $existing = WishlistManager::query()->where('owner_id', $owner->id)->pluck('manager_id')->map(fn ($id) => (int) $id)->all();
 
             WishlistManager::query()->where('owner_id', $owner->id)->whereNotIn('manager_id', $managerIds)->delete();
