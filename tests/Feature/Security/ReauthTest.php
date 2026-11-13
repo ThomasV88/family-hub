@@ -198,3 +198,15 @@ it('still accepts the password for a member with no second factor', function () 
     $this->actingAs($user)->postJson('/confirm-access', ['password' => 'password'])->assertOk();
     $this->getJson('/finance')->assertOk();
 });
+
+// 06-REVIEW WR-04: audit first, so a failing audit write never leaves the member confirmed.
+it('opens no window when the audit write fails on confirm', function () {
+    $user = reauthUser();
+    $this->app->instance(\App\Audit\AuditLogger::class, new \Tests\Support\FailingAuditLogger);
+    $this->withoutExceptionHandling();
+
+    expect(fn () => $this->actingAs($user)->postJson('/confirm-access', ['password' => 'password']))
+        ->toThrow(RuntimeException::class);
+
+    expect(session('auth.password_confirmed_at'))->toBeNull()->and(session('sensitive.active_at'))->toBeNull();
+});

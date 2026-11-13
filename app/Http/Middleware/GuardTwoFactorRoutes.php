@@ -9,6 +9,7 @@ use App\Security\SafeIntended;
 use App\Security\SensitiveSession;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -100,13 +101,17 @@ class GuardTwoFactorRoutes
             return redirect(url('/confirm-access'));
         }
 
-        $response = $next($request);
+        // One transaction (06-REVIEW WR-04): if the audit row cannot be written, Fortify's change is rolled back,
+        // so a failing audit write never leaves a disabled factor behind a 500 (fail closed, no state change).
+        return DB::transaction(function () use ($request, $next, $user, $wasConfirmed) {
+            $response = $next($request);
 
-        if ($wasConfirmed && $response->getStatusCode() < 400) {
-            $this->audit->record(AuditEvent::TwoFactorDisabled, $user);
-        }
+            if ($wasConfirmed && $response->getStatusCode() < 400) {
+                $this->audit->record(AuditEvent::TwoFactorDisabled, $user);
+            }
 
-        return $response;
+            return $response;
+        });
     }
 
     private function challengeExpired(Request $request): bool

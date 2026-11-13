@@ -180,6 +180,21 @@ it('turns a confirmed app off only on a fresh window, with one audit row', funct
     expect(auditCount('two_factor_disabled'))->toBe(1);
 });
 
+// 06-REVIEW WR-04: a failing audit write must not leave the factor disabled behind a 500.
+it('rolls the factor change back when the audit write fails on disable', function () {
+    $user = User::factory()->create();
+    Totp::enable($user);
+    $this->app->instance(\App\Audit\AuditLogger::class, new \Tests\Support\FailingAuditLogger);
+    $this->withoutExceptionHandling();
+
+    expect(fn () => $this->actingAs($user)->withSession(freshWindow())->deleteJson('/user/two-factor-authentication'))
+        ->toThrow(RuntimeException::class, 'audit write failed');
+
+    $fresh = $user->fresh();
+    expect($fresh->two_factor_secret)->not->toBeNull()->and($fresh->two_factor_recovery_codes)->not->toBeNull()
+        ->and($fresh->two_factor_confirmed_at)->not->toBeNull();
+});
+
 // --- challenge lifetime and limits ---------------------------------------------------------------
 
 it('expires a pending challenge after ten minutes', function () {

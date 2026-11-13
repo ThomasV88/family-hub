@@ -37,8 +37,9 @@ class ReauthPasskeyController extends Controller
             return response()->json(['error' => 'passkey_failed'], 422);
         }
 
-        $sensitive->confirm();
+        // Audit first (fail closed, 06-REVIEW WR-04): no audit row, no confirmation.
         $this->audit->record(AuditEvent::ReauthConfirmed, $user, ['method' => 'passkey']);
+        $sensitive->confirm();
 
         return $request->input('mode') === 'dialog'
             ? response()->json(['confirmed' => true])

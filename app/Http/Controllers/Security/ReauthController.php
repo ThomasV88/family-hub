@@ -56,9 +56,11 @@ class ReauthController extends Controller
                 : back()->withErrors([$field => $error]);
         }
 
-        // Opens both the idle window and the 10-minute security window, in page and dialog mode alike.
-        $session->confirm();
+        // Audit first (fail closed, 06-REVIEW WR-04): if the row cannot be written the request fails and the
+        // windows were never opened. Then open both the idle window and the 10-minute security window, in page
+        // and dialog mode alike.
         $this->audit->record(AuditEvent::ReauthConfirmed, $user, ['method' => $method]);
+        $session->confirm();
 
         return $json
             ? response()->json(['confirmed' => true])
