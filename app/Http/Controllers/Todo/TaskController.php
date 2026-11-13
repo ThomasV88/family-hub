@@ -87,7 +87,11 @@ class TaskController extends Controller
         $model = Task::query()->visibleTo($user)->findOrFail($task);
         abort_unless($access->canEdit($user, $model), 403);
 
-        $service->update($model, $request->validated(), $user);
+        // Only the creator changes who sees a task; the UI never sends these for other editors.
+        $mayChange = $access->canChangeVisibility($user, $model);
+        abort_if(! $mayChange && $request->hasAny(['visibility', 'member_ids']), 403);
+
+        $service->update($model, $request->validated(), $user, $mayChange);
 
         return back(303)->with('toast', ['key' => 'todo.toast.saved']);
     }

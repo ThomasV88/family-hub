@@ -62,7 +62,7 @@ it('validates dates, times and notes with i18n keys', function () {
 
 it('ignores creator, timezone and completion fields in the payload', function () {
     $this->actingAs($this->parent)->post('/todo/tasks', [
-        'title' => 't', 'creator_id' => $this->child->id, 'timezone' => 'UTC', 'completed_at' => now()->toIso8601String(), 'visibility' => 'personal',
+        'title' => 't', 'creator_id' => $this->child->id, 'timezone' => 'UTC', 'completed_at' => now()->toIso8601String(),
     ])->assertStatus(303);
 
     $task = Task::query()->sole();

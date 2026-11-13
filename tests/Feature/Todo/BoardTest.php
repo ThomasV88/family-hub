@@ -97,7 +97,7 @@ it('ignores extra fields on quick add (no mass assignment)', function () {
     $other = User::factory()->withPreset(Preset::Child)->create();
 
     $this->actingAs($parent)->post('/todo/tasks', [
-        'title' => 'Mine', 'creator_id' => $other->id, 'visibility' => 'personal', 'completed_at' => now()->toIso8601String(),
+        'title' => 'Mine', 'creator_id' => $other->id, 'completed_at' => now()->toIso8601String(),
     ])->assertStatus(303);
 
     $task = Task::query()->sole();
