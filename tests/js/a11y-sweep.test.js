@@ -13,16 +13,18 @@ vi.mock('@inertiajs/vue3', async () => {
             props: {
                 locale: mockLocale,
                 app: { name: 'Family Hub', env: 'local' },
+                auth: { user: { id: 1, name: 'Mira' }, access: { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'edit' } },
                 heartbeat: { last_recorded_at: '2026-11-13T10:00:00+00:00', last_source: 'schedule', count_24h: 3, expected_24h: 1440 },
             },
         }),
-        router: { post: vi.fn(), visit: vi.fn(), on: vi.fn() },
+        router: { post: vi.fn(), get: vi.fn(), visit: vi.fn(), on: vi.fn() },
         Link: { props: ['href'], render() { return h('a', { href: this.href }, this.$slots.default?.()); } },
     };
 });
 
 import StyleGuide from '../../resources/js/Pages/StyleGuide.vue';
 import Home from '../../resources/js/Pages/Home.vue';
+import TodoIndex from '../../resources/js/Pages/Todo/Index.vue';
 import AppShell from '../../resources/js/Layouts/AppShell.vue';
 
 let wrapper;
@@ -34,7 +36,25 @@ afterEach(() => {
     window.innerWidth = originalWidth;
 });
 
-const pages = { StyleGuide, Home };
+const pages = { StyleGuide, Home, 'Todo/Index': TodoIndex };
+const ME = 1;
+const todoTask = (id, extra = {}) => ({
+    id, title: `Task ${id}`, notes: null, status: 'todo', visibility: 'family', creatorId: ME, assigneeId: ME,
+    dueDate: null, dueTime: null, isRecurring: false, completedAt: null, memberIds: [], ...extra,
+});
+const pageProps = {
+    'Todo/Index': {
+        timezone: 'Europe/Bratislava', today: '2026-11-13', canEdit: true,
+        members: [{ id: 1, name: 'Mira' }, { id: 2, name: 'Adam' }],
+        tasks: [
+            todoTask(1, { dueDate: '2026-11-10' }),
+            todoTask(2, { visibility: 'personal', isRecurring: true, dueDate: '2026-11-13', dueTime: '18:00' }),
+            todoTask(3, { assigneeId: 2, visibility: 'selected', memberIds: [1, 2], status: 'in_progress' }),
+            todoTask(4, { status: 'done', completedAt: '2026-11-12T10:00:00Z' }),
+            todoTask(5, { assigneeId: null }),
+        ],
+    },
+};
 const cases = [];
 for (const locale of ['en', 'sk', 'pl'])
     for (const theme of ['light', 'dark'])
@@ -46,7 +66,7 @@ describe('accessibility sweep', () => {
         mockLocale = locale;
         document.documentElement.dataset.theme = theme;
         window.innerWidth = width;
-        wrapper = mountUi(pages[name], { locale });
+        wrapper = mountUi(pages[name], { locale, props: pageProps[name] ?? {} });
         await expectNoAxeViolations(wrapper.element);
     });
 
