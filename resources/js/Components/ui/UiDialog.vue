@@ -11,6 +11,8 @@ const props = defineProps({
     title: { type: String, required: true },
     // Function returning the element (or component instance) to focus first; defaults to the first focusable.
     initialFocus: { type: Function, default: null },
+    // false: Esc, scrim click and the close button do nothing (the caller offers its own exit).
+    dismissable: { type: Boolean, default: true },
 });
 const emit = defineEmits(['update:open']);
 const { t } = useI18n();
@@ -20,6 +22,7 @@ const trap = useFocusTrap(panel, { initialFocus: () => props.initialFocus?.() })
 let locked = false;
 
 function close() {
+    if (!props.dismissable) return;
     emit('update:open', false);
 }
 
@@ -63,7 +66,7 @@ onBeforeUnmount(() => {
                 <div ref="panel" class="ui-dialog" role="dialog" aria-modal="true" :aria-labelledby="titleId" tabindex="-1">
                     <div class="ui-dialog__header">
                         <h2 :id="titleId" class="ui-dialog__title">{{ title }}</h2>
-                        <UiButton variant="ghost" icon-only :icon="X" :label="t('ui.close')" @click="close" />
+                        <UiButton v-if="dismissable" variant="ghost" icon-only :icon="X" :label="t('ui.close')" @click="close" />
                     </div>
                     <div class="ui-dialog__body"><slot /></div>
                     <div v-if="$slots.footer" class="ui-dialog__footer"><slot name="footer" /></div>
