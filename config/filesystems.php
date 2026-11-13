@@ -33,7 +33,8 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // No framework route for the private disk: it would sit outside the web group and its access guard.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

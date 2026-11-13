@@ -43,6 +43,9 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::loginView(fn () => Inertia::render('Auth/Login', ['googleEnabled' => false]));
 
+        // Fortify always registers the password-confirmation routes; the app has no such screen, so a GET is a plain 404 instead of a missing-view 500.
+        Fortify::confirmPasswordView(fn () => abort(404));
+
         Fortify::authenticateUsing(function (Request $request) {
             $user = User::where('email', Str::lower((string) $request->input('email')))->first();
 
