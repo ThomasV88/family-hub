@@ -18,9 +18,10 @@ return [
     // Empty body: validation failure for a signed-in member (never reaches the ceremony).
     'passkeys.store' => ['method' => 'POST', 'uri' => '/settings/security/passkeys', 'data' => [], 'expect' => $signedIn(302)],
     // Nobody owns passkey 999999: a missing and a foreign passkey look the same. Route-model binding runs before
-    // the access rule, so a guest also sees the 404 (nothing about the passkey is revealed either way).
-    'passkeys.update' => ['method' => 'PATCH', 'uri' => '/settings/security/passkeys/999999', 'data' => ['name' => 'x'], 'expect' => array_merge($signedIn(404), ['guest' => 404])],
-    'passkeys.destroy' => ['method' => 'DELETE', 'uri' => '/settings/security/passkeys/999999', 'expect' => array_merge($signedIn(404), ['guest' => 404])],
+    // the access rule, which used to give a guest a 404; the id is now resolved in the controller (06-REVIEW IN-02), so a
+    // guest gets the same 302 for any id.
+    'passkeys.update' => ['method' => 'PATCH', 'uri' => '/settings/security/passkeys/999999', 'data' => ['name' => 'x'], 'expect' => $signedIn(404)],
+    'passkeys.destroy' => ['method' => 'DELETE', 'uri' => '/settings/security/passkeys/999999', 'expect' => $signedIn(404)],
     // No pending sign-in: guests go to /login; signed-in members are sent home by the guest rule.
     'two-factor.passkey.options' => ['method' => 'GET', 'uri' => '/two-factor-challenge/passkey/options', 'expect' => $everyone(302)],
     'two-factor.passkey.store' => ['method' => 'POST', 'uri' => '/two-factor-challenge/passkey', 'data' => [], 'expect' => $everyone(302)],

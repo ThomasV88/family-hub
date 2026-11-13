@@ -204,3 +204,27 @@ it('never enables Fortify\'s passkey feature or a passwordless login route', fun
         $this->postJson('/'.$uri)->assertNotFound();
     }
 });
+
+// 06-REVIEW IN-02: an anonymous caller cannot tell an existing passkey id from a missing one.
+it('answers an anonymous caller the same for an existing and a missing passkey id', function () {
+    $user = pkMember();
+    $id = pkRow($user);
+    $missing = $id + 1000;
+
+    foreach (['patch' => ['name' => 'x'], 'delete' => []] as $verb => $data) {
+        $real = $this->{$verb.'Json'}("/settings/security/passkeys/{$id}", $data);
+        $none = $this->{$verb.'Json'}("/settings/security/passkeys/{$missing}", $data);
+        expect($real->getStatusCode())->toBe($none->getStatusCode())->toBe(401);
+    }
+    expect(DB::table('passkeys')->where('id', $id)->exists())->toBeTrue();
+});
+
+it('still answers 404 for another member\'s passkey and for a missing one when signed in', function () {
+    $user = pkMember();
+    $other = pkRow(pkMember());
+    $this->actingAs($user)->withSession(pkFresh());
+
+    $this->patchJson("/settings/security/passkeys/{$other}", ['name' => 'x'])->assertNotFound();
+    $this->deleteJson("/settings/security/passkeys/{$other}")->assertNotFound();
+    $this->deleteJson('/settings/security/passkeys/999999')->assertNotFound();
+});

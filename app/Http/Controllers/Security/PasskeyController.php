@@ -44,10 +44,12 @@ class PasskeyController extends Controller
         return response()->json(['passkey' => $this->present($passkey)], 201);
     }
 
-    public function update(PasskeyNameRequest $request, Passkey $passkey): JsonResponse
+    // The id is resolved here, not by route model binding: binding runs before access:* and would answer an
+    // anonymous caller differently for an existing and a missing id (06-REVIEW IN-02).
+    public function update(PasskeyNameRequest $request, int $passkeyId): JsonResponse
     {
         $user = $this->user($request);
-        $this->owned($user, $passkey);
+        $passkey = $this->owned($user, $passkeyId);
 
         $passkey->forceFill(['name' => $request->validated('name')])->save();
         $this->audit->record(AuditEvent::PasskeyRenamed, $user);
@@ -55,10 +57,10 @@ class PasskeyController extends Controller
         return response()->json(['passkey' => $this->present($passkey)]);
     }
 
-    public function destroy(Request $request, Passkey $passkey, DeletePasskey $delete): Response
+    public function destroy(Request $request, int $passkeyId, DeletePasskey $delete): Response
     {
         $user = $this->user($request);
-        $this->owned($user, $passkey);
+        $passkey = $this->owned($user, $passkeyId);
 
         $delete($user, $passkey);
 
@@ -74,9 +76,9 @@ class PasskeyController extends Controller
     }
 
     /** Another member's passkey is indistinguishable from a missing one. */
-    private function owned(User $user, Passkey $passkey): void
+    private function owned(User $user, int $id): Passkey
     {
-        abort_unless((int) $passkey->user_id === (int) $user->getKey(), 404);
+        return Passkey::query()->where('user_id', $user->getKey())->whereKey($id)->firstOr(fn () => abort(404));
     }
 
     /** @return array<string, mixed> display fields only: never the credential or its id */

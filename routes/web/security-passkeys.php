@@ -16,10 +16,10 @@ Route::get('/settings/security/passkeys/options', [PasskeyController::class, 'op
     ->middleware([$on, 'access:authenticated', 'access:recent', 'throttle:20,1'])->name('passkeys.options');
 Route::post('/settings/security/passkeys', [PasskeyController::class, 'store'])
     ->middleware([$on, 'access:authenticated', 'access:recent', 'throttle:10,1'])->name('passkeys.store');
-Route::patch('/settings/security/passkeys/{passkey}', [PasskeyController::class, 'update'])
-    ->middleware([$on, 'access:authenticated', 'throttle:20,1'])->whereNumber('passkey')->name('passkeys.update');
-Route::delete('/settings/security/passkeys/{passkey}', [PasskeyController::class, 'destroy'])
-    ->middleware([$on, 'access:authenticated', 'access:recent', 'throttle:20,1'])->whereNumber('passkey')->name('passkeys.destroy');
+Route::patch('/settings/security/passkeys/{passkeyId}', [PasskeyController::class, 'update'])
+    ->middleware([$on, 'access:authenticated', 'throttle:20,1'])->whereNumber('passkeyId')->name('passkeys.update');
+Route::delete('/settings/security/passkeys/{passkeyId}', [PasskeyController::class, 'destroy'])
+    ->middleware([$on, 'access:authenticated', 'access:recent', 'throttle:20,1'])->whereNumber('passkeyId')->name('passkeys.destroy');
 
 // Second step of sign-in (the two-factor.passkey.* names get the challenge TTL guard).
 Route::get('/two-factor-challenge/passkey/options', [ChallengePasskeyController::class, 'options'])
