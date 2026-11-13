@@ -9,6 +9,7 @@ use App\Models\Invitation;
 use App\Models\User;
 use App\Notifications\InviteNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -117,6 +118,46 @@ class InviteService
     {
         Notification::route('mail', $invitation->email)
             ->notify(new InviteNotification($invitation->id, $admin->name, $invitation->locale, $token));
+    }
+
+    /**
+     * Turns an invitation into an account. Row lock plus state re-check make the link single-use under races.
+     *
+     * @param  array{name: string, password?: string}  $attrs
+     *
+     * @throws InvalidInviteException when the invitation is no longer valid or the email already has an account
+     */
+    public function accept(Invitation $invitation, array $attrs, ?string $googleId = null): User
+    {
+        return DB::transaction(function () use ($invitation, $attrs, $googleId) {
+            $locked = Invitation::query()->lockForUpdate()->find($invitation->id);
+            if ($locked === null || $locked->state() !== 'valid') {
+                throw new InvalidInviteException;
+            }
+            if (User::query()->whereRaw('lower(email) = ?', [mb_strtolower($locked->email)])->exists()) {
+                throw new InvalidInviteException;
+            }
+
+            $user = new User;
+            $user->forceFill([
+                'name' => $attrs['name'],
+                'email' => mb_strtolower($locked->email),
+                'password' => Hash::make($googleId !== null ? Str::random(64) : (string) ($attrs['password'] ?? Str::random(64))),
+                'locale' => $locked->locale,
+                'email_verified_at' => now(),
+                'google_id' => $googleId,
+                'is_admin' => false,
+            ])->save();
+
+            foreach ($locked->preset->grants() as $module => $level) {
+                $user->modulePermissions()->updateOrCreate(['module' => $module], ['level' => $level]);
+            }
+
+            $locked->forceFill(['accepted_at' => now(), 'accepted_user_id' => $user->id])->save();
+            $this->audit->record(AuditEvent::InviteAccepted, $user, ['email' => $locked->email, 'preset' => $locked->preset->value]);
+
+            return $user;
+        });
     }
 
     public static function link(string $token): string
