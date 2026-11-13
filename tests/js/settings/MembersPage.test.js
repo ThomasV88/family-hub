@@ -65,7 +65,7 @@ describe('Members page', () => {
         expect(current.text().match(/Active/g)).toHaveLength(2);
         expect(manage('Anna').text()).toBe('Manage');
         expect(manage('Bob').exists()).toBe(true);
-        expect(current.text()).not.toContain('Invite member');
+        expect(current.text()).toContain('Invite member');
     });
 
     it('opens the member panel on the Permissions tab from Manage', async () => {

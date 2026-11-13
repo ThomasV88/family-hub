@@ -61,12 +61,12 @@ onBeforeUnmount(() => {
         <Transition name="ui-dialog">
             <div v-if="open" class="ui-dialog__scrim" @click.self="close" @keydown.esc.stop="close">
                 <div ref="panel" class="ui-dialog" role="dialog" aria-modal="true" :aria-labelledby="titleId" tabindex="-1">
-                    <header class="ui-dialog__header">
+                    <div class="ui-dialog__header">
                         <h2 :id="titleId" class="ui-dialog__title">{{ title }}</h2>
                         <UiButton variant="ghost" icon-only :icon="X" :label="t('ui.close')" @click="close" />
-                    </header>
+                    </div>
                     <div class="ui-dialog__body"><slot /></div>
-                    <footer v-if="$slots.footer" class="ui-dialog__footer"><slot name="footer" /></footer>
+                    <div v-if="$slots.footer" class="ui-dialog__footer"><slot name="footer" /></div>
                 </div>
             </div>
         </Transition>
