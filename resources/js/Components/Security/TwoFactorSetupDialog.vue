@@ -12,7 +12,8 @@ import OtpInput from './OtpInput.vue';
 import ReauthPrompt from './ReauthPrompt.vue';
 import RecoveryCodesPanel from './RecoveryCodesPanel.vue';
 
-// 3-step authenticator setup. Steps: confirm (stale security window) -> scan -> verify -> codes.
+// 3-step authenticator setup. The in-dialog ReauthForm comes through ReauthPrompt (form, or no-method copy).
+// Steps: confirm (stale security window) -> scan -> verify -> codes.
 // The QR, the key, the typed code and the recovery codes live only in this component's local state, rendered
 // with v-if, and are wiped on leaving a step, on cancel and on finish.
 const props = defineProps({
