@@ -47,6 +47,7 @@ class HandleInertiaRequests extends Middleware
             'app' => [
                 'name' => config('app.name'),
                 'env' => app()->environment(),
+                'styleGuide' => app()->environment(config('app.style_guide_environments', [])),
             ],
         ];
     }

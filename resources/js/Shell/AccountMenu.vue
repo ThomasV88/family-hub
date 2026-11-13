@@ -23,7 +23,7 @@ const items = computed(() => {
         { type: 'radio-group', key: 'language', label: t('nav.language'), value: page.props.locale ?? 'en', options: LANGUAGES },
         { type: 'radio-group', key: 'theme', label: t('theme.label'), value: theme.value, options: THEME_OPTIONS.map((value) => ({ value, label: t(`theme.${value}`) })) },
     ];
-    if (page.props.app?.env !== 'production') {
+    if (page.props.app?.styleGuide === true) {
         list.push({ type: 'item', key: 'style', label: t('nav.style_guide'), icon: Palette });
     }
     return list;

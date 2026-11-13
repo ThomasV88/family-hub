@@ -30,6 +30,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Style guide environments
+    |--------------------------------------------------------------------------
+    |
+    | Single allowlist for the /_style page: the route guard and the account
+    | menu link both derive from it, so they cannot disagree.
+    |
+    */
+
+    'style_guide_environments' => ['local', 'staging', 'testing'],
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

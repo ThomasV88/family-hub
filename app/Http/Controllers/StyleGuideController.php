@@ -9,7 +9,7 @@ class StyleGuideController extends Controller
 {
     public function __invoke(): Response
     {
-        abort_unless(app()->environment(['local', 'staging', 'testing']), 404);
+        abort_unless(app()->environment(config('app.style_guide_environments', [])), 404);
 
         return Inertia::render('StyleGuide');
     }

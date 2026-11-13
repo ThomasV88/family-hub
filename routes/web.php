@@ -14,6 +14,5 @@ Route::post('/locale', [LocaleController::class, 'update'])
     ->middleware('throttle:30,1')
     ->name('locale.update');
 
-if (app()->environment(['local', 'staging', 'testing'])) {
-    Route::get('/_style', StyleGuideController::class)->name('style');
-}
+// Always registered (so route:cache cannot bake in the build environment); the controller enforces the allowlist.
+Route::get('/_style', StyleGuideController::class)->name('style');
