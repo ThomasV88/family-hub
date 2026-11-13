@@ -8,12 +8,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/wishlist/occasions', [OccasionController::class, 'index'])
     ->middleware('access:module,wishlist,view')->name('wishlist.occasions.index');
 Route::post('/wishlist/occasions', [OccasionController::class, 'store'])
-    ->middleware(['access:module,wishlist,edit', 'throttle:60,1'])->name('wishlist.occasions.store');
+    ->middleware(['access:module,wishlist,edit', 'throttle:60,1,wishlist.occasions.store'])->name('wishlist.occasions.store');
 Route::patch('/wishlist/occasions/{occasion}', [OccasionController::class, 'update'])
-    ->whereNumber('occasion')->middleware(['access:module,wishlist,edit', 'throttle:60,1'])->name('wishlist.occasions.update');
+    ->whereNumber('occasion')->middleware(['access:module,wishlist,edit', 'throttle:60,1,wishlist.occasions.update'])->name('wishlist.occasions.update');
 Route::delete('/wishlist/occasions/{occasion}', [OccasionController::class, 'destroy'])
-    ->whereNumber('occasion')->middleware(['access:module,wishlist,edit', 'throttle:60,1'])->name('wishlist.occasions.destroy');
+    ->whereNumber('occasion')->middleware(['access:module,wishlist,edit', 'throttle:60,1,wishlist.occasions.destroy'])->name('wishlist.occasions.destroy');
 Route::put('/wishlist/members/{member}/dates', [MemberDatesController::class, 'update'])
-    ->whereNumber('member')->middleware(['access:module,wishlist,edit', 'throttle:60,1'])->name('wishlist.members.dates.update');
+    ->whereNumber('member')->middleware(['access:module,wishlist,edit', 'throttle:60,1,wishlist.members.dates.update'])->name('wishlist.members.dates.update');
 Route::get('/wishlist/namedays', [NameDayController::class, 'search'])
-    ->middleware(['access:module,wishlist,view', 'throttle:120,1'])->name('wishlist.namedays.search');
+    ->middleware(['access:module,wishlist,view', 'throttle:120,1,wishlist.namedays.search'])->name('wishlist.namedays.search');
