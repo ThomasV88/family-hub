@@ -4,6 +4,7 @@ use App\Access\AccessLevel;
 use App\Access\Module;
 use App\Access\Preset;
 use App\Finance\Queries\RecurringQuery;
+use App\Finance\Recurring\RecurringMatchService;
 use App\Finance\Viewer;
 use App\Models\FinanceAccount;
 use App\Models\FinanceRecurring;
@@ -14,6 +15,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Tests\Support\FinancePrivacy;
 
 beforeEach(function () {
@@ -205,7 +207,7 @@ it('shows what a transaction pays on rows and in the panel', function () {
 it('books one payment when the same occurrence is recorded twice (double submit past the request check)', function () {
     [$user, , $item] = fhMfSetup();
     $viewer = Viewer::for($user);
-    $service = app(App\Finance\Recurring\RecurringMatchService::class);
+    $service = app(RecurringMatchService::class);
     $payment = ['minor' => 45000, 'booked_on' => '2027-03-05', 'description' => 'Rent', 'category_id' => null, 'note' => null];
     $locked = false;
     DB::listen(function ($q) use (&$locked) {
@@ -214,7 +216,7 @@ it('books one payment when the same occurrence is recorded twice (double submit 
 
     $service->recordPayment($viewer, $item, '2027-03-05', $payment);
     expect(fn () => $service->recordPayment($viewer, $item, '2027-03-05', $payment))
-        ->toThrow(Illuminate\Validation\ValidationException::class);
+        ->toThrow(ValidationException::class);
 
     expect($locked)->toBeTrue()
         ->and(FinanceTransaction::query()->count())->toBe(1)

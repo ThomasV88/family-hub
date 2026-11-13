@@ -5,6 +5,8 @@ use App\Access\Module;
 use App\Access\Preset;
 use App\Models\AuditEntry;
 use App\Models\FinanceAccount;
+use App\Models\FinanceImportBatch;
+use App\Models\FinanceRecurring;
 use App\Models\FinanceTransaction;
 use App\Models\User;
 use App\Support\SettingsSections;
@@ -253,7 +255,7 @@ it('refuses currency and opening date changes while recurring items or a draft i
     $base = ['name' => 'Acc', 'type' => 'bank', 'member_ids' => [$admin->id]];
 
     // Recurring item, no transactions: locked.
-    $rec = \App\Models\FinanceRecurring::factory()->onAccount($account)->create();
+    $rec = FinanceRecurring::factory()->onAccount($account)->create();
     $this->actingAs($admin)->patch($url, $base + ['currency' => 'PLN'])->assertSessionHasErrors(['currency' => 'finance.acc.currency_locked']);
     $this->actingAs($admin)->patch($url, $base + ['balance_as_of' => '2026-02-01'])->assertSessionHasErrors(['balance_as_of' => 'finance.acc.opening_locked']);
     // An unchanged value is not a change.
@@ -262,7 +264,7 @@ it('refuses currency and opening date changes while recurring items or a draft i
 
     // Open draft import only: also locked.
     $rec->delete();
-    $batch = \App\Models\FinanceImportBatch::factory()->create(['account_id' => $account->id, 'user_id' => $admin->id, 'status' => 'draft']);
+    $batch = FinanceImportBatch::factory()->create(['account_id' => $account->id, 'user_id' => $admin->id, 'status' => 'draft']);
     $this->actingAs($admin)->patch($url, $base + ['currency' => 'PLN'])->assertSessionHasErrors(['currency' => 'finance.acc.currency_locked']);
 
     // Nothing depends any more: allowed.

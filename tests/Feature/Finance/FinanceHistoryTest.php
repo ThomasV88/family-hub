@@ -17,7 +17,6 @@ beforeEach(function () {
     $this->withoutMiddleware(PreventRequestForgery::class);
 });
 
-
 it('encrypts browser history for authenticated finance pages and not for the login page', function () {
     $user = User::factory()->withPreset(Preset::Parent)->create();
 

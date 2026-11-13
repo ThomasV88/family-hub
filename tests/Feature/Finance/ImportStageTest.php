@@ -16,6 +16,7 @@ use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 function fhImpBytes(): string
@@ -206,7 +207,7 @@ it('sanitises a failing commit statement too', function () {
     [$user, $account, $viewer] = fhImpSetup();
     $batchId = fhImpStage($viewer, $account);
     $rows = array_values(array_filter(fhImpRows($batchId), fn ($r) => $r->state === 'new'));
-    $txId = (string) Illuminate\Support\Str::uuid7();
+    $txId = (string) Str::uuid7();
     $picked = array_map(fn ($r) => ['tx_id' => $txId, 'row_id' => $r->id, 'import_hash' => $r->import_hash, 'category_id' => null], array_slice($rows, 0, 2));
 
     $caught = null;

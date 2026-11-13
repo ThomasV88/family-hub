@@ -11,6 +11,7 @@ use App\Finance\Queries\ImportQuery;
 use App\Finance\Viewer;
 use App\Models\FinanceAccount;
 use App\Models\FinanceImportProfile;
+use App\Rules\ValidUtf8;
 use Closure;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -96,7 +97,7 @@ class ImportUploadRequest extends FormRequest
             'profile_id' => ['sometimes', 'nullable', 'string'],
             'settings' => ['sometimes', 'nullable', 'array'],
             'save_profile' => ['sometimes', 'boolean'],
-            'profile_name' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'profile_name' => ['sometimes', 'nullable', 'string', 'max:60', new ValidUtf8('finance.imp.err_profile_name')],
         ];
     }
 

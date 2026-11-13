@@ -323,3 +323,14 @@ it('throttles transaction update, delete and create in separate buckets', functi
     $this->actingAs($user)->delete('/finance/transactions/'.Str::uuid7())->assertStatus(429);
     expect($this->actingAs($user)->patch('/finance/transactions/'.Str::uuid7(), ['description' => 'x'])->status())->not->toBe(429);
 });
+
+it('answers invalid UTF-8 in the search or a text field without a 500 (IN-09)', function () {
+    [$user, $account] = fhTxSetup();
+
+    $this->actingAs($user)->get('/finance/transactions?q=%FF%FE')->assertOk();
+    $this->actingAs($user)->post('/finance/transactions', ['kind' => 'expense', 'amount' => '1', 'booked_on' => '2026-03-05', 'description' => "bad \xFF", 'account_id' => $account->id], ['Accept' => 'application/json'])
+        ->assertStatus(422)->assertJsonValidationErrors('description');
+    $this->actingAs($user)->post('/finance/transactions', ['kind' => 'expense', 'amount' => '1', 'booked_on' => '2026-03-05', 'description' => 'ok', 'note' => "bad \xC3\x28", 'account_id' => $account->id], ['Accept' => 'application/json'])
+        ->assertStatus(422)->assertJsonValidationErrors('note');
+    expect(FinanceTransaction::query()->count())->toBe(0);
+});

@@ -3,6 +3,7 @@
 use App\Access\AccessLevel;
 use App\Access\Module;
 use App\Access\Preset;
+use App\Models\AuditEntry;
 use App\Models\FinanceAccount;
 use App\Models\FinanceBudget;
 use App\Models\FinanceCategory;
@@ -265,7 +266,7 @@ it('audits a category delete as one content-free entry', function () {
 
     $this->actingAs($user)->delete('/finance/categories/'.$from->id, ['move_to' => fhCatDefault('other')->id])->assertStatus(303);
 
-    $rows = \App\Models\AuditEntry::query()->where('event', 'finance_category_changed')->get();
+    $rows = AuditEntry::query()->where('event', 'finance_category_changed')->get();
     expect($rows)->toHaveCount(1)
         ->and((array) $rows->first()->meta)->toBe(['change' => 'deleted'])
         ->and($rows->first()->actor_id)->toBe($user->id)

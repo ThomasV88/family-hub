@@ -10,6 +10,7 @@ use App\Finance\Queries\RecurringQuery;
 use App\Finance\Viewer;
 use App\Models\FinanceAccount;
 use App\Recurrence\RuleBuilder;
+use App\Rules\ValidUtf8;
 use App\Tasks\TaskRecurrence;
 use Closure;
 use Illuminate\Contracts\Validation\Validator;
@@ -92,7 +93,7 @@ class RecurringRequest extends FormRequest
         };
 
         return [
-            'name' => [$presence, 'string', 'max:120'],
+            'name' => [$presence, 'string', 'max:120', new ValidUtf8('finance.rec.err_name')],
             'amount' => [$presence, 'string'],
             'account_id' => ['sometimes', 'nullable'],
             'kind' => ['sometimes', 'nullable'],
@@ -102,7 +103,7 @@ class RecurringRequest extends FormRequest
             'recurrence' => [$presence, 'array'],
             'window_days' => ['sometimes', 'integer', Rule::in((array) config('finance.recurring.window_days_options'))],
             'tolerance' => ['sometimes', 'nullable', 'string'],
-            'text_hint' => ['sometimes', 'nullable', 'string', 'min:4', 'max:120'],
+            'text_hint' => ['sometimes', 'nullable', 'string', 'min:4', 'max:120', new ValidUtf8('finance.rec.hint_text')],
         ];
     }
 

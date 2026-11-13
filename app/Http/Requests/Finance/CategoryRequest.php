@@ -4,6 +4,7 @@ namespace App\Http\Requests\Finance;
 
 use App\Finance\Queries\CategoryQuery;
 use App\Models\FinanceCategory;
+use App\Rules\ValidUtf8;
 use Closure;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -49,7 +50,7 @@ class CategoryRequest extends FormRequest
         }
 
         return [
-            'name' => ['required', 'string', 'max:40'],
+            'name' => ['required', 'string', 'max:40', new ValidUtf8('finance.cat.err_name')],
             'kind' => $this->isMethod('POST') ? ['required', 'in:expense,income'] : ['nullable'],
         ];
     }

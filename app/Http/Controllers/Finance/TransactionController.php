@@ -93,7 +93,7 @@ class TransactionController extends Controller
         $source = $request->query('source');
 
         return [
-            'q' => is_string($q) ? mb_substr(trim($q), 0, 100) : '',
+            'q' => is_string($q) && mb_check_encoding($q, 'UTF-8') ? mb_substr(trim($q), 0, 100) : '',
             'type' => in_array($type, ['income', 'expense', 'transfer'], true) ? $type : 'all',
             'category' => $category === 'none' || (is_string($category) && Str::isUuid($category)) ? $category : 'all',
             'source' => in_array($source, ['manual', 'import'], true) ? $source : 'all',

@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use App\Support\RequestInput;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Controllers\Auth\InviteAcceptController;
 use App\Models\User;
+use App\Support\RequestInput;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;

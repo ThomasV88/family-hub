@@ -10,6 +10,7 @@ use App\Finance\MoneyParser;
 use App\Finance\Queries\AccountAdminQuery;
 use App\Finance\Viewer;
 use App\Models\User;
+use App\Rules\ValidUtf8;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -52,7 +53,7 @@ class FinanceAccountRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'name' => ['required', 'string', 'max:60'],
+            'name' => ['required', 'string', 'max:60', new ValidUtf8('finance.acc.err_save')],
             'type' => ['required', 'in:bank,cash,savings,card'],
             'member_ids' => ['present', 'array', 'max:50'],
             'member_ids.*' => ['integer', 'distinct', $this->eligibleMember()],

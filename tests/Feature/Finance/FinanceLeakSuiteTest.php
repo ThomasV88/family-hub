@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\FinanceAccount;
+use App\Models\FinanceCategory;
+use App\Models\FinanceTransaction;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -193,7 +196,6 @@ it('keeps mutant routes out of the application', function () {
     expect(Str::contains(file_get_contents(base_path('routes/web.php')), 'zz_'))->toBeFalse();
 });
 
-
 it('catches an unscoped INSERT and an unscoped DELETE write route (mutation sanity)', function () {
     $ctx = fhLsScenario();
     $hiddenAccount = $ctx['hiddenAccount']->id;
@@ -201,7 +203,7 @@ it('catches an unscoped INSERT and an unscoped DELETE write route (mutation sani
     Route::middleware(['web', 'access:module,finance,edit'])->group(function () use ($hiddenAccount, $hiddenTx) {
         // Body-supplied account id written without any visible-account lookup.
         Route::post('/finance/zz-mutant-insert', function () use ($hiddenAccount) {
-            App\Models\FinanceTransaction::factory()->onAccount(App\Models\FinanceAccount::query()->findOrFail($hiddenAccount))->expense(1)->create();
+            FinanceTransaction::factory()->onAccount(FinanceAccount::query()->findOrFail($hiddenAccount))->expense(1)->create();
 
             return response('ok');
         })->name('finance.zz_mutant_insert');
@@ -240,7 +242,7 @@ const FH_LS_CATEGORY_EXEMPT = [
 it('runs the category routes through the mutation check with a documented exemption that only rewrites category_id', function () {
     $ctx = fhLsScenario();
     $pets = $ctx['category']['pets'];
-    $target = App\Models\FinanceCategory::query()->where('default_key', 'other')->value('id');
+    $target = FinanceCategory::query()->where('default_key', 'other')->value('id');
     $snapshot = fn () => [
         'tx' => DB::table('finance_transactions')->orderBy('id')->get()->map(fn ($r) => collect((array) $r)->except('category_id')->all())->all(),
         'rec' => DB::table('finance_recurring')->orderBy('id')->get()->map(fn ($r) => collect((array) $r)->except('category_id')->all())->all(),
@@ -256,12 +258,12 @@ it('runs the category routes through the mutation check with a documented exempt
     DB::beginTransaction();
     expect(fn () => FinancePrivacy::assertScopedMutations($delete))->toThrow(AssertionFailedError::class, 'Unscoped finance mutation');
     DB::rollBack();
-    expect(App\Models\FinanceCategory::query()->whereKey($pets)->exists())->toBeTrue();
+    expect(FinanceCategory::query()->whereKey($pets)->exists())->toBeTrue();
 
     FinancePrivacy::assertScopedMutations($delete, FH_LS_CATEGORY_EXEMPT);
 
     // The hidden rows moved to the target category and nothing else about them changed (no updated_at, no amounts).
-    expect(App\Models\FinanceCategory::query()->whereKey($pets)->exists())->toBeFalse()
+    expect(FinanceCategory::query()->whereKey($pets)->exists())->toBeFalse()
         ->and($snapshot())->toEqual($before)
         ->and(DB::table('finance_transactions')->where('description', 'like', 'ZxCanaryFin vet')->value('category_id'))->toBe($target)
         ->and(DB::table('finance_recurring')->where('name', 'like', 'ZxCanaryFin pet insurance')->value('category_id'))->toBe($target);

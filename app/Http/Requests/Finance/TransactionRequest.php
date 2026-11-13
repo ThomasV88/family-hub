@@ -11,6 +11,7 @@ use App\Finance\Viewer;
 use App\Models\FinanceAccount;
 use App\Models\FinanceCategory;
 use App\Models\FinanceTransaction;
+use App\Rules\ValidUtf8;
 use Closure;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -86,8 +87,8 @@ class TransactionRequest extends FormRequest
                     $fail('finance.error.date');
                 }
             }],
-            'description' => ['sometimes', 'nullable', 'string', 'max:160'],
-            'note' => ['sometimes', 'nullable', 'string', 'max:1000'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:160', new ValidUtf8('finance.error.description')],
+            'note' => ['sometimes', 'nullable', 'string', 'max:1000', new ValidUtf8('finance.error.tx_save')],
             'category_id' => ['sometimes', 'nullable', 'string'],
             'account_id' => ['sometimes', 'nullable'],
             'from_account_id' => ['sometimes', 'nullable'],
