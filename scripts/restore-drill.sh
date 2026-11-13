@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Restore drill: restore the newest snapshot into a scratch database in the SAME stack, compare it
-# with the live database, drop the scratch database.
+# Restore drill: restore the newest DATABASE snapshot (selected by path /<db>.dump, never the newest snapshot
+# of any kind) into a scratch database in the SAME stack, compare it with the live database, drop the
+# scratch database. Then prove the newest uploads snapshot (tag uploads-<DRILL_TAG>, path /uploads.tar)
+# readable: RESTORE-DRILL UPLOADS OK files=<n> snapshot=<id>, or RESTORE-DRILL UPLOADS NONE when absent.
 # RULE: never restore into another stack's database; a production backup is never restored into staging.
 # Usage: restore-drill.sh [snapshot|latest]   (run from the stack directory)
 # Optional env: DRILL_DB, DRILL_TAG (default nightly; pre-migrate snapshots are not drilled by default), DRILL_CHECK_TABLE (must have >= 1 row), DRILL_ADMIN_USER (default postgres)
@@ -45,10 +47,16 @@ drop_scratch() { q postgres "drop database if exists \"$DRILL_DB\" with (force)"
 trap drop_scratch EXIT
 
 DRILL_TAG="${DRILL_TAG:-nightly}"
-SNAP_ID="$("${R[@]}" snapshots --json --latest 1 --tag "$DRILL_TAG" 2>/dev/null \
+DB_PATH="/${DB_NAME}.dump"
+SNAP_ID="$("${R[@]}" snapshots --json --latest 1 --tag "$DRILL_TAG" --path "$DB_PATH" 2>/dev/null \
   | python3 -c 'import json,sys; s=json.load(sys.stdin); print(max(s, key=lambda x: x["time"])["short_id"] if s else "")')" || true
 [ -n "$SNAP_ID" ] || die "no snapshot found"
-[ "$SNAPSHOT" = "latest" ] || SNAP_ID="$SNAPSHOT"
+if [ "$SNAPSHOT" != "latest" ]; then
+  "${R[@]}" snapshots --json "$SNAPSHOT" 2>/dev/null \
+    | python3 -c 'import json,sys; s=json.load(sys.stdin); sys.exit(0 if s and sys.argv[1] in s[0].get("paths", []) else 1)' "$DB_PATH" \
+    || die "snapshot is not a database snapshot"
+  SNAP_ID="$SNAPSHOT"
+fi
 
 log "start snapshot=$SNAP_ID scratch=$DRILL_DB"
 drop_scratch
@@ -79,6 +87,26 @@ if [ -n "${DRILL_CHECK_TABLE:-}" ]; then
   [[ "$DRILL_CHECK_TABLE" =~ ^[a-z_][a-z0-9_]*$ ]] || die "invalid DRILL_CHECK_TABLE"
   CHK="$(q "$DRILL_DB" "select count(*) from \"$DRILL_CHECK_TABLE\"")"
   [ "$CHK" -ge 1 ] || die "check table $DRILL_CHECK_TABLE is empty after restore"
+fi
+
+# Uploads: the newest uploads snapshot of this kind must list as a readable tar.
+U_ID="$("${R[@]}" snapshots --json --latest 1 --tag "uploads-$DRILL_TAG" --path /uploads.tar 2>/dev/null \
+  | python3 -c 'import json,sys; s=json.load(sys.stdin); print(max(s, key=lambda x: x["time"])["short_id"] if s else "")')" || true
+if [ -n "$U_ID" ]; then
+  UL="$(mktemp)"
+  set +e
+  "${R[@]}" dump "$U_ID" /uploads.tar | tar -tf - > "$UL"
+  URC=("${PIPESTATUS[@]}")
+  set -e
+  if [ "${URC[0]}" -ne 0 ] || [ "${URC[1]}" -ne 0 ]; then rm -f "$UL"; die "uploads restore failed"; fi
+  U_FILES="$(grep -vc '/$' "$UL" || true)"
+  rm -f "$UL"
+  UMSG="RESTORE-DRILL UPLOADS OK files=$U_FILES snapshot=$U_ID"
+  log "$UMSG"
+  echo "$UMSG"
+else
+  log "no uploads snapshot for tag uploads-$DRILL_TAG"
+  echo "RESTORE-DRILL UPLOADS NONE"
 fi
 
 MSG="RESTORE-DRILL OK tables=$DRILL_TABLES rows_checked=$ROWS snapshot=$SNAP_ID"
