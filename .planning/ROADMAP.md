@@ -11,7 +11,7 @@ Family Hub is built as a vertical-slice MVP: each phase delivers a usable capabi
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [ ] **Phase 1: Foundation and Infrastructure** - Deployed staging/prod stack with i18n, PWA shell, encrypted tested backups and synthetic staging data
-- [ ] **Phase 01.1: Design System and App Shell (INSERTED)** - Minimalist design tokens, core Vue components, responsive app shell and chosen sketches for all modules
+- [x] **Phase 01.1: Design System and App Shell (INSERTED)** - Minimalist design tokens, core Vue components, responsive app shell and chosen sketches for all modules (completed 2026-11-13)
 - [ ] **Phase 2: Identity and Authorization Core** - Invite-only accounts, Google sign-in, per-module permissions with presets, deny-by-default policy layer and audit log
 - [ ] **Phase 3: To-Do** - Shared and personal tasks with assignment, recurrence and email/push reminders
 - [ ] **Phase 4: Wishlist** - Gift wishlists with link images, hidden reservations, occasions, co-buying and giver-only reminders
@@ -63,7 +63,7 @@ Plans:
   4. Keyboard navigation, visible focus, contrast and touch target sizes meet the accessibility baseline on the style page and the shell
   5. A sketch for every module (to-do, wishlist, finance, medical, settings) has been chosen and recorded as the design direction for later phases
 **UI hint**: yes
-**Plans:** 6/7 plans executed
+**Plans:** 7/7 plans complete
 
 Plans:
 - [x] 01.1-01-PLAN.md — Package approval (@lucide/vue, axe-core), AA-verified tokens, System/Light/Dark theme without inline script
@@ -72,7 +72,7 @@ Plans:
 - [x] 01.1-04-PLAN.md — Tags, avatars, chips, cards, empty/error states, alerts, skeleton, progress, lists and responsive tables
 - [x] 01.1-05-PLAN.md — Dialogs, destructive confirm, detail panel (sheet/overlay/docked), menu, tabs, toasts
 - [x] 01.1-06-PLAN.md — Responsive app shell: bottom bar + FAB, toggleable sidebar, account menu, skip link, coming-soon panel
-- [ ] 01.1-07-PLAN.md — Overview dashboard with quick add, restyled PWA banner/switcher, accessibility sweep, end-of-phase verification
+- [x] 01.1-07-PLAN.md — Overview dashboard with quick add, restyled PWA banner/switcher, accessibility sweep, end-of-phase verification
 
 ### Phase 2: Identity and Authorization Core
 **Goal**: Family members can join by invitation and sign in, and every piece of data is guarded server-side by per-member, per-module permissions that the admin controls.
