@@ -77,3 +77,43 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
 ## Deploy
 
 (Filled by plan 01-12.)
+
+## Two-step verification and re-authentication
+
+Phase 6. Values live in each stack's `.env` / `app.env`; this section records meaning and procedure only, never a value.
+
+### Keys and secrets
+
+- `APP_KEY` encrypts every member's authenticator secret and recovery codes. Keep it in the backups of each stack (it travels with `app.env`; the restic snapshot already includes that file). Losing it, or changing it, makes every enrolled authenticator app unusable: members could no longer pass the challenge with a code, and recovery codes would not decrypt either. Rotating the key is therefore a planned operation: put the old key in `APP_PREVIOUS_KEYS` so existing secrets still decrypt [ASSUMED: verify on a staging rotation before relying on it], then let members re-enrol. If a rotation goes wrong, the recovery path is the admin reset below.
+- `PASSKEYS_USER_HANDLE_SECRET`: set it explicitly in each environment to a long random value that never changes afterwards. When unset it falls back to a value derived from `APP_KEY`, so an `APP_KEY` rotation would silently change every member's passkey user handle. Staging and production use different values.
+- Never copy `APP_KEY`, `PASSKEYS_USER_HANDLE_SECRET` or a production database dump into staging.
+
+### Passkey domain binding
+
+Passkeys are bound to the host of each environment's `APP_URL` (the relying-party id). Staging (`family-hub-stage.vostack.dev`) and production (`family-hub.vostack.dev`) therefore hold separate credentials; a passkey registered on one never works on the other. `APP_URL` must be the public `https://` URL of that environment. Optional overrides: `PASSKEYS_RP_ID` and `PASSKEYS_ALLOWED_ORIGINS` (comma list); leave them unset unless the public host changes. After changing the host, existing passkeys stop working until members add new ones, so the authenticator app or a recovery code must still be available.
+
+### Settings (environment variables, defaults in `config/security.php`)
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `SECURITY_IDLE_SECONDS` | 900 | Idle window for Health and Finances; after it the member confirms again. Only activity inside those modules extends it. |
+| `SECURITY_CONFIRM_WINDOW_SECONDS` | 600 | How long a confirmation (password, code, passkey) or a sign-in counts for security actions. |
+| `SECURITY_PASSKEYS_ENABLED` | true | `false` turns every passkey route into a 404 and hides the passkey UI. |
+| `SECURITY_GOOGLE_REAUTH` | false | Offers "Sign in with Google again" to members who have neither a password nor a second step. Off by default: members in that situation use "Sign in again" instead. Turn it on only after the owner has accepted the plan 06-13 observation of Google's behaviour. |
+
+Setting up an authenticator app, adding a passkey and changing the admin requirement all need a confirmation within the last 10 minutes (signing in counts). A member who is past that window confirms inside the dialog; nothing needs to be done on the server.
+
+### Turning on the requirement
+
+An admin opens Settings > Members and switches on "Require two-step verification for Health and Finances" (it needs a fresh confirmation and is written to the audit log). It is off by default. Members with access to Health or Finances who have no second step are then guided to Settings > Security before they can open those modules; everybody else is unaffected. Switching it off is the same control.
+
+### Runbook: a member lost every second step
+
+1. The admin opens Settings > Members, picks the member, opens the Security tab and chooses "Reset two-step verification" (confirming their own identity if asked).
+2. The reset removes the authenticator app, recovery codes and all passkeys in one transaction, signs the member out on every device and writes `second_factor_reset` to the audit log (admin and member, no secrets).
+3. The member signs in with their password (or Google) and sets up a new second step in Settings > Security. If the requirement is on, they are guided there.
+4. An admin cannot reset their own row; a second admin does it. If the only admin is locked out, use the shell on the server: clear `two_factor_secret`, `two_factor_recovery_codes`, `two_factor_confirmed_at` for that user and delete their `passkeys` rows (`php artisan tinker`, run through `docker compose exec`, staging first), then record the action by hand.
+
+### What is and is not logged
+
+Audit and application logs never contain a code, secret, recovery code, passkey name or credential id; the canary tests (`SecurityAuditContentTest`) fail the build if one appears. Security pages and secret-bearing endpoints answer `Cache-Control: no-store` and the service worker never caches them.
