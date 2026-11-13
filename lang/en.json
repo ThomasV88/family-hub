@@ -1,24 +1,218 @@
 {
-    "app": { "name": "Family Hub" },
-    "banner": { "staging": "Staging - synthetic data only" },
+    "app": {
+        "name": "Family Hub"
+    },
+    "banner": {
+        "staging": "Staging - synthetic data only"
+    },
     "home": {
         "title": "Family Hub",
         "intro": "One trusted place for your family's everyday life.",
         "status_title": "System status",
         "last_check": "Last background check: {time}",
         "no_checks": "No background check has run yet.",
-        "source": { "schedule": "scheduled", "manual": "manual" },
+        "source": {
+            "schedule": "scheduled",
+            "manual": "manual"
+        },
         "checks_count": "{count} check | {count} checks",
         "checks_24h": "Last 24 hours: {checks} (expected {expected})",
         "coverage": "Coverage: {percent}",
         "run_now": "Run check now",
         "running": "Running..."
     },
-    "locale": { "label": "Language" },
+    "locale": {
+        "label": "Language"
+    },
     "pwa": {
         "update_available": "A new version is available.",
         "reload": "Reload",
         "dismiss": "Dismiss"
     },
-    "theme": { "label": "Theme", "system": "System", "light": "Light", "dark": "Dark" }
+    "theme": {
+        "label": "Theme",
+        "system": "System",
+        "light": "Light",
+        "dark": "Dark"
+    },
+    "ui": {
+        "close": "Close",
+        "loading": "Loading",
+        "retry": "Try again",
+        "open": "Open",
+        "save_changes": "Save changes",
+        "dismiss": "Dismiss"
+    },
+    "nav": {
+        "main": "Main",
+        "overview": "Overview",
+        "tasks": "Tasks",
+        "wishlist": "Wishlist",
+        "finances": "Finances",
+        "health": "Health",
+        "open_menu": "Open menu",
+        "close_menu": "Close menu",
+        "account": "Account",
+        "language": "Language",
+        "skip": "Skip to main content",
+        "add_task": "Add task",
+        "style_guide": "Style guide"
+    },
+    "module": {
+        "tasks": "To-do",
+        "wishlist": "Wishlist",
+        "finances": "Finances",
+        "health": "Health"
+    },
+    "dashboard": {
+        "title": "Overview",
+        "quick_add_label": "Add task",
+        "quick_add_placeholder": "Add a task and press Enter",
+        "system_status": "System status"
+    },
+    "empty": {
+        "generic": {
+            "title": "Nothing here yet",
+            "body": "When something is added, it will show up here. Use the Add button to start."
+        },
+        "tasks": {
+            "title": "No tasks yet",
+            "body": "Add the first task for your family."
+        },
+        "wishlist": {
+            "title": "No wishes yet",
+            "body": "Add the first gift idea to your list."
+        },
+        "finances": {
+            "title": "No transactions yet",
+            "body": "Add the first expense or income."
+        },
+        "health": {
+            "title": "No health records yet",
+            "body": "Add the first visit or document."
+        }
+    },
+    "soon": {
+        "title": "This part is coming soon",
+        "body": "It is not ready yet. You can go back to the overview.",
+        "back": "Back to overview"
+    },
+    "error": {
+        "generic": {
+            "title": "Something went wrong",
+            "body": "We could not load this. Check your connection and try again."
+        },
+        "email_example": "Enter a valid email address, for example name@example.com."
+    },
+    "offline": {
+        "banner": "You are offline. Some things may not be up to date."
+    },
+    "confirm": {
+        "delete_task": {
+            "title": "Delete task",
+            "body": "Delete this task? This cannot be undone.",
+            "confirm": "Delete task",
+            "keep": "Keep task"
+        }
+    },
+    "style": {
+        "title": "Style guide",
+        "intro": "Every token, component and state, in light and dark.",
+        "contrast": "Contrast {ratio}:1",
+        "spacing_12_note": "12 px: inner padding of controls and card gaps, between 8 and 16 so 40 px controls stay compact.",
+        "reserved_note": "Defined for later phases, not used yet.",
+        "pass": "Pass",
+        "fail": "Fail",
+        "minimum": "minimum {min}:1",
+        "section": {
+            "tokens": "Tokens",
+            "colors": "Colours",
+            "typography": "Typography",
+            "spacing": "Spacing",
+            "radii": "Corner radii",
+            "shadows": "Shadows",
+            "buttons": "Buttons",
+            "forms": "Forms",
+            "display": "Tags, cards and states",
+            "lists": "Lists and tables",
+            "overlays": "Dialogs, panels and menus",
+            "shell": "Shell"
+        },
+        "state": {
+            "default": "Default",
+            "hover": "Hover",
+            "active": "Pressed",
+            "focus": "Focus",
+            "disabled": "Disabled",
+            "loading": "Loading",
+            "error": "Error",
+            "readonly": "Read-only",
+            "filled": "Filled",
+            "checked": "Checked",
+            "indeterminate": "Partly selected",
+            "selected": "Selected",
+            "empty": "Empty"
+        },
+        "variant": {
+            "primary": "Primary",
+            "secondary": "Secondary",
+            "ghost": "Ghost",
+            "danger": "Danger",
+            "info": "Information",
+            "success": "Success",
+            "warning": "Warning"
+        },
+        "demo": {
+            "email": "Email",
+            "email_hint": "We only use this to send invitations.",
+            "notes": "Notes",
+            "category": "Category",
+            "category_groceries": "Groceries",
+            "category_home": "Home",
+            "category_doctor": "Doctor",
+            "remind": "Remind me",
+            "visibility": "Visibility",
+            "shared": "Shared",
+            "personal": "Personal",
+            "notifications": "Notifications",
+            "tag_due": "Due tomorrow",
+            "tag_overdue": "Overdue",
+            "tag_done": "Done",
+            "tag_weekly": "Weekly",
+            "chip_all": "All",
+            "chip_mine": "Mine",
+            "chip_shared": "Shared",
+            "chip_personal": "Personal",
+            "row_milk": "Buy milk",
+            "row_bill": "Pay the electricity bill",
+            "row_today": "Today",
+            "col_date": "Date",
+            "col_description": "Description",
+            "col_category": "Category",
+            "col_amount": "Amount",
+            "table_caption": "Transactions this month",
+            "tab_overview": "Overview",
+            "tab_transactions": "Transactions",
+            "tab_recurring": "Recurring",
+            "toast_saved": "Changes saved",
+            "progress_label": "Budget used",
+            "person_anna": "Anna",
+            "person_peter": "Peter",
+            "open_dialog": "Open dialog",
+            "open_panel": "Open panel",
+            "mode_sheet": "Bottom sheet",
+            "mode_overlay": "Side overlay",
+            "mode_docked": "Docked panel",
+            "show_toast": "Show message",
+            "dialog_title": "Edit task",
+            "dialog_body": "Change the details and save.",
+            "delete_example": "Delete task",
+            "menu_example": "Open menu example"
+        },
+        "header": {
+            "pair": "Colour pair",
+            "contrast": "Contrast",
+            "result": "Result"
+        }
+    }
 }

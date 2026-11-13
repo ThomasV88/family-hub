@@ -1,24 +1,218 @@
 {
-    "app": { "name": "Family Hub" },
-    "banner": { "staging": "Środowisko testowe - tylko fikcyjne dane" },
+    "app": {
+        "name": "Family Hub"
+    },
+    "banner": {
+        "staging": "Środowisko testowe - tylko fikcyjne dane"
+    },
     "home": {
         "title": "Family Hub",
         "intro": "Jedno zaufane miejsce na codzienne sprawy Twojej rodziny.",
         "status_title": "Stan systemu",
         "last_check": "Ostatnie sprawdzenie w tle: {time}",
         "no_checks": "Nie wykonano jeszcze żadnego sprawdzenia w tle.",
-        "source": { "schedule": "zaplanowane", "manual": "ręczne" },
+        "source": {
+            "schedule": "zaplanowane",
+            "manual": "ręczne"
+        },
         "checks_count": "{count} sprawdzenie | {count} sprawdzenia | {count} sprawdzeń | {count} sprawdzenia",
         "checks_24h": "Ostatnie 24 godziny: {checks} (oczekiwane {expected})",
         "coverage": "Pokrycie: {percent}",
         "run_now": "Uruchom sprawdzenie teraz",
         "running": "Uruchamianie..."
     },
-    "locale": { "label": "Język" },
+    "locale": {
+        "label": "Język"
+    },
     "pwa": {
         "update_available": "Dostępna jest nowa wersja.",
         "reload": "Załaduj ponownie",
         "dismiss": "Zamknij"
     },
-    "theme": { "label": "Motyw", "system": "Systemowy", "light": "Jasny", "dark": "Ciemny" }
+    "theme": {
+        "label": "Motyw",
+        "system": "Systemowy",
+        "light": "Jasny",
+        "dark": "Ciemny"
+    },
+    "ui": {
+        "close": "Zamknij",
+        "loading": "Ładowanie",
+        "retry": "Spróbuj ponownie",
+        "open": "Otwórz",
+        "save_changes": "Zapisz zmiany",
+        "dismiss": "Odrzuć"
+    },
+    "nav": {
+        "main": "Główna nawigacja",
+        "overview": "Przegląd",
+        "tasks": "Zadania",
+        "wishlist": "Wishlist",
+        "finances": "Finanse",
+        "health": "Zdrowie",
+        "open_menu": "Otwórz menu",
+        "close_menu": "Zamknij menu",
+        "account": "Konto",
+        "language": "Język",
+        "skip": "Przejdź do głównej treści",
+        "add_task": "Dodaj zadanie",
+        "style_guide": "Przewodnik stylu"
+    },
+    "module": {
+        "tasks": "Zadania",
+        "wishlist": "Wishlist",
+        "finances": "Finanse",
+        "health": "Zdrowie"
+    },
+    "dashboard": {
+        "title": "Przegląd",
+        "quick_add_label": "Dodaj zadanie",
+        "quick_add_placeholder": "Dodaj zadanie i naciśnij Enter",
+        "system_status": "Stan systemu"
+    },
+    "empty": {
+        "generic": {
+            "title": "Na razie nic tu nie ma",
+            "body": "Gdy coś zostanie dodane, pojawi się tutaj. Zacznij od przycisku Dodaj."
+        },
+        "tasks": {
+            "title": "Na razie brak zadań",
+            "body": "Dodaj pierwsze zadanie dla swojej rodziny."
+        },
+        "wishlist": {
+            "title": "Na razie brak życzeń",
+            "body": "Dodaj pierwszy pomysł na prezent do listy."
+        },
+        "finances": {
+            "title": "Na razie brak transakcji",
+            "body": "Dodaj pierwszy wydatek lub przychód."
+        },
+        "health": {
+            "title": "Na razie brak wpisów zdrowotnych",
+            "body": "Dodaj pierwszą wizytę lub dokument."
+        }
+    },
+    "soon": {
+        "title": "Ta część będzie wkrótce",
+        "body": "Nie jest jeszcze gotowa. Możesz wrócić do przeglądu.",
+        "back": "Wróć do przeglądu"
+    },
+    "error": {
+        "generic": {
+            "title": "Coś poszło nie tak",
+            "body": "Nie udało się tego wczytać. Sprawdź połączenie i spróbuj ponownie."
+        },
+        "email_example": "Wpisz prawidłowy adres e-mail, na przykład imie@example.com."
+    },
+    "offline": {
+        "banner": "Jesteś offline. Niektóre dane mogą być nieaktualne."
+    },
+    "confirm": {
+        "delete_task": {
+            "title": "Usuń zadanie",
+            "body": "Usunąć to zadanie? Tej operacji nie można cofnąć.",
+            "confirm": "Usuń zadanie",
+            "keep": "Zachowaj zadanie"
+        }
+    },
+    "style": {
+        "title": "Przewodnik stylu",
+        "intro": "Każdy token, komponent i stan, w jasnym i ciemnym motywie.",
+        "contrast": "Kontrast {ratio}:1",
+        "spacing_12_note": "12 px: wewnętrzny margines kontrolek i odstępy kart, między 8 a 16, aby kontrolki 40 px pozostały zwarte.",
+        "reserved_note": "Zdefiniowane na późniejsze etapy, jeszcze nieużywane.",
+        "pass": "Zgodne",
+        "fail": "Niezgodne",
+        "minimum": "minimum {min}:1",
+        "section": {
+            "tokens": "Tokeny",
+            "colors": "Kolory",
+            "typography": "Typografia",
+            "spacing": "Odstępy",
+            "radii": "Zaokrąglenie rogów",
+            "shadows": "Cienie",
+            "buttons": "Przyciski",
+            "forms": "Formularze",
+            "display": "Etykiety, karty i stany",
+            "lists": "Listy i tabele",
+            "overlays": "Okna dialogowe, panele i menu",
+            "shell": "Układ aplikacji"
+        },
+        "state": {
+            "default": "Domyślny",
+            "hover": "Najechanie",
+            "active": "Wciśnięty",
+            "focus": "Fokus",
+            "disabled": "Wyłączony",
+            "loading": "Ładowanie",
+            "error": "Błąd",
+            "readonly": "Tylko do odczytu",
+            "filled": "Wypełniony",
+            "checked": "Zaznaczony",
+            "indeterminate": "Częściowo zaznaczone",
+            "selected": "Wybrany",
+            "empty": "Pusty"
+        },
+        "variant": {
+            "primary": "Główny",
+            "secondary": "Dodatkowy",
+            "ghost": "Przezroczysty",
+            "danger": "Niebezpieczny",
+            "info": "Informacja",
+            "success": "Sukces",
+            "warning": "Ostrzeżenie"
+        },
+        "demo": {
+            "email": "E-mail",
+            "email_hint": "Użyjemy go tylko do wysyłania zaproszeń.",
+            "notes": "Notatki",
+            "category": "Kategoria",
+            "category_groceries": "Zakupy spożywcze",
+            "category_home": "Dom",
+            "category_doctor": "Lekarz",
+            "remind": "Przypomnij mi",
+            "visibility": "Widoczność",
+            "shared": "Wspólne",
+            "personal": "Osobiste",
+            "notifications": "Powiadomienia",
+            "tag_due": "Termin jutro",
+            "tag_overdue": "Po terminie",
+            "tag_done": "Gotowe",
+            "tag_weekly": "Co tydzień",
+            "chip_all": "Wszystko",
+            "chip_mine": "Moje",
+            "chip_shared": "Wspólne",
+            "chip_personal": "Osobiste",
+            "row_milk": "Kupić mleko",
+            "row_bill": "Zapłacić rachunek za prąd",
+            "row_today": "Dzisiaj",
+            "col_date": "Data",
+            "col_description": "Opis",
+            "col_category": "Kategoria",
+            "col_amount": "Kwota",
+            "table_caption": "Transakcje w tym miesiącu",
+            "tab_overview": "Przegląd",
+            "tab_transactions": "Transakcje",
+            "tab_recurring": "Cykliczne",
+            "toast_saved": "Zmiany zapisane",
+            "progress_label": "Wykorzystany budżet",
+            "person_anna": "Anna",
+            "person_peter": "Piotr",
+            "open_dialog": "Otwórz okno dialogowe",
+            "open_panel": "Otwórz panel",
+            "mode_sheet": "Dolny panel",
+            "mode_overlay": "Panel boczny nad treścią",
+            "mode_docked": "Przypięty panel",
+            "show_toast": "Pokaż komunikat",
+            "dialog_title": "Edytuj zadanie",
+            "dialog_body": "Zmień szczegóły i zapisz.",
+            "delete_example": "Usuń zadanie",
+            "menu_example": "Otwórz przykład menu"
+        },
+        "header": {
+            "pair": "Para kolorów",
+            "contrast": "Kontrast",
+            "result": "Wynik"
+        }
+    }
 }

@@ -1,24 +1,218 @@
 {
-    "app": { "name": "Family Hub" },
-    "banner": { "staging": "Testovacie prostredie - iba vymyslené údaje" },
+    "app": {
+        "name": "Family Hub"
+    },
+    "banner": {
+        "staging": "Testovacie prostredie - iba vymyslené údaje"
+    },
     "home": {
         "title": "Family Hub",
         "intro": "Jedno dôveryhodné miesto pre každodenný život vašej rodiny.",
         "status_title": "Stav systému",
         "last_check": "Posledná kontrola na pozadí: {time}",
         "no_checks": "Zatiaľ neprebehla žiadna kontrola na pozadí.",
-        "source": { "schedule": "plánovaná", "manual": "ručná" },
+        "source": {
+            "schedule": "plánovaná",
+            "manual": "ručná"
+        },
         "checks_count": "{count} kontrola | {count} kontroly | {count} kontroly | {count} kontrol",
         "checks_24h": "Posledných 24 hodín: {checks} (očakávané {expected})",
         "coverage": "Pokrytie: {percent}",
         "run_now": "Spustiť kontrolu teraz",
         "running": "Spúšťa sa..."
     },
-    "locale": { "label": "Jazyk" },
+    "locale": {
+        "label": "Jazyk"
+    },
     "pwa": {
         "update_available": "Je dostupná nová verzia.",
         "reload": "Načítať znova",
         "dismiss": "Zavrieť"
     },
-    "theme": { "label": "Vzhľad", "system": "Podľa systému", "light": "Svetlý", "dark": "Tmavý" }
+    "theme": {
+        "label": "Vzhľad",
+        "system": "Podľa systému",
+        "light": "Svetlý",
+        "dark": "Tmavý"
+    },
+    "ui": {
+        "close": "Zavrieť",
+        "loading": "Načítava sa",
+        "retry": "Skúsiť znova",
+        "open": "Otvoriť",
+        "save_changes": "Uložiť zmeny",
+        "dismiss": "Odmietnuť"
+    },
+    "nav": {
+        "main": "Hlavná navigácia",
+        "overview": "Prehľad",
+        "tasks": "Úlohy",
+        "wishlist": "Wishlist",
+        "finances": "Financie",
+        "health": "Zdravie",
+        "open_menu": "Otvoriť ponuku",
+        "close_menu": "Zavrieť ponuku",
+        "account": "Účet",
+        "language": "Jazyk",
+        "skip": "Preskočiť na hlavný obsah",
+        "add_task": "Pridať úlohu",
+        "style_guide": "Sprievodca štýlom"
+    },
+    "module": {
+        "tasks": "Úlohy",
+        "wishlist": "Wishlist",
+        "finances": "Financie",
+        "health": "Zdravie"
+    },
+    "dashboard": {
+        "title": "Prehľad",
+        "quick_add_label": "Pridať úlohu",
+        "quick_add_placeholder": "Pridajte úlohu a stlačte Enter",
+        "system_status": "Stav systému"
+    },
+    "empty": {
+        "generic": {
+            "title": "Zatiaľ tu nič nie je",
+            "body": "Keď sa niečo pridá, zobrazí sa to tu. Začnite tlačidlom Pridať."
+        },
+        "tasks": {
+            "title": "Zatiaľ žiadne úlohy",
+            "body": "Pridajte prvú úlohu pre svoju rodinu."
+        },
+        "wishlist": {
+            "title": "Zatiaľ žiadne priania",
+            "body": "Pridajte prvý nápad na darček do zoznamu."
+        },
+        "finances": {
+            "title": "Zatiaľ žiadne transakcie",
+            "body": "Pridajte prvý výdavok alebo príjem."
+        },
+        "health": {
+            "title": "Zatiaľ žiadne zdravotné záznamy",
+            "body": "Pridajte prvú návštevu alebo dokument."
+        }
+    },
+    "soon": {
+        "title": "Táto časť už čoskoro",
+        "body": "Ešte nie je pripravená. Môžete sa vrátiť na prehľad.",
+        "back": "Späť na prehľad"
+    },
+    "error": {
+        "generic": {
+            "title": "Niečo sa pokazilo",
+            "body": "Nepodarilo sa to načítať. Skontrolujte pripojenie a skúste to znova."
+        },
+        "email_example": "Zadajte platnú e-mailovú adresu, napríklad meno@example.com."
+    },
+    "offline": {
+        "banner": "Ste offline. Niektoré údaje nemusia byť aktuálne."
+    },
+    "confirm": {
+        "delete_task": {
+            "title": "Zmazať úlohu",
+            "body": "Zmazať túto úlohu? Túto akciu nemožno vrátiť späť.",
+            "confirm": "Zmazať úlohu",
+            "keep": "Ponechať úlohu"
+        }
+    },
+    "style": {
+        "title": "Sprievodca štýlom",
+        "intro": "Každý token, komponent a stav, vo svetlej aj tmavej téme.",
+        "contrast": "Kontrast {ratio}:1",
+        "spacing_12_note": "12 px: vnútorné odsadenie ovládacích prvkov a medzery kariet, medzi 8 a 16, aby 40 px prvky zostali kompaktné.",
+        "reserved_note": "Definované pre neskoršie fázy, zatiaľ nepoužité.",
+        "pass": "Vyhovuje",
+        "fail": "Nevyhovuje",
+        "minimum": "minimum {min}:1",
+        "section": {
+            "tokens": "Tokeny",
+            "colors": "Farby",
+            "typography": "Typografia",
+            "spacing": "Rozostupy",
+            "radii": "Zaoblenie rohov",
+            "shadows": "Tiene",
+            "buttons": "Tlačidlá",
+            "forms": "Formuláre",
+            "display": "Štítky, karty a stavy",
+            "lists": "Zoznamy a tabuľky",
+            "overlays": "Dialógy, panely a ponuky",
+            "shell": "Rozloženie aplikácie"
+        },
+        "state": {
+            "default": "Predvolený",
+            "hover": "Nad prvkom",
+            "active": "Stlačený",
+            "focus": "Fokus",
+            "disabled": "Zakázaný",
+            "loading": "Načítava sa",
+            "error": "Chyba",
+            "readonly": "Iba na čítanie",
+            "filled": "Vyplnený",
+            "checked": "Zaškrtnutý",
+            "indeterminate": "Čiastočne vybrané",
+            "selected": "Vybraný",
+            "empty": "Prázdny"
+        },
+        "variant": {
+            "primary": "Primárny",
+            "secondary": "Sekundárny",
+            "ghost": "Priehľadný",
+            "danger": "Nebezpečný",
+            "info": "Informácia",
+            "success": "Úspech",
+            "warning": "Upozornenie"
+        },
+        "demo": {
+            "email": "E-mail",
+            "email_hint": "Použijeme ho iba na posielanie pozvánok.",
+            "notes": "Poznámky",
+            "category": "Kategória",
+            "category_groceries": "Potraviny",
+            "category_home": "Domácnosť",
+            "category_doctor": "Lekár",
+            "remind": "Pripomenúť",
+            "visibility": "Viditeľnosť",
+            "shared": "Zdieľané",
+            "personal": "Osobné",
+            "notifications": "Upozornenia",
+            "tag_due": "Termín zajtra",
+            "tag_overdue": "Po termíne",
+            "tag_done": "Hotovo",
+            "tag_weekly": "Týždenne",
+            "chip_all": "Všetko",
+            "chip_mine": "Moje",
+            "chip_shared": "Zdieľané",
+            "chip_personal": "Osobné",
+            "row_milk": "Kúpiť mlieko",
+            "row_bill": "Zaplatiť účet za elektrinu",
+            "row_today": "Dnes",
+            "col_date": "Dátum",
+            "col_description": "Popis",
+            "col_category": "Kategória",
+            "col_amount": "Suma",
+            "table_caption": "Transakcie tento mesiac",
+            "tab_overview": "Prehľad",
+            "tab_transactions": "Transakcie",
+            "tab_recurring": "Opakované",
+            "toast_saved": "Zmeny uložené",
+            "progress_label": "Využitý rozpočet",
+            "person_anna": "Anna",
+            "person_peter": "Peter",
+            "open_dialog": "Otvoriť dialóg",
+            "open_panel": "Otvoriť panel",
+            "mode_sheet": "Spodný panel",
+            "mode_overlay": "Bočný panel cez obsah",
+            "mode_docked": "Pripnutý panel",
+            "show_toast": "Zobraziť správu",
+            "dialog_title": "Upraviť úlohu",
+            "dialog_body": "Zmeňte podrobnosti a uložte.",
+            "delete_example": "Zmazať úlohu",
+            "menu_example": "Otvoriť ukážku ponuky"
+        },
+        "header": {
+            "pair": "Dvojica farieb",
+            "contrast": "Kontrast",
+            "result": "Výsledok"
+        }
+    }
 }
