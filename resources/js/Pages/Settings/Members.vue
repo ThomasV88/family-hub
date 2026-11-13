@@ -133,7 +133,7 @@ function open(id, tab = 'permissions') {
             @confirm="confirmRevoke"
         />
         <template #panel>
-            <MemberPanel v-if="opened" :key="`${opened.id}-${openTab}`" :member="opened" :presets="presets" :initial-tab="openTab" @close="openId = null" />
+            <MemberPanel v-if="opened" :key="`${opened.id}-${openTab}`" :member="opened" :presets="presets" :members="members" :initial-tab="openTab" @close="openId = null" />
         </template>
     </SettingsLayout>
 </template>

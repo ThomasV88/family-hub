@@ -6,22 +6,28 @@ import UiTabs from '../ui/UiTabs.vue';
 import UiConfirmDialog from '../ui/UiConfirmDialog.vue';
 import PermissionsTab from './PermissionsTab.vue';
 import SessionsTab from './SessionsTab.vue';
+import WishlistManagersTab from './WishlistManagersTab.vue';
 
 const props = defineProps({
     member: { type: Object, required: true },
     presets: { type: Object, required: true },
+    // All members, for the wishlist managers tab.
+    members: { type: Array, default: () => [] },
     initialTab: { type: String, default: 'permissions' },
 });
 const emit = defineEmits(['close']);
 const { t } = useI18n();
 
 const tab = ref(props.initialTab);
-const dirty = ref(false);
+const permissionsDirty = ref(false);
+const wishlistDirty = ref(false);
+const dirty = computed(() => permissionsDirty.value || wishlistDirty.value);
 const confirming = ref(false);
 
 // One entry per tab, plus one panel slot below.
 const tabs = computed(() => [
     { key: 'permissions', label: t('permissions.tab.permissions') },
+    { key: 'wishlist', label: t('settings.members.wishlist_managers.tab') },
     { key: 'sessions', label: t('permissions.tab.sessions') },
 ]);
 
@@ -39,7 +45,10 @@ function requestClose() {
         <p class="member-panel__email">{{ member.email }}</p>
         <UiTabs v-model="tab" :tabs="tabs" :label="member.name">
             <template #panel-permissions>
-                <PermissionsTab :member="member" :presets="presets" @dirty="dirty = $event" />
+                <PermissionsTab :member="member" :presets="presets" @dirty="permissionsDirty = $event" />
+            </template>
+            <template #panel-wishlist>
+                <WishlistManagersTab :member="member" :members="members" @dirty="wishlistDirty = $event" />
             </template>
             <template #panel-sessions>
                 <SessionsTab :member="member" />
