@@ -1,6 +1,5 @@
 <?php
 
-use App\Access\Module;
 use App\Access\Preset;
 use App\Models\Task;
 use App\Models\User;
