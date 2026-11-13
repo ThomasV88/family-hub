@@ -59,6 +59,31 @@ describe('UiMenu', () => {
         expect(document.activeElement).toBe(trigger.element);
     });
 
+    it('supports header and separator items that keyboard navigation skips', async () => {
+        const withExtras = [
+            { type: 'header', key: 'h', label: 'Anna', sublabel: 'anna@example.test' },
+            { type: 'item', key: 'one', label: 'One' },
+            { type: 'separator', key: 'sep' },
+            { type: 'item', key: 'out', label: 'Out' },
+        ];
+        wrapper = mountUi(UiMenu, { props: { label: 'Menu', items: withExtras } });
+        await wrapper.find('button').trigger('click');
+        await flush();
+        const entries = [...document.querySelectorAll('[role=menuitem]')];
+        expect(entries).toHaveLength(2);
+        expect(document.activeElement).toBe(entries[0]);
+        expect(document.querySelector('[data-testid=menu-header]').textContent).toContain('anna@example.test');
+        expect(document.querySelector('[data-testid=menu-header]').getAttribute('role')).toBeNull();
+        // one separator before the explicit one is rendered, none doubled after it
+        const seps = document.querySelectorAll('[role=separator]');
+        expect(seps.length).toBe(2);
+        press('ArrowDown'); await flush();
+        expect(document.activeElement).toBe(entries[1]);
+        press('ArrowDown'); await flush();
+        expect(document.activeElement).toBe(entries[0]);
+        await expectNoAxeViolations(document.body);
+    });
+
     it('closes on Esc, Tab and outside click', async () => {
         wrapper = mountUi(UiMenu, { props: { label: 'Menu', items } });
         const trigger = wrapper.find('button');

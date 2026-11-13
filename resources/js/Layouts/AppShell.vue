@@ -1,9 +1,10 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, provide, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import UiAlert from '../Components/ui/UiAlert.vue';
 import UiToastRegion from '../Components/ui/UiToastRegion.vue';
+import { useToast } from '../Components/ui/useToast.js';
 import PwaUpdateBanner from '../Components/PwaUpdateBanner.vue';
 import SidebarNav from '../Shell/SidebarNav.vue';
 import BottomNav from '../Shell/BottomNav.vue';
@@ -20,6 +21,15 @@ defineProps({
 
 const { t } = useI18n();
 const page = usePage();
+const { show: showToast } = useToast();
+// Server flash toast: { key, params }, translated here.
+watch(
+    () => page.props.flash?.toast,
+    (toast) => {
+        if (toast?.key) showToast(t(toast.key, toast.params ?? {}));
+    },
+    { immediate: true },
+);
 const isStaging = computed(() => page.props.app?.env === 'staging');
 
 const frame = ref(null);

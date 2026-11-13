@@ -24,6 +24,7 @@ const mountHome = (locale = 'en') => {
 afterEach(() => { current?.unmount(); current = null; post.mockClear(); });
 
 import Home from '../../resources/js/Pages/Home.vue';
+import { useToast } from '../../resources/js/Components/ui/useToast.js';
 
 describe('Home page', () => {
     it('renders the home page with the app heading and staging banner on staging', () => {
@@ -135,5 +136,16 @@ describe('Home page', () => {
             const w = mountHome();
             await expectNoAxeViolations(w.element);
         });
+    });
+});
+
+describe('flash toast', () => {
+    it('shows a translated toast from the server flash', () => {
+        const { toasts } = useToast();
+        toasts.splice(0);
+        mockProps = { app: { name: 'Family Hub', env: 'production' }, flash: { toast: { key: 'invite.accept.welcome', params: { name: 'Anna' } } } };
+        mountHome();
+        expect(toasts.map((x) => x.message)).toEqual(['Welcome to Family Hub, Anna.']);
+        toasts.splice(0);
     });
 });

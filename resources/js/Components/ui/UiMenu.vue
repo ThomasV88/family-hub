@@ -7,6 +7,7 @@ const props = defineProps({
     label: { type: String, required: true },
     icon: { type: [Object, Function], default: null },
     // { type: 'item', key, label, icon? } | { type: 'radio-group', key, label, value, options: [{ value, label }] }
+    // | { type: 'header', key, label, sublabel? } (non-interactive) | { type: 'separator', key }
     items: { type: Array, required: true },
 });
 const emit = defineEmits(['select']);
@@ -21,6 +22,7 @@ const els = ref([]);
 const flat = computed(() => {
     const out = [];
     for (const item of props.items) {
+        if (item.type === 'header' || item.type === 'separator') continue;
         if (item.type === 'radio-group') for (const option of item.options) out.push({ key: item.key, value: option.value });
         else out.push({ key: item.key });
     }
@@ -88,9 +90,13 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick));
         </UiButton>
         <div v-if="open" :id="`${uid}-menu`" class="ui-menu__popover" role="menu" :aria-label="label" @keydown="onKeydown">
             <template v-for="(item, i) in items" :key="item.key">
-                <div v-if="i > 0" class="ui-menu__separator" role="separator"></div>
+                <div v-if="item.type === 'separator' || (i > 0 && items[i - 1].type !== 'separator')" class="ui-menu__separator" role="separator"></div>
+                <div v-if="item.type === 'header'" class="ui-menu__header" data-testid="menu-header">
+                    <span class="ui-menu__header-name">{{ item.label }}</span>
+                    <span v-if="item.sublabel" class="ui-menu__header-sub">{{ item.sublabel }}</span>
+                </div>
                 <button
-                    v-if="item.type === 'item'"
+                    v-else-if="item.type === 'item'"
                     :ref="(el) => (els[indexOf(item.key)] = el)"
                     type="button"
                     role="menuitem"
@@ -101,7 +107,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick));
                     <component :is="item.icon" v-if="item.icon" :size="20" :stroke-width="1.75" aria-hidden="true" />
                     <span>{{ item.label }}</span>
                 </button>
-                <div v-else role="group" :aria-label="item.label">
+                <div v-else-if="item.type === 'radio-group'" role="group" :aria-label="item.label">
                     <div class="ui-menu__group-label" aria-hidden="true">{{ item.label }}</div>
                     <button
                         v-for="option in item.options"
@@ -159,5 +165,8 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick));
 .ui-menu__item:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
 .ui-menu__check { display: inline-flex; width: 20px; height: 20px; }
 .ui-menu__group-label { padding: var(--space-2) var(--space-3) var(--space-1); color: var(--color-text-muted); font-size: var(--text-sm); font-weight: 600; }
+.ui-menu__header { display: flex; flex-direction: column; padding: var(--space-2) var(--space-3); min-width: 0; }
+.ui-menu__header-name { font-size: var(--text-base); font-weight: 600; overflow-wrap: anywhere; }
+.ui-menu__header-sub { font-size: var(--text-sm); font-weight: 400; color: var(--color-text-muted); overflow-wrap: anywhere; }
 .ui-menu__separator { height: 1px; margin-block: var(--space-1); background: var(--color-border); }
 </style>
