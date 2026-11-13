@@ -100,6 +100,27 @@ d=$(make_fixture mode2 family-hub-staging staging 0 staging)
 chmod 640 "$d/secrets/restic_password"
 expect fail "secret with mode 0640" "$d" "$TAG" guard_secrets
 
+# stale_images: keeps the deployed and the last good tag, lists other sha-* images of this stack only
+d=$(make_fixture img family-hub-staging staging 0 staging)
+echo 'sha-bbbbbbb' > "$d/.last-good-tag"
+imgs=$(
+  cd "$d" || exit 99
+  export IMAGE_TAG=sha-aaaaaaa DEPLOY_SH_SOURCE_ONLY=1
+  # shellcheck disable=SC1090
+  source "$DEPLOY"
+  docker() {
+    printf '%s\n' ghcr.io/example/family-hub-app:sha-aaaaaaa ghcr.io/example/family-hub-app:sha-bbbbbbb \
+      ghcr.io/example/family-hub-app:sha-ccccccc ghcr.io/example/family-hub-nginx:sha-ccccccc \
+      ghcr.io/example/family-hub-app:develop ghcr.io/other/family-hub-app:sha-ddddddd postgres:18-alpine
+  }
+  stale_images
+)
+if [ "$imgs" = "$(printf 'ghcr.io/example/family-hub-app:sha-ccccccc\nghcr.io/example/family-hub-nginx:sha-ccccccc')" ]; then
+  PASS=$((PASS + 1)); echo "ok   stale_images keeps current and last-good, drops old sha-* only"
+else
+  FAILS=$((FAILS + 1)); echo "FAIL stale_images output: $imgs"
+fi
+
 echo "cases passed: $PASS, failed: $FAILS"
 [ "$FAILS" = 0 ] && [ "$PASS" -ge 7 ] || exit 1
 echo "GUARDS OK"

@@ -58,6 +58,24 @@ guard_env_has_no_passwords() {
   fi
 }
 
+# Prints the sha-* tagged app/nginx images of this stack that are neither the deployed tag nor the last good
+# tag (the rollback target). `docker image prune` alone only removes dangling images, never tagged ones.
+stale_images() {
+  local prefix keep_a keep_b ref
+  prefix=$(env_get IMAGE_PREFIX)
+  keep_a="${IMAGE_TAG:-}"
+  keep_b=$(cat .last-good-tag 2>/dev/null || true)
+  docker image ls --format '{{.Repository}}:{{.Tag}}' | while IFS= read -r ref; do
+    case "$ref" in
+      "$prefix-app:sha-"*|"$prefix-nginx:sha-"*) ;;
+      *) continue ;;
+    esac
+    [ "${ref#*:}" = "$keep_a" ] && continue
+    [ "${ref#*:}" = "$keep_b" ] && continue
+    printf '%s\n' "$ref"
+  done
+}
+
 # secrets/* must be exactly 0600; the env files must not be accessible to others.
 guard_secrets() {
   local f mode bad=0
@@ -206,7 +224,9 @@ main() {
     exit 1
   fi
 
-  docker image prune -f --filter until=168h >/dev/null || true
+  docker image prune -f >/dev/null || true
+  # Containers still using an image make `rmi` fail, which is the desired safety net.
+  stale_images | while IFS= read -r ref; do docker rmi "$ref" >/dev/null 2>&1 || true; done
   log "Deploy finished"
 }
 
