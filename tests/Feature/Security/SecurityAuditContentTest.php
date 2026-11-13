@@ -45,7 +45,7 @@ function sacSignedOut(object $test): void
 }
 
 it('keeps secrets, codes, names, credentials and passwords out of audit rows and logs across every flow', function () {
-    config(['security.google_reauth' => true, 'security.passkeys_enabled' => true]);
+    config(['security.passkeys_enabled' => true]);
     FakeGoogle::configure();
 
     $logged = [];
@@ -128,14 +128,6 @@ it('keeps secrets, codes, names, credentials and passwords out of audit rows and
     $this->actingAs($admin)->withSession(sacFresh())->putJson('/settings/security/policy', ['required' => true])->assertSuccessful();
     $this->putJson('/settings/security/policy', ['required' => false])->assertSuccessful();
     $this->deleteJson("/settings/members/{$member->id}/second-factor")->assertSuccessful();
-
-    // --- Google re-auth failure --------------------------------------------------------------------------------
-    $googleOnly = User::factory()->googleOnly()->withPreset(Preset::Parent)->create()->refresh();
-    FakeGoogle::returns('someone-else-sub', 'other@example.test');
-    $this->actingAs($googleOnly)->withSession(sacStale() + ['reauth.google' => ['user' => $googleOnly->id, 'at' => now()->getTimestamp()]])
-        ->get('/auth/google/callback');
-    FakeGoogle::throws();
-    $this->get('/auth/google/callback');
 
     // --- scan -----------------------------------------------------------------------------------------------------
     $rows = DB::table('audit_logs')->get();

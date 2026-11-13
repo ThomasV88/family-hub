@@ -1532,8 +1532,6 @@
         "setup_first": "Set up an authenticator app first",
         "back": "Back to overview",
         "passkey_waiting": "Follow the prompt on your device.",
-        "google": "Sign in with Google again",
-        "google_failed": "That Google account could not confirm it's you. Try again.",
         "use_password": "Use password"
     },
     "security": {

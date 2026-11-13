@@ -39,31 +39,12 @@ it('shows the methods, the idle minutes and the interrupted flag', function () {
     $user = reauthUser();
     $this->actingAs($user)->get('/confirm-access')->assertInertia(fn (Assert $p) => $p
         ->component('Auth/ConfirmAccess')
-        ->where('methods', ['password' => true, 'totp' => false, 'passkey' => false, 'google' => false])
+        ->where('methods', ['password' => true, 'totp' => false, 'passkey' => false])
         ->where('minutes', 15)->where('interrupted', false));
 
     Totp::enable($user);
     $this->actingAs($user)->withSession(['status' => 'reauth_interrupted'])->get('/confirm-access')
         ->assertInertia(fn (Assert $p) => $p->where('methods.totp', true)->where('interrupted', true));
-});
-
-it('offers Google re-auth only behind the flag and only without a stronger method', function () {
-    $user = User::factory()->googleOnly()->create()->refresh();
-    expect(ReauthMethods::for($user))->toBe(['password' => false, 'totp' => false, 'passkey' => false, 'google' => false]);
-
-    config(['security.google_reauth' => true]);
-    expect(ReauthMethods::googleAvailable($user))->toBeTrue();
-
-    $withPassword = User::factory()->googleOnly()->create(['password_set' => true])->refresh();
-    expect(ReauthMethods::googleAvailable($withPassword))->toBeFalse();
-
-    $withTotp = User::factory()->googleOnly()->create()->refresh();
-    Totp::enable($withTotp);
-    expect(ReauthMethods::googleAvailable($withTotp))->toBeFalse();
-
-    $withPasskey = User::factory()->googleOnly()->create()->refresh();
-    reauthPasskey($withPasskey);
-    expect(ReauthMethods::googleAvailable($withPasskey))->toBeFalse();
 });
 
 it('confirms with the password, returns to the intended page and audits it', function () {
@@ -173,4 +154,12 @@ it('signs the member out, keeps the intended address and clears the sensitive wi
         ->assertSessionMissing('sensitive.active_at')->assertSessionMissing('auth.password_confirmed_at');
 
     $this->assertGuest();
+});
+
+it('has no Google re-auth route and sends a signed-in member away from the Google callback', function () {
+    $user = User::factory()->googleOnly()->create()->refresh();
+
+    $this->actingAs($user)->get('/confirm-access/google')->assertNotFound();
+    $this->actingAs($user)->get('/auth/google/callback')->assertRedirect('/');
+    expect(array_keys(ReauthMethods::for($user)))->toBe(['password', 'totp', 'passkey']);
 });

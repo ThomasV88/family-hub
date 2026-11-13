@@ -11,7 +11,7 @@ vi.mock('../../../resources/js/Security/securityFetch.js', () => ({ securityFetc
 import TwoFactorSetupDialog from '../../../resources/js/Components/Security/TwoFactorSetupDialog.vue';
 import { useToast } from '../../../resources/js/Components/ui/useToast.js';
 
-const methods = { password: true, totp: false, passkey: false, google: false };
+const methods = { password: true, totp: false, passkey: false };
 const SVG = '<svg data-q="1"><rect width="4" height="4"/></svg>';
 const KEY = 'JBSWY3DPEHPK3PXP';
 const CODES = ['aaaa-1111', 'bbbb-2222', 'cccc-3333', 'dddd-4444', 'eeee-5555', 'ffff-6666', 'gggg-7777', 'hhhh-8888'];
@@ -263,7 +263,7 @@ describe('TwoFactorSetupDialog', () => {
 
         it('shows the no-method copy and Sign in again when nothing can confirm', async () => {
             route();
-            await mountDialog({ confirmFresh: false, methods: { password: false, totp: false, passkey: false, google: false }, isAdmin: true });
+            await mountDialog({ confirmFresh: false, methods: { password: false, totp: false, passkey: false }, isAdmin: true });
             expect(q('.reauth-form')).toBeNull();
             expect(q('[data-testid="reauth-no-method"]').textContent).toContain('no password or second step');
             expect(q('a[href="/settings/security"]')).not.toBeNull();

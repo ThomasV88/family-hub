@@ -16,7 +16,7 @@ vi.mock('../../../resources/js/Security/securityFetch.js', () => ({ securityFetc
 
 import ReauthForm from '../../../resources/js/Components/Security/ReauthForm.vue';
 
-const both = { password: true, totp: true, passkey: false, google: false };
+const both = { password: true, totp: true, passkey: false };
 let wrapper;
 const mountForm = (props = {}, slots = {}) => {
     wrapper = mountUi(ReauthForm, { props: { methods: both, mode: 'page', ...props }, slots });
@@ -111,8 +111,8 @@ describe('ReauthForm', () => {
     });
 
     describe('passkey', () => {
-        const withPasskey = { password: true, totp: false, passkey: true, google: false };
-        const passkeyOnly = { password: false, totp: false, passkey: true, google: false };
+        const withPasskey = { password: true, totp: false, passkey: true };
+        const passkeyOnly = { password: false, totp: false, passkey: true };
         const answer = (finalResult) => fetchMock.mockImplementation(async (url) => (url.endsWith('/options')
             ? { ok: true, status: 200, data: { options: { challenge: 'x' } } }
             : finalResult));

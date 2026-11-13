@@ -43,10 +43,6 @@ it('honours config overrides', function () {
     expect($s->fresh())->toBeFalse();
 });
 
-it('keeps google re-auth off by default', function () {
-    expect(config('security.google_reauth'))->toBeFalse();
-});
-
 it('binds the always-fresh double by default and the real class on demand', function () {
     expect(app(SensitiveSession::class))->toBeInstanceOf(AlwaysFreshSensitiveSession::class);
     $this->useRealSensitiveSession();

@@ -12,8 +12,8 @@ import TotpDisableDialog from '../../../resources/js/Components/Security/TotpDis
 import RegenerateCodesDialog from '../../../resources/js/Components/Security/RegenerateCodesDialog.vue';
 import { useToast } from '../../../resources/js/Components/ui/useToast.js';
 
-const methods = { password: true, totp: true, passkey: false, google: false };
-const none = { password: false, totp: false, passkey: false, google: false };
+const methods = { password: true, totp: true, passkey: false };
+const none = { password: false, totp: false, passkey: false };
 const CODES = ['aaaa-1111', 'bbbb-2222', 'cccc-3333', 'dddd-4444', 'eeee-5555', 'ffff-6666', 'gggg-7777', 'hhhh-8888'];
 const ok = (data = {}) => ({ ok: true, status: 200, data });
 const stale = { ok: false, status: 423, error: 'confirm_required', data: {} };

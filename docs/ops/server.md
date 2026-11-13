@@ -99,7 +99,8 @@ Passkeys are bound to the host of each environment's `APP_URL` (the relying-part
 | `SECURITY_IDLE_SECONDS` | 900 | Idle window for Health and Finances; after it the member confirms again. Only activity inside those modules extends it. |
 | `SECURITY_CONFIRM_WINDOW_SECONDS` | 600 | How long a confirmation (password, code, passkey) or a sign-in counts for security actions. |
 | `SECURITY_PASSKEYS_ENABLED` | true | `false` turns every passkey route into a 404 and hides the passkey UI. |
-| `SECURITY_GOOGLE_REAUTH` | false | Offers "Sign in with Google again" to members who have neither a password nor a second step. Off by default: members in that situation use "Sign in again" instead. Turn it on only after the owner has accepted the plan 06-13 observation of Google's behaviour. |
+
+There is deliberately no "Sign in with Google again" confirmation (removed in the 06 review fix, CR-02: Google's `max_age`/`auth_time` freshness cannot be proven with Socialite). A member with no password and no second step confirms with the single "Sign in again" action (sign out, then a fresh Google sign-in). Known limitation: for such a member, Google sign-in without 2FA is effectively one click on a device that is already signed in to Google, so the stale-session gate does not stop someone at an unattended, Google-signed-in browser. Recommendation: Google-only members enrol an authenticator app or a passkey, and the admin turns on the second-factor requirement.
 
 Setting up an authenticator app, adding a passkey and changing the admin requirement all need a confirmation within the last 10 minutes (signing in counts). A member who is past that window confirms inside the dialog; nothing needs to be done on the server.
 

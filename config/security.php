@@ -11,7 +11,4 @@ return [
     'challenge_ttl_seconds' => (int) env('SECURITY_CHALLENGE_TTL_SECONDS', 600),
 
     'passkeys_enabled' => (bool) env('SECURITY_PASSKEYS_ENABLED', true),
-
-    // Gates the "Sign in with Google again" re-auth fallback until Google's behaviour is recorded (plan 06-13).
-    'google_reauth' => (bool) env('SECURITY_GOOGLE_REAUTH', false),
 ];

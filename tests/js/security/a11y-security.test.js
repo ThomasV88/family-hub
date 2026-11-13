@@ -60,9 +60,9 @@ import UiList from '../../../resources/js/Components/ui/UiList.vue';
 import AuditTable from '../../../resources/js/Components/Settings/AuditTable.vue';
 import { useToast } from '../../../resources/js/Components/ui/useToast.js';
 
-const METHODS = { password: true, totp: true, passkey: true, google: false };
-const PW = { password: true, totp: false, passkey: false, google: false };
-const NONE = { password: false, totp: false, passkey: false, google: false };
+const METHODS = { password: true, totp: true, passkey: true };
+const PW = { password: true, totp: false, passkey: false };
+const NONE = { password: false, totp: false, passkey: false };
 const ok = (data = {}, status = 200) => ({ ok: true, status, data });
 const stale = { ok: false, status: 423, error: 'confirm_required', data: {} };
 const CODES = ['aaaa-1111', 'bbbb-2222', 'cccc-3333', 'dddd-4444', 'eeee-5555', 'ffff-6666', 'gggg-7777', 'hhhh-8888'];
@@ -211,13 +211,8 @@ const scenarios = {
     'Confirm password': async () => { mountIt(ConfirmAccess, { methods: PW, minutes: 15, interrupted: false }); await axe(); },
     'Confirm code': async () => { mountIt(ConfirmAccess, { methods: { ...NONE, totp: true }, minutes: 15, interrupted: false }); await axe(); },
     'Confirm password, code and passkey': async () => { mountIt(ConfirmAccess, { methods: METHODS, minutes: 15, interrupted: false }); await axe(); },
-    'Confirm no-method (Google flag off)': async () => { mountIt(ConfirmAccess, { methods: NONE, minutes: 15, interrupted: false }); await axe(); },
-    'Confirm no-method with Google link (flag on)': async () => { mountIt(ConfirmAccess, { methods: { ...NONE, google: true }, minutes: 15, interrupted: false }); await axe(); },
+    'Confirm no-method': async () => { mountIt(ConfirmAccess, { methods: NONE, minutes: 15, interrupted: false }); await axe(); },
     'Confirm interrupted': async () => { mountIt(ConfirmAccess, { methods: PW, minutes: 15, interrupted: true }); await axe(); },
-    'Confirm Google failed': async () => {
-        page.props.flash.status = 'google_reauth_failed';
-        mountIt(ConfirmAccess, { methods: { ...NONE, google: true }, minutes: 15, interrupted: false }); await axe();
-    },
 
     // --- members ---
     'Requirement card': async () => { mountIt(SecurityRequirementCard, { securityPolicy: { required: false, pending: 2 }, confirmFresh: true, methods: PW }); await axe(); },

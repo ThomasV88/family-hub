@@ -1532,8 +1532,6 @@
         "setup_first": "Najprv nastavte overovaciu aplikáciu",
         "back": "Späť na prehľad",
         "passkey_waiting": "Postupujte podľa výzvy na zariadení.",
-        "google": "Znova sa prihlásiť cez Google",
-        "google_failed": "Tento účet Google nepotvrdil vašu identitu. Skúste to znova.",
         "use_password": "Použiť heslo"
     },
     "security": {

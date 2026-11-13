@@ -15,8 +15,8 @@ import PasskeyRemoveDialog from '../../../resources/js/Components/Security/Passk
 import PasskeyRow from '../../../resources/js/Components/Security/PasskeyRow.vue';
 import { useToast } from '../../../resources/js/Components/ui/useToast.js';
 
-const methods = { password: true, totp: true, passkey: true, google: false };
-const none = { password: false, totp: false, passkey: false, google: false };
+const methods = { password: true, totp: true, passkey: true };
+const none = { password: false, totp: false, passkey: false };
 const passkey = { id: 'p1', name: 'iPhone', authenticator: null, createdAt: '2026-11-01T10:00:00Z', lastUsedAt: null };
 const ok = (data = {}, status = 200) => ({ ok: true, status, data });
 const stale = { ok: false, status: 423, error: 'confirm_required', data: {} };

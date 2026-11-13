@@ -41,7 +41,7 @@ describe('Phase 6 copy parity', () => {
 
     it('has the Phase 6 keys and the amendment keys', () => {
         expect(Object.keys(en).length).toBeGreaterThanOrEqual(120);
-        for (const k of [...EXTRA, 'reauth.google', 'reauth.google_failed', 'security.confirm_first', 'members.security.confirm_first', 'members.security.reset_body_required']) {
+        for (const k of [...EXTRA, 'security.confirm_first', 'members.security.confirm_first', 'members.security.reset_body_required']) {
             expect(en[k], k).toBeTruthy();
         }
         expect(Object.keys(en).some((k) => k.includes('reset_suffix'))).toBe(false);

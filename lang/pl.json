@@ -1532,8 +1532,6 @@
         "setup_first": "Najpierw skonfiguruj aplikację uwierzytelniającą",
         "back": "Wróć do przeglądu",
         "passkey_waiting": "Postępuj zgodnie z instrukcją na urządzeniu.",
-        "google": "Zaloguj się ponownie przez Google",
-        "google_failed": "To konto Google nie potwierdziło Twojej tożsamości. Spróbuj ponownie.",
         "use_password": "Użyj hasła"
     },
     "security": {

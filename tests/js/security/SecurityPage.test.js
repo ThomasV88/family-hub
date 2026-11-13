@@ -23,7 +23,7 @@ vi.mock('../../../resources/js/Security/securityFetch.js', () => ({ securityFetc
 import TwoFactorSetupDialog from '../../../resources/js/Components/Security/TwoFactorSetupDialog.vue';
 import Security from '../../../resources/js/Pages/Settings/Security.vue';
 
-const methods = { password: true, totp: false, passkey: false, google: false };
+const methods = { password: true, totp: false, passkey: false };
 const base = { sections: [], status: { totp: false, recoveryRemaining: null }, passkeys: [], required: false, guidance: false, continueTo: null, methods, confirmFresh: true, passkeysEnabled: false };
 let wrapper;
 const mountPage = (props = {}, locale = 'en') => {

@@ -156,8 +156,9 @@ it('keeps the recency rule on enrolment, codes, passkeys, policy and member rese
     expect(secCode((string) file_get_contents(base_path('app/Http/Middleware/GuardTwoFactorRoutes.php'))))->toContain('recentlyConfirmed');
 });
 
-it('defaults the Google re-auth flag to off', function () {
-    $config = secCode((string) file_get_contents(base_path('config/security.php')));
-
-    expect($config)->toMatch('/\'google_reauth\'\s*=>\s*\(bool\)\s*env\(\s*\'SECURITY_GOOGLE_REAUTH\'\s*,\s*false\s*\)/');
+it('has no Google re-auth surface (06-REVIEW CR-02: removed, not flagged off)', function () {
+    expect(secCode((string) file_get_contents(base_path('config/security.php'))))->not->toContain('google_reauth');
+    expect(file_get_contents(base_path('routes/web/google.php')))->not->toContain('confirm-access');
+    expect(strtolower((string) file_get_contents(base_path('app/Security/ReauthMethods.php'))))->not->toContain('google');
+    expect(file_get_contents(base_path('.env.example')))->not->toContain('SECURITY_GOOGLE_REAUTH');
 });

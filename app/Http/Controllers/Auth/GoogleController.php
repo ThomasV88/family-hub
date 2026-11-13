@@ -2,13 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Audit\AuditEvent;
-use App\Audit\AuditLogger;
 use App\Auth\GoogleLoginService;
 use App\Http\Controllers\Controller;
 use App\Models\Invitation;
-use App\Models\User;
-use App\Security\ReauthMethods;
 use App\Security\SafeIntended;
 use App\Security\SensitiveSession;
 use Illuminate\Http\RedirectResponse;
@@ -21,8 +17,6 @@ use Throwable;
 class GoogleController extends Controller
 {
     private const SESSION_KEY = 'google_invite_token';
-
-    private const REAUTH_KEY = 'reauth.google';
 
     public function redirect(Request $request): Response
     {
@@ -44,25 +38,11 @@ class GoogleController extends Controller
         return Socialite::driver('google')->redirect();
     }
 
-    /** "Sign in with Google again" for a Google-only member: 404 unless ReauthMethods::googleAvailable. */
-    public function reauthRedirect(Request $request): Response
-    {
-        /** @var User $user */
-        $user = $request->user();
-        if (! ReauthMethods::googleAvailable($user) || ! InviteAcceptController::googleEnabled()) {
-            abort(404);
-        }
-
-        $request->session()->put(self::REAUTH_KEY, ['user' => $user->id, 'at' => now()->getTimestamp()]);
-
-        // [ASSUMED] Google honouring prompt/max_age is unverified; 06-13 records the observed behaviour with the owner.
-        return Socialite::driver('google')->with(['prompt' => 'select_account', 'max_age' => 0])->redirect();
-    }
-
     public function callback(Request $request, GoogleLoginService $google): RedirectResponse
     {
         if (Auth::check()) {
-            return $this->reauthCallback($request);
+            // A signed-in member has no business here (there is deliberately no Google re-auth): back to the app.
+            return redirect('/');
         }
 
         $token = $request->session()->pull(self::SESSION_KEY);
@@ -108,46 +88,6 @@ class GoogleController extends Controller
         return $outcome === 'created'
             ? $redirect->with('toast', ['key' => 'invite.accept.welcome', 'params' => ['name' => $user->name]])
             : $redirect;
-    }
-
-    private function reauthCallback(Request $request): RedirectResponse
-    {
-        /** @var User $user */
-        $user = $request->user();
-        $flag = $request->session()->pull(self::REAUTH_KEY);
-        if (! is_array($flag)) {
-            return redirect('/');
-        }
-
-        $fresh = isset($flag['at'], $flag['user'])
-            && (int) $flag['user'] === (int) $user->id
-            && now()->getTimestamp() - (int) $flag['at'] >= 0
-            && now()->getTimestamp() - (int) $flag['at'] <= 600;
-
-        $ok = false;
-        // Re-checked now: the flag turned off or a factor enrolled mid-flow lands on the failure path.
-        if ($fresh && ReauthMethods::googleAvailable($user) && InviteAcceptController::googleEnabled()) {
-            try {
-                // Identity only: never resolve(), so nothing is linked or created here.
-                $identity = Socialite::driver('google')->user();
-                $ok = $user->google_id !== null && hash_equals((string) $user->google_id, (string) $identity->getId());
-            } catch (Throwable) {
-                $ok = false;
-            }
-            unset($identity);
-        }
-
-        $audit = app(AuditLogger::class);
-        if (! $ok) {
-            $audit->record(AuditEvent::SecondFactorFailed, $user, ['method' => 'google', 'context' => 'reauth']);
-
-            return redirect('/confirm-access')->with('status', 'google_reauth_failed');
-        }
-
-        app(SensitiveSession::class)->confirm();
-        $audit->record(AuditEvent::ReauthConfirmed, $user, ['method' => 'google']);
-
-        return redirect(SafeIntended::pull($request), 303);
     }
 
     private function failed(): RedirectResponse

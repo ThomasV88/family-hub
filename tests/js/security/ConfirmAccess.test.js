@@ -20,7 +20,7 @@ vi.mock('../../../resources/js/Layouts/AppShell.vue', async () => {
 
 import ConfirmAccess from '../../../resources/js/Pages/Auth/ConfirmAccess.vue';
 
-const pw = { password: true, totp: false, passkey: false, google: false };
+const pw = { password: true, totp: false, passkey: false };
 let wrapper;
 const mountPage = (props = {}, locale = 'en') => {
     wrapper = mountUi(ConfirmAccess, { props: { methods: pw, minutes: 15, interrupted: false, ...props }, locale });
@@ -56,48 +56,20 @@ describe('ConfirmAccess page', () => {
     });
 
     it('without a password shows the passkey-only body and the code form', () => {
-        mountPage({ methods: { password: false, totp: true, passkey: false, google: false } });
+        mountPage({ methods: { password: false, totp: true, passkey: false } });
         expect(wrapper.text()).toContain('Use your passkey or authenticator code to confirm.');
         expect(wrapper.find('input[autocomplete="current-password"]').exists()).toBe(false);
         expect(wrapper.find('input[autocomplete="one-time-code"]').exists()).toBe(true);
     });
 
-    it('with no method offers a single Sign in again button', async () => {
-        mountPage({ methods: { password: false, totp: false, passkey: false, google: false } });
+    it('with no method offers a single Sign in again button and no Google link', async () => {
+        mountPage({ methods: { password: false, totp: false, passkey: false } });
         expect(wrapper.text()).toContain('no password or second step');
         expect(wrapper.find('form').exists()).toBe(false);
-        await wrapper.find('[data-testid="sign-in-again"]').trigger('click');
-        expect(post).toHaveBeenCalledWith('/confirm-access/sign-in-again', {}, expect.any(Object));
-    });
-
-    it('adds the Google link next to Sign in again for an eligible member', () => {
-        mountPage({ methods: { password: false, totp: false, passkey: false, google: true } });
-        expect(wrapper.find('[data-testid="sign-in-again"]').exists()).toBe(true);
-        const link = wrapper.find('a[href="/confirm-access/google"]');
-        expect(link.exists()).toBe(true);
-        expect(link.text()).toBe('Sign in with Google again');
-        expect(wrapper.text()).toContain('no password or second step');
-    });
-
-    it('shows neither the Google link nor its text with the flag off or with other methods', () => {
-        mountPage({ methods: { password: false, totp: false, passkey: false, google: false } });
         expect(wrapper.findAll('button')).toHaveLength(1);
         expect(wrapper.find('a[href="/confirm-access/google"]').exists()).toBe(false);
-        expect(wrapper.text()).not.toContain('Sign in with Google again');
-        for (const methods of [pw, { ...pw, password: false, totp: true }, { ...pw, password: false, passkey: true }]) {
-            wrapper.unmount();
-            mountPage({ methods });
-            expect(wrapper.find('a[href="/confirm-access/google"]').exists()).toBe(false);
-            expect(wrapper.text()).not.toContain('Sign in with Google again');
-        }
-    });
-
-    it('shows a danger alert after a failed Google confirmation', () => {
-        pageProps.flash = { status: 'google_reauth_failed' };
-        mountPage();
-        const alert = wrapper.find('[data-testid="google-failed-alert"]');
-        expect(alert.attributes('role')).toBe('alert');
-        expect(alert.text()).toContain("could not confirm it's you");
+        await wrapper.find('[data-testid="sign-in-again"]').trigger('click');
+        expect(post).toHaveBeenCalledWith('/confirm-access/sign-in-again', {}, expect.any(Object));
     });
 
     it.each(['en', 'sk', 'pl'])('has no axe violations in %s, light and dark', async (locale) => {
@@ -106,8 +78,7 @@ describe('ConfirmAccess page', () => {
             mountPage({ methods: { ...pw, totp: true }, interrupted: true }, locale);
             await expectNoAxeViolations(wrapper.element);
             wrapper.unmount();
-            pageProps.flash = { status: 'google_reauth_failed' };
-            mountPage({ methods: { password: false, totp: false, passkey: false, google: true } }, locale);
+            mountPage({ methods: { password: false, totp: false, passkey: false } }, locale);
             await expectNoAxeViolations(wrapper.element);
             wrapper.unmount();
             pageProps.flash = {};
