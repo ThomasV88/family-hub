@@ -96,7 +96,7 @@ function payload() {
         starts_on: f.starts_on,
         ends_on: f.ends_on === '' ? null : f.ends_on,
         recurrence: patternFromRepeat(f.repeat, f.starts_on),
-        window_days: Number(f.window_days),
+        window_days: parseInt(f.window_days, 10),
         tolerance: f.tolerance.trim() === '' ? '0' : f.tolerance.trim(),
         text_hint: f.text_hint.trim() === '' ? null : f.text_hint.trim(),
     };

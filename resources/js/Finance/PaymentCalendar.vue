@@ -101,7 +101,7 @@ function onKeydown(event, date) {
     nextTick(() => buttons[target]?.focus());
 }
 
-const dayNumber = (date) => Number(date.slice(8, 10));
+const dayLabel = (date) => parseInt(date.slice(8, 10), 10);
 </script>
 
 <template>
@@ -127,7 +127,7 @@ const dayNumber = (date) => Number(date.slice(8, 10));
                             @click="focusDate = date; emit('open', date)"
                             @keydown="onKeydown($event, date)"
                         >
-                            <span class="cal__num">{{ dayNumber(date) }}</span>
+                            <span class="cal__num">{{ dayLabel(date) }}</span>
                             <template v-if="(byDate[date] ?? []).length">
                                 <span :class="['cal__chip', `cal__chip--${worst(byDate[date])}`]" aria-hidden="true">
                                     <component :is="ICONS[worst(byDate[date])]" :size="14" :stroke-width="1.75" />
