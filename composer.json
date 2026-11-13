@@ -12,7 +12,9 @@
         "laravel/fortify": "^1.42",
         "laravel/framework": "^13.17",
         "laravel/socialite": "^5.32",
-        "laravel/tinker": "^3.0"
+        "laravel/tinker": "^3.0",
+        "minishlink/web-push": "^11.0",
+        "rlanvin/php-rrule": "^3.0"
     },
     "require-dev": {
         "laravel/pail": "^1.2.5",
