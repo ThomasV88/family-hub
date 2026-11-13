@@ -12,7 +12,8 @@ defineEmits(['toggle']);
 const { t } = useI18n();
 const page = usePage();
 const shell = useShell();
-const canAdd = computed(() => page.props.auth?.access?.todo === 'edit');
+const canAdd = computed(() => page.props.auth?.access?.todo === 'edit' || Boolean(shell?.addLabel?.value));
+const addText = computed(() => shell?.addLabel?.value ?? t('nav.add_task'));
 const appName = computed(() => page.props.app?.name ?? t('app.name'));
 </script>
 
@@ -30,7 +31,7 @@ const appName = computed(() => page.props.app?.name ?? t('app.name'));
         />
         <span class="topbar__name">{{ appName }}</span>
         <div class="topbar__end">
-            <UiButton v-if="showToggle && canAdd" variant="primary" :icon="Plus" @click="shell.triggerAdd()">{{ t('nav.add_task') }}</UiButton>
+            <UiButton v-if="showToggle && canAdd" variant="primary" :icon="Plus" @click="shell.triggerAdd()">{{ addText }}</UiButton>
             <AccountMenu />
         </div>
     </header>

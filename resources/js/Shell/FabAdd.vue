@@ -7,11 +7,12 @@ import { useShell } from './shellState.js';
 
 const { t } = useI18n();
 const shell = useShell();
-const canAdd = computed(() => usePage().props.auth?.access?.todo === 'edit');
+const canAdd = computed(() => usePage().props.auth?.access?.todo === 'edit' || Boolean(shell?.addLabel?.value));
+const addText = computed(() => shell?.addLabel?.value ?? t('nav.add_task'));
 </script>
 
 <template>
-    <button v-if="canAdd" type="button" class="fab" :aria-label="t('nav.add_task')" @click="shell.triggerAdd()">
+    <button v-if="canAdd" type="button" class="fab" :aria-label="addText" @click="shell.triggerAdd()">
         <Plus :size="24" :stroke-width="1.75" aria-hidden="true" />
     </button>
 </template>

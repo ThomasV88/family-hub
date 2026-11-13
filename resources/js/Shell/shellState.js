@@ -54,6 +54,8 @@ export function provideShell({ panelMode, isPhone }) {
     const panelModule = ref(null);
     let addHandler = null;
     let lastTrigger = null;
+    // Translated label of the registered add handler (null = the default "Add task"); lets a module name its own add action.
+    const addLabel = ref(null);
     const shell = {
         panelModule,
         panelMode,
@@ -69,9 +71,15 @@ export function provideShell({ panelMode, isPhone }) {
             lastTrigger = null;
             if (target?.isConnected) nextTick(() => target.focus());
         },
-        registerAddHandler(fn) {
+        addLabel,
+        registerAddHandler(fn, label = null) {
             addHandler = fn;
-            return () => { if (addHandler === fn) addHandler = null; };
+            addLabel.value = label;
+            return () => {
+                if (addHandler !== fn) return;
+                addHandler = null;
+                addLabel.value = null;
+            };
         },
         // A registered handler (the board on /todo) wins; elsewhere the add entry points open the create panel.
         triggerAdd() {

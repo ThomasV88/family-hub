@@ -81,7 +81,7 @@ describe('AppShell desktop', () => {
         setWidth(1280);
         mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' } };
         mountShell();
-        const soon = wrapper.findAll('nav li').at(2).find('button');
+        const soon = wrapper.findAll('nav li').at(3).find('button');
         soon.element.focus();
         await soon.trigger('click');
         await flushPromises();
