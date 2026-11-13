@@ -10,6 +10,7 @@ class OutboxHandlers
     /** @var array<string, class-string<OutboxHandler>> */
     private const HANDLERS = [
         'task_reminder' => TaskReminderHandler::class,
+        'wish_occasion' => WishOccasionHandler::class,
     ];
 
     public function for(string $kind): OutboxHandler

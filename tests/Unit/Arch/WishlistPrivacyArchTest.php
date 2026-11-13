@@ -31,3 +31,17 @@ arch('reservation models are used only by the giving side')
         'Database\Factories',
         'Tests\Support',
     ]);
+
+// Reminders and the home card say who and when, never what is reserved.
+arch('reminders and the home card are blind to reservations')
+    ->expect([
+        'App\Notifications\Outbox\WishOccasionHandler',
+        'App\Notifications\WishOccasionNotification',
+        'App\Console\Commands\EnqueueOccasionReminders',
+        'App\Http\Controllers\HomeController',
+    ])
+    ->not->toUse([
+        'App\Models\WishReservation',
+        'App\Models\WishContribution',
+        'App\Wishlist\Giving',
+    ]);
