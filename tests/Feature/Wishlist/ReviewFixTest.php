@@ -69,3 +69,13 @@ it('keeps the old image and does not mark ready when the disk write fails', func
     expect($fresh->image_source)->toBe('fetched')->and($fresh->image_path)->toBe('wish-images/9/old-full.jpg');
     expect($real->exists('wish-images/9/old-full.jpg'))->toBeTrue();
 });
+
+it('treats an empty nameday object as a no-op instead of a 500', function () {
+    $existing = \App\Models\WishOccasion::factory()->nameday('sk', 'Ľubomír', 8, 13)->create(['owner_id' => $this->parent->id]);
+
+    foreach ([[], (object) []] as $empty) {
+        $this->actingAs($this->parent)->putJson('/wishlist/members/'.$this->parent->id.'/dates', ['nameday' => $empty])
+            ->assertStatus(303);
+    }
+    expect(\App\Models\WishOccasion::query()->whereKey($existing->id)->exists())->toBeTrue();
+});

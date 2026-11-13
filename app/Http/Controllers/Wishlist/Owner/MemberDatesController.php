@@ -26,7 +26,10 @@ class MemberDatesController extends Controller
             if (array_key_exists('nameday', $data)) {
                 $existing = WishOccasion::query()->where('owner_id', $member)->where('kind', WishOccasion::NAMEDAY);
                 $nameday = $data['nameday'];
-                if ($nameday === null || ! in_array($nameday['calendar'], NameDayCalendar::calendars(), true)) {
+                if ($nameday === []) {
+                    return; // an empty object is neither a value nor an explicit clear (null clears)
+                }
+                if ($nameday === null || ! in_array($nameday['calendar'] ?? null, NameDayCalendar::calendars(), true)) {
                     $existing->delete();
 
                     return;
