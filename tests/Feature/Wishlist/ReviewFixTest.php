@@ -130,3 +130,21 @@ it('re-checks the manager designation inside the giving transactions and locks t
     $sql = collect(\Illuminate\Support\Facades\DB::getQueryLog())->pluck('query')->implode("\n");
     expect($sql)->toContain('from "users" where "users"."id" = ? limit 1 for update');
 });
+
+it('answers 409 for co-buy open and contribute on a received wish, and 404 when the wish vanishes mid-reserve', function () {
+    $owner = User::factory()->withPreset(Preset::Child)->create();
+    $giver = User::factory()->withPreset(Preset::Parent)->create();
+    $other = User::factory()->withPreset(Preset::Parent)->create();
+    $wish = Wish::factory()->create(['owner_id' => $owner->id]);
+    $this->actingAs($giver)->post("/wishlist/wishes/{$wish->id}/reservation")->assertStatus(303);
+    $wish->forceFill(['received_at' => now()])->save();
+
+    $this->actingAs($giver)->post("/wishlist/wishes/{$wish->id}/reservation/cobuy")->assertStatus(409);
+    $this->actingAs($other)->put("/wishlist/wishes/{$wish->id}/reservation/contribution", ['amount' => '10'])->assertStatus(409);
+
+    // Wish deleted after the lookup: the FK violation becomes a 404, not a 500.
+    $ghost = Wish::factory()->make(['owner_id' => $owner->id]);
+    $ghost->id = 987654;
+    expect(fn () => app(\App\Wishlist\Giving\ReservationService::class)->reserve($giver, $ghost))
+        ->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+});

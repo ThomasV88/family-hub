@@ -7,6 +7,7 @@ use App\Models\Wish;
 use App\Models\WishContribution;
 use App\Models\WishReservation;
 use App\Wishlist\ViewerContext;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
@@ -37,6 +38,11 @@ final class ReservationService
             abort_if($existing === null, 409);
 
             return $existing->user;
+        } catch (QueryException $e) {
+            // 23503 = foreign key violation: the owner deleted the wish between the lookup and the insert.
+            abort_if($e->getCode() === '23503', 404);
+
+            throw $e;
         }
 
         return null;

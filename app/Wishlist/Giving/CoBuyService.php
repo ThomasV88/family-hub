@@ -20,6 +20,7 @@ final class CoBuyService
     public function open(User $giver, Wish $wish): void
     {
         $this->guard->assertGiver(ViewerContext::for($giver), $wish->owner_id);
+        abort_if($wish->received_at !== null, 409);
 
         DB::transaction(function () use ($giver, $wish) {
             $this->guard->assertStillGiver($giver, $wish->owner_id);
@@ -46,6 +47,7 @@ final class CoBuyService
     public function contribute(User $giver, Wish $wish, ?int $amountMinor): void
     {
         $this->guard->assertGiver(ViewerContext::for($giver), $wish->owner_id);
+        abort_if($wish->received_at !== null, 409);
 
         DB::transaction(function () use ($giver, $wish, $amountMinor) {
             $this->guard->assertStillGiver($giver, $wish->owner_id);
