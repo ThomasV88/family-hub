@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Finance;
 
 use App\Finance\FinancePage;
 use App\Finance\Queries\RecurringQuery;
+use App\Finance\Recurring\RecurringMatchService;
 use App\Finance\Recurring\RecurringWriter;
 use App\Finance\Viewer;
 use App\Http\Controllers\Controller;
@@ -17,12 +18,13 @@ use Inertia\Response;
 
 class RecurringController extends Controller
 {
-    public function index(Request $request, FinancePage $page, RecurringQuery $recurring): Response
+    public function index(Request $request, FinancePage $page, RecurringQuery $recurring, RecurringMatchService $matching): Response
     {
         $viewer = Viewer::for($request->user());
         $finance = $page->props($viewer, $request);
         $accountId = $finance['selectedAccount'] === 'all' ? null : $finance['selectedAccount'];
         $upcoming = $recurring->upcoming($viewer, $accountId);
+        $panelBill = $this->panelBill($request, $viewer, $recurring);
 
         return Inertia::render('Finance/Recurring', [
             'finance' => $finance,
@@ -33,10 +35,11 @@ class RecurringController extends Controller
                 'next30' => $upcoming['next30'],
                 'stillToPay' => $recurring->stillToPay($viewer, $finance['month'], $accountId),
             ],
-            'panelBill' => $this->panelBill($request, $viewer, $recurring),
+            'panelBill' => $panelBill,
             'panelRecurring' => $this->panelRecurring($request, $viewer, $recurring),
             'dayPanel' => $this->dayPanel($request, $viewer, $recurring, $accountId),
-            'candidates' => null,
+            // Only when the user asks to match (one visit per action): same-account unmatched transactions, ranked.
+            'candidates' => $panelBill !== null && $request->query('match') === '1' ? $matching->candidates($viewer, $panelBill) : null,
         ]);
     }
 

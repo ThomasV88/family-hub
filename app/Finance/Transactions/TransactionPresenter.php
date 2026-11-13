@@ -40,6 +40,7 @@ class TransactionPresenter
             'accountName' => $accountNames[(string) $r->account_id] ?? null,
             'transfer' => $transfer,
             'source' => (string) $r->source,
+            'matchedRecurringName' => $r->matched_recurring_name ?? null,
             'createdAt' => CarbonImmutable::parse((string) $r->created_at)->utc()->toIso8601String(),
         ];
     }
@@ -53,7 +54,11 @@ class TransactionPresenter
         return $this->row($r, $accountNames) + [
             'note' => $r->note,
             'editable' => $editable,
-            'match' => null,
+            'match' => ($r->matched_recurring_id ?? null) === null ? null : [
+                'recurringId' => (string) $r->matched_recurring_id,
+                'recurringName' => (string) $r->matched_recurring_name,
+                'dueDate' => substr((string) $r->matched_due_date, 0, 10),
+            ],
         ];
     }
 }

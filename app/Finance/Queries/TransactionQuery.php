@@ -133,8 +133,26 @@ class TransactionQuery
             $columns[] = 't.note';
         }
 
-        return $query->select($columns)
-            ->selectSub($this->counterpart($viewer)->limit(1), 'counterpart_account_id');
+        $query->select($columns)
+            ->selectSub($this->counterpart($viewer)->limit(1), 'counterpart_account_id')
+            ->selectSub($this->matchColumn('r.name'), 'matched_recurring_name');
+        if ($withNote) {
+            // A match always lies on the transaction's own (visible) account, so these subqueries need no extra scope.
+            $query->selectSub($this->matchColumn('r.id'), 'matched_recurring_id')
+                ->selectSub($this->matchColumn('m.due_date'), 'matched_due_date');
+        }
+
+        return $query;
+    }
+
+    /** One column of the recurring match that pays the outer transaction (same account, hence visible). */
+    private function matchColumn(string $column): Builder
+    {
+        return DB::table('finance_recurring_matches as m')
+            ->join('finance_recurring as r', 'r.id', '=', 'm.recurring_id')
+            ->whereColumn('m.transaction_id', 't.id')
+            ->select($column)
+            ->limit(1);
     }
 
     /** @param  array{q: string, type: string, category: string, source: string}  $filters */
