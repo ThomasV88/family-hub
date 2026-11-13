@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Audit\AuditEvent;
+use App\Audit\AuditLogger;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
@@ -14,7 +16,7 @@ class CreateAdmin extends Command
 
     protected $description = 'Create the first family admin (refuses when an admin already exists)';
 
-    public function handle(): int
+    public function handle(AuditLogger $audit): int
     {
         if (User::where('is_admin', true)->exists()) {
             $this->error('An admin already exists.');
@@ -53,6 +55,8 @@ class CreateAdmin extends Command
             'locale' => $locale,
             'email_verified_at' => now(),
         ])->save();
+
+        $audit->record(AuditEvent::AdminCreated, null, target: $user);
 
         $this->info("Admin {$email} created.");
 

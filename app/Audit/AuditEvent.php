@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Audit;
+
+use App\Access\Module;
+
+enum AuditEvent: string
+{
+    case LoginSuccess = 'login_success';
+    case LoginFailed = 'login_failed';
+    case Lockout = 'lockout';
+    case PasswordReset = 'password_reset';
+    case AdminCreated = 'admin_created';
+    case InviteCreated = 'invite_created';
+    case InviteResent = 'invite_resent';
+    case InviteRevoked = 'invite_revoked';
+    case InviteAccepted = 'invite_accepted';
+    case PermissionChanged = 'permission_changed';
+    case SessionRevoked = 'session_revoked';
+    case SessionRevokedAll = 'session_revoked_all';
+    case GoogleLinked = 'google_linked';
+    case AccessDenied = 'access_denied';
+    case HealthRead = 'health_read';
+    case HealthWrite = 'health_write';
+    case FinanceRead = 'finance_read';
+    case FinanceWrite = 'finance_write';
+
+    /** UI filter groups, in display order. */
+    public const GROUPS = ['login', 'login_failed', 'invite', 'permission', 'session_revoked', 'health', 'finance', 'account'];
+
+    /** The `<module>_read` / `<module>_write` event for an audited module. */
+    public static function forModule(Module $module, bool $write): self
+    {
+        return match ($module) {
+            Module::Health => $write ? self::HealthWrite : self::HealthRead,
+            Module::Finance => $write ? self::FinanceWrite : self::FinanceRead,
+            default => throw new \InvalidArgumentException("Module {$module->value} is not audited."),
+        };
+    }
+
+    /** Allowed meta keys for this event. */
+    public function metaKeys(): array
+    {
+        return match ($this) {
+            self::PermissionChanged => ['from', 'to'],
+            self::InviteCreated, self::InviteResent, self::InviteRevoked, self::InviteAccepted => ['email', 'preset'],
+            self::SessionRevoked => ['device'],
+            self::AccessDenied => ['level'],
+            default => [],
+        };
+    }
+
+    /** UI filter group. access_denied depends on the module it was denied for. */
+    public function group(?string $module = null): string
+    {
+        return match ($this) {
+            self::LoginSuccess => 'login',
+            self::LoginFailed, self::Lockout => 'login_failed',
+            self::InviteCreated, self::InviteResent, self::InviteRevoked, self::InviteAccepted => 'invite',
+            self::PermissionChanged => 'permission',
+            self::SessionRevoked, self::SessionRevokedAll => 'session_revoked',
+            self::HealthRead, self::HealthWrite => 'health',
+            self::FinanceRead, self::FinanceWrite => 'finance',
+            self::AccessDenied => $module === 'finance' ? 'finance' : 'health',
+            self::PasswordReset, self::AdminCreated, self::GoogleLinked => 'account',
+        };
+    }
+
+    /**
+     * Events stored for a filter group, plus whether access_denied rows belong to it.
+     *
+     * @return array{events: list<string>, deniedModule: ?string}
+     */
+    public static function eventsForGroup(string $group): array
+    {
+        $events = array_values(array_map(
+            fn (self $e) => $e->value,
+            array_filter(self::cases(), fn (self $e) => $e !== self::AccessDenied && $e->group() === $group),
+        ));
+
+        return ['events' => $events, 'deniedModule' => in_array($group, ['health', 'finance'], true) ? $group : null];
+    }
+}

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AuditEntry;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,6 +22,16 @@ it('creates the first admin with a hashed password and lowercased email', functi
         ->and($user->email_verified_at)->not->toBeNull()
         ->and($user->password)->not->toBe('correct-horse-battery')
         ->and(Hash::check('correct-horse-battery', $user->password))->toBeTrue();
+});
+
+it('audits admin creation without an actor', function () {
+    $this->artisan('family:create-admin', ['email' => 'anna@example.test'])
+        ->expectsQuestion('Password', 'correct-horse-battery')
+        ->expectsQuestion('Confirm password', 'correct-horse-battery')
+        ->assertExitCode(0);
+
+    $row = AuditEntry::sole();
+    expect($row->event)->toBe('admin_created')->and($row->actor_id)->toBeNull()->and($row->target_user_id)->toBe(User::sole()->id);
 });
 
 it('honours --locale', function () {

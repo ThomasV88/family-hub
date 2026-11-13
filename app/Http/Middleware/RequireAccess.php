@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use App\Access\AccessGate;
 use App\Access\AccessLevel;
 use App\Access\Module;
+use App\Audit\AuditEvent;
+use App\Audit\AuditLogger;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class RequireAccess
 {
-    public function __construct(private readonly AccessGate $gate) {}
+    public function __construct(private readonly AccessGate $gate, private readonly AuditLogger $audit) {}
 
     public function handle(Request $request, Closure $next, string $rule, ?string $module = null, ?string $level = null): Response
     {
@@ -48,15 +50,34 @@ class RequireAccess
             return $this->toLogin($request);
         }
 
-        $this->afterDecision($request, $moduleEnum, (bool) $allowed);
+        $this->afterDecision($request, $moduleEnum, $levelEnum, (bool) $allowed);
 
         abort_unless($allowed, 403);
 
         return $next($request);
     }
 
-    /** Hook for audit writes (plan 05); intentionally empty. */
-    protected function afterDecision(Request $request, ?Module $module, bool $allowed): void {}
+    /**
+     * Audit write for health and finance, before the controller runs. Deliberately not wrapped in a
+     * try/catch: if the row cannot be written the request fails (fail closed).
+     */
+    protected function afterDecision(Request $request, ?Module $module, ?AccessLevel $level, bool $allowed): void
+    {
+        if ($module === null || ! $module->audited()) {
+            return;
+        }
+
+        $user = $request->user();
+
+        if (! $allowed) {
+            $this->audit->record(AuditEvent::AccessDenied, $user, $level ? ['level' => $level->label()] : [], null, $module);
+
+            return;
+        }
+
+        $write = ! in_array($request->method(), ['GET', 'HEAD'], true);
+        $this->audit->record(AuditEvent::forModule($module, $write), $user, [], null, $module);
+    }
 
     private function toLogin(Request $request): Response
     {
