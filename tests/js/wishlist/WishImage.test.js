@@ -7,6 +7,7 @@ import { wish, link, image } from './fixtures.js';
 
 const calls = { post: vi.fn(), delete: vi.fn(), reload: vi.fn() };
 vi.mock('@inertiajs/vue3', () => ({
+    usePage: () => ({ props: {} }),
     router: {
         get: vi.fn(), patch: vi.fn(), visit: vi.fn(), on: vi.fn(),
         post: (...a) => calls.post(...a),

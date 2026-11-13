@@ -11,6 +11,7 @@ import MemberDatesTable from '../../Wishlist/MemberDatesTable.vue';
 import OccasionList from '../../Wishlist/OccasionList.vue';
 import OccasionPanel from '../../Wishlist/OccasionPanel.vue';
 import ShellAdd from '../../Wishlist/ShellAdd.vue';
+import ShoppingSummary from '../../Wishlist/ShoppingSummary.vue';
 import { formatDayMonth } from '../../Wishlist/occasionIcons.js';
 
 const props = defineProps({
@@ -86,6 +87,8 @@ const customDate = (o) => formatDayMonth(o.month, o.day, locale.value) + (o.year
                     <h1 class="occasions__title">{{ t('occasions.title') }}</h1>
                     <UiButton v-if="can_add" variant="primary" :icon="Plus" class="occasions__add" @click="openAdd">{{ t('occasions.add') }}</UiButton>
                 </header>
+
+                <ShoppingSummary />
 
                 <OccasionList :upcoming="upcoming" :can-add="can_add" @add="openAdd" />
 

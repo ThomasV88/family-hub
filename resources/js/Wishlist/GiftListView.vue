@@ -4,8 +4,9 @@ import { useI18n } from 'vue-i18n';
 import UiAvatar from '../Components/ui/UiAvatar.vue';
 import UiEmptyState from '../Components/ui/UiEmptyState.vue';
 import GiftWishCard from './GiftWishCard.vue';
+import ShoppingSummary from './ShoppingSummary.vue';
 
-// The giver side of someone else's list. Plan 04-10 inserts ShoppingSummary above the context slot.
+// The giver side of someone else's list. ShoppingSummary sits above the context slot.
 const props = defineProps({
     list: { type: Object, required: true },
     selectedId: { type: Number, default: null },
@@ -19,6 +20,7 @@ const wishes = computed(() => props.list.wishes ?? []);
 
 <template>
     <div class="list-view" data-testid="gift-list">
+        <ShoppingSummary />
         <slot name="context" />
 
         <header class="list-header">
