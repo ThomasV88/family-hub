@@ -6,7 +6,7 @@ import { loadMessages } from '../helpers/mount.js';
 import { pseudoLong } from '../helpers/pseudoLong.js';
 import { wish, link, image } from './fixtures.js';
 
-vi.mock('@inertiajs/vue3', () => ({ router: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn(), visit: vi.fn(), on: vi.fn() } }));
+vi.mock('@inertiajs/vue3', () => ({ router: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn(), visit: vi.fn(), on: vi.fn() }, usePage: () => ({ props: {} }) }));
 
 import GiftWishPanel from '../../../resources/js/Wishlist/GiftWishPanel.vue';
 

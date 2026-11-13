@@ -1,20 +1,24 @@
 <script setup>
 import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { ExternalLink, Star } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiDetailPanel from '../Components/ui/UiDetailPanel.vue';
 import UiTag from '../Components/ui/UiTag.vue';
+import ReservationBox from './ReservationBox.vue';
 import WishImage from './WishImage.vue';
 import { formatMoney } from './money.js';
 
-// Read-only wish for givers. Plan 04-10 adds the reservation box between the priority tag and the links.
+// Read-only wish for givers. The reservation box sits under the priority tag; list context (owner name, viewer_can_reserve) comes from the page props.
 const props = defineProps({
     open: { type: Boolean, default: false },
     wish: { type: Object, default: null },
 });
 const emit = defineEmits(['close']);
 const { t, locale } = useI18n();
+const page = usePage();
+const list = computed(() => page.props?.list ?? {});
 
 const price = computed(() => (props.wish ? formatMoney(props.wish.price, props.wish.currency, locale.value) : ''));
 const urls = computed(() => props.wish?.urls ?? []);
@@ -33,6 +37,8 @@ const label = (link) => (link.label && link.label.trim() !== '' ? link.label : l
             <div>
                 <UiTag :icon="wish.priority === 'top' ? Star : null">{{ t(`wishlist.priority.${wish.priority}`) }}</UiTag>
             </div>
+
+            <ReservationBox :wish="wish" :owner-name="list.owner?.name ?? ''" :can-reserve="list.viewer_can_reserve === true" />
 
             <section v-if="urls.length" class="gift-panel__section">
                 <h4 class="gift-panel__heading">{{ t('wishlist.field.links') }}</h4>
