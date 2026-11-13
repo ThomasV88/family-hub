@@ -10,6 +10,7 @@ import { financeUrl } from './financeQuery.js';
 const props = defineProps({
     finance: { type: Object, required: true },
     showAddFab: { type: Boolean, default: false },
+    monthDisabled: { type: Boolean, default: false },
 });
 const emit = defineEmits(['add']);
 const { t } = useI18n();
@@ -21,7 +22,7 @@ const importHref = () => financeUrl('/finance/import', { account: props.finance.
     <div class="fin-toolbar" data-testid="finance-toolbar">
         <AccountChips :accounts="finance.accounts" :selected="finance.selectedAccount" />
         <div class="fin-toolbar__row">
-            <MonthSwitcher :month="finance.month" :today="finance.today" />
+            <MonthSwitcher :month="finance.month" :today="finance.today" :disabled="monthDisabled" />
             <div v-if="finance.canEdit" class="fin-toolbar__actions">
                 <slot name="actions" />
                 <UiButton variant="secondary" :icon="Upload" :href="importHref()">{{ t('finance.import') }}</UiButton>

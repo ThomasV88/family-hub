@@ -26,12 +26,12 @@ function shift(delta) {
 }
 function go(month) {
     if (props.disabled) return;
-    visitFinance({ month: month === currentMonth.value ? null : month }, { only: ['finance', 'transactionItems', 'transactions', 'filters', 'accounts'], reset: ['transactionItems'] });
+    visitFinance({ month: month === currentMonth.value ? null : month }, { only: ['finance', 'transactionItems', 'transactions', 'filters', 'accounts', 'recurring', 'panelBill', 'panelRecurring', 'dayPanel', 'candidates'], reset: ['transactionItems'] });
 }
 </script>
 
 <template>
-    <nav class="month-switcher" :aria-label="t('finance.month.label')">
+    <nav class="month-switcher" :aria-label="t('finance.month.label')" :aria-disabled="disabled ? 'true' : undefined">
         <UiButton variant="ghost" icon-only :icon="ChevronLeft" :label="t('finance.month.prev')" :disabled="disabled" @click="shift(-1)" />
         <span class="month-switcher__label" aria-live="polite" data-testid="month-label">{{ label }}</span>
         <UiButton variant="ghost" icon-only :icon="ChevronRight" :label="t('finance.month.next')" :disabled="disabled" @click="shift(1)" />

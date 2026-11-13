@@ -16,6 +16,7 @@ const props = defineProps({
     // 'overview' | 'transactions' | 'recurring'
     current: { type: String, default: 'transactions' },
     showAddFab: { type: Boolean, default: false },
+    monthDisabled: { type: Boolean, default: false },
 });
 const emit = defineEmits(['add']);
 const { t } = useI18n();
@@ -65,7 +66,7 @@ onBeforeUnmount(() => offs.forEach((off) => off()));
         </UiEmptyState>
 
         <template v-else>
-            <FinanceToolbar :finance="finance" :show-add-fab="showAddFab" @add="emit('add')">
+            <FinanceToolbar :finance="finance" :show-add-fab="showAddFab" :month-disabled="monthDisabled" @add="emit('add')">
                 <template #actions><slot name="actions" /></template>
             </FinanceToolbar>
             <UiTabs :tabs="tabs" :model-value="current" :label="t('finance.title')" @update:model-value="openTab">
