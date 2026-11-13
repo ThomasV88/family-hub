@@ -12,8 +12,13 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
-# 1. Home page over HTTPS
-code=$(curl -sS -D "$TMP/h" -o "$TMP/b" -w '%{http_code}' "$BASE/")
+# 1. Home page over HTTPS. The first request is retried: right after a deploy the stack may still warm up.
+code=000
+for attempt in 1 2 3 4 5 6 7 8; do
+  code=$(curl -sS --max-time 20 -D "$TMP/h" -o "$TMP/b" -w '%{http_code}' "$BASE/" 2>/dev/null) || code=000
+  [ "$code" = 200 ] && break
+  sleep 4
+done
 [ "$code" = 200 ] || fail "GET / returned HTTP $code"
 grep -qi '^strict-transport-security:' "$TMP/h" || fail "no Strict-Transport-Security header"
 grep -q 'data-page' "$TMP/b" || fail "no data-page in body (Inertia not rendering)"
@@ -31,9 +36,12 @@ code=$(curl -sS -o "$TMP/n" -w '%{http_code}' "$BASE/$rnd")
 [ "$code" = 404 ] || fail "GET /$rnd returned HTTP $code (expected 404)"
 if grep -Eq 'Stack trace|vendor/laravel|Whoops' "$TMP/n"; then fail "404 page leaks a stack trace"; fi
 
-# 4. Redirects must stay on https (a POST without CSRF token is expected to return 419)
-loc=$(curl -sS -I -X POST "$BASE/heartbeat" | tr -d '\r' | sed -n 's/^[Ll]ocation: //p' | head -n1)
-case "$loc" in http://*) fail "POST /heartbeat redirects to non-https URL: $loc" ;; esac
+# 4. Redirects must stay on https. /icons is a directory, so nginx answers GET /icons with a real 301
+#    whose Location is built from the scheme the request arrived with.
+code=$(curl -sS -D "$TMP/r" -o /dev/null -w '%{http_code}' "$BASE/icons")
+[ "$code" = 301 ] || fail "GET /icons returned HTTP $code (expected a 301 redirect)"
+loc=$(tr -d '\r' < "$TMP/r" | sed -n 's/^[Ll]ocation: //p' | head -n1)
+case "$loc" in https://*) ;; *) fail "GET /icons redirects to a non-https URL: '$loc'" ;; esac
 
 # 5. Service worker (arrives with the PWA plan): 200 must carry no-cache, 404 is acceptable until then
 code=$(curl -sS -D "$TMP/sw" -o /dev/null -w '%{http_code}' "$BASE/sw.js")

@@ -19,7 +19,7 @@ err() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 env_get() { sed -n "s/^$1=//p" .env 2>/dev/null | head -n1 | tr -d "'\"\r"; }
 appenv_get() { sed -n "s/^$1=//p" app.env 2>/dev/null | head -n1 | tr -d "'\"\r "; }
 
-REQUIRED_FILES=(.env app.env migrate.env compose.server.yaml backup.sh postgres-init/01-roles.sh)
+REQUIRED_FILES=(.env app.env migrate.env compose.server.yaml backup.sh smoke-server.sh postgres-init/01-roles.sh)
 REQUIRED_SECRETS=(secrets/db_root_password secrets/db_owner_password secrets/db_app_password secrets/restic_password secrets/cloudflare.ini)
 
 guard_inputs() {
@@ -211,11 +211,13 @@ main() {
   fi
 
   log "Starting services"
-  if dc up -d --wait --remove-orphans app worker scheduler nginx; then
+  # The tag is recorded as good only after the containers are healthy AND the live smoke test passes.
+  if dc up -d --wait --remove-orphans app worker scheduler nginx \
+     && { [ "${SKIP_SMOKE:-}" = 1 ] || bash ./smoke-server.sh "$app_domain" "$(env_get STACK_ENV)"; }; then
     printf '%s\n' "$IMAGE_TAG" > .last-good-tag
-    log "Healthy. Recorded $IMAGE_TAG as last good tag."
+    log "Healthy and smoke test passed. Recorded $IMAGE_TAG as last good tag."
   else
-    err "Services did not become healthy."
+    err "Services did not become healthy or the smoke test failed."
     if [ -s .last-good-tag ]; then
       local good
       good=$(cat .last-good-tag)

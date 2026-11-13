@@ -24,7 +24,7 @@ STAGING_RESEED=$4
 ENV
   printf 'APP_ENV=%s\nDB_USERNAME=fh_app\n' "$5" > "$d/app.env"
   echo 'DB_USERNAME=fh_owner' > "$d/migrate.env"
-  for f in compose.server.yaml backup.sh postgres-init/01-roles.sh; do echo '#' > "$d/$f"; done
+  for f in compose.server.yaml backup.sh smoke-server.sh postgres-init/01-roles.sh; do echo '#' > "$d/$f"; done
   for s in db_root_password db_owner_password db_app_password restic_password cloudflare.ini; do
     echo x > "$d/secrets/$s"; chmod 600 "$d/secrets/$s"
   done
