@@ -21,15 +21,27 @@ function clear(id) {
 }
 function pause(id) {
     const entry = timers.get(id);
-    if (!entry) return;
+    if (!entry || entry.paused) return;
     clearTimeout(entry.timer);
     entry.remaining -= Date.now() - entry.started;
     entry.paused = true;
 }
 function resume(id) {
     const entry = timers.get(id);
-    if (!entry || !entry.paused) return;
+    if (!entry || !entry.paused || entry.hover || entry.focus) return;
     start(id, Math.max(entry.remaining, 1000));
+}
+// Hover and keyboard focus hold the toast independently; it resumes only when neither is active.
+function hold(id, kind, on) {
+    const entry = timers.get(id);
+    if (!entry) return;
+    entry[kind] = on;
+    if (on) pause(id);
+    else resume(id);
+}
+function onFocusOut(id, event) {
+    if (event.currentTarget.contains(event.relatedTarget)) return;
+    hold(id, 'focus', false);
 }
 
 watch(
@@ -49,10 +61,10 @@ onBeforeUnmount(() => timers.forEach((entry) => clearTimeout(entry.timer)));
             v-for="toast in toasts"
             :key="toast.id"
             class="ui-toast"
-            @mouseenter="pause(toast.id)"
-            @mouseleave="resume(toast.id)"
-            @focusin="pause(toast.id)"
-            @focusout="resume(toast.id)"
+            @mouseenter="hold(toast.id, 'hover', true)"
+            @mouseleave="hold(toast.id, 'hover', false)"
+            @focusin="hold(toast.id, 'focus', true)"
+            @focusout="onFocusOut(toast.id, $event)"
         >
             <span class="ui-toast__message">{{ toast.message }}</span>
             <UiButton variant="ghost" size="sm" icon-only :icon="X" :label="t('ui.close')" @click="dismiss(toast.id)" />

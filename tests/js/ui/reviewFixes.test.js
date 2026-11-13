@@ -109,3 +109,49 @@ describe('WR-04 / WR-05 focus trap', () => {
         trap.deactivate();
     });
 });
+
+import { vi } from 'vitest';
+import UiToastRegion from '../../../resources/js/Components/ui/UiToastRegion.vue';
+import { useToast } from '../../../resources/js/Components/ui/useToast.js';
+
+describe('WR-06 toast pause/resume', () => {
+    afterEach(() => {
+        vi.useRealTimers();
+        useToast().toasts.splice(0);
+    });
+    it('hover plus focus does not double-subtract, and mouseleave keeps it while focused', async () => {
+        vi.useFakeTimers();
+        const w = mountUi(UiToastRegion);
+        useToast().show('Held', { duration: 5000 });
+        await nextTick();
+        const el = () => w.find('.ui-toast');
+        vi.advanceTimersByTime(1000);
+        await el().trigger('mouseenter');
+        await el().trigger('focusin'); // second pause must be a no-op
+        vi.advanceTimersByTime(60000);
+        await el().trigger('mouseleave'); // focus still inside: stay
+        vi.advanceTimersByTime(60000);
+        await nextTick();
+        expect(w.text()).toContain('Held');
+        await el().trigger('focusout');
+        vi.advanceTimersByTime(3500); // remaining 4000, not clamped to 1000
+        await nextTick();
+        expect(w.text()).toContain('Held');
+        vi.advanceTimersByTime(600);
+        await nextTick();
+        expect(w.text()).not.toContain('Held');
+        w.unmount();
+    });
+    it('focus moving between children does not resume', async () => {
+        vi.useFakeTimers();
+        const w = mountUi(UiToastRegion);
+        useToast().show('Inner', { duration: 5000 });
+        await nextTick();
+        await w.find('.ui-toast').trigger('focusin');
+        await w.find('.ui-toast').trigger('focusout', { relatedTarget: w.find('.ui-toast button').element });
+        vi.advanceTimersByTime(60000);
+        await nextTick();
+        expect(w.text()).toContain('Inner');
+        w.unmount();
+    });
+});
