@@ -92,14 +92,14 @@ const importHref = computed(() => financeUrl('/finance/import', { account: props
                 </thead>
                 <tbody v-for="group in groups" :key="group.date">
                     <tr class="tx-table__day">
-                        <th scope="colgroup" :colspan="showAccount ? 4 : 3"><h3 class="tx-list__day">{{ group.label }}</h3></th>
+                        <th scope="colgroup" :colspan="showAccount ? 4 : 3"><h2 class="tx-list__day">{{ group.label }}</h2></th>
                     </tr>
                     <TransactionRow v-for="row in group.rows" :key="row.id" :row="row" :categories="finance.categories" layout="wide" :show-account="showAccount" :selected="row.id === selectedId" @open="emit('open', $event)" />
                 </tbody>
             </table>
             <div v-else>
                 <section v-for="group in groups" :key="group.date" class="tx-list__group">
-                    <h3 class="tx-list__day">{{ group.label }}</h3>
+                    <h2 class="tx-list__day">{{ group.label }}</h2>
                     <ul class="tx-list__items">
                         <TransactionRow v-for="row in group.rows" :key="row.id" :row="row" :categories="finance.categories" layout="narrow" :show-account="showAccount" :selected="row.id === selectedId" @open="emit('open', $event)" />
                     </ul>

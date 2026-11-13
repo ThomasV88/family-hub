@@ -63,7 +63,7 @@ describe('TransactionList markup', () => {
         expect(document.querySelectorAll('table')).toHaveLength(1);
         expect(document.querySelectorAll('ul.tx-list__items')).toHaveLength(0);
         expect([...document.querySelectorAll('thead th')].map((th) => th.textContent.trim())).toEqual(['Description', 'Category', 'Account', 'Amount']);
-        const days = [...document.querySelectorAll('h3')].map((h) => h.textContent);
+        const days = [...document.querySelectorAll('h2.tx-list__day')].map((h) => h.textContent);
         expect(days).toEqual(['Thursday 12 March', 'Tuesday 10 March']);
     });
 
@@ -71,7 +71,7 @@ describe('TransactionList markup', () => {
         mountList({}, { width: 320 });
         expect(document.querySelectorAll('table')).toHaveLength(0);
         expect(document.querySelectorAll('li > button')).toHaveLength(4);
-        expect(document.querySelectorAll('h3')).toHaveLength(2);
+        expect(document.querySelectorAll('h2.tx-list__day')).toHaveLength(2);
     });
 
     it('hides the Account column when one account is selected', () => {
