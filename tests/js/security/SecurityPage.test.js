@@ -77,10 +77,10 @@ describe('Security page', () => {
         expect(document.activeElement).toBe(wrapper.find('h1').element);
     });
 
-    it('renders an empty passkey region only when passkeys are enabled', () => {
+    it('renders the passkeys card in the region only when passkeys are enabled', () => {
         mountPage({ passkeysEnabled: true });
         expect(wrapper.find('[data-testid="passkeys-region"]').exists()).toBe(true);
-        expect(wrapper.find('[data-testid="passkeys-region"]').text()).toBe('');
+        expect(wrapper.find('[data-testid="passkeys-region"] [data-testid="passkeys-card"]').exists()).toBe(true);
         wrapper.unmount();
         mountPage({ passkeysEnabled: false });
         expect(wrapper.find('[data-testid="passkeys-region"]').exists()).toBe(false);

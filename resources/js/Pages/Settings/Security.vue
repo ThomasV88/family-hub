@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { ShieldCheck, ShieldOff, TriangleAlert } from '@lucide/vue';
@@ -9,6 +9,7 @@ import UiButton from '../../Components/ui/UiButton.vue';
 import UiCard from '../../Components/ui/UiCard.vue';
 import UiTag from '../../Components/ui/UiTag.vue';
 import RegenerateCodesDialog from '../../Components/Security/RegenerateCodesDialog.vue';
+import PasskeysCard from '../../Components/Security/PasskeysCard.vue';
 import TotpDisableDialog from '../../Components/Security/TotpDisableDialog.vue';
 import TwoFactorSetupDialog from '../../Components/Security/TwoFactorSetupDialog.vue';
 
@@ -31,9 +32,12 @@ const isAdmin = computed(() => !!page.props?.auth?.user?.isAdmin);
 const setupOpen = ref(false);
 const disableOpen = ref(false);
 const regenOpen = ref(false);
-const lastFactor = computed(() => props.required && props.passkeys.length === 0);
+// The card keeps its own list as passkeys are added, renamed and removed; props refresh it after a reload.
+const passkeyList = ref([...props.passkeys]);
+watch(() => props.passkeys, (v) => { passkeyList.value = [...v]; });
+const lastFactor = computed(() => props.required && passkeyList.value.length === 0);
 
-const on = computed(() => props.status.totp || props.passkeys.length > 0);
+const on = computed(() => props.status.totp || passkeyList.value.length > 0);
 const tag = computed(() => {
     if (props.guidance) return { variant: 'warn', icon: TriangleAlert, label: t('security.tag.needs') };
     return on.value
@@ -104,8 +108,17 @@ function setupFinished() {
             </UiButton>
         </UiCard>
 
-        <!-- Passkeys card is mounted here by the passkey plan (06-09) when passkeysEnabled. -->
-        <section v-if="passkeysEnabled" class="security__region" data-testid="passkeys-region"></section>
+        <section v-if="passkeysEnabled" class="security__region" data-testid="passkeys-region">
+            <PasskeysCard
+                v-model:passkeys="passkeyList"
+                :methods="methods"
+                :confirm-fresh="confirmFresh"
+                :is-admin="isAdmin"
+                :required="required"
+                :guidance="guidance"
+                :totp="status.totp"
+            />
+        </section>
 
         <UiCard v-if="status.totp" class="security__card" data-testid="recovery-card">
             <h2 class="security__heading">{{ t('twofactor.recovery.title') }}</h2>

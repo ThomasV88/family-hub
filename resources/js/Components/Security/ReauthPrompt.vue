@@ -14,7 +14,7 @@ const props = defineProps({
 defineEmits(['confirmed']);
 const { t } = useI18n();
 
-const usable = computed(() => !!(props.methods.password || props.methods.totp));
+const usable = computed(() => !!(props.methods.password || props.methods.totp || props.methods.passkey));
 
 function signInAgain() {
     router.post('/confirm-access/sign-in-again');
