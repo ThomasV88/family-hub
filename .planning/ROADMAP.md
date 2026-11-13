@@ -34,16 +34,16 @@ Family Hub is built as a vertical-slice MVP: each phase delivers a usable capabi
   3. User can install the app to the home screen on phone and iPad and use it on desktop, and the service worker caches only the app shell and never medical or finance data
   4. An encrypted database backup runs on a schedule and a restore from it has been performed successfully
   5. Staging holds only synthetic data, with no real medical or finance records
-**Plans:** 1/12 plans executed
+**Plans:** 6/12 plans executed
 **UI hint**: yes
 
 Plans:
 - [x] 01-01-PLAN.md — Package approval, Laravel/Inertia/Vue scaffold and five-service dev Docker stack
-- [ ] 01-02-PLAN.md — Owner ops decisions (hostnames, RAM, retention, off-site, repo visibility) and DNS records
-- [ ] 01-03-PLAN.md — Heartbeat slice: scheduler -> database queue -> worker -> Postgres -> home page, "Run check now"
-- [ ] 01-04-PLAN.md — Server compose, TLS/PROXY-protocol nginx, cert, deploy.sh with guards and rollback, smoke test
-- [ ] 01-05-PLAN.md — Synthetic-only staging: staging:seed and staging:audit with production guards
-- [ ] 01-06-PLAN.md — Encrypted restic backups, restore drill, freshness check, cron schedule (proven locally)
+- [x] 01-02-PLAN.md — Owner ops decisions (hostnames, RAM, retention, off-site, repo visibility) and DNS records
+- [x] 01-03-PLAN.md — Heartbeat slice: scheduler -> database queue -> worker -> Postgres -> home page, "Run check now"
+- [x] 01-04-PLAN.md — Server compose, TLS/PROXY-protocol nginx, cert, deploy.sh with guards and rollback, smoke test
+- [x] 01-05-PLAN.md — Synthetic-only staging: staging:seed and staging:audit with production guards
+- [x] 01-06-PLAN.md — Encrypted restic backups, restore drill, freshness check, cron schedule (proven locally)
 - [ ] 01-07-PLAN.md — SK/PL/EN: locale resolution, switcher, Intl plurals, dates and numbers
 - [ ] 01-08-PLAN.md — CI/CD workflow, secret scan, provisioning script, GitHub environments and secrets
 - [ ] 01-09-PLAN.md — PWA: manifest, icons, precache-only service worker with build guard, no-store, update prompt
@@ -63,10 +63,16 @@ Plans:
   4. Keyboard navigation, visible focus, contrast and touch target sizes meet the accessibility baseline on the style page and the shell
   5. A sketch for every module (to-do, wishlist, finance, medical, settings) has been chosen and recorded as the design direction for later phases
 **UI hint**: yes
-**Plans:** 0 plans
+**Plans:** 7 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 01.1 to break down)
+- [ ] 01.1-01-PLAN.md — Package approval (@lucide/vue, axe-core), AA-verified tokens, System/Light/Dark theme without inline script
+- [ ] 01.1-02-PLAN.md — Non-production /_style living style page, tokens with contrast, UiButton, all phase copy in SK/PL/EN
+- [ ] 01.1-03-PLAN.md — Form controls (field, input, textarea, select, checkbox, radio, switch) and per-module design notes
+- [ ] 01.1-04-PLAN.md — Tags, avatars, chips, cards, empty/error states, alerts, skeleton, progress, lists and responsive tables
+- [ ] 01.1-05-PLAN.md — Dialogs, destructive confirm, detail panel (sheet/overlay/docked), menu, tabs, toasts
+- [ ] 01.1-06-PLAN.md — Responsive app shell: bottom bar + FAB, toggleable sidebar, account menu, skip link, coming-soon panel
+- [ ] 01.1-07-PLAN.md — Overview dashboard with quick add, restyled PWA banner/switcher, accessibility sweep, end-of-phase verification
 
 ### Phase 2: Identity and Authorization Core
 **Goal**: Family members can join by invitation and sign in, and every piece of data is guarded server-side by per-member, per-module permissions that the admin controls.
@@ -180,7 +186,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Infrastructure | 1/12 | In Progress|  |
+| 1. Foundation and Infrastructure | 6/12 | In Progress|  |
 | 2. Identity and Authorization Core | 0/TBD | Not started | - |
 | 3. To-Do | 0/TBD | Not started | - |
 | 4. Wishlist | 0/TBD | Not started | - |
