@@ -47,3 +47,24 @@ describe('WR-02 docked panel does not trap Tab', () => {
         w.unmount();
     });
 });
+
+describe('WR-03 mode change while open', () => {
+    it('releases the scroll lock when switching overlay to docked and re-locks on the way back', async () => {
+        const w = mountUi(UiDetailPanel, { props: { open: true, title: 'Panel', mode: 'overlay' } });
+        await nextTick();
+        await nextTick();
+        expect(document.body.style.overflow).toBe('hidden');
+        await w.setProps({ mode: 'docked' });
+        await nextTick();
+        await nextTick();
+        expect(document.body.style.overflow).toBe('');
+        expect(w.find('aside').exists()).toBe(true);
+        await w.setProps({ mode: 'overlay' });
+        await nextTick();
+        await nextTick();
+        expect(document.body.style.overflow).toBe('hidden');
+        expect(document.querySelector('[role=dialog]').contains(document.activeElement)).toBe(true);
+        w.unmount();
+        expect(document.body.style.overflow).toBe('');
+    });
+});

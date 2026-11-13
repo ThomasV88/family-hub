@@ -41,41 +41,47 @@ function unlock() {
 }
 
 let dockedPrevious = null;
+let activeAs = null; // 'trap' | 'docked' | null: how the current container was activated
 
 function activate() {
     if (modal.value) {
+        activeAs = 'trap';
         trap.activate();
         return;
     }
     // Docked panel is non-modal: move focus to the heading without trapping Tab.
+    activeAs = 'docked';
     dockedPrevious = document.activeElement;
     document.getElementById(titleId)?.focus();
 }
 function deactivate() {
-    if (modal.value) {
+    const was = activeAs;
+    activeAs = null;
+    if (was === 'trap') {
         trap.deactivate();
-        return;
+    } else if (was === 'docked') {
+        if (dockedPrevious && document.contains(dockedPrevious)) dockedPrevious.focus();
+        dockedPrevious = null;
     }
-    if (dockedPrevious && document.contains(dockedPrevious)) dockedPrevious.focus();
-    dockedPrevious = null;
 }
 
+// Watches open and the effective modality together: when the layout switches between overlay and
+// docked while open, tear down the old trap/lock and set them up again on the new container.
 watch(
-    () => props.open,
-    async (open) => {
+    [() => props.open, modal],
+    async ([open]) => {
+        deactivate();
+        unlock();
         if (open) {
             lock();
             await nextTick();
-            activate();
-        } else {
-            deactivate();
-            unlock();
+            if (props.open) activate();
         }
     },
     { immediate: true, flush: 'post' },
 );
 onBeforeUnmount(() => {
-    if (props.open) deactivate();
+    deactivate();
     unlock();
 });
 </script>
