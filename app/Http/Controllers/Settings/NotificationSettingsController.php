@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Settings;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Settings\UpdateNotificationPreferenceRequest;
 use App\Access\AccessGate;
 use App\Access\AccessLevel;
 use App\Access\Module;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Settings\UpdateNotificationPreferenceRequest;
 use App\Notifications\NotificationPreferences;
 use App\Push\PushConfig;
 use App\Support\SettingsSections;
