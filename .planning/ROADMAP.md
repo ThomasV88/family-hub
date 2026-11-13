@@ -85,8 +85,20 @@ Plans:
   3. Admin can set no access, view or edit per member per module, start from a preset (Parent, Child, Grandparent, Guest) and adjust it
   4. A member without a grant cannot read or change a module's data through any endpoint, proven by an automated role-by-endpoint test matrix
   5. Admin can view an audit log of access to and changes of sensitive data
-**Plans**: TBD
+**Plans:** 10 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 02-01-PLAN.md — Package approval (Fortify, Socialite), headless Fortify with no registration, full SK/PL/EN Phase 2 copy
+- [ ] 02-02-PLAN.md — First admin command, email+password sign-in with lockout, 30-day remember, logout, Login page and account menu
+- [ ] 02-03-PLAN.md — Deny-by-default access layer (grants, presets, requireAccess, fail-closed guard), role-by-endpoint matrix, 403 page, access-aware nav
+- [ ] 02-04-PLAN.md — Enumeration-safe password reset that signs out other devices, SessionRevoker, Settings shell and Appearance page
+- [ ] 02-05-PLAN.md — Append-only audit log (health/finance auto-audit incl. denied, auth events, 2-year prune) and the admin audit page
+- [ ] 02-06-PLAN.md — Members and access: member panel with presets and per-module none/view/edit, audited atomic save, permission matrix
+- [ ] 02-07-PLAN.md — Invites: hashed single-use 7-day tokens, queued mail with failure flag, resend/copy (rotating)/revoke, invite dialog
+- [ ] 02-08-PLAN.md — Member sessions: list devices, revoke one or all (rows deleted + remember token rotated), audited
+- [ ] 02-09-PLAN.md — Invite acceptance (password, race-safe) and Google sign-in linked by verified identity, no self-signup
+- [ ] 02-10-PLAN.md — DEFERRED with owner: Stalwart mailbox, Google OAuth clients, staging/production rollout, admin creation, audit cron
 
 ### Phase 3: To-Do
 **Goal**: The family can track shared and personal tasks together, including recurring ones, and gets reminded when tasks are due.
