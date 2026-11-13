@@ -28,13 +28,24 @@ final class WishPresenter
             ])->values()->all(),
             'image' => [
                 'status' => $wish->image_status,
-                'thumb_url' => null,
-                'full_url' => null,
+                'thumb_url' => $this->imageUrl($wish, 'thumb'),
+                'full_url' => $this->imageUrl($wish, 'full'),
                 'source' => $wish->image_source,
                 'host' => $wish->image_source_host,
             ],
             'received' => $wish->received_at !== null,
         ];
+    }
+
+    /** Only for a ready image; the version suffix changes with every new file so browsers refetch. */
+    private function imageUrl(Wish $wish, string $variant): ?string
+    {
+        $path = $variant === 'thumb' ? $wish->thumb_path : $wish->image_path;
+        if ($wish->image_status !== 'ready' || $path === null) {
+            return null;
+        }
+
+        return route('wishlist.images.show', ['wish' => $wish->id, 'variant' => $variant], false).'?v='.substr(sha1($path), 0, 8);
     }
 
     public static function host(string $url): ?string
