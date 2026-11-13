@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Route;
  * is what puts it behind the idle gate by construction, because SensitiveGate runs inside RequireAccess for
  * Module::sensitive(). It MUST also use a URI under /health or /medical and a route name containing `health` or
  * `medical`, so the naming safety net in SensitiveGateMatrixTest catches a route that forgets the middleware.
- * File and JSON routes included.
+ * File and JSON routes included. The controller must also live under App\Http\Controllers\Health (or Medical):
+ * the namespace net in offenders() catches a route that serves the data under an innocent name or URI.
  */
 class SensitiveRoutes
 {
@@ -137,7 +138,16 @@ class SensitiveRoutes
         return false;
     }
 
-    /** Routes that look sensitive by URI or name yet are neither behind the gate nor allowlisted. @return list<string> */
+    /**
+     * The route's controller lives in a Finance, Health or Medical controller namespace (06-REVIEW WR-09): a route
+     * serving that data under an innocent name or URI is still found.
+     */
+    public static function inSensitiveNamespace(LaravelRoute $route): bool
+    {
+        return preg_match('/^\\\\?App\\\\Http\\\\Controllers\\\\(Finance|Health|Medical)\\\\/', $route->getActionName()) === 1;
+    }
+
+    /** Routes that look sensitive by URI, name or controller namespace yet are neither behind the gate nor allowlisted. @return list<string> */
     public static function offenders(): array
     {
         $offenders = [];
@@ -145,7 +155,8 @@ class SensitiveRoutes
             $uri = ltrim($route->uri(), '/');
             $name = (string) $route->getName();
             $looks = preg_match('#^(finance|health|medical)(/|$)#', $uri) === 1
-                || preg_match('/finance|health|medical/', $name) === 1;
+                || preg_match('/finance|health|medical/', $name) === 1
+                || self::inSensitiveNamespace($route);
             if ($looks && ! self::isSensitive($route) && ! self::allowlisted($route) && ! in_array($name, self::accessGranting(), true)) {
                 $offenders[] = $name !== '' ? $name : 'UNNAMED:'.$uri;
             }

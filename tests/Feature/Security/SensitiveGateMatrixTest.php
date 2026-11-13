@@ -228,3 +228,136 @@ it('reports a throwaway grant route that was never classified (mutation check)',
 
     expect(SensitiveRoutes::unclassifiedGrantRoutes())->toContain('settings.invitations.zz_probe');
 });
+
+// ---- WR-09: the proof replayed in every request shape the gate must hold for ---------------------------------------
+
+function inertiaHeaders(): array
+{
+    return ['HTTP_X_INERTIA' => 'true', 'HTTP_X_INERTIA_VERSION' => (string) \Inertia\Inertia::getVersion()];
+}
+
+/**
+ * Sends the route's request as `$shape` and returns [response, method used].
+ * Shapes: html, json, inertia, head (GET routes only), prefetch, plus the session state is chosen by the caller.
+ */
+function replayAs(object $test, string $name, string $shape, array $session): ?array
+{
+    $spec = EndpointMatrix::all()[$name];
+    $method = $spec['method'];
+    if ($shape === 'head' && $method !== 'GET') {
+        return null;
+    }
+    app('auth')->forgetGuards();
+    $test->flushSession();
+    $users = Roles::make();
+    $user = $users[sensitiveRole($name)];
+    [$uri, $data] = sensitiveRequest($name, $users);
+    $server = match ($shape) {
+        'json' => ['HTTP_ACCEPT' => 'application/json'],
+        'inertia' => inertiaHeaders(),
+        'prefetch' => ['HTTP_PURPOSE' => 'prefetch'],
+        default => [],
+    };
+
+    $response = $test->actingAs($user)->withSession($session)->call($shape === 'head' ? 'HEAD' : $method, $uri, $data, [], [], $server);
+
+    return [$response, $method];
+}
+
+it('refuses every sensitive route in every request shape for a missing and an expired idle timestamp, with no audit row', function () {
+    $this->freezeTime();
+    $states = [
+        'missing key' => [],
+        'expired timestamp' => ['sensitive.active_at' => now()->getTimestamp() - ((int) config('security.idle_seconds') + 1)],
+        'garbage timestamp' => ['sensitive.active_at' => 'yesterday'],
+    ];
+
+    foreach (SensitiveRoutes::all() as $name => $route) {
+        foreach ($states as $label => $session) {
+            foreach (['html', 'json', 'inertia', 'head', 'prefetch'] as $shape) {
+                $before = sensitiveAuditRows();
+                $replay = replayAs($this, $name, $shape, $session);
+                if ($replay === null) {
+                    continue;
+                }
+                [$response, $method] = $replay;
+                $ctx = "$name [$shape, $label]";
+
+                if ($shape === 'json' || $shape === 'prefetch') {
+                    expect($response->getStatusCode())->toBe(423, $ctx);
+                    expect($response->headers->get('Content-Type'))->toContain('json');
+                } else {
+                    expect($response->getStatusCode())->toBeIn([302, 303], $ctx);
+                    expect((string) $response->headers->get('Location'))->toEndWith('/confirm-access');
+                }
+                expect(sensitiveAuditRows())->toBe($before, "$ctx wrote an audit row");
+            }
+        }
+    }
+});
+
+it('never lets a passive prefetch extend or refresh the idle window', function () {
+    $this->freezeTime();
+    $name = collect(array_keys(SensitiveRoutes::all()))->first(fn ($n) => EndpointMatrix::all()[$n]['method'] === 'GET');
+    $old = now()->getTimestamp() - 100;
+
+    [$response] = replayAs($this, $name, 'prefetch', ['sensitive.active_at' => $old]);
+
+    expect($response->getStatusCode())->toBeIn([200, 302, 404, 423, 403, 303]);
+    expect(session('sensitive.active_at'))->toBe($old);
+});
+
+it('honours the idle boundary exactly on every sensitive GET route', function () {
+    $this->freezeTime();
+    $idle = (int) config('security.idle_seconds');
+
+    foreach (SensitiveRoutes::all() as $name => $route) {
+        $spec = EndpointMatrix::all()[$name];
+        if ($spec['method'] !== 'GET') {
+            continue;
+        }
+        $role = sensitiveRole($name);
+
+        [$edge] = replayAs($this, $name, 'html', ['sensitive.active_at' => now()->getTimestamp() - $idle]);
+        expect($edge->getStatusCode())->toBe($spec['expect'][$role], "$name at exactly $idle seconds");
+
+        [$over] = replayAs($this, $name, 'html', ['sensitive.active_at' => now()->getTimestamp() - $idle - 1]);
+        expect($over->getStatusCode())->toBe(302, "$name one second past the window");
+    }
+});
+
+it('lets a fresh session through on every sensitive route, GET and write alike, in the page and JSON shapes', function () {
+    foreach (SensitiveRoutes::all() as $name => $route) {
+        $spec = EndpointMatrix::all()[$name];
+        $role = sensitiveRole($name);
+
+        foreach (['html', 'json', 'inertia'] as $shape) {
+            [$response] = replayAs($this, $name, $shape, ['sensitive.active_at' => now()->getTimestamp()]);
+            $status = $response->getStatusCode();
+            expect($status)->not->toBe(423, "$name [$shape] fresh session refused");
+            if ($shape === 'html') {
+                expect($status)->toBe($spec['expect'][$role], "$name fresh html");
+            }
+            // A refusal would point at the confirm page; a real handler never does.
+            expect((string) $response->headers->get('Location'))->not->toEndWith('/confirm-access', "$name [$shape] fresh session bounced");
+        }
+    }
+});
+
+it('finds a finance, health or medical controller route behind an innocent name and URI (namespace net, mutation check)', function () {
+    Route::middleware('web')->get('/reports/zz-probe', [\App\Http\Controllers\Finance\OverviewController::class, 'index'])
+        ->middleware('access:authenticated')->name('zz.report_probe');
+
+    expect(SensitiveRoutes::offenders())->toContain('zz.report_probe');
+});
+
+it('reports no controller in a sensitive namespace outside the gate today', function () {
+    $outside = [];
+    foreach (Route::getRoutes() as $route) {
+        if (SensitiveRoutes::inSensitiveNamespace($route) && ! SensitiveRoutes::isSensitive($route)) {
+            $outside[] = (string) $route->getName();
+        }
+    }
+
+    expect($outside)->toBe([], 'Sensitive-namespace routes outside the gate: '.implode(', ', $outside));
+});
