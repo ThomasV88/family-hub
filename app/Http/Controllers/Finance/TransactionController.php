@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Finance;
 use App\Finance\FinancePage;
 use App\Finance\Queries\TransactionQuery;
 use App\Finance\Transactions\TransactionPresenter;
+use App\Finance\Transactions\TransactionWriter;
 use App\Finance\Viewer;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Finance\TransactionRequest;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -31,6 +34,54 @@ class TransactionController extends Controller
             'transactionItems' => Inertia::merge(array_map(fn ($r) => $presenter->row($r, $names), $result['rows'])),
             'panelTransaction' => $this->panel($request, $viewer, $transactions, $presenter, $names),
         ]);
+    }
+
+    public function store(TransactionRequest $request, TransactionWriter $writer): RedirectResponse
+    {
+        $viewer = Viewer::for($request->user());
+        $date = (string) $request->input('booked_on');
+        $description = $request->input('description');
+        $note = $request->input('note');
+
+        if ($request->input('kind') === 'transfer') {
+            $writer->createTransfer($viewer, $request->fromAccount(), $request->toAccount(), $request->magnitude(), $date, $description, $note);
+        } else {
+            $writer->createSingle($viewer, $request->account(), (string) $request->input('kind'), $request->magnitude(), $date, (string) $description, $request->category()?->id, $note);
+        }
+
+        return $this->done($request, 'finance.toast.tx_saved');
+    }
+
+    public function update(TransactionRequest $request, string $transaction, TransactionWriter $writer): RedirectResponse
+    {
+        $writer->update(Viewer::for($request->user()), $request->leg(), $request->counterpart(), $request->changes());
+
+        return $this->done($request, 'finance.toast.tx_saved');
+    }
+
+    public function destroy(Request $request, string $transaction, TransactionQuery $transactions, TransactionWriter $writer): RedirectResponse
+    {
+        $viewer = Viewer::for($request->user());
+        $leg = $transactions->findVisible($viewer, $transaction);
+        abort_if($leg === null, 404);
+
+        $writer->delete($viewer, $leg, $transactions->visibleCounterpart($viewer, $leg));
+
+        return $this->done($request, 'finance.toast.tx_deleted');
+    }
+
+    /** Back to the list the user came from (month, account and filters kept, panel closed). */
+    private function done(Request $request, string $toast): RedirectResponse
+    {
+        $params = [];
+        parse_str((string) parse_url((string) $request->headers->get('referer'), PHP_URL_QUERY), $query);
+        foreach (['account', 'month', 'q', 'type', 'category', 'source'] as $key) {
+            if (isset($query[$key]) && is_string($query[$key])) {
+                $params[$key] = $query[$key];
+            }
+        }
+
+        return redirect()->route('finance.transactions.index', $params, 303)->with('toast', ['key' => $toast]);
     }
 
     /** @return array{q: string, type: string, category: string, source: string} */

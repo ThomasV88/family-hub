@@ -143,3 +143,168 @@ it('carries the membership subquery in every statement of the list and panel req
     $touching = array_filter($statements, fn ($s) => str_contains($s, 'finance_transactions') || str_contains($s, 'finance_accounts'));
     expect($touching)->not->toBeEmpty()->and(FinancePrivacy::unscopedReads($statements))->toBe([]);
 });
+
+// ---- writes ----
+
+beforeEach(function () {
+    $this->withoutMiddleware(PreventRequestForgery::class);
+});
+
+function fhTxPost($test, User $user, array $data)
+{
+    return $test->actingAs($user)->postJson('/finance/transactions', $data);
+}
+
+it('stores an expense and an income in the account currency with exact minor units', function () {
+    [$user, $account] = fhTxSetup();
+    $expenseCat = FinanceCategory::query()->where('default_key', 'groceries')->firstOrFail();
+    $incomeCat = FinanceCategory::query()->where('default_key', 'salary')->firstOrFail();
+
+    $this->actingAs($user)->post('/finance/transactions', [
+        'kind' => 'expense', 'amount' => '12,34', 'booked_on' => '2026-03-05', 'description' => 'Milk',
+        'category_id' => $expenseCat->id, 'account_id' => $account->id, 'note' => 'fresh',
+    ])->assertStatus(303)->assertSessionHas('toast.key', 'finance.toast.tx_saved');
+    $this->actingAs($user)->post('/finance/transactions', [
+        'kind' => 'income', 'amount' => '1000', 'booked_on' => '2026-03-06', 'description' => 'Pay',
+        'category_id' => $incomeCat->id, 'account_id' => $account->id,
+    ])->assertStatus(303);
+
+    $rows = FinanceTransaction::query()->orderBy('booked_on')->get();
+    expect($rows)->toHaveCount(2)
+        ->and($rows[0]->amount_minor)->toBe(-1234)
+        ->and($rows[0]->kind)->toBe('expense')
+        ->and($rows[0]->currency)->toBe('EUR')
+        ->and($rows[0]->source)->toBe('manual')
+        ->and($rows[0]->created_by)->toBe($user->id)
+        ->and($rows[0]->edited_at)->toBeNull()
+        ->and($rows[0]->note)->toBe('fresh')
+        ->and($rows[1]->amount_minor)->toBe(100000);
+});
+
+it('creates two linked legs for a transfer and rejects bad transfers', function () {
+    [$user, $a] = fhTxSetup();
+    $b = FinanceAccount::factory()->withMembers($user)->create();
+    $usd = FinanceAccount::factory()->withMembers($user)->create(['currency' => 'USD']);
+
+    fhTxPost($this, $user, ['kind' => 'transfer', 'from_account_id' => $a->id, 'to_account_id' => $b->id, 'amount' => '25', 'booked_on' => '2026-03-05', 'description' => 'Move'])
+        ->assertRedirect();
+    $legs = FinanceTransaction::query()->orderBy('amount_minor')->get();
+    expect($legs)->toHaveCount(2)
+        ->and($legs[0]->amount_minor)->toBe(-2500)->and($legs[0]->account_id)->toBe($a->id)
+        ->and($legs[1]->amount_minor)->toBe(2500)->and($legs[1]->account_id)->toBe($b->id)
+        ->and($legs[0]->transfer_id)->not->toBeNull()->and($legs[0]->transfer_id)->toBe($legs[1]->transfer_id);
+
+    fhTxPost($this, $user, ['kind' => 'transfer', 'from_account_id' => $a->id, 'to_account_id' => $a->id, 'amount' => '5', 'booked_on' => '2026-03-05'])
+        ->assertJsonValidationErrors(['to_account_id' => 'finance.error.transfer_same']);
+    fhTxPost($this, $user, ['kind' => 'transfer', 'from_account_id' => $a->id, 'to_account_id' => $usd->id, 'amount' => '5', 'booked_on' => '2026-03-05'])
+        ->assertJsonValidationErrors(['to_account_id' => 'finance.error.transfer_currency']);
+    expect(FinanceTransaction::query()->count())->toBe(2);
+});
+
+it('answers a hidden account like a nonexistent one and validates the other fields', function () {
+    [$user, $account] = fhTxSetup();
+    $other = User::factory()->withPreset(Preset::Parent)->create();
+    $hidden = FinanceAccount::factory()->withMembers($other)->create();
+    $base = ['kind' => 'expense', 'amount' => '5', 'booked_on' => '2026-03-05', 'description' => 'x'];
+
+    $hiddenBody = fhTxPost($this, $user, $base + ['account_id' => $hidden->id]);
+    $randomBody = fhTxPost($this, $user, $base + ['account_id' => (string) Str::uuid7()]);
+    $hiddenBody->assertStatus(422)->assertJsonValidationErrors(['account_id' => 'finance.error.account']);
+    expect($hiddenBody->getContent())->toBe($randomBody->getContent());
+
+    $incomeCat = FinanceCategory::query()->where('default_key', 'salary')->firstOrFail();
+    $post = fn (array $override) => fhTxPost($this, $user, array_merge($base, ['account_id' => $account->id], $override));
+
+    $post(['category_id' => $incomeCat->id])->assertJsonValidationErrors(['category_id' => 'finance.error.category']);
+    $post(['category_id' => (string) Str::uuid7()])->assertJsonValidationErrors(['category_id' => 'finance.error.category']);
+    foreach (['0,001', '0', 'abc', '-5', '1,2,3'] as $amount) {
+        $post(['amount' => $amount])->assertJsonValidationErrors(['amount' => 'finance.error.amount']);
+    }
+    $post(['booked_on' => '2019-12-31'])->assertJsonValidationErrors(['booked_on' => 'finance.error.date_before_open']);
+    $post(['booked_on' => '2026-02-30'])->assertJsonValidationErrors(['booked_on' => 'finance.error.date']);
+    $post(['description' => ''])->assertJsonValidationErrors(['description' => 'finance.error.description']);
+    expect(FinanceTransaction::query()->count())->toBe(0);
+});
+
+it('forbids writes for view-only users and gives 404 for transactions of accounts the editor cannot see', function () {
+    [$user, $account] = fhTxSetup();
+    $viewOnly = User::factory()->withGrant(Module::Finance, AccessLevel::View)->create();
+    $other = User::factory()->withPreset(Preset::Parent)->create();
+    $hiddenAccount = FinanceAccount::factory()->withMembers($other)->create();
+    $hiddenTx = FinanceTransaction::factory()->onAccount($hiddenAccount)->expense(500)->create(['booked_on' => '2026-03-05']);
+    $own = FinanceTransaction::factory()->onAccount($account)->expense(500)->create(['booked_on' => '2026-03-05']);
+
+    fhTxPost($this, $viewOnly, ['kind' => 'expense'])->assertForbidden();
+    $this->actingAs($viewOnly)->patchJson('/finance/transactions/'.$own->id, ['amount' => '1'])->assertForbidden();
+    $this->actingAs($viewOnly)->deleteJson('/finance/transactions/'.$own->id)->assertForbidden();
+
+    $this->actingAs($user)->patchJson('/finance/transactions/'.$hiddenTx->id, ['amount' => '1'])->assertNotFound();
+    $this->actingAs($user)->deleteJson('/finance/transactions/'.$hiddenTx->id)->assertNotFound();
+    $this->actingAs($user)->patchJson('/finance/transactions/'.Str::uuid7(), ['amount' => '1'])->assertNotFound();
+    expect($hiddenTx->fresh()->amount_minor)->toBe(-500)->and(FinanceTransaction::query()->count())->toBe(2);
+});
+
+it('edits a transaction and stamps edited_at only on changed legs', function () {
+    [$user, $account] = fhTxSetup();
+    $cat = FinanceCategory::query()->where('default_key', 'groceries')->firstOrFail();
+    $tx = FinanceTransaction::factory()->onAccount($account)->expense(500)->create(['booked_on' => '2026-03-05', 'description' => 'Old']);
+
+    $this->actingAs($user)->patchJson('/finance/transactions/'.$tx->id, ['amount' => '1,00', 'booked_on' => '2026-03-09', 'description' => 'New', 'category_id' => $cat->id, 'note' => 'n'])
+        ->assertRedirect();
+    $tx->refresh();
+    expect($tx->amount_minor)->toBe(-100)->and($tx->booked_on->format('Y-m-d'))->toBe('2026-03-09')
+        ->and($tx->description)->toBe('New')->and($tx->category_id)->toBe($cat->id)->and($tx->note)->toBe('n')
+        ->and($tx->edited_at)->not->toBeNull();
+
+    $untouched = FinanceTransaction::factory()->onAccount($account)->expense(500)->create(['booked_on' => '2026-03-05', 'description' => 'Same']);
+    $this->actingAs($user)->patchJson('/finance/transactions/'.$untouched->id, ['amount' => '5,00', 'description' => 'Same'])->assertRedirect();
+    expect($untouched->fresh()->edited_at)->toBeNull();
+});
+
+it('propagates amount, date and description across a fully visible transfer, keeping note and category per leg', function () {
+    [$user, $a] = fhTxSetup();
+    $b = FinanceAccount::factory()->withMembers($user)->create();
+    fhTxPost($this, $user, ['kind' => 'transfer', 'from_account_id' => $a->id, 'to_account_id' => $b->id, 'amount' => '25', 'booked_on' => '2026-03-05', 'description' => 'Move', 'note' => 'from note']);
+    $out = FinanceTransaction::query()->where('amount_minor', '<', 0)->firstOrFail();
+
+    $this->actingAs($user)->patchJson('/finance/transactions/'.$out->id, ['amount' => '40,50', 'booked_on' => '2026-03-12', 'description' => 'Moved', 'note' => 'changed'])->assertRedirect();
+
+    $legs = FinanceTransaction::query()->orderBy('amount_minor')->get();
+    expect($legs[0]->amount_minor)->toBe(-4050)->and($legs[1]->amount_minor)->toBe(4050)
+        ->and($legs[0]->booked_on->format('Y-m-d'))->toBe('2026-03-12')->and($legs[1]->booked_on->format('Y-m-d'))->toBe('2026-03-12')
+        ->and($legs[1]->description)->toBe('Moved')
+        ->and($legs[0]->note)->toBe('changed')->and($legs[1]->note)->toBeNull()
+        ->and($legs[0]->edited_at)->not->toBeNull()->and($legs[1]->edited_at)->not->toBeNull();
+
+    // Deleting either leg of a fully visible transfer deletes both.
+    $this->actingAs($user)->delete('/finance/transactions/'.$legs[1]->id)->assertStatus(303)->assertSessionHas('toast.key', 'finance.toast.tx_deleted');
+    expect(FinanceTransaction::query()->count())->toBe(0);
+});
+
+it('rejects account and kind changes on PATCH with one message, whatever the value', function () {
+    [$user, $account] = fhTxSetup();
+    $other = User::factory()->withPreset(Preset::Parent)->create();
+    $hidden = FinanceAccount::factory()->withMembers($other)->create();
+    $tx = FinanceTransaction::factory()->onAccount($account)->expense(500)->create(['booked_on' => '2026-03-05']);
+
+    foreach (['account_id', 'kind', 'from_account_id', 'to_account_id'] as $key) {
+        $bodies = [];
+        foreach ([$account->id, $hidden->id, (string) Str::uuid7(), 'income'] as $value) {
+            $response = $this->actingAs($user)->patchJson('/finance/transactions/'.$tx->id, [$key => $value, 'amount' => '9']);
+            $response->assertStatus(422)->assertJsonValidationErrors([$key => 'finance.error.immutable']);
+            $bodies[] = $response->getContent();
+        }
+        expect(array_unique($bodies))->toHaveCount(1);
+    }
+    $fresh = $tx->fresh();
+    expect($fresh->account_id)->toBe($account->id)->and($fresh->amount_minor)->toBe(-500)->and($fresh->kind)->toBe('expense');
+});
+
+it('deletes a transaction', function () {
+    [$user, $account] = fhTxSetup();
+    $tx = FinanceTransaction::factory()->onAccount($account)->expense(500)->create(['booked_on' => '2026-03-05']);
+
+    $this->actingAs($user)->delete('/finance/transactions/'.$tx->id, [], ['Referer' => 'http://localhost/finance/transactions?month=2026-03&account='.$account->id.'&tx='.$tx->id])
+        ->assertRedirect(route('finance.transactions.index', ['account' => $account->id, 'month' => '2026-03']));
+    expect(FinanceTransaction::query()->count())->toBe(0);
+});

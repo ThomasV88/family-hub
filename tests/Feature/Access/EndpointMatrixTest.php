@@ -74,7 +74,11 @@ it('enforces the expected status per role', function (string $name) {
         }
 
         $request = $users[$role] ? $this->actingAs($users[$role]) : $this;
-        $response = $request->call($spec['method'], $uri, $spec['data'] ?? []);
+        $data = $spec['data'] ?? [];
+        if ($data instanceof Closure) {
+            $data = $data($users, $params);
+        }
+        $response = $request->call($spec['method'], $uri, $data);
 
         expect($response->getStatusCode())->toBe($spec['expect'][$role], "$name as $role");
     }
