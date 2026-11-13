@@ -70,7 +70,7 @@ after=$(restic_r snapshots --json | python3 -c 'import json,sys; print(len(json.
 [ "$before" = "$after" ] || fail "snapshot created despite pg_dump failure ($before -> $after)"
 
 # 6. restore drill
-out=$(DRILL_CHECK_TABLE=backup_test_marker bash scripts/restore-drill.sh) || fail "restore drill failed"
+out=$(DRILL_TAG=manual DRILL_CHECK_TABLE=backup_test_marker bash scripts/restore-drill.sh) || fail "restore drill failed"
 echo "$out" | grep -q '^RESTORE-DRILL OK tables=' || fail "drill output unexpected: $out"
 live_tables=$(psql_live "select count(*) from information_schema.tables where table_schema='public'")
 echo "$out" | grep -q "tables=$live_tables " || fail "table count mismatch: $out vs $live_tables"
@@ -79,12 +79,17 @@ echo "$out" | grep -q "tables=$live_tables " || fail "table count mismatch: $out
 
 # 7. stale scratch DB from a crashed run is dropped first
 dc exec -T postgres psql -U postgres -d postgres -qc "create database family_hub_restore_test owner fh_owner" >/dev/null
-DRILL_CHECK_TABLE=backup_test_marker bash scripts/restore-drill.sh | grep -q '^RESTORE-DRILL OK' \
+DRILL_TAG=manual DRILL_CHECK_TABLE=backup_test_marker bash scripts/restore-drill.sh | grep -q '^RESTORE-DRILL OK' \
   || fail "drill did not recover from stale scratch DB"
 
 # 8. drill refuses the live database name
 if DRILL_DB="$DB_NAME" bash scripts/restore-drill.sh >/dev/null 2>&1; then
   fail "drill accepted the live DB as target"
+fi
+
+# 8b. drill refuses a target name that is not a *_restore_test scratch name
+if DRILL_DB="postgres" bash scripts/restore-drill.sh >/dev/null 2>&1; then
+  fail "drill accepted an arbitrary DRILL_DB"
 fi
 
 # 9. freshness: only nightly snapshots count, a newer manual snapshot must not mask a missing nightly
@@ -98,6 +103,8 @@ grep -q 'BACKUP STALE' "$ALERT_LOG" || fail "alert hook was not called on stale"
 rm -f "$ALERT_LOG" "$ALERT_LOG.sh"
 bash scripts/backup.sh nightly >/dev/null || fail "backup.sh nightly failed"
 bash scripts/backup-freshness.sh >/dev/null || fail "freshness failed right after nightly backup"
+DRILL_CHECK_TABLE=backup_test_marker bash scripts/restore-drill.sh | grep -q '^RESTORE-DRILL OK' \
+  || fail "default drill (nightly snapshot) failed"
 if bash scripts/backup-freshness.sh 0 >/dev/null 2>&1; then
   fail "freshness with max_hours=0 should fail"
 fi
