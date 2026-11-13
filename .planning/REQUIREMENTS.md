@@ -21,8 +21,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **AUTH-02**: User can sign in with email and password
 - [x] **AUTH-03**: User can sign in with Google, linked to their account by verified Google identity
 - [ ] **AUTH-04**: User session persists across browser refresh, and an admin can revoke a member's sessions
-- [ ] **AUTH-05**: Admin can set per-member, per-module access (no access / view / edit)
-- [ ] **AUTH-06**: Admin can apply permission presets (Parent, Child, Grandparent, Guest) and then adjust them
+- [x] **AUTH-05**: Admin can set per-member, per-module access (no access / view / edit)
+- [x] **AUTH-06**: Admin can apply permission presets (Parent, Child, Grandparent, Guest) and then adjust them
 - [x] **AUTH-07**: All permission checks are enforced server-side by one deny-by-default policy layer, covered by a role-by-endpoint automated test matrix
 - [ ] **AUTH-08**: Access to and changes of sensitive data (medical, finance) are recorded in an audit log that admins can view
 - [ ] **AUTH-09**: User can enable TOTP or passkey as a second factor
@@ -132,8 +132,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-02 | Phase 2 | Complete |
 | AUTH-03 | Phase 2 | Complete |
 | AUTH-04 | Phase 2 | Pending |
-| AUTH-05 | Phase 2 | Pending |
-| AUTH-06 | Phase 2 | Pending |
+| AUTH-05 | Phase 2 | Complete |
+| AUTH-06 | Phase 2 | Complete |
 | AUTH-07 | Phase 2 | Complete |
 | AUTH-08 | Phase 2 | Pending |
 | TODO-01 | Phase 3 | Pending |
