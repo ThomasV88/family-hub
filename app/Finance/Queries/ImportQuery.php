@@ -178,6 +178,159 @@ class ImportQuery
             ->get()->all();
     }
 
+    /**
+     * The batch row locked for the rest of the transaction when it is in the given status on a visible account (and,
+     * for a draft, created by the viewer); null otherwise.
+     */
+    public function lockBatch(Viewer $viewer, string $batchId, string $status): ?object
+    {
+        $query = Visibility::apply(
+            DB::table('finance_import_batches')->where('id', $batchId)->where('status', $status),
+            $viewer
+        );
+        if ($status === 'draft') {
+            $query->where('user_id', $viewer->userId());
+        }
+
+        return $query->lockForUpdate()->select(['id', 'account_id', 'status'])->first();
+    }
+
+    /** @return list<object> every staged row of a visible batch with the data a commit needs */
+    public function stagedRows(Viewer $viewer, string $batchId): array
+    {
+        return Visibility::apply(
+            DB::table('finance_import_rows as r')
+                ->join('finance_import_batches as b', 'b.id', '=', 'r.batch_id')
+                ->where('r.batch_id', $batchId),
+            $viewer,
+            'b.account_id'
+        )->orderBy('r.row_no')->orderBy('r.id')->select([
+            'r.id', 'r.row_no', 'r.booked_on', 'r.amount_minor', 'r.kind', 'r.description', 'r.import_hash', 'r.state',
+            'r.probable_transaction_id',
+        ])->get()->all();
+    }
+
+    /**
+     * Inserts the chosen staged rows as transactions of the batch's own account. Conditional on the batch being the
+     * viewer's draft on an account the viewer belongs to. A hash already booked on the account is skipped by
+     * ON CONFLICT DO NOTHING, so a repeated or concurrent commit adds nothing twice.
+     *
+     * @param  list<array{tx_id: string, row_id: string, import_hash: ?string, category_id: ?string}>  $picked
+     * @return list<string> ids of the transactions that were actually inserted
+     */
+    public function commitRows(Viewer $viewer, string $batchId, array $picked): array
+    {
+        $now = now();
+        $ids = [];
+        foreach (array_chunk($picked, self::INSERT_CHUNK) as $chunk) {
+            $rows = DB::select(
+                'insert into finance_transactions (id, account_id, currency, kind, amount_minor, booked_on, description, category_id, source, import_batch_id, import_hash, created_by, created_at, updated_at) '
+                ."select x.tx_id, b.account_id, a.currency, r.kind, r.amount_minor, r.booked_on, nullif(left(r.description, 160), ''), x.category_id, 'import', b.id, x.import_hash, ?::bigint, ?::timestamptz, ?::timestamptz "
+                .'from jsonb_to_recordset(?::jsonb) as x(tx_id uuid, row_id uuid, import_hash text, category_id uuid) '
+                .'join finance_import_rows r on r.id = x.row_id and r.batch_id = ?::uuid '
+                .'join finance_import_batches b on b.id = r.batch_id '
+                .'join finance_accounts a on a.id = b.account_id '
+                ."where b.status = 'draft' and b.user_id = ? and r.state <> 'invalid' "
+                .'and b.account_id in (select account_id from finance_account_members where user_id = ?) '
+                .'on conflict (account_id, import_hash) where import_hash is not null do nothing returning id',
+                [$viewer->userId(), $now, $now, json_encode($chunk, JSON_THROW_ON_ERROR), $batchId, $viewer->userId(), $viewer->userId()]
+            );
+            foreach ($rows as $row) {
+                $ids[] = (string) $row->id;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Stamps a still hand-entered transaction with the hash of the bank row it duplicates, so a later import of the same
+     * statement dedupes exactly. Skipped when the hash is already booked on the account.
+     */
+    public function reconcile(Viewer $viewer, string $accountId, string $batchId, string $transactionId, string $hash): int
+    {
+        return Visibility::apply(
+            DB::table('finance_transactions as t')
+                ->where('t.id', $transactionId)
+                ->where('t.account_id', $accountId)
+                ->where('t.source', 'manual')
+                ->whereNull('t.import_hash')
+                ->whereNotExists(fn ($q) => $q->select(DB::raw('1'))->from('finance_transactions as o')
+                    ->whereColumn('o.account_id', 't.account_id')->where('o.import_hash', $hash)),
+            $viewer,
+            't.account_id'
+        )->update(['import_hash' => $hash, 'reconciled_batch_id' => $batchId]);
+    }
+
+    /** Drops the staged rows of a batch: after a commit only the counts remain. */
+    public function deleteStagedRows(Viewer $viewer, string $batchId): int
+    {
+        return DB::table('finance_import_rows')
+            ->whereIn('batch_id', Visibility::apply(DB::table('finance_import_batches')->where('id', $batchId), $viewer)->select('id'))
+            ->delete();
+    }
+
+    public function markCommitted(Viewer $viewer, string $batchId, int $added, int $matched): int
+    {
+        return Visibility::apply(
+            DB::table('finance_import_batches')->where('id', $batchId)->where('status', 'draft')->where('user_id', $viewer->userId()),
+            $viewer
+        )->update(['status' => 'committed', 'added_count' => $added, 'matched_count' => $matched, 'committed_at' => now(), 'updated_at' => now()]);
+    }
+
+    /** Deletes the viewer's own draft (its staged rows cascade). */
+    public function deleteDraft(Viewer $viewer, string $batchId): int
+    {
+        return Visibility::apply(
+            DB::table('finance_import_batches')->where('id', $batchId)->where('status', 'draft')->where('user_id', $viewer->userId()),
+            $viewer
+        )->delete();
+    }
+
+    /** Deletes the batch's transactions the family never edited (and that are no transfer leg); their matches cascade. */
+    public function deletePristine(Viewer $viewer, string $batchId): int
+    {
+        return Visibility::apply(
+            DB::table('finance_transactions')->where('import_batch_id', $batchId)->whereNull('edited_at')->whereNull('transfer_id'),
+            $viewer
+        )->delete();
+    }
+
+    /** Detaches what is left of the batch (edited rows, transfer legs) so it stays as an ordinary transaction. */
+    public function detachRemaining(Viewer $viewer, string $batchId): int
+    {
+        return Visibility::apply(
+            DB::table('finance_transactions')->where('import_batch_id', $batchId),
+            $viewer
+        )->update(['import_batch_id' => null]);
+    }
+
+    /** Frees the hash of hand-entered transactions this batch had reconciled. */
+    public function revertReconciled(Viewer $viewer, string $batchId): int
+    {
+        return Visibility::apply(
+            DB::table('finance_transactions')->where('reconciled_batch_id', $batchId),
+            $viewer
+        )->update(['import_hash' => null, 'reconciled_batch_id' => null]);
+    }
+
+    public function markUndone(Viewer $viewer, string $batchId, int $kept): int
+    {
+        return Visibility::apply(
+            DB::table('finance_import_batches')->where('id', $batchId)->where('status', 'committed'),
+            $viewer
+        )->update(['status' => 'undone', 'undone_at' => now(), 'kept_count' => $kept, 'updated_at' => now()]);
+    }
+
+    /**
+     * Unscoped write: the scheduler has no viewer. Removes draft batches (staged rows cascade) created before the cutoff;
+     * committed and undone batches and every transaction are untouched.
+     */
+    public function pruneDrafts(\DateTimeInterface $cutoff): int
+    {
+        return DB::table('finance_import_batches')->where('status', 'draft')->where('created_at', '<', $cutoff)->delete();
+    }
+
     /** @return list<FinanceImportProfile> family-wide saved profiles, by name */
     public function profiles(): array
     {

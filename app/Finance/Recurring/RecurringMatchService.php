@@ -151,9 +151,11 @@ class RecurringMatchService
     }
 
     /**
-     * @param  list<string>|null  $onlyTransactionIds  candidates restricted to these ids (null = every unmatched one)
+     * Open (unmatched, inside their window) occurrences of one account's visible recurring items.
+     *
+     * @return array{0: array<string, object>, 1: list<Occurrence>} items by id, open occurrences
      */
-    private function matchAccount(Viewer $viewer, string $accountId, ?array $onlyTransactionIds, ?string $onlyRecurringId): int
+    private function openOccurrences(Viewer $viewer, string $accountId, ?string $onlyRecurringId): array
     {
         $today = now((string) config('family.timezone'))->toDateString();
         $from = $this->shift($today, -(int) config('finance.recurring.overdue_lookback_days', 45));
@@ -165,7 +167,7 @@ class RecurringMatchService
             }
         }
         if ($items === []) {
-            return 0;
+            return [[], []];
         }
 
         $open = [];
@@ -176,6 +178,56 @@ class RecurringMatchService
             }
             $open[] = $this->occurrence($item, $occ['dueDate'], (int) $item->expected_amount_minor);
         }
+
+        return [$items, $open];
+    }
+
+    /**
+     * Which recurring item each staged import row would auto-match. Read-only: nothing is written.
+     *
+     * @param  list<object>  $rows  staged rows with id, booked_on, amount_minor, kind, description, state
+     * @return array<string, string> row id => recurring item name
+     */
+    public function previewMatches(Viewer $viewer, string $accountId, array $rows): array
+    {
+        [$items, $open] = $this->openOccurrences($viewer, $accountId, null);
+        if ($open === []) {
+            return [];
+        }
+
+        $candidates = [];
+        foreach ($rows as $row) {
+            if ($row->state !== 'new' || $row->amount_minor === null || (int) $row->amount_minor >= 0 || $row->kind !== 'expense') {
+                continue;
+            }
+            $candidates[] = new MatchCandidate(
+                (string) $row->id,
+                $accountId,
+                substr((string) $row->booked_on, 0, 10),
+                (int) $row->amount_minor,
+                'expense',
+                TextNormalizer::normalize((string) ($row->description ?? '')),
+            );
+        }
+        if ($candidates === []) {
+            return [];
+        }
+
+        $names = [];
+        foreach ($this->matcher->assign($open, $candidates, []) as $pair) {
+            [$recurringId] = explode('.', $pair['occurrence'], 2);
+            $names[$pair['transaction']] = (string) $items[$recurringId]->name;
+        }
+
+        return $names;
+    }
+
+    /**
+     * @param  list<string>|null  $onlyTransactionIds  candidates restricted to these ids (null = every unmatched one)
+     */
+    private function matchAccount(Viewer $viewer, string $accountId, ?array $onlyTransactionIds, ?string $onlyRecurringId): int
+    {
+        [$items, $open] = $this->openOccurrences($viewer, $accountId, $onlyRecurringId);
         if ($open === []) {
             return 0;
         }

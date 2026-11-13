@@ -2,6 +2,7 @@
 
 use App\Models\FinanceAccount;
 use App\Models\FinanceImportBatch;
+use App\Models\FinanceImportRow;
 use Illuminate\Http\UploadedFile;
 
 $skFixture = fn (): UploadedFile => UploadedFile::fake()->createWithContent(
@@ -62,6 +63,48 @@ return [
         ],
         'expect' => [
             'guest' => 302, 'admin' => 403, 'parent' => 200, 'child' => 403,
+            'grandparent' => 403, 'guestPreset' => 403, 'noGrants' => 403,
+        ],
+    ],
+    'finance.import.commit' => [
+        'method' => 'POST',
+        'uri' => '/finance/import/{batch}/commit',
+        'params' => fn (array $users): array => [
+            'batch' => FinanceImportBatch::factory()
+                ->forAccount(FinanceAccount::factory()->withMembers($users['parent'])->create(), $users['parent'])
+                ->withRows(2, 'Matrix commit row')->create()->id,
+        ],
+        'data' => fn (array $users, array $params): array => [
+            'include' => FinanceImportRow::query()->where('batch_id', $params['batch'])->pluck('id')->all(),
+        ],
+        'expect' => [
+            'guest' => 302, 'admin' => 403, 'parent' => 303, 'child' => 403,
+            'grandparent' => 403, 'guestPreset' => 403, 'noGrants' => 403,
+        ],
+    ],
+    'finance.import.undo' => [
+        'method' => 'POST',
+        'uri' => '/finance/import/{batch}/undo',
+        'params' => fn (array $users): array => [
+            'batch' => FinanceImportBatch::factory()
+                ->forAccount(FinanceAccount::factory()->withMembers($users['parent'])->create(), $users['parent'])
+                ->committed()->create()->id,
+        ],
+        'expect' => [
+            'guest' => 302, 'admin' => 403, 'parent' => 303, 'child' => 403,
+            'grandparent' => 403, 'guestPreset' => 403, 'noGrants' => 403,
+        ],
+    ],
+    'finance.import.discard' => [
+        'method' => 'DELETE',
+        'uri' => '/finance/import/{batch}',
+        'params' => fn (array $users): array => [
+            'batch' => FinanceImportBatch::factory()
+                ->forAccount(FinanceAccount::factory()->withMembers($users['parent'])->create(), $users['parent'])
+                ->withRows(1, 'Matrix discard row')->create()->id,
+        ],
+        'expect' => [
+            'guest' => 302, 'admin' => 403, 'parent' => 303, 'child' => 403,
             'grandparent' => 403, 'guestPreset' => 403, 'noGrants' => 403,
         ],
     ],

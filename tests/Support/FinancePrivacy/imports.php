@@ -28,4 +28,8 @@ return [
     'hiddenParams' => [
         'batch' => fn (array $ctx): string => $ctx['hidden']['importDraft'],
     ],
+
+    'payloads' => [
+        'finance.import.commit' => fn (array $ctx): array => ['include' => []],
+    ],
 ];

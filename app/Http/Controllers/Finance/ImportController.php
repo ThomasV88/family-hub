@@ -5,13 +5,17 @@ namespace App\Http\Controllers\Finance;
 use App\Finance\FinancePage;
 use App\Finance\Import\CsvReader;
 use App\Finance\Import\Decoder;
+use App\Finance\Import\ImportCommitter;
 use App\Finance\Import\ImportError;
 use App\Finance\Import\ImportStager;
+use App\Finance\Import\ImportUndo;
 use App\Finance\Import\ProfileSpec;
 use App\Finance\Queries\AccountQuery;
 use App\Finance\Queries\ImportQuery;
+use App\Finance\Recurring\RecurringMatchService;
 use App\Finance\Viewer;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Finance\ImportCommitRequest;
 use App\Http\Requests\Finance\ImportPreviewRequest;
 use App\Http\Requests\Finance\ImportUploadRequest;
 use Carbon\CarbonImmutable;
@@ -20,6 +24,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 /**
@@ -52,6 +57,7 @@ class ImportController extends Controller
                     'accountName' => $b->account_name,
                     'addedCount' => (int) $b->added_count,
                     'status' => $b->status,
+                    'canUndo' => $b->status === 'committed' && $viewer->canEdit(),
                 ], $imports->history($viewer)),
                 'limits' => [
                     'maxBytes' => (int) config('finance.import.max_bytes'),
@@ -125,7 +131,7 @@ class ImportController extends Controller
         return redirect()->route('finance.import.show', ['batch' => $batchId], 303);
     }
 
-    public function show(Request $request, string $batch, ImportQuery $imports): Response
+    public function show(Request $request, string $batch, ImportQuery $imports, RecurringMatchService $matching): Response
     {
         $viewer = Viewer::for($request->user());
         $found = $imports->findBatchForViewer($viewer, $batch);
@@ -134,6 +140,8 @@ class ImportController extends Controller
         $draft = $found->status === 'draft';
         $rows = [];
         if ($draft) {
+            $staged = $imports->batchRows($viewer, (string) $found->id);
+            $matchNames = $matching->previewMatches($viewer, (string) $found->account_id, $staged);
             $rows = array_map(fn ($r) => [
                 'id' => $r->id,
                 'rowNo' => (int) $r->row_no,
@@ -150,8 +158,8 @@ class ImportController extends Controller
                     'bookedOn' => $r->probable_booked_on,
                     'amountMinor' => (string) $r->probable_amount_minor,
                 ],
-                'matchName' => null,
-            ], $imports->batchRows($viewer, (string) $found->id));
+                'matchName' => $matchNames[(string) $r->id] ?? null,
+            ], $staged);
         }
 
         return Inertia::render('Finance/ImportBatch', [
@@ -171,6 +179,42 @@ class ImportController extends Controller
                 ],
             ],
         ]);
+    }
+
+    public function commit(ImportCommitRequest $request, ImportCommitter $committer): RedirectResponse
+    {
+        $viewer = Viewer::for($request->user());
+        $committer->commit($viewer, $request->batchId(), $request->included(), $request->categories());
+
+        return redirect()->route('finance.import.show', ['batch' => $request->batchId()], 303);
+    }
+
+    public function undo(Request $request, string $batch, ImportQuery $imports, ImportUndo $undo): RedirectResponse
+    {
+        $viewer = Viewer::for($request->user());
+        $found = $imports->findBatchForViewer($viewer, $batch);
+        abort_if($found === null || $found->status === 'draft', 404);
+        $back = redirect()->back(303, [], route('finance.import.show', ['batch' => $found->id]));
+        if ($found->status === 'undone') {
+            return $back;
+        }
+
+        $result = $undo->undo($viewer, (string) $found->id);
+        abort_if($result === null, 404);
+        $back->with('toast', ['key' => 'finance.toast.imp_undone']);
+        if ($result['kept'] > 0) {
+            $back->with('toast_kept', ['key' => 'finance.toast.imp_undone_kept', 'kept' => $result['kept'], 'params' => ['n' => $result['kept']]]);
+        }
+
+        return $back;
+    }
+
+    public function discard(Request $request, string $batch, ImportQuery $imports): RedirectResponse
+    {
+        $viewer = Viewer::for($request->user());
+        abort_if(! Str::isUuid($batch) || $imports->deleteDraft($viewer, $batch) === 0, 404);
+
+        return redirect()->route('finance.import.index', [], 303);
     }
 
     /** The upload is read once into memory; it is never stored or moved. */
