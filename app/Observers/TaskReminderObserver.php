@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Task;
 use App\Tasks\ReminderTimeCalculator;
 use App\Tasks\TaskStatus;
+use Carbon\CarbonImmutable;
 use InvalidArgumentException;
 
 /** Keeps tasks.remind_at (UTC) in step with the fields that decide it. */
@@ -30,7 +31,7 @@ class TaskReminderObserver
         $task->remind_at = $this->compute($task);
     }
 
-    private function compute(Task $task): ?\Carbon\CarbonImmutable
+    private function compute(Task $task): ?CarbonImmutable
     {
         if ($task->status === TaskStatus::Done || $task->completed_at !== null || $task->skipped_at !== null) {
             return null;
