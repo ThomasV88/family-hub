@@ -79,3 +79,30 @@ it('treats an empty nameday object as a no-op instead of a 500', function () {
     }
     expect(\App\Models\WishOccasion::query()->whereKey($existing->id)->exists())->toBeTrue();
 });
+
+it('applies list visibility to the image route with a uniform 404', function () {
+    $owner = User::factory()->withPreset(Preset::Child)->create();
+    $giver = User::factory()->withPreset(Preset::Parent)->create();
+    $wish = Wish::factory()->create([
+        'owner_id' => $owner->id, 'image_status' => 'ready', 'image_source' => 'uploaded',
+        'image_path' => 'wish-images/5/a-full.jpg', 'thumb_path' => 'wish-images/5/a-thumb.jpg',
+    ]);
+    Storage::disk('local')->put('wish-images/5/a-thumb.jpg', 'jpg');
+    $url = "/wishlist/wishes/{$wish->id}/image/thumb";
+
+    $this->actingAs($giver)->get($url)->assertOk();
+    $this->actingAs($owner)->get($url)->assertOk();
+
+    // Received wishes: recipient-side only.
+    $wish->forceFill(['received_at' => now()])->save();
+    $this->actingAs($giver)->get($url)->assertNotFound();
+    $this->actingAs($owner)->get($url)->assertOk();
+    $wish->forceFill(['received_at' => null])->save();
+
+    // Owner lost wishlist access: their list is gone for everyone else.
+    \App\Models\ModulePermission::query()->where('user_id', $owner->id)->where('module', 'wishlist')->delete();
+    $this->actingAs($giver)->get($url)->assertNotFound();
+
+    // Unknown id looks the same as a hidden wish.
+    $this->actingAs($giver)->get('/wishlist/wishes/999999/image/thumb')->assertNotFound();
+});

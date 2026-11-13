@@ -10,7 +10,9 @@ use App\Wishlist\Catalog\ImageProcessor;
 use App\Wishlist\Catalog\ImageRejected;
 use App\Wishlist\Catalog\WishImageStore;
 use App\Wishlist\Catalog\WishImageWriteFailed;
+use App\Wishlist\ViewerContext;
 use App\Wishlist\WishAccess;
+use App\Wishlist\WishlistMembers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -20,9 +22,15 @@ use Illuminate\Validation\ValidationException;
 class WishImageController extends Controller
 {
     /** Streams a private file. Revalidated on every view (no-cache + ETag), so access is re-checked each time. */
-    public function show(Request $request, int $wish, string $variant): Response
+    public function show(Request $request, int $wish, string $variant, WishlistMembers $members): Response
     {
-        $model = Wish::query()->findOrFail($wish);
+        $model = Wish::query()->find($wish);
+        // Same visibility as the list: owner must be a visible list for this viewer, and received wishes are
+        // recipient-side only. Every refusal is the same 404 as an unknown id or a missing image.
+        $viewer = $request->user();
+        abort_if($model === null
+            || ! in_array($model->owner_id, $members->ids($viewer), true)
+            || ($model->received_at !== null && ! ViewerContext::for($viewer)->isRecipientSideOf($model->owner_id)), 404);
         $path = $variant === 'thumb' ? $model->thumb_path : ($variant === 'full' ? $model->image_path : null);
         $disk = Storage::disk('local');
         abort_if($path === null || $model->image_status !== 'ready' || ! $disk->exists($path), 404);
