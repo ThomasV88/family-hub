@@ -16,7 +16,7 @@ class AuditEntry extends Model
 
     public $timestamps = false;
 
-    protected $guarded = [];
+    protected $fillable = ['event', 'actor_id', 'actor_label', 'target_user_id', 'target_label', 'module', 'subject_type', 'subject_id', 'ip', 'meta', 'occurred_at'];
 
     protected function casts(): array
     {

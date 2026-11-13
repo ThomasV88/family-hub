@@ -172,3 +172,8 @@ it('takes a per-email advisory lock so concurrent creates cannot race the open-i
     $held = DB::selectOne("select count(*) as c from pg_locks where locktype = 'advisory' and pid = pg_backend_pid() and granted")->c;
     expect($held)->toBeGreaterThanOrEqual(1);
 });
+
+it('uses explicit fillable lists on Invitation and AuditEntry', function () {
+    expect((new Invitation)->getGuarded())->toBe(['*'])->and((new Invitation)->getFillable())->toContain('email')->not->toContain('id');
+    expect((new AuditEntry)->getGuarded())->toBe(['*'])->and((new AuditEntry)->getFillable())->toContain('event')->not->toContain('id');
+});

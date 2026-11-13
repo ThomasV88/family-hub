@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Invitation extends Model
 {
-    protected $guarded = [];
+    protected $fillable = ['email', 'token_hash', 'preset', 'locale', 'invited_by', 'expires_at', 'accepted_at', 'revoked_at', 'mail_failed_at', 'accepted_user_id'];
 
     protected $hidden = ['token_hash'];
 
