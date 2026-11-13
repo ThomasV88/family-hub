@@ -143,8 +143,8 @@ Plans:
 
 Plans:
 - [ ] 04-01-PLAN.md — All Phase 4 copy up front: wishlist/occasions/gift reminders/managers in SK/PL/EN (pipe plurals) and server reminder strings
-- [ ] 04-02-PLAN.md — Infrastructure: gd + exif in the image, shared uploads volume (dev and server), upload limits on the upload route, uploads in backup and restore drill
-- [ ] 04-03-PLAN.md — Name-day data: SK vendored (MIT), PL compiled from Polish Wikipedia with provenance and validation; AnnualDate and NameDayCalendar
+- [ ] 04-02-PLAN.md — Infrastructure: gd + exif in the image, shared uploads volume (dev and server), upload limits on the upload route, uploads as a separately tagged snapshot in backup, off-site copy, restore drill and freshness
+- [ ] 04-03-PLAN.md — Name-day data: SK vendored (MIT), PL compiled from Polish Wikipedia with provenance, validation and a stop-and-return gate (checkpoint on failure); AnnualDate and NameDayCalendar
 - [ ] 04-04-PLAN.md — SafeFetcher (explicit denylist, resolve-once DNS pinning, manual redirects, byte caps, real-socket test) and MetaImageExtractor
 - [ ] 04-05-PLAN.md — Wish slice backend: schema, Catalog, ViewerContext/WishAccess, list and wish endpoints, wishlist managers, matrix, privacy arch test
 - [ ] 04-06-PLAN.md — Wish slice UI: Wishlist page, person chips, own and giver galleries, owner panel with links, giver panel, nav, managers tab, owner DOM privacy test
