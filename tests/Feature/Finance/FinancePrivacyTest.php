@@ -50,7 +50,25 @@ it('puts the membership subquery in every finance statement a viewer request iss
 
 it('detects an unscoped read statement (helper self-test)', function () {
     expect(FinancePrivacy::unscopedReads(['select * from "finance_transactions" where "id" = ?']))->toHaveCount(1)
-        ->and(FinancePrivacy::unscopedReads(['select * from "finance_transactions" where "account_id" in (select "account_id" from "finance_account_members")']))->toBe([]);
+        ->and(FinancePrivacy::unscopedReads(['select * from "finance_transactions" where "account_id" in (select "account_id" from "finance_account_members" where "user_id" = ?)']))->toBe([])
+        ->and(FinancePrivacy::unscopedReads(['select 1 from finance_transactions t where exists (select 1 from finance_account_members m where m.user_id = ? and m.account_id = t.account_id)']))->toBe([])
+        // The members table merely mentioned, or constraining someone else or another column, is not a scope.
+        ->and(FinancePrivacy::unscopedReads(['select * from "finance_transactions" where "account_id" in (select "account_id" from "finance_account_members")']))->toHaveCount(1)
+        ->and(FinancePrivacy::unscopedReads(['select * from "finance_transactions" t join "finance_account_members" m on m.account_id = t.account_id']))->toHaveCount(1)
+        ->and(FinancePrivacy::unscopedReads(['select count(*) from "finance_transactions" where exists (select 1 from "finance_account_members" where "role" = ?)']))->toHaveCount(1);
+});
+
+it('classifies every finance table as account-owned or family-wide', function () {
+    $tables = collect(DB::select("select table_name from information_schema.tables where table_schema = current_schema() and table_name like 'finance\_%'"))
+        ->pluck('table_name')->all();
+    $owned = (new ReflectionClass(FinancePrivacy::class))->getReflectionConstant('READ_TABLES')->getValue();
+
+    expect($tables)->not->toBeEmpty();
+    foreach ($tables as $table) {
+        expect(in_array($table, $owned, true) || array_key_exists($table, FinancePrivacy::FAMILY_WIDE_TABLES))
+            ->toBeTrue("finance table $table is neither scope-checked nor declared family-wide");
+    }
+    expect(array_intersect($owned, array_keys(FinancePrivacy::FAMILY_WIDE_TABLES)))->toBe([]);
 });
 
 it('reports a missing provider with route and parameter name', function () {

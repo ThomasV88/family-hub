@@ -79,8 +79,21 @@ it('fails the scoped-mutation helper for an unscoped statement (helper self-test
 
     expect(FinancePrivacy::unscopedMutations(['delete from "finance_import_rows" where "id" = ?']))->toHaveCount(1)
         ->and(FinancePrivacy::unscopedMutations(['insert into "finance_budgets" ("id") values (?) on conflict ("id") do update set "id" = excluded."id"']))->toHaveCount(1)
-        ->and(FinancePrivacy::unscopedMutations(['insert into "finance_transactions" ("id") values (?)']))->toBe([])
-        ->and(FinancePrivacy::unscopedMutations(['update "finance_categories" set "name" = ?']))->toBe([]);
+        ->and(FinancePrivacy::unscopedMutations(['update "finance_categories" set "name" = ?']))->toBe([])
+        // INSERT is a mutation: a plain INSERT needs an earlier visible-account lookup, INSERT ... SELECT its own predicate.
+        ->and(FinancePrivacy::unscopedMutations(['insert into "finance_transactions" ("id") values (?)']))->toHaveCount(1)
+        ->and(FinancePrivacy::unscopedMutations([
+            'select * from "finance_accounts" where "id" in (select "account_id" from "finance_account_members" where "user_id" = ?)',
+            'insert into "finance_transactions" ("id") values (?)',
+        ]))->toBe([])
+        ->and(FinancePrivacy::unscopedMutations([
+            'select * from "finance_account_members"',
+            'insert into "finance_transactions" ("id") values (?)',
+        ]))->toHaveCount(1)
+        ->and(FinancePrivacy::unscopedMutations(['insert into finance_transactions (id) select x.id from jsonb_to_recordset(?) as x(id uuid)']))->toHaveCount(1)
+        ->and(FinancePrivacy::unscopedMutations(['insert into finance_transactions (id) select x.id from x where exists (select 1 from finance_account_members where user_id = ?)']))->toBe([])
+        // A predicate on another user column or without the viewer binding is not a scope.
+        ->and(FinancePrivacy::unscopedMutations(['delete from finance_recurring where id in (select recurring_id from finance_account_members where role = ?)']))->toHaveCount(1);
 
     $scoped = fn () => DB::update('update finance_transactions set note = ? where id = ? and account_id in (select account_id from finance_account_members where user_id = ?)', ['x', (string) Str::uuid7(), 1]);
     FinancePrivacy::assertScopedMutations($scoped);

@@ -36,7 +36,7 @@ class FinancePrivacy
     /** @var list<string> */
     public const CANARY_NEEDLES = ['ZxCanaryFin', '777777', '7777.77', '7777,77'];
 
-    /** Tables whose statements must always carry the membership subquery. */
+    /** Tables whose statements must always carry the membership predicate (user_id = ?). */
     private const READ_TABLES = [
         'finance_accounts', 'finance_transactions', 'finance_recurring', 'finance_recurring_matches',
         'finance_match_rejections', 'finance_import_batches', 'finance_import_rows',
@@ -46,6 +46,23 @@ class FinancePrivacy
         'finance_transactions', 'finance_recurring', 'finance_recurring_matches', 'finance_match_rejections',
         'finance_budgets', 'finance_import_batches', 'finance_import_rows',
     ];
+
+    /**
+     * finance_* tables that are family-wide by design and therefore carry no membership predicate. Every finance table
+     * must be in READ_TABLES or here (FinanceLeakSuiteTest checks the schema), so a new table cannot slip past the net.
+     */
+    public const FAMILY_WIDE_TABLES = [
+        'finance_account_members' => 'the membership table itself is the scope',
+        'finance_categories' => 'one family-wide category list',
+        'finance_budgets' => 'family-wide limits per category; spending is read from scoped transactions',
+        'finance_import_profiles' => 'family-wide generic CSV profiles, validated to hold header text only',
+    ];
+
+    /**
+     * The membership predicate: a subselect or join of finance_account_members constrained to the viewer
+     * (user_id = ?), with an optional alias and table-qualified column. A bare mention of the table does not count.
+     */
+    private const MEMBERSHIP = '/\bfinance_account_members"?(?:\s+(?:as\s+)?"?\w+"?)?\s+(?:where|on)\b[^()]*?(?:"?\w+"?\.)?"?user_id"?\s*=\s*\?/is';
 
     /** @var array<string, mixed>|null */
     private static ?array $areas = null;
@@ -283,8 +300,20 @@ class FinancePrivacy
         return preg_replace('/\d{4}-\d{2}-\d{2}T[\d:.]+Z?/', '', $normalised) ?? $normalised;
     }
 
+    /** Whether the statement carries the membership predicate for the viewer. */
+    public static function hasMembershipPredicate(string $sql): bool
+    {
+        return preg_match(self::MEMBERSHIP, $sql) === 1;
+    }
+
+    /** @return list<string> the account-owned tables a statement names */
+    private static function tablesIn(string $lower, array $tables): array
+    {
+        return array_values(array_filter($tables, fn (string $t) => preg_match('/\b'.preg_quote($t, '/').'\b/', $lower) === 1));
+    }
+
     /**
-     * Statements run by $request that touch an account-owned finance table without the membership subquery.
+     * Statements that touch an account-owned finance table without the membership predicate for the viewer.
      *
      * @return list<string>
      */
@@ -292,12 +321,8 @@ class FinancePrivacy
     {
         $bad = [];
         foreach ($statements as $sql) {
-            $lower = strtolower($sql);
-            foreach (self::READ_TABLES as $table) {
-                if (str_contains($lower, $table) && ! str_contains($lower, 'finance_account_members')) {
-                    $bad[] = $sql;
-                    break;
-                }
+            if (self::tablesIn(strtolower($sql), self::READ_TABLES) !== [] && ! self::hasMembershipPredicate($sql)) {
+                $bad[] = $sql;
             }
         }
 
@@ -305,35 +330,55 @@ class FinancePrivacy
     }
 
     /**
-     * Statements that change an account-owned finance table (UPDATE, DELETE, INSERT ... ON CONFLICT DO UPDATE)
-     * without the membership subquery.
+     * Statements that change an account-owned finance table without proof that the account is visible, by shape:
+     * UPDATE and DELETE need the membership predicate, and so does INSERT ... SELECT and INSERT ... ON CONFLICT DO
+     * UPDATE. A plain INSERT ... VALUES cannot carry a predicate, so it needs an earlier statement of the same request
+     * that does (the visible-account lookup). Statements matching an $exempt pattern are skipped; the exemption list is
+     * explicit per route and itself tested.
      *
-     * @param  list<string>  $statements
+     * @param  list<string>  $statements  in execution order
+     * @param  list<string>  $exempt  regular expressions matched against the lower-cased, whitespace-collapsed statement
      * @return list<string>
      */
-    public static function unscopedMutations(array $statements): array
+    public static function unscopedMutations(array $statements, array $exempt = []): array
     {
         $bad = [];
+        $proved = false;
         foreach ($statements as $sql) {
-            $lower = strtolower(trim($sql));
-            $mutation = preg_match('/^(update|delete)\b/', $lower) === 1
-                || preg_match('/^insert\b.*\bon\s+conflict\b.*\bdo\s+update\b/s', $lower) === 1;
-            if (! $mutation || str_contains($lower, 'finance_account_members')) {
+            $lower = strtolower(trim((string) preg_replace('/\s+/', ' ', $sql)));
+            $scoped = self::hasMembershipPredicate($sql);
+            $isWrite = preg_match('/^(update|delete|insert)\b/', $lower) === 1;
+            $touches = $isWrite && self::tablesIn(preg_replace('/\bfinance_account_members\b/', '', $lower), self::MUTATION_TABLES) !== [];
+            $wasProved = $proved;
+            $proved = $proved || $scoped;
+            if (! $touches || self::exempt($lower, $exempt)) {
                 continue;
             }
-            foreach (self::MUTATION_TABLES as $table) {
-                if (str_contains($lower, $table)) {
-                    $bad[] = $sql;
-                    break;
-                }
+            $plainInsert = preg_match('/^insert\b/', $lower) === 1
+                && preg_match('/\bselect\b/', $lower) !== 1
+                && preg_match('/\bon conflict\b.*\bdo update\b/', $lower) !== 1;
+            if ($plainInsert ? ! $wasProved : ! $scoped) {
+                $bad[] = $sql;
             }
         }
 
         return $bad;
     }
 
+    /** @param  list<string>  $exempt */
+    private static function exempt(string $lower, array $exempt): bool
+    {
+        foreach ($exempt as $pattern) {
+            if (preg_match($pattern, $lower) === 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** Runs $request and fails, naming the statement, when it issues an unscoped finance mutation. */
-    public static function assertScopedMutations(callable $request): void
+    public static function assertScopedMutations(callable $request, array $exempt = []): void
     {
         $statements = [];
         DB::listen(function ($query) use (&$statements) {
@@ -341,9 +386,9 @@ class FinancePrivacy
         });
         $request();
 
-        $bad = self::unscopedMutations($statements);
+        $bad = self::unscopedMutations($statements, $exempt);
         if ($bad !== []) {
-            Assert::fail('Unscoped finance mutation (no finance_account_members): '.$bad[0]);
+            Assert::fail('Unscoped finance mutation (no membership proof): '.$bad[0]);
         }
         Assert::assertTrue(true);
     }
