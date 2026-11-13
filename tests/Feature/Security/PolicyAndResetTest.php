@@ -12,7 +12,7 @@ use Tests\Support\Totp;
 
 uses(RefreshDatabase::class);
 
-function addPasskey(User $user, string $id): void
+function prAddPasskey(User $user, string $id): void
 {
     DB::table('passkeys')->insert([
         'user_id' => $user->id, 'name' => 'Phone', 'credential_id' => $id,
@@ -20,17 +20,17 @@ function addPasskey(User $user, string $id): void
     ]);
 }
 
-function addSession(User $user, string $id): void
+function prAddSession(User $user, string $id): void
 {
     DB::table('sessions')->insert(['id' => $id, 'user_id' => $user->id, 'ip_address' => '127.0.0.1', 'user_agent' => 'x', 'payload' => '', 'last_activity' => time()]);
 }
 
-function staleAdminWindow(): array
+function prStaleAdminWindow(): array
 {
     return ['auth.password_confirmed_at' => now()->subMinutes(11)->getTimestamp()];
 }
 
-function auditRows(string $event): int
+function prAuditRows(string $event): int
 {
     return AuditEntry::where('event', $event)->count();
 }
@@ -52,7 +52,7 @@ it('rejects a non-boolean value', function () {
 
     $this->actingAs($admin)->putJson('/settings/security/policy', ['required' => 'yes'])->assertStatus(422);
     $this->actingAs($admin)->putJson('/settings/security/policy', [])->assertStatus(422);
-    expect(auditRows('security_policy_changed'))->toBe(0);
+    expect(prAuditRows('security_policy_changed'))->toBe(0);
 });
 
 it('forbids non-admins and redirects guests on the policy', function () {
@@ -66,15 +66,15 @@ it('refuses both directions on a stale admin window and saves nothing', function
     $this->useRealSensitiveSession();
     $admin = User::factory()->admin()->create();
 
-    $this->actingAs($admin)->withSession(staleAdminWindow())->putJson('/settings/security/policy', ['required' => true])
+    $this->actingAs($admin)->withSession(prStaleAdminWindow())->putJson('/settings/security/policy', ['required' => true])
         ->assertStatus(423)->assertJson(['error' => 'confirm_required']);
     expect(app(SecondFactorPolicy::class)->required())->toBeFalse();
 
     app(SecondFactorPolicy::class)->setRequired(true);
-    $this->actingAs($admin)->withSession(staleAdminWindow())->putJson('/settings/security/policy', ['required' => false])
+    $this->actingAs($admin)->withSession(prStaleAdminWindow())->putJson('/settings/security/policy', ['required' => false])
         ->assertStatus(423)->assertJson(['error' => 'confirm_required']);
     expect(DB::table('app_settings')->where('key', 'require_second_factor')->value('value'))->toBe('true');
-    expect(auditRows('security_policy_changed'))->toBe(0);
+    expect(prAuditRows('security_policy_changed'))->toBe(0);
 });
 
 it('saves on a fresh admin window', function () {
@@ -83,7 +83,7 @@ it('saves on a fresh admin window', function () {
 
     $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => now()->getTimestamp()])
         ->putJson('/settings/security/policy', ['required' => true])->assertOk()->assertJson(['required' => true]);
-    expect(auditRows('security_policy_changed'))->toBe(1);
+    expect(prAuditRows('security_policy_changed'))->toBe(1);
 });
 
 // --- members props ----------------------------------------------------------------------------
@@ -93,7 +93,7 @@ it('exposes per-member factor status without secrets', function () {
     $totp = User::factory()->withPreset(Preset::Parent)->create(['name' => 'Beta']);
     Totp::enable($totp);
     $passkey = User::factory()->withPreset(Preset::Parent)->create(['name' => 'Cecil']);
-    addPasskey($passkey, 'cred-secret-abc');
+    prAddPasskey($passkey, 'cred-secret-abc');
     $bare = User::factory()->withPreset(Preset::Parent)->create(['name' => 'Dora']);
     $child = User::factory()->withPreset(Preset::Child)->create(['name' => 'Eva']);
 
@@ -130,10 +130,10 @@ it('resets all factors, revokes sessions and audits with actor and target', func
     $admin = User::factory()->admin()->create();
     $member = User::factory()->withPreset(Preset::Parent)->create();
     Totp::enable($member);
-    addPasskey($member, 'a');
-    addPasskey($member, 'b');
-    addSession($member, str_repeat('a', 40));
-    addSession($member, str_repeat('b', 40));
+    prAddPasskey($member, 'a');
+    prAddPasskey($member, 'b');
+    prAddSession($member, str_repeat('a', 40));
+    prAddSession($member, str_repeat('b', 40));
     $token = $member->fresh()->remember_token;
 
     $this->actingAs($admin)->deleteJson("/settings/members/{$member->id}/second-factor")->assertOk()->assertJson(['reset' => true]);
@@ -152,7 +152,7 @@ it('resets all factors, revokes sessions and audits with actor and target', func
 it('redirects back with a toast for a non-JSON reset', function () {
     $admin = User::factory()->admin()->create();
     $member = User::factory()->create();
-    addPasskey($member, 'a');
+    prAddPasskey($member, 'a');
 
     $this->actingAs($admin)->from('/settings/members')->delete("/settings/members/{$member->id}/second-factor")
         ->assertStatus(303)->assertRedirect('/settings/members')
@@ -165,11 +165,11 @@ it('refuses a reset on a stale admin window without changing anything', function
     $member = User::factory()->create();
     Totp::enable($member);
 
-    $this->actingAs($admin)->withSession(staleAdminWindow())->deleteJson("/settings/members/{$member->id}/second-factor")
+    $this->actingAs($admin)->withSession(prStaleAdminWindow())->deleteJson("/settings/members/{$member->id}/second-factor")
         ->assertStatus(423)->assertJson(['error' => 'confirm_required']);
 
     expect($member->fresh()->two_factor_secret)->not->toBeNull();
-    expect(auditRows('second_factor_reset'))->toBe(0);
+    expect(prAuditRows('second_factor_reset'))->toBe(0);
 });
 
 it('refuses the own row, a member without a factor and a non-numeric id', function () {
@@ -187,7 +187,7 @@ it('rolls everything back when the session revoke fails', function () {
     $admin = User::factory()->admin()->create();
     $member = User::factory()->create();
     Totp::enable($member);
-    addPasskey($member, 'a');
+    prAddPasskey($member, 'a');
 
     $this->app->instance(SessionRevoker::class, new class extends SessionRevoker
     {
@@ -202,5 +202,5 @@ it('rolls everything back when the session revoke fails', function () {
 
     expect($member->fresh()->two_factor_secret)->not->toBeNull()
         ->and(DB::table('passkeys')->where('user_id', $member->id)->count())->toBe(1);
-    expect(auditRows('second_factor_reset'))->toBe(0);
+    expect(prAuditRows('second_factor_reset'))->toBe(0);
 });

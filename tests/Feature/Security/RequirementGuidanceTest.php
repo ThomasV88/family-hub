@@ -19,7 +19,7 @@ beforeEach(function () {
 });
 
 /** Acts as $user in a clean browser session; $minutesOld is the age of the last identity proof (null = just now). */
-function actAs(User $user, ?int $minutesOld = null, bool $active = true): void
+function rgActAs(User $user, ?int $minutesOld = null, bool $active = true): void
 {
     app('auth')->forgetGuards();
     test()->flushSession();
@@ -31,51 +31,51 @@ function actAs(User $user, ?int $minutesOld = null, bool $active = true): void
     test()->actingAs($user)->withSession($session);
 }
 
-function financeMember(string $name = 'Member'): User
+function rgFinanceMember(string $name = 'Member'): User
 {
     return User::factory()->withPreset(Preset::Parent)->create(['name' => $name])->refresh();
 }
 
-function requireSecondFactor(): void
+function rgRequireSecondFactor(): void
 {
     $admin = User::factory()->admin()->create();
-    actAs($admin);
+    rgActAs($admin);
     test()->putJson('/settings/security/policy', ['required' => true])->assertOk();
 }
 
 it('does not bother anyone while the requirement is off', function () {
-    $member = financeMember();
-    actAs($member);
+    $member = rgFinanceMember();
+    rgActAs($member);
 
     $this->get('/finance')->assertOk();
 });
 
 it('guides a finance member to Settings > Security once the admin switches the requirement on', function () {
-    $member = financeMember();
+    $member = rgFinanceMember();
     $admin = User::factory()->admin()->create();
 
-    actAs($admin);
+    rgActAs($admin);
     $this->put('/settings/security/policy', ['required' => true])->assertStatus(303);
 
-    actAs($member);
+    rgActAs($member);
     $this->get('/finance')->assertRedirect('/settings/security')
         ->assertSessionHas('status', 'second_factor_required')
         ->assertSessionHas('url.intended', '/finance');
 
-    actAs($member);
+    rgActAs($member);
     $this->getJson('/finance')->assertStatus(423)->assertJson(['error' => 'second_factor_required']);
 
-    actAs($member);
+    rgActAs($member);
     $this->get('/')->assertOk();
     $this->get('/todo')->assertOk();
     $this->get('/settings/security')->assertOk();
 });
 
 it('releases the member once the authenticator is confirmed, without a confirm-access loop', function () {
-    $member = financeMember();
-    requireSecondFactor();
+    $member = rgFinanceMember();
+    rgRequireSecondFactor();
 
-    actAs($member);
+    rgActAs($member);
     $this->get('/finance')->assertRedirect('/settings/security');
     $this->postJson('/user/two-factor-authentication')->assertOk();
     $secret = Fortify::currentEncrypter()->decrypt($member->fresh()->two_factor_secret);
@@ -86,11 +86,11 @@ it('releases the member once the authenticator is confirmed, without a confirm-a
 });
 
 it('lets a stale session confirm first, then enrol and continue', function () {
-    $member = financeMember();
-    requireSecondFactor();
+    $member = rgFinanceMember();
+    rgRequireSecondFactor();
 
     // Stale proof (as after a remember-me restore): no windows at all except an 11 minute old confirmation.
-    actAs($member, 11, active: false);
+    rgActAs($member, 11, active: false);
     $this->get('/finance')->assertRedirect('/settings/security')->assertSessionHas('url.intended', '/finance');
 
     $this->postJson('/user/two-factor-authentication')->assertStatus(423)->assertJson(['error' => 'confirm_required']);
@@ -105,11 +105,11 @@ it('lets a stale session confirm first, then enrol and continue', function () {
 });
 
 it('does not let a stolen stale session enrol or escape the guidance', function () {
-    $member = financeMember();
-    requireSecondFactor();
+    $member = rgFinanceMember();
+    rgRequireSecondFactor();
     $secret = Totp::enable($member, confirm: false);
 
-    actAs($member, 11, active: false);
+    rgActAs($member, 11, active: false);
     $this->postJson('/user/two-factor-authentication')->assertStatus(423);
     $this->postJson('/user/confirmed-two-factor-authentication', ['code' => Totp::code($secret)])->assertStatus(423);
     $this->get('/finance')->assertRedirect('/settings/security');
@@ -118,23 +118,23 @@ it('does not let a stolen stale session enrol or escape the guidance', function 
 });
 
 it('puts the guidance ahead of the confirm page for a stale member', function () {
-    $member = financeMember();
-    requireSecondFactor();
+    $member = rgFinanceMember();
+    rgRequireSecondFactor();
 
-    actAs($member, 11, active: false);
+    rgActAs($member, 11, active: false);
     $this->get('/finance')->assertRedirect('/settings/security')->assertRedirectContains('/settings/security');
 });
 
 it('never redirects to-do-only members or an admin without module grants', function () {
-    requireSecondFactor();
+    rgRequireSecondFactor();
     $todoOnly = User::factory()->withPreset(Preset::Child)->create();
     $admin = User::factory()->admin()->create();
 
-    actAs($todoOnly);
+    rgActAs($todoOnly);
     $this->get('/todo')->assertOk();
     $this->get('/finance')->assertForbidden();
 
-    actAs($admin);
+    rgActAs($admin);
     $this->get('/settings/members')->assertOk();
     $this->get('/finance')->assertForbidden();
     expect(app(SecondFactorPolicy::class)->mustEnrol($todoOnly))->toBeFalse()
@@ -143,15 +143,15 @@ it('never redirects to-do-only members or an admin without module grants', funct
 
 it('guides a member again after an admin reset and sign-in', function () {
     $admin = User::factory()->admin()->create();
-    $member = financeMember();
-    requireSecondFactor();
+    $member = rgFinanceMember();
+    rgRequireSecondFactor();
     Totp::enable($member);
     DB::table('sessions')->insert(['id' => str_repeat('c', 40), 'user_id' => $member->id, 'ip_address' => '127.0.0.1', 'user_agent' => 'x', 'payload' => '', 'last_activity' => time()]);
 
-    actAs($member);
+    rgActAs($member);
     $this->get('/finance')->assertOk();
 
-    actAs($admin);
+    rgActAs($admin);
     $this->deleteJson("/settings/members/{$member->id}/second-factor")->assertOk();
     expect(DB::table('sessions')->where('user_id', $member->id)->count())->toBe(0)
         ->and(AuditEntry::where('event', 'second_factor_reset')->count())->toBe(1);
