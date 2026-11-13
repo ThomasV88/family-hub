@@ -65,7 +65,7 @@ it('rebuilds byte-identical files from the stored sources', function () {
 });
 
 it('ships the CC BY-SA licence notice with the Polish data', function () {
-    $notice = file_get_contents(base_path('database/data/namedays/LICENSE-pl.txt'));
+    $notice = file_get_contents(dirname(__DIR__, 3).'/database/data/namedays/LICENSE-pl.txt');
 
     expect($notice)->toContain('https://creativecommons.org/licenses/by-sa/4.0/legalcode')
         ->toContain('https://pl.wikipedia.org/wiki/Imieniny')->toContain('Modifications')->toContain('78166931');
