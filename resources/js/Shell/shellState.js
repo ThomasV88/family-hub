@@ -1,4 +1,4 @@
-import { inject, onBeforeUnmount, onMounted, provide, ref } from 'vue';
+import { inject, nextTick, onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { FRAME_DESKTOP } from '../design/panelMode.js';
 
 export const SIDEBAR_STORAGE_KEY = 'fh-sidebar';
@@ -52,19 +52,29 @@ const SHELL_KEY = 'fh-shell';
 export function provideShell({ panelMode, isPhone }) {
     const panelModule = ref(null);
     let addHandler = null;
+    let lastTrigger = null;
     const shell = {
         panelModule,
         panelMode,
         isPhone,
-        openComingSoon(moduleKey) { panelModule.value = moduleKey; },
-        closePanel() { panelModule.value = null; },
+        // The optional element is where focus returns when the panel closes.
+        openComingSoon(moduleKey, trigger = null) {
+            lastTrigger = trigger ?? (document.activeElement !== document.body ? document.activeElement : null);
+            panelModule.value = moduleKey;
+        },
+        closePanel() {
+            panelModule.value = null;
+            const target = lastTrigger;
+            lastTrigger = null;
+            if (target?.isConnected) nextTick(() => target.focus());
+        },
         registerAddHandler(fn) {
             addHandler = fn;
             return () => { if (addHandler === fn) addHandler = null; };
         },
-        triggerAdd() {
+        triggerAdd(trigger = null) {
             if (addHandler) addHandler();
-            else panelModule.value = 'tasks';
+            else shell.openComingSoon('tasks', trigger);
         },
     };
     provide(SHELL_KEY, shell);
