@@ -8,7 +8,10 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 DOMAIN=example.test
 
-docker build -q -f docker/nginx/Dockerfile -t fh-nginx-check . >/dev/null
+# The nginx image copies public/ from the app image (single asset build). The config check does not need the
+# real assets, so a stub app image with an empty public/ keeps this check fast.
+printf 'FROM busybox\nRUN mkdir -p /var/www/html/public\n' | docker build -q -t fh-app-stub - >/dev/null
+docker build -q -f docker/nginx/Dockerfile --build-arg APP_IMAGE=fh-app-stub -t fh-nginx-check . >/dev/null
 
 mkdir -p "$TMP/live/$DOMAIN"
 openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=$DOMAIN" \

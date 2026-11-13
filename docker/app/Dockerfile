@@ -26,12 +26,16 @@ RUN set -eux; \
 USER app
 
 # ---- assets: build the Vite output so PHP can read public/build/manifest.json ----
+# This is the single build of the front-end assets: the nginx image copies public/ out of the prod image
+# (docker/nginx/Dockerfile), so HTML and static files can never come from two differently hashed builds.
 FROM node:22-alpine AS assets
 WORKDIR /build
 COPY package.json package-lock.json .npmrc ./
 RUN npm ci
-COPY vite.config.js ./
+COPY vite.config.js vitest.config.js ./
 COPY resources ./resources
+COPY lang ./lang
+COPY scripts/check-sw-precache.mjs ./scripts/check-sw-precache.mjs
 COPY public ./public
 RUN npm run build
 
@@ -47,7 +51,8 @@ COPY docker/app/php-prod.ini "$PHP_INI_DIR/conf.d/zz-prod.ini"
 COPY docker/app/php-fpm-prod.conf /usr/local/etc/php-fpm.d/zz-prod.conf
 COPY --from=vendor /var/www/html/vendor ./vendor
 COPY . .
-COPY --from=assets /build/public/build ./public/build
+# whole public/: build/, sw.js, manifest, icons (nginx serves them from a copy of this directory)
+COPY --from=assets /build/public ./public
 RUN set -eux; \
     composer dump-autoload --no-dev --optimize --no-interaction; \
     mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache; \

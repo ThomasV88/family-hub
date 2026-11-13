@@ -153,6 +153,9 @@ jobs:
           file: docker/nginx/Dockerfile
           platforms: linux/amd64
           push: true
+          # static files come from the app image just pushed (single Vite build)
+          build-args: |
+            APP_IMAGE=${{ env.PREFIX }}-app:sha-${{ github.sha }}
           tags: |
             ${{ env.PREFIX }}-nginx:sha-${{ github.sha }}
             ${{ env.PREFIX }}-nginx:${{ env.BRANCH_TAG }}

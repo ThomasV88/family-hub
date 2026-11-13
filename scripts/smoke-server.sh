@@ -23,6 +23,12 @@ done
 grep -qi '^strict-transport-security:' "$TMP/h" || fail "no Strict-Transport-Security header"
 grep -q 'data-page' "$TMP/b" || fail "no data-page in body (Inertia not rendering)"
 
+# 1b. A static asset referenced by the HTML must be served (catches app/nginx images built from different assets)
+asset=$(grep -oE '/build/assets/[A-Za-z0-9._-]+\.(js|css)' "$TMP/b" | head -n1 || true)
+[ -n "$asset" ] || fail "no /build/assets reference found in the home page"
+code=$(curl -sS -o /dev/null -w '%{http_code}' "$BASE$asset")
+[ "$code" = 200 ] || fail "$asset referenced by the page returned HTTP $code"
+
 # 2. noindex on staging only
 if [ "$STACK" = staging ]; then
   grep -i '^x-robots-tag:' "$TMP/h" | grep -qi noindex || fail "staging must send X-Robots-Tag noindex"
