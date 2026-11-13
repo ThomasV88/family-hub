@@ -68,6 +68,9 @@ jobs:
           bash scripts/check-compose.sh
           bash scripts/check-nginx-template.sh
 
+      - name: Server postgres first init (compose.server.yaml, throwaway secrets)
+        run: bash scripts/test-server-postgres.sh
+
       - name: Deploy guard tests
         run: bash scripts/test-deploy-guards.sh
 

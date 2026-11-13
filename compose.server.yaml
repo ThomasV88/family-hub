@@ -34,7 +34,8 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD_FILE: /run/secrets/db_root_password
-      POSTGRES_DB: family_hub
+      # No POSTGRES_DB: 01-roles.sh creates family_hub owned by fh_owner; setting it here would make the
+      # entrypoint create the database first and the init script would abort on first start.
       TZ: Europe/Bratislava
     command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=20"]
     mem_limit: ${MEM_POSTGRES:-192m}
@@ -47,7 +48,7 @@ services:
       - db_app_password
     logging: *logging
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d family_hub"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 10
