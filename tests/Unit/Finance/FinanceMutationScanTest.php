@@ -202,3 +202,30 @@ PHP;
         ->and(fhMutUnscoped($upsert))->toBe(['F2::s'])
         ->and(fhMutUnscoped($upsert2))->toBe(['F3::s']);
 });
+
+it('fails on a planted unscoped write in every query class (mutation sanity)', function () {
+    $classes = 0;
+    foreach (fhMutFiles('Finance/Queries') as $file) {
+        $src = file_get_contents($file);
+        $pos = strrpos($src, '}');
+        if ($pos === false || ! str_contains($src, 'class ')) {
+            continue; // enums and other non-class files
+        }
+        $classes++;
+        $name = basename($file, '.php');
+        $planted = [
+            'builder update' => 'FinanceTransaction::query()->whereKey($id)->update([\'note\' => \'x\']);',
+            'raw sql' => 'DB::update(\'update finance_budgets set note = ?\', [1]);',
+            'upsert' => 'FinanceBudget::query()->upsert([], [\'a\']);',
+            'delete' => 'FinanceRecurring::query()->whereKey($id)->delete();',
+        ];
+        foreach ($planted as $label => $statement) {
+            $mutated = substr($src, 0, $pos).'    public function zzPlanted($id) { '.$statement." }\n".substr($src, $pos);
+            expect(in_array($name.'::zzPlanted', fhMutUnscoped($mutated), true))->toBeTrue("$label not detected in $name");
+        }
+        // ...and the same method with the scope passes, so the failure above is caused by the missing scope alone.
+        $scoped = substr($src, 0, $pos).'    public function zzPlanted($id) { Visibility::apply(FinanceTransaction::query(), $v)->update([\'note\' => \'x\']); }'."\n".substr($src, $pos);
+        expect(fhMutUnscoped($scoped))->not->toContain($name.'::zzPlanted');
+    }
+    expect($classes)->toBeGreaterThanOrEqual(8);
+});

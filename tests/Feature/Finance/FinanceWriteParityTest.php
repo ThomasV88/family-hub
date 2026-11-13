@@ -41,7 +41,8 @@ it('answers a write on a hidden record exactly like a write on a record that doe
         $checked++;
     }
 
-    expect($checked)->toBeGreaterThanOrEqual(0);
+    // 05-04 left this vacuous while no write routes existed: the phase has 13 record-id write routes.
+    expect($checked)->toBeGreaterThanOrEqual(13);
 });
 
 it('issues only membership-scoped UPDATE and DELETE statements from every finance write request', function () {
@@ -50,7 +51,7 @@ it('issues only membership-scoped UPDATE and DELETE statements from every financ
     FinancePrivacy::seedHidden($ctx);
     $viewer = $ctx['viewer'];
 
-    expect(FinancePrivacy::writes())->toBeArray();
+    $checked = 0;
 
     foreach (FinancePrivacy::writes() as $route) {
         if (in_array($route->getName(), FH_PARITY_EXCLUDED, true)) {
@@ -65,7 +66,11 @@ it('issues only membership-scoped UPDATE and DELETE statements from every financ
             $this->flushSession();
             $this->actingAs($viewer)->call(FinancePrivacy::method($route), $url, $payload);
         });
+        $checked++;
     }
+
+    // 21 finance write routes minus the two allowlisted category routes.
+    expect($checked)->toBeGreaterThanOrEqual(19);
 });
 
 it('fails the scoped-mutation helper for an unscoped statement (helper self-test)', function () {
