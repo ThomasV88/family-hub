@@ -11,7 +11,8 @@ import FilterChips from './FilterChips.vue';
 import QuickAddBar from './QuickAddBar.vue';
 import TaskColumn from './TaskColumn.vue';
 import TaskDetailPanel from './TaskDetailPanel.vue';
-import { dueInfo } from './dueLabel.js';
+import { useToast } from '../Components/ui/useToast.js';
+import { dueInfo, formatDate } from './dueLabel.js';
 
 const props = defineProps({
     timezone: { type: String, required: true },
@@ -20,6 +21,7 @@ const props = defineProps({
     members: { type: Array, default: () => [] },
     tasks: { type: Array, default: () => [] },
     selectedTaskMissing: { type: Boolean, default: false },
+    history: { type: Array, default: null },
 });
 
 const { t, locale } = useI18n();
@@ -85,6 +87,14 @@ function closePanel() {
     closing.value = true;
     navigate({ filter: filter.value });
 }
+
+// Completing or skipping a recurring task answers with the next due date (family-local), formatted here.
+const toast = useToast();
+watch(() => page.props.flash?.data, (data) => {
+    if (!data?.nextDue || !data.toast) return;
+    const [ymd, time] = String(data.nextDue).split(' ');
+    toast.show(t(data.toast, { date: time ? `${formatDate(ymd, locale.value)} ${time}` : formatDate(ymd, locale.value) }));
+});
 
 // Topbar Add and the phone FAB open the create panel while the board is shown.
 const shell = useShell();
@@ -205,6 +215,7 @@ function toggle(column) {
             :me="me"
             :timezone="timezone"
             :initial-assignee="initialAssignee"
+            :history="history"
             @close="closePanel"
         />
     </div>

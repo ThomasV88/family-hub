@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Todo;
 use App\Models\Task;
 use Illuminate\Http\RedirectResponse;
 
-/** Redirect back with the next due date (family-local) and the matching toast when an occurrence was advanced. */
+/**
+ * Redirect back with the next due date (family-local) and the toast key in flash_data. The date is formatted by
+ * the client (Intl, family zone), so no server toast is flashed that would show a raw {date}.
+ */
 final class NextOccurrence
 {
     public static function redirect(Task $task, string $toastKey = 'todo.toast.done_next'): RedirectResponse
@@ -19,6 +22,6 @@ final class NextOccurrence
         $time = $next->due_time === null ? null : substr((string) $next->due_time, 0, 5);
         $due = $next->due_date->format('Y-m-d').($time !== null ? ' '.$time : '');
 
-        return $response->with('flash_data', ['nextDue' => $due])->with('toast', ['key' => $toastKey]);
+        return $response->with('flash_data', ['nextDue' => $due, 'toast' => $toastKey]);
     }
 }

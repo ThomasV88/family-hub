@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
+import { reactive } from 'vue';
 import { expectNoAxeViolations } from '../helpers/axe.js';
 import { createAppI18n } from '../../../resources/js/i18n.js';
 import { loadMessages } from '../helpers/mount.js';
@@ -33,6 +34,7 @@ const task = (id, extra = {}) => ({
     id, title: `Task ${id}`, notes: null, status: 'todo', visibility: 'family', creatorId: ME, assigneeId: ME,
     dueDate: null, dueTime: null, isRecurring: false, completedAt: null, memberIds: [], abilities: ALL, ...extra,
 });
+const REC = { kind: 'weekly', interval: 1, weekdays: ['MO', 'WE'] };
 const TASKS = [
     task(1, { notes: 'Some notes', dueDate: '2026-11-20', dueTime: '18:30' }),
     task(2, { assigneeId: 3, creatorId: 3, title: 'Adam chore', abilities: { edit: false, status: true, delete: false, visibility: false } }),
@@ -43,11 +45,11 @@ let current;
 function mountBoard({ url = '/todo', locale = 'en', props = {} } = {}) {
     mockUrl = url;
     window.innerWidth = 1024;
-    mockProps = {
+    mockProps = reactive({
         locale, flash: { status: null, toast: null, data: null }, availableLocales: ['sk', 'pl', 'en'],
         auth: { user: { id: ME, name: 'Mira', email: 'm@example.test', isAdmin: false }, access: { todo: 'edit', wishlist: 'none', finance: 'none', health: 'none' } },
         app: { env: 'local', styleGuide: false },
-    };
+    });
     window.matchMedia = (query) => ({ matches: false, media: query, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
     current = mount(Index, {
         props: { timezone: 'Europe/Bratislava', today: '2026-11-13', canEdit: true, members: MEMBERS, tasks: TASKS, selectedTaskMissing: false, ...props },
@@ -330,5 +332,231 @@ describe('Task panel accessibility', () => {
                 });
             }
         }
+    }
+});
+
+const RECS = [
+    task(4, { title: 'Water plants', dueDate: '2026-11-16', isRecurring: true, recurrence: REC, recurrenceMode: 'completion', remindBefore: 1440 }),
+    task(5, { title: 'Pay rent', dueDate: '2026-11-30', isRecurring: true, recurrence: { kind: 'monthly_day', interval: 1, monthDay: 30 }, recurrenceMode: 'schedule', remindBefore: 0 }),
+    task(6, { title: 'Old rent', dueDate: '2026-10-30', status: 'done', completedAt: '2026-10-30T10:00:00+01:00', isRecurring: true, recurrence: { kind: 'monthly_day', interval: 1, monthDay: 30 }, recurrenceMode: 'schedule', abilities: { edit: true, status: false, delete: true, visibility: true } }),
+];
+function mountRec(opts = {}) {
+    return mountBoard({ ...opts, props: { tasks: [...TASKS, ...RECS], ...(opts.props ?? {}) } });
+}
+
+describe('Repeat, reminder, skip and history in the panel', () => {
+    it('create payload stays free of repeat and reminder keys by default', async () => {
+        calls.post.mockImplementation((url, data, opts) => { opts.onSuccess?.(); });
+        mountRec({ url: '/todo?task=new' });
+        await flushPromises();
+        await type(input('Title'), 'Plain');
+        await type(input('Due date'), '2026-12-01');
+        byText('Save task').click();
+        await flushPromises();
+        const data = calls.post.mock.calls[0][1];
+        expect(Object.keys(data)).not.toContain('recurrence');
+        expect(Object.keys(data)).not.toContain('remind_before_minutes');
+    });
+
+    it('disables Repeat and Remind me without a due date', async () => {
+        mountRec({ url: '/todo?task=new' });
+        await flushPromises();
+        expect(input('Repeat').disabled).toBe(true);
+        expect(input('Remind me').disabled).toBe(true);
+        expect(document.body.textContent).toContain('Set a due date to make this task repeat.');
+        expect(document.body.textContent).toContain('Set a due date to get a reminder.');
+    });
+
+    it('posts a structured weekly pattern and never an RRULE', async () => {
+        calls.post.mockImplementation((url, data, opts) => { opts.onSuccess?.(); });
+        mountRec({ url: '/todo?task=new' });
+        await flushPromises();
+        await type(input('Title'), 'Gym');
+        await type(input('Due date'), '2026-12-01');
+        await type(input('Repeat'), 'weekly');
+        const chips = [...document.body.querySelectorAll('[data-testid="repeat-fields"] button[aria-pressed]')];
+        expect(chips).toHaveLength(7);
+        chips[0].click();
+        await flushPromises();
+        chips[2].click();
+        await flushPromises();
+        await type(input('Remind me'), 'before_1d');
+        byText('Save task').click();
+        await flushPromises();
+        const data = calls.post.mock.calls[0][1];
+        expect(data).toMatchObject({ recurrence: { kind: 'weekly', interval: 1, weekdays: ['MO', 'WE'] }, recurrence_mode: 'schedule', remind_before_minutes: 1440 });
+        expect(JSON.stringify(data)).not.toContain('FREQ=');
+    });
+
+    it('shows an inline weekdays error and does not post when none is chosen', async () => {
+        mountRec({ url: '/todo?task=new' });
+        await flushPromises();
+        await type(input('Title'), 'Gym');
+        await type(input('Due date'), '2026-12-01');
+        await type(input('Repeat'), 'weekly');
+        byText('Save task').click();
+        await flushPromises();
+        expect(calls.post).not.toHaveBeenCalled();
+        expect(document.body.textContent).toContain('Choose at least one weekday.');
+    });
+
+    it('validates the custom interval and sends the unit', async () => {
+        calls.post.mockImplementation((url, data, opts) => { opts.onSuccess?.(); });
+        mountRec({ url: '/todo?task=new' });
+        await flushPromises();
+        await type(input('Title'), 'Filter');
+        await type(input('Due date'), '2027-01-31');
+        await type(input('Repeat'), 'custom');
+        await type(input('Interval'), '0');
+        byText('Save task').click();
+        await flushPromises();
+        expect(calls.post).not.toHaveBeenCalled();
+        expect(document.body.textContent).toContain('Enter a whole number from 1 to 99.');
+        await type(input('Interval'), '3');
+        await type(input('Unit'), 'month');
+        expect(document.body.querySelector('[data-testid="repeat-summary"]').textContent).toBe('Repeats every 3 months');
+        byText('Save task').click();
+        await flushPromises();
+        expect(calls.post.mock.calls[0][1]).toMatchObject({ recurrence: { kind: 'custom', interval: 3, unit: 'month', monthDay: 31 } });
+    });
+
+    it('shows the live summary for monthly day and last day', async () => {
+        mountRec({ url: '/todo?task=new' });
+        await flushPromises();
+        await type(input('Due date'), '2027-01-31');
+        await type(input('Repeat'), 'monthly');
+        const summary = () => document.body.querySelector('[data-testid="repeat-summary"]').textContent;
+        expect(summary()).toBe('Repeats every month on day 31');
+        await type(input('Day of month'), 'last');
+        expect(summary()).toBe('Repeats on the last day of every month');
+    });
+
+    it('loads an existing recurring task and sends recurrence null when the repeat is removed', async () => {
+        calls.patch.mockImplementation((url, data, opts) => { opts.onSuccess?.(); });
+        mountRec({ url: '/todo?task=4' });
+        await flushPromises();
+        expect(input('Repeat').value).toBe('weekly');
+        expect(input('Remind me').value).toBe('before_1d');
+        expect(document.body.querySelector('[data-testid="repeat-summary"]').textContent).toBe('Repeats on Monday and Wednesday');
+        expect(document.body.querySelector('input[type="radio"][value="completion"]').checked).toBe(true);
+        await type(input('Repeat'), 'none');
+        byText('Save task').click();
+        await flushPromises();
+        expect(calls.patch.mock.calls[0][1].recurrence).toBeNull();
+    });
+
+    it('keeps a stored month day (clamped rule) in the summary', async () => {
+        mountRec({ url: '/todo?task=5' });
+        await flushPromises();
+        expect(document.body.querySelector('[data-testid="repeat-summary"]').textContent).toBe('Repeats every month on day 30');
+    });
+
+    it('resets repeat and reminder when the due date is cleared', async () => {
+        calls.patch.mockImplementation((url, data, opts) => { opts.onSuccess?.(); });
+        mountRec({ url: '/todo?task=4' });
+        await flushPromises();
+        await type(input('Due date'), '');
+        expect(input('Repeat').disabled).toBe(true);
+        expect(input('Remind me').value).toBe('at_due');
+        byText('Save task').click();
+        await flushPromises();
+        const data = calls.patch.mock.calls[0][1];
+        expect(data.recurrence).toBeNull();
+        expect(data).not.toHaveProperty('remind_before_minutes');
+    });
+
+    it('maps server repeat errors onto the fields', async () => {
+        calls.patch.mockImplementation((url, data, opts) => { opts.onError?.({ 'recurrence.interval': 'todo.error.interval' }); });
+        mountRec({ url: '/todo?task=4' });
+        await flushPromises();
+        await type(input('Repeat'), 'custom');
+        await type(input('Interval'), '5');
+        byText('Save task').click();
+        await flushPromises();
+        expect(document.body.textContent).toContain('Enter a whole number from 1 to 99.');
+    });
+
+    it('offers Skip this occurrence on a recurring task and posts to /skip', async () => {
+        calls.post.mockImplementation((url, data, opts) => { opts.onSuccess?.(); });
+        mountRec({ url: '/todo?task=4' });
+        await flushPromises();
+        byText('Skip this occurrence').click();
+        await flushPromises();
+        expect(calls.post).toHaveBeenCalledWith('/todo/tasks/4/skip', {}, expect.any(Object));
+    });
+
+    it('has no Skip button on plain tasks or completed history rows', async () => {
+        mountRec({ url: '/todo?task=1' });
+        await flushPromises();
+        expect(byText('Skip this occurrence')).toBeUndefined();
+        current.unmount();
+        mountRec({ url: '/todo?task=6' });
+        await flushPromises();
+        expect(byText('Skip this occurrence')).toBeUndefined();
+    });
+
+    it('lists the history in a collapsible section', async () => {
+        mountRec({ url: '/todo?task=4', props: { history: [{ kind: 'skipped', at: '2026-11-09T10:00:00+01:00' }, { kind: 'completed', at: '2026-11-02T10:00:00+01:00' }] } });
+        await flushPromises();
+        const toggle = byText('Completed history');
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+        toggle.click();
+        await flushPromises();
+        expect(toggle.getAttribute('aria-expanded')).toBe('true');
+        const items = [...document.body.querySelectorAll('#task-history-list li')].map((li) => li.textContent);
+        expect(items).toEqual(['Skipped 9 Nov', 'Completed 2 Nov']);
+    });
+
+    it('shows the empty history copy and the recurring delete text', async () => {
+        mountRec({ url: '/todo?task=4', props: { history: [] } });
+        await flushPromises();
+        byText('Completed history').click();
+        await flushPromises();
+        expect(document.body.querySelector('#task-history-list').textContent).toContain('No completions yet.');
+        byText('Delete task').click();
+        await flushPromises();
+        expect(document.body.textContent).toContain('and all its future repeats');
+    });
+
+    it('toasts the next due date from the flash after completing a recurring task', async () => {
+        mountRec();
+        mockProps.flash = { status: null, toast: null, data: { nextDue: '2026-11-16 18:30', toast: 'todo.toast.done_next' } };
+        await flushPromises();
+        expect(useToast().toasts.map((x) => x.message)).toContain('Done. Next one is due 16 Nov 18:30.');
+    });
+
+    it('renders completed recurring history cards with a disabled checkbox', async () => {
+        mountRec();
+        const showDone = current.findAll('button').find((b) => b.text().startsWith('Show done'));
+        await showDone.trigger('click');
+        const cards = current.findAll('[data-testid="task-card"]');
+        const old = cards.find((c) => c.text().includes('Old rent'));
+        expect(old.find('input[type="checkbox"]').attributes('disabled')).toBeDefined();
+    });
+});
+
+describe('Repeat and reminder accessibility', () => {
+    for (const task of [4, 5]) {
+        for (const locale of ['en', 'sk', 'pl']) {
+            for (const theme of ['light', 'dark']) {
+                it(`recurring task ${task} panel has no axe violations (${locale}, ${theme})`, async () => {
+                    document.documentElement.dataset.theme = theme;
+                    mountRec({ url: `/todo?task=${task}`, locale, props: { history: [{ kind: 'completed', at: '2026-11-02T10:00:00+01:00' }] } });
+                    await flushPromises();
+                    await expectNoAxeViolations(document.body);
+                    delete document.documentElement.dataset.theme;
+                });
+            }
+        }
+    }
+
+    for (const kind of ['custom', 'monthly', 'daily']) {
+        it(`create panel with ${kind} repeat has no axe violations`, async () => {
+            mountRec({ url: '/todo?task=new' });
+            await flushPromises();
+            await type(input('Due date'), '2026-12-01');
+            await type(input('Repeat'), kind);
+            await expectNoAxeViolations(document.body);
+        });
     }
 });

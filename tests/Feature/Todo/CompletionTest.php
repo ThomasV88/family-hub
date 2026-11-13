@@ -143,7 +143,7 @@ it('skips an occurrence, opens the next and records it in history', function () 
 
     $this->actingAs($this->child)->post("/todo/tasks/{$task->id}/skip")->assertStatus(303)
         ->assertSessionHas('flash_data.nextDue', '2027-05-11')
-        ->assertSessionHas('toast.key', 'todo.toast.skipped');
+        ->assertSessionHas('flash_data.toast', 'todo.toast.skipped');
 
     $skipped = $task->fresh();
     expect($skipped->skipped_at)->not->toBeNull()->and($skipped->status->value)->toBe('todo');
@@ -180,7 +180,7 @@ it('completes through the status endpoint and flashes the next due date', functi
 
     $this->actingAs($this->child)->patch("/todo/tasks/{$task->id}/status", ['status' => 'done'])->assertStatus(303)
         ->assertSessionHas('flash_data.nextDue', '2027-05-11 18:30')
-        ->assertSessionHas('toast.key', 'todo.toast.done_next');
+        ->assertSessionHas('flash_data.toast', 'todo.toast.done_next');
     expect(Task::where('series_id', $task->series_id)->count())->toBe(2);
 
     // moving to in progress is a plain status change
