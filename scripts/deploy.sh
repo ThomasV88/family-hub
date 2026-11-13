@@ -183,7 +183,8 @@ main() {
     fi
   fi
 
-  if [ ! -f "letsencrypt/live/$app_domain/fullchain.pem" ]; then
+  # letsencrypt/live is root-owned; the check runs inside the certbot container (cert-renew.sh exists)
+  if ! bash ./cert-renew.sh exists; then
     log "Issuing certificate for $app_domain"
     bash ./cert-renew.sh issue
   fi

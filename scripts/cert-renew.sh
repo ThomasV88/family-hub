@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Let's Encrypt certificate for the stack domain (DNS-01 through Cloudflare).
 #   cert-renew.sh issue   issue the certificate if none exists yet
-#   cert-renew.sh renew   renew (cron) and reload nginx only when the certificate changed
+#   cert-renew.sh renew   renew (cron) and reload nginx when the certificate changed (or cannot be compared)
+#   cert-renew.sh exists  exit 0 when a certificate for the domain exists
+# letsencrypt/live is root-owned (certbot runs as root), so presence and hash are read inside the certbot container.
 # Run from the stack directory (or any cwd: the script changes into its own directory).
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -20,7 +22,12 @@ fi
 export IMAGE_TAG
 
 dc() { docker compose -f compose.server.yaml "$@"; }
-CERT="letsencrypt/live/$APP_DOMAIN/fullchain.pem"
+
+# Prints the sha256 of the live certificate (empty when absent). Runs as root inside the certbot image.
+cert_hash() {
+  dc --profile certbot run --rm -T --no-deps --entrypoint sh certbot \
+    -c 'sha256sum "/etc/letsencrypt/live/$0/fullchain.pem" 2>/dev/null | cut -d" " -f1' "$APP_DOMAIN" || true
+}
 
 case "$MODE" in
   issue)
@@ -31,18 +38,22 @@ case "$MODE" in
       -d "$APP_DOMAIN" --non-interactive --agree-tos -m "$CERT_EMAIL" --keep-until-expiring
     ;;
   renew)
-    before=$(sha256sum "$CERT" 2>/dev/null | cut -d' ' -f1 || true)
+    before=$(cert_hash)
     dc --profile certbot run --rm certbot renew --quiet
-    after=$(sha256sum "$CERT" 2>/dev/null | cut -d' ' -f1 || true)
-    if [ "$before" != "$after" ]; then
+    after=$(cert_hash)
+    # An empty hash means the comparison is not trustworthy: reload anyway (a reload is harmless).
+    if [ -z "$before" ] || [ -z "$after" ] || [ "$before" != "$after" ]; then
       echo "Certificate changed, reloading nginx"
       dc exec -T nginx nginx -s reload
     else
       echo "Certificate unchanged"
     fi
     ;;
+  exists)
+    [ -n "$(cert_hash)" ]
+    ;;
   *)
-    echo "usage: $0 issue|renew" >&2
+    echo "usage: $0 issue|renew|exists" >&2
     exit 2
     ;;
 esac
