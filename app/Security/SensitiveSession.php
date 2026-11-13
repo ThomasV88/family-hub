@@ -31,6 +31,12 @@ class SensitiveSession
         $this->session()->put(self::CONFIRMED_KEY, now()->getTimestamp());
     }
 
+    /** Forget both windows (sign in again). */
+    public function clear(): void
+    {
+        $this->session()->forget([self::ACTIVE_KEY, self::CONFIRMED_KEY]);
+    }
+
     /** The last proof of identity is within the security confirm window. */
     public function recentlyConfirmed(): bool
     {

@@ -14,4 +14,10 @@ enum Module: string
     {
         return in_array($this, [self::Finance, self::Health], true);
     }
+
+    /** Modules behind the idle re-authentication gate. */
+    public function sensitive(): bool
+    {
+        return in_array($this, [self::Finance, self::Health], true);
+    }
 }

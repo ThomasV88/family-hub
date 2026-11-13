@@ -8,6 +8,7 @@ use App\Access\Module;
 use App\Audit\AuditEvent;
 use App\Audit\AuditLogger;
 use App\Security\SafeIntended;
+use App\Security\SensitiveGate;
 use App\Security\SensitiveSession;
 use Closure;
 use Illuminate\Http\Request;
@@ -57,6 +58,15 @@ class RequireAccess
 
         if ($rule === 'recent' && ! app(SensitiveSession::class)->recentlyConfirmed()) {
             return $this->toConfirm($request);
+        }
+
+        if ($allowed && $moduleEnum !== null && $moduleEnum->sensitive()) {
+            // After the allow decision (no-access members get 403, never a redirect), before the audit write
+            // (a bounced request is not a read or a write).
+            $bounce = app(SensitiveGate::class)->check($request, $user);
+            if ($bounce !== null) {
+                return $bounce;
+            }
         }
 
         $this->afterDecision($request, $moduleEnum, $levelEnum, (bool) $allowed);
