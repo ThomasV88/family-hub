@@ -32,9 +32,10 @@ it('shows the valid state with the email and no-referrer', function () {
             ->where('state', 'valid')->where('email', 'eva@example.test')->where('token', 'plaintoken1234')->where('googleEnabled', false));
 });
 
-it('sets the invitation locale cookie and redirects once when the visitor has no locale cookie', function () {
+it('renders in the invitation locale and sets the cookie without redirecting when the visitor has no locale cookie', function () {
     openInvite();
-    $this->get('/invite/plaintoken1234')->assertRedirect('/invite/plaintoken1234')->assertCookie('locale', 'sk');
+    $this->get('/invite/plaintoken1234')->assertOk()->assertCookie('locale', 'sk')
+        ->assertInertia(fn ($page) => $page->component('Auth/AcceptInvite')->where('locale', 'sk')->where('state', 'valid'));
 });
 
 it('reports expired, used, revoked and unknown states without leaking the email', function () {

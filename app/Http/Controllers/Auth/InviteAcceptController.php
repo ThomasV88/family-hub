@@ -17,16 +17,17 @@ use Inertia\Response;
 
 class InviteAcceptController extends Controller
 {
-    public function show(Request $request, string $token): Response|RedirectResponse
+    public function show(Request $request, string $token): Response
     {
         $invitation = Invitation::findByToken($token);
 
-        // First visit without a language choice: open the page in the language the admin picked, once.
+        // First visit without a language choice: render in the language the admin picked and remember it.
+        // No redirect: a browser that refuses the cookie would otherwise loop (and burn the throttle budget).
         if ($invitation !== null && $invitation->state() === 'valid' && ! $request->cookies->has('locale')
             && in_array($invitation->locale, SetLocale::SUPPORTED, true)) {
             Cookie::queue(cookie('locale', $invitation->locale, 60 * 24 * 365, null, null, (bool) config('session.secure'), true, false, 'lax'));
 
-            return redirect($request->getRequestUri());
+            app()->setLocale($invitation->locale);
         }
 
         return $this->page($invitation, $token);
