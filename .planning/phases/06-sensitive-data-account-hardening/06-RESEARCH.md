@@ -425,7 +425,9 @@ RateLimiter::for('reauth', fn (Request $r) => [
 | A8 | Window 1 and global replay cache key acceptable at family scale | Pitfall 8 | Negligible |
 | A9 | `$user->two_factor_*` hidden attributes plus explicit mapping suffice (no prop leaks) | Pattern 7 | Add arch test (below) |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+RESOLVED by orchestrator decisions: (1) Google-only members without a factor: enrol a factor when the policy is on, and offer "Sign in with Google again" as re-auth fallback (owner to confirm at the end, Google prompt/max_age behaviour unverified); (2) Home still-to-pay finance card stays visible when the session is stale (allowlisted, counts only); (3) admin finance-account settings are not gated (allowlisted, metadata only); (4) a fresh sign-in counts as confirmation except remember-cookie restores (Login event must not set it); (5) no import-wizard keepalive (deferred).
 
 1. **Google-only members cannot use "password" to re-authenticate.**
    - What we know: Google-created accounts have `Hash::make(Str::random(64))` [VERIFIED: InviteService]. They can set a password only via the forgot-password email flow, which also revokes their sessions.
