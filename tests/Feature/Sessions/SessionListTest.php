@@ -13,7 +13,7 @@ function listSessionRow(?User $user, string $id, string $ua, int $at, array $pay
 {
     DB::table('sessions')->insert([
         'id' => $id, 'user_id' => $user?->id, 'ip_address' => '203.0.113.5', 'user_agent' => $ua,
-        'payload' => base64_encode(serialize($payload + ['_token' => 'secret-token'])), 'last_activity' => $at,
+        'payload' => base64_encode(json_encode($payload + ['_token' => 'secret-token'])), 'last_activity' => $at,
     ]);
 }
 

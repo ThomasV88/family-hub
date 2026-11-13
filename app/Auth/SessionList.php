@@ -40,7 +40,7 @@ class SessionList
         if ($raw === false) {
             return false;
         }
-        $data = @unserialize($raw, ['allowed_classes' => false]);
+        $data = json_decode($raw, true);
 
         return is_array($data) && ($data['auth_remember'] ?? false) === true;
     }
