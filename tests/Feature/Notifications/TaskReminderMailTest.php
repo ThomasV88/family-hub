@@ -35,3 +35,22 @@ it('has en and pl variants and falls back to en', function () {
     expect(reminderMail('pl', ['due_date' => '2027-05-10', 'due_time' => '18:00'])->subject)->toBe('Termin zadania: Zaplatiť internet');
     expect(reminderMail(null, ['due_date' => '2027-05-10', 'due_time' => '18:00'])->subject)->toBe('Task due: Zaplatiť internet');
 });
+
+it('neutralizes Markdown and links in the task title and member name', function () {
+    $user = User::factory()->withPreset(Preset::Parent)->create(['name' => '[Jana](https://evil.example/n)', 'locale' => 'en']);
+    $model = Task::factory()->create([
+        'creator_id' => $user->id,
+        'title' => '[Confirm your bank login](https://evil.example/x) ![i](https://evil.example/i.png) **bold** https://evil.example/auto',
+        'due_date' => '2027-05-10',
+    ]);
+    $html = (string) (new TaskReminderNotification($model->fresh()))->toMail($user)->render();
+
+    expect($html)->not->toContain('evil.example/x"')->not->toContain('href="https://evil.example')
+        ->not->toContain('<img src="https://evil.example')->not->toContain('<strong>bold')
+        ->toContain('Confirm your bank login');
+    // The only anchor is the action button to our own app.
+    preg_match_all('/<a [^>]*href="([^"]+)"/', $html, $m);
+    foreach ($m[1] as $href) {
+        expect($href)->toStartWith(url('/'));
+    }
+});

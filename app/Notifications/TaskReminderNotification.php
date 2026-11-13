@@ -29,6 +29,15 @@ class TaskReminderNotification extends Notification
         $this->timezone = $task->timezone;
     }
 
+    /**
+     * Mail lines are rendered as Markdown. Backslash-escape every ASCII punctuation character of
+     * user-controlled text so a title cannot become a link, image, emphasis or autolink.
+     */
+    private static function plain(string $text): string
+    {
+        return preg_replace('/([!-\/:-@\[-`{-~])/', '\\\\$1', $text) ?? '';
+    }
+
     /** @return list<string> */
     public function via(object $notifiable): array
     {
@@ -45,8 +54,8 @@ class TaskReminderNotification extends Notification
 
         return (new MailMessage)
             ->subject(trans('notifications.reminder_title', ['title' => $this->title], $locale))
-            ->greeting(trans('notifications.reminder_greeting', ['name' => $notifiable->name], $locale))
-            ->line(trans('notifications.reminder_body', ['title' => $this->title, 'date' => $date], $locale))
+            ->greeting(trans('notifications.reminder_greeting', ['name' => self::plain($notifiable->name)], $locale))
+            ->line(trans('notifications.reminder_body', ['title' => self::plain($this->title), 'date' => $date], $locale))
             ->action(trans('notifications.reminder_action', [], $locale), url('/todo?task='.$this->taskId))
             ->salutation(trans('mail.salutation', [], $locale));
     }
