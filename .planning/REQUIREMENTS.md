@@ -20,7 +20,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **AUTH-01**: Registration is invite-only: a family admin invites a member by email
 - [x] **AUTH-02**: User can sign in with email and password
 - [x] **AUTH-03**: User can sign in with Google, linked to their account by verified Google identity
-- [ ] **AUTH-04**: User session persists across browser refresh, and an admin can revoke a member's sessions
+- [x] **AUTH-04**: User session persists across browser refresh, and an admin can revoke a member's sessions
 - [x] **AUTH-05**: Admin can set per-member, per-module access (no access / view / edit)
 - [x] **AUTH-06**: Admin can apply permission presets (Parent, Child, Grandparent, Guest) and then adjust them
 - [x] **AUTH-07**: All permission checks are enforced server-side by one deny-by-default policy layer, covered by a role-by-endpoint automated test matrix
@@ -131,7 +131,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Complete |
 | AUTH-03 | Phase 2 | Complete |
-| AUTH-04 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Complete |
 | AUTH-05 | Phase 2 | Complete |
 | AUTH-06 | Phase 2 | Complete |
 | AUTH-07 | Phase 2 | Complete |

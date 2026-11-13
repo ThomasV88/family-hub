@@ -85,7 +85,7 @@ Plans:
   3. Admin can set no access, view or edit per member per module, start from a preset (Parent, Child, Grandparent, Guest) and adjust it
   4. A member without a grant cannot read or change a module's data through any endpoint, proven by an automated role-by-endpoint test matrix
   5. Admin can view an audit log of access to and changes of sensitive data
-**Plans:** 6/10 plans executed
+**Plans:** 9/10 plans executed
 **UI hint**: yes
 
 Plans:
@@ -95,9 +95,9 @@ Plans:
 - [x] 02-04-PLAN.md — Enumeration-safe password reset that signs out other devices, SessionRevoker, Settings shell and Appearance page
 - [x] 02-05-PLAN.md — Append-only audit log (health/finance auto-audit incl. denied, auth events, 2-year prune) and the admin audit page
 - [x] 02-06-PLAN.md — Members and access: member panel with presets and per-module none/view/edit, audited atomic save, permission matrix
-- [ ] 02-07-PLAN.md — Invites: hashed single-use 7-day tokens, queued mail with failure flag, resend/copy (rotating)/revoke, invite dialog
-- [ ] 02-08-PLAN.md — Member sessions: list devices, revoke one or all (rows deleted + remember token rotated), audited
-- [ ] 02-09-PLAN.md — Invite acceptance (password, race-safe) and Google sign-in linked by verified identity, no self-signup
+- [x] 02-07-PLAN.md — Invites: hashed single-use 7-day tokens, queued mail with failure flag, resend/copy (rotating)/revoke, invite dialog
+- [x] 02-08-PLAN.md — Member sessions: list devices, revoke one or all (rows deleted + remember token rotated), audited
+- [x] 02-09-PLAN.md — Invite acceptance (password, race-safe) and Google sign-in linked by verified identity, no self-signup
 - [ ] 02-10-PLAN.md — DEFERRED with owner: Stalwart mailbox, Google OAuth clients, staging/production rollout, admin creation, audit cron
 
 ### Phase 3: To-Do
@@ -199,7 +199,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and Infrastructure | 6/12 | In Progress|  |
-| 2. Identity and Authorization Core | 6/10 | In Progress|  |
+| 2. Identity and Authorization Core | 9/10 | In Progress|  |
 | 3. To-Do | 0/TBD | Not started | - |
 | 4. Wishlist | 0/TBD | Not started | - |
 | 5. Finance | 0/TBD | Not started | - |
