@@ -14,14 +14,24 @@ class DispatchOutbox extends Command
 
     private const BATCH = 100;
 
+    /** Well above SendOutboxItem::$timeout (300 s), so a slow send is never mistaken for a dead worker. */
+    public const STUCK_MINUTES = 30;
+
     public function handle(): int
     {
         $now = now()->toIso8601String();
 
-        // Rows stuck in queued/sending (worker died) go back to pending.
+        $stuckBefore = now()->subMinutes(self::STUCK_MINUTES)->toIso8601String();
+
+        // Stuck rows that already used up their attempts are failed, never retried forever.
         DB::update(
-            "update notification_outbox set status = 'pending', updated_at = ? where status in ('queued', 'sending') and updated_at < ?",
-            [$now, now()->subMinutes(10)->toIso8601String()],
+            "update notification_outbox set status = 'failed', last_error = 'stuck', updated_at = ? where status in ('queued', 'sending') and updated_at < ? and attempts >= ?",
+            [$now, $stuckBefore, SendOutboxItem::MAX_ATTEMPTS],
+        );
+        // The others (worker died) go back to pending.
+        DB::update(
+            "update notification_outbox set status = 'pending', updated_at = ? where status in ('queued', 'sending') and updated_at < ? and attempts < ?",
+            [$now, $stuckBefore, SendOutboxItem::MAX_ATTEMPTS],
         );
 
         $ids = DB::select(

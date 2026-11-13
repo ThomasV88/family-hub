@@ -64,11 +64,11 @@ it('dispatches due pending rows once and marks them queued', function () {
         ->and($later->fresh()->status->value)->toBe('pending');
 });
 
-it('returns rows stuck in queued or sending for over 10 minutes to pending and redispatches', function () {
+it('returns rows stuck in queued or sending for over 30 minutes to pending and redispatches', function () {
     Queue::fake();
     $stuck = outboxRow();
     $stuck->forceFill(['status' => 'sending'])->save();
-    DB::table('notification_outbox')->where('id', $stuck->id)->update(['updated_at' => now()->subMinutes(11)]);
+    DB::table('notification_outbox')->where('id', $stuck->id)->update(['updated_at' => now()->subMinutes(31)]);
 
     $this->artisan('outbox:dispatch');
 
@@ -190,4 +190,56 @@ it('schedules outbox:dispatch every minute and outbox:prune daily', function () 
 
     expect($dispatch->expression)->toBe('* * * * *')->and($dispatch->withoutOverlapping)->toBeTrue()
         ->and($prune->expression)->toBe('0 0 * * *');
+});
+
+it('does not reset a send that has been running for only 11 minutes', function () {
+    Queue::fake();
+    $slow = outboxRow();
+    $slow->forceFill(['status' => 'sending'])->save();
+    DB::table('notification_outbox')->where('id', $slow->id)->update(['updated_at' => now()->subMinutes(11)]);
+
+    $this->artisan('outbox:dispatch');
+
+    Queue::assertNothingPushed();
+    expect($slow->fresh()->status->value)->toBe('sending');
+});
+
+it('fails a stuck row that exhausted its attempts instead of retrying forever', function () {
+    Queue::fake();
+    $poison = outboxRow();
+    $poison->forceFill(['status' => 'sending', 'attempts' => SendOutboxItem::MAX_ATTEMPTS])->save();
+    DB::table('notification_outbox')->where('id', $poison->id)->update(['updated_at' => now()->subMinutes(31)]);
+
+    $this->artisan('outbox:dispatch');
+
+    Queue::assertNothingPushed();
+    expect($poison->fresh()->status->value)->toBe('failed')->and($poison->fresh()->last_error)->toBe('stuck');
+});
+
+it('does not claim a queued row whose attempts are exhausted', function () {
+    Notification::fake();
+    $row = queued(outboxRow());
+    $row->forceFill(['attempts' => SendOutboxItem::MAX_ATTEMPTS])->save();
+
+    runJob($row);
+
+    Notification::assertNothingSent();
+});
+
+it('does not resend when marking a delivered mail as sent fails once', function () {
+    Notification::fake();
+    $row = queued(outboxRow());
+    $GLOBALS['fh_fail_mark'] = 1;
+    OutboxItem::saving(function (OutboxItem $m) {
+        if (($GLOBALS['fh_fail_mark'] ?? 0) > 0 && $m->status === \App\Notifications\Outbox\OutboxStatus::Sent) {
+            $GLOBALS['fh_fail_mark']--;
+            throw new RuntimeException('db blip');
+        }
+    });
+
+    runJob($row);
+    $GLOBALS['fh_fail_mark'] = 0;
+
+    Notification::assertSentTimes(TaskReminderNotification::class, 1);
+    expect($row->fresh()->status->value)->toBe('sent');
 });

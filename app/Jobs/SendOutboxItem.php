@@ -26,6 +26,12 @@ class SendOutboxItem implements ShouldQueue
 
     public $tries = 1;
 
+    /**
+     * Hard kill after this many seconds (10 devices at 15 s each plus slack). DispatchOutbox::STUCK_MINUTES
+     * must stay well above it, otherwise a slow send would be taken for a dead one and sent twice.
+     */
+    public $timeout = 300;
+
     public const MAX_ATTEMPTS = 5;
 
     /** Seconds until the next attempt, indexed by the attempt that just failed minus one. */
@@ -39,6 +45,7 @@ class SendOutboxItem implements ShouldQueue
         $claimed = OutboxItem::query()
             ->whereKey($this->outboxId)
             ->where('status', OutboxStatus::Queued->value)
+            ->where('attempts', '<', self::MAX_ATTEMPTS)
             ->update([
                 'status' => OutboxStatus::Sending->value,
                 'attempts' => DB::raw('attempts + 1'),
@@ -76,9 +83,31 @@ class SendOutboxItem implements ShouldQueue
             }
 
             $handler->sendMail($item, $item->user);
-            $this->finish($item, OutboxStatus::Sent);
         } catch (Throwable $e) {
             $this->recordFailure($item, class_basename($e));
+
+            return;
+        }
+
+        // The mail is out: a failure while marking it must never be routed to recordFailure (resend).
+        $this->finishAfterSend($item);
+    }
+
+    /**
+     * Marks a row sent after the message left the server. Retries only the status update; if the database
+     * stays unavailable the row remains 'sending' and DispatchOutbox later retries it (documented
+     * at-least-once risk: delivery can repeat only when the database fails right after a successful send).
+     */
+    private function finishAfterSend(OutboxItem $item): void
+    {
+        for ($try = 1; $try <= 3; $try++) {
+            try {
+                $this->finish($item, OutboxStatus::Sent);
+
+                return;
+            } catch (Throwable) {
+                usleep(200_000 * $try);
+            }
         }
     }
 
@@ -106,21 +135,30 @@ class SendOutboxItem implements ShouldQueue
         foreach ($subscriptions as $subscription) {
             $result = $sender->send($subscription, $message);
             if ($result === PushResult::Success) {
-                $subscription->forceFill(['last_success_at' => now()])->save();
                 $succeeded++;
+                $this->bestEffort(fn () => $subscription->forceFill(['last_success_at' => now()])->save());
             } elseif ($result === PushResult::Expired) {
-                $subscription->delete();
+                $this->bestEffort(fn () => $subscription->delete());
             } else {
                 $failed++;
             }
         }
 
         if ($succeeded > 0) {
-            $this->finish($item, OutboxStatus::Sent);
+            $this->finishAfterSend($item);
         } elseif ($failed > 0) {
             $this->recordFailure($item, 'push_failed');
         } else {
             $this->finish($item, OutboxStatus::Skipped, 'no_subscription');
+        }
+    }
+
+    /** Bookkeeping after a delivered push must not turn the delivery into a failure that is retried. */
+    private function bestEffort(callable $work): void
+    {
+        try {
+            $work();
+        } catch (Throwable) {
         }
     }
 
