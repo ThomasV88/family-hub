@@ -87,7 +87,9 @@ final class RRuleRecurrenceEngine implements RecurrenceEngine
         $time = $anchor->format('H:i');
         $anchorDate = $anchor->format('Y-m-d');
         $start = LocalTime::at($anchorDate, $time, $timezone);
-        $limitDate = $start->addYears(self::MAX_YEARS)->format('Y-m-d');
+        // The horizon counts from where a result can first appear (like next()), not from the anchor: a bill that
+        // started twelve years ago still has due dates in today's window.
+        $limitDate = CarbonImmutable::parse(max($fromDate, $anchorDate), $timezone)->addYears(self::MAX_YEARS)->format('Y-m-d');
         $last = min($toDate, $limitDate);
 
         $dates = [];

@@ -60,3 +60,9 @@ it('respects the cap and counts daily items', function () {
 it('rejects non-allowlisted rules', function () {
     app(RecurrenceEngine::class)->between('FREQ=YEARLY', LocalTime::at('2027-01-01', '12:00', BETWEEN_TZ), '2027-01-01', '2028-01-01', BETWEEN_TZ);
 })->throws(InvalidArgumentException::class);
+
+it('keeps a bill started twelve years ago due in today\'s window', function () {
+    $p = ['kind' => 'monthly_day', 'monthDay' => 5];
+
+    expect(betweenDates($p, '2014-03-05', '2026-11-01', '2027-01-31'))->toBe(['2026-11-05', '2026-12-05', '2027-01-05']);
+});
