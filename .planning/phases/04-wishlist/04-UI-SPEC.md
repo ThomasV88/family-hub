@@ -30,10 +30,10 @@ New components (compose only from existing tokens and `Ui*` parts). Recipient an
 
 | Component | Contract |
 |-----------|----------|
-| `WishlistPage` | Page body of `/wishlist`. Owns selected member (URL query `?member={id}`, default = viewer) and selected wish (`?wish={id}`, `?wish=new`). Picks `OwnListView` when the server says `list.viewer_is_recipient` (viewer is the owner or a manager of the owner), otherwise `GiftListView`. The flag is the only branch; reservation data never exists in the owner's props |
+| `WishlistPage` | Page body of `/wishlist`. Owns selected member (URL query `?member={id}`, default = viewer) and selected wish (`?wish={id}`, `?wish=new`). Picks `OwnListView` when the server says `list.viewer_is_recipient` (recipient-equivalent: the viewer is the owner, a manager of the owner, or holds an edit grant or admin edit rights on that list), otherwise `GiftListView`. The flag is the only branch; reservation data never exists in the props of `OwnListView` |
 | `PersonChips` | `UiChip` group (`role="group"`, label "Choose a list"): one chip per member with wishlist view access, `UiAvatar` 24px + name. Viewer's own chip first with "(You)" suffix, others alphabetical by locale collation. No counts on chips |
 | `OccasionStrip` | Horizontal row of up to 3 `OccasionPill`s (icon, "{person}: {occasion}", date, days-away) for the next 60 days across all members, ending with link "All occasions". Wraps, never scrolls horizontally |
-| `ShoppingSummary` | `UiCard` shown on `GiftListView` and `OwnListView` alike, **only for the viewer's own reservations on other people** (never anything about the viewer's own list). Header `ShoppingBag` "Your shopping" with Show/Hide toggle (`aria-expanded`, default collapsed), grouped by person; each row jumps to `?member={id}&wish={id}`. Co-buys show the viewer's own share only. Hidden entirely when the viewer has no reservations (no empty state) |
+| `ShoppingSummary` | `UiCard` rendered **only on `GiftListView` and on `/wishlist/occasions`** (own section above "Upcoming"); it is never rendered on `OwnListView`. Data comes from a separate lazy Inertia prop `shopping`, loaded by its own request and scoped server-side to `reserver_id = viewer`, excluding every list where the viewer is recipient-equivalent (owner, manager, edit grant or admin editor). It never carries anything about the viewer's own list. Header `ShoppingBag` "Your shopping" with Show/Hide toggle (`aria-expanded`, default collapsed), grouped by person; each row jumps to `?member={id}&wish={id}`. Co-buys show the viewer's own share only. Hidden entirely when the viewer has no reservations (no empty state). A reservation the viewer holds on a list for which they later become recipient-equivalent (for example made a manager) is excluded server-side from this prop and from giver reminders, never rendered, and purged from that list's reservation data when the grant is made |
 | `WishCard` (two variants) | `OwnWishCard` and `GiftWishCard`. Card button area: image (4:3), title, price, link count, priority tag. `GiftWishCard` adds one status tag line. `OwnWishCard` has no status line, no tag slot, no extra row |
 | `WishImage` | Four states, see Image states. Used in card and panel |
 | `OwnWishPanel` | Create and edit form for the owner and managers (`UiDetailPanel`). Contains no reservation markup |
@@ -60,7 +60,7 @@ Reuse 01.1 tokens exactly (4, 8, 12, 16, 24, 32, 48, 64). No new values.
 | 2xl | 48px | Empty-state vertical padding |
 | 3xl | 64px | not used here |
 
-Exceptions: 44px minimum touch targets on phone/iPad for person chips, wish card button, priority chips, "Add link", remove-link buttons, reservation-box buttons, occasion rows and the days-ahead checkboxes. Image aspect ratio 4:3 (ratio, not a spacing value). Panel width 360px docked (01.1). Gallery tile minimum width 148px.
+Exceptions: 44px minimum touch targets on phone/iPad for person chips, wish card button, priority chips, "Add link", remove-link buttons, reservation-box buttons, occasion rows and the days-ahead checkboxes. Image aspect ratio 4:3 (ratio, not a spacing value). Panel width 360px docked (01.1). Gallery tiles have no pixel minimum; the grid drops to 1 column below 340px content width so 320px viewports and 200% zoom never scroll horizontally.
 
 ---
 
@@ -99,11 +99,11 @@ Semantic tags (always text plus icon, `UiTag` variants only):
 - Co-buy: `neutral` tag with `Users`, "Co-buy, {people}"
 - Priority: "Top wish" `neutral` tag with `Star`; "Would love" and "Nice to have" shown in the panel only (cards show a tag for Top wish only, to keep cards calm) (discretion)
 - Days away: "Today" `warn`; 1 to 3 days `warn` with days text; otherwise `neutral`
-- Received (own list archive): `success` tag with `Check`, "Received"
+- Received (own list archive): `success` tag with `Check`, "Received" (key `wishlist.received.tag`, deliberately outside `wishlist.status.*`)
 
 Pledge progress (`UiProgress`): fill `--color-border-strong`, track `--color-surface-2`, always with text value; never accent, never danger.
 
-Destructive (`--color-danger`) reserved for: "Delete wish" button and confirm, "Cancel reservation" confirm button when co-buyers exist, "Discard" in discard dialog, field errors, upload/load error text, reservation conflict alert.
+Destructive (`--color-danger`) reserved for: "Delete wish" button and confirm, "Cancel reservation" confirm button when co-buyers exist, "Discard" in discard dialog, field errors, upload/load error text. The reservation conflict alert is `warning`, not danger.
 
 ---
 
@@ -115,26 +115,28 @@ Routes (Inertia pages): `/wishlist` (gallery; panel via `?wish=`), `/wishlist/oc
 
 The recipient view must be indistinguishable from a list that has no reservation feature at all.
 
-- On `OwnListView` (owner or manager of the list): no status tags, no reservation or co-buy words in any visible text, `aria-label`, `title`, tooltip, empty-state text, toast, live-region text, dialog or banner; no counts of reserved, available or contributed items; no "reserved" filter or sort; no skeleton, spacer or reserved space for a status row; wish cards are the same height whether or not the wish is reserved; no polling of reservation state; no Inertia prop, `data-*` attribute or hidden DOM node carrying reservation data. Layout must not shift when a giver reserves.
-- The owner can mark a wish "Received" and delete it. Neither action shows or asks anything about reservations. Delete confirm copy is the same whether or not the wish is reserved.
-- A parent/manager managing a child's list sees `OwnListView` for that child with banner "You are managing {name}'s list." Their own reservations on other members' lists remain visible to them via the shopping summary (those are their own gifts for others).
-- `ShoppingSummary` and giver reminders contain only the viewer's own reservations on other people's lists.
+- On `OwnListView` (viewer is recipient-equivalent for the viewed list: owner, manager, edit grant or admin editor): no status tags, no reservation or co-buy words in any visible text, `aria-label`, `title`, tooltip, empty-state text, toast, live-region text, dialog or banner; no counts of reserved, available or contributed items; no "reserved" filter or sort; no skeleton, spacer or reserved space for a status row; wish cards are the same height whether or not the wish is reserved; no polling of reservation state; no Inertia prop, `data-*` attribute or hidden DOM node carrying reservation data about the viewed list's wishes. `OwnListView` never renders `ShoppingSummary` and its page props never include the `shopping` prop. Layout must not shift when a giver reserves.
+- The owner can mark a wish "Received" and delete it. Neither action shows or asks anything about reservations. Delete confirm copy is the same whether or not the wish is reserved. The Received group renders with the same neutral `wishlist.received.tag` whether or not the wish was reserved.
+- Edit panels (`OwnWishPanel`, including "New wish for {name}") never contain a reservation box, for owners, managers, edit-grant holders and admin editors alike.
+- A parent/manager managing a child's list sees `OwnListView` for that child with banner "You are managing {name}'s list." Their own reservations on other members' lists are visible only on `GiftListView` pages and in `/wishlist/occasions` through `ShoppingSummary`. Reservations they hold on the child's list are excluded server-side (see `ShoppingSummary`) and never rendered.
+- `ShoppingSummary` and giver reminders contain only the viewer's own reservations on lists where the viewer is a giver (not recipient-equivalent).
 - Search, exports and notifications: no reservation text. Giver reminders: see Reminders.
-- Tests (Vitest + axe, plus Pest leak tests): snapshot `OwnListView` and `OwnWishPanel` DOM with a reserved wish versus an unreserved wish and assert equality; assert none of the reservation copy keys appear in the rendered text of any own-list state in en/sk/pl.
+- Tests (Vitest + axe, plus Pest leak tests): snapshot `OwnListView` and `OwnWishPanel` DOM with a reserved wish versus an unreserved wish and assert equality, covering the Received group, the managed-child state and an edit-grant viewer; assert the `OwnListView` Inertia props are identical for reserved and unreserved states and contain no `shopping` prop (Pest, also with a viewer who holds reservations elsewhere, and with a viewer who became manager of a list they had reserved on); assert that neither `wishlist.status.*` nor `wishlist.res.*` keys appear in the rendered text of any own-list state in en/sk/pl (a wholesale ban, which is why Received uses `wishlist.received.tag`).
+
 
 ### 1. Wishlist gallery (`/wishlist`)
 
 Focal point on own list: the first wish card with the "Add wish" tile directly before it; on someone else's list: the first card with an "Available" tag, so the next gift to buy is the first thing seen.
 
 Region order from top (sketch 005, 16px gap):
-1. Page header: h1 "Wishlist". At container width >= 640px the topbar shows primary "Add wish" only while the own list is selected; phone uses the FAB (own list only). Never shown on other members' lists unless the viewer has an edit grant for that child's list (then label "Add wish for {name}").
-2. `ShoppingSummary` (when applicable, collapsed by default).
+1. Page header: h1 "Wishlist". At container width >= 640px the topbar shows primary "Add wish" only while the own list is selected; phone uses the FAB (own list only). Never shown on other members' lists unless the viewer has an edit grant or admin edit rights for that list (then label "Add wish for {name}"). A viewer with an edit grant or admin editor on another member's list gets `OwnListView` for that list (banner "You are managing {name}'s list.", no giver controls, no status tags, no reservation box); the edit panel is `OwnWishPanel` with no reservation box. They are recipient-equivalent for that list and cannot reserve on it.
+2. `ShoppingSummary` (`GiftListView` only, when applicable, collapsed by default; absent on `OwnListView`).
 3. `PersonChips`.
 4. `OccasionStrip`.
 5. List banner (own list: neutral `UiAlert` info, text "This is your wishlist. Everyone with access can see it." Dismissible per session. Managed child list: "You are managing {name}'s list." Another member's list: no banner, instead a list header line: avatar, "{name}'s wishlist" (Heading), muted "{n} wishes".)
 6. Gallery.
 
-Gallery (container query on `.content`, `grid-template-columns: repeat(n, minmax(0, 1fr))`, gap 16px): 2 columns by default (phone), 3 from content width 560px, 4 from 800px. With the docked panel open the container query naturally reduces columns. Order on own list: by priority (Top wish, Would love, Nice to have), then newest first. On others' lists: Available wishes first, then reserved/co-buy, each by priority then newest (discretion: puts actionable gifts first; this ordering only exists in `GiftListView`, the owner order never depends on reservations). Received wishes leave the gallery and live in a collapsible "Received ({n})" group (own list only, `aria-expanded`, `Archive` icon), read-only cards without a panel action except "Delete wish".
+Gallery (container query on `.content`, `grid-template-columns: repeat(n, minmax(0, 1fr))` with no minimum tile width, gap 16px): 1 column below 340px content width (320px viewport, 200% zoom), 2 columns by default (phone), 3 from content width 560px, 4 from 800px. With the docked panel open the container query naturally reduces columns. Order on own list: by priority (Top wish, Would love, Nice to have), then newest first. On others' lists: Available wishes first, then reserved/co-buy, each by priority then newest (discretion: puts actionable gifts first; this ordering only exists in `GiftListView`, the owner order never depends on reservations). Received wishes leave the gallery and live in a collapsible "Received ({n})" group (own list only, `aria-expanded`, `Archive` icon), read-only cards without a panel action except "Delete wish".
 
 `OwnWishCard` anatomy (radius 12px, 1px `--color-border`, `--color-surface`, no shadow): `WishImage` 4:3 on top (radius 12px 12px 0 0), body padding 12px: title 16/600 (2 lines clamp), price 14/600 ("{amount}" via `Intl.NumberFormat` currency, omitted when no price), meta line 14/400 muted: `Link` icon with "{n} links" (only when >= 1) and the Top wish tag. Whole card is one `<button>` that opens `OwnWishPanel` (`aria-label` = title). No other controls on the card.
 
@@ -150,7 +152,7 @@ States:
 - Empty other list: `UiEmptyState` "{name} has not added any wishes yet" with body "Check back later.", no action.
 - Empty received group: group is not rendered.
 - Error: `UiErrorState` "Something went wrong" / load body, action "Try again". Module access none = 403 `UiErrorState` (Phase 2). `?wish=` for an id the viewer cannot see or that does not exist renders the same 403 state (no existence leak).
-- View-only users (no edit grant): no add tile, no FAB, no topbar button; they can still reserve on others' lists if they have view access (reserving is a giver action available to anyone with view access except the recipient).
+- View-only users (no edit grant): no add tile, no FAB, no topbar button; they can still reserve on others' lists if they have view access (reserving is a giver action available to anyone with view access except the recipient and recipient-equivalents).
 
 ### 2. Wish form, owner panel (`OwnWishPanel`)
 
@@ -167,7 +169,7 @@ Field order (single column, 16px gap):
 6. Priority: radiogroup of 3 `UiChip`s "Top wish" / "Would love" / "Nice to have", exactly one on, default "Would love", arrow keys move between them.
 7. Notes (`UiTextarea`, 4 rows growing to 12).
 
-Footer: primary "Save wish", secondary "Cancel". Edit mode adds secondary "Mark as received" (leading `Check`, confirm-free, toast "Wish marked as received", moves it to Received) and danger ghost "Delete wish" (`Trash2`, at the start edge). Delete confirm dialog (default focus "Keep wish"): body "Delete "{title}"? This cannot be undone." Same body whether or not anyone interacted with the wish.
+Footer: primary "Save wish", secondary "Close" (`wishlist.close`; when the form is dirty it opens the "Discard changes?" dialog, so no button is labelled "Cancel" next to "Discard"). Edit mode adds secondary "Mark as received" (leading `Check`, confirm-free, toast "Wish marked as received", moves it to Received) and danger ghost "Delete wish" (`Trash2`, at the start edge). Delete confirm dialog (default focus "Keep wish"): body "Delete "{title}"? This cannot be undone." Same body whether or not anyone interacted with the wish.
 
 Behavior:
 - Single save path (as 03): save enabled when dirty and valid. Success: toast "Wish saved"; create mode closes the panel; edit mode stays open. If a link was added or changed and no image exists, the server queues image loading and the card shows the image-loading state.
@@ -286,6 +288,7 @@ Tone from 01.1: calm, plain, short, no exclamation marks. Keys under `wishlist.*
 | wishlist.banner.own | This is your wishlist. Everyone with access can see it. | Toto je váš zoznam želaní. Vidí ho každý, kto má prístup. | To jest Twoja lista życzeń. Widzi ją każdy, kto ma dostęp. |
 | wishlist.banner.managing | You are managing {name}'s list. | Spravujete zoznam: {name}. | Zarządzasz listą: {name}. |
 | wishlist.received.show | Received ({n}) | Prijaté ({n}) | Otrzymane ({n}) |
+| wishlist.received.tag | Received | Prijaté | Otrzymane |
 | wishlist.received.hide | Hide received ({n}) | Skryť prijaté ({n}) | Ukryj otrzymane ({n}) |
 | wishlist.shopping.title | Your shopping | Váš nákup | Twoje zakupy |
 | wishlist.shopping.show | Show | Zobraziť | Pokaż |
@@ -298,7 +301,7 @@ Tone from 01.1: calm, plain, short, no exclamation marks. Keys under `wishlist.*
 | wishlist.priority.nice | Nice to have | Bolo by fajn | Byłoby miło |
 | wishlist.people | {n} person \| {n} people | {n} osoba \| {n} osoby \| {n} osoby \| {n} osôb | {n} osoba \| {n} osoby \| {n} osób \| {n} osoby |
 
-### Status tags (giver lists only)
+### Status tags (giver lists only; `wishlist.status.*` and `wishlist.res.*` are banned on own-list states)
 
 | Key | EN | SK | PL |
 |-----|----|----|----|
@@ -306,7 +309,6 @@ Tone from 01.1: calm, plain, short, no exclamation marks. Keys under `wishlist.*
 | wishlist.status.reserved_by | Reserved by {name} | Rezervuje {name} | Rezerwuje {name} |
 | wishlist.status.reserved_you | Reserved by you | Rezervované vami | Zarezerwowane przez Ciebie |
 | wishlist.status.cobuy | Co-buy, {people} | Spoločný nákup, {people} | Wspólny zakup, {people} |
-| wishlist.status.received | Received | Prijaté | Otrzymane |
 
 ### Wish form (owner)
 
@@ -384,7 +386,7 @@ Tone from 01.1: calm, plain, short, no exclamation marks. Keys under `wishlist.*
 | Key | EN | SK | PL |
 |-----|----|----|----|
 | wishlist.save | Save wish | Uložiť želanie | Zapisz życzenie |
-| wishlist.cancel | Cancel | Zrušiť | Anuluj |
+| wishlist.cancel | Cancel (inline co-buy share form only) | Zrušiť | Anuluj |
 | wishlist.close | Close | Zavrieť | Zamknij |
 | wishlist.received | Mark as received | Označiť ako prijaté | Oznacz jako otrzymane |
 | wishlist.delete | Delete wish | Odstrániť želanie | Usuń życzenie |
