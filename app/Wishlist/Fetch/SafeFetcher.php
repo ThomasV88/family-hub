@@ -3,6 +3,7 @@
 namespace App\Wishlist\Fetch;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ResponseTimeoutException;
 use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
@@ -139,19 +140,8 @@ final class SafeFetcher
         $tooLarge = false;
         $curl = [
             CURLOPT_RESOLVE => ["{$host}:{$port}:{$ip}"],
-            CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_LOW_SPEED_LIMIT => 1024,
             CURLOPT_LOW_SPEED_TIME => 5,
-            CURLOPT_NOPROGRESS => false,
-            CURLOPT_XFERINFOFUNCTION => function ($ch, $dlTotal, $dlNow) use ($maxBytes, &$tooLarge): int {
-                if ($dlNow > $maxBytes) {
-                    $tooLarge = true;
-
-                    return 1;
-                }
-
-                return 0;
-            },
         ];
         if (defined('CURLOPT_PREREQFUNCTION')) {
             $curl[CURLOPT_PREREQFUNCTION] = fn ($ch, $dstIp) => self::connectedIpMatches($ip, (string) $dstIp)
@@ -174,7 +164,16 @@ final class SafeFetcher
                     'User-Agent' => 'FamilyHubImageFetcher/1.0',
                     'Accept' => $kind === 'image' ? 'image/*' : 'text/html,application/xhtml+xml',
                 ],
+                'protocols' => ['http', 'https'],
                 'curl' => $curl,
+                // Aborts chunked bodies without Content-Length once the cap is crossed.
+                'progress' => function ($dlTotal, $dlNow) use ($maxBytes, &$tooLarge): void {
+                    if ($dlNow > $maxBytes) {
+                        $tooLarge = true;
+
+                        throw new FetchFailed('too_large');
+                    }
+                },
                 'on_headers' => function (ResponseInterface $r) use ($maxBytes): void {
                     $length = $r->getHeaderLine('Content-Length');
                     if ($length !== '' && ctype_digit($length) && (int) $length > $maxBytes) {
@@ -201,7 +200,8 @@ final class SafeFetcher
         if (method_exists($e, 'getHandlerContext')) {
             $errno = (int) ($e->getHandlerContext()['errno'] ?? 0);
         }
-        if ($errno === 28 || str_contains(strtolower($e->getMessage()), 'timed out')) {
+        $message = strtolower($e->getMessage());
+        if ($errno === 28 || $e instanceof ResponseTimeoutException || str_contains($message, 'timed out') || str_contains($message, 'too slow')) {
             return new FetchFailed('timeout');
         }
 

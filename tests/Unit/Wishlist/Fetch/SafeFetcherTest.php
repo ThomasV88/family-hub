@@ -9,7 +9,7 @@ use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 use Tests\Support\FakeDnsResolver;
 
-function fetcher(array $dns, array $responses, ?array &$seen = null, int $hops = 3): SafeFetcher
+function fetchTestFetcher(array $dns, array $responses, ?array &$seen = null, int $hops = 3): SafeFetcher
 {
     $seen = [];
     $mock = new MockHandler($responses);
@@ -22,7 +22,7 @@ function fetcher(array $dns, array $responses, ?array &$seen = null, int $hops =
     return new SafeFetcher(new FakeDnsResolver($dns), null, $handler, $hops);
 }
 
-function reasonOf(callable $fn): string
+function fetchReasonOf(callable $fn): string
 {
     try {
         $fn();
@@ -48,7 +48,7 @@ it('allows a public IPv4 address', function () {
 it('rejects hostile URLs before any DNS lookup', function (string $url) {
     $dns = new FakeDnsResolver(['a.example' => ['93.184.216.34']]);
     $f = new SafeFetcher($dns, null, new MockHandler([new Response(200)]));
-    expect(reasonOf(fn () => $f->get($url, 1000, 'html')))->toBeIn(['bad_url', 'blocked_address'])
+    expect(fetchReasonOf(fn () => $f->get($url, 1000, 'html')))->toBeIn(['bad_url', 'blocked_address'])
         ->and($dns->total())->toBe(0);
 })->with([
     'javascript:alert(1)', 'file:///etc/passwd', 'ftp://a.example/x', 'data:text/html,x',
@@ -58,19 +58,19 @@ it('rejects hostile URLs before any DNS lookup', function (string $url) {
 ]);
 
 it('converts punycode IDN hosts and fetches them', function () {
-    $f = fetcher(['xn--bcher-kva.example' => ['93.184.216.34']], [new Response(200, [], 'ok')], $seen);
+    $f = fetchTestFetcher(['xn--bcher-kva.example' => ['93.184.216.34']], [new Response(200, [], 'ok')], $seen);
     $r = $f->get('http://bücher.example/p?q=1', 1000, 'html');
     expect($r->body)->toBe('ok')->and($seen[0]['url'])->toBe('http://xn--bcher-kva.example/p?q=1');
 });
 
 it('rejects a host with one private A record among public ones', function () {
-    $f = fetcher(['a.example' => ['93.184.216.34', '10.0.0.5']], [new Response(200)]);
-    expect(reasonOf(fn () => $f->get('http://a.example/', 1000, 'html')))->toBe('blocked_address');
+    $f = fetchTestFetcher(['a.example' => ['93.184.216.34', '10.0.0.5']], [new Response(200)]);
+    expect(fetchReasonOf(fn () => $f->get('http://a.example/', 1000, 'html')))->toBe('blocked_address');
 });
 
 it('rejects hosts without an A record (IPv6-only)', function () {
-    $f = fetcher([], [new Response(200)]);
-    expect(reasonOf(fn () => $f->get('http://v6only.example/', 1000, 'html')))->toBe('blocked_address');
+    $f = fetchTestFetcher([], [new Response(200)]);
+    expect(fetchReasonOf(fn () => $f->get('http://v6only.example/', 1000, 'html')))->toBe('blocked_address');
 });
 
 it('pins the connection, disables proxies and redirects, and resolves once per hop', function () {
@@ -116,7 +116,7 @@ it('compares the connected IP with the pinned IP', function () {
 
 it('follows redirects manually, re-resolving each hop and resolving relative Locations', function () {
     $dns = ['a.example' => ['93.184.216.34'], 'b.example' => ['93.184.216.35']];
-    $f = fetcher($dns, [
+    $f = fetchTestFetcher($dns, [
         new Response(301, ['Location' => '/next']),
         new Response(302, ['Location' => 'https://b.example/final']),
         new Response(200, [], 'done'),
@@ -129,8 +129,8 @@ it('follows redirects manually, re-resolving each hop and resolving relative Loc
 });
 
 it('rejects redirects to unsafe targets', function (string $location, array $dns) {
-    $f = fetcher(['a.example' => ['93.184.216.34']] + $dns, [new Response(302, ['Location' => $location]), new Response(200, [], 'leak')]);
-    expect(reasonOf(fn () => $f->get('http://a.example/', 1000, 'html')))->toBeIn(['blocked_address', 'bad_url']);
+    $f = fetchTestFetcher(['a.example' => ['93.184.216.34']] + $dns, [new Response(302, ['Location' => $location]), new Response(200, [], 'leak')]);
+    expect(fetchReasonOf(fn () => $f->get('http://a.example/', 1000, 'html')))->toBeIn(['blocked_address', 'bad_url']);
 })->with([
     'metadata' => ['http://169.254.169.254/latest', []],
     'private host' => ['http://internal.example/', ['internal.example' => ['10.0.0.5']]],
@@ -142,25 +142,25 @@ it('rejects redirects to unsafe targets', function (string $location, array $dns
 it('stops after the third redirect and on loops', function () {
     $dns = ['a.example' => ['93.184.216.34'], 'b.example' => ['93.184.216.35']];
     $r = fn () => new Response(302, ['Location' => 'http://b.example/']);
-    $ok = fetcher($dns, [$r(), $r(), $r(), new Response(200, [], 'x')]);
+    $ok = fetchTestFetcher($dns, [$r(), $r(), $r(), new Response(200, [], 'x')]);
     expect($ok->get('http://a.example/', 10, 'html')->body)->toBe('x');
 
-    $f = fetcher($dns, [$r(), $r(), $r(), $r(), new Response(200)]);
-    expect(reasonOf(fn () => $f->get('http://a.example/', 10, 'html')))->toBe('too_many_redirects');
+    $f = fetchTestFetcher($dns, [$r(), $r(), $r(), $r(), new Response(200)]);
+    expect(fetchReasonOf(fn () => $f->get('http://a.example/', 10, 'html')))->toBe('too_many_redirects');
 
-    $loop = fetcher($dns, [
+    $loop = fetchTestFetcher($dns, [
         new Response(302, ['Location' => 'http://b.example/']), new Response(302, ['Location' => 'http://a.example/']),
         new Response(302, ['Location' => 'http://b.example/']), new Response(302, ['Location' => 'http://a.example/']),
         new Response(200),
     ]);
-    expect(reasonOf(fn () => $loop->get('http://a.example/', 10, 'html')))->toBe('too_many_redirects');
+    expect(fetchReasonOf(fn () => $loop->get('http://a.example/', 10, 'html')))->toBe('too_many_redirects');
 });
 
 it('fails on non-200 statuses and oversize bodies', function () {
     $dns = ['a.example' => ['93.184.216.34']];
-    expect(reasonOf(fn () => fetcher($dns, [new Response(404)])->get('http://a.example/', 10, 'html')))->toBe('http_status')
-        ->and(reasonOf(fn () => fetcher($dns, [new Response(200, ['Content-Length' => '5000'], 'x')])->get('http://a.example/', 100, 'html')))->toBe('too_large')
-        ->and(reasonOf(fn () => fetcher($dns, [new Response(200, [], str_repeat('x', 101))])->get('http://a.example/', 100, 'html')))->toBe('too_large');
+    expect(fetchReasonOf(fn () => fetchTestFetcher($dns, [new Response(404)])->get('http://a.example/', 10, 'html')))->toBe('http_status')
+        ->and(fetchReasonOf(fn () => fetchTestFetcher($dns, [new Response(200, ['Content-Length' => '5000'], 'x')])->get('http://a.example/', 100, 'html')))->toBe('too_large')
+        ->and(fetchReasonOf(fn () => fetchTestFetcher($dns, [new Response(200, [], str_repeat('x', 101))])->get('http://a.example/', 100, 'html')))->toBe('too_large');
 });
 
 it('resolves references per RFC 3986', function (string $base, string $ref, ?string $expected) {
