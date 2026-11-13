@@ -7,12 +7,14 @@ import GiftListView from '../../Wishlist/GiftListView.vue';
 import GiftWishPanel from '../../Wishlist/GiftWishPanel.vue';
 import OwnListView from '../../Wishlist/OwnListView.vue';
 import OwnWishPanel from '../../Wishlist/OwnWishPanel.vue';
+import OccasionStrip from '../../Wishlist/OccasionStrip.vue';
 import PersonChips from '../../Wishlist/PersonChips.vue';
 import ShellAdd from '../../Wishlist/ShellAdd.vue';
 
 const props = defineProps({
     members: { type: Array, default: () => [] },
     list: { type: Object, required: true },
+    occasions: { type: Array, default: () => [] },
     // null | 'new' | wish id (server-validated; it mirrors ?wish= in the URL)
     selected: { default: null },
 });
@@ -67,11 +69,13 @@ function closePanel() {
                 <OwnListView v-if="recipient" :list="list" :selected-id="Number.isInteger(selected) ? selected : null" @open="openWish" @add="openCreate">
                     <template #context>
                         <PersonChips :members="members" :selected-id="ownerId" :guard="guarded" />
+                        <OccasionStrip :occasions="occasions" />
                     </template>
                 </OwnListView>
                 <GiftListView v-else :list="list" :selected-id="Number.isInteger(selected) ? selected : null" @open="openWish">
                     <template #context>
                         <PersonChips :members="members" :selected-id="ownerId" :guard="guarded" />
+                        <OccasionStrip :occasions="occasions" />
                     </template>
                 </GiftListView>
             </div>

@@ -226,4 +226,20 @@ describe('Home Due soon card', () => {
         mockProps = { ...base, locale, dueSoon: dueSoon({ more: 2 }) };
         await expectNoAxeViolations(mountHome(locale).element);
     });
+
+    it('renders the upcoming occasions card instead of the wishlist module card when occasions is a list', () => {
+        mockProps = {
+            app: { name: 'Family Hub', env: 'production' },
+            occasions: [{ key: 'a', type: 'birthday', owner: { id: 1, name: 'Adam' }, title: null, date: '2027-03-02', days_away: 1 }],
+        };
+        const wrapper = mountHome();
+        expect(wrapper.find('[data-testid=upcoming-occasions]').exists()).toBe(true);
+        expect(wrapper.find('[data-testid=upcoming-occasions]').text()).toContain("Adam's birthday");
+    });
+
+    it('keeps the wishlist module card when occasions is null', () => {
+        mockProps = { app: { name: 'Family Hub', env: 'production' }, occasions: null };
+        const wrapper = mountHome();
+        expect(wrapper.find('[data-testid=upcoming-occasions]').exists()).toBe(false);
+    });
 });
