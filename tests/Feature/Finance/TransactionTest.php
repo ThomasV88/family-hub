@@ -309,3 +309,17 @@ it('deletes a transaction', function () {
         ->assertRedirect(route('finance.transactions.index', ['account' => $account->id, 'month' => '2026-03']));
     expect(FinanceTransaction::query()->count())->toBe(0);
 });
+
+it('throttles transaction update, delete and create in separate buckets', function () {
+    $user = User::factory()->withPreset(Preset::Parent)->create();
+    $middleware = fn (string $name) => collect(app('router')->getRoutes()->getByName($name)->gatherMiddleware())->first(fn ($m) => is_string($m) && str_starts_with($m, 'throttle:'));
+    expect($middleware('finance.transactions.update'))->toBe('throttle:120,1,finance.transactions.update')
+        ->and($middleware('finance.transactions.destroy'))->toBe('throttle:60,1,finance.transactions.destroy');
+
+    // Exhausting the delete bucket does not touch the update bucket.
+    for ($i = 0; $i < 60; $i++) {
+        $this->actingAs($user)->delete('/finance/transactions/'.Str::uuid7())->assertNotFound();
+    }
+    $this->actingAs($user)->delete('/finance/transactions/'.Str::uuid7())->assertStatus(429);
+    expect($this->actingAs($user)->patch('/finance/transactions/'.Str::uuid7(), ['description' => 'x'])->status())->not->toBe(429);
+});
