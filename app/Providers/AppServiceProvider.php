@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Recurrence\RecurrenceEngine;
+use App\Recurrence\RRuleRecurrenceEngine;
 use App\Support\RequestInput;
 use App\Access\AccessGate;
 use Illuminate\Auth\Events\Lockout;
@@ -21,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(AccessGate::class);
+        $this->app->singleton(RecurrenceEngine::class, RRuleRecurrenceEngine::class);
     }
 
     /**
