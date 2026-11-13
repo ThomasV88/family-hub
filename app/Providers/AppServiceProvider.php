@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\Task;
 use App\Observers\TaskReminderObserver;
+use App\Push\PushSender;
+use App\Push\WebPushSender;
 use App\Recurrence\RecurrenceEngine;
 use App\Recurrence\RRuleRecurrenceEngine;
 use App\Support\RequestInput;
@@ -26,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(AccessGate::class);
         $this->app->singleton(RecurrenceEngine::class, RRuleRecurrenceEngine::class);
+        $this->app->bind(PushSender::class, WebPushSender::class);
     }
 
     /**
