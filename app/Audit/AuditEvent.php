@@ -27,9 +27,20 @@ enum AuditEvent: string
     case FinanceVisibilityChanged = 'finance_visibility_changed';
     case FinanceAdminSelfAdded = 'finance_admin_self_added';
     case FinanceCategoryChanged = 'finance_category_changed';
+    case TwoFactorEnabled = 'two_factor_enabled';
+    case TwoFactorDisabled = 'two_factor_disabled';
+    case RecoveryCodesRegenerated = 'recovery_codes_regenerated';
+    case RecoveryCodeUsed = 'recovery_code_used';
+    case PasskeyAdded = 'passkey_added';
+    case PasskeyRenamed = 'passkey_renamed';
+    case PasskeyRemoved = 'passkey_removed';
+    case SecondFactorFailed = 'second_factor_failed';
+    case ReauthConfirmed = 'reauth_confirmed';
+    case SecondFactorReset = 'second_factor_reset';
+    case SecurityPolicyChanged = 'security_policy_changed';
 
     /** UI filter groups, in display order. */
-    public const GROUPS = ['login', 'login_failed', 'invite', 'permission', 'session_revoked', 'health', 'finance', 'account'];
+    public const GROUPS = ['login', 'login_failed', 'invite', 'permission', 'session_revoked', 'health', 'finance', 'account', 'security'];
 
     /** The `<module>_read` / `<module>_write` event for an audited module. */
     public static function forModule(Module $module, bool $write): self
@@ -52,6 +63,9 @@ enum AuditEvent: string
             self::FinanceVisibilityChanged => ['change', 'account'],
             self::FinanceAdminSelfAdded => ['account'],
             self::FinanceCategoryChanged => ['change'],
+            self::SecondFactorFailed => ['method', 'context'],
+            self::ReauthConfirmed => ['method'],
+            self::SecurityPolicyChanged => ['setting', 'value'],
             default => [],
         };
     }
@@ -69,6 +83,9 @@ enum AuditEvent: string
             self::FinanceRead, self::FinanceWrite, self::FinanceVisibilityChanged, self::FinanceAdminSelfAdded, self::FinanceCategoryChanged => 'finance',
             self::AccessDenied => $module === 'finance' ? 'finance' : 'health',
             self::PasswordReset, self::AdminCreated, self::GoogleLinked => 'account',
+            self::TwoFactorEnabled, self::TwoFactorDisabled, self::RecoveryCodesRegenerated, self::RecoveryCodeUsed,
+            self::PasskeyAdded, self::PasskeyRenamed, self::PasskeyRemoved, self::SecondFactorFailed,
+            self::ReauthConfirmed, self::SecondFactorReset, self::SecurityPolicyChanged => 'security',
         };
     }
 
