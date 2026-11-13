@@ -25,6 +25,9 @@ class SettingsSections
         if (Route::has('settings.notifications')) {
             $sections[] = ['key' => 'notifications', 'href' => route('settings.notifications', absolute: false), 'labelKey' => 'notifications.nav', 'icon' => 'bell'];
         }
+        if (Route::has('settings.security')) {
+            $sections[] = ['key' => 'security', 'href' => route('settings.security', absolute: false), 'labelKey' => 'settings.section.security', 'icon' => 'shield-check'];
+        }
         $sections[] = ['key' => 'appearance', 'href' => route('settings.appearance', absolute: false), 'labelKey' => 'settings.section.appearance', 'icon' => 'palette'];
 
         return $sections;
