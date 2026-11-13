@@ -1263,7 +1263,8 @@
             "keep": "Keep category",
             "err_name": "Enter a name for the category.",
             "err_taken": "A category with this name already exists.",
-            "err_move": "Choose a category to move to."
+            "err_move": "Choose a category to move to.",
+            "err_save": "We could not save the category. Nothing was changed. Try again."
         },
         "imp": {
             "title": "Import CSV",

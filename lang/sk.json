@@ -1263,7 +1263,8 @@
             "keep": "Ponechať kategóriu",
             "err_name": "Zadajte názov kategórie.",
             "err_taken": "Kategória s týmto názvom už existuje.",
-            "err_move": "Vyberte kategóriu, do ktorej sa presunie."
+            "err_move": "Vyberte kategóriu, do ktorej sa presunie.",
+            "err_save": "Kategóriu sa nepodarilo uložiť. Nič sa nezmenilo. Skúste to znova."
         },
         "imp": {
             "title": "Import CSV",
