@@ -7,13 +7,16 @@ use App\Access\AccessLevel;
 use App\Access\Module;
 use App\Audit\AuditEvent;
 use App\Audit\AuditLogger;
+use App\Security\SafeIntended;
+use App\Security\SensitiveSession;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Route rule guard (alias `access`):
- *   access:public | access:guest | access:authenticated | access:admin | access:module,<module>,<level>
+ *   access:public | access:guest | access:authenticated | access:admin | access:module,<module>,<level> | access:recent
+ * `recent` demands a signed-in member whose last proof of identity is inside the confirm window.
  * Anything unknown or malformed denies (fail closed).
  */
 class RequireAccess
@@ -42,12 +45,18 @@ class RequireAccess
             $allowed = $user !== null;
         } elseif ($rule === 'admin') {
             $allowed = $this->gate->isAdmin($user);
+        } elseif ($rule === 'recent') {
+            $allowed = $user !== null;
         } else {
             $allowed = false;
         }
 
         if ($user === null) {
             return $this->toLogin($request);
+        }
+
+        if ($rule === 'recent' && ! app(SensitiveSession::class)->recentlyConfirmed()) {
+            return $this->toConfirm($request);
         }
 
         $this->afterDecision($request, $moduleEnum, $levelEnum, (bool) $allowed);
@@ -77,6 +86,19 @@ class RequireAccess
 
         $write = ! in_array($request->method(), ['GET', 'HEAD'], true);
         $this->audit->record(AuditEvent::forModule($module, $write), $user, [], null, $module);
+    }
+
+    /** Stale proof of identity: 423 for JSON callers, otherwise to the confirm page (no audit row). */
+    private function toConfirm(Request $request): Response
+    {
+        if ($request->expectsJson() && ! $request->header('X-Inertia')) {
+            return response()->json(['error' => 'confirm_required'], 423);
+        }
+
+        $back = $request->isMethod('GET') ? $request->fullUrl() : (string) url()->previous();
+        SafeIntended::remember($request, $back);
+
+        return redirect(url('/confirm-access'));
     }
 
     private function toLogin(Request $request): Response
