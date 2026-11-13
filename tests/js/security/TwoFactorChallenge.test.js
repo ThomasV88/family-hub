@@ -32,6 +32,15 @@ vi.mock('@inertiajs/vue3', async () => {
     };
 });
 
+const fetchMock = vi.fn();
+vi.mock('../../../resources/js/Security/securityFetch.js', () => ({ securityFetch: (...a) => fetchMock(...a) }));
+const webauthn = vi.hoisted(() => ({ supported: false, assert: vi.fn() }));
+vi.mock('../../../resources/js/Security/webauthn.js', () => ({
+    passkeysSupported: () => webauthn.supported,
+    getAssertion: (...a) => webauthn.assert(...a),
+}));
+
+import { router } from '@inertiajs/vue3';
 import TwoFactorChallenge from '../../../resources/js/Pages/Auth/TwoFactorChallenge.vue';
 import Login from '../../../resources/js/Pages/Auth/Login.vue';
 
@@ -47,7 +56,7 @@ function mountPage(component, { locale = 'en', props = {}, errors = {}, flash = 
     });
     return wrapper;
 }
-afterEach(() => { wrapper?.unmount(); wrapper = null; formPost.mockClear(); document.body.innerHTML = ''; vi.useRealTimers(); });
+afterEach(() => { webauthn.supported = false; fetchMock.mockReset(); webauthn.assert.mockReset(); router.visit.mockClear(); wrapper?.unmount(); wrapper = null; formPost.mockClear(); document.body.innerHTML = ''; vi.useRealTimers(); });
 
 describe('TwoFactorChallenge', () => {
     it('shows the code form with the totp body and posts only the code', async () => {
@@ -88,14 +97,108 @@ describe('TwoFactorChallenge', () => {
         expect(formPost).not.toHaveBeenCalled();
     });
 
-    it('shows no code form for a passkey-only member and offers a passkey slot', () => {
-        mountPage(TwoFactorChallenge, {
-            props: { totp: false, passkey: true },
-            slots: { passkey: '<div data-testid="slot-probe">passkey</div>' },
-        });
+    it('shows no code form for a passkey-only member; the passkey button is primary and full width', () => {
+        webauthn.supported = true;
+        mountPage(TwoFactorChallenge, { props: { totp: false, passkey: true } });
         expect(wrapper.find('form').exists()).toBe(false);
         expect(wrapper.find('[data-testid="passkey-only"]').text()).toBe('Use your passkey to finish signing in.');
-        expect(wrapper.find('[data-testid="slot-probe"]').exists()).toBe(true);
+        const button = wrapper.find('[data-testid="use-passkey"]');
+        expect(button.text()).toBe('Use a passkey');
+        expect(button.classes()).toContain('ui-button--primary');
+        expect(button.classes()).toContain('challenge__full');
+        expect(wrapper.find('[role="separator"]').exists()).toBe(false);
+    });
+
+    it('unsupported device: passkey-only member sees the explanation and the way back, no button', () => {
+        mountPage(TwoFactorChallenge, { props: { totp: false, passkey: true } });
+        expect(wrapper.find('button[data-testid="use-passkey"]').exists()).toBe(false);
+        expect(wrapper.text()).toContain('does not support passkeys');
+        expect(wrapper.find('[data-testid="back-to-login"]').exists()).toBe(true);
+    });
+
+    it('unsupported device with a code form: no passkey button and no divider', () => {
+        mountPage(TwoFactorChallenge, { props: { totp: true, passkey: true } });
+        expect(wrapper.find('button[data-testid="use-passkey"]').exists()).toBe(false);
+        expect(wrapper.find('[role="separator"]').exists()).toBe(false);
+    });
+
+    it('with a code form the passkey button is secondary under an "or" divider', () => {
+        webauthn.supported = true;
+        mountPage(TwoFactorChallenge, { props: { totp: true, passkey: true } });
+        expect(wrapper.find('[role="separator"]').text()).toBe('or');
+        expect(wrapper.find('[data-testid="use-passkey"]').classes()).toContain('ui-button--secondary');
+    });
+
+    it('passkey success visits the server-provided redirect', async () => {
+        webauthn.supported = true;
+        webauthn.assert.mockResolvedValue({ id: 'cred' });
+        fetchMock.mockImplementation(async (url) => (url.endsWith('/options')
+            ? { ok: true, status: 200, data: { options: { challenge: 'x' } } }
+            : { ok: true, status: 200, data: { redirect: '/health' } }));
+        mountPage(TwoFactorChallenge, { props: { totp: true, passkey: true } });
+        await wrapper.find('[data-testid="use-passkey"]').trigger('click');
+        await flushPromises();
+        expect(fetchMock).toHaveBeenNthCalledWith(1, '/two-factor-challenge/passkey/options');
+        expect(fetchMock).toHaveBeenNthCalledWith(2, '/two-factor-challenge/passkey', { method: 'POST', body: { credential: { id: 'cred' } } });
+        expect(router.visit).toHaveBeenCalledWith('/health');
+    });
+
+    it('never follows an off-site redirect', async () => {
+        webauthn.supported = true;
+        webauthn.assert.mockResolvedValue({ id: 'cred' });
+        fetchMock.mockImplementation(async (url) => (url.endsWith('/options')
+            ? { ok: true, status: 200, data: { options: {} } }
+            : { ok: true, status: 200, data: { redirect: '//evil.example' } }));
+        mountPage(TwoFactorChallenge, { props: { totp: false, passkey: true } });
+        await wrapper.find('[data-testid="use-passkey"]').trigger('click');
+        await flushPromises();
+        expect(router.visit).toHaveBeenCalledWith('/');
+    });
+
+    it('a rejected passkey shows the generic danger alert', async () => {
+        webauthn.supported = true;
+        webauthn.assert.mockResolvedValue({ id: 'cred' });
+        fetchMock.mockImplementation(async (url) => (url.endsWith('/options')
+            ? { ok: true, status: 200, data: { options: {} } }
+            : { ok: false, status: 422, error: 'invalid', errors: {}, data: { error: 'passkey_failed' } }));
+        mountPage(TwoFactorChallenge, { props: { totp: true, passkey: true } });
+        await wrapper.find('[data-testid="use-passkey"]').trigger('click');
+        await flushPromises();
+        expect(wrapper.find('[data-testid="challenge-alert"]').text()).toBe('Passkey check did not work. Try again or use a code.');
+        expect(router.visit).not.toHaveBeenCalled();
+    });
+
+    it('a cancelled device prompt is quiet and the button is usable again', async () => {
+        webauthn.supported = true;
+        webauthn.assert.mockRejectedValue(Object.assign(new Error('cancelled'), { name: 'cancelled' }));
+        fetchMock.mockResolvedValue({ ok: true, status: 200, data: { options: {} } });
+        mountPage(TwoFactorChallenge, { props: { totp: true, passkey: true } });
+        await wrapper.find('[data-testid="use-passkey"]').trigger('click');
+        await flushPromises();
+        expect(wrapper.find('[data-testid="challenge-alert"]').exists()).toBe(false);
+        expect(wrapper.find('[data-testid="use-passkey"]').attributes('aria-busy')).toBeUndefined();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('an expired challenge (410) goes back to sign in', async () => {
+        webauthn.supported = true;
+        fetchMock.mockResolvedValue({ ok: false, status: 410, error: 'failed', data: { error: 'challenge_expired' } });
+        mountPage(TwoFactorChallenge, { props: { totp: true, passkey: true } });
+        await wrapper.find('[data-testid="use-passkey"]').trigger('click');
+        await flushPromises();
+        expect(router.visit).toHaveBeenCalledWith('/login');
+    });
+
+    it('a throttle (429) disables both the submit and the passkey button', async () => {
+        vi.useFakeTimers();
+        webauthn.supported = true;
+        fetchMock.mockResolvedValue({ ok: false, status: 429, error: 'throttle', minutes: 2, data: {} });
+        mountPage(TwoFactorChallenge, { props: { totp: true, passkey: true } });
+        await wrapper.find('[data-testid="use-passkey"]').trigger('click');
+        await flushPromises();
+        expect(wrapper.find('[data-testid="throttle-alert"]').text()).toBe('Too many attempts. Try again in 2 minutes.');
+        expect(wrapper.find('button[type=submit]').attributes('disabled')).toBeDefined();
+        expect(wrapper.find('[data-testid="use-passkey"]').attributes('disabled')).toBeDefined();
     });
 
     it('shows one generic danger alert for a wrong code, clears and refocuses the input', async () => {
@@ -155,6 +258,20 @@ describe('TwoFactorChallenge', () => {
             mountPage(TwoFactorChallenge, { locale, props: { totp: false, passkey: true } });
             await expectNoAxeViolations(wrapper.element);
             wrapper.unmount();
+            wrapper = null;
+        }
+        document.documentElement.removeAttribute('data-theme');
+    });
+
+    it.each(['en', 'sk', 'pl'])('has no axe violations with a supported passkey in %s', async (locale) => {
+        webauthn.supported = true;
+        for (const theme of ['light', 'dark']) {
+            document.documentElement.setAttribute('data-theme', theme);
+            for (const totp of [true, false]) {
+                mountPage(TwoFactorChallenge, { locale, props: { totp, passkey: true } });
+                await expectNoAxeViolations(wrapper.element);
+                wrapper.unmount();
+            }
             wrapper = null;
         }
         document.documentElement.removeAttribute('data-theme');

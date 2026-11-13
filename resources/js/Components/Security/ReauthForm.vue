@@ -8,6 +8,8 @@ import UiButton from '../ui/UiButton.vue';
 import UiField from '../ui/UiField.vue';
 import UiInput from '../ui/UiInput.vue';
 import OtpInput from './OtpInput.vue';
+import PasskeyButton from './PasskeyButton.vue';
+import { getAssertion, passkeysSupported } from '../../Security/webauthn.js';
 import { securityFetch } from '../../Security/securityFetch.js';
 
 // The shared "Confirm it's you" form. `page` mode posts through Inertia and follows the server redirect;
@@ -30,6 +32,8 @@ const otpInput = ref(null);
 
 const canPassword = computed(() => !!props.methods.password);
 const canCode = computed(() => !!props.methods.totp);
+const canPasskey = computed(() => !!props.methods.passkey && passkeysSupported());
+const passkeyBusy = ref(false);
 const hasForm = computed(() => canPassword.value || canCode.value);
 const usingPassword = computed(() => method.value === 'password' && canPassword.value);
 
@@ -108,6 +112,37 @@ async function submit() {
     });
 }
 
+// Passkey: options, device prompt, then confirm. Cancel is quiet; any failure shows the same generic copy.
+async function usePasskey() {
+    if (locked.value || busy.value || passkeyBusy.value) return;
+    passkeyBusy.value = true;
+    error.value = '';
+    throttleOver.value = false;
+    try {
+        const opts = await securityFetch('/confirm-access/passkey/options');
+        if (!opts.ok) return failPasskey(opts);
+        let credential;
+        try {
+            credential = await getAssertion(opts.data.options);
+        } catch (e) {
+            if (e?.name !== 'cancelled') error.value = 'twofactor.error.passkey';
+            return;
+        }
+        const result = await securityFetch('/confirm-access/passkey', { method: 'POST', body: { credential, mode: props.mode } });
+        if (!result.ok) return failPasskey(result);
+        if (props.mode === 'dialog') return emit('confirmed');
+        const target = result.data?.redirect;
+        router.visit(typeof target === 'string' && target.startsWith('/') && !target.startsWith('//') ? target : '/');
+    } finally {
+        passkeyBusy.value = false;
+    }
+}
+
+function failPasskey(result) {
+    if (result.error === 'throttle') return startThrottle(result.minutes);
+    error.value = 'twofactor.error.passkey';
+}
+
 watch(() => props.methods, () => {
     if (!usingPassword.value && !canCode.value) method.value = 'password';
 });
@@ -164,8 +199,21 @@ watch(() => props.methods, () => {
             </p>
         </form>
 
-        <template v-if="$slots.alternatives">
+        <template v-if="canPasskey">
             <div v-if="hasForm" class="reauth-form__divider" role="separator"><span>{{ t('auth.or') }}</span></div>
+            <PasskeyButton
+                class="reauth-form__passkey"
+                :variant="hasForm ? 'secondary' : 'primary'"
+                :busy="passkeyBusy"
+                :disabled="locked"
+                data-testid="use-passkey"
+                @start="usePasskey"
+            />
+            <p v-if="passkeyBusy" role="status" class="reauth-form__waiting" data-testid="passkey-waiting">{{ t('reauth.passkey_waiting') }}</p>
+        </template>
+
+        <template v-if="$slots.alternatives">
+            <div v-if="hasForm || canPasskey" class="reauth-form__divider" role="separator"><span>{{ t('auth.or') }}</span></div>
             <slot name="alternatives" />
         </template>
     </div>
@@ -177,6 +225,8 @@ watch(() => props.methods, () => {
 .reauth-form__password { display: flex; align-items: center; gap: var(--space-2); }
 .reauth-form__password :deep(.ui-input) { flex: 1; min-width: 0; }
 .reauth-form__full { display: flex; width: 100%; margin-top: var(--space-4); }
+.reauth-form__passkey { display: flex; width: 100%; }
+.reauth-form__waiting { margin: var(--space-2) 0 0; color: var(--color-text-muted); font-size: var(--text-sm); text-align: center; }
 .reauth-form__switch { margin: var(--space-3) 0 0; text-align: center; }
 .reauth-form__divider { display: flex; align-items: center; gap: var(--space-3); margin-block: var(--space-4); color: var(--color-text-muted); font-size: var(--text-sm); }
 .reauth-form__divider::before, .reauth-form__divider::after { content: ''; flex: 1; height: 1px; background: var(--color-border); }

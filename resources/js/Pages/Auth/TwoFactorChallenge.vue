@@ -1,12 +1,15 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AuthLayout from '../../Layouts/AuthLayout.vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import OtpInput from '../../Components/Security/OtpInput.vue';
 import RecoveryCodeInput from '../../Components/Security/RecoveryCodeInput.vue';
+import PasskeyButton from '../../Components/Security/PasskeyButton.vue';
+import { getAssertion, passkeysSupported } from '../../Security/webauthn.js';
+import { securityFetch } from '../../Security/securityFetch.js';
 
 // Booleans only: the server never sends ids, names or emails to this page.
 const props = defineProps({
@@ -22,7 +25,10 @@ const otp = ref(null);
 const recovery = ref(null);
 
 const translate = (value) => (value ? t(value) : '');
-const errorMessage = computed(() => translate(form.errors?.code || form.errors?.recovery_code));
+const passkeyError = ref('');
+const passkeyBusy = ref(false);
+const supported = passkeysSupported();
+const errorMessage = computed(() => translate(passkeyError.value || form.errors?.code || form.errors?.recovery_code));
 
 // Lockout: submit stays disabled until the announced wait has elapsed. The visible minutes tick down once a minute.
 const waitMinutes = ref(null);
@@ -37,15 +43,15 @@ function tick() {
     }
     timer = setTimeout(tick, 60 * 1000);
 }
+function startWait(value) {
+    clearTimeout(timer);
+    waitOver.value = false;
+    waitMinutes.value = Math.max(1, parseInt(value, 10) || 0);
+    timer = setTimeout(tick, 60 * 1000);
+}
 watch(
     () => form.errors?.throttle,
-    (value) => {
-        if (!value) return;
-        clearTimeout(timer);
-        waitOver.value = false;
-        waitMinutes.value = Math.max(1, parseInt(value, 10) || 0);
-        timer = setTimeout(tick, 60 * 1000);
-    },
+    (value) => { if (value) startWait(value); },
     { immediate: true },
 );
 onBeforeUnmount(() => clearTimeout(timer));
@@ -56,6 +62,38 @@ async function switchTo(next) {
     form.clearErrors?.();
     await nextTick();
     (next === 'recovery' ? recovery : otp).value?.focus();
+}
+
+// Passkey second step: options, device prompt, then the server answers with the page to continue to.
+// A cancelled prompt is quiet; every failure shows the same generic copy.
+async function usePasskey() {
+    if (locked.value || passkeyBusy.value) return;
+    passkeyBusy.value = true;
+    passkeyError.value = '';
+    form.clearErrors?.();
+    try {
+        const opts = await securityFetch('/two-factor-challenge/passkey/options');
+        if (!opts.ok) return failPasskey(opts);
+        let credential;
+        try {
+            credential = await getAssertion(opts.data.options);
+        } catch (e) {
+            if (e?.name !== 'cancelled') passkeyError.value = 'twofactor.error.passkey';
+            return;
+        }
+        const result = await securityFetch('/two-factor-challenge/passkey', { method: 'POST', body: { credential } });
+        if (!result.ok) return failPasskey(result);
+        const target = result.data?.redirect;
+        router.visit(typeof target === 'string' && target.startsWith('/') && !target.startsWith('//') ? target : '/');
+    } finally {
+        passkeyBusy.value = false;
+    }
+}
+
+function failPasskey(result) {
+    if (result.status === 410) return router.visit('/login');
+    if (result.error === 'throttle') return startWait(result.minutes);
+    passkeyError.value = 'twofactor.error.passkey';
 }
 
 function submit() {
@@ -111,8 +149,18 @@ function submit() {
         </form>
         <p v-else-if="passkey" class="challenge__body" data-testid="passkey-only">{{ t('twofactor.challenge.passkey_only') }}</p>
 
-        <!-- Plan 06-09 renders the passkey button here; it needs the page-level lock state. -->
-        <slot name="passkey" :locked="locked" />
+        <template v-if="passkey">
+            <div v-if="totp && supported" class="challenge__divider" role="separator"><span>{{ t('auth.or') }}</span></div>
+            <PasskeyButton
+                :variant="totp ? 'secondary' : 'primary'"
+                :busy="passkeyBusy"
+                :disabled="locked"
+                :show-unsupported="!totp"
+                :class="{ 'challenge__full': true, 'challenge__full--first': !totp }"
+                data-testid="use-passkey"
+                @start="usePasskey"
+            />
+        </template>
 
         <p class="challenge__back"><Link href="/login" data-testid="back-to-login">{{ t('auth.back_to_login') }}</Link></p>
     </AuthLayout>
@@ -122,6 +170,9 @@ function submit() {
 .challenge__alert { margin-bottom: var(--space-4); }
 .challenge__body { margin: 0 0 var(--space-4); color: var(--color-text-muted); }
 .challenge__full { display: flex; width: 100%; margin-top: var(--space-4); }
+.challenge__full--first { margin-top: 0; }
+.challenge__divider { display: flex; align-items: center; gap: var(--space-3); margin-block: var(--space-4); color: var(--color-text-muted); font-size: var(--text-sm); }
+.challenge__divider::before, .challenge__divider::after { content: ''; flex: 1; height: 1px; background: var(--color-border); }
 .challenge__switch { margin: var(--space-4) 0 0; text-align: center; font-size: var(--text-sm); }
 .challenge__link {
     min-height: 44px;
