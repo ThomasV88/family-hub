@@ -1,7 +1,8 @@
 ---
 phase: 06
 slug: sensitive-data-account-hardening
-status: draft
+status: approved
+reviewed_at: 2026-11-13
 shadcn_initialized: false
 preset: none
 created: 2026-11-13
@@ -23,7 +24,7 @@ Inherited unchanged from 01.1 and 02. Do not redefine tokens, type, spacing or c
 | Tool | none (custom Vue 3 + Inertia design system, no shadcn) |
 | Preset | not applicable |
 | Component library | `resources/js/Components/ui/*` (reuse: `UiButton`, `UiInput`, `UiField`, `UiSwitch`, `UiCheckbox`, `UiTag`, `UiList`/`UiListRow`, `UiCard`, `UiDialog` + confirm variant, `UiTabs`, `UiAlert`, `UiEmptyState`, `UiErrorState`, `UiToast`, `DetailPanel`, `AuthLayout`) |
-| Icon library | Lucide via `lucide-vue-next`, 20px, stroke 1.75. New icons: `ShieldCheck` (on), `ShieldOff` (off), `TriangleAlert` (needs setup), `KeyRound` (passkey), `Smartphone` (authenticator), `Copy`, `Download`, `Pencil` (rename), `Trash2` (remove), `Fingerprint` (passkey button), `Lock` (reuse) |
+| Icon library | Lucide via `lucide-vue-next`, 20px, stroke 1.75. New icons: `ShieldCheck` (on), `ShieldOff` (off), `TriangleAlert` (needs setup), `KeyRound` (passkey), `Smartphone` (authenticator), `Copy`, `Download`, `Pencil` (rename), `Trash2` (remove), `ShieldAlert` (failed-challenge audit tag), `Fingerprint` (passkey button), `Lock` (reuse) |
 | Font | System stack. Mono token (`--font-mono`) for the setup key, recovery codes and code inputs |
 | New dependencies | none required by this contract. QR is rendered server-side as SVG (Fortify output). WebAuthn browser calls use `navigator.credentials` per the `laravel/passkeys` docs; planner verifies whether its published JS helper is used and vets any npm package when planning |
 
@@ -37,19 +38,19 @@ New components (compose only from existing tokens and `Ui*` parts):
 | `ReauthForm` | The shared "confirm it's you" body: password field plus "Use authenticator code" and "Use a passkey" alternatives (only methods the account has). Used by the confirm page, the "create new codes" dialog and the admin reset dialog. Emits `confirmed` |
 | `TwoFactorSetupDialog` | 3-step `UiDialog` (scan, confirm, recovery codes), see Screen 1 |
 | `RecoveryCodesPanel` | The 8-code block with copy, download and acknowledgement. Used at setup and after regeneration |
-| `PasskeyRow` | `UiListRow`: `KeyRound` icon, name (16/600), meta line "Added {date} · Last used {date}" (14/400 muted), trailing "Rename" and "Remove" ghost buttons (44px touch hit area) |
+| `PasskeyRow` | `UiListRow`: `KeyRound` icon, name (16/600), meta line "Added {date} · Last used {date}" (14/400 muted), trailing ghost buttons (44px touch hit area). Phone: visible text "Rename passkey" and "Remove passkey" (`passkey.rename_long`, `passkey.remove_long`; icon `Pencil`/`Trash2` plus text, row actions wrap below the meta line). Tablet and desktop: short visible "Rename" and "Remove" with the full `aria-label`s |
 
 ---
 
 ## Spacing Scale
 
-Reuse 01.1 tokens exactly (4, 8, 12, 16, 24, 32, 48, 64). No new values.
+Reuse 01.1 tokens exactly (4, 8, 12, 16, 24, 32, 48, 64). No new values. The 12px token is an accepted extension of the standard 8-point scale (inherited from 01.1).
 
 | Token | Value | Usage in this phase |
 |-------|-------|---------------------|
 | xs | 4px | Icon-to-label gaps, tag padding |
 | sm | 8px | Gap between button group items, gap between code rows |
-| 12 | 12px | Recovery code block inner padding, row inner gaps |
+| 12 | 12px | Recovery code block inner padding, row inner gaps (accepted extension of the standard 4/8/16/24/32/48/64 scale, carried over from 01.1; not to be used elsewhere) |
 | md | 16px | Field gap, card padding on phone, QR quiet-zone padding |
 | lg | 24px | Card padding wider, dialog padding |
 | xl | 32px | Gap between settings list and content |
@@ -83,7 +84,7 @@ Accent reserved for (subset of the 01.1 closed list):
 3. Focus ring and body links ("Back to sign in", "Use a recovery code", "Use authenticator code")
 4. Checked `UiSwitch` (admin requirement) and checked acknowledgement checkbox
 
-Destructive (`--color-danger`) reserved for: "Turn off authenticator app", "Remove passkey", "Create new codes" confirm button (invalidates existing codes), "Reset two-step verification" confirm, field and alert error text/borders, failed-challenge audit tag. Never for "off" status (off is neutral).
+Destructive (`--color-danger`) reserved for: "Turn off authenticator app", "Remove passkey", "Create new codes" confirm button (invalidates existing codes), "Reset two-step verification" confirm, field and alert error text/borders, failed-challenge audit tag (`ShieldAlert`). Never for "off" status (off is neutral).
 
 Status tags (text always present, icon always present, never color alone):
 
@@ -112,7 +113,7 @@ Focal point: the status line "Two-step verification is on/off" with the primary 
   2. Authenticator app card: title, body, tag On/Off, one button. Off: primary "Set up authenticator app" (opens setup dialog). On: secondary danger-ghost "Turn off authenticator app" (opens confirm dialog).
   3. Passkeys card: title, body, "Add passkey" button (primary when list empty, secondary otherwise), then `UiList` of `PasskeyRow`. Empty: `UiEmptyState` "No passkeys yet".
   4. Recovery codes card: rendered only when the authenticator app is on. Shows the remaining count (pipe plural), a muted warning line with `TriangleAlert` when 2 or fewer remain, and secondary button "Create new codes". Codes themselves are never shown here.
-- Guidance state (member under requirement without a factor): arrived here by redirect from a sensitive module. A persistent `UiAlert` warning at the top (not `role="alert"`, it is page content; focus goes to the h1): title "Set up two-step verification to continue", body "Your family admin requires a second step for Health and Finances. Choose one method below.". The status tag reads "Needs two-step". Both method cards stay as-is (member picks either). After the first factor is confirmed (and recovery codes acknowledged for TOTP), redirect to the originally requested sensitive page (server-side intended URL) with toast "Two-step verification is on. You can continue.". If there is no intended URL, stay on the page and show the toast only.
+- Guidance state (member under requirement without a factor): arrived here by redirect from a sensitive module. A persistent `UiAlert` warning at the top (not `role="alert"`, it is page content; focus goes to the h1): title "Set up two-step verification to continue", body "Your family admin requires a second step for Health and Finances. Choose one method below.". The status tag reads "Needs two-step". Both method cards stay as-is (member picks either). After the first factor is confirmed (and recovery codes acknowledged for TOTP), redirect to the originally requested sensitive page (server-side intended URL) with toast "Two-step verification is on. You can continue.". If there is no intended URL, stay on the page and show the toast only. Gate order for a member under the requirement with no factor: the requirement-guidance redirect to Settings > Security comes first, the idle gate (`/confirm-access`) second; such a member is never sent to `/confirm-access`.
 - Loading: `UiSkeleton` cards. Error: `UiErrorState` with "Try again".
 
 ### 2. Authenticator app setup dialog (`TwoFactorSetupDialog`)
@@ -120,10 +121,11 @@ Focal point: the status line "Two-step verification is on/off" with the primary 
 Focal point: step 1 shows the QR code; step 2 the 6-digit input; step 3 the 8 recovery codes.
 
 - `UiDialog` max 480px, full width minus 32px on phone, h2 "Set up authenticator app", step indicator "Step {step} of {total}" (14/600 muted) with `aria-live="polite"` only on step change. Dialog opens by requesting the secret from a JSON endpoint (`Cache-Control: no-store`); data kept in component-local state only.
-- Step 1 "Scan the code": body "Open your authenticator app and scan this QR code."; QR (192px, `role="img"`, `aria-label` "QR code for your authenticator app", no secret in the label). Under it a disclosure button (`aria-expanded`) "Can't scan? Enter the key instead" that renders (v-if, not hidden by CSS) a `UiField` read-only block with the key in mono grouped in blocks of 4, plus "Copy key" (toast "Key copied"). Footer: secondary "Cancel setup", primary "Next step". Default focus: primary "Next step"? No: default focus on the dialog title region then first button; first Tab stop is the disclosure.
-- Step 2 "Confirm the code": `OtpInput` label "6-digit code", hint "Enter the code your app shows now.", autofocus. Footer: ghost "Back to scan", primary "Confirm code" (loading state). Error: field error with `TriangleAlert`, input cleared and refocused, `role="alert"` on the error line. Throttle: error text uses the throttle copy and the button is disabled until the wait ends.
+- Step 1 "Scan the code": body "Open your authenticator app and scan this QR code."; QR (192px, `role="img"`, `aria-label` "QR code for your authenticator app", no secret in the label). Under it a disclosure button (`aria-expanded`) "Can't scan? Enter the key instead" that renders (v-if, not hidden by CSS) a `UiField` read-only block with the key in mono grouped in blocks of 4, plus "Copy key" (toast "Key copied"). Footer: secondary "Cancel setup", primary "Next step". Focus rule: on open, focus moves to the dialog title (`tabindex="-1"`); the first Tab stop is the disclosure button, then "Cancel setup", then "Next step".
+- Step 2 "Confirm the code": `OtpInput` label "6-digit code", hint "Enter the code your app shows now.", autofocus. Footer: ghost "Back to scan", primary "Confirm code" (loading state). "Back to scan" re-fetches the pending secret from the JSON endpoint (`no-store`) and re-renders the QR and key (alternatively the secret may be held in component-local state while the dialog is open, but the QR and key nodes are still removed with v-if on leaving step 1 and re-created on return); this path is covered by the no-secrets-after-finish test. Error: field error with `TriangleAlert`, input cleared and refocused, `role="alert"` on the error line. Throttle: error text uses the throttle copy and the button is disabled until the wait ends. Minutes shown are rounded up with a minimum of 1 (never "0 minutes").
 - Step 3 "Save your recovery codes": `RecoveryCodesPanel` (see Screen 3). Footer: primary "Finish setup" disabled until the acknowledgement is checked.
 - "Cancel setup" at step 1 or 2 closes the dialog, clears local state and calls the disable endpoint so an unconfirmed secret is dropped; no confirm dialog (nothing is enabled yet). Esc and scrim click behave the same at steps 1-2.
+- Sensitive action inside this flow (disabling the factor) is covered in Screen 5; setup itself needs no `ReauthForm` because the member is mid-session.
 - Step 3 deviates from the 01.1 dialog rule (discretion): Esc and scrim click do NOT close, a `beforeunload` warning is registered, and the only exit is "Finish setup" after acknowledgement. There is no keyboard trap: "Finish setup" is reachable once the checkbox is checked.
 - No secrets in the DOM after setup (see Security UX): on leaving step 1 the QR and key nodes are removed; on "Finish setup" the codes are removed and local state is reset; page props and Inertia history never contain secrets (use encrypted history for the security pages and call `router.clearHistory()` after finish).
 - Success: dialog closes, focus returns to the (now changed) authenticator card heading, toast "Authenticator app is on".
@@ -145,18 +147,19 @@ Focal point: the passkey list with each device's name and last-used date.
 - Add: "Add passkey" starts the browser flow. Waiting: button `aria-busy`, status line (`role="status"`) "Follow the prompt on your device to create the passkey." Success opens a small `UiDialog` "Name this passkey" (field "Passkey name", hint "For example: iPhone or Work laptop.", prefilled with a device guess, max 60 chars, primary "Save name", secondary "Skip naming"; skipping keeps the default name). Toast "Passkey added".
 - Errors (inline `UiAlert`, polite): cancelled "Passkey setup was cancelled. Nothing was added."; failed "We could not create the passkey. Try again or use an authenticator app."; unsupported (no `PublicKeyCredential`): button not rendered, muted line "This browser or device does not support passkeys."
 - Rename: ghost "Rename" (aria-label "Rename passkey {name}") opens a dialog "Rename passkey" with the field prefilled and focused, primary "Save name". Toast "Passkey renamed".
-- Remove: ghost danger "Remove" (aria-label "Remove passkey {name}") opens the confirm dialog (title "Remove passkey", body "Remove {name}? You will not be able to use it to confirm it's you.", danger "Remove passkey", safe "Keep passkey" default focus). If it is the member's last factor and the requirement is on, add a warning line to the body: "This is your only second step. You will need to set up another before opening Health or Finances." Removal requires a fresh confirmation (Screen 6 `ReauthForm` at the top of the dialog when the confirm window is stale).
+- Remove: ghost danger "Remove" (aria-label "Remove passkey {name}") opens the confirm dialog (title "Remove passkey", body "Remove {name}? You will not be able to use it to confirm it's you.", danger "Remove passkey", safe "Keep passkey" default focus). If it is the member's last factor and the requirement is on, add a warning line to the body: "This is your only second step. You will need to set up another before opening Health or Finances." Removal requires a fresh confirmation: `ReauthForm` at the top of the dialog, shown only when the security confirm window is stale (see "Confirmation windows" below). If the account has no usable method (Google-only, no factor), the dialog shows the `reauth.no_method` copy and a "Sign in again" button instead of the form; for admins it also shows a link "Set up an authenticator app first" to `/settings/security`. A server "stale" refusal re-shows `ReauthForm` inside this dialog; it never navigates to `/confirm-access`, so an unsaved passkey rename and open dialogs are kept.
+- Rename uses no re-auth and is unaffected by the window.
 - Passkey names are user text: always rendered as escaped text, never in the `title` attribute or audit log.
 
 ### 5. Turn off the authenticator app
 
-- Danger confirm dialog: title "Turn off authenticator app", body "Turn off the authenticator app? Your recovery codes will stop working. You can set it up again at any time.", danger "Turn off authenticator app", safe "Keep authenticator app" (default focus). Same last-factor warning line as passkey removal. Requires fresh confirmation (`ReauthForm` shown inside the dialog when the confirm window is stale). Toast "Authenticator app is off".
+- Danger confirm dialog: title "Turn off authenticator app", body "Turn off the authenticator app? Your recovery codes will stop working. You can set it up again at any time.", danger "Turn off authenticator app", safe "Keep authenticator app" (default focus). Same last-factor warning line as passkey removal. Requires fresh confirmation: `ReauthForm` shown inside the dialog only when the security confirm window is stale. No usable method (Google-only, no factor): the dialog shows `reauth.no_method` with "Sign in again" and, for admins, the link "Set up an authenticator app first" to `/settings/security`. A server "stale" refusal re-shows `ReauthForm` in this dialog and never navigates to `/confirm-access`. Toast "Authenticator app is off".
 
 ### 6. Create new recovery codes (re-auth required)
 
 Focal point: the re-auth field, then the new codes.
 
-- Confirm dialog: title "Create new recovery codes", body "Your current codes will stop working. Confirm it's you first.", `ReauthForm` inline, danger "Create new codes", safe "Keep current codes" (default focus). After success the dialog switches to the `RecoveryCodesPanel` with the same non-dismissable rule as setup step 3, exit button "Finish". Remaining count refreshes.
+- Confirm dialog: title "Create new recovery codes", body "Your current codes will stop working. Confirm it's you first.", `ReauthForm` shown inline only when the security confirm window is stale (consistent with Screens 4, 5 and 9; when fresh the dialog shows the body without the form and the danger button is enabled), danger "Create new codes", safe "Keep current codes" (default focus). After success the dialog switches to the `RecoveryCodesPanel` with the same non-dismissable rule as setup step 3, exit button "Finish and close". Remaining count refreshes. No usable method (Google-only, no factor): the dialog shows `reauth.no_method` with "Sign in again" and, for admins, the link "Set up an authenticator app first" (recovery codes need an authenticator, so this state only arises when the stale window cannot be refreshed). A "stale" refusal re-shows `ReauthForm` in this dialog and never navigates to `/confirm-access`.
 
 ### 7. Sign-in second-factor challenge (`/two-factor-challenge`)
 
@@ -169,9 +172,10 @@ Focal point: the 6-digit code field (or the passkey button when the member has o
   - Passkey: below the form a divider "or" and `PasskeyButton` "Use a passkey" (secondary), shown when the member has a passkey. If the member has only passkeys, no code form is shown: the passkey button becomes primary, full width, body "Use your passkey to finish signing in."
 - Below the card: link "Back to sign in" (cancels the challenge and clears the pending login) and the reused `LanguageSwitcher`/`ThemeSwitch` row.
 - Errors: single `UiAlert` danger above the form, `role="alert"`, generic: "That code is not correct. Check it and try again." (recovery: "That recovery code is not correct or was already used."; passkey: "Passkey check did not work. Try again or use a code."). Input is cleared and refocused. Never says which factor exists.
-- Throttle: danger alert with "Too many attempts. Try again in {n} minutes." (pipe plural), submit and passkey buttons disabled until the wait ends. The visible minutes update once per minute; only the initial message and the re-enable are announced (`role="alert"` once, then a `role="status"` "You can try again now.").
+- Throttle: danger alert with "Too many attempts. Try again in {n} minutes." (pipe plural; `{n}` is the remaining wait in minutes rounded up, minimum 1), submit and passkey buttons disabled until the wait ends. The visible minutes update once per minute; only the initial message and the re-enable are announced (`role="alert"` once, then a `role="status"` "You can try again now.").
 - Expired challenge (pending login older than the server window): redirect to `/login` with info alert "Your sign-in timed out. Sign in again."
 - Recovery code success: land on Overview with toast "You used a recovery code. {n} left." (pipe plural). When 2 or fewer remain, the Security page shows the low-codes warning and a one-time `UiAlert` info on Overview is NOT added (avoid nagging; discretion).
+- Completing a sign-in (password plus challenge, passkey, or Google) sets the confirmed timestamp, so a fresh login restarts the 15-minute idle window and a Google-only member does not loop into `/confirm-access`.
 - Autofill: `autocomplete="one-time-code"` lets iOS/Android offer the code from SMS-like sources and password managers; paste allowed.
 
 ### 8. Idle re-authentication confirm page (`/confirm-access`)
@@ -183,12 +187,23 @@ Focal point: the password field and a one-line reason.
   - Password (default): `UiField` "Password" (`autocomplete="current-password"`, show/hide toggle reused from login), primary "Confirm password".
   - "Use authenticator code" link button swaps to `OtpInput` with primary "Confirm code" (and "Use a recovery code" is NOT offered here; recovery codes are for sign-in only, discretion).
   - "Use a passkey" `PasskeyButton` (secondary), shown when the account has a passkey. Divider "or" between password form and passkey button.
-  - Account with no password (Google-only) and a factor: password form is omitted, available factors shown. Account with neither password nor factor: show body "This account has no password or second step. Sign in again to continue." with a single "Sign in again" button (logs out; the intended URL is kept server-side).
-- Return behavior: intended URL is stored server-side in the session (never in a query string; avoids open redirect and URL leakage). After success the page redirects to the intended GET location; if absent, to Overview. A secondary link "Back to overview" is always present and does not require confirmation.
+  - Account with no password (Google-only) and a factor: password form is omitted, body `reauth.passkey_only_body` ("Use your passkey or authenticator code to confirm.") shown, available factors shown. Account with neither password nor factor: show body "This account has no password or second step. Sign in again to continue." with a single "Sign in again" button (logs out; the intended URL is kept, see next bullet). Completing that sign-in sets the confirmed timestamp, so the member lands on the intended page without looping.
+- Return behavior: intended URL is stored server-side in the session (never in a query string; avoids open redirect and URL leakage). It must be a same-origin relative GET path (starts with a single `/`, no scheme, host or `//`), validated on write and again on read; anything else is dropped and Overview is used. "Sign in again" must not wipe it: the logout for this flow uses session regenerate (not invalidate) or carries the URL in a dedicated session key restored after login. After success the page redirects to the intended GET location; if absent, to Overview. A secondary link "Back to overview" is always present and does not require confirmation.
 - Interrupted write: when a non-GET request or JSON/file request in a sensitive module is rejected for idle, the client shows this page for the previous GET location and a `UiAlert` info (polite) "Your last change was not saved. Confirm it's you, then repeat it." The request is never replayed automatically (discretion).
 - Errors: danger alert/field error "That password is not correct. Try again." (code: reuse challenge copy); throttle as in Screen 7. Success needs no toast.
-- Fetch/JSON and file requests receive the same server refusal; the client handler turns it into an Inertia visit to this page (no data left on screen, `no-store`).
+- Fetch/JSON and file requests in Health and Finances receive the same idle refusal; the client handler turns it into an Inertia visit to this page (no data left on screen, `no-store`). This applies only to the sensitive-module idle refusal; "stale" refusals from security actions in dialogs never navigate here (see "Confirmation windows").
 - Activity timer is invisible: no countdown, no "session ending" banner. Only activity inside Health and Finances extends it.
+
+### Confirmation windows (applies to Screens 4, 5, 6, 8, 9)
+
+Two independent timers:
+
+| Window | Length | Governs | Refresh |
+|--------|--------|---------|---------|
+| Sensitive-module idle timer | 15 minutes without activity in Health or Finances | Access to Health and Finances (`/confirm-access`) | Activity in those modules; completing any sign-in; a confirmation |
+| Security confirm window | 10 minutes | Security actions: turn off a factor, remove a passkey, regenerate recovery codes, admin reset of a member | A successful `ReauthForm` confirmation or completing a sign-in |
+
+The two do not extend each other except through the shared confirmation events above. When the security window is fresh, security dialogs show no `ReauthForm`. When a security action returns a server "stale" refusal, the dialog that issued it re-shows `ReauthForm` in place (focus to the password field, original dialog state and any unsaved input kept) and never navigates to `/confirm-access`. Dialog fallback when the account has no usable method (Google-only, no factor): the dialog shows `reauth.no_method` with "Sign in again", and for admins a link "Set up an authenticator app first" (`reauth.setup_first`) to `/settings/security`.
 
 ### 9. Admin: members panel additions (`/settings/members`)
 
@@ -199,7 +214,7 @@ Focal point: the "Needs two-step" warn tags telling the admin who is blocked.
 - Member `DetailPanel` gains a third tab "Security" (after "Permissions", "Sessions"). Contents (read-only status list, `UiListRow`s): "Authenticator app" with On/Off tag; "Passkeys" with count (pipe plural) or "None"; "Requirement" with "Required" / "Not required" tag. Footer: danger secondary "Reset two-step verification".
   - Disabled with hint "This member has no two-step verification to reset." when no factor exists.
   - Hidden on the admin's own row; replaced by "Manage your own two-step verification in Security settings." with a link to `/settings/security`.
-  - Confirm dialog: title "Reset two-step verification", body "Remove all two-step verification for {name}? Their authenticator app, passkeys and recovery codes will be deleted and they will be signed out on every device. {name} must set it up again{requirementSuffix}." where `requirementSuffix` = " before opening Health or Finances" when the requirement is on, else empty (two keys, no concatenation). Contains `ReauthForm` when the admin's confirm window is stale (discretion: reset is an account-takeover vector). Buttons: danger "Reset two-step verification", safe "Keep two-step verification" (default focus). Toast "Two-step verification reset for {name}".
+  - Confirm dialog: title "Reset two-step verification", body "Remove all two-step verification for {name}? Their authenticator app, passkeys and recovery codes will be deleted and they will be signed out on every device. {name} must set it up again{requirementSuffix}." where `requirementSuffix` = " before opening Health or Finances" when the requirement is on, else empty (two keys, no concatenation). Contains `ReauthForm` only when the admin's security confirm window is stale (discretion: reset is an account-takeover vector); a "stale" refusal re-shows it in the dialog without navigating. An admin with no usable method (Google-only, no factor) sees `reauth.no_method`, "Sign in again" and the link "Set up an authenticator app first" instead of the form. Buttons: danger "Reset two-step verification", safe "Keep two-step verification" (default focus). Toast "Two-step verification reset for {name}".
   - Panel unsaved-changes rule from 02 is unaffected (Security tab has no form state).
 
 ### 10. Audit log additions
@@ -210,12 +225,13 @@ Focal point: the "Needs two-step" warn tags telling the admin who is blocked.
 
 ## Security UX Rules (acceptance criteria)
 
-- No secrets in the DOM after setup: QR, setup key and recovery codes exist only while their step is visible, rendered with v-if, held in component-local state, never in Inertia page props, shared props, URL, `<title>`, `data-*` attributes or console logs. Tests assert absence from the DOM after finishing or cancelling.
+- No secrets in the DOM after setup: QR, setup key and recovery codes exist only while their step is visible, rendered with v-if, held in component-local state, never in Inertia page props, shared props, URL, `<title>`, `data-*` attributes or console logs. Tests assert absence from the DOM after finishing or cancelling, including the "Back to scan" path (QR and key removed on leaving step 1, re-created on return, absent again after Finish or Cancel).
 - Secret/code endpoints respond `Cache-Control: no-store`; the service worker never caches `/settings/security`, `/two-factor-challenge` or `/confirm-access` (extends 01.1/02 rule).
 - Code inputs: `autocomplete="one-time-code"`, `inputmode="numeric"`, `pattern="[0-9]*"`; recovery input `autocomplete="off"`; inputs 16px or larger (no iOS zoom).
 - No color-only status: every status tag has text and icon; "off" is neutral, "needs" is warn with `TriangleAlert`.
 - Destructive confirms (turn off app, remove passkey, create new codes, reset second step) put default focus on the safe button; destructive button is never default.
 - Generic errors only: challenge and re-auth never reveal which factor a member has or whether a code was a valid recovery code.
+- Session: the stored intended URL is a same-origin relative GET path validated on write and on read; `/confirm-access` "Sign in again" keeps it (session regenerate, not invalidate).
 - Keyboard: every flow is operable by keyboard; `PasskeyButton` is a native button; dialogs trap and restore focus (except the documented step-3 rule); focus after errors moves to the field or alert.
 - Touch: 44px hit areas on phone and iPad; challenge and confirm pages work at 320px without horizontal scroll and at 200% zoom.
 - Reduced motion: no transitions on dialog step change beyond opacity 150ms, disabled under `prefers-reduced-motion`.
@@ -227,7 +243,7 @@ Focal point: the "Needs two-step" warn tags telling the admin who is blocked.
 
 Tone from 01.1: calm, plain, short, no exclamation marks. Keys live under `security.*`, `twofactor.*`, `reauth.*`, `members.security.*`, `audit.*` in `lang/en-GB.json`, `lang/sk-SK.json`, `lang/pl-PL.json`, all added up front in one plan.
 
-Plural note (vue-i18n pipe format, not ICU): English uses 2 segments `one | other`; Slovak and Polish use 4 segments `one | few | many | other`, with custom `pluralRules` registered in `createI18n` because vue-i18n's default only understands 2 or 3 segments. Slovak: n=1 index 0, n 2-4 index 1, non-integer index 2, else (0, 5+) index 3. Polish: n=1 index 0, n%10 in 2-4 and n%100 not in 12-14 index 1, other integers (0, 5-21, ...) index 2, non-integer index 3. Call sites pass the count as both named parameter and plural count (`t(key, { n }, n)`). A Vitest test asserts 0, 1, 2, 4, 5, 12, 22, 25 for sk and pl on every plural key. Zero is handled by a separate key where wording differs ("No recovery codes left", "Everyone with access has set it up."). Existing Phase 2 throttle copy is reused only if it already exists in pipe form; otherwise use `twofactor.error.throttle` below (no duplicate semantics).
+Plural note (vue-i18n pipe format, not ICU): English uses 2 segments `one | other`; Slovak and Polish use 4 segments `one | few | many | other`, with custom `pluralRules` registered in `createI18n` because vue-i18n's default only understands 2 or 3 segments. Slovak: n=1 index 0, n 2-4 index 1, non-integer index 2, else (0, 5+) index 3. Polish: n=1 index 0, n%10 in 2-4 and n%100 not in 12-14 index 1, other integers (0, 5-21, ...) index 2, non-integer index 3. Call sites pass the count as both named parameter and plural count (`t(key, { n }, n)`). Throttle minutes are rounded up with a minimum of 1. A Vitest test asserts 0, 1, 2, 4, 5, 12, 22, 25 for sk and pl on every plural key. Zero is handled by a separate key where wording differs ("No recovery codes left", "Everyone with access has set it up."). Existing Phase 2 throttle copy is reused only if it already exists in pipe form; otherwise use `twofactor.error.throttle` below (no duplicate semantics).
 
 ### Primary CTAs (noun-bearing)
 
@@ -305,7 +321,7 @@ Plural note (vue-i18n pipe format, not ICU): English uses 2 segments `one | othe
 | twofactor.recovery.regen_title | Create new recovery codes | Vytvorenie nových kódov na obnovenie | Tworzenie nowych kodów odzyskiwania |
 | twofactor.recovery.regen_body | Your current codes will stop working. Confirm it's you first. | Vaše súčasné kódy prestanú fungovať. Najprv potvrďte, že ste to vy. | Obecne kody przestaną działać. Najpierw potwierdź, że to Ty. |
 | twofactor.recovery.regen_keep | Keep current codes | Ponechať súčasné kódy | Zachowaj obecne kody |
-| twofactor.recovery.finish | Finish | Dokončiť | Zakończ |
+| twofactor.recovery.finish | Finish and close | Dokončiť a zavrieť | Zakończ i zamknij |
 
 ### Passkeys
 
@@ -324,6 +340,8 @@ Plural note (vue-i18n pipe format, not ICU): English uses 2 segments `one | othe
 | passkey.rename_aria | Rename passkey {name} | Premenovať prístupový kľúč {name} | Zmień nazwę klucza dostępu {name} |
 | passkey.rename_title | Rename passkey | Premenovanie prístupového kľúča | Zmiana nazwy klucza dostępu |
 | passkey.renamed_toast | Passkey renamed | Prístupový kľúč premenovaný | Zmieniono nazwę klucza dostępu |
+| passkey.rename_long | Rename passkey | Premenovať prístupový kľúč | Zmień nazwę klucza dostępu |
+| passkey.remove_long | Remove passkey | Odstrániť prístupový kľúč | Usuń klucz dostępu |
 | passkey.remove | Remove | Odstrániť | Usuń |
 | passkey.remove_aria | Remove passkey {name} | Odstrániť prístupový kľúč {name} | Usuń klucz dostępu {name} |
 | passkey.remove_title | Remove passkey | Odstránenie prístupového kľúča | Usuwanie klucza dostępu |
@@ -363,7 +381,8 @@ Plural note (vue-i18n pipe format, not ICU): English uses 2 segments `one | othe
 | reauth.interrupted | Your last change was not saved. Confirm it's you, then repeat it. | Vaša posledná zmena sa neuložila. Potvrďte, že ste to vy, a zopakujte ju. | Twoja ostatnia zmiana nie została zapisana. Potwierdź, że to Ty, i powtórz ją. |
 | reauth.error.password | That password is not correct. Try again. | Toto heslo nie je správne. Skúste to znova. | To hasło jest nieprawidłowe. Spróbuj ponownie. |
 | reauth.no_method | This account has no password or second step. Sign in again to continue. | Tento účet nemá heslo ani druhý krok. Na pokračovanie sa prihláste znova. | To konto nie ma hasła ani drugiego kroku. Zaloguj się ponownie, aby kontynuować. |
-| reauth.passkey_only_body | Use your passkey or authenticator code to confirm. | Potvrďte prístupovým kľúčom alebo kódom z aplikácie. | Potwierdź kluczem dostępu lub kodem z aplikacji. |
+| reauth.passkey_only_body (used on `/confirm-access` for Google-only accounts with a factor) | Use your passkey or authenticator code to confirm. | Potvrďte prístupovým kľúčom alebo kódom z aplikácie. | Potwierdź kluczem dostępu lub kodem z aplikacji. |
+| reauth.setup_first | Set up an authenticator app first | Najprv nastavte overovaciu aplikáciu | Najpierw skonfiguruj aplikację uwierzytelniającą |
 | reauth.back | Back to overview | Späť na prehľad | Wróć do przeglądu |
 | reauth.passkey_waiting | Follow the prompt on your device. | Postupujte podľa výzvy na zariadení. | Postępuj zgodnie z instrukcją na urządzeniu. |
 
@@ -435,11 +454,11 @@ Empty/error states: Security page empty passkeys state defined above ("No passke
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-11-13 (UI checker approved with revisions; flags resolved in this spec)
