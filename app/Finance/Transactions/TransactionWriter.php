@@ -13,6 +13,11 @@ use Illuminate\Support\Str;
 /**
  * Creates, edits and deletes transactions. Existing rows are changed only through TransactionQuery::updateVisible and
  * deleteVisible, and a transfer's other leg is touched only when its account is visible to the editor.
+ *
+ * Design note (05-REVIEW WR-04, decided: privacy over balancing): when the counterpart leg is on an account the editor
+ * cannot see, the editor's leg is an ordinary entry. Changing the amount or deleting it leaves the hidden leg in place,
+ * so the pair can stop summing to zero. Refusing the edit would reveal that a hidden counterpart exists, so it is not
+ * refused; the hidden account's members see an unpaired leg as a plain income or expense.
  */
 class TransactionWriter
 {
