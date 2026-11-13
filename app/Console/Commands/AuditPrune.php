@@ -19,7 +19,12 @@ class AuditPrune extends Command
             return 1;
         }
 
-        $count = DB::delete("delete from audit_logs where occurred_at < now() - interval '2 years'");
+        // The removal trigger on audit_logs only lets the owner role delete inside a transaction that opts in.
+        $count = DB::transaction(function (): int {
+            DB::statement("set local audit.prune = 'on'");
+
+            return DB::delete("delete from audit_logs where occurred_at < now() - interval '2 years'");
+        });
         $this->info("Pruned {$count} audit rows.");
 
         return 0;

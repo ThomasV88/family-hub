@@ -4,7 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/** Append-only. Rows are inserted once; the model refuses to update or delete them. */
+/**
+ * Append-only. Rows are inserted once. Enforcement is layered: the model refuses single-row update/delete
+ * (bulk query-builder calls bypass these hooks), the runtime role fh_app has no UPDATE/DELETE/TRUNCATE
+ * privilege, and database triggers refuse UPDATE, and DELETE/TRUNCATE outside audit:prune. A DB owner or
+ * superuser can still change the table; this protects the history from the application, not from the DB owner.
+ */
 class AuditEntry extends Model
 {
     protected $table = 'audit_logs';
