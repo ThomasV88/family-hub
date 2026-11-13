@@ -162,6 +162,9 @@ main() {
   dc() { docker compose -f compose.server.yaml "$@"; }
 
   log "Deploying $IMAGE_TAG to $COMPOSE_PROJECT_NAME ($here)"
+  if [ "$(env_get STACK_ENV)" = production ] && [ -z "$(env_get BACKUP_COPY_REPOSITORY)" ]; then
+    err "WARNING: BACKUP_COPY_REPOSITORY is empty. Backups live on this VPS only (owner decision for Phase 1: no off-site copy); they do not survive loss of the server."
+  fi
 
   if [ "${SKIP_PULL:-}" = 1 ]; then
     log "Skipping pull (SKIP_PULL=1), checking local images"

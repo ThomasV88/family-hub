@@ -6,7 +6,7 @@
 set -euo pipefail
 
 MAX="${1:-26}"
-for key in STACK_ENV BACKUP_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE BACKUP_ALERT_COMMAND; do
+for key in STACK_ENV BACKUP_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE BACKUP_ALERT_COMMAND BACKUP_COPY_REPOSITORY; do
   if [ -z "${!key:-}" ] && [ -f .env ]; then
     line="$(grep -E "^${key}=" .env | tail -n 1 || true)"
     [ -n "$line" ] && { val="${line#*=}"; val="${val%\"}"; val="${val#\"}"; export "$key=$val"; }
@@ -16,6 +16,10 @@ RESTIC_PASSWORD_FILE="${RESTIC_PASSWORD_FILE:-./secrets/restic_password}"
 LOG_FILE="${BACKUP_LOG_FILE:-./logs/backup.log}"
 mkdir -p "$(dirname "$LOG_FILE")"
 [ -n "${BACKUP_RESTIC_REPOSITORY:-}" ] || { echo "BACKUP_RESTIC_REPOSITORY not set" >&2; exit 1; }
+
+if [ "${STACK_ENV:-}" = production ] && [ -z "${BACKUP_COPY_REPOSITORY:-}" ]; then
+  echo "WARNING: BACKUP_COPY_REPOSITORY is empty: backups exist on this VPS only (Phase 1 decision: no off-site copy)" >&2
+fi
 
 # Visible failure: stderr line, log entry and the optional notification hook, then non-zero exit.
 stale() {
