@@ -75,3 +75,20 @@ it('refuses bad input before parsing', function () {
         ->and(refused(fn () => Decoder::decode(" \n\t ")))->toBe('empty')
         ->and(refused(fn () => Decoder::decode('abc', 'KOI8-R')))->toBe('decode_failed');
 });
+
+it('decodes a diacritics sample in every allowlisted encoding with the iconv of the app image (WR-13)', function () {
+    // The suite runs in the app container, so this exercises the production iconv (GNU libiconv), not a host glibc.
+    $sample = "Dátum;Popis\n05.01.2026;Zaplatené nájomné Ľudovít Štúr, Łódź, Žilina\n";
+    $viaIconv = ['WINDOWS-1250' => 'WINDOWS-1250', 'ISO-8859-2' => 'ISO-8859-2', 'CP852' => 'CP852'];
+    foreach ($viaIconv as $encoding) {
+        $bytes = iconv('UTF-8', $encoding.'//TRANSLIT', $sample);
+        expect($bytes)->not->toBeFalse();
+        expect(Decoder::decode($bytes, $encoding)->text)->toContain('Zaplatené nájomné');
+    }
+    expect(Decoder::decode($sample, 'UTF-8')->text)->toContain('Zaplatené nájomné')
+        ->and(Decoder::decode(mb_convert_encoding($sample, 'UTF-16LE', 'UTF-8'), 'UTF-16LE')->text)->toContain('Zaplatené nájomné')
+        ->and(Decoder::decode(mb_convert_encoding($sample, 'UTF-16BE', 'UTF-8'), 'UTF-16BE')->text)->toContain('Zaplatené nájomné');
+
+    // Nothing in the allowlist may be untested here.
+    expect(array_diff(config('finance.import.encodings'), ['UTF-8', 'UTF-16LE', 'UTF-16BE', ...array_values($viaIconv)]))->toBe([]);
+});
