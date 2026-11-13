@@ -54,8 +54,26 @@ describe('account header and log out', () => {
         const w = await open({ app: { name: 'FH', env: 'local', styleGuide: false } });
         const logout = [...document.querySelectorAll('[role=menuitem]')].find((e) => e.textContent.includes('Log out'));
         logout.click();
-        expect(post).toHaveBeenCalledWith('/logout');
+        await vi.waitFor(() => expect(post).toHaveBeenCalledWith('/logout'));
         w.unmount();
+    });
+
+    it('unsubscribes this device and sends its endpoint with the logout request', async () => {
+        const unsubscribe = vi.fn().mockResolvedValue(true);
+        const subscription = { endpoint: 'https://fcm.googleapis.com/x', unsubscribe };
+        Object.defineProperty(navigator, 'serviceWorker', { value: { ready: Promise.resolve({ pushManager: { getSubscription: () => Promise.resolve(subscription) } }) }, configurable: true });
+        window.PushManager = function PushManager() {};
+        window.Notification = { permission: 'granted' };
+        globalThis.fetch = vi.fn().mockResolvedValue({ ok: true });
+        post.mockClear();
+        const w = await open({ app: { name: 'FH', env: 'local', styleGuide: false } });
+        [...document.querySelectorAll('[role=menuitem]')].find((e) => e.textContent.includes('Log out')).click();
+        await vi.waitFor(() => expect(post).toHaveBeenCalledWith('/logout', { push_endpoint: 'https://fcm.googleapis.com/x' }));
+        expect(unsubscribe).toHaveBeenCalled();
+        expect(globalThis.fetch).toHaveBeenCalledWith('/settings/notifications/push', expect.objectContaining({ method: 'DELETE' }));
+        w.unmount();
+        delete navigator.serviceWorker;
+        delete window.PushManager;
     });
 
     it('has no header or Log out for a guest', async () => {

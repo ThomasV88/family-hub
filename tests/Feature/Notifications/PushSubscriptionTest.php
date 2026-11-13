@@ -135,3 +135,24 @@ it('test endpoint sends the localized title through the sender', function () {
         ->and($fake->sent[0]['message']['title'])->toBe(trans('notifications.test_title', [], 'sk'))
         ->and($fake->sent[0]['message']['url'])->toBe('/settings/notifications');
 });
+
+it('removes only the logging-out device subscription when the logout request names its endpoint', function () {
+    $mine = 'https://fcm.googleapis.com/fcm/send/mine';
+    $other = 'https://fcm.googleapis.com/fcm/send/other';
+    $this->actingAs($this->user)->postJson('/settings/notifications/push', subBody($mine))->assertCreated();
+    $this->actingAs($this->user)->postJson('/settings/notifications/push', subBody($other))->assertCreated();
+
+    $this->actingAs($this->user)->post('/logout', ['push_endpoint' => $mine])->assertRedirect();
+
+    $hashes = PushSubscription::query()->pluck('endpoint_hash')->all();
+    expect($hashes)->toBe([PushSubscription::hashEndpoint($other)]);
+});
+
+it('does not let a logout delete another user\'s subscription', function () {
+    $victim = User::factory()->withPreset(Preset::Child)->create();
+    $this->actingAs($victim)->postJson('/settings/notifications/push', subBody('https://fcm.googleapis.com/fcm/send/v'))->assertCreated();
+
+    $this->actingAs($this->user)->post('/logout', ['push_endpoint' => 'https://fcm.googleapis.com/fcm/send/v']);
+
+    expect(PushSubscription::query()->count())->toBe(1);
+});

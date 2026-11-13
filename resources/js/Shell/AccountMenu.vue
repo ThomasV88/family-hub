@@ -4,6 +4,7 @@ import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { CircleUser, LogOut, Palette, Settings } from '@lucide/vue';
 import UiMenu from '../Components/ui/UiMenu.vue';
+import { currentSubscription, disable } from '../push.js';
 import { THEME_OPTIONS, getThemePreference, setThemePreference } from '../theme.js';
 
 const { t } = useI18n();
@@ -42,7 +43,28 @@ function onSelect({ key, value }) {
         theme.value = value;
     } else if (key === 'settings') router.visit('/settings');
     else if (key === 'style') router.visit('/_style');
-    else if (key === 'logout') router.post('/logout');
+    else if (key === 'logout') logout();
+}
+
+// Drop this device's push subscription first so reminders stop reaching a shared device after logout.
+// The endpoint also travels with the logout request as a server-side fallback. Never blocks logout.
+async function logout() {
+    let data = null;
+    try {
+        const work = (async () => {
+            const subscription = await currentSubscription();
+            if (!subscription) return null;
+            const endpoint = subscription.endpoint;
+            await disable().catch(() => {});
+
+            return { push_endpoint: endpoint };
+        })();
+        data = await Promise.race([work, new Promise((resolve) => setTimeout(() => resolve(null), 3000))]);
+    } catch {
+        data = null;
+    }
+    if (data) router.post('/logout', data);
+    else router.post('/logout');
 }
 </script>
 
