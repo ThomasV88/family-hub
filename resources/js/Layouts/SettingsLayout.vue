@@ -42,6 +42,7 @@ const ICONS = { users: Users, 'scroll-text': ScrollText, palette: Palette };
                 <slot />
             </div>
         </div>
+        <template #panel><slot name="panel" /></template>
     </AppShell>
 </template>
 
