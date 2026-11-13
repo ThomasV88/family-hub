@@ -6,9 +6,9 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\StyleGuideController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', HomeController::class)->name('home');
+Route::get('/', HomeController::class)->middleware('auth')->name('home');
 Route::post('/heartbeat', [HeartbeatController::class, 'store'])
-    ->middleware('throttle:6,1')
+    ->middleware(['auth', 'throttle:6,1'])
     ->name('heartbeat.store');
 Route::post('/locale', [LocaleController::class, 'update'])
     ->middleware('throttle:30,1')

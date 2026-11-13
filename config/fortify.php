@@ -2,6 +2,17 @@
 
 return [
 
+    'guard' => 'web',
+
+    'home' => '/',
+
+    'lowercase_usernames' => true,
+
+    // Named limiter 'login' is defined in AppServiceProvider (5/min per email+IP, 10/15min per email, 30/min per IP).
+    'limiters' => [
+        'login' => 'login',
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Features

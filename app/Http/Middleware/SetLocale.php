@@ -30,6 +30,11 @@ class SetLocale
 
         // getPreferredLanguage returns the first supported entry when nothing matches,
         // so only trust it when the browser actually listed one of our languages.
+        $stored = $request->user()?->locale;
+        if (is_string($stored) && in_array($stored, self::SUPPORTED, true)) {
+            return $stored;
+        }
+
         $listed = array_map(fn (string $l) => strtolower(substr($l, 0, 2)), $request->getLanguages());
         if (array_intersect($listed, self::SUPPORTED) === []) {
             return 'en';

@@ -25,7 +25,7 @@ it('rejects an unsupported locale and sets no cookie', function () {
 });
 
 it('uses the locale cookie and exposes messages and html lang', function () {
-    $response = $this->withCookie('locale', 'sk')->get('/');
+    $response = $this->withCookie('locale', 'sk')->get('/login');
 
     $response->assertInertia(fn (Assert $page) => $page
         ->where('locale', 'sk')
@@ -36,20 +36,20 @@ it('uses the locale cookie and exposes messages and html lang', function () {
 });
 
 it('picks the locale from Accept-Language when there is no cookie', function () {
-    $this->withHeader('Accept-Language', 'pl-PL,pl;q=0.9,en;q=0.8')->get('/')
+    $this->withHeader('Accept-Language', 'pl-PL,pl;q=0.9,en;q=0.8')->get('/login')
         ->assertInertia(fn (Assert $page) => $page->where('locale', 'pl'));
 
-    $this->withHeader('Accept-Language', 'de-DE')->get('/')
+    $this->withHeader('Accept-Language', 'de-DE')->get('/login')
         ->assertInertia(fn (Assert $page) => $page->where('locale', 'en'));
 });
 
 it('lets the cookie win over Accept-Language', function () {
     $this->withCookie('locale', 'sk')
-        ->withHeader('Accept-Language', 'pl-PL,pl;q=0.9')->get('/')
+        ->withHeader('Accept-Language', 'pl-PL,pl;q=0.9')->get('/login')
         ->assertInertia(fn (Assert $page) => $page->where('locale', 'sk'));
 });
 
 it('ignores a tampered locale cookie value', function () {
-    $this->withCookie('locale', '../../etc/passwd')->get('/')
+    $this->withCookie('locale', '../../etc/passwd')->get('/login')
         ->assertInertia(fn (Assert $page) => $page->where('locale', 'en'));
 });

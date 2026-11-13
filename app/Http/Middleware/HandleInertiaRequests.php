@@ -44,6 +44,20 @@ class HandleInertiaRequests extends Middleware
             'locale' => $locale,
             'availableLocales' => SetLocale::SUPPORTED,
             'messages' => json_decode(File::get(lang_path("$locale.json")), true, flags: JSON_THROW_ON_ERROR),
+            'auth' => [
+                'user' => $request->user() ? [
+                    'id' => $request->user()->id,
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
+                    'locale' => $request->user()->locale,
+                    'isAdmin' => (bool) $request->user()->is_admin,
+                ] : null,
+            ],
+            'flash' => [
+                'status' => $request->session()->get('status'),
+                'toast' => $request->session()->get('toast'),
+                'data' => $request->session()->get('flash_data'),
+            ],
             'app' => [
                 'name' => config('app.name'),
                 'env' => app()->environment(),

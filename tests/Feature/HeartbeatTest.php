@@ -2,19 +2,23 @@
 
 use App\Jobs\RecordHeartbeat;
 use App\Models\SystemHeartbeat;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
 
 uses(RefreshDatabase::class);
 
 afterEach(fn () => CarbonImmutable::setTestNow());
 
+beforeEach(fn () => $this->actingAs(User::factory()->create()));
+
 it('records a schedule heartbeat row with the current time', function () {
     $now = CarbonImmutable::parse('2026-11-13 10:00:00', 'UTC');
     CarbonImmutable::setTestNow($now);
-    Illuminate\Support\Carbon::setTestNow($now);
+    Carbon::setTestNow($now);
 
     (new RecordHeartbeat('schedule'))->handle();
 
@@ -25,7 +29,7 @@ it('records a schedule heartbeat row with the current time', function () {
 
 it('prunes rows older than 7 days and keeps newer ones', function () {
     $now = CarbonImmutable::parse('2026-11-13 10:00:00', 'UTC');
-    Illuminate\Support\Carbon::setTestNow($now);
+    Carbon::setTestNow($now);
     SystemHeartbeat::create(['source' => 'schedule', 'recorded_at' => $now->subDays(8)]);
     SystemHeartbeat::create(['source' => 'schedule', 'recorded_at' => $now->subDays(6)]);
 
@@ -63,4 +67,10 @@ it('schedules RecordHeartbeat every minute', function () {
 
     expect($events)->toHaveCount(1);
     expect($events->first()->expression)->toBe('* * * * *');
+});
+
+it('redirects a guest heartbeat request to the login page', function () {
+    auth()->logout();
+
+    $this->post('/heartbeat')->assertRedirect('/login');
 });

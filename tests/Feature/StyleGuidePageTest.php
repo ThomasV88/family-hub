@@ -39,5 +39,5 @@ it('returns 404 in environments outside the allowlist', function (string $env) {
 it('shares a styleGuide flag derived from the same allowlist', function (string $env, bool $expected) {
     app()['env'] = $env;
 
-    $this->get('/')->assertInertia(fn (Assert $page) => $page->where('app.styleGuide', $expected));
+    $this->get('/login')->assertInertia(fn (Assert $page) => $page->where('app.styleGuide', $expected));
 })->with([['local', true], ['staging', true], ['production', false], ['qa', false]]);

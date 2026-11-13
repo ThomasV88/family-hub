@@ -12,6 +12,8 @@ class LocaleController extends Controller
     {
         $data = $request->validate(['locale' => ['required', 'in:sk,pl,en']]);
 
+        $request->user()?->forceFill(['locale' => $data['locale']])->save();
+
         Cookie::queue(cookie('locale', $data['locale'], 60 * 24 * 365, null, null, (bool) config('session.secure'), true, false, 'lax'));
 
         return back(303);

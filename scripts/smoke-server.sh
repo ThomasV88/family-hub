@@ -12,20 +12,21 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
-# 1. Home page over HTTPS. The first request is retried: right after a deploy the stack may still warm up.
+# 1. Sign-in page over HTTPS (the Overview needs a session, so a guest gets /login). The first request is retried: right after a deploy the stack may still warm up.
 code=000
 for attempt in 1 2 3 4 5 6 7 8; do
-  code=$(curl -sS --max-time 20 -D "$TMP/h" -o "$TMP/b" -w '%{http_code}' "$BASE/" 2>/dev/null) || code=000
+  code=$(curl -sS --max-time 20 -D "$TMP/h" -o "$TMP/b" -w '%{http_code}' "$BASE/login" 2>/dev/null) || code=000
   [ "$code" = 200 ] && break
   sleep 4
 done
-[ "$code" = 200 ] || fail "GET / returned HTTP $code"
+[ "$code" = 200 ] || fail "GET /login returned HTTP $code"
 grep -qi '^strict-transport-security:' "$TMP/h" || fail "no Strict-Transport-Security header"
 grep -q 'data-page' "$TMP/b" || fail "no data-page in body (Inertia not rendering)"
+grep -q 'Auth/Login' "$TMP/b" || fail "Auth/Login component not in body"
 
 # 1b. A static asset referenced by the HTML must be served (catches app/nginx images built from different assets)
 asset=$(grep -oE '/build/assets/[A-Za-z0-9._-]+\.(js|css)' "$TMP/b" | head -n1 || true)
-[ -n "$asset" ] || fail "no /build/assets reference found in the home page"
+[ -n "$asset" ] || fail "no /build/assets reference found in the login page"
 code=$(curl -sS -o /dev/null -w '%{http_code}' "$BASE$asset")
 [ "$code" = 200 ] || fail "$asset referenced by the page returned HTTP $code"
 

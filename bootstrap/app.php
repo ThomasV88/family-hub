@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\NoStoreDynamicResponses;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,11 +24,14 @@ return Application::configure(basePath: dirname(__DIR__))
             '192.168.0.0/16',
         ]);
         // The theme cookie is written by JS (plain value) and allowlisted server-side in ThemePreference.
+        $middleware->redirectGuestsTo('/login');
+        $middleware->redirectUsersTo('/');
+        $middleware->authenticateSessions();
         $middleware->encryptCookies(except: ['fh_theme']);
         $middleware->web(append: [
-            \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\HandleInertiaRequests::class,
-            \App\Http\Middleware\NoStoreDynamicResponses::class,
+            SetLocale::class,
+            HandleInertiaRequests::class,
+            NoStoreDynamicResponses::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
