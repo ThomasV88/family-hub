@@ -18,7 +18,8 @@ return [
     'login' => ['method' => 'GET', 'uri' => '/login', 'expect' => ['guest' => 200] + $signedIn(302)],
     'login.store' => ['method' => 'POST', 'uri' => '/login', 'data' => [], 'expect' => $everyone(302)],
     'logout' => ['method' => 'POST', 'uri' => '/logout', 'expect' => $signedIn(303)],
-    'password.confirm' => ['method' => 'GET', 'uri' => '/user/confirm-password', 'expect' => $signedIn(404)],
-    'password.confirm.store' => ['method' => 'POST', 'uri' => '/user/confirm-password', 'data' => [], 'expect' => $signedIn(302)],
-    'password.confirmation' => ['method' => 'GET', 'uri' => '/user/confirmed-password-status', 'expect' => $signedIn(200)],
+    // Fortify's password-confirm endpoints are an unthrottled password oracle: denied for everybody (Phase 6).
+    'password.confirm' => ['method' => 'GET', 'uri' => '/user/confirm-password', 'expect' => $signedIn(403)],
+    'password.confirm.store' => ['method' => 'POST', 'uri' => '/user/confirm-password', 'data' => [], 'expect' => $signedIn(403)],
+    'password.confirmation' => ['method' => 'GET', 'uri' => '/user/confirmed-password-status', 'expect' => $signedIn(403)],
 ];

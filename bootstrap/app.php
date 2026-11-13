@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureRouteDeclaresAccess;
+use App\Http\Middleware\GuardTwoFactorRoutes;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\NoReferrer;
 use App\Http\Middleware\NoStoreDynamicResponses;
@@ -41,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             EnsureRouteDeclaresAccess::class,
             ThrottleAuthRoutes::class,
+            GuardTwoFactorRoutes::class,
             NoStoreDynamicResponses::class,
         ]);
     })
