@@ -92,3 +92,9 @@ it('decodes a diacritics sample in every allowlisted encoding with the iconv of 
     // Nothing in the allowlist may be untested here.
     expect(array_diff(config('finance.import.encodings'), ['UTF-8', 'UTF-16LE', 'UTF-16BE', ...array_values($viaIconv)]))->toBe([]);
 });
+
+it('removes a BOM character without eating the lead byte of a character that shares it (IN-01)', function () {
+    expect(Decoder::decode("\u{FF21};b\n1;2\n", 'UTF-8')->text)->toStartWith("\u{FF21};b")
+        ->and(Decoder::decode("\xEF\xBB\xBF\u{FF21};b\n1;2\n", 'UTF-8')->text)->toStartWith("\u{FF21};b")
+        ->and(Decoder::decode(mb_convert_encoding("\u{FEFF}a;b\n1;2\n", 'UTF-16LE', 'UTF-8'), 'UTF-16LE')->text)->toStartWith('a;b');
+});

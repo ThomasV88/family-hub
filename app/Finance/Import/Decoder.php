@@ -80,7 +80,8 @@ final class Decoder
             }
         }
 
-        $text = ltrim($text, "\u{FEFF}");
+        // A BOM is one character; ltrim() with it would treat it as a byte set and eat the lead byte of e.g. U+FF21.
+        $text = preg_replace('/^\x{FEFF}+/u', '', $text) ?? $text;
         $text = str_replace(["\r\n", "\r"], "\n", $text);
         $text = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $text);
         if ($text === null) {
