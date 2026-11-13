@@ -27,7 +27,7 @@ it('renders the page for the admin with entries newest first and the page shape'
         ->has('entries.0', fn (Assert $e) => $e->hasAll(['id', 'occurredAt', 'actorLabel', 'event', 'group', 'module', 'targetLabel', 'meta', 'ip']))
         ->has('members', 1)
         ->where('filters', ['member' => null, 'event' => null, 'from' => null, 'to' => null])
-        ->has('sections', 4)
+        ->has('sections', 5)
         ->where('error', null));
 });
 

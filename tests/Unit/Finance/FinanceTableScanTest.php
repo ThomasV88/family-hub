@@ -49,7 +49,8 @@ it('keeps finance table names inside the query layer, the scope and the models',
     $bad = fhTblHits(
         fhTblFiles(''),
         '/finance_(accounts|account_members|categories|transactions|recurring|recurring_matches|match_rejections|budgets|import_profiles|import_batches|import_rows)\b/',
-        fn (string $rel) => $fhTblInQueries($rel) || $rel === 'Finance/Visibility.php' || (bool) preg_match('#^Models/Finance[A-Za-z]*\.php$#', $rel),
+        // SettingsSections only names the settings route, section key and label for the admin account screen.
+        fn (string $rel) => $fhTblInQueries($rel) || $rel === 'Finance/Visibility.php' || $rel === 'Support/SettingsSections.php' || (bool) preg_match('#^Models/Finance[A-Za-z]*\.php$#', $rel),
     );
     expect($bad)->toBe([]);
 });

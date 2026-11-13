@@ -260,7 +260,7 @@ class FinancePrivacy
         return (string) (app(HandleInertiaRequests::class)->version(Request::create('/')) ?? '');
     }
 
-    /** Status, redirect target and body with only the per-session noise removed (CSRF token). */
+    /** Status, redirect target and body with only the per-request noise removed (CSRF token, echoed page url). */
     public static function normalise(TestResponse $response): string
     {
         $body = $response->baseResponse instanceof BinaryFileResponse
@@ -270,6 +270,9 @@ class FinancePrivacy
 
         $body = preg_replace('/(name="csrf-token"\s+content=")[^"]*/', '$1', $body) ?? $body;
         $body = preg_replace('/"csrf_token"\s*:\s*"[^"]*"/', '"csrf_token":""', $body) ?? $body;
+
+        // The Inertia page url echoes the requested path, which differs by construction between a hidden and a random id.
+        $body = preg_replace('/"url"\s*:\s*"[^"]*"/', '"url":""', $body) ?? $body;
 
         return $response->getStatusCode()."\n".(string) $response->headers->get('Location')."\n".$body;
     }
