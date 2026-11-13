@@ -69,6 +69,11 @@ The `secrets/` directory itself is 0700. Values are never written to this docume
 
 (Filled by plan 01-11.)
 
+Freshness alerting: `backup-freshness.sh` (cron, 09:xx) checks only snapshots tagged `nightly`. When the newest one
+is older than 26 h it prints `BACKUP STALE` to `logs/cron.log`, appends to `logs/backup.log`, exits non-zero and,
+if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script with the message as its argument
+(hook point for mail or push notification; none is configured in Phase 1).
+
 ## Deploy
 
 (Filled by plan 01-12.)

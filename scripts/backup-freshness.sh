@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Exits 1 when the newest snapshot is older than max_hours (default 26).
+# Exits 1 when the newest nightly snapshot is older than max_hours (default 26). Pre-migrate and manual
+# snapshots do not count. Every failure prints a BACKUP STALE line to stderr (cron.log) and, when
+# BACKUP_ALERT_COMMAND is set (env or .env), runs that command with the message as its only argument.
 # Usage: backup-freshness.sh [max_hours=26]
 set -euo pipefail
 
 MAX="${1:-26}"
-for key in STACK_ENV BACKUP_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE; do
+for key in STACK_ENV BACKUP_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE BACKUP_ALERT_COMMAND; do
   if [ -z "${!key:-}" ] && [ -f .env ]; then
     line="$(grep -E "^${key}=" .env | tail -n 1 || true)"
     [ -n "$line" ] && { val="${line#*=}"; val="${val%\"}"; val="${val#\"}"; export "$key=$val"; }
@@ -15,8 +17,19 @@ LOG_FILE="${BACKUP_LOG_FILE:-./logs/backup.log}"
 mkdir -p "$(dirname "$LOG_FILE")"
 [ -n "${BACKUP_RESTIC_REPOSITORY:-}" ] || { echo "BACKUP_RESTIC_REPOSITORY not set" >&2; exit 1; }
 
-JSON="$(restic -r "$BACKUP_RESTIC_REPOSITORY" --password-file "$RESTIC_PASSWORD_FILE" snapshots --json --latest 1)" \
-  || { echo "BACKUP STALE: repository unreadable" >&2; exit 1; }
+# Visible failure: stderr line, log entry and the optional notification hook, then non-zero exit.
+stale() {
+  local msg="BACKUP STALE: $1"
+  echo "$msg" >&2
+  printf '%s freshness[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${STACK_ENV:-}" "$msg" >> "$LOG_FILE"
+  if [ -n "${BACKUP_ALERT_COMMAND:-}" ]; then
+    "$BACKUP_ALERT_COMMAND" "$msg [${STACK_ENV:-}]" || echo "alert command failed" >&2
+  fi
+  exit 1
+}
+
+JSON="$(restic -r "$BACKUP_RESTIC_REPOSITORY" --password-file "$RESTIC_PASSWORD_FILE" snapshots --json --tag nightly --latest 1)" \
+  || stale "repository unreadable"
 
 AGE="$(printf '%s' "$JSON" | python3 -c '
 import json, sys
@@ -32,12 +45,10 @@ print(f"{(datetime.now(timezone.utc) - d).total_seconds() / 3600:.6f}")
 ')"
 
 if [ "$AGE" = "none" ]; then
-  echo "BACKUP STALE: no snapshot" >&2; exit 1
+  stale "no nightly snapshot"
 fi
 if python3 -c "import sys; sys.exit(0 if float('$AGE') <= float('$MAX') else 1)"; then
   echo "BACKUP FRESH: ${AGE}h"
 else
-  echo "BACKUP STALE: ${AGE}h" >&2
-  printf '%s freshness[%s] STALE %sh\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${STACK_ENV:-}" "$AGE" >> "$LOG_FILE"
-  exit 1
+  stale "newest nightly snapshot is ${AGE}h old (max ${MAX}h)"
 fi

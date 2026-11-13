@@ -87,8 +87,17 @@ if DRILL_DB="$DB_NAME" bash scripts/restore-drill.sh >/dev/null 2>&1; then
   fail "drill accepted the live DB as target"
 fi
 
-# 9. freshness
-bash scripts/backup-freshness.sh >/dev/null || fail "freshness failed right after backup"
+# 9. freshness: only nightly snapshots count, a newer manual snapshot must not mask a missing nightly
+if bash scripts/backup-freshness.sh >/dev/null 2>&1; then
+  fail "freshness passed with manual snapshots only"
+fi
+ALERT_LOG=$(mktemp)
+printf '#!/bin/sh\necho "$1" >> "%s"\n' "$ALERT_LOG" > "$ALERT_LOG.sh"; chmod +x "$ALERT_LOG.sh"
+BACKUP_ALERT_COMMAND="$ALERT_LOG.sh" bash scripts/backup-freshness.sh >/dev/null 2>&1 || true
+grep -q 'BACKUP STALE' "$ALERT_LOG" || fail "alert hook was not called on stale"
+rm -f "$ALERT_LOG" "$ALERT_LOG.sh"
+bash scripts/backup.sh nightly >/dev/null || fail "backup.sh nightly failed"
+bash scripts/backup-freshness.sh >/dev/null || fail "freshness failed right after nightly backup"
 if bash scripts/backup-freshness.sh 0 >/dev/null 2>&1; then
   fail "freshness with max_hours=0 should fail"
 fi
