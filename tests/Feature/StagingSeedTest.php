@@ -89,3 +89,30 @@ it('audit refuses in production', function () {
 
     $this->artisan('staging:audit')->assertExitCode(1);
 });
+
+it('audit fails on a real invited email, and on audit rows of real users', function () {
+    setEnv('staging');
+    $synthetic = User::factory()->create(['email' => 'a.1@example.test']);
+    DB::table('invitations')->insert([
+        'email' => 'real.person@gmail.com', 'token_hash' => str_repeat('a', 64), 'preset' => 'child', 'locale' => 'sk',
+        'invited_by' => $synthetic->id, 'expires_at' => now()->addDay(),
+    ]);
+    DB::table('audit_logs')->insert(['event' => 'invite_created', 'actor_id' => $synthetic->id, 'meta' => json_encode(['email' => 'real.person@gmail.com'])]);
+
+    $this->artisan('staging:audit')
+        ->expectsOutputToContain('1 non-synthetic invitations')
+        ->expectsOutputToContain('1 non-synthetic audit_logs')
+        ->assertExitCode(1);
+});
+
+it('audit passes when invitations and audit rows only reference synthetic data', function () {
+    setEnv('staging');
+    $synthetic = User::factory()->create(['email' => 'a.1@example.test']);
+    DB::table('invitations')->insert([
+        'email' => 'eva@example.test', 'token_hash' => str_repeat('b', 64), 'preset' => 'child', 'locale' => 'sk',
+        'invited_by' => $synthetic->id, 'expires_at' => now()->addDay(),
+    ]);
+    DB::table('audit_logs')->insert(['event' => 'invite_created', 'actor_id' => $synthetic->id, 'meta' => json_encode(['email' => 'eva@example.test'])]);
+
+    $this->artisan('staging:audit')->assertExitCode(0);
+});

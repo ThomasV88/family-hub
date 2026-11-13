@@ -21,6 +21,11 @@ class StagingAudit extends Command
     {
         return [
             ['users', "email not like '%@example.test'"],
+            // Phase 2: invitations hold the invited address; audit rows keep names (labels) and invite emails.
+            ['invitations', "email not like '%@example.test'"],
+            ['audit_logs', "(meta->>'email' is not null and meta->>'email' not like '%@example.test')"
+                ." or (actor_id is not null and actor_id not in (select id from users where email like '%@example.test'))"
+                ." or (target_user_id is not null and target_user_id not in (select id from users where email like '%@example.test'))"],
         ];
     }
 
