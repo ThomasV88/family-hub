@@ -14,6 +14,9 @@ const props = defineProps({
     dueDate: { type: String, default: '' },
     disabled: { type: Boolean, default: false },
     errors: { type: Object, default: () => ({}) },
+    // Finance recurring expenses are schedule-only and always repeat.
+    showMode: { type: Boolean, default: true },
+    allowNone: { type: Boolean, default: true },
 });
 const emit = defineEmits(['update:modelValue']);
 const { t, locale } = useI18n();
@@ -38,7 +41,7 @@ function toggleDay(code, on) {
 // Display only: the server computes every date. Monthly repeats anchor on the due date's day (or the stored day).
 const dayOfMonth = computed(() => props.modelValue.monthDay ?? (props.dueDate ? Number(props.dueDate.slice(8, 10)) : null));
 
-const kindOptions = computed(() => ['none', 'daily', 'weekly', 'monthly', 'custom'].map((value) => ({ value, label: t(`todo.repeat.${value}`) })));
+const kindOptions = computed(() => ['none', 'daily', 'weekly', 'monthly', 'custom'].filter((value) => props.allowNone || value !== 'none').map((value) => ({ value, label: t(`todo.repeat.${value}`) })));
 const monthOptions = computed(() => [
     { value: 'day', label: dayOfMonth.value ? t('todo.repeat.on_day', { n: dayOfMonth.value }) : t('todo.repeat.month_day') },
     { value: 'last', label: t('todo.repeat.last_day') },
@@ -101,7 +104,7 @@ const summary = computed(() => {
                 </UiField>
             </div>
 
-            <fieldset class="repeat__from">
+            <fieldset v-if="showMode" class="repeat__from">
                 <legend class="repeat__legend">{{ t('todo.repeat.from') }}</legend>
                 <div class="repeat__radios">
                     <UiRadio :model-value="modelValue.mode" value="schedule" :name="`${uid}-from`" :disabled="disabled" @update:model-value="(v) => set({ mode: v })">{{ t('todo.repeat.from_schedule') }}</UiRadio>
