@@ -32,7 +32,9 @@ function outboxRow(?User $user = null, ?Task $task = null, string $channel = 'ma
 {
     $user ??= User::factory()->withPreset(Preset::Parent)->create();
     $task ??= Task::factory()->dueOn('2027-05-10')->create(['assignee_id' => $user->id, 'creator_id' => $user->id]);
-    app(OutboxWriter::class)->enqueue('task_reminder', $user, $channel, 'task', $task->id, "k:{$task->id}:{$user->id}:{$channel}", ['task_id' => $task->id, 'remind_at' => 1]);
+    $at = $task->due_date === null ? 1 : app(\App\Tasks\ReminderTimeCalculator::class)
+        ->remindAt($task->due_date->format('Y-m-d'), $task->due_time === null ? null : substr((string) $task->due_time, 0, 5), $task->timezone, $task->remind_before_minutes ?? 0)->timestamp;
+    app(OutboxWriter::class)->enqueue('task_reminder', $user, $channel, 'task', $task->id, "k:{$task->id}:{$user->id}:{$channel}", ['task_id' => $task->id, 'remind_at' => $at]);
 
     return OutboxItem::query()->latest('id')->first();
 }
@@ -242,4 +244,25 @@ it('does not resend when marking a delivered mail as sent fails once', function 
 
     Notification::assertSentTimes(TaskReminderNotification::class, 1);
     expect($row->fresh()->status->value)->toBe('sent');
+});
+
+it('skips a stale reminder after the task was rescheduled or reassigned', function () {
+    Notification::fake();
+    $user = User::factory()->withPreset(Preset::Parent)->create();
+    $other = User::factory()->withPreset(Preset::Parent)->create();
+
+    $moved = outboxRow($user, Task::factory()->dueOn('2027-05-10')->create(['creator_id' => $user->id, 'assignee_id' => $user->id]));
+    Task::query()->whereKey($moved->subject_id)->first()->update(['due_date' => '2027-05-20']);
+
+    $reassigned = outboxRow($user, Task::factory()->dueOn('2027-05-10')->create(['creator_id' => $user->id, 'assignee_id' => $user->id]));
+    Task::query()->whereKey($reassigned->subject_id)->first()->update(['assignee_id' => $other->id]);
+
+    $offset = outboxRow($user, Task::factory()->dueOn('2027-05-10', '18:00')->create(['creator_id' => $user->id, 'assignee_id' => $user->id]));
+    Task::query()->whereKey($offset->subject_id)->first()->update(['remind_before_minutes' => 60]);
+
+    foreach ([$moved, $reassigned, $offset] as $row) {
+        runJob(queued($row));
+        expect($row->fresh()->status->value)->toBe('skipped');
+    }
+    Notification::assertNothingSent();
 });
