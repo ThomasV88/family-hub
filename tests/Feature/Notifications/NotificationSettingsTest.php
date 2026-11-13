@@ -60,6 +60,7 @@ it('lists sections in order for admins', function () {
     $this->actingAs(User::factory()->admin()->create())->get('/settings/notifications')->assertInertia(fn (Assert $p) => $p
         ->where('sections.0.key', 'members')
         ->where('sections.1.key', 'audit')
-        ->where('sections.2.key', 'notifications')
-        ->where('sections.3.key', 'appearance'));
+        ->where('sections.2.key', 'finance_accounts')
+        ->where('sections.3.key', 'notifications')
+        ->where('sections.4.key', 'appearance'));
 });
