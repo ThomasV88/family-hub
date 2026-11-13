@@ -50,7 +50,9 @@ guard_inputs() {
 
 # .env is read by compose and this script only; credentials belong in app.env, migrate.env or secrets/.
 guard_env_has_no_passwords() {
-  if grep -v '^[[:space:]]*#' .env 2>/dev/null | grep -Eiq '^[^=]*(PASSWORD|APP_KEY)'; then
+  # Keys ending in _FILE (RESTIC_PASSWORD_FILE, BACKUP_COPY_PASSWORD_FILE) hold paths, not secrets.
+  if grep -v '^[[:space:]]*#' .env 2>/dev/null | grep -Ei '^[^=]*(PASSWORD|APP_KEY)[^=]*=' \
+    | grep -Eivq '^[[:space:]]*[A-Za-z0-9_]*_FILE[[:space:]]*='; then
     err ".env contains PASSWORD or APP_KEY lines; they belong in app.env, migrate.env or secrets/. Nothing deployed."
     return 1
   fi

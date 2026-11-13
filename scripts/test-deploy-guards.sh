@@ -63,6 +63,12 @@ expect pass "no reseed requested" "$d" "$TAG" guard_reseed
 d=$(make_fixture pw family-hub-staging staging 0 staging)
 echo 'DB_PASSWORD=x' >> "$d/.env"
 expect fail "password in .env" "$d" "$TAG" guard_env_has_no_passwords
+d=$(make_fixture pwf family-hub-staging staging 0 staging)
+printf 'RESTIC_PASSWORD_FILE=/opt/x/secrets/restic_password\nBACKUP_COPY_PASSWORD_FILE=/opt/x/secrets/copy_password\n' >> "$d/.env"
+expect pass "*_PASSWORD_FILE paths in .env" "$d" "$TAG" guard_env_has_no_passwords
+d=$(make_fixture pwf2 family-hub-staging staging 0 staging)
+printf 'RESTIC_PASSWORD_FILE=/x\nDB_PASSWORD=x\n' >> "$d/.env"
+expect fail "password next to a *_FILE key" "$d" "$TAG" guard_env_has_no_passwords
 d=$(make_fixture key family-hub-staging staging 0 staging)
 echo 'APP_KEY=base64:abc' >> "$d/.env"
 expect fail "APP_KEY in .env" "$d" "$TAG" guard_env_has_no_passwords
