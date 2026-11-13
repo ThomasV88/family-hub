@@ -128,6 +128,12 @@ class MatchQuery
         ]) > 0;
     }
 
+    /** Row lock on a visible recurring item for the rest of the transaction; false when it is not visible. */
+    public function lockRecurring(Viewer $viewer, string $recurringId): bool
+    {
+        return Visibility::apply(DB::table('finance_recurring')->where('id', $recurringId), $viewer)->lockForUpdate()->value('id') !== null;
+    }
+
     public function deleteMatch(Viewer $viewer, string $recurringId, string $date): int
     {
         return Visibility::apply(

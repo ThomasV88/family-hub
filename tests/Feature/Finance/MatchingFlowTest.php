@@ -201,3 +201,23 @@ it('shows what a transaction pays on rows and in the panel', function () {
         ->and($props['panelTransaction']['match'])->toBe(['recurringId' => $item->id, 'recurringName' => 'Rent', 'dueDate' => '2027-03-05'])
         ->and($plainPanel)->toBeNull();
 });
+
+it('books one payment when the same occurrence is recorded twice (double submit past the request check)', function () {
+    [$user, , $item] = fhMfSetup();
+    $viewer = Viewer::for($user);
+    $service = app(App\Finance\Recurring\RecurringMatchService::class);
+    $payment = ['minor' => 45000, 'booked_on' => '2027-03-05', 'description' => 'Rent', 'category_id' => null, 'note' => null];
+    $locked = false;
+    DB::listen(function ($q) use (&$locked) {
+        $locked = $locked || (str_contains($q->sql, 'finance_recurring"') && str_contains($q->sql, 'for update'));
+    });
+
+    $service->recordPayment($viewer, $item, '2027-03-05', $payment);
+    expect(fn () => $service->recordPayment($viewer, $item, '2027-03-05', $payment))
+        ->toThrow(Illuminate\Validation\ValidationException::class);
+
+    expect($locked)->toBeTrue()
+        ->and(FinanceTransaction::query()->count())->toBe(1)
+        ->and(FinanceRecurringMatch::query()->count())->toBe(1)
+        ->and(FinanceRecurringMatch::query()->value('transaction_id'))->toBe(FinanceTransaction::query()->value('id'));
+});

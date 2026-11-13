@@ -135,13 +135,19 @@ class RecurringMatchService
     public function recordPayment(Viewer $viewer, object $item, string $date, array $validated): FinanceTransaction
     {
         return DB::transaction(function () use ($viewer, $item, $date, $validated): FinanceTransaction {
+            // Serialises concurrent submits for the same item: the second one waits, then finds the first one's match.
+            if (! $this->matches->lockRecurring($viewer, (string) $item->id)) {
+                abort(404);
+            }
+            if ($this->matches->matchFor($viewer, (string) $item->id, $date) !== null) {
+                $this->rejectTransaction();
+            }
             $account = $this->accounts->findVisible($viewer, (string) $item->account_id) ?? abort(404);
             // Resolved lazily: the writer itself depends on this service.
             $tx = app(TransactionWriter::class)->createSingle(
                 $viewer, $account, 'expense', $validated['minor'], $validated['booked_on'], $validated['description'],
                 $validated['category_id'] ?? null, $validated['note'] ?? null, false,
             );
-            $this->matches->deleteMatch($viewer, (string) $item->id, $date);
             if (! $this->matches->insertManual((string) $item->id, (string) $item->account_id, $date, (string) $tx->id, (int) $item->expected_amount_minor, $viewer->userId())) {
                 $this->rejectTransaction();
             }
