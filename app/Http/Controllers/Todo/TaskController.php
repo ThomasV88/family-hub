@@ -11,6 +11,7 @@ use App\Http\Requests\Todo\UpdateTaskRequest;
 use App\Models\Task;
 use App\Models\User;
 use App\Tasks\TaskAccess;
+use App\Tasks\TaskRecurrence;
 use App\Tasks\TaskService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,6 +51,7 @@ class TaskController extends Controller
 
         return Inertia::render('Todo/Index', [
             'selectedTaskMissing' => $selectedTaskMissing,
+            'history' => $this->history($user, $requested),
             'timezone' => $timezone,
             'today' => now($timezone)->toDateString(),
             'canEdit' => $gate->allows($user, Module::Todo, AccessLevel::Edit),
@@ -65,6 +67,9 @@ class TaskController extends Controller
                 'dueDate' => $t->due_date?->format('Y-m-d'),
                 'dueTime' => $t->due_time ? substr((string) $t->due_time, 0, 5) : null,
                 'isRecurring' => $t->isRecurring(),
+                'recurrence' => TaskRecurrence::stored($t->recurrence_rule)?->toArray(),
+                'recurrenceMode' => $t->recurrence_mode,
+                'remindBefore' => $t->remind_before_minutes,
                 'completedAt' => $t->completed_at?->toIso8601String(),
                 'memberIds' => $t->members->pluck('id')->values()->all(),
                 'abilities' => $access->abilities($user, $t),
@@ -91,9 +96,13 @@ class TaskController extends Controller
         $mayChange = $access->canChangeVisibility($user, $model);
         abort_if(! $mayChange && $request->hasAny(['visibility', 'member_ids']), 403);
 
-        $service->update($model, $request->validated(), $user, $mayChange);
+        $saved = $service->update($model, $request->validated(), $user, $mayChange);
 
-        return back(303)->with('toast', ['key' => 'todo.toast.saved']);
+        $response = NextOccurrence::redirect($saved);
+
+        return $saved->relationLoaded('nextOccurrence') && $saved->getRelation('nextOccurrence') !== null
+            ? $response
+            : $response->with('toast', ['key' => 'todo.toast.saved']);
     }
 
     public function destroy(Request $request, int $task, TaskAccess $access, TaskService $service): RedirectResponse
@@ -105,5 +114,34 @@ class TaskController extends Controller
         $service->delete($model);
 
         return back(303)->with('toast', ['key' => 'todo.toast.deleted']);
+    }
+
+    /**
+     * Completed and skipped rows of the open task's series that the viewer may see, newest first.
+     *
+     * @return list<array{kind: string, at: string}>|null
+     */
+    private function history(User $user, mixed $requested): ?array
+    {
+        if (! is_string($requested) || ! ctype_digit($requested)) {
+            return null;
+        }
+        $current = Task::query()->visibleTo($user)->whereKey((int) $requested)->first();
+        if ($current === null || ! $current->isRecurring() || $current->series_id === null) {
+            return null;
+        }
+
+        return Task::query()
+            ->visibleTo($user)
+            ->where('tasks.series_id', $current->series_id)
+            ->where(fn ($q) => $q->whereNotNull('tasks.completed_at')->orWhereNotNull('tasks.skipped_at'))
+            ->orderByRaw('COALESCE(tasks.completed_at, tasks.skipped_at) DESC')
+            ->limit(50)
+            ->get()
+            ->map(fn (Task $t) => $t->completed_at !== null
+                ? ['kind' => 'completed', 'at' => $t->completed_at->toIso8601String()]
+                : ['kind' => 'skipped', 'at' => $t->skipped_at->toIso8601String()])
+            ->values()
+            ->all();
     }
 }

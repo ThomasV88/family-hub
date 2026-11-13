@@ -4,11 +4,15 @@ namespace App\Tasks;
 
 use App\Models\Task;
 use App\Models\User;
+use App\Recurrence\RuleBuilder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class TaskService
 {
+    public function __construct(private readonly TaskCompletionService $completion) {}
+
     /** @param  array<string, mixed>  $validated */
     public function create(User $creator, array $validated): Task
     {
@@ -26,11 +30,12 @@ class TaskService
             ]);
             $this->enforceVisibility($task, $visibility, $memberIds);
             $this->normalizeDue($task);
+            $this->applyRecurrence($task, $validated);
             $task->save();
             $this->syncMembers($task, $visibility, $memberIds);
 
             if (isset($validated['status'])) {
-                $this->applyStatus($task, TaskStatus::from($validated['status']), $creator)->save();
+                $this->changeStatus($task, TaskStatus::from($validated['status']), $creator);
             }
 
             return $task;
@@ -42,6 +47,7 @@ class TaskService
     {
         return DB::transaction(function () use ($task, $validated, $actor, $mayChangeVisibility) {
             $task->fill($this->fields($validated));
+            $dueChanged = $task->isDirty('due_date');
 
             $visibility = $task->visibility;
             if ($mayChangeVisibility && isset($validated['visibility'])) {
@@ -53,24 +59,103 @@ class TaskService
             $this->enforceVisibility($task, $visibility, $memberIds);
             $task->forceFill(['visibility' => $visibility]);
             $this->normalizeDue($task);
+            $this->applyRecurrence($task, $validated, $dueChanged);
 
-            if (isset($validated['status']) && $actor !== null) {
-                $this->applyStatus($task, TaskStatus::from($validated['status']), $actor);
+            // A closed occurrence of a series is history; its status is never changed again.
+            $status = isset($validated['status']) && $actor !== null && ! $this->isClosedOccurrence($task)
+                ? TaskStatus::from($validated['status']) : null;
+            $completing = $status === TaskStatus::Done && $task->isRecurring() && $task->completed_at === null;
+            if ($status !== null && ! $completing) {
+                $this->applyStatus($task, $status, $actor);
             }
             $task->save();
             $this->syncMembers($task, $visibility, $memberIds);
+
+            if ($completing) {
+                $next = $this->completion->complete($task, $actor);
+                $task->setRelation('nextOccurrence', $next);
+            }
 
             return $task;
         });
     }
 
+    /** Done on a recurring task completes the occurrence and opens the next one (kept on the nextOccurrence relation). */
     public function setStatus(Task $task, TaskStatus $status, User $by): Task
     {
         return DB::transaction(function () use ($task, $status, $by) {
-            $this->applyStatus($task, $status, $by)->save();
+            $this->changeStatus($task, $status, $by);
 
             return $task;
         });
+    }
+
+    private function changeStatus(Task $task, TaskStatus $status, User $by): void
+    {
+        if ($status === TaskStatus::Done && $task->isRecurring() && $task->completed_at === null) {
+            $task->setRelation('nextOccurrence', $this->completion->complete($task, $by));
+
+            return;
+        }
+        $this->applyStatus($task, $status, $by)->save();
+    }
+
+    private function isClosedOccurrence(Task $task): bool
+    {
+        return $task->isRecurring() && ($task->completed_at !== null || $task->skipped_at !== null);
+    }
+
+    /**
+     * recurrence key present: set or clear the rule (series_id is kept when cleared so history stays linked).
+     * Absent: keep the rule, but a due date change re-anchors a monthly day. No due date means no repeat.
+     *
+     * @param  array<string, mixed>  $validated
+     */
+    private function applyRecurrence(Task $task, array $validated, bool $dueChanged = false): void
+    {
+        if ($task->due_date === null) {
+            $task->forceFill(['recurrence_rule' => null, 'recurrence_mode' => null]);
+
+            return;
+        }
+        $due = $task->due_date->format('Y-m-d');
+
+        if (array_key_exists('recurrence', $validated)) {
+            $posted = $validated['recurrence'];
+            if ($posted === null) {
+                $task->forceFill(['recurrence_rule' => null, 'recurrence_mode' => null]);
+
+                return;
+            }
+            $stored = TaskRecurrence::stored($task->recurrence_rule);
+            $pattern = TaskRecurrence::pattern($posted, $due);
+            // Saving another occurrence untouched must not re-anchor a clamped rule (day 31 stays 31 on Feb 28).
+            if (! $dueChanged && $stored !== null) {
+                $same = $stored->toArray();
+                $new = $pattern->toArray();
+                unset($same['monthDay'], $new['monthDay']);
+                if ($same === $new) {
+                    $pattern = $stored;
+                }
+            }
+            $task->forceFill([
+                'recurrence_rule' => RuleBuilder::toRrule($pattern),
+                'recurrence_mode' => $validated['recurrence_mode'] ?? $task->recurrence_mode,
+                'series_id' => $task->series_id ?? (string) Str::uuid(),
+            ]);
+
+            return;
+        }
+
+        if ($dueChanged && $task->recurrence_rule !== null) {
+            $stored = TaskRecurrence::stored($task->recurrence_rule);
+            if ($stored !== null && $stored->monthDay !== null) {
+                $task->forceFill(['recurrence_rule' => TaskRecurrence::rule($stored->toArray(), $due)]);
+            }
+        }
+        if (isset($validated['recurrence_mode']) && $task->recurrence_rule !== null) {
+            $task->forceFill(['recurrence_mode' => $validated['recurrence_mode']]);
+        }
     }
 
     public function delete(Task $task): void

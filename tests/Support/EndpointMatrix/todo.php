@@ -46,6 +46,19 @@ return [
             'grandparent' => 303, 'guestPreset' => 403, 'noGrants' => 403,
         ],
     ],
+    'todo.tasks.skip' => [
+        'method' => 'POST',
+        'uri' => '/todo/tasks/{task}/skip',
+        'params' => fn (array $users) => ['task' => Task::factory()->recurring('FREQ=DAILY;INTERVAL=1')->create([
+            'creator_id' => $users['parent']->id,
+            'assignee_id' => $users['parent']->id,
+            'due_date' => now(config('family.timezone'))->addDay()->toDateString(),
+        ])->id],
+        'expect' => [
+            'guest' => 302, 'admin' => 403, 'parent' => 303, 'child' => 303,
+            'grandparent' => 303, 'guestPreset' => 403, 'noGrants' => 403,
+        ],
+    ],
     'todo.tasks.destroy' => [
         'method' => 'DELETE',
         'uri' => '/todo/tasks/{task}',
