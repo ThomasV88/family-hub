@@ -38,7 +38,7 @@ function reauthPasskey(User $user): void
 it('shows the methods, the idle minutes and the interrupted flag', function () {
     $user = reauthUser();
     $this->actingAs($user)->get('/confirm-access')->assertInertia(fn (Assert $p) => $p
-        ->component('Auth/ConfirmAccess', false)
+        ->component('Auth/ConfirmAccess')
         ->where('methods', ['password' => true, 'totp' => false, 'passkey' => false, 'google' => false])
         ->where('minutes', 15)->where('interrupted', false));
 
