@@ -6,8 +6,9 @@ use App\Recurrence\RecurrenceMode;
 use App\Recurrence\RecurrencePattern;
 use App\Recurrence\RuleBuilder;
 use Carbon\CarbonImmutable;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 const MONTHEND_TZ = 'Europe/Bratislava';
 

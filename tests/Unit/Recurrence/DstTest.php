@@ -4,8 +4,9 @@ use App\Recurrence\LocalTime;
 use App\Recurrence\RecurrenceEngine;
 use App\Recurrence\RecurrenceMode;
 use Carbon\CarbonImmutable;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 const DST_TZ = 'Europe/Bratislava';
 
