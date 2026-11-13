@@ -22,11 +22,11 @@ defineProps({
 const { t } = useI18n();
 const page = usePage();
 const { show: showToast } = useToast();
-// Server flash toast: { key, params }, translated here.
+// Server flash toast: { key, params, count? }, translated here; `count` selects the plural form.
 watch(
     () => page.props.flash?.toast,
     (toast) => {
-        if (toast?.key) showToast(t(toast.key, toast.params ?? {}));
+        if (toast?.key) showToast(toast.count !== undefined ? t(toast.key, toast.params ?? {}, toast.count) : t(toast.key, toast.params ?? {}));
     },
     { immediate: true },
 );

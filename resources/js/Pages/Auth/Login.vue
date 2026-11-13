@@ -52,6 +52,7 @@ const statusAlert = computed(() => {
     const map = {
         signed_out: { variant: 'info', key: 'auth.signed_out' },
         session_ended: { variant: 'info', key: 'auth.session_ended' },
+        challenge_expired: { variant: 'info', key: 'twofactor.error.expired' },
         password_reset: { variant: 'success', key: 'auth.reset.done' },
         google_failed: { variant: 'danger', key: 'auth.error.google_failed' },
         google_not_invited: { variant: 'danger', key: 'auth.error.google_not_invited' },

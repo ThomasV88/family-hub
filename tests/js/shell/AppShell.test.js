@@ -218,3 +218,19 @@ describe('AppShell topbar Add task', () => {
         expect(wrapper.findAll('header button').some((b) => b.text() === en.nav.add_task)).toBe(false);
     });
 });
+
+describe('AppShell flash toast count', () => {
+    it('uses the plural form for a toast with a count (sk, n=2 selects the second segment)', async () => {
+        setWidth(1280);
+        const messages = loadMessages('sk');
+        mockProps = {
+            locale: 'sk',
+            app: { name: 'Family Hub', env: 'production' },
+            flash: { status: null, toast: { key: 'twofactor.recovery.used', params: { n: 2 }, count: 2 }, data: null },
+        };
+        mountShell({ locale: 'sk', messages });
+        await nextTick();
+        await flushPromises();
+        expect(document.body.textContent).toContain('Použili ste kód na obnovenie. Zostávajú 2 kódy.');
+    });
+});
