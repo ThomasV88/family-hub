@@ -497,5 +497,204 @@
         "try_again": "Try again",
         "load_error_title": "Something went wrong",
         "load_error_body": "We could not load this. Check your connection and try again."
+    },
+    "todo": {
+        "title": "Tasks",
+        "add": "Add task",
+        "quick": {
+            "label": "New task title",
+            "placeholder": "Add a task and press Enter",
+            "added": "Task added",
+            "open": "Open task"
+        },
+        "filter": {
+            "label": "Filter tasks",
+            "all": "All",
+            "mine": "Mine",
+            "shared": "Shared",
+            "personal": "Personal"
+        },
+        "column": {
+            "unassigned": "Unassigned",
+            "count": "{n} open task | {n} open tasks",
+            "empty": "No tasks",
+            "empty_add": "No tasks yet. Add one below.",
+            "you": "You",
+            "add": "Add task for {name}"
+        },
+        "done": {
+            "show": "Show done ({n})",
+            "hide": "Hide done ({n})"
+        },
+        "card": {
+            "mark_done": "Mark done: {title}",
+            "mark_undone": "Mark not done: {title}",
+            "title": "Due soon",
+            "open": "Open tasks",
+            "more": "and {n} more",
+            "none_due": "Nothing is due soon."
+        },
+        "due": {
+            "today": "Today",
+            "tomorrow": "Tomorrow",
+            "on": "Due {date}",
+            "overdue": "Overdue, {date}"
+        },
+        "icon": {
+            "repeats": "Repeats",
+            "personal": "Personal task",
+            "selected": "Shared with selected members"
+        },
+        "viewonly": "You can view tasks but not change them.",
+        "status": {
+            "label": "Status",
+            "todo": "To do",
+            "in_progress": "In progress",
+            "done": "Done"
+        },
+        "panel": {
+            "new": "New task",
+            "edit": "Task details"
+        },
+        "field": {
+            "title": "Title",
+            "assignee": "Assigned to",
+            "assignee_personal": "Personal tasks stay with you.",
+            "due": "Due date",
+            "add_time": "Add a time",
+            "time": "Time",
+            "tz_hint": "Times use the family time zone ({tz}).",
+            "notes": "Notes"
+        },
+        "repeat": {
+            "label": "Repeat",
+            "none": "Does not repeat",
+            "daily": "Every day",
+            "weekly": "On chosen weekdays",
+            "monthly": "Every month",
+            "custom": "Custom interval",
+            "need_date": "Set a due date to make this task repeat.",
+            "weekdays": "Weekdays",
+            "month_day": "Day of month",
+            "on_day": "On day {n}",
+            "last_day": "On the last day of the month",
+            "month_hint": "In shorter months this happens on the last day.",
+            "interval": "Interval",
+            "unit": "Unit",
+            "unit_day": "Days",
+            "unit_week": "Weeks",
+            "unit_month": "Months",
+            "from": "Repeat from",
+            "from_schedule": "The schedule",
+            "from_completion": "When I complete it",
+            "from_hint": "Schedule: the next date follows the rule. Completion: the next date counts from the day you finish.",
+            "summary_daily": "Repeats every day",
+            "summary_days": "Repeats every day | Repeats every {n} days",
+            "summary_weeks": "Repeats every week | Repeats every {n} weeks",
+            "summary_months": "Repeats every month | Repeats every {n} months",
+            "summary_weekdays": "Repeats on {days}",
+            "summary_last_day": "Repeats on the last day of every month",
+            "summary_month_day": "Repeats every month on day {n}"
+        },
+        "reminder": {
+            "label": "Remind me",
+            "at_due": "At due time",
+            "before_15m": "15 minutes before",
+            "before_1h": "1 hour before",
+            "before_1d": "1 day before",
+            "none": "No reminder",
+            "hint": "Tasks without a time remind at 08:00.",
+            "need_date": "Set a due date to get a reminder.",
+            "need_time": "Add a time to remind minutes or hours before."
+        },
+        "visibility": {
+            "label": "Who can see this task",
+            "personal": "Personal",
+            "personal_hint": "Only you can see it. Admins cannot see it either.",
+            "family": "Family",
+            "family_hint": "Everyone with access to tasks can see it.",
+            "selected": "Selected members",
+            "selected_hint": "You and the people you choose can see it.",
+            "choose": "Choose members"
+        },
+        "history": {
+            "title": "Completed history",
+            "completed": "Completed {date}",
+            "skipped": "Skipped {date}",
+            "empty": "No completions yet."
+        },
+        "save": "Save task",
+        "cancel": "Cancel changes",
+        "close": "Close",
+        "skip": "Skip this occurrence",
+        "delete": {
+            "action": "Delete task",
+            "title": "Delete task",
+            "body": "Delete \"{title}\"? This cannot be undone.",
+            "body_recurring": "Delete \"{title}\" and all its future repeats? This cannot be undone.",
+            "keep": "Keep task"
+        },
+        "discard": {
+            "title": "Discard changes?",
+            "body": "Your changes to this task are not saved.",
+            "confirm": "Discard",
+            "keep": "Keep editing"
+        },
+        "toast": {
+            "saved": "Task saved",
+            "deleted": "Task deleted",
+            "done_next": "Done. Next one is due {date}.",
+            "skipped": "Skipped. Next one is due {date}."
+        },
+        "error": {
+            "title_required": "Enter a task title.",
+            "date_invalid": "Enter a valid date.",
+            "time_invalid": "Enter a valid time.",
+            "title_long": "Use at most 200 characters.",
+            "notes_long": "Use at most 5000 characters.",
+            "assignee": "Choose a member who can see this task.",
+            "interval": "Enter a whole number from 1 to 99.",
+            "weekdays": "Choose at least one weekday.",
+            "selected_none": "Choose at least one member, or pick Family or Personal.",
+            "save_failed": "We could not save the task. Nothing was changed. Try again.",
+            "toggle_failed": "We could not update the task. Try again.",
+            "load_title": "Something went wrong",
+            "load_body": "We could not load your tasks. Check your connection and try again."
+        },
+        "empty": {
+            "title": "No tasks yet",
+            "body": "Add the first task for your family."
+        },
+        "filter_empty": {
+            "title": "No tasks match",
+            "body": "Try another filter.",
+            "action": "Show all tasks"
+        }
+    },
+    "notifications": {
+        "nav": "Notifications",
+        "intro": "Choose how you want to be reminded about tasks.",
+        "card_title": "Task reminders",
+        "email": "Email reminders",
+        "email_hint": "Sent to {email}.",
+        "push": "Push notifications",
+        "push_hint": "Short alerts with the task title only. Notes are never shown.",
+        "both_off": "Both channels are off. You will not get task reminders.",
+        "saved": "Notification settings saved",
+        "save_failed": "We could not save this setting. It was not changed. Try again.",
+        "device": "This device",
+        "device_on": "Push is on for this device.",
+        "device_off": "Push is off for this device.",
+        "enable": "Enable push on this device",
+        "disable": "Turn off push on this device",
+        "test": "Send test notification",
+        "test_sent": "Test notification sent.",
+        "test_failed": "We could not send the test. Try again.",
+        "unsupported": "This browser does not support push notifications. Email still works.",
+        "denied": "Notifications are blocked for this site. Allow them in your browser settings, then try again.",
+        "ios_title": "Install the app to get push on iPhone and iPad",
+        "ios_body": "On iPhone and iPad, push works only after you add Family Hub to your Home Screen. Tap Share, choose Add to Home Screen, then open the app from there.",
+        "push_unavailable": "Push is not set up on this server yet. Email still works.",
+        "enable_failed": "We could not turn on push. Try again."
     }
 }

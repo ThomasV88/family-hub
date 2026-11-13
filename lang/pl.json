@@ -497,5 +497,204 @@
         "try_again": "Spróbuj ponownie",
         "load_error_title": "Coś poszło nie tak",
         "load_error_body": "Nie udało się tego wczytać. Sprawdź połączenie i spróbuj ponownie."
+    },
+    "todo": {
+        "title": "Zadania",
+        "add": "Dodaj zadanie",
+        "quick": {
+            "label": "Tytuł nowego zadania",
+            "placeholder": "Dodaj zadanie i naciśnij Enter",
+            "added": "Dodano zadanie",
+            "open": "Otwórz zadanie"
+        },
+        "filter": {
+            "label": "Filtruj zadania",
+            "all": "Wszystkie",
+            "mine": "Moje",
+            "shared": "Wspólne",
+            "personal": "Osobiste"
+        },
+        "column": {
+            "unassigned": "Nieprzypisane",
+            "count": "{n} otwarte zadanie | {n} otwarte zadania | {n} otwartych zadań | {n} otwartego zadania",
+            "empty": "Brak zadań",
+            "empty_add": "Na razie brak zadań. Dodaj jedno poniżej.",
+            "you": "Ty",
+            "add": "Dodaj zadanie dla {name}"
+        },
+        "done": {
+            "show": "Pokaż ukończone ({n})",
+            "hide": "Ukryj ukończone ({n})"
+        },
+        "card": {
+            "mark_done": "Oznacz jako ukończone: {title}",
+            "mark_undone": "Oznacz jako nieukończone: {title}",
+            "title": "Wkrótce do wykonania",
+            "open": "Otwórz zadania",
+            "more": "i jeszcze {n}",
+            "none_due": "Nic nie jest wkrótce do wykonania."
+        },
+        "due": {
+            "today": "Dziś",
+            "tomorrow": "Jutro",
+            "on": "Termin {date}",
+            "overdue": "Po terminie, {date}"
+        },
+        "icon": {
+            "repeats": "Powtarza się",
+            "personal": "Zadanie osobiste",
+            "selected": "Udostępnione wybranym członkom"
+        },
+        "viewonly": "Możesz przeglądać zadania, ale nie możesz ich zmieniać.",
+        "status": {
+            "label": "Status",
+            "todo": "Do zrobienia",
+            "in_progress": "W toku",
+            "done": "Gotowe"
+        },
+        "panel": {
+            "new": "Nowe zadanie",
+            "edit": "Szczegóły zadania"
+        },
+        "field": {
+            "title": "Tytuł",
+            "assignee": "Przypisane do",
+            "assignee_personal": "Zadania osobiste zostają przy Tobie.",
+            "due": "Termin",
+            "add_time": "Dodaj godzinę",
+            "time": "Godzina",
+            "tz_hint": "Godziny używają strefy czasowej rodziny ({tz}).",
+            "notes": "Notatki"
+        },
+        "repeat": {
+            "label": "Powtarzanie",
+            "none": "Nie powtarza się",
+            "daily": "Codziennie",
+            "weekly": "W wybrane dni tygodnia",
+            "monthly": "Co miesiąc",
+            "custom": "Własny interwał",
+            "need_date": "Ustaw termin, aby zadanie się powtarzało.",
+            "weekdays": "Dni tygodnia",
+            "month_day": "Dzień miesiąca",
+            "on_day": "W {n}. dniu miesiąca",
+            "last_day": "Ostatniego dnia miesiąca",
+            "month_hint": "W krótszych miesiącach wypada ostatniego dnia.",
+            "interval": "Interwał",
+            "unit": "Jednostka",
+            "unit_day": "Dni",
+            "unit_week": "Tygodnie",
+            "unit_month": "Miesiące",
+            "from": "Powtarzaj od",
+            "from_schedule": "Harmonogramu",
+            "from_completion": "Ukończenia",
+            "from_hint": "Harmonogram: kolejny termin wynika z reguły. Ukończenie: kolejny termin liczy się od dnia ukończenia.",
+            "summary_daily": "Powtarza się codziennie",
+            "summary_days": "Powtarza się co dzień | Powtarza się co {n} dni | Powtarza się co {n} dni | Powtarza się co {n} dnia",
+            "summary_weeks": "Powtarza się co tydzień | Powtarza się co {n} tygodnie | Powtarza się co {n} tygodni | Powtarza się co {n} tygodnia",
+            "summary_months": "Powtarza się co miesiąc | Powtarza się co {n} miesiące | Powtarza się co {n} miesięcy | Powtarza się co {n} miesiąca",
+            "summary_weekdays": "Powtarza się w dni: {days}",
+            "summary_last_day": "Powtarza się ostatniego dnia każdego miesiąca",
+            "summary_month_day": "Powtarza się co miesiąc w {n}. dniu"
+        },
+        "reminder": {
+            "label": "Przypomnij",
+            "at_due": "W terminie",
+            "before_15m": "15 minut wcześniej",
+            "before_1h": "1 godzinę wcześniej",
+            "before_1d": "1 dzień wcześniej",
+            "none": "Bez przypomnienia",
+            "hint": "Zadania bez godziny przypominamy o 8:00.",
+            "need_date": "Ustaw termin, aby otrzymać przypomnienie.",
+            "need_time": "Dodaj godzinę, aby przypomnieć na minuty lub godziny wcześniej."
+        },
+        "visibility": {
+            "label": "Kto widzi to zadanie",
+            "personal": "Osobiste",
+            "personal_hint": "Widzisz je tylko Ty. Nie widzą go także administratorzy.",
+            "family": "Rodzina",
+            "family_hint": "Widzi je każdy, kto ma dostęp do zadań.",
+            "selected": "Wybrani członkowie",
+            "selected_hint": "Widzisz je Ty i wybrane osoby.",
+            "choose": "Wybierz członków"
+        },
+        "history": {
+            "title": "Historia ukończeń",
+            "completed": "Ukończono {date}",
+            "skipped": "Pominięto {date}",
+            "empty": "Jeszcze nic nie ukończono."
+        },
+        "save": "Zapisz zadanie",
+        "cancel": "Anuluj zmiany",
+        "close": "Zamknij",
+        "skip": "Pomiń to wystąpienie",
+        "delete": {
+            "action": "Usuń zadanie",
+            "title": "Usuń zadanie",
+            "body": "Usunąć zadanie „{title}”? Tej operacji nie można cofnąć.",
+            "body_recurring": "Usunąć zadanie „{title}” i wszystkie jego przyszłe powtórzenia? Tej operacji nie można cofnąć.",
+            "keep": "Zachowaj zadanie"
+        },
+        "discard": {
+            "title": "Odrzucić zmiany?",
+            "body": "Zmiany w tym zadaniu nie zostały zapisane.",
+            "confirm": "Odrzuć",
+            "keep": "Wróć do edycji"
+        },
+        "toast": {
+            "saved": "Zapisano zadanie",
+            "deleted": "Usunięto zadanie",
+            "done_next": "Gotowe. Następne ma termin {date}.",
+            "skipped": "Pominięto. Następne ma termin {date}."
+        },
+        "error": {
+            "title_required": "Wpisz tytuł zadania.",
+            "date_invalid": "Podaj prawidłową datę.",
+            "time_invalid": "Podaj prawidłową godzinę.",
+            "title_long": "Użyj maksymalnie 200 znaków.",
+            "notes_long": "Użyj maksymalnie 5000 znaków.",
+            "assignee": "Wybierz osobę, która widzi to zadanie.",
+            "interval": "Wpisz liczbę całkowitą od 1 do 99.",
+            "weekdays": "Wybierz co najmniej jeden dzień tygodnia.",
+            "selected_none": "Wybierz co najmniej jedną osobę albo wybierz Rodzina lub Osobiste.",
+            "save_failed": "Nie udało się zapisać zadania. Nic nie zostało zmienione. Spróbuj ponownie.",
+            "toggle_failed": "Nie udało się zaktualizować zadania. Spróbuj ponownie.",
+            "load_title": "Coś poszło nie tak",
+            "load_body": "Nie udało się wczytać zadań. Sprawdź połączenie i spróbuj ponownie."
+        },
+        "empty": {
+            "title": "Na razie brak zadań",
+            "body": "Dodaj pierwsze zadanie dla swojej rodziny."
+        },
+        "filter_empty": {
+            "title": "Brak pasujących zadań",
+            "body": "Spróbuj innego filtra.",
+            "action": "Pokaż wszystkie zadania"
+        }
+    },
+    "notifications": {
+        "nav": "Powiadomienia",
+        "intro": "Wybierz, jak przypominać Ci o zadaniach.",
+        "card_title": "Przypomnienia o zadaniach",
+        "email": "Przypomnienia e-mailem",
+        "email_hint": "Wysyłamy na {email}.",
+        "push": "Powiadomienia push",
+        "push_hint": "Krótkie alerty tylko z tytułem zadania. Notatki nigdy nie są pokazywane.",
+        "both_off": "Oba kanały są wyłączone. Nie dostaniesz przypomnień o zadaniach.",
+        "saved": "Zapisano ustawienia powiadomień",
+        "save_failed": "Nie udało się zapisać tego ustawienia. Nie zostało zmienione. Spróbuj ponownie.",
+        "device": "To urządzenie",
+        "device_on": "Push jest włączony na tym urządzeniu.",
+        "device_off": "Push jest wyłączony na tym urządzeniu.",
+        "enable": "Włącz push na tym urządzeniu",
+        "disable": "Wyłącz push na tym urządzeniu",
+        "test": "Wyślij powiadomienie testowe",
+        "test_sent": "Wysłano powiadomienie testowe.",
+        "test_failed": "Nie udało się wysłać powiadomienia testowego. Spróbuj ponownie.",
+        "unsupported": "Ta przeglądarka nie obsługuje powiadomień push. E-mail nadal działa.",
+        "denied": "Powiadomienia są zablokowane dla tej witryny. Zezwól na nie w ustawieniach przeglądarki i spróbuj ponownie.",
+        "ios_title": "Zainstaluj aplikację, aby otrzymywać push na iPhonie i iPadzie",
+        "ios_body": "Na iPhonie i iPadzie push działa dopiero po dodaniu Family Hub do ekranu początkowego. Dotknij Udostępnij, wybierz Dodaj do ekranu początkowego i otwórz aplikację stamtąd.",
+        "push_unavailable": "Push nie jest jeszcze skonfigurowany na tym serwerze. E-mail nadal działa.",
+        "enable_failed": "Nie udało się włączyć push. Spróbuj ponownie."
     }
 }

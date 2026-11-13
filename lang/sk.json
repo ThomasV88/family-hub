@@ -497,5 +497,204 @@
         "try_again": "Skúsiť znova",
         "load_error_title": "Niečo sa pokazilo",
         "load_error_body": "Nepodarilo sa to načítať. Skontrolujte pripojenie a skúste to znova."
+    },
+    "todo": {
+        "title": "Úlohy",
+        "add": "Pridať úlohu",
+        "quick": {
+            "label": "Názov novej úlohy",
+            "placeholder": "Pridajte úlohu a stlačte Enter",
+            "added": "Úloha pridaná",
+            "open": "Otvoriť úlohu"
+        },
+        "filter": {
+            "label": "Filtrovať úlohy",
+            "all": "Všetky",
+            "mine": "Moje",
+            "shared": "Spoločné",
+            "personal": "Osobné"
+        },
+        "column": {
+            "unassigned": "Nepriradené",
+            "count": "{n} otvorená úloha | {n} otvorené úlohy | {n} otvorenej úlohy | {n} otvorených úloh",
+            "empty": "Žiadne úlohy",
+            "empty_add": "Zatiaľ žiadne úlohy. Pridajte jednu nižšie.",
+            "you": "Vy",
+            "add": "Pridať úlohu pre {name}"
+        },
+        "done": {
+            "show": "Zobraziť hotové ({n})",
+            "hide": "Skryť hotové ({n})"
+        },
+        "card": {
+            "mark_done": "Označiť ako hotové: {title}",
+            "mark_undone": "Označiť ako nehotové: {title}",
+            "title": "Čoskoro splatné",
+            "open": "Otvoriť úlohy",
+            "more": "a ďalšie: {n}",
+            "none_due": "Nič nie je čoskoro splatné."
+        },
+        "due": {
+            "today": "Dnes",
+            "tomorrow": "Zajtra",
+            "on": "Termín {date}",
+            "overdue": "Po termíne, {date}"
+        },
+        "icon": {
+            "repeats": "Opakuje sa",
+            "personal": "Osobná úloha",
+            "selected": "Zdieľané s vybranými členmi"
+        },
+        "viewonly": "Úlohy môžete iba čítať, nie meniť.",
+        "status": {
+            "label": "Stav",
+            "todo": "Treba urobiť",
+            "in_progress": "Rozpracované",
+            "done": "Hotovo"
+        },
+        "panel": {
+            "new": "Nová úloha",
+            "edit": "Podrobnosti úlohy"
+        },
+        "field": {
+            "title": "Názov",
+            "assignee": "Priradené",
+            "assignee_personal": "Osobné úlohy zostávajú vám.",
+            "due": "Termín",
+            "add_time": "Pridať čas",
+            "time": "Čas",
+            "tz_hint": "Časy používajú časové pásmo rodiny ({tz}).",
+            "notes": "Poznámky"
+        },
+        "repeat": {
+            "label": "Opakovanie",
+            "none": "Neopakuje sa",
+            "daily": "Každý deň",
+            "weekly": "V vybrané dni v týždni",
+            "monthly": "Každý mesiac",
+            "custom": "Vlastný interval",
+            "need_date": "Nastavte termín, aby sa úloha opakovala.",
+            "weekdays": "Dni v týždni",
+            "month_day": "Deň v mesiaci",
+            "on_day": "V {n}. deň mesiaca",
+            "last_day": "Posledný deň v mesiaci",
+            "month_hint": "V kratších mesiacoch sa to stane posledný deň.",
+            "interval": "Interval",
+            "unit": "Jednotka",
+            "unit_day": "Dni",
+            "unit_week": "Týždne",
+            "unit_month": "Mesiace",
+            "from": "Opakovať od",
+            "from_schedule": "Plánu",
+            "from_completion": "Dokončenia",
+            "from_hint": "Plán: ďalší termín sa riadi pravidlom. Dokončenie: ďalší termín sa počíta odo dňa, keď úlohu dokončíte.",
+            "summary_daily": "Opakuje sa každý deň",
+            "summary_days": "Opakuje sa každý deň | Opakuje sa každé {n} dni | Opakuje sa každých {n} dní | Opakuje sa každých {n} dní",
+            "summary_weeks": "Opakuje sa každý týždeň | Opakuje sa každé {n} týždne | Opakuje sa každých {n} týždňov | Opakuje sa každých {n} týždňov",
+            "summary_months": "Opakuje sa každý mesiac | Opakuje sa každé {n} mesiace | Opakuje sa každých {n} mesiacov | Opakuje sa každých {n} mesiacov",
+            "summary_weekdays": "Opakuje sa v dňoch: {days}",
+            "summary_last_day": "Opakuje sa posledný deň každého mesiaca",
+            "summary_month_day": "Opakuje sa každý mesiac v {n}. deň"
+        },
+        "reminder": {
+            "label": "Pripomenúť",
+            "at_due": "V čase termínu",
+            "before_15m": "15 minút predtým",
+            "before_1h": "1 hodinu predtým",
+            "before_1d": "1 deň predtým",
+            "none": "Bez pripomienky",
+            "hint": "Úlohy bez času pripomenieme o 8:00.",
+            "need_date": "Nastavte termín, aby ste dostali pripomienku.",
+            "need_time": "Pridajte čas, aby sa pripomienka poslala minúty či hodiny vopred."
+        },
+        "visibility": {
+            "label": "Kto túto úlohu vidí",
+            "personal": "Osobná",
+            "personal_hint": "Vidíte ju len vy. Nevidia ju ani správcovia.",
+            "family": "Rodina",
+            "family_hint": "Vidí ju každý, kto má prístup k úlohám.",
+            "selected": "Vybraní členovia",
+            "selected_hint": "Vidíte ju vy a ľudia, ktorých vyberiete.",
+            "choose": "Vyberte členov"
+        },
+        "history": {
+            "title": "História dokončenia",
+            "completed": "Dokončené {date}",
+            "skipped": "Preskočené {date}",
+            "empty": "Zatiaľ nič dokončené."
+        },
+        "save": "Uložiť úlohu",
+        "cancel": "Zrušiť zmeny",
+        "close": "Zavrieť",
+        "skip": "Preskočiť tento výskyt",
+        "delete": {
+            "action": "Odstrániť úlohu",
+            "title": "Odstrániť úlohu",
+            "body": "Odstrániť úlohu „{title}“? Nedá sa to vrátiť.",
+            "body_recurring": "Odstrániť úlohu „{title}“ a všetky jej budúce opakovania? Nedá sa to vrátiť.",
+            "keep": "Ponechať úlohu"
+        },
+        "discard": {
+            "title": "Zahodiť zmeny?",
+            "body": "Zmeny tejto úlohy nie sú uložené.",
+            "confirm": "Zahodiť",
+            "keep": "Pokračovať v úpravách"
+        },
+        "toast": {
+            "saved": "Úloha uložená",
+            "deleted": "Úloha odstránená",
+            "done_next": "Hotovo. Ďalšia je splatná {date}.",
+            "skipped": "Preskočené. Ďalšia je splatná {date}."
+        },
+        "error": {
+            "title_required": "Zadajte názov úlohy.",
+            "date_invalid": "Zadajte platný dátum.",
+            "time_invalid": "Zadajte platný čas.",
+            "title_long": "Použite najviac 200 znakov.",
+            "notes_long": "Použite najviac 5000 znakov.",
+            "assignee": "Vyberte člena, ktorý túto úlohu vidí.",
+            "interval": "Zadajte celé číslo od 1 do 99.",
+            "weekdays": "Vyberte aspoň jeden deň v týždni.",
+            "selected_none": "Vyberte aspoň jedného člena alebo zvoľte Rodina či Osobná.",
+            "save_failed": "Úlohu sa nepodarilo uložiť. Nič sa nezmenilo. Skúste to znova.",
+            "toggle_failed": "Úlohu sa nepodarilo aktualizovať. Skúste to znova.",
+            "load_title": "Niečo sa pokazilo",
+            "load_body": "Úlohy sa nepodarilo načítať. Skontrolujte pripojenie a skúste to znova."
+        },
+        "empty": {
+            "title": "Zatiaľ žiadne úlohy",
+            "body": "Pridajte prvú úlohu pre vašu rodinu."
+        },
+        "filter_empty": {
+            "title": "Žiadne zhodné úlohy",
+            "body": "Skúste iný filter.",
+            "action": "Zobraziť všetky úlohy"
+        }
+    },
+    "notifications": {
+        "nav": "Oznámenia",
+        "intro": "Vyberte, ako vám pripomíname úlohy.",
+        "card_title": "Pripomienky úloh",
+        "email": "Pripomienky e-mailom",
+        "email_hint": "Posielame na {email}.",
+        "push": "Push oznámenia",
+        "push_hint": "Krátke upozornenia len s názvom úlohy. Poznámky sa nikdy nezobrazia.",
+        "both_off": "Oba kanály sú vypnuté. Pripomienky úloh nedostanete.",
+        "saved": "Nastavenia oznámení uložené",
+        "save_failed": "Toto nastavenie sa nepodarilo uložiť. Nezmenilo sa. Skúste to znova.",
+        "device": "Toto zariadenie",
+        "device_on": "Push je na tomto zariadení zapnutý.",
+        "device_off": "Push je na tomto zariadení vypnutý.",
+        "enable": "Zapnúť push na tomto zariadení",
+        "disable": "Vypnúť push na tomto zariadení",
+        "test": "Poslať skúšobné oznámenie",
+        "test_sent": "Skúšobné oznámenie odoslané.",
+        "test_failed": "Skúšobné oznámenie sa nepodarilo odoslať. Skúste to znova.",
+        "unsupported": "Tento prehliadač nepodporuje push oznámenia. E-mail stále funguje.",
+        "denied": "Oznámenia sú pre túto stránku zablokované. Povoľte ich v nastaveniach prehliadača a skúste to znova.",
+        "ios_title": "Nainštalujte aplikáciu, aby push fungoval na iPhone a iPade",
+        "ios_body": "Na iPhone a iPade push funguje až po pridaní Family Hub na plochu. Klepnite na Zdieľať, vyberte Pridať na plochu a potom otvorte aplikáciu odtiaľ.",
+        "push_unavailable": "Push na tomto serveri zatiaľ nie je nastavený. E-mail stále funguje.",
+        "enable_failed": "Push sa nepodarilo zapnúť. Skúste to znova."
     }
 }
