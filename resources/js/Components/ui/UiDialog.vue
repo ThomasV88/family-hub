@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { X } from '@lucide/vue';
 import UiButton from './UiButton.vue';
 import { useFocusTrap } from './useFocusTrap.js';
+import { lockScroll, unlockScroll } from './useScrollLock.js';
 
 const props = defineProps({
     open: { type: Boolean, default: false },
@@ -16,22 +17,22 @@ const { t } = useI18n();
 const titleId = useId();
 const panel = ref(null);
 const trap = useFocusTrap(panel, { initialFocus: () => props.initialFocus?.() });
-let previousOverflow = null;
+let locked = false;
 
 function close() {
     emit('update:open', false);
 }
 
 function lock() {
-    if (previousOverflow === null) {
-        previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
+    if (!locked) {
+        locked = true;
+        lockScroll();
     }
 }
 function unlock() {
-    if (previousOverflow !== null) {
-        document.body.style.overflow = previousOverflow;
-        previousOverflow = null;
+    if (locked) {
+        locked = false;
+        unlockScroll();
     }
 }
 

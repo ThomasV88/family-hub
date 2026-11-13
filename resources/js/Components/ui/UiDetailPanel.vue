@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { X } from '@lucide/vue';
 import UiButton from './UiButton.vue';
 import { useFocusTrap } from './useFocusTrap.js';
+import { lockScroll, unlockScroll } from './useScrollLock.js';
 
 const props = defineProps({
     open: { type: Boolean, default: false },
@@ -18,7 +19,7 @@ const modal = computed(() => effective.value !== 'docked');
 const titleId = useId();
 const root = ref(null);
 const trap = useFocusTrap(root);
-let previousOverflow = null;
+let locked = false;
 
 function unwrap(v) {
     return v && typeof v === 'object' && 'value' in v ? v.value : v;
@@ -27,15 +28,15 @@ function close() {
     emit('update:open', false);
 }
 function lock() {
-    if (modal.value && previousOverflow === null) {
-        previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
+    if (modal.value && !locked) {
+        locked = true;
+        lockScroll();
     }
 }
 function unlock() {
-    if (previousOverflow !== null) {
-        document.body.style.overflow = previousOverflow;
-        previousOverflow = null;
+    if (locked) {
+        locked = false;
+        unlockScroll();
     }
 }
 
