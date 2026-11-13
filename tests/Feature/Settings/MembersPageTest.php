@@ -53,3 +53,28 @@ it('forbids non-admins and redirects guests', function () {
     $this->flushSession();
     $this->get('/settings/members')->assertRedirect('/login');
 });
+
+it('lists non-accepted invitations newest first with state and mail failure, without token data', function () {
+    $admin = User::factory()->admin()->create();
+    $make = fn (string $email, array $extra = []) => App\Models\Invitation::create(array_merge([
+        'email' => $email, 'token_hash' => hash('sha256', $email), 'preset' => 'child', 'locale' => 'sk',
+        'expires_at' => now()->addDays(7),
+    ], $extra));
+    $make('old@example.test', ['expires_at' => now()->subDay()]);
+    $make('failed@example.test', ['mail_failed_at' => now()]);
+    $make('done@example.test', ['accepted_at' => now()]);
+
+    $response = $this->actingAs($admin)->get('/settings/members');
+    $response->assertInertia(fn (Assert $page) => $page
+        ->has('invitations', 2)
+        ->where('invitations.0.email', 'failed@example.test')
+        ->where('invitations.0.state', 'valid')
+        ->where('invitations.0.mailFailed', true)
+        ->where('invitations.0.preset', 'child')
+        ->where('invitations.1.state', 'expired')
+        ->where('invitations.1.mailFailed', false)
+        ->has('invitations.0', fn (Assert $i) => $i->hasAll(['id', 'email', 'preset', 'locale', 'state', 'expiresAt', 'mailFailed'])));
+
+    $json = $this->actingAs($admin)->get('/settings/members', ['X-Inertia' => 'true', 'X-Inertia-Version' => Inertia\Inertia::getVersion()])->getContent();
+    expect($json)->not->toContain('token_hash')->not->toContain(hash('sha256', 'old@example.test'));
+});

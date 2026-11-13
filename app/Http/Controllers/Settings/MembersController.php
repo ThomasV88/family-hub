@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Access\AccessGate;
 use App\Access\Preset;
 use App\Http\Controllers\Controller;
+use App\Models\Invitation;
 use App\Models\User;
 use App\Support\SettingsSections;
 use Illuminate\Http\Request;
@@ -33,12 +34,24 @@ class MembersController extends Controller
             $presets[$preset->value] = array_map(fn ($level) => $level->label(), $preset->grants());
         }
 
+        $invitations = Invitation::query()->whereNull('accepted_at')->orderByDesc('id')->get()
+            ->map(fn (Invitation $inv) => [
+                'id' => $inv->id,
+                'email' => $inv->email,
+                'preset' => $inv->preset->value,
+                'locale' => $inv->locale,
+                'state' => $inv->state(),
+                'expiresAt' => $inv->expires_at->toIso8601String(),
+                'mailFailed' => $inv->mail_failed_at !== null,
+            ])->values();
+
         $open = (int) $request->query('member');
 
         return Inertia::render('Settings/Members', [
             'sections' => SettingsSections::for($viewer),
             'members' => $members,
             'presets' => $presets,
+            'invitations' => $invitations,
             'openMember' => $open > 0 && $members->contains('id', $open) ? $open : null,
         ]);
     }
