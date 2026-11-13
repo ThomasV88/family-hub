@@ -12,6 +12,8 @@ return [
     'fetch_image_max_bytes' => 5242880,
     // Lowered from 16 MP for the 128M production memory_limit (see plan 04-07 memory budget).
     'image_max_pixels' => 13000000,
+    // How long an upload or fetch waits for the single image-decode slot per container before giving up.
+    'image_lock_wait_seconds' => 20,
     'image_full_px' => 1280,
     'image_thumb_px' => 480,
     'christmas' => ['month' => 12, 'day' => 24],

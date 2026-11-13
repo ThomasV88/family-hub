@@ -62,6 +62,7 @@ class WishImageController extends Controller
         } catch (ImageRejected $e) {
             $key = match ($e->reason) {
                 'too_large', 'too_many_pixels' => 'wishlist.image.err_size',
+                'busy' => 'wishlist.image.err_upload',
                 default => 'wishlist.image.err_type',
             };
             throw ValidationException::withMessages(['image' => $key]);

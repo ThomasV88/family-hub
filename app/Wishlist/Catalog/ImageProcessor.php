@@ -9,6 +9,11 @@ use GdImage;
  * client-declared MIME), size and pixel count are capped before any decode, and the output is a fresh JPEG that
  * carries no metadata. Memory: the full-resolution bitmap is resized first and freed, and only the small result
  * is rotated or flipped, so a 12 MP photo stays inside a 128M memory_limit.
+ *
+ * Memory budget (production): a 13 MP decode costs ~52 MB bitmap + the 5 MB byte string + libjpeg/libwebp
+ * buffers, roughly 70 MB. Decodes are serialized per container (exclusive()), so the app container (192m:
+ * up to 4 idle-light php-fpm children plus one decode) and the worker (160m, one queue:work process, one job
+ * at a time) each hold at most one decode.
  */
 final class ImageProcessor
 {
@@ -38,6 +43,15 @@ final class ImageProcessor
             throw new ImageRejected('unsupported_type');
         }
 
+        // Only one decode per container at a time: a full-size bitmap is ~4 bytes per pixel, and several in
+        // parallel would exceed the container memory limit (see the budget in the class docblock).
+        return $this->exclusive(fn () => $this->render($bytes, $info));
+    }
+
+    /** @param  array<int, mixed>  $info  getimagesizefromstring result */
+    private function render(string $bytes, array $info): ProcessedImage
+    {
+        [$width, $height] = $info;
         $orientation = $info[2] === IMAGETYPE_JPEG ? $this->orientation($bytes) : 1;
 
         $source = @imagecreatefromstring($bytes);
@@ -65,6 +79,37 @@ final class ImageProcessor
         imagedestroy($thumb);
 
         return $result;
+    }
+
+    /**
+     * Serializes decodes with an advisory file lock in the container's temp dir (the web container and the
+     * worker are separate containers with separate limits, so each needs only its own lock).
+     *
+     * @template T
+     *
+     * @param  callable(): T  $work
+     * @return T
+     */
+    private function exclusive(callable $work): mixed
+    {
+        $handle = fopen(sys_get_temp_dir().'/fh-image-processor.lock', 'c');
+        if ($handle === false) {
+            return $work();
+        }
+        $deadline = microtime(true) + (float) config('wishlist.image_lock_wait_seconds');
+        try {
+            while (! flock($handle, LOCK_EX | LOCK_NB)) {
+                if (microtime(true) >= $deadline) {
+                    throw new ImageRejected('busy');
+                }
+                usleep(100_000);
+            }
+
+            return $work();
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
+        }
     }
 
     /** Reads the EXIF orientation from a stream so the bytes are not copied into a data URI. */

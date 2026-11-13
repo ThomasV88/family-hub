@@ -153,3 +153,19 @@ describe('WishImageStore', function () {
         $disk->assertExists([$wish->image_path, $wish->thumb_path]);
     });
 });
+
+it('serializes decodes: a held decode slot makes another process() give up with busy instead of using memory in parallel', function () {
+    config(['wishlist.image_lock_wait_seconds' => 0.3]);
+    $held = fopen(sys_get_temp_dir().'/fh-image-processor.lock', 'c');
+    flock($held, LOCK_EX);
+
+    try {
+        expect(fn () => (new \App\Wishlist\Catalog\ImageProcessor)->process(\Tests\Support\ImageFixtures::jpeg(), 5 * 1024 * 1024))
+            ->toThrow(\App\Wishlist\Catalog\ImageRejected::class, 'busy');
+    } finally {
+        flock($held, LOCK_UN);
+        fclose($held);
+    }
+
+    expect((new \App\Wishlist\Catalog\ImageProcessor)->process(\Tests\Support\ImageFixtures::jpeg(), 5 * 1024 * 1024)->width)->toBeGreaterThan(0);
+});
