@@ -167,29 +167,31 @@ Plans:
   3. User can define recurring expenses (rent, savings, kindergarten, energy and so on), see an upcoming-bills view, and see each one matched as expected versus actual against recorded or imported transactions
   4. User can set monthly category budgets, see progress, and view charts of spending by category and balance over months
   5. User can import a Slovak or Polish bank CSV (Windows-1250, semicolons, decimal comma) with a saved per-bank mapping, review step and duplicate detection, and can undo the import
-**Plans:** 19 plans
+**Plans:** 21 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 05-01-PLAN.md — All Phase 5 copy up front (finance.*, settings section, audit details) in SK/PL/EN with pipe plurals and decision deltas (2 MB, encodings, indicator mode)
+- [ ] 05-01-PLAN.md — All Phase 5 copy up front (finance.*, settings section, audit details) in SK/PL/EN with pipe plurals and decision deltas (2 MB, encodings, indicator mode, immutable-field error, budget toasts)
 - [ ] 05-02-PLAN.md — Exact money core (TDD): Currency exponents, strict MoneyParser, TextNormalizer, money.js + MoneyAmount via Intl, no-float scan
 - [ ] 05-03-PLAN.md — RecurrenceEngine::between and pure Matcher/StatusResolver (TDD)
-- [ ] 05-04-PLAN.md — Finance data core: accounts/members/categories/transactions schema, Viewer + Visibility, AccountQuery, arch/file-scan rules, leak net (differential, canary, query-log, write parity)
-- [ ] 05-05-PLAN.md — Pure CSV pipeline (TDD): iconv decoding, fgetcsv, strict dates, profile mapping (single/split/indicator), dedupe hashes, synthetic fixtures
-- [ ] 05-06-PLAN.md — Admin account visibility: Settings > Finance accounts (metadata only), membership audit event
-- [ ] 05-07-PLAN.md — Transactions backend: FinancePage props, scoped list/filters, two-leg transfers, hidden-counterpart privacy, Accounts page backend
-- [ ] 05-08-PLAN.md — Finance shell and Transactions UI: chips, month switcher, tabs, list, panel/form, Accounts page
-- [ ] 05-09-PLAN.md — Recurring backend: schema, CRUD, derived statuses, calendar/list/still-to-pay/Home counts
-- [ ] 05-10-PLAN.md — Import staging backend: preview JSON, staged draft batches, duplicates and probable duplicates, profiles, nginx limit
-- [ ] 05-11-PLAN.md — Matching: auto-match on save/backfill, record payment, manual match/unmatch with rejections
-- [ ] 05-12-PLAN.md — Recurring UI: still-to-pay card, payment calendar, list, day/bill/recurring panels
-- [ ] 05-13-PLAN.md — Budgets and Overview backend: versioned budgets, per-currency aggregates in SQL, Home card counts
-- [ ] 05-14-PLAN.md — Import wizard UI: file, columns (live preview), review, done, history
-- [ ] 05-15-PLAN.md — Overview UI: summary cards, budgets, SVG charts with table alternatives, Home card, nav entry
-- [ ] 05-16-PLAN.md — Import commit/undo: idempotent commit, reconcile, match, keep-and-detach undo, daily prune
-- [ ] 05-17-PLAN.md — Categories: family-wide list, rename, delete-with-move (no usage counts)
-- [ ] 05-18-PLAN.md — Phase-wide proofs: leak-suite completeness and mutation sanity, admin privacy, no-store, SW, staging audit, axe sweep, validation map
-- [ ] 05-19-PLAN.md — DEFERRED with owner: image rebuild (bcmath), staging/production release, device privacy/display checks, owner bank CSVs, SK/PL wording review
+- [ ] 05-04-PLAN.md — Finance data core: accounts/members/categories/transactions schema, Viewer + Visibility, AccountQuery, arch/file-scan/mutation-scope rules, leak net (differential, canary, query-log, write parity, scoped-mutation check)
+- [ ] 05-05-PLAN.md — CSV decode/parse (TDD): config/finance.php, iconv decoding, fgetcsv, strict dates, synthetic fixtures
+- [ ] 05-06-PLAN.md — CSV map/hash (TDD): generic profiles, single/split/indicator amounts, dedupe hashes, 20+ variant pipeline test
+- [ ] 05-07-PLAN.md — Admin account visibility: Settings > Finance accounts (metadata only), membership audit event
+- [ ] 05-08-PLAN.md — Transactions backend: FinancePage props, scoped list/filters (one page per request), two-leg transfers editing only visible legs, immutable account/kind, hidden-counterpart read and write parity, Accounts page backend
+- [ ] 05-09-PLAN.md — Finance shell and Transactions UI: chips, month switcher, tabs, list, panel/form, Accounts page
+- [ ] 05-10-PLAN.md — Recurring backend: schema with same-account composite FKs, CRUD with immutable account, derived statuses, calendar/list/still-to-pay/Home counts
+- [ ] 05-11-PLAN.md — Import staging backend: preview JSON, staged draft batches, duplicates and probable duplicates, profiles, nginx limit
+- [ ] 05-12-PLAN.md — Budgets backend: versioned category budgets, DisplayKind helper, viewer-scoped progress, budget write routes
+- [ ] 05-13-PLAN.md — Matching: auto-match on save/backfill, record payment, manual match/unmatch with rejections
+- [ ] 05-14-PLAN.md — Recurring UI: still-to-pay card, payment calendar, list, day/bill/recurring panels
+- [ ] 05-15-PLAN.md — Overview and Home backend: per-currency aggregates in SQL, Overview route, Home card counts
+- [ ] 05-16-PLAN.md — Import wizard UI: file, columns (live preview), review, done, history
+- [ ] 05-17-PLAN.md — Overview UI: summary cards, budgets, SVG charts with table alternatives, Home card, nav entry
+- [ ] 05-18-PLAN.md — Import commit/undo: idempotent commit, reconcile, match, keep-and-detach undo, daily prune
+- [ ] 05-19-PLAN.md — Categories: family-wide list, rename, delete-with-move (no usage counts, no edited_at change)
+- [ ] 05-20-PLAN.md — Phase-wide proofs: leak-suite completeness and mutation sanity, admin privacy, no-store, SW, staging audit, axe sweep, validation sign-off
+- [ ] 05-21-PLAN.md — DEFERRED with owner: image rebuild (bcmath), staging/production release, device privacy/display checks, owner bank CSVs, SK/PL wording review
 
 ### Phase 6: Sensitive-Data Account Hardening
 **Goal**: Medical and finance data are protected by a second factor and idle re-authentication before the most sensitive module goes live.
