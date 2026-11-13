@@ -73,4 +73,46 @@ final class RRuleRecurrenceEngine implements RecurrenceEngine
 
         return null;
     }
+
+    public function between(
+        string $rrule,
+        CarbonImmutable $anchorLocal,
+        string $fromDate,
+        string $toDate,
+        string $timezone,
+        int $cap = 62,
+    ): array {
+        RuleBuilder::fromRrule($rrule);
+        $anchor = $anchorLocal->setTimezone($timezone);
+        $time = $anchor->format('H:i');
+        $anchorDate = $anchor->format('Y-m-d');
+        $start = LocalTime::at($anchorDate, $time, $timezone);
+        $limitDate = $start->addYears(self::MAX_YEARS)->format('Y-m-d');
+        $last = min($toDate, $limitDate);
+
+        $dates = [];
+        if ($anchorDate >= $fromDate && $anchorDate <= $last) {
+            $dates[$anchorDate] = true;
+        }
+
+        $iterator = new RRule($rrule, DateTimeImmutable::createFromInterface($start)->setTimezone(new DateTimeZone($timezone)));
+        $seen = 0;
+        foreach ($iterator as $occurrence) {
+            $date = CarbonImmutable::instance($occurrence)->setTimezone($timezone)->format('Y-m-d');
+            if (++$seen > self::MAX_ITERATIONS || $date > $last) {
+                break;
+            }
+            if ($date >= $fromDate) {
+                $dates[$date] = true;
+            }
+        }
+
+        $dates = array_keys($dates);
+        sort($dates);
+
+        return array_map(
+            fn (string $d): CarbonImmutable => LocalTime::at($d, $time, $timezone),
+            array_slice($dates, 0, max(0, $cap)),
+        );
+    }
 }

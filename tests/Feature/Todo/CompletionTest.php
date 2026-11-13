@@ -129,6 +129,11 @@ it('treats a concurrent insert hitting the one-open-per-series index as a no-op'
 
             return CarbonImmutable::parse('2027-05-11', $timezone);
         }
+
+        public function between(string $rrule, CarbonImmutable $anchorLocal, string $fromDate, string $toDate, string $timezone, int $cap = 62): array
+        {
+            throw new LogicException('not used');
+        }
     };
 
     $result = (new TaskCompletionService($engine))->complete($task, $this->parent);
