@@ -201,8 +201,23 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. User can enable a TOTP app or passkey as a second factor and must use it at sign-in
   2. After a period of inactivity, user is asked to re-authenticate before opening medical or finance data, and other modules are not interrupted
-**Plans**: TBD
+**Plans:** 13 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 06-01-PLAN.md — Factor storage (2FA columns, passkeys, app_settings, password_set), User contracts, security audit events and listener, second-factor policy
+- [ ] 06-02-PLAN.md — Session windows (idle 15 min, security confirm 10 min), SafeIntended, access:recent rule, per-member limiters, test seam
+- [ ] 06-03-PLAN.md — All Phase 6 copy in SK/PL/EN with plural tests; OtpInput, RecoveryCodeInput, PasskeyButton, WebAuthn and securityFetch helpers
+- [ ] 06-04-PLAN.md — Idle gate inside RequireAccess for finance/health and the /confirm-access page (password, authenticator code)
+- [ ] 06-05-PLAN.md — Fortify two-factor headless: sign-in challenge for any factor, hardened 2FA endpoints, sign-in counts as confirmation
+- [ ] 06-06-PLAN.md — Settings > Security: authenticator setup dialog, recovery codes, turn off and new codes with in-dialog confirmation
+- [ ] 06-07-PLAN.md — Admin requirement switch, member factor status and audited admin reset with session revocation
+- [ ] 06-08-PLAN.md — Passkey backend: registration/management, challenge and re-auth ceremonies behind one adapter
+- [ ] 06-09-PLAN.md — Passkey UI: Passkeys card, name/rename/remove, "Use a passkey" on challenge and confirm form
+- [ ] 06-10-PLAN.md — Google sign-in through the challenge, Google re-auth fallback, password_set maintenance
+- [ ] 06-11-PLAN.md — Matrix-driven idle-gate proof with naming safety net, sign-in end-to-end checks, import wizard 423 handling
+- [ ] 06-12-PLAN.md — Audit log security rows, canary/arch/no-store/SW proofs, axe sweep, ops notes, validation sign-off
+- [ ] 06-13-PLAN.md — DEFERRED with owner: staging/production release, real-device passkey and authenticator UAT, Google re-auth check, owner decisions
 
 ### Phase 7: Medical Records
 **Goal**: The family can keep each person's medical history, documents and exports in one private place, fully usable by hand without any AI.
