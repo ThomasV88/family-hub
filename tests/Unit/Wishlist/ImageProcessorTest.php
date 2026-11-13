@@ -64,16 +64,15 @@ it('applies every orientation to the right output shape', function (int $orienta
 })->with([[1, false], [2, false], [3, false], [4, false], [5, true], [6, true], [7, true], [8, true]]);
 
 it('processes a 12 MP orientation 6 photo within the 128M budget', function () {
-    $bytes = ImageFixtures::jpegWithExif(6, 4000, 3000);
-    gc_collect_cycles();
-    memory_reset_peak_usage();
-    $baseline = memory_get_usage();
+    // A separate process under the production memory_limit: the result must not depend on suite memory.
+    $output = [];
+    exec(escapeshellarg(PHP_BINARY).' -d memory_limit=128M '.escapeshellarg(base_path('tests/Support/image-memory-probe.php')).' 2>&1', $output, $code);
+    $result = json_decode((string) end($output), true);
 
-    $out = (new ImageProcessor)->process($bytes, IMG_MAX);
-
-    $peak = memory_get_peak_usage() - $baseline;
-    fwrite(STDERR, sprintf("\n12MP peak delta: %.1f MiB\n", $peak / 1048576));
-    expect($peak)->toBeLessThan(72 * 1048576)->and([$out->width, $out->height])->toBe([960, 1280]);
+    expect($code)->toBe(0)->and($result)->toBeArray();
+    fwrite(STDERR, sprintf("\n12MP peak delta: %.1f MiB (memory_limit %s)\n", $result['peak'] / 1048576, $result['limit']));
+    expect($result['limit'])->toBe('128M')->and($result['peak'])->toBeLessThan(72 * 1048576)
+        ->and([$result['width'], $result['height']])->toBe([960, 1280]);
 });
 
 it('rejects a 13.12 MP header before decoding', function () {

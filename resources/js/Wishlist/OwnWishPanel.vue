@@ -1,7 +1,7 @@
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
-import { Check, Trash2 } from '@lucide/vue';
+import { Check, Link, Trash2, Upload } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import UiAlert from '../Components/ui/UiAlert.vue';
 import UiButton from '../Components/ui/UiButton.vue';
@@ -195,7 +195,108 @@ function onPriorityKey(event, index) {
 const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preventDefault(); };
 
 const currencyOptions = CURRENCIES.map((code) => ({ value: code, label: code }));
-const imageHint = computed(() => !creating.value && ['none', 'failed'].includes(props.wish?.image?.status ?? 'none'));
+
+// Image controls. Everything here is owner-side only; the giver panel has no equivalent.
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const POLL_MS = 3000;
+const POLL_MAX = 10;
+
+const fileInput = ref(null);
+const uploadFile = ref(null);
+const imageError = ref('');
+const imageBusy = ref(false);
+const pollExhausted = ref(false);
+const imageStatus = computed(() => props.wish?.image?.status ?? 'none');
+const hasLinks = computed(() => (props.wish?.urls ?? []).length > 0);
+const loadingFromLink = computed(() => imageStatus.value === 'pending' && !pollExhausted.value);
+const canUpload = computed(() => !creating.value && !received.value && !uploadFile.value);
+const canLoad = computed(() => !creating.value && !received.value && hasLinks.value && imageStatus.value !== 'pending' && !uploadFile.value);
+const canRemove = computed(() => !creating.value && !received.value && imageStatus.value === 'ready' && !uploadFile.value);
+const imageMessage = computed(() => {
+    if (creating.value) return '';
+    if (uploadFile.value) return t('wishlist.image.uploading');
+    if (loadingFromLink.value) return t('wishlist.image.loading');
+    if (imageStatus.value === 'ready' && props.wish?.image?.source === 'fetched' && props.wish.image.host) return t('wishlist.image.from', { host: props.wish.image.host });
+    if (imageStatus.value === 'ready') return '';
+    return t('wishlist.image.none');
+});
+
+function pickImage() {
+    fileInput.value?.click();
+}
+function onImagePicked(event) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || creating.value) return;
+    if (file.size > MAX_IMAGE_BYTES) {
+        imageError.value = t('wishlist.image.err_size');
+        return;
+    }
+    if (!IMAGE_TYPES.includes(file.type)) {
+        imageError.value = t('wishlist.image.err_type');
+        return;
+    }
+    imageError.value = '';
+    uploadFile.value = file;
+    router.post(`/wishlist/wishes/${props.wish.id}/image`, { image: file }, {
+        forceFormData: true,
+        preserveScroll: true,
+        onError: (errs) => {
+            const key = errs?.image;
+            imageError.value = typeof key === 'string' && key.startsWith('wishlist.image.') ? t(key) : t('wishlist.image.err_upload');
+        },
+        onHttpException: () => { imageError.value = t('wishlist.image.err_upload'); },
+        onNetworkError: () => { imageError.value = t('wishlist.image.err_upload'); },
+        onFinish: () => { uploadFile.value = null; },
+    });
+}
+function loadFromLink() {
+    imageError.value = '';
+    pollExhausted.value = false;
+    router.post(`/wishlist/wishes/${props.wish.id}/image/fetch`, {}, {
+        preserveScroll: true,
+        onError: () => { imageError.value = t('wishlist.image.err_load'); },
+        onHttpException: () => { imageError.value = t('wishlist.image.err_load'); },
+        onNetworkError: () => { imageError.value = t('wishlist.image.err_load'); },
+    });
+}
+function removeImage() {
+    imageError.value = '';
+    imageBusy.value = true;
+    router.delete(`/wishlist/wishes/${props.wish.id}/image`, {
+        preserveScroll: true,
+        onFinish: () => { imageBusy.value = false; },
+    });
+}
+
+// While the worker looks for an image, reload the list every 3 s (at most 10 times, paused in a hidden tab).
+let pollTimer = null;
+let polls = 0;
+function stopPolling() {
+    if (pollTimer !== null) clearInterval(pollTimer);
+    pollTimer = null;
+}
+function pollTick() {
+    if (typeof document !== 'undefined' && document.hidden) return;
+    if (polls >= POLL_MAX) {
+        stopPolling();
+        pollExhausted.value = true;
+        return;
+    }
+    polls += 1;
+    router.reload({ only: ['list'] });
+}
+watch(() => props.open && imageStatus.value === 'pending', (active) => {
+    stopPolling();
+    if (active) {
+        polls = 0;
+        pollExhausted.value = false;
+        pollTimer = setInterval(pollTick, POLL_MS);
+    }
+}, { immediate: true });
+watch(() => props.wish?.id, () => { imageError.value = ''; uploadFile.value = null; });
+onBeforeUnmount(stopPolling);
 
 defineExpose({ guard, dirty });
 </script>
@@ -212,8 +313,15 @@ defineExpose({ guard, dirty });
                     </UiField>
 
                     <div class="wish-panel__block">
-                        <WishImage :image="wish?.image ?? { status: 'none' }" size="panel" />
-                        <p v-if="imageHint" class="wish-panel__hint">{{ t('wishlist.image.none') }}</p>
+                        <WishImage :image="wish?.image ?? { status: 'none' }" :uploading="uploadFile" size="panel" />
+                        <p role="status" class="wish-panel__hint" data-testid="image-status">{{ imageMessage }}</p>
+                        <UiAlert v-if="imageError" variant="danger" live data-testid="image-error">{{ imageError }}</UiAlert>
+                        <div class="wish-panel__image-actions">
+                            <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden data-testid="image-input" @change="onImagePicked" />
+                            <UiButton variant="secondary" size="sm" :icon="Upload" :disabled="!canUpload" @click="pickImage">{{ t('wishlist.image.upload') }}</UiButton>
+                            <UiButton v-if="canLoad" variant="secondary" size="sm" :icon="Link" @click="loadFromLink">{{ t('wishlist.image.load') }}</UiButton>
+                            <UiButton v-if="canRemove" variant="ghost" size="sm" :icon="Trash2" :loading="imageBusy" @click="removeImage">{{ t('wishlist.image.remove') }}</UiButton>
+                        </div>
                     </div>
 
                     <LinksEditor ref="links" v-model="form.urls" :server-errors="linkErrors" />
@@ -284,6 +392,7 @@ defineExpose({ guard, dirty });
 .wish-panel__fields { min-width: 0; margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: var(--space-4); }
 .wish-panel__fields:disabled { opacity: 0.85; }
 .wish-panel__block { display: flex; flex-direction: column; gap: var(--space-2); }
+.wish-panel__image-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .wish-panel__hint { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 .wish-panel__label { font-size: var(--text-sm); font-weight: 600; line-height: 1.4; }
 .wish-panel__priority { display: flex; flex-wrap: wrap; gap: var(--space-2); }
