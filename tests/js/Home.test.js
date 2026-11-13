@@ -96,14 +96,25 @@ describe('Home page', () => {
             expect(empties.slice(0, 4)).toEqual(['No tasks yet', 'No wishes yet', 'No transactions yet', 'No health records yet']);
         });
 
-        it('Enter with text clears the input and opens coming soon without sending anything', async () => {
+        it('Enter with text posts the title to /todo/tasks and clears the input on success', async () => {
             mockProps = base;
             const w = mountHome();
             const input = w.find('input');
-            await input.setValue('Buy bread');
+            await input.setValue('  Buy bread ');
             await input.trigger('keydown', { key: 'Enter' });
+            expect(post).toHaveBeenCalledWith('/todo/tasks', { title: 'Buy bread' }, expect.objectContaining({ preserveScroll: true }));
+            expect(soonOpen()).toBe(false);
+            post.mock.calls[0][2].onSuccess();
+            await w.vm.$nextTick();
             expect(input.element.value).toBe('');
-            expect(soonOpen()).toBe(true);
+        });
+
+        it('Enter during IME composition sends nothing', async () => {
+            mockProps = base;
+            const w = mountHome();
+            const input = w.find('input');
+            await input.setValue('Hello');
+            await input.trigger('keydown', { key: 'Enter', isComposing: true });
             expect(post).not.toHaveBeenCalled();
         });
 
@@ -115,6 +126,8 @@ describe('Home page', () => {
             await input.setValue('   ');
             await input.trigger('keydown', { key: 'Enter' });
             expect(soonOpen()).toBe(false);
+            expect(post).not.toHaveBeenCalled();
+            expect(w.text()).toContain('Enter a task title.');
         });
 
         it('Open on a module card opens coming soon', async () => {
@@ -124,14 +137,10 @@ describe('Home page', () => {
             expect(soonOpen()).toBe(true);
         });
 
-        it('the top bar Add task moves focus to quick add', async () => {
+        it('QuickAdd no longer registers a shell add handler', () => {
             mockProps = base;
-            const w = mountHome();
-            const add = w.findAll('header button').find((b) => b.text() === 'Add task');
-            if (add) {
-                await add.trigger('click');
-                expect(document.activeElement).toBe(w.find('input').element);
-            }
+            const source = readFileSync(`${process.cwd()}/resources/js/Dashboard/QuickAdd.vue`, 'utf8');
+            expect(source).not.toMatch(/registerAddHandler|openComingSoon/);
         });
 
         it('has no axe violations', async () => {

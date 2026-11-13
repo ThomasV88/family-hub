@@ -1,34 +1,23 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { Plus } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import UiField from '../Components/ui/UiField.vue';
 import UiInput from '../Components/ui/UiInput.vue';
-import { useShell } from '../Shell/shellState.js';
+import { useQuickAdd } from '../Todo/useQuickAdd.js';
 
 const { t } = useI18n();
-const shell = useShell();
-const text = ref('');
 const input = ref(null);
-
-// Placeholder only in this phase: the text is cleared and never sent or stored (tasks arrive in Phase 3).
-function submit(event) {
-    if (event.isComposing) return;
-    if (!text.value.trim()) return;
-    text.value = '';
-    shell.openComingSoon('tasks', event.target);
-}
-
-let unregister = null;
-onMounted(() => { unregister = shell.registerAddHandler(() => input.value?.focus()); });
-onBeforeUnmount(() => unregister?.());
+// Same create call as the board: title only, the server defaults to Family visibility with the creator as assignee.
+// The "Task added" toast is the server flash shown by the shell. The shell Add button opens /todo (plan 03-06).
+const { text, error, submit } = useQuickAdd({ onAdded: () => input.value?.focus() });
 
 defineExpose({ focus: () => input.value?.focus() });
 </script>
 
 <template>
     <div class="quick-add" data-testid="quick-add">
-        <UiField :label="t('dashboard.quick_add_label')" label-visually-hidden>
+        <UiField :label="t('dashboard.quick_add_label')" label-visually-hidden :error="error">
             <UiInput
                 ref="input"
                 v-model="text"
@@ -36,7 +25,7 @@ defineExpose({ focus: () => input.value?.focus() });
                 :placeholder="t('dashboard.quick_add_placeholder')"
                 enterkeyhint="done"
                 autocomplete="off"
-                @keydown.enter="submit"
+                @keydown.enter.prevent="submit"
             />
         </UiField>
     </div>

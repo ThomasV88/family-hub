@@ -80,16 +80,16 @@ describe('AppShell desktop', () => {
         setWidth(1280);
         mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' } };
         mountShell();
-        const tasks = wrapper.findAll('nav li').at(1).find('button');
-        tasks.element.focus();
-        await tasks.trigger('click');
+        const soon = wrapper.findAll('nav li').at(2).find('button');
+        soon.element.focus();
+        await soon.trigger('click');
         await flushPromises();
         expect(wrapper.text()).toContain(en.soon.title);
         const back = wrapper.findAll('button').find((b) => b.text() === en.soon.back);
         await back.trigger('click');
         await flushPromises();
         expect(wrapper.text()).not.toContain(en.soon.title);
-        expect(document.activeElement).toBe(tasks.element);
+        expect(document.activeElement).toBe(soon.element);
     });
 
     it('shows the staging banner with exact text only on staging', () => {
