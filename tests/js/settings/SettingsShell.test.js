@@ -21,6 +21,7 @@ import Appearance from '../../../resources/js/Pages/Settings/Appearance.vue';
 
 const load = (l) => JSON.parse(readFileSync(`${process.cwd()}/lang/${l}.json`, 'utf8'));
 const APPEARANCE = { key: 'appearance', href: '/settings/appearance', labelKey: 'settings.section.appearance', icon: 'palette' };
+const NOTIFICATIONS = { key: 'notifications', href: '/settings/notifications', labelKey: 'notifications.nav', icon: 'bell' };
 const MEMBERS = { key: 'members', href: '/settings/members', labelKey: 'settings.section.members', icon: 'users' };
 let current;
 function mountPage(component, { locale = 'en', sections = [APPEARANCE] } = {}) {
@@ -47,6 +48,16 @@ describe('Settings index', () => {
         const links = current.findAll('nav[aria-label="Settings"] a');
         expect(links.map((a) => a.attributes('href'))).toEqual(['/settings/members', '/settings/appearance']);
         expect(current.text()).toContain('Appearance and language');
+    });
+
+    it('lists the Notifications section with its bell icon', async () => {
+        setWide(false);
+        mountPage(Index, { sections: [NOTIFICATIONS, APPEARANCE] });
+        await flushPromises();
+        const links = current.findAll('nav[aria-label="Settings"] a');
+        expect(links.map((a) => a.attributes('href'))).toEqual(['/settings/notifications', '/settings/appearance']);
+        expect(links[0].text()).toBe('Notifications');
+        expect(current.findAll('nav[aria-label="Settings"] svg').length).toBeGreaterThanOrEqual(2);
     });
 
     it('replaces the visit with the first section on a wide container', async () => {
