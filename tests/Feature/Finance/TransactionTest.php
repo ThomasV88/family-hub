@@ -10,9 +10,10 @@ use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Testing\TestResponse;
 use Tests\Support\FinancePrivacy;
 
-function fhTxInertia($test, User $user, string $url, array $extra = []): Illuminate\Testing\TestResponse
+function fhTxInertia($test, User $user, string $url, array $extra = []): TestResponse
 {
     return $test->actingAs($user)->get($url, ['X-Inertia' => 'true', 'X-Inertia-Version' => FinancePrivacy::inertiaVersion()] + $extra);
 }
