@@ -8,6 +8,12 @@ namespace App\Finance\Recurring;
  */
 final class Matcher
 {
+    /** A text hint shorter than this (normalised) is too unspecific to pair a transaction with a bill. */
+    public const MIN_HINT_LENGTH = 4;
+
+    /** Largest amount deviation, in percent of the expected amount, that a text hint alone may auto-match. */
+    public const HINT_AMOUNT_PERCENT = 50;
+
     public function score(Occurrence $o, MatchCandidate $c): ?int
     {
         if (! $this->eligible($o, $c)) {
@@ -38,7 +44,9 @@ final class Matcher
             return false;
         }
 
-        return ($this->withinTolerance($o, $c) && $score >= 50) || $this->hintMatches($o, $c);
+        // A hint never matches on its own: it needs a usable length (hintMatches), the date window (score() above) and a
+        // plausible amount. "Paid differently" stays reachable, but only within HINT_AMOUNT_PERCENT of the expected amount.
+        return ($this->withinTolerance($o, $c) && $score >= 50) || ($this->hintMatches($o, $c) && $this->withinHintBound($o, $c));
     }
 
     /**
@@ -130,6 +138,12 @@ final class Matcher
         return $c->kind === 'expense' || ($c->kind === 'transfer' && $c->amountMinor < 0);
     }
 
+    private function withinHintBound(Occurrence $o, MatchCandidate $c): bool
+    {
+        return abs(abs($c->amountMinor) - $o->expectedMinor) * 100 <= $o->expectedMinor * self::HINT_AMOUNT_PERCENT
+            || $this->withinTolerance($o, $c);
+    }
+
     private function withinTolerance(Occurrence $o, MatchCandidate $c): bool
     {
         return abs(abs($c->amountMinor) - $o->expectedMinor) <= $o->toleranceMinor;
@@ -137,6 +151,6 @@ final class Matcher
 
     private function hintMatches(Occurrence $o, MatchCandidate $c): bool
     {
-        return $o->hint !== null && $o->hint !== '' && str_contains($c->normalizedDescription, $o->hint);
+        return $o->hint !== null && mb_strlen($o->hint) >= self::MIN_HINT_LENGTH && str_contains($c->normalizedDescription, $o->hint);
     }
 }

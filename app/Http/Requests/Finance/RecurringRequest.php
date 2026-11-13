@@ -102,7 +102,7 @@ class RecurringRequest extends FormRequest
             'recurrence' => [$presence, 'array'],
             'window_days' => ['sometimes', 'integer', Rule::in((array) config('finance.recurring.window_days_options'))],
             'tolerance' => ['sometimes', 'nullable', 'string'],
-            'text_hint' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'text_hint' => ['sometimes', 'nullable', 'string', 'min:4', 'max:120'],
         ];
     }
 
@@ -126,6 +126,7 @@ class RecurringRequest extends FormRequest
             'tolerance.string' => 'finance.rec.hint_tolerance',
             'text_hint.string' => 'finance.rec.hint_text',
             'text_hint.max' => 'finance.rec.hint_text',
+            'text_hint.min' => 'finance.rec.hint_text',
         ];
     }
 

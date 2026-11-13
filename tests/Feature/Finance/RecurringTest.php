@@ -186,7 +186,7 @@ it('restarts the schedule today when the amount, rule or first date change, not 
     $patch = fn (array $data) => $this->actingAs($user)->patchJson('/finance/recurring/'.$item->id, $data)->assertStatus(303);
     $effective = fn () => $item->fresh()->schedule_effective_from->format('Y-m-d');
 
-    $patch(['name' => 'Flat rent', 'text_hint' => 'x', 'window_days' => 7, 'tolerance' => '1', 'ends_on' => '2028-01-01']);
+    $patch(['name' => 'Flat rent', 'text_hint' => 'xyzw', 'window_days' => 7, 'tolerance' => '1', 'ends_on' => '2028-01-01']);
     expect($effective())->toBe('2027-03-05')
         ->and($item->fresh()->name)->toBe('Flat rent')
         ->and($item->fresh()->tolerance_minor)->toBe(100);

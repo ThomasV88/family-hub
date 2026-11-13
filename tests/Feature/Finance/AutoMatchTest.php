@@ -5,6 +5,7 @@ use App\Finance\Queries\RecurringQuery;
 use App\Finance\Recurring\RecurringMatchService;
 use App\Finance\Viewer;
 use App\Models\FinanceAccount;
+use App\Models\FinanceCategory;
 use App\Models\FinanceRecurring;
 use App\Models\FinanceRecurringMatch;
 use App\Models\FinanceTransaction;
@@ -255,4 +256,36 @@ it('writes the recurring item\'s account on every match and rejection row and sc
         expect($sql)->toContain('finance_account_members');
     }
     expect(DB::table('finance_match_rejections')->value('account_id'))->toBe($account->id);
+});
+
+it('never matches on a text hint alone: minimum length, plausible amount, and the date window all apply', function () {
+    [$user, $account] = fhAmSetup();
+
+    // A one-character hint matches nothing, even for a transaction in the window that contains it.
+    $short = fhAmRent($account, ['text_hint' => 'a', 'name' => 'Short']);
+    fhAmPay($this, $user, $account, '480,00', '2027-03-05', 'a shop');
+    expect(fhAmStatus($user, $short, '2027-03-05'))->toBe('overdue');
+
+    // A three-character hint is still too short.
+    $three = fhAmRent($account, ['text_hint' => 'abc', 'name' => 'Three'], '2027-03-07');
+    fhAmPay($this, $user, $account, '480,00', '2027-03-07', 'abc store');
+    expect(fhAmStatus($user, $three, '2027-03-07'))->toBe('overdue');
+
+    // A long hint with an implausible amount does not match (3x the expected amount).
+    $far = fhAmRent($account, ['text_hint' => 'landlord', 'name' => 'Far'], '2027-03-08');
+    fhAmPay($this, $user, $account, '1350,00', '2027-03-08', 'Landlord extra');
+    expect(fhAmStatus($user, $far, '2027-03-08'))->toBe('overdue');
+
+    // A long hint outside the date window does not match either.
+    $late = fhAmRent($account, ['text_hint' => 'electricity', 'name' => 'Late'], '2027-01-05');
+    fhAmPay($this, $user, $account, '480,00', '2027-03-09', 'Electricity bill');
+    expect(fhAmStatus($user, $late, '2027-01-05'))->not->toBe('paid')->not->toBe('paid_differently');
+});
+
+it('refuses a text hint shorter than four characters when saving a recurring item', function () {
+    [$user, $account] = fhAmSetup();
+    $this->actingAs($user)->post('/finance/recurring', [
+        'name' => 'Rent', 'amount' => '450,00', 'account_id' => $account->id, 'category_id' => FinanceCategory::query()->where('kind', 'expense')->value('id'),
+        'recurrence' => ['kind' => 'monthly_day', 'monthDay' => 5], 'starts_on' => '2027-03-05', 'text_hint' => 'ab',
+    ])->assertSessionHasErrors(['text_hint' => 'finance.rec.hint_text']);
 });
