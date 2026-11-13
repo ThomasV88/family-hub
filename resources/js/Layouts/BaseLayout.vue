@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import LanguageSwitcher from '../Components/LanguageSwitcher.vue';
+import PwaUpdateBanner from '../Components/PwaUpdateBanner.vue';
 
 const { t } = useI18n();
 const page = usePage();
@@ -22,5 +23,6 @@ const isStaging = computed(() => page.props.app?.env === 'staging');
         <main class="layout__main">
             <slot />
         </main>
+        <PwaUpdateBanner />
     </div>
 </template>
