@@ -9,7 +9,9 @@
         "php": "^8.3",
         "fakerphp/faker": "^1.23",
         "inertiajs/inertia-laravel": "^3",
+        "laravel/fortify": "^1.42",
         "laravel/framework": "^13.17",
+        "laravel/socialite": "^5.32",
         "laravel/tinker": "^3.0"
     },
     "require-dev": {
