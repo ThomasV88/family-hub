@@ -473,7 +473,9 @@ Generate in code, not by hand: `tests/Support/CsvFixtures.php` builds statements
 | A11 | Pest `arch()` `->not->toUse([...functions...])` works for global functions; else use a file-scan test | Validation | Falls back to the file-scan test |
 | A12 | PHP deletes the uploaded temp file at request end | Pattern 7 | A test (no leftover files) catches it |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+RESOLVED by orchestrator decisions: (1) the budget limit persists to following months (no unspent carry-over in v1); (2) budgets are per category (family-wide limit) and progress counts only transactions of accounts visible to the viewer; (3) admin membership changes get their own AuditEvent; (4) a recurring savings item may match transfer rows, cross-currency transfers deferred; (5) planner must read Preset.php before writing literal EndpointMatrix expectations; (6) Home card shows counts of overdue and upcoming bills on visible accounts only; (7) generic CSV profiles only, no bank-named profiles until the owner supplies anonymised statements (deferred); admin sees account metadata only and money data only for accounts shared with them; transfers with a hidden counterpart render as plain income or expense; categories are family-wide non-sensitive.
 
 1. **Budget "roll to the next month": persisting limit or unspent carry-over?**
    - Known: CONTEXT says "budgets roll to the next month"; brief says "rollover".
