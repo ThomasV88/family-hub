@@ -1,9 +1,11 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { router } from '@inertiajs/vue3';
 import { CalendarDays, CircleAlert, CircleDot, Clock, Lock, Repeat, Users } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import UiCheckbox from '../Components/ui/UiCheckbox.vue';
 import UiTag from '../Components/ui/UiTag.vue';
+import { useToast } from '../Components/ui/useToast.js';
 import { dueInfo } from './dueLabel.js';
 
 const props = defineProps({
@@ -15,7 +17,29 @@ const props = defineProps({
 defineEmits(['open']);
 const { t, locale } = useI18n();
 
-const done = computed(() => props.task.status === 'done' || props.task.completedAt !== null);
+const toast = useToast();
+// Optimistic override of the server state while a status request is in flight.
+const optimistic = ref(null);
+const serverDone = computed(() => props.task.status === 'done' || props.task.completedAt !== null);
+const done = computed(() => optimistic.value ?? serverDone.value);
+const canToggle = computed(() => props.task.abilities?.status === true);
+
+function toggle(checked) {
+    if (!canToggle.value) return;
+    optimistic.value = checked;
+    const revert = () => {
+        optimistic.value = null;
+        toast.show(t('todo.error.toggle_failed'));
+    };
+    router.patch(`/todo/tasks/${props.task.id}/status`, { status: checked ? 'done' : 'todo' }, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => { optimistic.value = null; },
+        onError: revert,
+        onHttpException: revert,
+        onNetworkError: revert,
+    });
+}
 const due = computed(() => dueInfo(props.task, props.today, props.timezone, new Date().toISOString(), locale.value));
 const dueIcon = computed(() => ({ today: Clock, overdue: CircleAlert, on: CalendarDays, tomorrow: CalendarDays })[due.value.kind]);
 const dueText = computed(() => {
@@ -30,11 +54,12 @@ const dueText = computed(() => {
 
 <template>
     <li :class="['task-card', { 'is-selected': selected, 'is-done': done }]" data-testid="task-card">
-        <!-- Checkbox is wired in plan 03-05; it is read-only here. -->
         <UiCheckbox
             class="task-card__check"
             :model-value="done"
-            disabled
+            :disabled="!canToggle"
+            :aria-disabled="canToggle ? undefined : 'true'"
+            @update:model-value="toggle"
             :aria-label="done ? t('todo.card.mark_undone', { title: task.title }) : t('todo.card.mark_done', { title: task.title })"
         />
         <div class="task-card__main">

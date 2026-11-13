@@ -1,15 +1,16 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { Plus } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import UiAlert from '../Components/ui/UiAlert.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiEmptyState from '../Components/ui/UiEmptyState.vue';
-import { useFrameWidth } from '../Shell/shellState.js';
+import { useFrameWidth, useShell } from '../Shell/shellState.js';
 import FilterChips from './FilterChips.vue';
 import QuickAddBar from './QuickAddBar.vue';
 import TaskColumn from './TaskColumn.vue';
+import TaskDetailPanel from './TaskDetailPanel.vue';
 import { dueInfo } from './dueLabel.js';
 
 const props = defineProps({
@@ -18,6 +19,7 @@ const props = defineProps({
     canEdit: { type: Boolean, default: false },
     members: { type: Array, default: () => [] },
     tasks: { type: Array, default: () => [] },
+    selectedTaskMissing: { type: Boolean, default: false },
 });
 
 const { t, locale } = useI18n();
@@ -30,28 +32,67 @@ const query = () => new URLSearchParams(
 const filter = ref(FILTERS.includes(query().get('filter')) ? query().get('filter') : 'all');
 const quickAdd = ref(null);
 const root = ref(null);
+const main = ref(null);
 const viewOnlyDismissed = ref(false);
 const me = computed(() => page.props.auth?.user?.id ?? null);
 
-// Selected task lives in the URL (?task=id) so a panel (plan 03-05) survives reload and push deep links.
-const selectedTaskId = computed(() => {
-    const id = Number(query().get('task'));
-    return Number.isInteger(id) && id > 0 && props.tasks.some((task) => task.id === id) ? id : null;
+// The panel state lives in the URL (?task=id | new, &assignee=id) so it survives reload and push deep links.
+const taskParam = computed(() => query().get('task'));
+const selectedTask = computed(() => {
+    const id = Number(taskParam.value);
+    return Number.isInteger(id) && id > 0 ? (props.tasks.find((task) => task.id === id) ?? null) : null;
 });
+const selectedTaskId = computed(() => selectedTask.value?.id ?? null);
+const initialAssignee = computed(() => {
+    const id = Number(query().get('assignee'));
+    return Number.isInteger(id) && id > 0 ? id : null;
+});
+const panelMode = computed(() => {
+    if (taskParam.value === 'new') return props.canEdit ? 'create' : null;
+    if (selectedTask.value) return 'edit';
+    return props.selectedTaskMissing ? 'missing' : null;
+});
+const panel = ref(null);
+const closing = ref(false);
+const panelOpen = computed(() => panelMode.value !== null && !closing.value);
+watch(panelMode, (mode) => { if (mode === null) closing.value = false; });
+
+const injectedMode = inject('fh-panel-mode', 'overlay');
+const docked = computed(() => (injectedMode && typeof injectedMode === 'object' && 'value' in injectedMode ? injectedMode.value : injectedMode) === 'docked');
 
 function navigate(next) {
     const params = {};
     if (next.filter && next.filter !== 'all') params.filter = next.filter;
     if (next.task) params.task = next.task;
-    router.get('/todo', params, { preserveState: true, preserveScroll: true, replace: true });
+    if (next.assignee) params.assignee = next.assignee;
+    router.get('/todo', params, { preserveState: true, preserveScroll: true, replace: true, onFinish: () => { if (!next.task) closing.value = false; } });
 }
 function setFilter(value) {
     filter.value = value;
-    navigate({ filter: value, task: selectedTaskId.value });
+    navigate({ filter: value, task: taskParam.value, assignee: initialAssignee.value });
+}
+function guarded(fn) {
+    if (panel.value) panel.value.guard(fn);
+    else fn();
 }
 function openTask(id) {
-    navigate({ filter: filter.value, task: id });
+    guarded(() => navigate({ filter: filter.value, task: id }));
 }
+function openCreate(assignee = null) {
+    guarded(() => navigate({ filter: filter.value, task: 'new', assignee }));
+}
+function closePanel() {
+    closing.value = true;
+    navigate({ filter: filter.value });
+}
+
+// Topbar Add and the phone FAB open the create panel while the board is shown.
+const shell = useShell();
+let unregister = null;
+onMounted(() => {
+    if (props.canEdit) unregister = shell?.registerAddHandler(() => openCreate());
+});
+onBeforeUnmount(() => unregister?.());
 
 const isDone = (task) => task.status === 'done' || task.completedAt !== null;
 const now = () => new Date().toISOString();
@@ -104,7 +145,7 @@ const columns = computed(() => {
     return filter.value === 'mine' || filter.value === 'personal' ? result.filter((c) => c.isYou) : result;
 });
 
-const width = useFrameWidth(root);
+const width = useFrameWidth(main);
 const singleColumn = computed(() => width.value < 440);
 const expandedOverride = ref({});
 const isExpanded = (column) => expandedOverride.value[column.key] ?? (column.isYou || props.members.length <= 3);
@@ -114,7 +155,8 @@ function toggle(column) {
 </script>
 
 <template>
-    <div ref="root" class="board" data-testid="todo-board">
+    <div ref="root" :class="['board', { 'board--docked': docked && panelOpen }]" data-testid="todo-board">
+        <div ref="main" class="board__main">
         <h1 class="board__title">{{ t('todo.title') }}</h1>
         <UiAlert v-if="!canEdit && !viewOnlyDismissed" variant="info" dismissible class="board__block" @dismiss="viewOnlyDismissed = true">{{ t('todo.viewonly') }}</UiAlert>
         <QuickAddBar v-if="canEdit" ref="quickAdd" class="board__block" />
@@ -144,17 +186,33 @@ function toggle(column) {
                 :today="today"
                 :timezone="timezone"
                 :selected-id="selectedTaskId"
+                :person-id="column.id"
                 :collapsible="singleColumn"
                 :expanded="isExpanded(column)"
                 @open="openTask"
+                @add="openCreate"
                 @toggle="toggle(column)"
             />
         </div>
+        </div>
+        <TaskDetailPanel
+            v-if="canEdit || panelMode"
+            ref="panel"
+            :open="panelOpen"
+            :mode="panelMode ?? 'edit'"
+            :task="selectedTask"
+            :members="members"
+            :me="me"
+            :timezone="timezone"
+            :initial-assignee="initialAssignee"
+            @close="closePanel"
+        />
     </div>
 </template>
 
 <style scoped>
-.board { container-type: inline-size; container-name: board; }
+.board { display: flex; align-items: flex-start; gap: var(--space-4); }
+.board__main { flex: 1; min-width: 0; container-type: inline-size; container-name: board; }
 .board__title { margin: 0 0 var(--space-4); font-size: var(--text-xl); font-weight: 600; line-height: 1.2; }
 .board__block { margin-bottom: var(--space-4); }
 .board__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); align-items: start; margin-top: var(--space-4); }

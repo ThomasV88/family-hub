@@ -1,7 +1,8 @@
 <script setup>
 import { computed, ref, useId } from 'vue';
-import { ChevronDown } from '@lucide/vue';
+import { ChevronDown, Plus } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
+import UiButton from '../Components/ui/UiButton.vue';
 import UiAvatar from '../Components/ui/UiAvatar.vue';
 import UiTag from '../Components/ui/UiTag.vue';
 import TaskCard from './TaskCard.vue';
@@ -20,8 +21,9 @@ const props = defineProps({
     collapsible: { type: Boolean, default: false },
     expanded: { type: Boolean, default: true },
     unassigned: { type: Boolean, default: false },
+    personId: { type: Number, default: null },
 });
-defineEmits(['open', 'toggle']);
+defineEmits(['open', 'toggle', 'add']);
 const { t } = useI18n();
 const uid = useId();
 const headingId = `col-${uid}`;
@@ -58,6 +60,7 @@ const doneShown = computed(() => props.done.slice(0, 20));
                     <TaskCard v-for="task in doneShown" :key="task.id" :task="task" :today="today" :timezone="timezone" :selected="selectedId === task.id" @open="$emit('open', $event)" />
                 </ul>
             </template>
+            <UiButton v-if="canEdit && !unassigned && personId !== null" variant="ghost" :icon="Plus" class="column__add" @click="$emit('add', personId, $event)">{{ t('todo.column.add', { name }) }}</UiButton>
         </div>
     </section>
 </template>
@@ -73,6 +76,7 @@ const doneShown = computed(() => props.done.slice(0, 20));
 .column__chevron.is-open { transform: rotate(180deg); }
 .column__body { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); }
 .column__list { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; }
+.column__add { align-self: flex-start; }
 .column__empty { margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
 .column__done-toggle { align-self: flex-start; min-height: var(--control-sm); padding: 0 var(--space-1); border: 0; background: transparent; color: var(--color-text-muted); font: inherit; font-size: var(--text-sm); font-weight: 600; cursor: pointer; text-decoration: underline; }
 .column__done-toggle:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }

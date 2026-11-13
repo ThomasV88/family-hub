@@ -8,11 +8,12 @@ defineProps({
     canEdit: { type: Boolean, default: false },
     members: { type: Array, default: () => [] },
     tasks: { type: Array, default: () => [] },
+    selectedTaskMissing: { type: Boolean, default: false },
 });
 </script>
 
 <template>
     <AppShell current="tasks">
-        <TaskBoard :timezone="timezone" :today="today" :can-edit="canEdit" :members="members" :tasks="tasks" />
+        <TaskBoard :timezone="timezone" :today="today" :can-edit="canEdit" :members="members" :tasks="tasks" :selected-task-missing="selectedTaskMissing" />
     </AppShell>
 </template>
