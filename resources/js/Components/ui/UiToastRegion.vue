@@ -76,7 +76,7 @@ onBeforeUnmount(() => timers.forEach((entry) => clearTimeout(entry.timer)));
 .ui-toasts {
     position: fixed;
     inset-inline: 0;
-    inset-block-end: var(--fh-toast-offset, 16px);
+    inset-block-end: calc(var(--fh-toast-offset, 16px) + var(--fh-banner-lift, 0px));
     z-index: 60;
     display: flex;
     flex-direction: column;

@@ -44,3 +44,21 @@ describe('PwaUpdateBanner', () => {
         w.unmount();
     });
 });
+
+describe('WR-08 banner and toast stacking', () => {
+    it('publishes a lift for the toast region while visible and clears it on dismiss', async () => {
+        const w = mountBanner('en');
+        await fire();
+        await nextTick();
+        expect(document.documentElement.style.getPropertyValue('--fh-banner-lift')).toMatch(/px$/);
+        await w.find('[data-testid=pwa-dismiss]').trigger('click');
+        await nextTick();
+        expect(document.documentElement.style.getPropertyValue('--fh-banner-lift')).toBe('');
+        w.unmount();
+    });
+    it('uses logical centering instead of physical left/translate', () => {
+        const src = readFileSync(`${process.cwd()}/resources/js/Components/PwaUpdateBanner.vue`, 'utf8');
+        expect(src).not.toMatch(/left:\s*50%/);
+        expect(src).not.toMatch(/translateX\(-50%\)/);
+    });
+});
