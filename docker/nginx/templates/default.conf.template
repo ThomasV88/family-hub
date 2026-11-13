@@ -25,6 +25,7 @@ server {
 
     set $fh_https on;
     set $fh_proto https;
+    set $fh_port 443;
 
     include /etc/nginx/snippets/security-headers.conf;
     include /etc/nginx/snippets/laravel-locations.conf;
