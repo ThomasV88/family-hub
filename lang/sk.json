@@ -1186,7 +1186,8 @@
             "delete_body": "Odstrániť „{name}“? Budúce platby sa prestanú sledovať. Už zaznamenané transakcie zostanú.",
             "delete_keep": "Ponechať pravidelný výdavok",
             "err_name": "Zadajte názov.",
-            "err_ends": "Dátum konca musí byť po prvom termíne splatnosti."
+            "err_ends": "Dátum konca musí byť po prvom termíne splatnosti.",
+            "err_save": "Opakovaný výdavok sa nepodarilo uložiť. Nič sa nezmenilo. Skúste to znova."
         },
         "status": {
             "upcoming": "Nadchádzajúce",
@@ -1346,6 +1347,8 @@
             "leave_confirm": "Opustiť import",
             "leave_stay": "Zostať tu",
             "err_rows": "Súbor má viac ako {max} riadkov. Rozdeľte ho na menšie súbory.",
+            "col_select": "Importovať",
+            "col_status": "Stav",
             "enc_utf8": "UTF-8",
             "enc_utf16": "UTF-16",
             "enc_1250": "Windows-1250 (stredoeurópske)",

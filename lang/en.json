@@ -1186,7 +1186,8 @@
             "delete_body": "Delete \"{name}\"? Future payments stop being tracked. Transactions already recorded stay.",
             "delete_keep": "Keep recurring expense",
             "err_name": "Enter a name.",
-            "err_ends": "The end date must be after the first due date."
+            "err_ends": "The end date must be after the first due date.",
+            "err_save": "We could not save the recurring expense. Nothing was changed. Try again."
         },
         "status": {
             "upcoming": "Upcoming",
@@ -1346,6 +1347,8 @@
             "leave_confirm": "Leave import",
             "leave_stay": "Stay here",
             "err_rows": "The file has more than {max} rows. Split it into smaller files.",
+            "col_select": "Import",
+            "col_status": "Status",
             "enc_utf8": "UTF-8",
             "enc_utf16": "UTF-16",
             "enc_1250": "Windows-1250 (Central European)",

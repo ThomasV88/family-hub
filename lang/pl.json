@@ -1186,7 +1186,8 @@
             "delete_body": "Usunąć „{name}”? Przyszłe płatności przestaną być śledzone. Zapisane transakcje pozostaną.",
             "delete_keep": "Zachowaj wydatek cykliczny",
             "err_name": "Wpisz nazwę.",
-            "err_ends": "Data zakończenia musi być po pierwszym terminie płatności."
+            "err_ends": "Data zakończenia musi być po pierwszym terminie płatności.",
+            "err_save": "Nie udało się zapisać wydatku cyklicznego. Nic nie zostało zmienione. Spróbuj ponownie."
         },
         "status": {
             "upcoming": "Nadchodzące",
@@ -1346,6 +1347,8 @@
             "leave_confirm": "Opuść import",
             "leave_stay": "Zostań tutaj",
             "err_rows": "Plik ma więcej niż {max} wierszy. Podziel go na mniejsze pliki.",
+            "col_select": "Importuj",
+            "col_status": "Status",
             "enc_utf8": "UTF-8",
             "enc_utf16": "UTF-16",
             "enc_1250": "Windows-1250 (środkowoeuropejskie)",
