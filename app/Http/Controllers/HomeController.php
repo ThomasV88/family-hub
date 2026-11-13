@@ -8,6 +8,7 @@ use App\Access\Module;
 use App\Models\SystemHeartbeat;
 use App\Models\Task;
 use App\Models\User;
+use App\Wishlist\Occasions\UpcomingOccasions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,7 +18,7 @@ class HomeController extends Controller
 {
     private const DUE_SOON_LIMIT = 5;
 
-    public function __invoke(Request $request, AccessGate $gate): Response
+    public function __invoke(Request $request, AccessGate $gate, UpcomingOccasions $occasions): Response
     {
         $latest = SystemHeartbeat::query()->orderByDesc('recorded_at')->first();
         $user = $request->user();
@@ -32,6 +33,10 @@ class HomeController extends Controller
             // Lazy: only evaluated when the Overview is rendered; null without To-do access.
             'dueSoon' => fn () => $user && $gate->allows($user, Module::Todo, AccessLevel::View)
                 ? $this->dueSoon($user)
+                : null,
+            // Lazy and reservation-blind; null without wishlist view access.
+            'occasions' => fn () => $user && $gate->allows($user, Module::Wishlist, AccessLevel::View)
+                ? $occasions->strip()
                 : null,
         ]);
     }

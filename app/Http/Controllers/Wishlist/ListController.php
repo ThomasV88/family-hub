@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Wishlist\Catalog\ListPage;
 use App\Wishlist\Giving\GiverListPage;
+use App\Wishlist\Occasions\UpcomingOccasions;
 use App\Wishlist\ViewerContext;
 use App\Wishlist\WishlistMembers;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ use Inertia\Response;
  */
 class ListController extends Controller
 {
-    public function index(Request $request, WishlistMembers $members, ListPage $page, GiverListPage $giverPage): Response
+    public function index(Request $request, WishlistMembers $members, ListPage $page, GiverListPage $giverPage, UpcomingOccasions $occasions): Response
     {
         $viewer = $request->user();
 
@@ -34,9 +35,9 @@ class ListController extends Controller
         $owner = User::query()->findOrFail($ownerId);
 
         if (ViewerContext::for($viewer)->isRecipientSideOf($owner->id)) {
-            return $page->render($owner, $viewer, $request);
+            return $page->render($owner, $viewer, $request)->with('occasions', fn () => $occasions->strip());
         }
 
-        return $giverPage->render($owner, $viewer, $request);
+        return $giverPage->render($owner, $viewer, $request)->with('occasions', fn () => $occasions->strip());
     }
 }
