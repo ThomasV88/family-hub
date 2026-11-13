@@ -5,6 +5,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Testing\TestResponse;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\Totp;
 
@@ -17,7 +18,7 @@ function challengeUser(array $attrs = []): User
     return User::factory()->create(['email' => 'anna@example.test'] + $attrs);
 }
 
-function passwordLogin(object $test, array $extra = []): Illuminate\Testing\TestResponse
+function passwordLogin(object $test, array $extra = []): TestResponse
 {
     return $test->post('/login', ['email' => 'anna@example.test', 'password' => 'password'] + $extra);
 }

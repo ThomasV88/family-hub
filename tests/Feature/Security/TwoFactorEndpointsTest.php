@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Fortify;
 use Tests\Support\Totp;
 
 uses(RefreshDatabase::class);
@@ -64,7 +65,7 @@ it('lets a freshly confirmed session enrol and confirm', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)->withSession(freshWindow())->postJson('/user/two-factor-authentication')->assertOk();
-    $secret = \Laravel\Fortify\Fortify::currentEncrypter()->decrypt($user->fresh()->two_factor_secret);
+    $secret = Fortify::currentEncrypter()->decrypt($user->fresh()->two_factor_secret);
     $this->actingAs($user)->withSession(freshWindow())->postJson('/user/confirmed-two-factor-authentication', ['code' => Totp::code($secret)])
         ->assertOk();
 });
@@ -244,7 +245,7 @@ it('does not crash or accept a code for a passkey-only member', function () {
         'created_at' => now(), 'updated_at' => now(),
     ]);
     Totp::enable($user, confirm: false); // a pending secret must not be a way in
-    $secret = \Laravel\Fortify\Fortify::currentEncrypter()->decrypt($user->fresh()->two_factor_secret);
+    $secret = Fortify::currentEncrypter()->decrypt($user->fresh()->two_factor_secret);
 
     $this->withSession(['login.id' => $user->id, 'login.at' => time()])
         ->post('/two-factor-challenge', ['code' => Totp::code($secret)])->assertSessionHasErrors('code');
