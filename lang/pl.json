@@ -311,7 +311,8 @@
             "members": "Członkowie i dostęp",
             "audit": "Dziennik zdarzeń",
             "appearance": "Wygląd i język",
-            "finance_accounts": "Konta finansowe"
+            "finance_accounts": "Konta finansowe",
+            "security": "Bezpieczeństwo"
         },
         "back": "Wróć do ustawień",
         "members": {
@@ -457,7 +458,8 @@
             "health": "Dane zdrowotne",
             "finance": "Dane finansowe",
             "account": "Konto",
-            "access_denied": "Odmowa dostępu"
+            "access_denied": "Odmowa dostępu",
+            "security": "Bezpieczeństwo"
         },
         "col": {
             "when": "Kiedy",
@@ -486,7 +488,19 @@
             "finance_visibility_added": "Udostępnił(a) konto finansowe dla {name}",
             "finance_visibility_removed": "Cofnął(ęła) dostęp do konta finansowego dla {name}",
             "finance_category_deleted": "Usunął(ęła) kategorię finansową i przeniósł(osła) jej wpisy",
-            "finance_admin_self_added": "Dodał(a) siebie do konta finansowego"
+            "finance_admin_self_added": "Dodał(a) siebie do konta finansowego",
+            "totp_enabled": "Aplikacja uwierzytelniająca włączona",
+            "totp_disabled": "Aplikacja uwierzytelniająca wyłączona",
+            "passkey_added": "Dodano klucz dostępu",
+            "passkey_renamed": "Zmieniono nazwę klucza dostępu",
+            "passkey_removed": "Usunięto klucz dostępu",
+            "challenge_failed": "Nieudana weryfikacja dwuetapowa",
+            "recovery_used": "Użyto kodu odzyskiwania",
+            "recovery_regenerated": "Utworzono nowe kody odzyskiwania",
+            "admin_reset": "Zresetowano weryfikację dwuetapową dla {name}",
+            "requirement_on": "Wymóg włączony",
+            "requirement_off": "Wymóg wyłączony",
+            "reauth_confirmed": "Tożsamość potwierdzona dla danych wrażliwych"
         },
         "page": "Strona {n} z {total}",
         "prev": "Poprzednia",
@@ -1394,6 +1408,188 @@
                 "benefits": "Świadczenia",
                 "other_income": "Pozostałe przychody"
             }
+        }
+    },
+    "twofactor": {
+        "cta": {
+            "setup": "Skonfiguruj aplikację uwierzytelniającą",
+            "next": "Następny krok",
+            "confirm_code": "Potwierdź kod",
+            "verify_code": "Zweryfikuj kod",
+            "finish": "Zakończ konfigurację",
+            "cancel": "Anuluj konfigurację",
+            "back_to_scan": "Wróć do skanowania",
+            "copy_codes": "Kopiuj kody",
+            "download_codes": "Pobierz kody",
+            "copy_key": "Kopiuj klucz",
+            "create_codes": "Utwórz nowe kody"
+        },
+        "setup": {
+            "title": "Konfiguracja aplikacji uwierzytelniającej",
+            "step": "Krok {step} z {total}",
+            "scan_title": "Zeskanuj kod",
+            "scan_body": "Otwórz aplikację uwierzytelniającą i zeskanuj ten kod QR.",
+            "qr_label": "Kod QR dla Twojej aplikacji uwierzytelniającej",
+            "cant_scan": "Nie możesz zeskanować? Wpisz klucz ręcznie",
+            "key_label": "Klucz konfiguracji",
+            "key_copied": "Skopiowano klucz",
+            "confirm_title": "Potwierdź kod",
+            "code_hint": "Wpisz kod, który aplikacja pokazuje teraz.",
+            "code_error": "Ten kod jest nieprawidłowy. Poczekaj na nowy kod i spróbuj ponownie."
+        },
+        "code": {
+            "label": "6-cyfrowy kod"
+        },
+        "recovery": {
+            "title": "Zapisz swoje kody odzyskiwania",
+            "body": "Każdy kod działa tylko raz. Jeśli stracisz telefon, kod odzyskiwania pozwoli Ci się zalogować. Pokazujemy je tylko teraz.",
+            "list_label": "Kody odzyskiwania",
+            "copied": "Skopiowano kody odzyskiwania",
+            "ack": "Te kody mam zapisane w bezpiecznym miejscu",
+            "file_title": "Kody odzyskiwania Family Hub",
+            "remaining": "Pozostał {n} kod odzyskiwania | Pozostały {n} kody odzyskiwania | Pozostało {n} kodów odzyskiwania | Pozostało {n} kodu odzyskiwania",
+            "none_left": "Brak kodów odzyskiwania",
+            "low": "Kończą się. Utwórz wkrótce nowe.",
+            "regen_title": "Tworzenie nowych kodów odzyskiwania",
+            "regen_body": "Obecne kody przestaną działać. Najpierw potwierdź, że to Ty.",
+            "regen_keep": "Zachowaj obecne kody",
+            "finish": "Zakończ i zamknij",
+            "label": "Kod odzyskiwania",
+            "used": "Użyto kodu odzyskiwania. Pozostał {n} kod. | Użyto kodu odzyskiwania. Pozostały {n} kody. | Użyto kodu odzyskiwania. Pozostało {n} kodów. | Użyto kodu odzyskiwania. Pozostało {n} kodu."
+        },
+        "challenge": {
+            "title": "Weryfikacja dwuetapowa",
+            "totp_body": "Wpisz 6-cyfrowy kod z aplikacji uwierzytelniającej.",
+            "recovery_body": "Wpisz jeden z kodów odzyskiwania. Każdy kod działa tylko raz.",
+            "passkey_only": "Użyj klucza dostępu, aby dokończyć logowanie.",
+            "use_recovery": "Użyj kodu odzyskiwania",
+            "use_totp": "Użyj kodu z aplikacji"
+        },
+        "error": {
+            "code": "Ten kod jest nieprawidłowy. Sprawdź go i spróbuj ponownie.",
+            "recovery": "Ten kod odzyskiwania jest nieprawidłowy lub został już użyty.",
+            "passkey": "Weryfikacja kluczem dostępu nie powiodła się. Spróbuj ponownie lub użyj kodu.",
+            "throttle": "Zbyt wiele prób. Spróbuj ponownie za {n} minutę. | Zbyt wiele prób. Spróbuj ponownie za {n} minuty. | Zbyt wiele prób. Spróbuj ponownie za {n} minut. | Zbyt wiele prób. Spróbuj ponownie za {n} minuty.",
+            "expired": "Logowanie wygasło. Zaloguj się ponownie."
+        },
+        "throttle_over": "Możesz spróbować ponownie."
+    },
+    "passkey": {
+        "cta": {
+            "add": "Dodaj klucz dostępu",
+            "save_name": "Zapisz nazwę",
+            "skip_naming": "Pomiń nazywanie",
+            "use": "Użyj klucza dostępu"
+        },
+        "title": "Klucze dostępu",
+        "body": "Zamiast kodu użyj odcisku palca, twarzy lub blokady ekranu.",
+        "empty_title": "Brak kluczy dostępu",
+        "empty_body": "Dodaj klucz dostępu, aby potwierdzać tożsamość jednym dotknięciem.",
+        "waiting": "Postępuj zgodnie z instrukcją na urządzeniu, aby utworzyć klucz dostępu.",
+        "name_title": "Nazwij ten klucz dostępu",
+        "name_label": "Nazwa klucza dostępu",
+        "name_hint": "Na przykład: iPhone lub Laptop służbowy.",
+        "added_toast": "Dodano klucz dostępu",
+        "rename": "Zmień nazwę",
+        "rename_aria": "Zmień nazwę klucza dostępu {name}",
+        "rename_title": "Zmiana nazwy klucza dostępu",
+        "renamed_toast": "Zmieniono nazwę klucza dostępu",
+        "rename_long": "Zmień nazwę klucza dostępu",
+        "remove_long": "Usuń klucz dostępu",
+        "remove": "Usuń",
+        "remove_aria": "Usuń klucz dostępu {name}",
+        "remove_title": "Usuwanie klucza dostępu",
+        "remove_body": "Usunąć {name}? Nie będzie można go użyć do potwierdzenia tożsamości.",
+        "remove_confirm": "Usuń klucz dostępu",
+        "remove_keep": "Zachowaj klucz dostępu",
+        "removed_toast": "Usunięto klucz dostępu",
+        "added_on": "Dodano {date}",
+        "last_used": "Ostatnio użyto {date}",
+        "never_used": "Jeszcze nie użyto",
+        "error": {
+            "cancelled": "Konfiguracja klucza dostępu została anulowana. Nic nie dodano.",
+            "failed": "Nie udało się utworzyć klucza dostępu. Spróbuj ponownie lub użyj aplikacji uwierzytelniającej.",
+            "name": "Wpisz nazwę o długości do 60 znaków."
+        },
+        "default_name": "Klucz dostępu",
+        "unsupported": "Ta przeglądarka lub urządzenie nie obsługuje kluczy dostępu.",
+        "count": "{n} klucz | {n} klucze | {n} kluczy | {n} klucza",
+        "none": "Brak"
+    },
+    "reauth": {
+        "cta": {
+            "password": "Potwierdź hasło",
+            "sign_in_again": "Zaloguj się ponownie"
+        },
+        "title": "Potwierdź, że to Ty",
+        "body": "Dla Twojego bezpieczeństwa pytamy ponownie po {minutes} minutach bez aktywności w Zdrowiu lub Finansach.",
+        "interrupted": "Twoja ostatnia zmiana nie została zapisana. Potwierdź, że to Ty, i powtórz ją.",
+        "error": {
+            "password": "To hasło jest nieprawidłowe. Spróbuj ponownie."
+        },
+        "no_method": "To konto nie ma hasła ani drugiego kroku. Zaloguj się ponownie, aby kontynuować.",
+        "passkey_only_body": "Potwierdź kluczem dostępu lub kodem z aplikacji.",
+        "setup_first": "Najpierw skonfiguruj aplikację uwierzytelniającą",
+        "back": "Wróć do przeglądu",
+        "passkey_waiting": "Postępuj zgodnie z instrukcją na urządzeniu.",
+        "google": "Zaloguj się ponownie przez Google",
+        "google_failed": "To konto Google nie potwierdziło Twojej tożsamości. Spróbuj ponownie.",
+        "use_password": "Użyj hasła"
+    },
+    "security": {
+        "title": "Bezpieczeństwo",
+        "intro": "Dodaj drugi krok, aby chronić Zdrowie i Finanse. Możesz użyć aplikacji uwierzytelniającej, klucza dostępu lub obu.",
+        "status": {
+            "on": "Weryfikacja dwuetapowa jest włączona.",
+            "off": "Weryfikacja dwuetapowa jest wyłączona."
+        },
+        "required_note": "Administrator rodziny wymaga weryfikacji dwuetapowej dla Zdrowia i Finansów.",
+        "tag": {
+            "on": "Włączone",
+            "off": "Wyłączone",
+            "required": "Wymagane",
+            "needs": "Wymaga weryfikacji dwuetapowej"
+        },
+        "guidance": {
+            "title": "Skonfiguruj weryfikację dwuetapową, aby kontynuować",
+            "body": "Administrator rodziny wymaga drugiego kroku dla Zdrowia i Finansów. Wybierz poniżej jedną metodę.",
+            "done": "Weryfikacja dwuetapowa jest włączona. Możesz kontynuować."
+        },
+        "totp": {
+            "title": "Aplikacja uwierzytelniająca",
+            "body": "Otrzymuj 6-cyfrowy kod z aplikacji, na przykład uwierzytelniającej w telefonie.",
+            "enabled_toast": "Aplikacja uwierzytelniająca jest włączona",
+            "disabled_toast": "Aplikacja uwierzytelniająca jest wyłączona",
+            "disable": "Wyłącz aplikację uwierzytelniającą",
+            "disable_body": "Wyłączyć aplikację uwierzytelniającą? Kody odzyskiwania przestaną działać. Możesz ją skonfigurować ponownie w dowolnej chwili.",
+            "disable_keep": "Zachowaj aplikację uwierzytelniającą"
+        },
+        "last_factor_warning": "To Twój jedyny drugi krok. Przed otwarciem Zdrowia lub Finansów musisz skonfigurować kolejny.",
+        "confirm_first": "Zanim zmienisz weryfikację dwuetapową, potwierdź, że to Ty."
+    },
+    "members": {
+        "security": {
+            "card_title": "Weryfikacja dwuetapowa dla danych wrażliwych",
+            "require_label": "Wymagaj weryfikacji dwuetapowej dla Zdrowia i Finansów",
+            "require_help": "Dotyczy członków, którzy mogą otworzyć Zdrowie lub Finanse. Muszą ją skonfigurować przed otwarciem tych modułów.",
+            "pending": "Jeszcze bez konfiguracji: {n} członek | Jeszcze bez konfiguracji: {n} członków | Jeszcze bez konfiguracji: {n} członków | Jeszcze bez konfiguracji: {n} członka",
+            "pending_zero": "Wszyscy z dostępem mają ją skonfigurowaną.",
+            "on_toast": "Wymóg włączony",
+            "off_toast": "Wymóg wyłączony",
+            "confirm_first": "Zanim zmienisz to wymaganie, potwierdź, że to Ty.",
+            "tag_on": "Dwuetapowa: włączona",
+            "tag_off": "Dwuetapowa: wyłączona",
+            "tab": "Bezpieczeństwo",
+            "required": "Wymagane",
+            "not_required": "Niewymagane",
+            "reset": "Zresetuj weryfikację dwuetapową",
+            "reset_none": "Ten członek nie ma weryfikacji dwuetapowej do zresetowania.",
+            "reset_self": "Własną weryfikacją dwuetapową zarządzasz w ustawieniach Bezpieczeństwo.",
+            "reset_title": "Resetowanie weryfikacji dwuetapowej",
+            "reset_body": "Usunąć całą weryfikację dwuetapową dla {name}? Aplikacja uwierzytelniająca, klucze dostępu i kody odzyskiwania zostaną usunięte, a członek zostanie wylogowany na każdym urządzeniu. {name} musi skonfigurować ją ponownie.",
+            "reset_body_required": "Usunąć całą weryfikację dwuetapową dla {name}? Aplikacja uwierzytelniająca, klucze dostępu i kody odzyskiwania zostaną usunięte, a członek zostanie wylogowany na każdym urządzeniu. {name} musi skonfigurować ją ponownie przed otwarciem Zdrowia lub Finansów.",
+            "reset_keep": "Zachowaj weryfikację dwuetapową",
+            "reset_toast": "Zresetowano weryfikację dwuetapową dla {name}"
         }
     }
 }

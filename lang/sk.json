@@ -311,7 +311,8 @@
             "members": "Členovia a prístup",
             "audit": "Záznam aktivity",
             "appearance": "Vzhľad a jazyk",
-            "finance_accounts": "Finančné účty"
+            "finance_accounts": "Finančné účty",
+            "security": "Zabezpečenie"
         },
         "back": "Späť do nastavení",
         "members": {
@@ -457,7 +458,8 @@
             "health": "Zdravotné údaje",
             "finance": "Finančné údaje",
             "account": "Účet",
-            "access_denied": "Prístup zamietnutý"
+            "access_denied": "Prístup zamietnutý",
+            "security": "Zabezpečenie"
         },
         "col": {
             "when": "Kedy",
@@ -486,7 +488,19 @@
             "finance_visibility_added": "Sprístupnil(a) finančný účet pre {name}",
             "finance_visibility_removed": "Zrušil(a) prístup k finančnému účtu pre {name}",
             "finance_category_deleted": "Odstránil(a) finančnú kategóriu a presunul(a) jej záznamy",
-            "finance_admin_self_added": "Pridal(a) seba k finančnému účtu"
+            "finance_admin_self_added": "Pridal(a) seba k finančnému účtu",
+            "totp_enabled": "Overovacia aplikácia zapnutá",
+            "totp_disabled": "Overovacia aplikácia vypnutá",
+            "passkey_added": "Prístupový kľúč pridaný",
+            "passkey_renamed": "Prístupový kľúč premenovaný",
+            "passkey_removed": "Prístupový kľúč odstránený",
+            "challenge_failed": "Neúspešné dvojstupňové overenie",
+            "recovery_used": "Použitý kód na obnovenie",
+            "recovery_regenerated": "Vytvorené nové kódy na obnovenie",
+            "admin_reset": "Dvojstupňové overenie obnovené pre {name}",
+            "requirement_on": "Požiadavka zapnutá",
+            "requirement_off": "Požiadavka vypnutá",
+            "reauth_confirmed": "Identita potvrdená pre citlivé údaje"
         },
         "page": "Strana {n} z {total}",
         "prev": "Predchádzajúca",
@@ -1394,6 +1408,188 @@
                 "benefits": "Dávky",
                 "other_income": "Ostatné príjmy"
             }
+        }
+    },
+    "twofactor": {
+        "cta": {
+            "setup": "Nastaviť overovaciu aplikáciu",
+            "next": "Ďalší krok",
+            "confirm_code": "Potvrdiť kód",
+            "verify_code": "Overiť kód",
+            "finish": "Dokončiť nastavenie",
+            "cancel": "Zrušiť nastavenie",
+            "back_to_scan": "Späť na skenovanie",
+            "copy_codes": "Kopírovať kódy",
+            "download_codes": "Stiahnuť kódy",
+            "copy_key": "Kopírovať kľúč",
+            "create_codes": "Vytvoriť nové kódy"
+        },
+        "setup": {
+            "title": "Nastavenie overovacej aplikácie",
+            "step": "Krok {step} z {total}",
+            "scan_title": "Naskenujte kód",
+            "scan_body": "Otvorte overovaciu aplikáciu a naskenujte tento QR kód.",
+            "qr_label": "QR kód pre vašu overovaciu aplikáciu",
+            "cant_scan": "Nemôžete naskenovať? Zadajte kľúč ručne",
+            "key_label": "Kľúč na nastavenie",
+            "key_copied": "Kľúč skopírovaný",
+            "confirm_title": "Potvrďte kód",
+            "code_hint": "Zadajte kód, ktorý aplikácia práve zobrazuje.",
+            "code_error": "Tento kód nie je správny. Počkajte na nový kód a skúste to znova."
+        },
+        "code": {
+            "label": "6-miestny kód"
+        },
+        "recovery": {
+            "title": "Uložte si kódy na obnovenie",
+            "body": "Každý kód funguje len raz. Ak stratíte telefón, kód na obnovenie vám umožní prihlásiť sa. Zobrazujeme ich iba teraz.",
+            "list_label": "Kódy na obnovenie",
+            "copied": "Kódy na obnovenie skopírované",
+            "ack": "Tieto kódy mám uložené na bezpečnom mieste",
+            "file_title": "Kódy na obnovenie Family Hub",
+            "remaining": "Zostáva {n} kód na obnovenie | Zostávajú {n} kódy na obnovenie | Zostáva {n} kódu na obnovenie | Zostáva {n} kódov na obnovenie",
+            "none_left": "Nezostali žiadne kódy na obnovenie",
+            "low": "Dochádzajú. Vytvorte si čoskoro nové.",
+            "regen_title": "Vytvorenie nových kódov na obnovenie",
+            "regen_body": "Vaše súčasné kódy prestanú fungovať. Najprv potvrďte, že ste to vy.",
+            "regen_keep": "Ponechať súčasné kódy",
+            "finish": "Dokončiť a zavrieť",
+            "label": "Kód na obnovenie",
+            "used": "Použili ste kód na obnovenie. Zostáva {n} kód. | Použili ste kód na obnovenie. Zostávajú {n} kódy. | Použili ste kód na obnovenie. Zostáva {n} kódu. | Použili ste kód na obnovenie. Zostáva {n} kódov."
+        },
+        "challenge": {
+            "title": "Dvojstupňové overenie",
+            "totp_body": "Zadajte 6-miestny kód z overovacej aplikácie.",
+            "recovery_body": "Zadajte jeden z kódov na obnovenie. Každý kód funguje len raz.",
+            "passkey_only": "Dokončite prihlásenie pomocou prístupového kľúča.",
+            "use_recovery": "Použiť kód na obnovenie",
+            "use_totp": "Použiť kód z aplikácie"
+        },
+        "error": {
+            "code": "Tento kód nie je správny. Skontrolujte ho a skúste to znova.",
+            "recovery": "Tento kód na obnovenie nie je správny alebo už bol použitý.",
+            "passkey": "Overenie prístupovým kľúčom sa nepodarilo. Skúste to znova alebo použite kód.",
+            "throttle": "Príliš veľa pokusov. Skúste to znova o {n} minútu. | Príliš veľa pokusov. Skúste to znova o {n} minúty. | Príliš veľa pokusov. Skúste to znova o {n} minúty. | Príliš veľa pokusov. Skúste to znova o {n} minút.",
+            "expired": "Platnosť prihlásenia vypršala. Prihláste sa znova."
+        },
+        "throttle_over": "Môžete to skúsiť znova."
+    },
+    "passkey": {
+        "cta": {
+            "add": "Pridať prístupový kľúč",
+            "save_name": "Uložiť názov",
+            "skip_naming": "Preskočiť pomenovanie",
+            "use": "Použiť prístupový kľúč"
+        },
+        "title": "Prístupové kľúče",
+        "body": "Namiesto kódu použite odtlačok prsta, tvár alebo zámku obrazovky.",
+        "empty_title": "Zatiaľ žiadne prístupové kľúče",
+        "empty_body": "Pridajte prístupový kľúč a potvrdzujte svoju identitu jedným dotykom.",
+        "waiting": "Postupujte podľa výzvy na zariadení a vytvorte prístupový kľúč.",
+        "name_title": "Pomenujte prístupový kľúč",
+        "name_label": "Názov prístupového kľúča",
+        "name_hint": "Napríklad: iPhone alebo Pracovný notebook.",
+        "added_toast": "Prístupový kľúč pridaný",
+        "rename": "Premenovať",
+        "rename_aria": "Premenovať prístupový kľúč {name}",
+        "rename_title": "Premenovanie prístupového kľúča",
+        "renamed_toast": "Prístupový kľúč premenovaný",
+        "rename_long": "Premenovať prístupový kľúč",
+        "remove_long": "Odstrániť prístupový kľúč",
+        "remove": "Odstrániť",
+        "remove_aria": "Odstrániť prístupový kľúč {name}",
+        "remove_title": "Odstránenie prístupového kľúča",
+        "remove_body": "Odstrániť {name}? Už ho nebudete môcť použiť na potvrdenie identity.",
+        "remove_confirm": "Odstrániť prístupový kľúč",
+        "remove_keep": "Ponechať prístupový kľúč",
+        "removed_toast": "Prístupový kľúč odstránený",
+        "added_on": "Pridané {date}",
+        "last_used": "Naposledy použité {date}",
+        "never_used": "Zatiaľ nepoužité",
+        "error": {
+            "cancelled": "Nastavenie prístupového kľúča bolo zrušené. Nič sa nepridalo.",
+            "failed": "Prístupový kľúč sa nepodarilo vytvoriť. Skúste to znova alebo použite overovaciu aplikáciu.",
+            "name": "Zadajte názov s najviac 60 znakmi."
+        },
+        "default_name": "Prístupový kľúč",
+        "unsupported": "Tento prehliadač alebo zariadenie nepodporuje prístupové kľúče.",
+        "count": "{n} kľúč | {n} kľúče | {n} kľúča | {n} kľúčov",
+        "none": "Žiadne"
+    },
+    "reauth": {
+        "cta": {
+            "password": "Potvrdiť heslo",
+            "sign_in_again": "Prihlásiť sa znova"
+        },
+        "title": "Potvrďte, že ste to vy",
+        "body": "Pre vašu bezpečnosť sa pýtame znova po {minutes} minútach nečinnosti v sekcii Zdravie alebo Financie.",
+        "interrupted": "Vaša posledná zmena sa neuložila. Potvrďte, že ste to vy, a zopakujte ju.",
+        "error": {
+            "password": "Toto heslo nie je správne. Skúste to znova."
+        },
+        "no_method": "Tento účet nemá heslo ani druhý krok. Na pokračovanie sa prihláste znova.",
+        "passkey_only_body": "Potvrďte prístupovým kľúčom alebo kódom z aplikácie.",
+        "setup_first": "Najprv nastavte overovaciu aplikáciu",
+        "back": "Späť na prehľad",
+        "passkey_waiting": "Postupujte podľa výzvy na zariadení.",
+        "google": "Znova sa prihlásiť cez Google",
+        "google_failed": "Tento účet Google nepotvrdil vašu identitu. Skúste to znova.",
+        "use_password": "Použiť heslo"
+    },
+    "security": {
+        "title": "Zabezpečenie",
+        "intro": "Pridajte druhý krok na ochranu sekcií Zdravie a Financie. Môžete použiť overovaciu aplikáciu, prístupový kľúč alebo oboje.",
+        "status": {
+            "on": "Dvojstupňové overenie je zapnuté.",
+            "off": "Dvojstupňové overenie je vypnuté."
+        },
+        "required_note": "Správca rodiny vyžaduje dvojstupňové overenie pre Zdravie a Financie.",
+        "tag": {
+            "on": "Zapnuté",
+            "off": "Vypnuté",
+            "required": "Povinné",
+            "needs": "Chýba dvojstupňové"
+        },
+        "guidance": {
+            "title": "Nastavte dvojstupňové overenie, aby ste mohli pokračovať",
+            "body": "Správca rodiny vyžaduje druhý krok pre Zdravie a Financie. Nižšie vyberte jednu metódu.",
+            "done": "Dvojstupňové overenie je zapnuté. Môžete pokračovať."
+        },
+        "totp": {
+            "title": "Overovacia aplikácia",
+            "body": "Získajte 6-miestny kód z aplikácie, napríklad z overovacej aplikácie v telefóne.",
+            "enabled_toast": "Overovacia aplikácia je zapnutá",
+            "disabled_toast": "Overovacia aplikácia je vypnutá",
+            "disable": "Vypnúť overovaciu aplikáciu",
+            "disable_body": "Vypnúť overovaciu aplikáciu? Kódy na obnovenie prestanú fungovať. Kedykoľvek ju môžete nastaviť znova.",
+            "disable_keep": "Ponechať overovaciu aplikáciu"
+        },
+        "last_factor_warning": "Toto je váš jediný druhý krok. Pred otvorením Zdravia alebo Financií si budete musieť nastaviť ďalší.",
+        "confirm_first": "Pred zmenou dvojstupňového overenia potvrďte, že ste to vy."
+    },
+    "members": {
+        "security": {
+            "card_title": "Dvojstupňové overenie pre citlivé údaje",
+            "require_label": "Vyžadovať dvojstupňové overenie pre Zdravie a Financie",
+            "require_help": "Platí pre členov, ktorí môžu otvoriť Zdravie alebo Financie. Pred otvorením týchto modulov si ho musia nastaviť.",
+            "pending": "Zatiaľ nenastavili: {n} člen | Zatiaľ nenastavili: {n} členovia | Zatiaľ nenastavili: {n} člena | Zatiaľ nenastavili: {n} členov",
+            "pending_zero": "Všetci s prístupom ho majú nastavené.",
+            "on_toast": "Požiadavka zapnutá",
+            "off_toast": "Požiadavka vypnutá",
+            "confirm_first": "Pred zmenou požiadavky potvrďte, že ste to vy.",
+            "tag_on": "Dvojstupňové: zapnuté",
+            "tag_off": "Dvojstupňové: vypnuté",
+            "tab": "Zabezpečenie",
+            "required": "Povinné",
+            "not_required": "Nepovinné",
+            "reset": "Obnoviť dvojstupňové overenie",
+            "reset_none": "Tento člen nemá dvojstupňové overenie, ktoré by sa dalo obnoviť.",
+            "reset_self": "Vlastné dvojstupňové overenie spravujete v nastaveniach Zabezpečenie.",
+            "reset_title": "Obnovenie dvojstupňového overenia",
+            "reset_body": "Odstrániť všetko dvojstupňové overenie pre {name}? Overovacia aplikácia, prístupové kľúče a kódy na obnovenie sa zmažú a člen bude odhlásený na každom zariadení. {name} si ho musí nastaviť znova.",
+            "reset_body_required": "Odstrániť všetko dvojstupňové overenie pre {name}? Overovacia aplikácia, prístupové kľúče a kódy na obnovenie sa zmažú a člen bude odhlásený na každom zariadení. {name} si ho musí nastaviť znova pred otvorením Zdravia alebo Financií.",
+            "reset_keep": "Ponechať dvojstupňové overenie",
+            "reset_toast": "Dvojstupňové overenie obnovené pre {name}"
         }
     }
 }

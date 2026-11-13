@@ -311,7 +311,8 @@
             "members": "Members and access",
             "audit": "Audit log",
             "appearance": "Appearance and language",
-            "finance_accounts": "Finance accounts"
+            "finance_accounts": "Finance accounts",
+            "security": "Security"
         },
         "back": "Back to settings",
         "members": {
@@ -457,7 +458,8 @@
             "health": "Health data",
             "finance": "Finance data",
             "account": "Account",
-            "access_denied": "Access denied"
+            "access_denied": "Access denied",
+            "security": "Security"
         },
         "col": {
             "when": "When",
@@ -486,7 +488,19 @@
             "finance_visibility_added": "Shared a finance account with {name}",
             "finance_visibility_removed": "Stopped sharing a finance account with {name}",
             "finance_category_deleted": "Deleted a finance category and moved its entries",
-            "finance_admin_self_added": "Added themselves to a finance account"
+            "finance_admin_self_added": "Added themselves to a finance account",
+            "totp_enabled": "Authenticator app turned on",
+            "totp_disabled": "Authenticator app turned off",
+            "passkey_added": "Passkey added",
+            "passkey_renamed": "Passkey renamed",
+            "passkey_removed": "Passkey removed",
+            "challenge_failed": "Failed two-step check",
+            "recovery_used": "Recovery code used",
+            "recovery_regenerated": "New recovery codes created",
+            "admin_reset": "Two-step verification reset for {name}",
+            "requirement_on": "Requirement turned on",
+            "requirement_off": "Requirement turned off",
+            "reauth_confirmed": "Identity confirmed for sensitive data"
         },
         "page": "Page {n} of {total}",
         "prev": "Previous",
@@ -1394,6 +1408,188 @@
                 "benefits": "Benefits",
                 "other_income": "Other income"
             }
+        }
+    },
+    "twofactor": {
+        "cta": {
+            "setup": "Set up authenticator app",
+            "next": "Next step",
+            "confirm_code": "Confirm code",
+            "verify_code": "Verify code",
+            "finish": "Finish setup",
+            "cancel": "Cancel setup",
+            "back_to_scan": "Back to scan",
+            "copy_codes": "Copy codes",
+            "download_codes": "Download codes",
+            "copy_key": "Copy key",
+            "create_codes": "Create new codes"
+        },
+        "setup": {
+            "title": "Set up authenticator app",
+            "step": "Step {step} of {total}",
+            "scan_title": "Scan the code",
+            "scan_body": "Open your authenticator app and scan this QR code.",
+            "qr_label": "QR code for your authenticator app",
+            "cant_scan": "Can't scan? Enter the key instead",
+            "key_label": "Setup key",
+            "key_copied": "Key copied",
+            "confirm_title": "Confirm the code",
+            "code_hint": "Enter the code your app shows now.",
+            "code_error": "That code is not correct. Wait for a new code and try again."
+        },
+        "code": {
+            "label": "6-digit code"
+        },
+        "recovery": {
+            "title": "Save your recovery codes",
+            "body": "Each code works once. If you lose your phone, a recovery code lets you sign in. We show them only now.",
+            "list_label": "Recovery codes",
+            "copied": "Recovery codes copied",
+            "ack": "I have saved these codes somewhere safe",
+            "file_title": "Family Hub recovery codes",
+            "remaining": "{n} recovery code left | {n} recovery codes left",
+            "none_left": "No recovery codes left",
+            "low": "Running low. Create new codes soon.",
+            "regen_title": "Create new recovery codes",
+            "regen_body": "Your current codes will stop working. Confirm it's you first.",
+            "regen_keep": "Keep current codes",
+            "finish": "Finish and close",
+            "label": "Recovery code",
+            "used": "You used a recovery code. {n} code left. | You used a recovery code. {n} codes left."
+        },
+        "challenge": {
+            "title": "Two-step verification",
+            "totp_body": "Enter the 6-digit code from your authenticator app.",
+            "recovery_body": "Enter one of your recovery codes. Each code works once.",
+            "passkey_only": "Use your passkey to finish signing in.",
+            "use_recovery": "Use a recovery code",
+            "use_totp": "Use authenticator code"
+        },
+        "error": {
+            "code": "That code is not correct. Check it and try again.",
+            "recovery": "That recovery code is not correct or was already used.",
+            "passkey": "Passkey check did not work. Try again or use a code.",
+            "throttle": "Too many attempts. Try again in {n} minute. | Too many attempts. Try again in {n} minutes.",
+            "expired": "Your sign-in timed out. Sign in again."
+        },
+        "throttle_over": "You can try again now."
+    },
+    "passkey": {
+        "cta": {
+            "add": "Add passkey",
+            "save_name": "Save name",
+            "skip_naming": "Skip naming",
+            "use": "Use a passkey"
+        },
+        "title": "Passkeys",
+        "body": "Use your fingerprint, face or screen lock instead of a code.",
+        "empty_title": "No passkeys yet",
+        "empty_body": "Add a passkey to confirm it's you with one touch.",
+        "waiting": "Follow the prompt on your device to create the passkey.",
+        "name_title": "Name this passkey",
+        "name_label": "Passkey name",
+        "name_hint": "For example: iPhone or Work laptop.",
+        "added_toast": "Passkey added",
+        "rename": "Rename",
+        "rename_aria": "Rename passkey {name}",
+        "rename_title": "Rename passkey",
+        "renamed_toast": "Passkey renamed",
+        "rename_long": "Rename passkey",
+        "remove_long": "Remove passkey",
+        "remove": "Remove",
+        "remove_aria": "Remove passkey {name}",
+        "remove_title": "Remove passkey",
+        "remove_body": "Remove {name}? You will not be able to use it to confirm it's you.",
+        "remove_confirm": "Remove passkey",
+        "remove_keep": "Keep passkey",
+        "removed_toast": "Passkey removed",
+        "added_on": "Added {date}",
+        "last_used": "Last used {date}",
+        "never_used": "Never used",
+        "error": {
+            "cancelled": "Passkey setup was cancelled. Nothing was added.",
+            "failed": "We could not create the passkey. Try again or use an authenticator app.",
+            "name": "Enter a name of up to 60 characters."
+        },
+        "default_name": "Passkey",
+        "unsupported": "This browser or device does not support passkeys.",
+        "count": "{n} passkey | {n} passkeys",
+        "none": "None"
+    },
+    "reauth": {
+        "cta": {
+            "password": "Confirm password",
+            "sign_in_again": "Sign in again"
+        },
+        "title": "Confirm it's you",
+        "body": "For your safety we ask again after {minutes} minutes without activity in Health or Finances.",
+        "interrupted": "Your last change was not saved. Confirm it's you, then repeat it.",
+        "error": {
+            "password": "That password is not correct. Try again."
+        },
+        "no_method": "This account has no password or second step. Sign in again to continue.",
+        "passkey_only_body": "Use your passkey or authenticator code to confirm.",
+        "setup_first": "Set up an authenticator app first",
+        "back": "Back to overview",
+        "passkey_waiting": "Follow the prompt on your device.",
+        "google": "Sign in with Google again",
+        "google_failed": "That Google account could not confirm it's you. Try again.",
+        "use_password": "Use password"
+    },
+    "security": {
+        "title": "Security",
+        "intro": "Add a second step to protect Health and Finances. You can use an authenticator app, a passkey or both.",
+        "status": {
+            "on": "Two-step verification is on.",
+            "off": "Two-step verification is off."
+        },
+        "required_note": "Your family admin requires two-step verification for Health and Finances.",
+        "tag": {
+            "on": "On",
+            "off": "Off",
+            "required": "Required",
+            "needs": "Needs two-step"
+        },
+        "guidance": {
+            "title": "Set up two-step verification to continue",
+            "body": "Your family admin requires a second step for Health and Finances. Choose one method below.",
+            "done": "Two-step verification is on. You can continue."
+        },
+        "totp": {
+            "title": "Authenticator app",
+            "body": "Get a 6-digit code from an app such as your phone's authenticator.",
+            "enabled_toast": "Authenticator app is on",
+            "disabled_toast": "Authenticator app is off",
+            "disable": "Turn off authenticator app",
+            "disable_body": "Turn off the authenticator app? Your recovery codes will stop working. You can set it up again at any time.",
+            "disable_keep": "Keep authenticator app"
+        },
+        "last_factor_warning": "This is your only second step. You will need to set up another before opening Health or Finances.",
+        "confirm_first": "Confirm it's you before changing two-step verification."
+    },
+    "members": {
+        "security": {
+            "card_title": "Two-step verification for sensitive data",
+            "require_label": "Require two-step verification for Health and Finances",
+            "require_help": "Applies to members who can open Health or Finances. They must set it up before opening these modules.",
+            "pending": "Not set up yet: {n} member | Not set up yet: {n} members",
+            "pending_zero": "Everyone with access has set it up.",
+            "on_toast": "Requirement turned on",
+            "off_toast": "Requirement turned off",
+            "confirm_first": "Confirm it's you before changing the requirement.",
+            "tag_on": "Two-step: on",
+            "tag_off": "Two-step: off",
+            "tab": "Security",
+            "required": "Required",
+            "not_required": "Not required",
+            "reset": "Reset two-step verification",
+            "reset_none": "This member has no two-step verification to reset.",
+            "reset_self": "Manage your own two-step verification in Security settings.",
+            "reset_title": "Reset two-step verification",
+            "reset_body": "Remove all two-step verification for {name}? Their authenticator app, passkeys and recovery codes will be deleted and they will be signed out on every device. {name} must set it up again.",
+            "reset_body_required": "Remove all two-step verification for {name}? Their authenticator app, passkeys and recovery codes will be deleted and they will be signed out on every device. {name} must set it up again before opening Health or Finances.",
+            "reset_keep": "Keep two-step verification",
+            "reset_toast": "Two-step verification reset for {name}"
         }
     }
 }
