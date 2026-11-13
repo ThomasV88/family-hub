@@ -11,7 +11,10 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
+use Laravel\Fortify\Contracts\FailedTwoFactorLoginResponse;
 use Laravel\Fortify\Events\RecoveryCodeReplaced;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\PasskeyAuthenticatable;
@@ -55,11 +58,31 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
      */
     public function replaceRecoveryCode($code)
     {
-        $remaining = array_values(array_filter($this->recoveryCodes(), fn ($c) => ! hash_equals((string) $c, (string) $code)));
+        // Consumed under a row lock, re-reading the stored codes (06-REVIEW WR-06): of two concurrent requests with
+        // the same code, the second finds it already gone and fails like any wrong code instead of also logging in.
+        DB::transaction(function () use ($code) {
+            $stored = static::query()->whereKey($this->getKey())->lockForUpdate()->value('two_factor_recovery_codes');
+            $codes = $stored !== null ? (array) json_decode(Fortify::currentEncrypter()->decrypt($stored), true) : [];
 
-        $this->forceFill([
-            'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode($remaining)),
-        ])->save();
+            $present = false;
+            $remaining = [];
+            foreach ($codes as $c) {
+                if (hash_equals((string) $c, (string) $code)) {
+                    $present = true;
+
+                    continue;
+                }
+                $remaining[] = $c;
+            }
+
+            if (! $present) {
+                throw new HttpResponseException(app(FailedTwoFactorLoginResponse::class)->toResponse(request()));
+            }
+
+            $this->forceFill([
+                'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode($remaining)),
+            ])->save();
+        });
 
         RecoveryCodeReplaced::dispatch($this, $code);
     }

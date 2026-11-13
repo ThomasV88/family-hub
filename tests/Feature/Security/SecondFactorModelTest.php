@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Cache;
 use App\Models\User;
 use App\Security\PasswordSetBackfill;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -102,4 +103,50 @@ it('backfills password_set false only for google accounts with no known password
         expect($u->fresh()->password_set)->toBeTrue();
     }
     expect(PasswordSetBackfill::run())->toBe(0);
+});
+
+// 06-REVIEW WR-06
+it('consumes a recovery code once even from a stale in-memory copy (the lock re-reads the stored codes)', function () {
+    $user = User::factory()->create();
+    Totp::enable($user);
+    $code = Totp::recoveryCodes($user)[0];
+
+    $first = User::find($user->id);
+    $second = User::find($user->id); // loaded before the first use, still lists the code: a parallel request
+    $first->replaceRecoveryCode($code);
+
+    expect(fn () => $second->replaceRecoveryCode($code))->toThrow(\Illuminate\Http\Exceptions\HttpResponseException::class);
+    expect(Totp::recoveryCodes($user->refresh()))->toHaveCount(7)->not->toContain($code);
+});
+
+it('rejects the second sequential use of a recovery code at the challenge', function () {
+    $user = User::factory()->create();
+    Totp::enable($user);
+    $code = Totp::recoveryCodes($user)[0];
+
+    foreach ([true, false] as $expectSuccess) {
+        app('auth')->forgetGuards();
+        $this->flushSession();
+        $response = $this->withSession(['login.id' => $user->id, 'login.remember' => false, 'login.at' => now()->getTimestamp()])
+            ->post('/two-factor-challenge', ['recovery_code' => $code]);
+        $expectSuccess ? $response->assertRedirect('/') : $response->assertSessionHasErrors('recovery_code');
+    }
+    expect(Totp::recoveryCodes($user->refresh()))->toHaveCount(7);
+});
+
+it('keys the TOTP replay marker per member secret, not by the bare code', function () {
+    $a = User::factory()->create();
+    $secret = Totp::enable($a);
+    $code = Totp::code($secret, -1);
+    $provider = app(\Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider::class);
+
+    expect($provider)->toBeInstanceOf(\App\Security\UserScopedTwoFactorProvider::class);
+    expect($provider->verify($secret, $code))->toBeTrue();
+    // Fortify's global key is untouched, so another member entering the same digits is not rejected by this use.
+    expect(Cache::has('fortify.2fa_codes.'.md5($code)))->toBeFalse();
+    expect(Cache::has(\App\Security\UserScopedTwoFactorProvider::replayKey($secret, $code)))->toBeTrue();
+    // The same member cannot replay it.
+    expect($provider->verify($secret, $code))->toBeFalse();
+    // A different secret has its own marker.
+    expect(\App\Security\UserScopedTwoFactorProvider::replayKey('OTHERSECRET', $code))->not->toBe(\App\Security\UserScopedTwoFactorProvider::replayKey($secret, $code));
 });

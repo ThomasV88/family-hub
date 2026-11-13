@@ -20,6 +20,14 @@ class SecurityServiceProvider extends ServiceProvider
         // Created by plan 06-01; referenced by class constant only.
         $this->app->scoped(\App\Security\AppSettings::class);
         $this->app->scoped(\App\Security\SecondFactorPolicy::class);
+        // Replay marker per member secret instead of Fortify's global per-code key (06-REVIEW WR-06).
+        $this->app->singleton(
+            \Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider::class,
+            fn ($app) => new \App\Security\UserScopedTwoFactorProvider(
+                $app->make(\PragmaRX\Google2FA\Google2FA::class),
+                $app->make(\Illuminate\Contracts\Cache\Repository::class),
+            ),
+        );
     }
 
     public function boot(): void
