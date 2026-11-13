@@ -40,22 +40,42 @@ function unlock() {
     }
 }
 
+let dockedPrevious = null;
+
+function activate() {
+    if (modal.value) {
+        trap.activate();
+        return;
+    }
+    // Docked panel is non-modal: move focus to the heading without trapping Tab.
+    dockedPrevious = document.activeElement;
+    document.getElementById(titleId)?.focus();
+}
+function deactivate() {
+    if (modal.value) {
+        trap.deactivate();
+        return;
+    }
+    if (dockedPrevious && document.contains(dockedPrevious)) dockedPrevious.focus();
+    dockedPrevious = null;
+}
+
 watch(
     () => props.open,
     async (open) => {
         if (open) {
             lock();
             await nextTick();
-            trap.activate();
+            activate();
         } else {
-            trap.deactivate();
+            deactivate();
             unlock();
         }
     },
     { immediate: true, flush: 'post' },
 );
 onBeforeUnmount(() => {
-    if (props.open) trap.deactivate();
+    if (props.open) deactivate();
     unlock();
 });
 </script>
@@ -63,7 +83,7 @@ onBeforeUnmount(() => {
 <template>
     <aside v-if="open && !modal" :ref="(el) => (root = el)" :class="['ui-panel', 'ui-panel--docked']" :aria-labelledby="titleId" @keydown.esc.stop="close">
         <header class="ui-panel__header">
-            <h2 :id="titleId" class="ui-panel__title">{{ title }}</h2>
+            <h2 :id="titleId" class="ui-panel__title" tabindex="-1">{{ title }}</h2>
             <UiButton variant="ghost" icon-only :icon="X" :label="t('ui.close')" @click="close" />
         </header>
         <div class="ui-panel__body"><slot /></div>
@@ -88,7 +108,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .ui-panel { display: flex; flex-direction: column; background: var(--color-surface); color: var(--color-text); overflow: hidden; }
-.ui-panel:focus { outline: none; }
+.ui-panel:focus, .ui-panel__title:focus { outline: none; }
 .ui-panel__header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); padding: var(--space-4) var(--space-4) var(--space-2); }
 .ui-panel__title { margin: 0; font-size: var(--text-xl); font-weight: 600; line-height: 1.3; }
 .ui-panel__body { flex: 1; overflow-y: auto; padding: var(--space-2) var(--space-4) var(--space-4); }
