@@ -210,3 +210,32 @@ it('opens no window when the audit write fails on confirm', function () {
 
     expect(session('auth.password_confirmed_at'))->toBeNull()->and(session('sensitive.active_at'))->toBeNull();
 });
+
+// 06-REVIEW WR-07: re-authentication rotates the session id and keeps the intended URL and the timestamps.
+it('rotates the session id on confirm and keeps the intended URL', function () {
+    $user = reauthUser();
+    $this->actingAs($user)->withSession(['url.intended' => 'http://localhost/finance/budgets']);
+    $before = session()->getId();
+
+    $this->post('/confirm-access', ['password' => 'password'])->assertRedirect('/finance/budgets');
+
+    expect(session()->getId())->not->toBe($before);
+    expect(session('auth.password_confirmed_at'))->toBeInt()->and(session('sensitive.active_at'))->toBeInt();
+    $this->getJson('/finance')->assertOk();
+});
+
+it('rotates the session id on a passkey confirm too', function () {
+    $user = reauthUser();
+    $id = \ParagonIE\ConstantTime\Base64UrlSafe::encodeUnpadded('key-'.$user->id);
+    DB::table('passkeys')->insert([
+        'user_id' => $user->id, 'name' => 'Laptop', 'credential_id' => $id,
+        'credential' => json_encode(['x' => 1]), 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    \Tests\Support\FakePasskeys::verifies();
+    $this->actingAs($user)->getJson('/confirm-access/passkey/options')->assertOk();
+    $before = session()->getId();
+
+    $this->postJson('/confirm-access/passkey', ['credential' => \Tests\Support\FakePasskeys::assertion($id), 'mode' => 'dialog'])->assertOk();
+
+    expect(session()->getId())->not->toBe($before)->and(session('auth.password_confirmed_at'))->toBeInt();
+});

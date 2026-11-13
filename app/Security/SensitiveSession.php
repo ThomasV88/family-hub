@@ -31,6 +31,17 @@ class SensitiveSession
         $this->session()->put(self::CONFIRMED_KEY, now()->getTimestamp());
     }
 
+    /**
+     * Interactive re-authentication raised the session's privilege: rotate the session id (keeps the data, so the
+     * intended URL and the timestamps survive) before recording the confirmation, so an id captured earlier cannot
+     * ride on it (06-REVIEW WR-07).
+     */
+    public function confirmRotating(): void
+    {
+        $this->session()->regenerate();
+        $this->confirm();
+    }
+
     /** Forget both windows (sign in again). */
     public function clear(): void
     {

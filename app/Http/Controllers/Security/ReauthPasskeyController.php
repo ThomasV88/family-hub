@@ -39,7 +39,7 @@ class ReauthPasskeyController extends Controller
 
         // Audit first (fail closed, 06-REVIEW WR-04): no audit row, no confirmation.
         $this->audit->record(AuditEvent::ReauthConfirmed, $user, ['method' => 'passkey']);
-        $sensitive->confirm();
+        $sensitive->confirmRotating();
 
         return $request->input('mode') === 'dialog'
             ? response()->json(['confirmed' => true])

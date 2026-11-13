@@ -60,7 +60,7 @@ class ReauthController extends Controller
         // windows were never opened. Then open both the idle window and the 10-minute security window, in page
         // and dialog mode alike.
         $this->audit->record(AuditEvent::ReauthConfirmed, $user, ['method' => $method]);
-        $session->confirm();
+        $session->confirmRotating();
 
         return $json
             ? response()->json(['confirmed' => true])
