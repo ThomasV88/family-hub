@@ -19,5 +19,6 @@
         "update_available": "A new version is available.",
         "reload": "Reload",
         "dismiss": "Dismiss"
-    }
+    },
+    "theme": { "label": "Theme", "system": "System", "light": "Light", "dark": "Dark" }
 }

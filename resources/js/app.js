@@ -1,6 +1,9 @@
 import { createApp, h } from 'vue';
 import { createInertiaApp, router } from '@inertiajs/vue3';
 import { createAppI18n, setAppLocale } from './i18n.js';
+import { initTheme } from './theme.js';
+
+initTheme();
 
 createInertiaApp({
     resolve: (name) => {

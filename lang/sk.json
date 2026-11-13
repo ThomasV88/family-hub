@@ -19,5 +19,6 @@
         "update_available": "Je dostupná nová verzia.",
         "reload": "Načítať znova",
         "dismiss": "Zavrieť"
-    }
+    },
+    "theme": { "label": "Vzhľad", "system": "Podľa systému", "light": "Svetlý", "dark": "Tmavý" }
 }

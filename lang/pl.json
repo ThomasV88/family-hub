@@ -19,5 +19,6 @@
         "update_available": "Dostępna jest nowa wersja.",
         "reload": "Załaduj ponownie",
         "dismiss": "Zamknij"
-    }
+    },
+    "theme": { "label": "Motyw", "system": "Systemowy", "light": "Jasny", "dark": "Ciemny" }
 }

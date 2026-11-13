@@ -20,6 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
             '172.16.0.0/12',
             '192.168.0.0/16',
         ]);
+        // The theme cookie is written by JS (plain value) and allowlisted server-side in ThemePreference.
+        $middleware->encryptCookies(except: ['fh_theme']);
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
