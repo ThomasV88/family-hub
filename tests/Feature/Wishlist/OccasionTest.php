@@ -26,7 +26,7 @@ it('renders the page props with day and month only for other members', function 
     WishOccasion::factory()->nameday('sk', 'Ľubomír', 11, 9)->create(['owner_id' => $this->other->id]);
 
     $this->actingAs($this->parent)->get('/wishlist/occasions')->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->component('Wishlist/Occasions', false)
+        ->component('Wishlist/Occasions')
         ->where('today', '2027-03-01')
         ->where('can_add', true)
         ->has('upcoming')
