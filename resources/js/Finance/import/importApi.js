@@ -34,6 +34,10 @@ export async function preview(file, settings = {}) {
         });
         const data = await response.json().catch(() => ({}));
         if (response.ok) return { ok: true, data };
+        // Idle gate refusal (Phase 6). Mapped to its own codes so the page can send the member to the right screen.
+        if (response.status === 423 && (data?.error === 'reauth_required' || data?.error === 'second_factor_required')) {
+            return { ok: false, error: data.error };
+        }
         return { ok: false, error: data?.error ?? 'decode_failed' };
     } catch {
         return { ok: false, error: 'decode_failed' };

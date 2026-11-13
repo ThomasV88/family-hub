@@ -75,6 +75,17 @@ function previewError(code) {
     return t('finance.imp.err_read');
 }
 
+// Idle gate refusal (423) from the preview fetch. The file stays in this component's memory only; the visit
+// discards it and the confirm page's interrupted note tells the member to repeat the step.
+// PROVISIONAL (orchestrator), owner confirms in 06-13 Task 2: no keepalive, the wizard does not ping to hold the window open.
+function handleRefusal(code) {
+    const target = code === 'reauth_required' ? '/confirm-access' : code === 'second_factor_required' ? '/settings/security' : null;
+    if (!target) return false;
+    allowLeave = true;
+    router.visit(target);
+    return true;
+}
+
 function applyPreview(data) {
     headers.value = data.headers ?? [];
     sample.value = data.sample ?? [];
@@ -114,6 +125,7 @@ async function openColumns(saved) {
     const result = await preview(file.value, first);
     busy.value = false;
     if (!result.ok) {
+        if (handleRefusal(result.error)) return;
         fileError.value = previewError(result.error);
         return;
     }
@@ -157,6 +169,7 @@ async function reparse(next) {
     const { encoding: _e, general: _g, ...rest } = errors.value;
     errors.value = rest;
     if (!result.ok) {
+        if (handleRefusal(result.error)) return;
         errors.value = result.error === 'decode_failed' ? { ...rest, encoding: previewError('decode_failed') } : { ...rest, general: previewError(result.error) };
         return;
     }
