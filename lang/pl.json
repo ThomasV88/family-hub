@@ -102,7 +102,7 @@
             "title": "Coś poszło nie tak",
             "body": "Nie udało się tego wczytać. Sprawdź połączenie i spróbuj ponownie."
         },
-        "email_example": "Wpisz prawidłowy adres e-mail, na przykład imie@example.com."
+        "email_example": "Wpisz prawidłowy adres e-mail, na przykład imie{'@'}example.com."
     },
     "offline": {
         "banner": "Jesteś offline. Niektóre dane mogą być nieaktualne."

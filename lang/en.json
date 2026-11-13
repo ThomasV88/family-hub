@@ -102,7 +102,7 @@
             "title": "Something went wrong",
             "body": "We could not load this. Check your connection and try again."
         },
-        "email_example": "Enter a valid email address, for example name@example.com."
+        "email_example": "Enter a valid email address, for example name{'@'}example.com."
     },
     "offline": {
         "banner": "You are offline. Some things may not be up to date."

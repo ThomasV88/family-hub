@@ -102,7 +102,7 @@
             "title": "Niečo sa pokazilo",
             "body": "Nepodarilo sa to načítať. Skontrolujte pripojenie a skúste to znova."
         },
-        "email_example": "Zadajte platnú e-mailovú adresu, napríklad meno@example.com."
+        "email_example": "Zadajte platnú e-mailovú adresu, napríklad meno{'@'}example.com."
     },
     "offline": {
         "banner": "Ste offline. Niektoré údaje nemusia byť aktuálne."
