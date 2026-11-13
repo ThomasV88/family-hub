@@ -9,6 +9,7 @@ import QuickAdd from '../Dashboard/QuickAdd.vue';
 import ModuleCard from '../Dashboard/ModuleCard.vue';
 import DueSoonCard from '../Dashboard/DueSoonCard.vue';
 import UpcomingOccasionsCard from '../Dashboard/UpcomingOccasionsCard.vue';
+import HomeStillToPayCard from '../Dashboard/HomeStillToPayCard.vue';
 import { visibleModules } from '../Shell/modules.js';
 
 const { t, d, n } = useI18n();
@@ -17,6 +18,7 @@ const heartbeat = computed(() => page.props.heartbeat ?? { last_recorded_at: nul
 const quickAdd = ref(null);
 const dueSoon = computed(() => page.props.dueSoon ?? null);
 const occasions = computed(() => page.props.occasions ?? null);
+const financeCard = computed(() => page.props.financeCard ?? null);
 const canEditTodo = computed(() => page.props.auth?.access?.todo === 'edit');
 const allowed = computed(() => new Set(visibleModules(page.props.auth?.access).map((m) => m.key)));
 // The shell lives below this page, so QuickAdd calls useShell().registerAddHandler (Add task focuses it).
@@ -54,7 +56,10 @@ function runCheck() {
                     <UpcomingOccasionsCard v-if="occasions" :occasions="occasions" />
                     <ModuleCard v-else module-key="wishlist" />
                 </template>
-                <ModuleCard v-if="allowed.has('finances')" module-key="finances" />
+                <template v-if="allowed.has('finances')">
+                    <HomeStillToPayCard v-if="financeCard" :card="financeCard" />
+                    <ModuleCard v-else module-key="finances" />
+                </template>
                 <ModuleCard v-if="allowed.has('health')" module-key="health" />
             </div>
             <UiCard :title="t('dashboard.system_status')" class="home__status">

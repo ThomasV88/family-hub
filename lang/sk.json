@@ -1040,7 +1040,8 @@
             "remove_body": "Odstrániť rozpočet „{category}“ od mesiaca {month}? Predchádzajúce mesiace si ho ponechajú.",
             "keep": "Ponechať rozpočet",
             "err_taken": "Táto kategória už má rozpočet.",
-            "err_amount": "Zadajte sumu vyššiu ako 0, najviac na {digits} desatinné miesta."
+            "err_amount": "Zadajte sumu vyššiu ako 0, najviac na {digits} desatinné miesta.",
+            "err_save": "Rozpočet sa nepodarilo uložiť. Nič sa nezmenilo. Skúste to znova."
         },
         "chart": {
             "category": "Výdavky podľa kategórie",

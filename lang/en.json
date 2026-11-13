@@ -1040,7 +1040,8 @@
             "remove_body": "Remove the budget for \"{category}\" from {month} on? Earlier months keep it.",
             "keep": "Keep budget",
             "err_taken": "This category already has a budget.",
-            "err_amount": "Enter an amount above 0, with up to {digits} decimals."
+            "err_amount": "Enter an amount above 0, with up to {digits} decimals.",
+            "err_save": "We could not save the budget. Nothing was changed. Try again."
         },
         "chart": {
             "category": "Spending by category",

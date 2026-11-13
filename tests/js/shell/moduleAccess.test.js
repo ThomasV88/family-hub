@@ -1,9 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { visibleModules } from '../../../resources/js/Shell/modules.js';
+import { MODULES, visibleModules } from '../../../resources/js/Shell/modules.js';
 
 const keys = (access) => visibleModules(access).map((m) => m.key);
 
 describe('visibleModules', () => {
+    it('links Finance to /finance (built) and keeps Health on the coming-soon null href', () => {
+        expect(MODULES.find((m) => m.key === 'finances').href).toBe('/finance');
+        expect(MODULES.find((m) => m.key === 'health').href).toBeNull();
+    });
+
     it('shows overview and tasks for a view-only todo grant', () => {
         expect(keys({ todo: 'view', wishlist: 'none', finance: 'none', health: 'none' })).toEqual(['overview', 'tasks']);
     });

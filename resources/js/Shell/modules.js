@@ -6,7 +6,7 @@ export const MODULES = [
     { key: 'overview', labelKey: 'nav.overview', titleKey: 'nav.overview', icon: House, href: '/' },
     { key: 'tasks', labelKey: 'nav.tasks', titleKey: 'module.tasks', icon: ListTodo, href: '/todo' },
     { key: 'wishlist', labelKey: 'nav.wishlist', titleKey: 'module.wishlist', icon: Gift, href: '/wishlist' },
-    { key: 'finances', labelKey: 'nav.finances', titleKey: 'module.finances', icon: Wallet, href: null },
+    { key: 'finances', labelKey: 'nav.finances', titleKey: 'module.finances', icon: Wallet, href: '/finance' },
     { key: 'health', labelKey: 'nav.health', titleKey: 'module.health', icon: HeartPulse, href: null },
 ];
 

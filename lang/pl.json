@@ -1040,7 +1040,8 @@
             "remove_body": "Usunąć budżet „{category}” od miesiąca {month}? Wcześniejsze miesiące go zachowają.",
             "keep": "Zachowaj budżet",
             "err_taken": "Ta kategoria ma już budżet.",
-            "err_amount": "Wpisz kwotę większą niż 0, najwyżej z {digits} miejscami po przecinku."
+            "err_amount": "Wpisz kwotę większą niż 0, najwyżej z {digits} miejscami po przecinku.",
+            "err_save": "Nie udało się zapisać budżetu. Nic nie zostało zmienione. Spróbuj ponownie."
         },
         "chart": {
             "category": "Wydatki według kategorii",
