@@ -23,6 +23,16 @@ final class ListPage
 
     public function render(User $owner, User $viewer, Request $request): Response
     {
+        return Inertia::render('Wishlist/Index', $this->props($owner, $viewer, $request));
+    }
+
+    /**
+     * The reservation-blind props. The giver branch (Giving\GiverListPage) decorates these; this class never decorates.
+     *
+     * @return array<string, mixed>
+     */
+    public function props(User $owner, User $viewer, Request $request): array
+    {
         $context = ViewerContext::for($viewer);
         $recipient = $context->isRecipientSideOf($owner->id);
         $canEdit = $this->access->canEditList($viewer, $owner->id);
@@ -52,11 +62,11 @@ final class ListPage
             $visible = $wishes->concat($received);
         }
 
-        return Inertia::render('Wishlist/Index', [
+        return [
             'members' => $this->members->forViewer($viewer),
             'list' => $list,
             'selected' => $this->selected($request->query('wish'), $canEdit, $visible),
-        ]);
+        ];
     }
 
     /**

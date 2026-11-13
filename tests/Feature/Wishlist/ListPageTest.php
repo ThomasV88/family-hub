@@ -117,3 +117,17 @@ it('orders by priority then newest', function () {
 
     expect($titles)->toBe(['top-old', 'love-new', 'love-old', 'nice-new']);
 });
+
+it('adds exactly the reservation keys on the giver branch and keeps the 04-05 keys on the recipient branch', function () {
+    $base = ['id', 'title', 'notes', 'price', 'currency', 'size_notes', 'priority', 'urls', 'image', 'received'];
+    Wish::factory()->create(['owner_id' => $this->child->id]);
+
+    $own = $this->actingAs($this->child)->get('/wishlist')->viewData('page')['props']['list'];
+    expect(array_keys($own['wishes'][0]))->toBe($base)
+        ->and($own)->not->toHaveKey('viewer_can_reserve');
+
+    $giver = $this->actingAs($this->grand)->get('/wishlist?member='.$this->child->id)->viewData('page')['props']['list'];
+    expect(array_keys($giver['wishes'][0]))->toBe([...$base, 'reservation'])
+        ->and($giver['viewer_can_reserve'])->toBeTrue()
+        ->and(array_keys($giver))->toBe(['owner', 'viewer_is_recipient', 'viewer_is_manager', 'can_edit', 'wishes', 'viewer_can_reserve']);
+});

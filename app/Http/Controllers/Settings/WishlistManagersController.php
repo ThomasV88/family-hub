@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\UpdateWishlistManagersRequest;
 use App\Models\User;
 use App\Models\WishlistManager;
+use App\Wishlist\Giving\PurgeManagerReservations;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +17,11 @@ class WishlistManagersController extends Controller
         // Resolved here, not by route model binding: binding runs before access:admin and would 404 non-admins.
         $owner = User::query()->findOrFail($user);
 
-        $this->sync($owner, $request->managerIds(), $request->user());
+        $added = $this->sync($owner, $request->managerIds(), $request->user());
+        // Newly designated managers become recipient-side: whatever they reserved on this list must vanish.
+        foreach ($added as $managerId) {
+            PurgeManagerReservations::dispatch($owner->id, $managerId)->afterCommit();
+        }
 
         return back()->with('toast', ['key' => 'settings.members.wishlist_managers.saved']);
     }
@@ -25,7 +30,7 @@ class WishlistManagersController extends Controller
      * Replace the owner's manager set, keeping rows that stay so their ids and created_at remain stable.
      *
      * @param  list<int>  $managerIds
-     * @return list<int> manager ids that were newly added (for the reservation purge job of plan 04-08)
+     * @return list<int> manager ids that were newly added (for the reservation purge job)
      */
     private function sync(User $owner, array $managerIds, User $admin): array
     {

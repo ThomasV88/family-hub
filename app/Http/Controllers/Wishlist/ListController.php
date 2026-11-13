@@ -5,17 +5,19 @@ namespace App\Http\Controllers\Wishlist;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Wishlist\Catalog\ListPage;
+use App\Wishlist\Giving\GiverListPage;
+use App\Wishlist\ViewerContext;
 use App\Wishlist\WishlistMembers;
 use Illuminate\Http\Request;
 use Inertia\Response;
 
 /**
- * The single branch point between recipient-side and giver views. In this plan every viewer gets the
- * reservation-blind ListPage; plan 04-08 changes only the non-recipient branch.
+ * The single branch point between recipient-side and giver views. Recipient-side viewers (owner, manager)
+ * get the reservation-blind ListPage; everyone else gets the GiverListPage. Nothing else branches.
  */
 class ListController extends Controller
 {
-    public function index(Request $request, WishlistMembers $members, ListPage $page): Response
+    public function index(Request $request, WishlistMembers $members, ListPage $page, GiverListPage $giverPage): Response
     {
         $viewer = $request->user();
 
@@ -31,6 +33,10 @@ class ListController extends Controller
 
         $owner = User::query()->findOrFail($ownerId);
 
-        return $page->render($owner, $viewer, $request);
+        if (ViewerContext::for($viewer)->isRecipientSideOf($owner->id)) {
+            return $page->render($owner, $viewer, $request);
+        }
+
+        return $giverPage->render($owner, $viewer, $request);
     }
 }
