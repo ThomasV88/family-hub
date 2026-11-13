@@ -33,6 +33,9 @@ class FortifyServiceProvider extends ServiceProvider
         {
             public function toResponse($request): Response
             {
+                // The next rendered page tells the browser to drop every stored history entry of this session.
+                Inertia::clearHistory();
+
                 return redirect('/login', 303)->with('status', 'signed_out');
             }
         });

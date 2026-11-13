@@ -3,9 +3,12 @@
 namespace App\Http\Middleware;
 
 use App\Access\AccessGate;
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Inertia\Inertia;
 use Inertia\Middleware;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -17,6 +20,17 @@ class HandleInertiaRequests extends Middleware
      * @var string
      */
     protected $rootView = 'app';
+
+    /**
+     * Page props of authenticated pages (balances, transactions, import rows) are encrypted before the browser keeps
+     * them in history state, so Back after logout on a shared device cannot show them.
+     */
+    public function handle(Request $request, Closure $next): SymfonyResponse
+    {
+        Inertia::encryptHistory($request->user() !== null);
+
+        return parent::handle($request, $next);
+    }
 
     /**
      * Determines the current asset version.
