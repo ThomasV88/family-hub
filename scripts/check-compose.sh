@@ -54,6 +54,19 @@ for s in ("app", "worker", "scheduler", "nginx", "postgres"):
         fail("%s sees the owner role" % s)
 if svcs["migrate"]["environment"].get("DB_USERNAME") != "fh_owner":
     fail("migrate does not use the owner role")
+WISH = "/var/www/html/storage/app/private/wish-images"
+
+
+def mounts(svc):
+    return [(v.get("source"), v.get("target")) for v in svc.get("volumes", [])]
+
+
+for s in ("app", "worker", "scheduler"):
+    if ("uploads", WISH) not in mounts(svcs[s]):
+        fail("%s does not mount volume uploads at %s" % (s, WISH))
+for s in ("nginx", "postgres"):
+    if any(src == "uploads" or tgt == WISH for src, tgt in mounts(svcs[s])):
+        fail("%s mounts the uploads volume" % s)
 PY
 
 echo "CHECK-COMPOSE OK"

@@ -5,12 +5,16 @@
 FROM php:8.4-fpm-alpine AS base
 
 RUN set -eux; \
-    apk add --no-cache icu-libs libpq libzip; \
-    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS icu-dev libzip-dev postgresql-dev; \
-    docker-php-ext-install -j"$(nproc)" pdo_pgsql intl opcache pcntl zip bcmath; \
+    apk add --no-cache icu-libs libpq libzip libjpeg-turbo libpng libwebp; \
+    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS icu-dev libzip-dev postgresql-dev libjpeg-turbo-dev libpng-dev libwebp-dev; \
+    docker-php-ext-configure gd --with-jpeg --with-webp; \
+    docker-php-ext-install -j"$(nproc)" pdo_pgsql intl opcache pcntl zip bcmath gd exif; \
     apk del .build-deps; \
     # php-fpm is run unprivileged in every target, so the pool user/group directives are not used
     sed -i 's/^user = /;user = /; s/^group = /;group = /' /usr/local/etc/php-fpm.d/www.conf
+
+# upload limits for wish images (app caps at 5 MiB; nginx allows 8m on the upload route only)
+COPY docker/app/php-uploads.ini "$PHP_INI_DIR/conf.d/zz-uploads.ini"
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
@@ -22,7 +26,9 @@ ARG UID=1000
 ARG GID=1000
 RUN set -eux; \
     addgroup -g "${GID}" app; \
-    adduser -D -u "${UID}" -G app app
+    adduser -D -u "${UID}" -G app app; \
+    mkdir -p /var/www/html/storage/app/private/wish-images; \
+    chown -R app:app /var/www/html/storage
 USER app
 
 # ---- assets: build the Vite output so PHP can read public/build/manifest.json ----
@@ -55,6 +61,6 @@ COPY . .
 COPY --from=assets /build/public ./public
 RUN set -eux; \
     composer dump-autoload --no-dev --optimize --no-interaction; \
-    mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache; \
+    mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs storage/app/private/wish-images bootstrap/cache; \
     chown -R www-data:www-data storage bootstrap/cache
 USER www-data

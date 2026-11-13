@@ -3,6 +3,12 @@
 # Migrations are never run on container start; run them as the owner role:
 #   docker compose run --rm -e DB_USERNAME=fh_owner -e DB_PASSWORD=fh_owner_dev app php artisan migrate
 
+# Private wish images (written by the worker, read by app). Backed up by scripts/backup.sh on the server;
+# the dev volume is disposable.
+x-uploads: &uploads
+  - .:/var/www/html
+  - uploads-dev:/var/www/html/storage/app/private/wish-images
+
 x-app: &app
   build:
     context: .
@@ -13,8 +19,7 @@ x-app: &app
       GID: ${GID:-1000}
   image: family-hub-app:dev
   env_file: .env
-  volumes:
-    - .:/var/www/html
+  volumes: *uploads
   depends_on:
     postgres:
       condition: service_healthy
@@ -78,3 +83,4 @@ services:
 
 volumes:
   pgdata-dev:
+  uploads-dev:

@@ -17,6 +17,11 @@ x-logging: &logging
     max-size: "10m"
     max-file: "3"
 
+# Private wish images (storage/app/private/wish-images): written by the worker, read by the web app, never mounted into nginx or postgres.
+# Backed up by scripts/backup.sh as its own restic snapshot (uploads.tar, wish-images volume). Staging has its own volume (own project name).
+x-uploads: &uploads
+  - uploads:/var/www/html/storage/app/private/wish-images
+
 x-app: &app
   image: ${IMAGE_PREFIX:?}-app:${IMAGE_TAG:?}
   restart: unless-stopped
@@ -56,6 +61,7 @@ services:
   app:
     <<: *app
     mem_limit: ${MEM_APP:-192m}
+    volumes: *uploads
     healthcheck:
       # php-fpm has no TCP client tools in the alpine image: a successful connect to the pool port is the check
       test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 9000) ? 0 : 1);"]
@@ -68,6 +74,7 @@ services:
     <<: *app
     command: ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--max-time=3600"]
     mem_limit: ${MEM_WORKER:-160m}
+    volumes: *uploads
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f '[q]ueue:work'"]
       interval: 15s
@@ -79,6 +86,7 @@ services:
     <<: *app
     command: ["php", "artisan", "schedule:work"]
     mem_limit: ${MEM_SCHEDULER:-128m}
+    volumes: *uploads
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f '[s]chedule:work'"]
       interval: 15s
@@ -140,6 +148,7 @@ networks:
 
 volumes:
   pgdata:
+  uploads:
 
 secrets:
   db_root_password:
