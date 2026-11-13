@@ -567,7 +567,9 @@ expect(OutboxItem::where('user_id', $owner->id)->where('kind','wish_occasion')->
 | A14 | Polish name days are best sourced from Polish Wikipedia monthly pages ("Imieniny - miesiąc") under CC BY-SA | Open Questions | Licensing or accuracy objection; owner decision needed |
 | A15 | Inertia 3 supports polling a prop with `router.reload({ only })` on a timer for `image_status=pending` | UI | Minor; fall back to manual refresh |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+RESOLVED by orchestrator/owner decisions: Polish name days built from Polish Wikipedia monthly pages (CC BY-SA) as a vendored static file with in-app attribution (owner choice); managers stored in `wishlist_managers`, admin-edited in Settings > Members; giver = member with wishlist edit grant, view-only members see reservations read-only; birth date entered in the wishlist My occasions panel (`users.birth_date`, only month/day shown to others); other recommendations in this section adopted.
 
 1. **Polish name-day source and licence (needs owner decision).**
    - What we know: Slovak has a clean source: `jozefgrencik/slovak-name-days` is MIT-licensed, 366 entries, derived from the official Ministry of Culture calendar approved June 2017 (files `data/names.json`, `names_by_month.json`, among others) [CITED: github.com/jozefgrencik/slovak-name-days]. For Poland there is no official calendar and no clean, machine-readable, permissively licensed dataset was found: `imieniny.sourceforge.io` is GPLv2, `DanRaiss/Nameday` is MIT-licensed code but states no data source, and Polish Wikipedia holds monthly pages (CC BY-SA, not fully read).
