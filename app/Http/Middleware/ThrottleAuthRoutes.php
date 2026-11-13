@@ -20,6 +20,11 @@ class ThrottleAuthRoutes
         $name = $request->route()?->getName();
 
         if ($name === 'password.reset') {
+            // The page discloses whether a token/email pair is still valid, so it is throttled too.
+            $key = 'reset-view-ip:'.$request->ip();
+            abort_if(RateLimiter::tooManyAttempts($key, 20), 429);
+            RateLimiter::hit($key, 60);
+
             $response = $next($request);
             $response->headers->set('Referrer-Policy', 'no-referrer');
 

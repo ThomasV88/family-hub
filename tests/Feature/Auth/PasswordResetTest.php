@@ -102,3 +102,11 @@ it('throttles the 6th forgot-password request per IP within a minute', function 
     $this->from('/forgot-password')->post('/forgot-password', ['email' => 'u6@example.test'])
         ->assertRedirect('/forgot-password')->assertSessionHasErrors('throttle');
 });
+
+it('throttles the reset page that discloses token validity', function () {
+    foreach (range(1, 20) as $i) {
+        $this->get('/reset-password/abc?email=a@example.test')->assertOk();
+    }
+
+    $this->get('/reset-password/abc?email=a@example.test')->assertStatus(429);
+});
