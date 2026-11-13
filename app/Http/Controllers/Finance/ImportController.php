@@ -124,8 +124,8 @@ class ImportController extends Controller
         }
 
         $name = $request->profileNameToSave();
-        if ($name !== null) {
-            $imports->createProfile($name, $request->spec()->toArray(), $viewer->userId());
+        if ($name !== null && $request->storableSpec() !== null) {
+            $imports->createProfile($name, $request->storableSpec()->toArray(), $viewer->userId());
         }
 
         return redirect()->route('finance.import.show', ['batch' => $batchId], 303);

@@ -277,3 +277,33 @@ it('declares a 3m body limit for the import routes in the nginx snippet', functi
     expect($conf)->toContain('location ~ ^/finance/import(/preview)?$ {')
         ->and(substr_count($conf, 'client_max_body_size 3m;'))->toBe(1);
 });
+
+it('never saves data-row content or client-forged text as a family-wide profile', function () {
+    [$user, $account] = fhPvSetup();
+    $post = fn (array $settings, string $name) => $this->actingAs($user)->post('/finance/import', [
+        'file' => fhPvFile(), 'account_id' => $account->id, 'settings' => json_encode($settings),
+        'save_profile' => '1', 'profile_name' => $name,
+    ]);
+
+    // A "header row" that is really a data row (row 5 of the fixture) is refused, and no profile is stored.
+    $dataRow = FinanceImportProfileFactory::skSettings();
+    $dataRow['headerRow'] = 5;
+    $post($dataRow, 'Data row')->assertSessionHasErrors(['profile_name']);
+
+    // No header row: nothing storable.
+    $none = FinanceImportProfileFactory::skSettings();
+    $none['headerRow'] = 0;
+    $post($none, 'No header')->assertSessionHasErrors(['profile_name']);
+
+    // A forged column name is replaced by the real header cell at that index.
+    $forged = FinanceImportProfileFactory::skSettings();
+    $forged['columns']['description']['name'] = 'IBAN partnera SK99 0000 0000 0000';
+    $post($forged, 'Forged')->assertSessionHasNoErrors();
+    $stored = json_decode((string) DB::table('finance_import_profiles')->value('settings'), true);
+    expect($stored['columns']['description']['name'])->toBe('Popis');
+
+    // Whatever profiles exist carry only header-row text, never anything from the data rows.
+    $blob = (string) DB::table('finance_import_profiles')->get()->map(fn ($p) => $p->name.$p->settings)->implode('');
+    expect(DB::table('finance_import_profiles')->count())->toBe(1)
+        ->and($blob)->not->toContain('nájomné')->and($blob)->not->toContain('450');
+});

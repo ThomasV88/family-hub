@@ -92,6 +92,67 @@ final class ProfileSpec
         );
     }
 
+    /**
+     * A copy that is safe to store family-wide: column names come from the detected header row only (the cell at the
+     * mapped index), never from the client, and a header that looks like data (dates, amounts, long digit runs such as
+     * IBANs) is refused. No header row means nothing is storable.
+     *
+     * @param  list<string>|null  $headerCells  the trimmed cells of the header row of the uploaded file
+     *
+     * @throws InvalidArgumentException
+     */
+    public function forStorage(?array $headerCells): self
+    {
+        if ($this->headerRow < 1 || $headerCells === null || $headerCells === []) {
+            throw new InvalidArgumentException('A profile needs a detected header row.');
+        }
+        $lower = array_map(fn ($c) => mb_strtolower(trim((string) $c)), $headerCells);
+        $columns = [];
+        foreach ($this->columns as $role => $col) {
+            $index = $col['index'];
+            if ($index === null) {
+                // Without an index the name must match a header cell and then it is resolved to its position.
+                $found = $col['name'] === null ? false : array_search(mb_strtolower(trim($col['name'])), $lower, true);
+                if ($found === false) {
+                    throw new InvalidArgumentException('Column is not in the header row.');
+                }
+                $index = (int) $found;
+            }
+            if (! isset($headerCells[$index])) {
+                throw new InvalidArgumentException('Column is not in the header row.');
+            }
+            $name = trim((string) $headerCells[$index]);
+            if ($name !== '' && ! self::isHeaderText($name)) {
+                throw new InvalidArgumentException('Header cell looks like data.');
+            }
+            $columns[$role] = ['name' => $name === '' ? null : $name, 'index' => $index];
+        }
+        foreach ([...$this->indicatorExpense, ...$this->indicatorIncome] as $t) {
+            if (preg_match('/^[\p{L}\p{N}+\-]{1,20}$/u', $t) !== 1) {
+                throw new InvalidArgumentException('Indicator value is not storable.');
+            }
+        }
+
+        return new self(
+            $this->delimiter, $this->encoding, $this->decimalSeparator, $this->groupingSeparator, $this->dateFormat,
+            $this->headerRow, $this->amountMode, $columns, $this->indicatorExpense, $this->indicatorIncome,
+        );
+    }
+
+    private static function isHeaderText(string $name): bool
+    {
+        if (mb_strlen($name) > 60 || preg_match('/\d{4,}/', $name) === 1 || preg_match('/^[-+\d\s.,\/:]+$/u', $name) === 1) {
+            return false;
+        }
+        foreach (config('finance.import.date_formats') as $format) {
+            if (DateParser::parse($name, $format) !== null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /** @return list<string> */
     private static function tokens(mixed $v): array
     {

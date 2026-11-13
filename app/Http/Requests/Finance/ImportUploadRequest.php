@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests\Finance;
 
+use App\Finance\Import\CsvReader;
+use App\Finance\Import\Decoder;
+use App\Finance\Import\ImportError;
 use App\Finance\Import\ProfileSpec;
 use App\Finance\Queries\AccountQuery;
 use App\Finance\Queries\ImportQuery;
@@ -24,6 +27,8 @@ class ImportUploadRequest extends FormRequest
     private ?FinanceImportProfile $profile = null;
 
     private ?ProfileSpec $spec = null;
+
+    private ?ProfileSpec $storable = null;
 
     public function authorize(): bool
     {
@@ -168,8 +173,37 @@ class ImportUploadRequest extends FormRequest
             $name = $this->input('profile_name');
             if (! is_string($name) || $name === '' || $imports->profileNameTaken($name)) {
                 $v->errors()->add('profile_name', 'finance.imp.err_profile_name');
+
+                return;
             }
+            $this->resolveStorable($v);
         }
+    }
+
+    /** Only a spec whose names come from the file's own header row may be saved family-wide. */
+    private function resolveStorable(Validator $v): void
+    {
+        $file = $this->file('file');
+        if ($file === null || $v->errors()->has('file') || $this->spec === null) {
+            return;
+        }
+        try {
+            $bytes = file_get_contents($file->getRealPath());
+            $decoded = Decoder::decode($bytes === false ? '' : $bytes, $this->spec->encoding);
+            $records = CsvReader::rows($decoded->text, $this->spec->delimiter, (int) config('finance.import.max_rows'));
+            $header = $this->spec->headerRow > 0 ? ($records[$this->spec->headerRow - 1] ?? null) : null;
+            $this->storable = $this->spec->forStorage($header === null ? null : array_map(fn ($c) => trim((string) $c), $header));
+        } catch (ImportError) {
+            // Staging reports file problems itself; nothing is saved for a file that cannot be read.
+        } catch (InvalidArgumentException) {
+            $v->errors()->add('profile_name', 'finance.imp.err_profile_name');
+        }
+    }
+
+    /** The sanitised settings to save as a profile, or null. */
+    public function storableSpec(): ?ProfileSpec
+    {
+        return $this->storable;
     }
 
     public function account(): FinanceAccount
