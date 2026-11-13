@@ -319,7 +319,16 @@
             "manage": "Manage",
             "manage_aria": "Manage {name}",
             "you": "You",
-            "caption": "Members"
+            "caption": "Members",
+            "wishlist_managers": {
+                "tab": "Wishlist",
+                "title": "Wishlist managers",
+                "hint": "Chosen members can add and edit wishes on {name}'s list. They see the list the way {name} does.",
+                "none": "There are no other members.",
+                "save": "Save managers",
+                "saved": "Wishlist managers saved",
+                "save_failed": "We could not save the managers. Nothing was changed. Try again."
+            }
         },
         "role": {
             "admin": "Admin",
@@ -695,6 +704,256 @@
         "ios_title": "Install the app to get push on iPhone and iPad",
         "ios_body": "On iPhone and iPad, push works only after you add Family Hub to your Home Screen. Tap Share, choose Add to Home Screen, then open the app from there.",
         "push_unavailable": "Push is not set up on this server yet. Email still works.",
-        "enable_failed": "We could not turn on push. Try again."
+        "enable_failed": "We could not turn on push. Try again.",
+        "gifts_title": "Gift reminders",
+        "gifts_intro": "Get a reminder before birthdays, name days and other occasions, so you have time to choose a gift. You never get these for your own occasions.",
+        "gifts_channels": "Delivered by email and push as set above.",
+        "gifts_legend": "Remind me",
+        "gifts_14": "14 days before",
+        "gifts_7": "7 days before",
+        "gifts_3": "3 days before",
+        "gifts_1": "1 day before",
+        "gifts_none_on": "No gift reminders are on. You will not hear about upcoming occasions.",
+        "gifts_both_off": "Both channels are off. You will not get gift reminders."
+    },
+    "wishlist": {
+        "nav": "Wishlist",
+        "title": "Wishlist",
+        "add": "Add wish",
+        "add_for": "Add wish for {name}",
+        "chips": {
+            "label": "Choose a list",
+            "you": "{name} (You)"
+        },
+        "list": {
+            "title": "{name}'s wishlist",
+            "count": "{n} wish | {n} wishes"
+        },
+        "banner": {
+            "own": "This is your wishlist. Everyone with access can see it.",
+            "managing": "You are managing {name}'s list."
+        },
+        "received": {
+            "show": "Received ({n})",
+            "tag": "Received",
+            "hide": "Hide received ({n})",
+            "mark": "Mark as received"
+        },
+        "shopping": {
+            "title": "Your shopping",
+            "show": "Show",
+            "hide": "Hide",
+            "share": "Your share: {amount}"
+        },
+        "card": {
+            "links": "{n} link | {n} links"
+        },
+        "priority": {
+            "label": "Priority",
+            "top": "Top wish",
+            "love": "Would love",
+            "nice": "Nice to have"
+        },
+        "people": "{n} person | {n} people",
+        "status": {
+            "available": "Available",
+            "reserved_by": "Reserved by {name}",
+            "reserved_you": "Reserved by you",
+            "cobuy": "Co-buy, {people}"
+        },
+        "panel": {
+            "new": "New wish",
+            "new_for": "New wish for {name}",
+            "edit": "Wish details"
+        },
+        "field": {
+            "title": "Title",
+            "links": "Links",
+            "link_url": "Link address",
+            "link_label": "Label",
+            "link_label_ph": "Shop or note, optional",
+            "link_add": "Add link",
+            "link_remove": "Remove link {n}",
+            "link_max": "You can add up to 5 links.",
+            "price": "Price",
+            "currency": "Currency",
+            "price_hint": "Optional. A rough price helps others plan.",
+            "variant": "Size or variant",
+            "variant_ph": "For example size M, blue",
+            "variant_line": "Size or variant: {value}",
+            "notes": "Notes"
+        },
+        "image": {
+            "upload": "Upload image",
+            "load": "Load image from link",
+            "remove": "Remove image",
+            "loading": "Looking for an image on the link...",
+            "uploading": "Uploading image...",
+            "from": "Image from {host}.",
+            "none": "No image found. Upload one to make this wish easier to spot.",
+            "err_type": "Use a JPEG, PNG or WebP image.",
+            "err_size": "The image is larger than 5 MB.",
+            "err_upload": "We could not upload the image. Try again.",
+            "err_load": "We could not start loading the image. Try again."
+        },
+        "res": {
+            "title": "Reservation",
+            "free": "Nobody is buying this yet.",
+            "free_hint": "Your name will be visible to other family members, not to {name}.",
+            "reserve": "Reserve gift",
+            "you": "You are buying this.",
+            "you_cobuy": "You are buying this. Co-buying is open.",
+            "other": "{name} is buying this.",
+            "other_open": "{name} is buying this. Co-buying is open.",
+            "other_closed": "{name} is buying this. Co-buying is closed.",
+            "cancel": "Cancel reservation",
+            "open_cobuy": "Open for co-buying",
+            "close_cobuy": "Close co-buying",
+            "join": "Join co-buy",
+            "change_share": "Change my share",
+            "save_share": "Save my share",
+            "leave": "Leave co-buy",
+            "share_label": "Your share (optional)",
+            "share_hint": "Leave empty if you will agree on amounts later.",
+            "organizer": "(organizer)",
+            "no_amount": "no amount",
+            "pledged": "Pledged {sum} of {price}",
+            "people_in": "{people} in",
+            "conflict": "{name} just reserved this gift. Nothing was changed.",
+            "error": "We could not update the reservation. Nothing was changed. Try again.",
+            "cancel_title": "Cancel reservation",
+            "cancel_body": "Cancel your reservation of \"{title}\"? The people who joined the co-buy are released too.",
+            "cancel_keep": "Keep reservation"
+        },
+        "link": {
+            "opens_new": "{label}, opens in a new tab"
+        },
+        "save": "Save wish",
+        "close": "Close",
+        "delete": {
+            "body": "Delete \"{title}\"? This cannot be undone.",
+            "keep": "Keep wish",
+            "action": "Delete wish"
+        },
+        "discard": {
+            "title": "Discard changes?",
+            "body": "Your changes to this wish are not saved.",
+            "confirm": "Discard",
+            "keep": "Keep editing"
+        },
+        "toast": {
+            "saved": "Wish saved",
+            "deleted": "Wish deleted",
+            "received": "Wish marked as received",
+            "reserved": "Gift reserved",
+            "unreserved": "Reservation cancelled",
+            "cobuy_open": "Co-buying opened",
+            "cobuy_closed": "Co-buying closed",
+            "joined": "You joined the co-buy",
+            "share_saved": "Your share was saved",
+            "left": "You left the co-buy",
+            "image_removed": "Image removed"
+        },
+        "error": {
+            "title_required": "Enter a title for the wish.",
+            "url_invalid": "Enter a web address that starts with http:// or https://.",
+            "price_invalid": "Enter a price of 0 or more, with up to 2 decimals.",
+            "share_invalid": "Enter an amount above 0, with up to 2 decimals.",
+            "save_failed": "We could not save the wish. Nothing was changed. Try again.",
+            "load_title": "Something went wrong",
+            "load_body": "We could not load the wishlist. Check your connection and try again."
+        },
+        "empty_own": {
+            "title": "Your wishlist is empty",
+            "body": "Add things you would like to get, with a link or a photo."
+        },
+        "empty_other": {
+            "title": "{name} has not added any wishes yet",
+            "body": "Check back later."
+        },
+        "viewonly": "You can view this list but not change it.",
+        "cancel": "Cancel"
+    },
+    "occasions": {
+        "title": "Occasions",
+        "add": "Add occasion",
+        "upcoming": "Upcoming",
+        "all": "All occasions",
+        "birthday": "{name}'s birthday",
+        "nameday": "{name}'s name day",
+        "christmas": "Christmas",
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "in_days": "in {n} day | in {n} days",
+        "open_list": "Open {name}'s list",
+        "open_lists": "Open wishlists",
+        "dates": {
+            "title": "Dates by member",
+            "member": "Member",
+            "birth": "Birth date",
+            "nameday": "Name day",
+            "not_set": "Not set",
+            "add_birth": "Add birth date",
+            "edit": "Edit dates",
+            "calendar": "Name day calendar",
+            "cal_none": "None",
+            "cal_sk": "Slovak calendar",
+            "cal_pl": "Polish calendar",
+            "search": "Search a name",
+            "pick": "Name day",
+            "pick_hint": "Pick the name day that applies to {name}. You can change it later.",
+            "save": "Save dates",
+            "no_match": "No name found. You can add a custom occasion instead.",
+            "pl_attribution": "Polish name days: Wikipedia contributors, CC BY-SA 4.0",
+            "save_failed": "We could not save the dates. Nothing was changed. Try again."
+        },
+        "custom": {
+            "title": "Custom occasions",
+            "field_title": "Title",
+            "field_date": "Date",
+            "field_yearly": "Repeat every year",
+            "field_for": "For",
+            "whole_family": "Whole family",
+            "save": "Save occasion",
+            "edit": "Edit occasion",
+            "delete": "Delete occasion",
+            "delete_body": "Delete \"{title}\"? This cannot be undone.",
+            "keep": "Keep occasion"
+        },
+        "error": {
+            "title_required": "Enter a title for the occasion.",
+            "date_invalid": "Enter a valid date.",
+            "birth_future": "The birth date cannot be in the future.",
+            "nameday_required": "Choose a name day or set the calendar to None.",
+            "load_body": "We could not load the occasions. Check your connection and try again."
+        },
+        "empty": {
+            "title": "No occasions yet",
+            "body": "Add birth dates or a custom occasion to see them here."
+        },
+        "card": {
+            "title": "Upcoming occasions",
+            "open": "Open wishlist",
+            "none": "No occasions in the next 60 days.",
+            "open_occasions": "Open occasions"
+        },
+        "close": "Close",
+        "discard": {
+            "title": "Discard changes?",
+            "body": "Your changes to this occasion are not saved.",
+            "confirm": "Discard",
+            "keep": "Keep editing"
+        },
+        "toast": {
+            "saved": "Occasion saved",
+            "deleted": "Occasion deleted",
+            "dates_saved": "Dates saved"
+        },
+        "type": {
+            "birthday": "Birthday",
+            "nameday": "Name day",
+            "christmas": "Christmas",
+            "custom": "Custom occasion"
+        }
     }
 }

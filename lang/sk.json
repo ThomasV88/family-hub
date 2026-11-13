@@ -319,7 +319,16 @@
             "manage": "Spravovať",
             "manage_aria": "Spravovať: {name}",
             "you": "Vy",
-            "caption": "Členovia"
+            "caption": "Členovia",
+            "wishlist_managers": {
+                "tab": "Zoznam želaní",
+                "title": "Správcovia zoznamu želaní",
+                "hint": "Vybraní členovia môžu pridávať a upravovať želania v zozname: {name}. Vidia ho tak, ako ho vidí {name}.",
+                "none": "Nie sú tu iní členovia.",
+                "save": "Uložiť správcov",
+                "saved": "Správcovia zoznamu uložení",
+                "save_failed": "Správcov sa nepodarilo uložiť. Nič sa nezmenilo. Skúste to znova."
+            }
         },
         "role": {
             "admin": "Správca",
@@ -695,6 +704,256 @@
         "ios_title": "Nainštalujte aplikáciu, aby push fungoval na iPhone a iPade",
         "ios_body": "Na iPhone a iPade push funguje až po pridaní Family Hub na plochu. Klepnite na Zdieľať, vyberte Pridať na plochu a potom otvorte aplikáciu odtiaľ.",
         "push_unavailable": "Push na tomto serveri zatiaľ nie je nastavený. E-mail stále funguje.",
-        "enable_failed": "Push sa nepodarilo zapnúť. Skúste to znova."
+        "enable_failed": "Push sa nepodarilo zapnúť. Skúste to znova.",
+        "gifts_title": "Pripomienky darčekov",
+        "gifts_intro": "Dostanete pripomienku pred narodeninami, meninami a ďalšími príležitosťami, aby ste mali čas vybrať darček. Pre vlastné príležitosti ju nedostanete.",
+        "gifts_channels": "Doručujeme e-mailom a push podľa nastavení vyššie.",
+        "gifts_legend": "Pripomenúť",
+        "gifts_14": "14 dní vopred",
+        "gifts_7": "7 dní vopred",
+        "gifts_3": "3 dni vopred",
+        "gifts_1": "1 deň vopred",
+        "gifts_none_on": "Žiadne pripomienky darčekov nie sú zapnuté. O nadchádzajúcich príležitostiach sa nedozviete.",
+        "gifts_both_off": "Oba kanály sú vypnuté. Pripomienky darčekov nedostanete."
+    },
+    "wishlist": {
+        "nav": "Zoznam želaní",
+        "title": "Zoznam želaní",
+        "add": "Pridať želanie",
+        "add_for": "Pridať želanie pre {name}",
+        "chips": {
+            "label": "Vyberte zoznam",
+            "you": "{name} (Vy)"
+        },
+        "list": {
+            "title": "Zoznam želaní: {name}",
+            "count": "{n} želanie | {n} želania | {n} želania | {n} želaní"
+        },
+        "banner": {
+            "own": "Toto je váš zoznam želaní. Vidí ho každý, kto má prístup.",
+            "managing": "Spravujete zoznam: {name}."
+        },
+        "received": {
+            "show": "Prijaté ({n})",
+            "tag": "Prijaté",
+            "hide": "Skryť prijaté ({n})",
+            "mark": "Označiť ako prijaté"
+        },
+        "shopping": {
+            "title": "Váš nákup",
+            "show": "Zobraziť",
+            "hide": "Skryť",
+            "share": "Váš podiel: {amount}"
+        },
+        "card": {
+            "links": "{n} odkaz | {n} odkazy | {n} odkazu | {n} odkazov"
+        },
+        "priority": {
+            "label": "Priorita",
+            "top": "Hlavné želanie",
+            "love": "Veľmi by ma potešilo",
+            "nice": "Bolo by fajn"
+        },
+        "people": "{n} osoba | {n} osoby | {n} osoby | {n} osôb",
+        "status": {
+            "available": "Voľné",
+            "reserved_by": "Rezervuje {name}",
+            "reserved_you": "Rezervované vami",
+            "cobuy": "Spoločný nákup, {people}"
+        },
+        "panel": {
+            "new": "Nové želanie",
+            "new_for": "Nové želanie pre {name}",
+            "edit": "Podrobnosti želania"
+        },
+        "field": {
+            "title": "Názov",
+            "links": "Odkazy",
+            "link_url": "Adresa odkazu",
+            "link_label": "Popis",
+            "link_label_ph": "Obchod alebo poznámka, nepovinné",
+            "link_add": "Pridať odkaz",
+            "link_remove": "Odstrániť odkaz {n}",
+            "link_max": "Môžete pridať najviac 5 odkazov.",
+            "price": "Cena",
+            "currency": "Mena",
+            "price_hint": "Nepovinné. Približná cena pomáha ostatným plánovať.",
+            "variant": "Veľkosť alebo variant",
+            "variant_ph": "Napríklad veľkosť M, modrá",
+            "variant_line": "Veľkosť alebo variant: {value}",
+            "notes": "Poznámky"
+        },
+        "image": {
+            "upload": "Nahrať obrázok",
+            "load": "Načítať obrázok z odkazu",
+            "remove": "Odstrániť obrázok",
+            "loading": "Hľadáme obrázok na odkaze...",
+            "uploading": "Nahrávame obrázok...",
+            "from": "Obrázok z {host}.",
+            "none": "Obrázok sa nenašiel. Nahrajte ho, aby bolo želanie lepšie vidieť.",
+            "err_type": "Použite obrázok JPEG, PNG alebo WebP.",
+            "err_size": "Obrázok je väčší ako 5 MB.",
+            "err_upload": "Obrázok sa nepodarilo nahrať. Skúste to znova.",
+            "err_load": "Načítanie obrázka sa nepodarilo spustiť. Skúste to znova."
+        },
+        "res": {
+            "title": "Rezervácia",
+            "free": "Zatiaľ to nikto nekupuje.",
+            "free_hint": "Vaše meno uvidia ostatní členovia rodiny, nie {name}.",
+            "reserve": "Rezervovať darček",
+            "you": "Kupujete to vy.",
+            "you_cobuy": "Kupujete to vy. Spoločný nákup je otvorený.",
+            "other": "Kupuje to {name}.",
+            "other_open": "Kupuje to {name}. Spoločný nákup je otvorený.",
+            "other_closed": "Kupuje to {name}. Spoločný nákup je uzavretý.",
+            "cancel": "Zrušiť rezerváciu",
+            "open_cobuy": "Otvoriť pre spoločný nákup",
+            "close_cobuy": "Uzavrieť spoločný nákup",
+            "join": "Pripojiť sa k nákupu",
+            "change_share": "Zmeniť môj podiel",
+            "save_share": "Uložiť môj podiel",
+            "leave": "Odísť zo spoločného nákupu",
+            "share_label": "Váš podiel (nepovinné)",
+            "share_hint": "Nechajte prázdne, ak sa na sumách dohodnete neskôr.",
+            "organizer": "(organizátor)",
+            "no_amount": "bez sumy",
+            "pledged": "Prisľúbené {sum} z {price}",
+            "people_in": "{people} v nákupe",
+            "conflict": "{name} práve rezervoval(a) tento darček. Nič sa nezmenilo.",
+            "error": "Rezerváciu sa nepodarilo upraviť. Nič sa nezmenilo. Skúste to znova.",
+            "cancel_title": "Zrušiť rezerváciu",
+            "cancel_body": "Zrušiť vašu rezerváciu „{title}“? Uvoľnia sa aj ľudia, ktorí sa pripojili k spoločnému nákupu.",
+            "cancel_keep": "Ponechať rezerváciu"
+        },
+        "link": {
+            "opens_new": "{label}, otvorí sa v novej karte"
+        },
+        "save": "Uložiť želanie",
+        "close": "Zavrieť",
+        "delete": {
+            "body": "Odstrániť „{title}“? Nedá sa to vrátiť.",
+            "keep": "Ponechať želanie",
+            "action": "Odstrániť želanie"
+        },
+        "discard": {
+            "title": "Zahodiť zmeny?",
+            "body": "Zmeny tohto želania nie sú uložené.",
+            "confirm": "Zahodiť",
+            "keep": "Pokračovať v úpravách"
+        },
+        "toast": {
+            "saved": "Želanie uložené",
+            "deleted": "Želanie odstránené",
+            "received": "Želanie označené ako prijaté",
+            "reserved": "Darček rezervovaný",
+            "unreserved": "Rezervácia zrušená",
+            "cobuy_open": "Spoločný nákup otvorený",
+            "cobuy_closed": "Spoločný nákup uzavretý",
+            "joined": "Pripojili ste sa k nákupu",
+            "share_saved": "Váš podiel bol uložený",
+            "left": "Odišli ste zo spoločného nákupu",
+            "image_removed": "Obrázok odstránený"
+        },
+        "error": {
+            "title_required": "Zadajte názov želania.",
+            "url_invalid": "Zadajte webovú adresu, ktorá začína http:// alebo https://.",
+            "price_invalid": "Zadajte cenu 0 alebo viac, najviac na 2 desatinné miesta.",
+            "share_invalid": "Zadajte sumu vyššiu ako 0, najviac na 2 desatinné miesta.",
+            "save_failed": "Želanie sa nepodarilo uložiť. Nič sa nezmenilo. Skúste to znova.",
+            "load_title": "Niečo sa pokazilo",
+            "load_body": "Zoznam želaní sa nepodarilo načítať. Skontrolujte pripojenie a skúste to znova."
+        },
+        "empty_own": {
+            "title": "Váš zoznam želaní je prázdny",
+            "body": "Pridajte veci, ktoré by ste chceli dostať, s odkazom alebo fotkou."
+        },
+        "empty_other": {
+            "title": "{name} zatiaľ nepridal(a) žiadne želania",
+            "body": "Pozrite sa neskôr."
+        },
+        "viewonly": "Tento zoznam môžete iba čítať, nie meniť.",
+        "cancel": "Zrušiť"
+    },
+    "occasions": {
+        "title": "Príležitosti",
+        "add": "Pridať príležitosť",
+        "upcoming": "Nadchádzajúce",
+        "all": "Všetky príležitosti",
+        "birthday": "Narodeniny: {name}",
+        "nameday": "Meniny: {name}",
+        "christmas": "Vianoce",
+        "today": "Dnes",
+        "tomorrow": "Zajtra",
+        "in_days": "o {n} deň | o {n} dni | o {n} dňa | o {n} dní",
+        "open_list": "Otvoriť zoznam: {name}",
+        "open_lists": "Otvoriť zoznamy želaní",
+        "dates": {
+            "title": "Dátumy podľa členov",
+            "member": "Člen",
+            "birth": "Dátum narodenia",
+            "nameday": "Meniny",
+            "not_set": "Nenastavené",
+            "add_birth": "Pridať dátum narodenia",
+            "edit": "Upraviť dátumy",
+            "calendar": "Kalendár mien",
+            "cal_none": "Žiadny",
+            "cal_sk": "Slovenský kalendár",
+            "cal_pl": "Poľský kalendár",
+            "search": "Hľadať meno",
+            "pick": "Meniny",
+            "pick_hint": "Vyberte meniny, ktoré platia pre: {name}. Neskôr to môžete zmeniť.",
+            "save": "Uložiť dátumy",
+            "no_match": "Meno sa nenašlo. Namiesto toho môžete pridať vlastnú príležitosť.",
+            "pl_attribution": "Poľské meniny: prispievatelia Wikipédie, CC BY-SA 4.0",
+            "save_failed": "Dátumy sa nepodarilo uložiť. Nič sa nezmenilo. Skúste to znova."
+        },
+        "custom": {
+            "title": "Vlastné príležitosti",
+            "field_title": "Názov",
+            "field_date": "Dátum",
+            "field_yearly": "Opakovať každý rok",
+            "field_for": "Pre",
+            "whole_family": "Celá rodina",
+            "save": "Uložiť príležitosť",
+            "edit": "Upraviť príležitosť",
+            "delete": "Odstrániť príležitosť",
+            "delete_body": "Odstrániť „{title}“? Nedá sa to vrátiť.",
+            "keep": "Ponechať príležitosť"
+        },
+        "error": {
+            "title_required": "Zadajte názov príležitosti.",
+            "date_invalid": "Zadajte platný dátum.",
+            "birth_future": "Dátum narodenia nemôže byť v budúcnosti.",
+            "nameday_required": "Vyberte meniny alebo nastavte kalendár na Žiadny.",
+            "load_body": "Príležitosti sa nepodarilo načítať. Skontrolujte pripojenie a skúste to znova."
+        },
+        "empty": {
+            "title": "Zatiaľ žiadne príležitosti",
+            "body": "Pridajte dátumy narodenia alebo vlastnú príležitosť, aby sa tu zobrazili."
+        },
+        "card": {
+            "title": "Nadchádzajúce príležitosti",
+            "open": "Otvoriť zoznam želaní",
+            "none": "Žiadne príležitosti v najbližších 60 dňoch.",
+            "open_occasions": "Otvoriť príležitosti"
+        },
+        "close": "Zavrieť",
+        "discard": {
+            "title": "Zahodiť zmeny?",
+            "body": "Zmeny tejto príležitosti nie sú uložené.",
+            "confirm": "Zahodiť",
+            "keep": "Pokračovať v úpravách"
+        },
+        "toast": {
+            "saved": "Príležitosť uložená",
+            "deleted": "Príležitosť odstránená",
+            "dates_saved": "Dátumy uložené"
+        },
+        "type": {
+            "birthday": "Narodeniny",
+            "nameday": "Meniny",
+            "christmas": "Vianoce",
+            "custom": "Vlastná príležitosť"
+        }
     }
 }

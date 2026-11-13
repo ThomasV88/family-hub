@@ -319,7 +319,16 @@
             "manage": "Zarządzaj",
             "manage_aria": "Zarządzaj: {name}",
             "you": "Ty",
-            "caption": "Członkowie"
+            "caption": "Członkowie",
+            "wishlist_managers": {
+                "tab": "Lista życzeń",
+                "title": "Opiekunowie listy życzeń",
+                "hint": "Wybrane osoby mogą dodawać i edytować życzenia na liście: {name}. Widzą ją tak, jak widzi ją {name}.",
+                "none": "Nie ma innych członków.",
+                "save": "Zapisz opiekunów",
+                "saved": "Zapisano opiekunów listy",
+                "save_failed": "Nie udało się zapisać opiekunów. Nic nie zostało zmienione. Spróbuj ponownie."
+            }
         },
         "role": {
             "admin": "Administrator",
@@ -695,6 +704,256 @@
         "ios_title": "Zainstaluj aplikację, aby otrzymywać push na iPhonie i iPadzie",
         "ios_body": "Na iPhonie i iPadzie push działa dopiero po dodaniu Family Hub do ekranu początkowego. Dotknij Udostępnij, wybierz Dodaj do ekranu początkowego i otwórz aplikację stamtąd.",
         "push_unavailable": "Push nie jest jeszcze skonfigurowany na tym serwerze. E-mail nadal działa.",
-        "enable_failed": "Nie udało się włączyć push. Spróbuj ponownie."
+        "enable_failed": "Nie udało się włączyć push. Spróbuj ponownie.",
+        "gifts_title": "Przypomnienia o prezentach",
+        "gifts_intro": "Dostaniesz przypomnienie przed urodzinami, imieninami i innymi okazjami, żeby mieć czas na wybór prezentu. Nie dostaniesz go przy własnych okazjach.",
+        "gifts_channels": "Dostarczamy e-mailem i push zgodnie z ustawieniami powyżej.",
+        "gifts_legend": "Przypomnij",
+        "gifts_14": "14 dni wcześniej",
+        "gifts_7": "7 dni wcześniej",
+        "gifts_3": "3 dni wcześniej",
+        "gifts_1": "1 dzień wcześniej",
+        "gifts_none_on": "Żadne przypomnienia o prezentach nie są włączone. Nie dowiesz się o nadchodzących okazjach.",
+        "gifts_both_off": "Oba kanały są wyłączone. Nie dostaniesz przypomnień o prezentach."
+    },
+    "wishlist": {
+        "nav": "Lista życzeń",
+        "title": "Lista życzeń",
+        "add": "Dodaj życzenie",
+        "add_for": "Dodaj życzenie dla {name}",
+        "chips": {
+            "label": "Wybierz listę",
+            "you": "{name} (Ty)"
+        },
+        "list": {
+            "title": "Lista życzeń: {name}",
+            "count": "{n} życzenie | {n} życzenia | {n} życzeń | {n} życzenia"
+        },
+        "banner": {
+            "own": "To jest Twoja lista życzeń. Widzi ją każdy, kto ma dostęp.",
+            "managing": "Zarządzasz listą: {name}."
+        },
+        "received": {
+            "show": "Otrzymane ({n})",
+            "tag": "Otrzymane",
+            "hide": "Ukryj otrzymane ({n})",
+            "mark": "Oznacz jako otrzymane"
+        },
+        "shopping": {
+            "title": "Twoje zakupy",
+            "show": "Pokaż",
+            "hide": "Ukryj",
+            "share": "Twój udział: {amount}"
+        },
+        "card": {
+            "links": "{n} link | {n} linki | {n} linków | {n} linku"
+        },
+        "priority": {
+            "label": "Priorytet",
+            "top": "Największe marzenie",
+            "love": "Bardzo by mnie ucieszyło",
+            "nice": "Byłoby miło"
+        },
+        "people": "{n} osoba | {n} osoby | {n} osób | {n} osoby",
+        "status": {
+            "available": "Wolne",
+            "reserved_by": "Rezerwuje {name}",
+            "reserved_you": "Zarezerwowane przez Ciebie",
+            "cobuy": "Wspólny zakup, {people}"
+        },
+        "panel": {
+            "new": "Nowe życzenie",
+            "new_for": "Nowe życzenie dla {name}",
+            "edit": "Szczegóły życzenia"
+        },
+        "field": {
+            "title": "Tytuł",
+            "links": "Linki",
+            "link_url": "Adres linku",
+            "link_label": "Opis",
+            "link_label_ph": "Sklep lub notatka, opcjonalnie",
+            "link_add": "Dodaj link",
+            "link_remove": "Usuń link {n}",
+            "link_max": "Możesz dodać najwyżej 5 linków.",
+            "price": "Cena",
+            "currency": "Waluta",
+            "price_hint": "Opcjonalnie. Przybliżona cena pomaga innym planować.",
+            "variant": "Rozmiar lub wariant",
+            "variant_ph": "Na przykład rozmiar M, niebieski",
+            "variant_line": "Rozmiar lub wariant: {value}",
+            "notes": "Notatki"
+        },
+        "image": {
+            "upload": "Prześlij obraz",
+            "load": "Pobierz obraz z linku",
+            "remove": "Usuń obraz",
+            "loading": "Szukamy obrazu pod linkiem...",
+            "uploading": "Przesyłamy obraz...",
+            "from": "Obraz z {host}.",
+            "none": "Nie znaleziono obrazu. Prześlij go, aby życzenie było lepiej widoczne.",
+            "err_type": "Użyj obrazu JPEG, PNG lub WebP.",
+            "err_size": "Obraz jest większy niż 5 MB.",
+            "err_upload": "Nie udało się przesłać obrazu. Spróbuj ponownie.",
+            "err_load": "Nie udało się rozpocząć pobierania obrazu. Spróbuj ponownie."
+        },
+        "res": {
+            "title": "Rezerwacja",
+            "free": "Nikt jeszcze tego nie kupuje.",
+            "free_hint": "Twoje imię zobaczą pozostali członkowie rodziny, ale nie {name}.",
+            "reserve": "Zarezerwuj prezent",
+            "you": "Kupujesz to Ty.",
+            "you_cobuy": "Kupujesz to Ty. Wspólny zakup jest otwarty.",
+            "other": "Kupuje to {name}.",
+            "other_open": "Kupuje to {name}. Wspólny zakup jest otwarty.",
+            "other_closed": "Kupuje to {name}. Wspólny zakup jest zamknięty.",
+            "cancel": "Anuluj rezerwację",
+            "open_cobuy": "Otwórz na wspólny zakup",
+            "close_cobuy": "Zamknij wspólny zakup",
+            "join": "Dołącz do zakupu",
+            "change_share": "Zmień mój udział",
+            "save_share": "Zapisz mój udział",
+            "leave": "Opuść wspólny zakup",
+            "share_label": "Twój udział (opcjonalnie)",
+            "share_hint": "Zostaw puste, jeśli kwoty ustalicie później.",
+            "organizer": "(organizator)",
+            "no_amount": "bez kwoty",
+            "pledged": "Zadeklarowano {sum} z {price}",
+            "people_in": "{people} we wspólnym zakupie",
+            "conflict": "{name} właśnie zarezerwował(a) ten prezent. Nic nie zostało zmienione.",
+            "error": "Nie udało się zmienić rezerwacji. Nic nie zostało zmienione. Spróbuj ponownie.",
+            "cancel_title": "Anulować rezerwację",
+            "cancel_body": "Anulować Twoją rezerwację „{title}”? Osoby, które dołączyły do wspólnego zakupu, również zostaną zwolnione.",
+            "cancel_keep": "Zachowaj rezerwację"
+        },
+        "link": {
+            "opens_new": "{label}, otworzy się w nowej karcie"
+        },
+        "save": "Zapisz życzenie",
+        "close": "Zamknij",
+        "delete": {
+            "body": "Usunąć „{title}”? Tej operacji nie można cofnąć.",
+            "keep": "Zachowaj życzenie",
+            "action": "Usuń życzenie"
+        },
+        "discard": {
+            "title": "Odrzucić zmiany?",
+            "body": "Zmiany w tym życzeniu nie zostały zapisane.",
+            "confirm": "Odrzuć",
+            "keep": "Wróć do edycji"
+        },
+        "toast": {
+            "saved": "Zapisano życzenie",
+            "deleted": "Usunięto życzenie",
+            "received": "Życzenie oznaczono jako otrzymane",
+            "reserved": "Prezent zarezerwowany",
+            "unreserved": "Rezerwację anulowano",
+            "cobuy_open": "Wspólny zakup otwarty",
+            "cobuy_closed": "Wspólny zakup zamknięty",
+            "joined": "Dołączyłeś(-aś) do zakupu",
+            "share_saved": "Twój udział został zapisany",
+            "left": "Opuściłeś(-aś) wspólny zakup",
+            "image_removed": "Usunięto obraz"
+        },
+        "error": {
+            "title_required": "Wpisz tytuł życzenia.",
+            "url_invalid": "Wpisz adres internetowy zaczynający się od http:// lub https://.",
+            "price_invalid": "Wpisz cenę 0 lub więcej, najwyżej z 2 miejscami po przecinku.",
+            "share_invalid": "Wpisz kwotę większą niż 0, najwyżej z 2 miejscami po przecinku.",
+            "save_failed": "Nie udało się zapisać życzenia. Nic nie zostało zmienione. Spróbuj ponownie.",
+            "load_title": "Coś poszło nie tak",
+            "load_body": "Nie udało się wczytać listy życzeń. Sprawdź połączenie i spróbuj ponownie."
+        },
+        "empty_own": {
+            "title": "Twoja lista życzeń jest pusta",
+            "body": "Dodaj rzeczy, które chciał(a)byś dostać, z linkiem lub zdjęciem."
+        },
+        "empty_other": {
+            "title": "{name} nie dodał(a) jeszcze żadnych życzeń",
+            "body": "Zajrzyj tu później."
+        },
+        "viewonly": "Możesz przeglądać tę listę, ale nie możesz jej zmieniać.",
+        "cancel": "Anuluj"
+    },
+    "occasions": {
+        "title": "Okazje",
+        "add": "Dodaj okazję",
+        "upcoming": "Nadchodzące",
+        "all": "Wszystkie okazje",
+        "birthday": "Urodziny: {name}",
+        "nameday": "Imieniny: {name}",
+        "christmas": "Boże Narodzenie",
+        "today": "Dziś",
+        "tomorrow": "Jutro",
+        "in_days": "za {n} dzień | za {n} dni | za {n} dni | za {n} dnia",
+        "open_list": "Otwórz listę: {name}",
+        "open_lists": "Otwórz listy życzeń",
+        "dates": {
+            "title": "Daty według członków",
+            "member": "Członek",
+            "birth": "Data urodzenia",
+            "nameday": "Imieniny",
+            "not_set": "Nie ustawiono",
+            "add_birth": "Dodaj datę urodzenia",
+            "edit": "Edytuj daty",
+            "calendar": "Kalendarz imienin",
+            "cal_none": "Brak",
+            "cal_sk": "Kalendarz słowacki",
+            "cal_pl": "Kalendarz polski",
+            "search": "Szukaj imienia",
+            "pick": "Imieniny",
+            "pick_hint": "Wybierz imieniny, które dotyczą: {name}. Możesz to później zmienić.",
+            "save": "Zapisz daty",
+            "no_match": "Nie znaleziono imienia. Zamiast tego możesz dodać własną okazję.",
+            "pl_attribution": "Polskie imieniny: autorzy Wikipedii, CC BY-SA 4.0",
+            "save_failed": "Nie udało się zapisać dat. Nic nie zostało zmienione. Spróbuj ponownie."
+        },
+        "custom": {
+            "title": "Własne okazje",
+            "field_title": "Tytuł",
+            "field_date": "Data",
+            "field_yearly": "Powtarzaj co roku",
+            "field_for": "Dla",
+            "whole_family": "Cała rodzina",
+            "save": "Zapisz okazję",
+            "edit": "Edytuj okazję",
+            "delete": "Usuń okazję",
+            "delete_body": "Usunąć „{title}”? Tej operacji nie można cofnąć.",
+            "keep": "Zachowaj okazję"
+        },
+        "error": {
+            "title_required": "Wpisz tytuł okazji.",
+            "date_invalid": "Podaj prawidłową datę.",
+            "birth_future": "Data urodzenia nie może być z przyszłości.",
+            "nameday_required": "Wybierz imieniny albo ustaw kalendarz na Brak.",
+            "load_body": "Nie udało się wczytać okazji. Sprawdź połączenie i spróbuj ponownie."
+        },
+        "empty": {
+            "title": "Na razie brak okazji",
+            "body": "Dodaj daty urodzin lub własną okazję, aby pojawiły się tutaj."
+        },
+        "card": {
+            "title": "Nadchodzące okazje",
+            "open": "Otwórz listę życzeń",
+            "none": "Brak okazji w ciągu najbliższych 60 dni.",
+            "open_occasions": "Otwórz okazje"
+        },
+        "close": "Zamknij",
+        "discard": {
+            "title": "Odrzucić zmiany?",
+            "body": "Zmiany w tej okazji nie zostały zapisane.",
+            "confirm": "Odrzuć",
+            "keep": "Wróć do edycji"
+        },
+        "toast": {
+            "saved": "Zapisano okazję",
+            "deleted": "Usunięto okazję",
+            "dates_saved": "Zapisano daty"
+        },
+        "type": {
+            "birthday": "Urodziny",
+            "nameday": "Imieniny",
+            "christmas": "Boże Narodzenie",
+            "custom": "Własna okazja"
+        }
     }
 }
