@@ -177,7 +177,7 @@ it('documents every existing allowlisted unscoped write', function () {
             $id = $m['class'].'::'.$m['method'];
             if (in_array($id, FH_MUT_ALLOWLIST, true)) {
                 $found[] = $id;
-                expect($m['doc'])->toContain('Unscoped write:', $id.' needs an "Unscoped write:" docblock');
+                expect(str_contains($m['doc'], 'Unscoped write:'))->toBeTrue($id.' needs an "Unscoped write:" docblock');
             }
         }
     }
