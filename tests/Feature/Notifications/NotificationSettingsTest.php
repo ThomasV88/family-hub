@@ -62,5 +62,6 @@ it('lists sections in order for admins', function () {
         ->where('sections.1.key', 'audit')
         ->where('sections.2.key', 'finance_accounts')
         ->where('sections.3.key', 'notifications')
-        ->where('sections.4.key', 'appearance'));
+        ->where('sections.4.key', 'security')
+        ->where('sections.5.key', 'appearance'));
 });
