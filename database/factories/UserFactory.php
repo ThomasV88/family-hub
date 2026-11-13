@@ -44,6 +44,15 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => ['is_admin' => true]);
     }
 
+    /** An account created through Google: no password the member knows. */
+    public function googleOnly(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'password_set' => false,
+            'google_id' => (string) fake()->unique()->numerify('##################'),
+        ]);
+    }
+
     /**
      * Indicate that the model's email address should be unverified.
      */
