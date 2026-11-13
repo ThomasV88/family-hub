@@ -31,6 +31,7 @@ class FakeGoogle
         $provider = Mockery::mock(Provider::class);
         $provider->shouldReceive('user')->andReturn($user);
         $provider->shouldReceive('redirect')->andReturn(new RedirectResponse('https://accounts.google.test/auth'));
+        $provider->shouldReceive('with')->andReturnSelf();
         Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
     }
 

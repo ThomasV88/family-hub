@@ -150,6 +150,8 @@ class InviteService
                 'locale' => $locked->locale,
                 'email_verified_at' => now(),
                 'google_id' => $googleId,
+                // A Google account has no password the member chose (the stored one is random).
+                'password_set' => $googleId === null,
                 'is_admin' => false,
             ])->save();
 

@@ -38,6 +38,7 @@ class ResetUserPassword implements ResetsUserPasswords
         DB::transaction(function () use ($user, $input): void {
             $user->forceFill([
                 'password' => Hash::make($input['password']),
+                'password_set' => true,
             ])->save();
 
             // Revoke means revoke: other devices are signed out.
