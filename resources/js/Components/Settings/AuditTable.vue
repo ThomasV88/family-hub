@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { ShieldAlert, ShieldCheck } from '@lucide/vue';
 import UiTable from '../ui/UiTable.vue';
 import UiTag from '../ui/UiTag.vue';
 import UiButton from '../ui/UiButton.vue';
@@ -25,8 +26,9 @@ const columns = computed(() => [
 const formatter = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium', timeStyle: 'short' }));
 const when = (iso) => formatter.value.format(new Date(iso));
 
-const DANGER = ['login_failed', 'lockout'];
+const DANGER = ['login_failed', 'lockout', 'second_factor_failed'];
 const variant = (row) => (DANGER.includes(row.event) ? 'danger' : 'neutral');
+const tagIcon = (row) => (row.event === 'second_factor_failed' ? ShieldAlert : row.group === 'security' ? ShieldCheck : null);
 const eventLabel = (row) => (row.event === 'access_denied' ? t('audit.event.access_denied') : t(`audit.event.${row.group}`));
 
 const moduleName = (key) => (key ? t(`permissions.module.${key}`) : '');
@@ -64,6 +66,26 @@ function details(row) {
             return t('audit.detail.session_revoked', { name, device: meta.device ?? '' });
         case 'session_revoked_all':
             return t('audit.detail.session_revoked_all', { name });
+        case 'two_factor_enabled':
+            return t('audit.detail.totp_enabled');
+        case 'two_factor_disabled':
+            return t('audit.detail.totp_disabled');
+        case 'passkey_added':
+        case 'passkey_renamed':
+        case 'passkey_removed':
+            return t(`audit.detail.${row.event}`);
+        case 'second_factor_failed':
+            return t('audit.detail.challenge_failed');
+        case 'recovery_code_used':
+            return t('audit.detail.recovery_used');
+        case 'recovery_codes_regenerated':
+            return t('audit.detail.recovery_regenerated');
+        case 'second_factor_reset':
+            return t('audit.detail.admin_reset', { name });
+        case 'security_policy_changed':
+            return t(`audit.detail.requirement_${meta.value === true || meta.value === 1 || meta.value === '1' ? 'on' : 'off'}`);
+        case 'reauth_confirmed':
+            return t('audit.detail.reauth_confirmed');
         default:
             return t(`audit.detail.${row.event}`);
     }
@@ -86,7 +108,7 @@ defineExpose({ focusCaption });
                 <time :datetime="row.occurredAt">{{ when(row.occurredAt) }}</time>
             </template>
             <template #cell-member="{ row }">{{ row.actorLabel ?? '-' }}</template>
-            <template #cell-event="{ row }"><UiTag :variant="variant(row)">{{ eventLabel(row) }}</UiTag></template>
+            <template #cell-event="{ row }"><UiTag :variant="variant(row)" :icon="tagIcon(row)">{{ eventLabel(row) }}</UiTag></template>
             <template #cell-details="{ row }">{{ details(row) }}</template>
             <template #cell-ip="{ row }"><span class="audit-table__ip">{{ row.ip ?? '-' }}</span></template>
         </UiTable>

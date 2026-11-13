@@ -37,13 +37,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->authenticateSessions();
         $middleware->encryptCookies(except: ['fh_theme']);
         $middleware->alias(['access' => RequireAccess::class, 'no-referrer' => NoReferrer::class]);
+        // NoStoreDynamicResponses is first so it wraps every later middleware: refusals produced by the access
+        // rules (403, 423, redirects) must be no-store as well.
         $middleware->web(append: [
+            NoStoreDynamicResponses::class,
             SetLocale::class,
             HandleInertiaRequests::class,
             EnsureRouteDeclaresAccess::class,
             ThrottleAuthRoutes::class,
             GuardTwoFactorRoutes::class,
-            NoStoreDynamicResponses::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
