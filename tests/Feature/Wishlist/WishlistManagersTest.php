@@ -79,3 +79,13 @@ it('writes no audit entry', function () {
 
     expect(DB::table('audit_logs')->count())->toBe($before);
 });
+
+it('does not remove managers when manager_ids is omitted; only an explicit empty array clears', function () {
+    WishlistManager::factory()->create(['owner_id' => $this->member->id, 'manager_id' => $this->a->id]);
+
+    $this->actingAs($this->admin)->putJson(($this->url)(), [])->assertUnprocessable()->assertJsonValidationErrors('manager_ids');
+    expect(WishlistManager::query()->where('owner_id', $this->member->id)->count())->toBe(1);
+
+    $this->actingAs($this->admin)->putJson(($this->url)(), ['manager_ids' => []])->assertRedirect();
+    expect(WishlistManager::query()->where('owner_id', $this->member->id)->count())->toBe(0);
+});

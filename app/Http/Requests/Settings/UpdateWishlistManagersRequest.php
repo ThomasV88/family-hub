@@ -17,7 +17,7 @@ class UpdateWishlistManagersRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'manager_ids' => ['sometimes', 'array', 'max:10'],
+            'manager_ids' => ['present', 'array', 'max:10'],
             'manager_ids.*' => [
                 'integer', 'distinct', Rule::exists('users', 'id'),
                 Rule::notIn([(int) $this->route('user')]),
