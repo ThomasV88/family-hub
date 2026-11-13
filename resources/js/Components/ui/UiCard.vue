@@ -3,6 +3,7 @@ defineProps({
     title: { type: String, default: '' },
     headingLevel: { type: Number, default: 2, validator: (v) => [2, 3].includes(v) },
     interactive: { type: Boolean, default: false },
+    titleId: { type: String, default: undefined },
 });
 </script>
 
@@ -10,7 +11,7 @@ defineProps({
     <div :class="['ui-card', { 'ui-card--interactive': interactive }]">
         <div class="ui-card__inner">
             <header v-if="title || $slots.action" class="ui-card__header">
-                <component :is="`h${headingLevel}`" v-if="title" class="ui-card__title">{{ title }}</component>
+                <component :is="`h${headingLevel}`" v-if="title" :id="titleId" class="ui-card__title">{{ title }}</component>
                 <div v-if="$slots.action" class="ui-card__action"><slot name="action" /></div>
             </header>
             <slot />
