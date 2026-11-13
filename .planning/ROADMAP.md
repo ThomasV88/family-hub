@@ -214,7 +214,7 @@ Plans:
 - [ ] 06-07-PLAN.md — Admin requirement switch, member factor status and audited admin reset with session revocation
 - [ ] 06-08-PLAN.md — Passkey backend: registration/management, challenge and re-auth ceremonies behind one adapter
 - [ ] 06-09-PLAN.md — Passkey UI: Passkeys card, name/rename/remove, "Use a passkey" on challenge and confirm form
-- [ ] 06-10-PLAN.md — Google sign-in through the challenge, Google re-auth fallback, password_set maintenance
+- [ ] 06-10-PLAN.md — Google sign-in through the challenge, flag-gated Google re-auth fallback (no-password, no-factor members only), password_set maintenance
 - [ ] 06-11-PLAN.md — Matrix-driven idle-gate proof with naming safety net, sign-in end-to-end checks, import wizard 423 handling
 - [ ] 06-12-PLAN.md — Audit log security rows, canary/arch/no-store/SW proofs, axe sweep, ops notes, validation sign-off
 - [ ] 06-13-PLAN.md — DEFERRED with owner: staging/production release, real-device passkey and authenticator UAT, Google re-auth check, owner decisions
