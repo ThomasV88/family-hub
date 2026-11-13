@@ -50,7 +50,8 @@ it('keeps finance table names inside the query layer, the scope and the models',
         fhTblFiles(''),
         '/finance_(accounts|account_members|categories|transactions|recurring|recurring_matches|match_rejections|budgets|import_profiles|import_batches|import_rows)\b/',
         // SettingsSections only names the settings route, section key and label for the admin account screen.
-        fn (string $rel) => $fhTblInQueries($rel) || $rel === 'Finance/Visibility.php' || $rel === 'Support/SettingsSections.php' || (bool) preg_match('#^Models/Finance[A-Za-z]*\.php$#', $rel),
+        // StagingAudit (single-file allowlist entry) names the finance tables in its non-synthetic-data rules only.
+        fn (string $rel) => $fhTblInQueries($rel) || $rel === 'Finance/Visibility.php' || $rel === 'Support/SettingsSections.php' || $rel === 'Console/Commands/StagingAudit.php' || (bool) preg_match('#^Models/Finance[A-Za-z]*\.php$#', $rel),
     );
     expect($bad)->toBe([]);
 });
@@ -82,4 +83,20 @@ it('never validates finance ids with database-backed rules in form requests', fu
         fhTblHits(fhTblFiles('Http/Requests'), '/exists:finance_|Rule::exists\([^)]*finance_/', fn () => false),
     );
     expect($bad)->toBe([]);
+});
+
+it('allowlists exactly one console command for finance table names and nothing else outside the layer', function () {
+    $regex = '/finance_(accounts|transactions)\b/';
+    $files = fhTblFiles('Console');
+    $hits = fhTblHits($files, $regex, fn () => false);
+    expect(array_unique(array_map(fn ($h) => explode(':', $h)[0], $hits)))->toBe(['Console/Commands/StagingAudit.php']);
+
+    $tmp = dirname(__DIR__, 3).'/app/Console/Commands/ZzScanProbe.php';
+    file_put_contents($tmp, "<?php\n// finance_transactions\n");
+    try {
+        $bad = fhTblHits(fhTblFiles('Console'), $regex, fn (string $rel) => $rel === 'Console/Commands/StagingAudit.php');
+    } finally {
+        unlink($tmp);
+    }
+    expect($bad)->toBe(['Console/Commands/ZzScanProbe.php:2']);
 });
