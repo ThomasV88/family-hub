@@ -158,3 +158,73 @@ it('keeps the Home still-to-pay card visible for a stale finance member (allowli
     $this->actingAs($user)->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page
         ->component('Home')->has('financeCard.paymentsCount'));
 });
+
+
+// CR-01: routes that grant or widen access to sensitive data need the recent-confirmation window.
+function grantSnapshot(): array
+{
+    return json_decode(json_encode([
+        'audit' => AuditEntry::count(),
+        'permissions' => ModulePermission::query()->orderBy('id')->get()->toArray(),
+        'invitations' => \Illuminate\Support\Facades\DB::table('invitations')->orderBy('id')->get()->toArray(),
+        'accounts' => FinanceAccount::query()->orderBy('id')->get()->toArray(),
+        'members' => \Illuminate\Support\Facades\DB::table('finance_account_members')->get()->toArray(),
+    ]), true);
+}
+
+it('lists only routes that exist and are gated by access:recent for access-granting admin routes', function () {
+    foreach (SensitiveRoutes::accessGranting() as $name) {
+        $route = Route::getRoutes()->getByName($name);
+        expect($route)->not->toBeNull("$name is not a route");
+        expect($route->gatherMiddleware())->toContain('access:admin')->toContain('access:recent');
+    }
+});
+
+it('refuses a stale admin session on every access-granting route and changes nothing', function () {
+    foreach (SensitiveRoutes::accessGranting() as $name) {
+        $this->app['auth']->forgetGuards();
+        $this->flushSession();
+
+        $spec = EndpointMatrix::all()[$name];
+        $users = Roles::make();
+        $admin = $users['admin'];
+        [$uri, $data] = sensitiveRequest($name, $users);
+        $before = grantSnapshot();
+
+        $html = $this->actingAs($admin)->call($spec['method'], $uri, $data);
+        expect($html->getStatusCode())->toBeIn([302, 303, 423], "$name html");
+        expect((string) $html->headers->get('Location'))->toEndWith('/confirm-access');
+
+        $this->app['auth']->forgetGuards();
+        $this->flushSession();
+        $json = $this->actingAs($admin)->call($spec['method'], $uri, $data, [], [], ['HTTP_ACCEPT' => 'application/json']);
+        expect($json->getStatusCode())->toBe(423, "$name json");
+
+        expect(grantSnapshot())->toBe($before, "$name changed state while stale");
+    }
+});
+
+it('keeps a member without admin at 403 on access-granting routes even when stale', function () {
+    foreach (SensitiveRoutes::accessGranting() as $name) {
+        $this->app['auth']->forgetGuards();
+        $this->flushSession();
+        $spec = EndpointMatrix::all()[$name];
+        $users = Roles::make();
+        [$uri, $data] = sensitiveRequest($name, $users);
+        $member = $users['parent'];
+
+        $this->actingAs($member)->call($spec['method'], $uri, $data, [], [], ['HTTP_ACCEPT' => 'application/json'])->assertForbidden();
+    }
+});
+
+it('has no admin grant route under the grant prefixes that is neither listed nor allowlisted', function () {
+    $bad = SensitiveRoutes::unclassifiedGrantRoutes();
+
+    expect($bad)->toBe([], 'Unclassified grant routes: '.implode(', ', $bad));
+});
+
+it('reports a throwaway grant route that was never classified (mutation check)', function () {
+    Route::middleware('web')->post('/settings/invitations/zz-probe', fn () => 'ok')->middleware('access:admin')->name('settings.invitations.zz_probe');
+
+    expect(SensitiveRoutes::unclassifiedGrantRoutes())->toContain('settings.invitations.zz_probe');
+});

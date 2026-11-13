@@ -25,11 +25,68 @@ class SensitiveRoutes
     public static function allowlist(): array
     {
         return [
-            // PROVISIONAL (orchestrator), owner confirms in 06-13 Task 2: admin account metadata only (names,
-            // membership), no money. Decision 2026-11-13 (research Open Question 3). If rejected, 06-13 Task 3
-            // removes this entry and gates the route.
-            'settings.finance_accounts.' => 'admin finance-account settings: metadata only, no money',
+            // PROVISIONAL (orchestrator), owner confirms in 06-13 Task 2: the read-only admin listing shows account
+            // names and membership, no money. Decision 2026-11-13 (research Open Question 3). The routes that
+            // CHANGE membership or visibility (store, update) are not allowlisted: see accessGranting().
+            'settings.finance_accounts.index' => 'admin finance-account listing: metadata only, no money, read-only',
         ];
+    }
+
+    /**
+     * Admin routes that grant or widen access to sensitive data (permissions, invitations, finance account
+     * membership/visibility). Each must carry `access:recent` on top of `access:admin` (06-REVIEW CR-01), so a
+     * stale or stolen admin session cannot mint access it never had to confirm for. By route name.
+     *
+     * @return list<string>
+     */
+    public static function accessGranting(): array
+    {
+        return [
+            'settings.members.permissions.update',
+            'settings.invitations.store',
+            'settings.invitations.resend',
+            'settings.invitations.link',
+            'settings.invitations.destroy',
+            'settings.finance_accounts.store',
+            'settings.finance_accounts.update',
+        ];
+    }
+
+    /**
+     * Route-name prefixes under which a NEW admin route must be either listed in accessGranting() or in
+     * grantAllowlist() (a deliberate "does not grant access" decision). Safety net for CR-01.
+     *
+     * @return list<string>
+     */
+    public static function grantPrefixes(): array
+    {
+        return ['settings.members.permissions.', 'settings.invitations.', 'settings.finance_accounts.'];
+    }
+
+    /** @return array<string, string> exact route name => reason it does not grant access */
+    public static function grantAllowlist(): array
+    {
+        return [
+            'settings.finance_accounts.index' => 'read-only listing (metadata, no money)',
+        ];
+    }
+
+    /** @return list<string> routes under a grant prefix that are neither listed nor allowlisted */
+    public static function unclassifiedGrantRoutes(): array
+    {
+        $bad = [];
+        foreach (Route::getRoutes() as $route) {
+            $name = (string) $route->getName();
+            foreach (self::grantPrefixes() as $prefix) {
+                if (str_starts_with($name, $prefix)
+                    && ! in_array($name, self::accessGranting(), true)
+                    && ! array_key_exists($name, self::grantAllowlist())) {
+                    $bad[] = $name;
+                }
+            }
+        }
+
+        return $bad;
     }
 
     /**
@@ -89,7 +146,7 @@ class SensitiveRoutes
             $name = (string) $route->getName();
             $looks = preg_match('#^(finance|health|medical)(/|$)#', $uri) === 1
                 || preg_match('/finance|health|medical/', $name) === 1;
-            if ($looks && ! self::isSensitive($route) && ! self::allowlisted($route)) {
+            if ($looks && ! self::isSensitive($route) && ! self::allowlisted($route) && ! in_array($name, self::accessGranting(), true)) {
                 $offenders[] = $name !== '' ? $name : 'UNNAMED:'.$uri;
             }
         }

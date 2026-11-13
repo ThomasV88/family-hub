@@ -6,6 +6,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/settings/members', [MembersController::class, 'index'])->middleware('access:admin')->name('settings.members');
 Route::put('/settings/members/{user}/permissions', [PermissionsController::class, 'update'])
-    ->middleware('access:admin')
+    ->middleware(['access:admin', 'access:recent'])
     ->whereNumber('user')
     ->name('settings.members.permissions.update');

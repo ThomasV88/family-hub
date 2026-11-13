@@ -4,7 +4,9 @@ use App\Http\Controllers\Settings\InvitationsController;
 use Illuminate\Support\Facades\Route;
 
 // Numeric ids are resolved in the controller: route model binding runs before access:admin and would 404 non-admins.
-Route::middleware(['access:admin', 'throttle:30,1'])->group(function () {
+// Every route here issues, re-issues or withdraws an invitation (a way to grant Finance/Health access), so all of
+// them need the recent-confirmation window on top of admin (SensitiveRoutes::accessGranting()).
+Route::middleware(['access:admin', 'access:recent', 'throttle:30,1'])->group(function () {
     Route::post('/settings/invitations', [InvitationsController::class, 'store'])->name('settings.invitations.store');
     Route::post('/settings/invitations/{invitation}/resend', [InvitationsController::class, 'resend'])
         ->whereNumber('invitation')->name('settings.invitations.resend');
