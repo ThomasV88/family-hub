@@ -6,6 +6,7 @@ import SettingsLayout from '../../Layouts/SettingsLayout.vue';
 import UiCard from '../../Components/ui/UiCard.vue';
 import UiSwitch from '../../Components/ui/UiSwitch.vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
+import GiftReminderPrefs from '../../Components/Settings/GiftReminderPrefs.vue';
 import PushDeviceRow from '../../Components/Settings/PushDeviceRow.vue';
 
 const props = defineProps({
@@ -13,6 +14,7 @@ const props = defineProps({
     email: { type: String, default: '' },
     preferences: { type: Object, default: () => ({ mail: true, push: false }) },
     vapidPublicKey: { type: String, default: null },
+    giftReminders: { type: Object, default: null },
 });
 
 const { t } = useI18n();
@@ -48,6 +50,7 @@ function save(channel, enabled) {
                 <PushDeviceRow :vapid-public-key="vapidPublicKey" @enabled="save('push', true)" />
             </div>
         </UiCard>
+        <GiftReminderPrefs v-if="giftReminders" :lead-days="giftReminders.lead_days" :allowed="giftReminders.allowed" :channels-off="bothOff" />
         <UiAlert v-if="bothOff" variant="info" live class="notifications__alert" data-testid="both-off">{{ t('notifications.both_off') }}</UiAlert>
     </SettingsLayout>
 </template>
