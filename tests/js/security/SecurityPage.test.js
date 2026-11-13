@@ -94,6 +94,16 @@ describe('Security page', () => {
         expect(document.body.querySelector('[data-testid="setup-dialog"]')).not.toBeNull();
     });
 
+    it('opens the turn-off and new-codes dialogs from the cards', async () => {
+        mountPage({ status: { totp: true, recoveryRemaining: 8 } });
+        await wrapper.find('[data-testid="disable-totp"]').trigger('click');
+        expect(document.body.querySelector('[data-testid="disable-dialog"]')).not.toBeNull();
+        document.body.querySelector('[data-testid="keep"]').click();
+        await flushPromises();
+        await wrapper.find('[data-testid="create-codes"]').trigger('click');
+        expect(document.body.querySelector('[data-testid="regen-dialog"]')).not.toBeNull();
+    });
+
     it('after setup finishes: reloads props normally, or posts continue under guidance', async () => {
         mountPage();
         wrapper.findComponent(TwoFactorSetupDialog).vm.$emit('finished');

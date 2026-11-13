@@ -8,6 +8,8 @@ import UiAlert from '../../Components/ui/UiAlert.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import UiCard from '../../Components/ui/UiCard.vue';
 import UiTag from '../../Components/ui/UiTag.vue';
+import RegenerateCodesDialog from '../../Components/Security/RegenerateCodesDialog.vue';
+import TotpDisableDialog from '../../Components/Security/TotpDisableDialog.vue';
 import TwoFactorSetupDialog from '../../Components/Security/TwoFactorSetupDialog.vue';
 
 const props = defineProps({
@@ -27,6 +29,9 @@ const page = usePage();
 const isAdmin = computed(() => !!page.props?.auth?.user?.isAdmin);
 
 const setupOpen = ref(false);
+const disableOpen = ref(false);
+const regenOpen = ref(false);
+const lastFactor = computed(() => props.required && props.passkeys.length === 0);
 
 const on = computed(() => props.status.totp || props.passkeys.length > 0);
 const tag = computed(() => {
@@ -94,6 +99,9 @@ function setupFinished() {
             <UiButton v-if="!status.totp" variant="primary" data-testid="setup-totp" @click="setupOpen = true">
                 {{ t('twofactor.cta.setup') }}
             </UiButton>
+            <UiButton v-else variant="ghost" class="security__danger" data-testid="disable-totp" @click="disableOpen = true">
+                {{ t('security.totp.disable') }}
+            </UiButton>
         </UiCard>
 
         <!-- Passkeys card is mounted here by the passkey plan (06-09) when passkeysEnabled. -->
@@ -109,8 +117,11 @@ function setupFinished() {
                 <TriangleAlert :size="16" :stroke-width="1.75" aria-hidden="true" />
                 {{ t('twofactor.recovery.low') }}
             </p>
+            <UiButton variant="secondary" data-testid="create-codes" @click="regenOpen = true">{{ t('twofactor.cta.create_codes') }}</UiButton>
         </UiCard>
 
+        <TotpDisableDialog v-model:open="disableOpen" :methods="methods" :is-admin="isAdmin" :last-factor="lastFactor" @done="reload" />
+        <RegenerateCodesDialog v-model:open="regenOpen" :methods="methods" :is-admin="isAdmin" @done="reload" />
         <TwoFactorSetupDialog
             v-model:open="setupOpen"
             :methods="methods"
@@ -132,6 +143,7 @@ function setupFinished() {
 .security__heading { margin: 0 0 var(--space-2); font-size: var(--text-lg); font-weight: 600; line-height: 1.3; }
 .security__heading:focus { outline: none; }
 .security__text { margin: 0 0 var(--space-3); }
+.security__danger { color: var(--color-danger); }
 .security__low { display: flex; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-3); color: var(--color-warn-text); font-size: var(--text-sm); }
 .security__region:empty { display: none; }
 </style>
