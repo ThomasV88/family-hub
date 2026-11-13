@@ -5,11 +5,14 @@ import { expectNoAxeViolations } from './helpers/axe.js';
 import { createAppI18n } from '../../resources/js/i18n.js';
 
 let mockProps = {};
+// Tests that do not care about permissions get full module access (visibleModules hides everything without it).
+const FULL_ACCESS = { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'edit' };
+const withAccess = (p) => ({ ...p, auth: { ...p.auth, access: p.auth?.access ?? FULL_ACCESS } });
 const post = vi.fn();
 vi.mock('@inertiajs/vue3', async () => {
     const { h } = await import('vue');
     return {
-        usePage: () => ({ props: mockProps }),
+        usePage: () => ({ props: withAccess(mockProps) }),
         router: { post: (...args) => post(...args), visit: vi.fn(), on: vi.fn() },
         Link: { props: ['href'], render() { return h('a', { href: this.href }, this.$slots.default?.()); } },
     };
@@ -147,5 +150,14 @@ describe('flash toast', () => {
         mountHome();
         expect(toasts.map((x) => x.message)).toEqual(['Welcome to Family Hub, Anna.']);
         toasts.splice(0);
+    });
+});
+
+describe('Home dashboard module cards', () => {
+    it('renders only the module cards the member may use', () => {
+        mockProps = { app: { name: 'Family Hub', env: 'production' }, auth: { access: { todo: 'view', wishlist: 'none', finance: 'none', health: 'none' } } };
+        const text = mountHome().find('.home__grid').text();
+        expect(text).toContain(load('en').module.tasks);
+        for (const k of ['wishlist', 'finances', 'health']) expect(text).not.toContain(load('en').module[k]);
     });
 });

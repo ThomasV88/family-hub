@@ -1,19 +1,23 @@
 <script setup>
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import NavItem from './NavItem.vue';
-import { MODULES } from './modules.js';
+import { visibleModules } from './modules.js';
 
 defineProps({
     open: { type: Boolean, default: true },
     current: { type: String, default: 'overview' },
 });
 const { t } = useI18n();
+const page = usePage();
+const modules = computed(() => visibleModules(page.props.auth?.access));
 </script>
 
 <template>
     <nav id="fh-sidebar" :aria-label="t('nav.main')" :class="['sidebar', { 'is-open': open }]">
         <ul class="sidebar__list">
-            <NavItem v-for="m in MODULES" :key="m.key" :module="m" :current="m.key === current" variant="side" :rail="!open" />
+            <NavItem v-for="m in modules" :key="m.key" :module="m" :current="m.key === current" variant="side" :rail="!open" />
         </ul>
     </nav>
 </template>

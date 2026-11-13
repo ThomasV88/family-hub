@@ -8,7 +8,7 @@ use App\Models\User;
 /**
  * The single deny-by-default permission layer. Bound with `scoped`, so the
  * per-instance cache never outlives one request. Admin status never implies
- * module access (no Gate::before).
+ * module access (no global before-hook).
  */
 class AccessGate
 {

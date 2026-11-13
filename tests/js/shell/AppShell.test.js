@@ -8,10 +8,13 @@ import { createAppI18n } from '../../../resources/js/i18n.js';
 import { mount } from '@vue/test-utils';
 
 let mockProps = {};
+// Tests that do not care about permissions get full module access (visibleModules hides everything without it).
+const FULL_ACCESS = { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'edit' };
+const withAccess = (p) => ({ ...p, auth: { ...p.auth, access: p.auth?.access ?? FULL_ACCESS } });
 vi.mock('@inertiajs/vue3', async () => {
     const { h } = await import('vue');
     return {
-        usePage: () => ({ props: mockProps }),
+        usePage: () => ({ props: withAccess(mockProps) }),
         router: { post: vi.fn(), visit: vi.fn(), on: vi.fn() },
         Link: { props: ['href'], render() { return h('a', { href: this.href }, this.$slots.default?.()); } },
     };
@@ -166,4 +169,21 @@ describe('AppShell text length', () => {
             });
         }
     }
+});
+
+describe('AppShell access-aware navigation', () => {
+    it.each([[1280], [390]])('renders only permitted modules in the nav at %s', async (width) => {
+        setWidth(width);
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, auth: { access: { todo: 'view', wishlist: 'none', finance: 'none', health: 'none' } } };
+        mountShell();
+        await nextTick();
+        const navs = wrapper.findAll('nav');
+        expect(navs.length).toBeGreaterThan(0);
+        for (const nav of navs) {
+            const text = nav.text();
+            expect(text).toContain(en.nav.overview);
+            expect(text).toContain(en.nav.tasks);
+            for (const hidden of ['wishlist', 'finances', 'health']) expect(text).not.toContain(en.nav[hidden]);
+        }
+    });
 });

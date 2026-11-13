@@ -7,11 +7,13 @@ import UiCard from '../Components/ui/UiCard.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import QuickAdd from '../Dashboard/QuickAdd.vue';
 import ModuleCard from '../Dashboard/ModuleCard.vue';
+import { visibleModules } from '../Shell/modules.js';
 
 const { t, d, n } = useI18n();
 const page = usePage();
 const heartbeat = computed(() => page.props.heartbeat ?? { last_recorded_at: null, last_source: null, count_24h: 0, expected_24h: 1440 });
 const quickAdd = ref(null);
+const allowed = computed(() => new Set(visibleModules(page.props.auth?.access).map((m) => m.key)));
 // The shell lives below this page, so QuickAdd calls useShell().registerAddHandler (Add task focuses it).
 const focusQuickAdd = () => quickAdd.value?.focus();
 
@@ -39,10 +41,10 @@ function runCheck() {
             <h1 class="home__title">{{ t('dashboard.title') }}</h1>
             <QuickAdd ref="quickAdd" />
             <div class="home__grid">
-                <ModuleCard module-key="tasks" @add="focusQuickAdd" />
-                <ModuleCard module-key="wishlist" />
-                <ModuleCard module-key="finances" />
-                <ModuleCard module-key="health" />
+                <ModuleCard v-if="allowed.has('tasks')" module-key="tasks" @add="focusQuickAdd" />
+                <ModuleCard v-if="allowed.has('wishlist')" module-key="wishlist" />
+                <ModuleCard v-if="allowed.has('finances')" module-key="finances" />
+                <ModuleCard v-if="allowed.has('health')" module-key="health" />
             </div>
             <UiCard :title="t('dashboard.system_status')" class="home__status">
                 <section data-testid="heartbeat">

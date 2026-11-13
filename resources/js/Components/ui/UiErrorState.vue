@@ -18,7 +18,9 @@ const { t } = useI18n();
         <CircleAlert :size="32" :stroke-width="1.75" aria-hidden="true" class="ui-error__icon" />
         <component :is="`h${headingLevel}`" class="ui-error__title">{{ title || t('error.generic.title') }}</component>
         <p class="ui-error__body">{{ body || t('error.generic.body') }}</p>
-        <UiButton variant="secondary" @click="$emit('retry')">{{ t('ui.retry') }}</UiButton>
+        <slot name="action">
+            <UiButton variant="secondary" @click="$emit('retry')">{{ t('ui.retry') }}</UiButton>
+        </slot>
     </div>
 </template>
 
