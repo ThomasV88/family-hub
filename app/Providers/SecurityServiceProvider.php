@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Security\SensitiveSession;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,7 +27,7 @@ class SecurityServiceProvider extends ServiceProvider
         RateLimiter::for('two-factor', function (Request $request) {
             $id = $request->hasSession() ? $request->session()->get('login.id') : null;
             $key = $id !== null ? 'user:'.$id : 'ip:'.$request->ip();
-            $respond = $this->lockoutResponse($id !== null ? (int) $id : null);
+            $respond = $this->lockoutResponse('two-factor:'.$key, $id !== null ? (int) $id : null);
 
             return [
                 Limit::perMinute(5)->by('2fa-1m:'.$key)->response($respond),
@@ -37,7 +38,7 @@ class SecurityServiceProvider extends ServiceProvider
         RateLimiter::for('reauth', function (Request $request) {
             $id = $request->user()?->id;
             $key = $id !== null ? 'user:'.$id : 'ip:'.$request->ip();
-            $respond = $this->lockoutResponse($id);
+            $respond = $this->lockoutResponse('reauth:'.$key, $id);
 
             return [
                 Limit::perMinute(5)->by('reauth-1m:'.$key)->response($respond),
@@ -47,13 +48,19 @@ class SecurityServiceProvider extends ServiceProvider
     }
 
     /** Audited 429 for JSON callers, back() with errors.throttle (minutes) for the rest. */
-    private function lockoutResponse(?int $userId): \Closure
+    private function lockoutResponse(string $subject, ?int $userId): \Closure
     {
-        return function (Request $request, array $headers) use ($userId) {
-            $member = $userId !== null ? User::find($userId) : null;
-            app(AuditLogger::class)->record(AuditEvent::Lockout, $member);
+        return function (Request $request, array $headers) use ($subject, $userId) {
+            $retryAfter = max(1, (int) ($headers['Retry-After'] ?? 60));
 
-            $minutes = max(1, (int) ceil(((int) ($headers['Retry-After'] ?? 60)) / 60));
+            // At most one lockout row per subject and lockout window (06-REVIEW WR-05): requests made while
+            // already locked out must not fill the audit table.
+            if (Cache::add('lockout-audited:'.$subject, 1, $retryAfter)) {
+                $member = $userId !== null ? User::find($userId) : null;
+                app(AuditLogger::class)->record(AuditEvent::Lockout, $member);
+            }
+
+            $minutes = max(1, (int) ceil($retryAfter / 60));
 
             if ($request->expectsJson() && ! $request->header('X-Inertia')) {
                 return response()->json(['error' => 'throttle', 'minutes' => $minutes], 429, $headers);

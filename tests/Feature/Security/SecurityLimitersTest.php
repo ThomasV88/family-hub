@@ -51,3 +51,38 @@ it('keys the challenge limiter by user id, not session', function () {
     $this->flushSession();
     $this->withSession(['login.id' => $other->id])->postJson('/test-probe/2fa')->assertOk();
 });
+
+// 06-REVIEW WR-05: one lockout audit row per member per lockout window, however many requests follow.
+it('writes a single lockout row while a member keeps hammering a locked limiter', function () {
+    $a = User::factory()->create();
+    foreach (range(1, 5) as $i) {
+        $this->actingAs($a)->postJson('/test-probe/reauth')->assertOk();
+    }
+    foreach (range(1, 12) as $i) {
+        $this->actingAs($a)->postJson('/test-probe/reauth')->assertStatus(429);
+    }
+
+    expect(AuditEntry::where('event', AuditEvent::Lockout->value)->count())->toBe(1);
+});
+
+it('writes a new lockout row once the window has passed', function () {
+    $a = User::factory()->create();
+    foreach (range(1, 6) as $i) {
+        $this->actingAs($a)->postJson('/test-probe/reauth');
+    }
+    $this->travel(61)->seconds();
+    foreach (range(1, 6) as $i) {
+        $this->actingAs($a)->postJson('/test-probe/reauth');
+    }
+
+    expect(AuditEntry::where('event', AuditEvent::Lockout->value)->count())->toBe(2);
+});
+
+it('dedupes the lockout row for the challenge limiter as well', function () {
+    $u = User::factory()->create();
+    foreach (range(1, 12) as $i) {
+        $this->withSession(['login.id' => $u->id])->postJson('/test-probe/2fa');
+    }
+
+    expect(AuditEntry::where('event', AuditEvent::Lockout->value)->count())->toBe(1);
+});

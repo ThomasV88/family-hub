@@ -9,6 +9,7 @@ use App\Security\SafeIntended;
 use App\Security\SensitiveSession;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Symfony\Component\HttpFoundation\Response;
@@ -78,8 +79,12 @@ class GuardTwoFactorRoutes
 
         $key = 'tfa-confirm:'.$user->id;
         if (RateLimiter::tooManyAttempts($key, 5)) {
-            $this->audit->record(AuditEvent::Lockout, $user);
-            $minutes = max(1, (int) ceil(RateLimiter::availableIn($key) / 60));
+            $wait = max(1, RateLimiter::availableIn($key));
+            // One lockout row per member and window (06-REVIEW WR-05).
+            if (Cache::add('lockout-audited:'.$key, 1, $wait)) {
+                $this->audit->record(AuditEvent::Lockout, $user);
+            }
+            $minutes = max(1, (int) ceil($wait / 60));
 
             return $this->wantsJson($request)
                 ? response()->json(['error' => 'throttle', 'minutes' => $minutes], 429)
