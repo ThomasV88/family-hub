@@ -3,6 +3,7 @@
 use App\Http\Controllers\HeartbeatController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\StyleGuideController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -12,3 +13,7 @@ Route::post('/heartbeat', [HeartbeatController::class, 'store'])
 Route::post('/locale', [LocaleController::class, 'update'])
     ->middleware('throttle:30,1')
     ->name('locale.update');
+
+if (app()->environment(['local', 'staging', 'testing'])) {
+    Route::get('/_style', StyleGuideController::class)->name('style');
+}
