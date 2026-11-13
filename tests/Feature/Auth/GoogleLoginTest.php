@@ -3,6 +3,9 @@
 use App\Models\AuditEntry;
 use App\Models\Invitation;
 use App\Models\User;
+use App\Notifications\GoogleLinkedNotification;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
 use Tests\Support\FakeGoogle;
 
@@ -80,12 +83,32 @@ it('signs in an existing member matched by Google id', function () {
 });
 
 it('links a Google id once by verified email and audits it', function () {
+    Notification::fake();
     $user = User::factory()->create(['email' => 'anna@example.test']);
     FakeGoogle::returns('sub-7', 'ANNA@example.test');
 
     $this->get('/auth/google/callback')->assertRedirect('/');
     $this->assertAuthenticatedAs($user);
     expect($user->refresh()->google_id)->toBe('sub-7')->and(AuditEntry::where('event', 'google_linked')->count())->toBe(1);
+    Notification::assertSentToTimes($user, GoogleLinkedNotification::class, 1);
+});
+
+it('builds a queued, localized link notice for the account owner', function () {
+    expect(new GoogleLinkedNotification)->toBeInstanceOf(ShouldQueue::class);
+
+    $user = User::factory()->create(['locale' => 'pl']);
+    $mail = (new GoogleLinkedNotification)->toMail($user);
+
+    expect($mail->subject)->toBe(trans('mail.google_linked_subject', [], 'pl'))->and($mail->subject)->not->toStartWith('mail.');
+});
+
+it('does not notify on a plain sign-in by Google id', function () {
+    Notification::fake();
+    User::factory()->create(['email' => 'anna@example.test', 'google_id' => 'sub-7']);
+    FakeGoogle::returns('sub-7', 'anna@example.test');
+
+    $this->get('/auth/google/callback')->assertRedirect('/');
+    Notification::assertNothingSent();
 });
 
 it('refuses the same email with a different Google id', function () {

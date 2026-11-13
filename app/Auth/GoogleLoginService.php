@@ -6,6 +6,7 @@ use App\Audit\AuditEvent;
 use App\Audit\AuditLogger;
 use App\Models\Invitation;
 use App\Models\User;
+use App\Notifications\GoogleLinkedNotification;
 use Illuminate\Support\Facades\DB;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 
@@ -74,6 +75,9 @@ class GoogleLoginService
             $byEmail->forceFill(['google_id' => $sub])->save();
             $this->audit->record(AuditEvent::GoogleLinked, $byEmail);
         });
+
+        // Linking by verified email is the agreed rule; the owner is told so a takeover cannot go unnoticed.
+        $byEmail->notify(new GoogleLinkedNotification);
 
         return ['login', $byEmail];
     }

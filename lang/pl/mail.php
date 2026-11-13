@@ -12,5 +12,8 @@ return [
     'reset_action' => 'Ustaw nowe hasło',
     'reset_expiry' => 'Link działa przez 60 minut.',
     'reset_ignore' => 'Jeśli nie prosisz o reset, zignoruj tę wiadomość. Twoje hasło pozostanie bez zmian.',
+    'google_linked_subject' => 'Konto Google zostało połączone z Twoim kontem Family Hub',
+    'google_linked_line' => 'Ktoś właśnie zalogował się kontem Google z Twoim adresem e-mail i jest ono teraz połączone z Twoim kontem Family Hub.',
+    'google_linked_action' => 'Jeśli to Ty, nie musisz nic robić. Jeśli nie, poproś administratora rodziny o sprawdzenie konta i od razu zmień hasło.',
     'salutation' => 'Family Hub',
 ];
