@@ -14,6 +14,7 @@ import UiSelect from '../Components/ui/UiSelect.vue';
 import UiSwitch from '../Components/ui/UiSwitch.vue';
 import UiTextarea from '../Components/ui/UiTextarea.vue';
 import StatusChips from './StatusChips.vue';
+import VisibilityField from './VisibilityField.vue';
 
 const props = defineProps({
     open: { type: Boolean, default: false },
@@ -30,7 +31,7 @@ const { t } = useI18n();
 
 const creating = computed(() => props.mode === 'create');
 const missing = computed(() => props.mode === 'missing' || (props.mode === 'edit' && !props.task));
-const abilities = computed(() => (creating.value ? { edit: true, status: true, delete: false } : (props.task?.abilities ?? { edit: false, status: false, delete: false })));
+const abilities = computed(() => (creating.value ? { edit: true, status: true, delete: false, visibility: true } : (props.task?.abilities ?? { edit: false, status: false, delete: false, visibility: false })));
 const readonly = computed(() => !abilities.value.edit);
 const title = computed(() => (creating.value ? t('todo.panel.new') : t('todo.panel.edit')));
 
@@ -39,7 +40,7 @@ function initial() {
     const task = props.task;
     if (creating.value || !task) {
         const wanted = props.initialAssignee !== null && known.value.has(props.initialAssignee) ? props.initialAssignee : props.me;
-        return { title: '', status: 'todo', assignee: wanted !== null && known.value.has(wanted) ? String(wanted) : '', dueDate: '', showTime: false, dueTime: '', notes: '' };
+        return { title: '', status: 'todo', assignee: wanted !== null && known.value.has(wanted) ? String(wanted) : '', dueDate: '', showTime: false, dueTime: '', notes: '', visibility: 'family', memberIds: [] };
     }
     return {
         title: task.title,
@@ -49,6 +50,8 @@ function initial() {
         showTime: Boolean(task.dueTime),
         dueTime: task.dueTime ?? '',
         notes: task.notes ?? '',
+        visibility: task.visibility ?? 'family',
+        memberIds: (task.memberIds ?? []).filter((id) => id !== task.creatorId),
     };
 }
 
@@ -96,9 +99,36 @@ function setShowTime(on) {
     if (!on) form.value.dueTime = '';
 }
 
+const creatorId = computed(() => (creating.value ? props.me : (props.task?.creatorId ?? props.me)));
+
+// Personal forces the assignee to the creator; Selected drops an assignee who is no longer a member.
+function setVisibility(value) {
+    form.value.visibility = value;
+    if (value === 'personal' && creatorId.value !== null) form.value.assignee = String(creatorId.value);
+    else if (value === 'selected') dropAssigneeIfOutside();
+}
+function setMemberIds(ids) {
+    form.value.memberIds = ids;
+    dropAssigneeIfOutside();
+}
+function dropAssigneeIfOutside() {
+    if (form.value.visibility !== 'selected' || form.value.assignee === '') return;
+    const id = Number(form.value.assignee);
+    if (id !== creatorId.value && !form.value.memberIds.includes(id)) {
+        form.value.assignee = creatorId.value !== null && known.value.has(creatorId.value) ? String(creatorId.value) : '';
+    }
+}
+
 function payload() {
     const f = form.value;
+    const visibility = {};
+    if (abilities.value.visibility) {
+        // Family is the server default on create, so a plain create stays title and fields only.
+        if (!creating.value || f.visibility !== 'family') visibility.visibility = f.visibility;
+        if (f.visibility === 'selected') visibility.member_ids = f.memberIds;
+    }
     return {
+        ...visibility,
         title: f.title.trim(),
         status: f.status,
         assignee_id: f.assignee === '' ? null : Number(f.assignee),
@@ -108,7 +138,7 @@ function payload() {
     };
 }
 
-const FIELD_FOR = { title: 'title', status: 'status', assignee_id: 'assignee', due_date: 'dueDate', due_time: 'dueTime', notes: 'notes' };
+const FIELD_FOR = { title: 'title', status: 'status', assignee_id: 'assignee', visibility: 'members', member_ids: 'members', due_date: 'dueDate', due_time: 'dueTime', notes: 'notes' };
 const message = (key) => (typeof key === 'string' && key.startsWith('todo.') ? t(key) : t('todo.error.save_failed'));
 
 function visitOptions(onOk) {
@@ -119,7 +149,8 @@ function visitOptions(onOk) {
         onError: (errs) => {
             const mapped = {};
             for (const [key, value] of Object.entries(errs ?? {})) {
-                if (FIELD_FOR[key]) mapped[FIELD_FOR[key]] = message(value);
+                const name = key.startsWith('member_ids.') ? 'member_ids' : key;
+                if (FIELD_FOR[name]) mapped[FIELD_FOR[name]] = message(value);
                 else serverError.value = true;
             }
             errors.value = mapped;
@@ -196,8 +227,12 @@ function keepEditing() {
     pendingAfterDiscard = null;
 }
 
+const assigneeHint = computed(() => (form.value.visibility === 'personal' ? t('todo.field.assignee_personal') : ''));
+const assigneeDisabled = computed(() => readonly.value || form.value.visibility === 'personal');
 const memberOptions = computed(() => [
-    ...props.members.map((m) => ({ value: String(m.id), label: m.name })),
+    ...props.members
+        .filter((m) => form.value.visibility !== 'selected' || m.id === creatorId.value || form.value.memberIds.includes(m.id))
+        .map((m) => ({ value: String(m.id), label: m.name })),
     { value: '', label: t('todo.column.unassigned') },
 ]);
 
@@ -224,8 +259,8 @@ defineExpose({ guard, dirty });
                     <StatusChips :model-value="form.status" :disabled="!(abilities.status)" @update:model-value="setStatus" />
                 </div>
 
-                <UiField :label="t('todo.field.assignee')" :error="errors.assignee">
-                    <UiSelect v-model="form.assignee" :options="memberOptions" :disabled="readonly" />
+                <UiField :label="t('todo.field.assignee')" :hint="assigneeHint" :error="errors.assignee">
+                    <UiSelect v-model="form.assignee" :options="memberOptions" :disabled="assigneeDisabled" />
                 </UiField>
 
                 <UiField :label="t('todo.field.due')" :hint="t('todo.field.tz_hint', { tz: timezone })" :error="errors.dueDate">
@@ -239,7 +274,16 @@ defineExpose({ guard, dirty });
                 </UiField>
 
                 <!-- Insertion point (plan 03-09): field 5 Repeat, field 6 Reminder. -->
-                <!-- Insertion point (plan 03-08): field 7 Visibility. -->
+                <VisibilityField
+                    :model-value="form.visibility"
+                    :member-ids="form.memberIds"
+                    :members="members"
+                    :creator-id="creatorId"
+                    :editable="Boolean(abilities.visibility)"
+                    :error="errors.members"
+                    @update:model-value="setVisibility"
+                    @update:member-ids="setMemberIds"
+                />
 
                 <UiField :label="t('todo.field.notes')" :error="errors.notes">
                     <UiTextarea v-model="form.notes" :rows="4" :readonly="readonly" />
