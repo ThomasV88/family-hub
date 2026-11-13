@@ -10,7 +10,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Foundation
 
 - [x] **FOUND-01**: App is deployed via Docker Compose on the owner's VPS behind the existing edge proxy, with separate staging (`develop`) and production (`main`) environments
-- [ ] **FOUND-02**: UI is available in Slovak, Polish and English, with a language switcher and correct plural/date/number formatting per locale
+- [x] **FOUND-02**: UI is available in Slovak, Polish and English, with a language switcher and correct plural/date/number formatting per locale
 - [x] **FOUND-03**: App is installable as a PWA and usable on phone, desktop and iPad; service worker caches only the app shell, never medical or finance data
 - [ ] **FOUND-04**: Database is backed up with encryption on a schedule, and a restore has been tested
 - [ ] **FOUND-05**: Staging contains only synthetic data (no real medical or finance data)
@@ -124,7 +124,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | FOUND-01 | Phase 1 | Complete |
-| FOUND-02 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Complete |
 | FOUND-04 | Phase 1 | Pending |
 | FOUND-05 | Phase 1 | Pending |
