@@ -156,3 +156,24 @@ it('does not let a logout delete another user\'s subscription', function () {
 
     expect(PushSubscription::query()->count())->toBe(1);
 });
+
+it('test endpoint only tries the newest few devices', function () {
+    $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
+    $keys = VAPID::createVapidKeys();
+    config(['push.subject' => 'mailto:test@example.test', 'push.public_key' => $keys['publicKey'], 'push.private_key' => $keys['privateKey']]);
+    $fake = new FakePushSender;
+    app()->instance(PushSender::class, $fake);
+    foreach (range(1, 5) as $i) {
+        $this->actingAs($this->user)->postJson('/settings/notifications/push', subBody("https://fcm.googleapis.com/fcm/send/d{$i}"))->assertCreated();
+    }
+
+    $this->actingAs($this->user)->postJson('/settings/notifications/push/test')->assertOk()->assertExactJson(['sent' => 3]);
+    expect($fake->sent)->toHaveCount(3);
+});
+
+it('re-registering the same endpoint keeps one row', function () {
+    $this->actingAs($this->user)->postJson('/settings/notifications/push', subBody())->assertCreated();
+    $this->actingAs($this->user)->postJson('/settings/notifications/push', subBody())->assertCreated();
+
+    expect(PushSubscription::query()->count())->toBe(1);
+});

@@ -18,6 +18,9 @@ class PushSubscriptionController extends Controller
 {
     public const CAP = 10;
 
+    /** The test button runs inside a web request, so it only tries the newest few devices. */
+    public const TEST_LIMIT = 3;
+
     public function store(StorePushSubscriptionRequest $request): JsonResponse
     {
         $user = $request->user();
@@ -26,17 +29,19 @@ class PushSubscriptionController extends Controller
 
         DB::transaction(function () use ($request, $user, $endpoint, $hash): void {
             // Same endpoint from another account: rebind it (the device is now this user's).
-            $row = PushSubscription::query()->where('endpoint_hash', $hash)->lockForUpdate()->first();
-            $row ??= new PushSubscription(['endpoint_hash' => $hash]);
-            $row->forceFill([
+            // updateOrCreate survives two simultaneous first inserts (unique endpoint_hash) without a 500.
+            $row = PushSubscription::query()->updateOrCreate(['endpoint_hash' => $hash], [
                 'user_id' => $user->id,
                 'endpoint' => $endpoint,
                 'p256dh' => $request->validated('keys.p256dh'),
                 'auth' => $request->validated('keys.auth'),
                 'content_encoding' => $request->validated('contentEncoding') ?? 'aes128gcm',
                 'label' => UserAgentLabel::device($request->userAgent()),
-            ])->save();
-            $row->touch();
+            ]);
+            // Recency decides which subscriptions the cap keeps, so an unchanged re-registration still counts.
+            if (! $row->wasRecentlyCreated && ! $row->wasChanged()) {
+                $row->touch();
+            }
 
             $excess = PushSubscription::query()->where('user_id', $user->id)->orderByDesc('updated_at')->orderByDesc('id')
                 ->skip(self::CAP)->take(100)->pluck('id');
@@ -60,7 +65,8 @@ class PushSubscriptionController extends Controller
 
     public function test(Request $request, PushSender $sender): JsonResponse
     {
-        $subscriptions = PushSubscription::query()->where('user_id', $request->user()->id)->get();
+        $subscriptions = PushSubscription::query()->where('user_id', $request->user()->id)
+            ->orderByDesc('updated_at')->orderByDesc('id')->limit(self::TEST_LIMIT)->get();
         if ($subscriptions->isEmpty()) {
             return response()->json(['error' => 'none'], 422);
         }
