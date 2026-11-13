@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\ResetUserPassword;
+use App\Http\Controllers\Auth\InviteAcceptController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -76,7 +77,7 @@ class FortifyServiceProvider extends ServiceProvider
             ]);
         });
 
-        Fortify::loginView(fn () => Inertia::render('Auth/Login', ['googleEnabled' => false]));
+        Fortify::loginView(fn () => Inertia::render('Auth/Login', ['googleEnabled' => InviteAcceptController::googleEnabled()]));
 
         // Fortify always registers the password-confirmation routes; the app has no such screen, so a GET is a plain 404 instead of a missing-view 500.
         Fortify::confirmPasswordView(fn () => abort(404));

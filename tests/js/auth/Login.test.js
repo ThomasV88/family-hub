@@ -81,6 +81,7 @@ describe('Login page', () => {
         mountLogin({ props: { googleEnabled: true } });
         expect(current.text()).toContain('Sign in with Google');
         expect(current.find('[role=separator]').text()).toBe('or');
+        expect(current.find('a[href="/auth/google/redirect"]').text()).toContain('Sign in with Google');
     });
 
     it('validates empty email and password client-side and does not post', async () => {
@@ -144,6 +145,8 @@ describe('Login page', () => {
         ['signed_out', 'info', 'You have been signed out.'],
         ['session_ended', 'info', 'You were signed out. Sign in again to continue.'],
         ['password_reset', 'success', 'Your password was changed. Sign in with the new one.'],
+        ['google_failed', 'danger', 'Google sign-in did not work. Try again or use your password.'],
+        ['google_not_invited', 'danger', 'This Google account is not invited. Ask your family admin for an invite.'],
     ])('shows the %s status alert', (status, variant, text) => {
         mountLogin({ flash: { status } });
         const alert = current.find('[data-testid=status-alert]');
