@@ -1,5 +1,7 @@
 <?php
 
+use Laravel\Fortify\Features;
+
 return [
 
     'guard' => 'web',
@@ -28,6 +30,8 @@ return [
     // updatePasswords, twoFactorAuthentication and passkeys must never be enabled here
     // (invites are the only way in; 2FA and passkeys are Phase 6). resetPasswords is
     // enabled in plan 04 together with its views.
-    'features' => [],
+    'features' => [
+        Features::resetPasswords(),
+    ],
 
 ];

@@ -6,10 +6,14 @@ use App\Actions\Fortify\ResetUserPassword;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Contracts\LogoutResponse;
+use Laravel\Fortify\Contracts\PasswordResetResponse;
+use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Fortify;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -30,16 +34,47 @@ class FortifyServiceProvider extends ServiceProvider
                 return redirect('/login', 303)->with('status', 'signed_out');
             }
         });
+
+        // No enumeration: known and unknown emails get the very same response (research Pattern 4).
+        $linkSent = fn () => new class implements FailedPasswordResetLinkRequestResponse, SuccessfulPasswordResetLinkRequestResponse
+        {
+            public function toResponse($request): Response
+            {
+                return back()->with('status', 'reset_link_sent');
+            }
+        };
+        $this->app->singleton(SuccessfulPasswordResetLinkRequestResponse::class, $linkSent);
+        $this->app->singleton(FailedPasswordResetLinkRequestResponse::class, $linkSent);
+
+        $this->app->singleton(PasswordResetResponse::class, fn () => new class implements PasswordResetResponse
+        {
+            public function toResponse($request): Response
+            {
+                return redirect('/login', 303)->with('status', 'password_reset');
+            }
+        });
     }
 
     /**
      * Bootstrap any application services.
-     *
-     * Plan 04 registers the reset views.
      */
     public function boot(): void
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
+
+        Fortify::requestPasswordResetLinkView(fn () => Inertia::render('Auth/ForgotPassword'));
+
+        Fortify::resetPasswordView(function (Request $request) {
+            $email = Str::lower((string) $request->query('email', ''));
+            $token = (string) $request->route('token');
+            $user = $email !== '' ? User::where('email', $email)->first() : null;
+
+            return Inertia::render('Auth/ResetPassword', [
+                'token' => $token,
+                'email' => $email,
+                'valid' => $user !== null && Password::broker()->tokenExists($user, $token),
+            ]);
+        });
 
         Fortify::loginView(fn () => Inertia::render('Auth/Login', ['googleEnabled' => false]));
 

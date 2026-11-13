@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use App\Auth\SessionRevoker;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -23,10 +24,18 @@ class ResetUserPassword implements ResetsUserPasswords
     {
         Validator::make($input, [
             'password' => $this->passwordRules(),
+        ], [
+            'password.required' => 'invite.accept.error.password_short',
+            'password.min' => 'invite.accept.error.password_short',
+            'password.confirmed' => 'invite.accept.error.password_mismatch',
+            'password.uncompromised' => 'auth.error.password_compromised',
         ])->validate();
 
         $user->forceFill([
             'password' => Hash::make($input['password']),
         ])->save();
+
+        // Revoke means revoke: other devices are signed out. Audit rows come from the PasswordReset event (plan 05).
+        app(SessionRevoker::class)->revokeAll($user);
     }
 }

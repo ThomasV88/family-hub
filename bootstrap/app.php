@@ -2,9 +2,11 @@
 
 use App\Http\Middleware\EnsureRouteDeclaresAccess;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\NoReferrer;
 use App\Http\Middleware\NoStoreDynamicResponses;
 use App\Http\Middleware\RequireAccess;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\ThrottleAuthRoutes;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -33,11 +35,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo('/');
         $middleware->authenticateSessions();
         $middleware->encryptCookies(except: ['fh_theme']);
-        $middleware->alias(['access' => RequireAccess::class]);
+        $middleware->alias(['access' => RequireAccess::class, 'no-referrer' => NoReferrer::class]);
         $middleware->web(append: [
             SetLocale::class,
             HandleInertiaRequests::class,
             EnsureRouteDeclaresAccess::class,
+            ThrottleAuthRoutes::class,
             NoStoreDynamicResponses::class,
         ]);
     })
