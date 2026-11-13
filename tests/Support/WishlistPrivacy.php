@@ -27,14 +27,21 @@ class WishlistPrivacy
 
     public const CANARY_AMOUNT_MINOR = 777700;
 
-    /** @return list<LaravelRoute> every GET route of the wishlist plus the pages that could summarise it */
-    public static function surfaces(): array
+    /**
+     * @param  bool  $includeGiving  false drops the viewer-scoped giving GETs (the shopping list queries the viewer's
+     *                               own reservations on other people's lists, by design)
+     * @return list<LaravelRoute> every GET route of the wishlist plus the pages that could summarise it
+     */
+    public static function surfaces(bool $includeGiving = true): array
     {
         $extra = ['home', 'settings.index', 'settings.notifications'];
         $out = [];
         foreach (Route::getRoutes() as $route) {
             $name = $route->getName();
             if ($name === null || ! in_array('GET', $route->methods(), true)) {
+                continue;
+            }
+            if (! $includeGiving && str_starts_with($name, 'wishlist.giving.')) {
                 continue;
             }
             if (str_starts_with($name, 'wishlist.') || in_array($name, $extra, true)) {
@@ -156,11 +163,11 @@ class WishlistPrivacy
      * @param  array<string, mixed>  $ctx
      * @return array<string, string>
      */
-    public static function capture(object $test, User $viewer, array $ctx): array
+    public static function capture(object $test, User $viewer, array $ctx, bool $includeGiving = true): array
     {
         $version = self::inertiaVersion();
         $out = [];
-        foreach (self::surfaces() as $route) {
+        foreach (self::surfaces($includeGiving) as $route) {
             foreach (self::urls($route, $ctx) as $url) {
                 foreach (['inertia', 'html'] as $kind) {
                     app('auth')->forgetGuards();

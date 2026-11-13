@@ -11,7 +11,7 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Reserve and cancel. Never audited and never touches the wish row (no touch(), no updated_at write).
+ * Reserve and cancel. Leaves no log trail and never writes to the wish row.
  */
 final class ReservationService
 {

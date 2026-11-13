@@ -23,9 +23,14 @@ it('serves recipient-side viewers byte-identical surfaces with and without reser
     WishlistPrivacy::seedReservationWithCoBuy($ctx['wish'], $ctx['giver'], $ctx['giver2']);
     expect(DB::table('audit_logs')->count())->toBe($auditBefore);
 
+    $after = WishlistPrivacy::capture($this, $viewer, $ctx);
+
+    // Zero SQL against the reservation tables on every owner-side surface. The viewer-scoped shopping list
+    // (wishlist.giving.*) is excluded here: it legitimately reads the viewer's own giving on OTHER lists, and its
+    // response is covered by the differential and canary checks above.
     DB::flushQueryLog();
     DB::enableQueryLog();
-    $after = WishlistPrivacy::capture($this, $viewer, $ctx);
+    WishlistPrivacy::capture($this, $viewer, $ctx, includeGiving: false);
     $queries = collect(DB::getQueryLog())->pluck('query')->map(fn ($q) => strtolower($q));
     DB::disableQueryLog();
 
