@@ -1,3 +1,4 @@
+import { router } from '@inertiajs/vue3';
 import { inject, nextTick, onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { FRAME_DESKTOP } from '../design/panelMode.js';
 
@@ -72,9 +73,10 @@ export function provideShell({ panelMode, isPhone }) {
             addHandler = fn;
             return () => { if (addHandler === fn) addHandler = null; };
         },
-        triggerAdd(trigger = null) {
+        // A registered handler (the board on /todo) wins; elsewhere the add entry points open the create panel.
+        triggerAdd() {
             if (addHandler) addHandler();
-            else shell.openComingSoon('tasks', trigger);
+            else router.visit('/todo?task=new');
         },
     };
     provide(SHELL_KEY, shell);

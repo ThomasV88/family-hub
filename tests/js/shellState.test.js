@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { SIDEBAR_STORAGE_KEY, resolveSidebarOpen, readSidebar, writeSidebar } from '../../resources/js/Shell/shellState.js';
+import { createApp, h } from 'vue';
+import { provideShell, SIDEBAR_STORAGE_KEY, resolveSidebarOpen, readSidebar, writeSidebar } from '../../resources/js/Shell/shellState.js';
+const visit = vi.fn();
+vi.mock('@inertiajs/vue3', () => ({ router: { visit: (...a) => visit(...a) } }));
+
 import { pseudoLong } from './helpers/pseudoLong.js';
 import { loadMessages } from './helpers/mount.js';
 
@@ -48,5 +52,34 @@ describe('pseudoLong', () => {
         const copy = pseudoLong(en);
         expect(copy.nav.tasks.length).toBeGreaterThanOrEqual(en.nav.tasks.length * 1.4);
         expect(en.nav.tasks).toBe('Tasks');
+    });
+});
+
+
+describe('triggerAdd', () => {
+    function shellInstance() {
+        let shell;
+        createApp({ setup() { shell = provideShell({ panelMode: 'sheet', isPhone: true }); return () => h('div'); } }).mount(document.createElement('div'));
+        return shell;
+    }
+    beforeEach(() => visit.mockClear());
+
+    it('falls back to /todo?task=new without a registered handler', () => {
+        const shell = shellInstance();
+        shell.triggerAdd();
+        expect(visit).toHaveBeenCalledWith('/todo?task=new');
+        expect(shell.panelModule.value).toBeNull();
+    });
+
+    it('a registered handler wins and unregisters', () => {
+        const shell = shellInstance();
+        const handler = vi.fn();
+        const off = shell.registerAddHandler(handler);
+        shell.triggerAdd();
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(visit).not.toHaveBeenCalled();
+        off();
+        shell.triggerAdd();
+        expect(visit).toHaveBeenCalledWith('/todo?task=new');
     });
 });

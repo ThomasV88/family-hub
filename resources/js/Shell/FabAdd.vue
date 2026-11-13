@@ -1,14 +1,17 @@
 <script setup>
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { Plus } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { useShell } from './shellState.js';
 
 const { t } = useI18n();
 const shell = useShell();
+const canAdd = computed(() => usePage().props.auth?.access?.todo === 'edit');
 </script>
 
 <template>
-    <button type="button" class="fab" :aria-label="t('nav.add_task')" @click="shell.triggerAdd($event.currentTarget)">
+    <button v-if="canAdd" type="button" class="fab" :aria-label="t('nav.add_task')" @click="shell.triggerAdd()">
         <Plus :size="24" :stroke-width="1.75" aria-hidden="true" />
     </button>
 </template>

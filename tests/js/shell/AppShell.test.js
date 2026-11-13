@@ -8,6 +8,7 @@ import { createAppI18n } from '../../../resources/js/i18n.js';
 import { mount } from '@vue/test-utils';
 
 let mockProps = {};
+const visit = vi.fn();
 // Tests that do not care about permissions get full module access (visibleModules hides everything without it).
 const FULL_ACCESS = { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'edit' };
 const withAccess = (p) => ({ ...p, auth: { ...p.auth, access: p.auth?.access ?? FULL_ACCESS } });
@@ -15,7 +16,7 @@ vi.mock('@inertiajs/vue3', async () => {
     const { h } = await import('vue');
     return {
         usePage: () => ({ props: withAccess(mockProps) }),
-        router: { post: vi.fn(), visit: vi.fn(), on: vi.fn() },
+        router: { post: vi.fn(), visit: (...a) => visit(...a), on: vi.fn() },
         Link: { props: ['href'], render() { return h('a', { href: this.href }, this.$slots.default?.()); } },
     };
 });
@@ -132,14 +133,23 @@ describe('AppShell phone', () => {
         expect(wrapper.find(`button[aria-label="${en.nav.add_task}"]`).exists()).toBe(true);
     });
 
-    it('opens the coming-soon sheet from the FAB', async () => {
+    it('navigates to /todo?task=new from the FAB instead of a coming-soon sheet', async () => {
         setWidth(390);
+        visit.mockClear();
         mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' } };
         mountShell();
         await wrapper.find(`button[aria-label="${en.nav.add_task}"]`).trigger('click');
         await flushPromises();
-        expect(document.body.textContent).toContain(en.soon.title);
-        expect(document.body.querySelector('[role=dialog]')).not.toBeNull();
+        expect(visit).toHaveBeenCalledWith('/todo?task=new');
+        expect(document.body.querySelector('[role=dialog]')).toBeNull();
+    });
+
+    it('hides the FAB without To-do edit', async () => {
+        setWidth(390);
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, auth: { access: { todo: 'view', wishlist: 'none', finance: 'none', health: 'none' } } };
+        mountShell();
+        await nextTick();
+        expect(wrapper.find(`button[aria-label="${en.nav.add_task}"]`).exists()).toBe(false);
     });
 
     it('is axe clean', async () => {
@@ -185,5 +195,26 @@ describe('AppShell access-aware navigation', () => {
             expect(text).toContain(en.nav.tasks);
             for (const hidden of ['wishlist', 'finances', 'health']) expect(text).not.toContain(en.nav[hidden]);
         }
+    });
+});
+
+describe('AppShell topbar Add task', () => {
+    it('shows Add task on desktop for editors and navigates to the create panel', async () => {
+        setWidth(1280);
+        visit.mockClear();
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' } };
+        mountShell();
+        await nextTick();
+        const btn = wrapper.findAll('header button').find((b) => b.text() === en.nav.add_task);
+        await btn.trigger('click');
+        expect(visit).toHaveBeenCalledWith('/todo?task=new');
+    });
+
+    it('hides Add task on desktop without To-do edit', async () => {
+        setWidth(1280);
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, auth: { access: { todo: 'view', wishlist: 'none', finance: 'none', health: 'none' } } };
+        mountShell();
+        await nextTick();
+        expect(wrapper.findAll('header button').some((b) => b.text() === en.nav.add_task)).toBe(false);
     });
 });

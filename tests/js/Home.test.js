@@ -170,3 +170,60 @@ describe('Home dashboard module cards', () => {
         for (const k of ['wishlist', 'finances', 'health']) expect(text).not.toContain(load('en').module[k]);
     });
 });
+
+
+describe('Home Due soon card', () => {
+    const base = { app: { name: 'Family Hub', env: 'production' } };
+    const dueSoon = (extra = {}) => ({
+        items: [
+            { id: 4, title: 'Pay rent', dueDate: '2000-01-01', dueTime: null, visibility: 'personal' },
+            { id: 9, title: 'Call gran', dueDate: '2999-01-01', dueTime: '18:00', visibility: 'family' },
+        ],
+        more: 0, hasAnyTasks: true, today: '2026-11-13', timezone: 'Europe/Bratislava', ...extra,
+    });
+
+    it('replaces the tasks module card with Due soon rows linking to /todo?task={id}', () => {
+        mockProps = { ...base, dueSoon: dueSoon({ more: 3 }) };
+        const w = mountHome();
+        const h2 = w.findAll('main h2').map((h) => h.text());
+        expect(h2).toEqual(['Due soon', 'Wishlist', 'Finances', 'Health', 'System status']);
+        const card = w.find('[data-testid=due-soon]');
+        expect(card.findAll('a').map((a) => a.attributes('href'))).toEqual(['/todo', '/todo?task=4', '/todo?task=9']);
+        expect(card.find('input[type=checkbox]').exists()).toBe(false);
+        expect(card.text()).toContain('Overdue');
+        expect(card.find('[aria-label="Personal task"]').exists()).toBe(true);
+        expect(card.find('[data-testid=due-soon-more]').text()).toBe('and 3 more');
+    });
+
+    it('shows the empty state with Add task for editors, none without edit', () => {
+        mockProps = { ...base, dueSoon: dueSoon({ items: [], hasAnyTasks: false }) };
+        const w = mountHome();
+        expect(w.find('[data-testid=due-soon]').text()).toContain('No tasks yet');
+        expect(w.find('[data-testid=due-soon]').findAll('button').map((b) => b.text())).toEqual(['Add task']);
+        current.unmount();
+        mockProps = { ...base, auth: { access: { todo: 'view', wishlist: 'none', finance: 'none', health: 'none' } }, dueSoon: dueSoon({ items: [], hasAnyTasks: false }) };
+        expect(mountHome().find('[data-testid=due-soon]').findAll('button')).toHaveLength(0);
+    });
+
+    it('shows the muted none-due text when tasks exist but none is due', () => {
+        mockProps = { ...base, dueSoon: dueSoon({ items: [] }) };
+        const card = mountHome().find('[data-testid=due-soon]');
+        expect(card.find('[data-testid=due-soon-none]').text()).toContain('Nothing is due soon.');
+    });
+
+    it('renders quick add only for To-do editors and no card without To-do access', () => {
+        mockProps = { ...base, auth: { access: { todo: 'view', wishlist: 'edit', finance: 'none', health: 'none' } }, dueSoon: dueSoon() };
+        let w = mountHome();
+        expect(w.find('[data-testid=quick-add]').exists()).toBe(false);
+        current.unmount();
+        mockProps = { ...base, auth: { access: { todo: 'none', wishlist: 'edit', finance: 'none', health: 'none' } }, dueSoon: null };
+        w = mountHome();
+        expect(w.find('[data-testid=due-soon]').exists()).toBe(false);
+        expect(w.findAll('main h2').map((h) => h.text())).not.toContain('To-do');
+    });
+
+    it.each(['en', 'sk', 'pl'])('has no axe violations (%s)', async (locale) => {
+        mockProps = { ...base, locale, dueSoon: dueSoon({ more: 2 }) };
+        await expectNoAxeViolations(mountHome(locale).element);
+    });
+});
