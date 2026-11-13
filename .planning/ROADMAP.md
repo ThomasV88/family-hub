@@ -63,15 +63,15 @@ Plans:
   4. Keyboard navigation, visible focus, contrast and touch target sizes meet the accessibility baseline on the style page and the shell
   5. A sketch for every module (to-do, wishlist, finance, medical, settings) has been chosen and recorded as the design direction for later phases
 **UI hint**: yes
-**Plans:** 2/7 plans executed
+**Plans:** 6/7 plans executed
 
 Plans:
 - [x] 01.1-01-PLAN.md — Package approval (@lucide/vue, axe-core), AA-verified tokens, System/Light/Dark theme without inline script
 - [x] 01.1-02-PLAN.md — Non-production /_style living style page, tokens with contrast, UiButton, all phase copy in SK/PL/EN
-- [ ] 01.1-03-PLAN.md — Form controls (field, input, textarea, select, checkbox, radio, switch) and per-module design notes
-- [ ] 01.1-04-PLAN.md — Tags, avatars, chips, cards, empty/error states, alerts, skeleton, progress, lists and responsive tables
-- [ ] 01.1-05-PLAN.md — Dialogs, destructive confirm, detail panel (sheet/overlay/docked), menu, tabs, toasts
-- [ ] 01.1-06-PLAN.md — Responsive app shell: bottom bar + FAB, toggleable sidebar, account menu, skip link, coming-soon panel
+- [x] 01.1-03-PLAN.md — Form controls (field, input, textarea, select, checkbox, radio, switch) and per-module design notes
+- [x] 01.1-04-PLAN.md — Tags, avatars, chips, cards, empty/error states, alerts, skeleton, progress, lists and responsive tables
+- [x] 01.1-05-PLAN.md — Dialogs, destructive confirm, detail panel (sheet/overlay/docked), menu, tabs, toasts
+- [x] 01.1-06-PLAN.md — Responsive app shell: bottom bar + FAB, toggleable sidebar, account menu, skip link, coming-soon panel
 - [ ] 01.1-07-PLAN.md — Overview dashboard with quick add, restyled PWA banner/switcher, accessibility sweep, end-of-phase verification
 
 ### Phase 2: Identity and Authorization Core
