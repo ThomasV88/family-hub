@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Todo;
 
+use App\Rules\HasTodoAccess;
+use App\Tasks\TaskStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreTaskRequest extends FormRequest
 {
@@ -24,6 +27,11 @@ class StoreTaskRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:200'],
+            'notes' => ['nullable', 'string', 'max:5000'],
+            'status' => ['sometimes', Rule::enum(TaskStatus::class)],
+            'assignee_id' => ['nullable', 'integer', new HasTodoAccess],
+            'due_date' => ['nullable', 'date_format:Y-m-d'],
+            'due_time' => ['nullable', 'date_format:H:i', Rule::prohibitedIf(fn () => blank($this->input('due_date')))],
         ];
     }
 
@@ -34,6 +42,13 @@ class StoreTaskRequest extends FormRequest
             'title.required' => 'todo.error.title_required',
             'title.string' => 'todo.error.title_required',
             'title.max' => 'todo.error.title_long',
+            'notes.string' => 'todo.error.notes_long',
+            'notes.max' => 'todo.error.notes_long',
+            'status.*' => 'todo.error.save_failed',
+            'assignee_id.integer' => 'todo.error.assignee',
+            'due_date.date_format' => 'todo.error.date_invalid',
+            'due_time.date_format' => 'todo.error.time_invalid',
+            'due_time.prohibited' => 'todo.error.time_invalid',
         ];
     }
 }

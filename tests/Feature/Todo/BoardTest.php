@@ -97,13 +97,14 @@ it('ignores extra fields on quick add (no mass assignment)', function () {
     $other = User::factory()->withPreset(Preset::Child)->create();
 
     $this->actingAs($parent)->post('/todo/tasks', [
-        'title' => 'Mine', 'creator_id' => $other->id, 'assignee_id' => $other->id, 'status' => 'done', 'visibility' => 'personal',
+        'title' => 'Mine', 'creator_id' => $other->id, 'visibility' => 'personal', 'completed_at' => now()->toIso8601String(),
     ])->assertStatus(303);
 
     $task = Task::query()->sole();
     expect($task->creator_id)->toBe($parent->id)
         ->and($task->assignee_id)->toBe($parent->id)
         ->and($task->status->value)->toBe('todo')
+        ->and($task->completed_at)->toBeNull()
         ->and($task->visibility->value)->toBe('family');
 });
 

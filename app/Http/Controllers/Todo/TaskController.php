@@ -7,10 +7,11 @@ use App\Access\AccessLevel;
 use App\Access\Module;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Todo\StoreTaskRequest;
+use App\Http\Requests\Todo\UpdateTaskRequest;
 use App\Models\Task;
 use App\Models\User;
-use App\Tasks\TaskStatus;
-use App\Tasks\TaskVisibility;
+use App\Tasks\TaskAccess;
+use App\Tasks\TaskService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,7 +19,7 @@ use Inertia\Response;
 
 class TaskController extends Controller
 {
-    public function index(Request $request, AccessGate $gate): Response
+    public function index(Request $request, AccessGate $gate, TaskAccess $access): Response
     {
         $user = $request->user();
         $timezone = config('family.timezone');
@@ -42,7 +43,13 @@ class TaskController extends Controller
             ->map(fn (User $m) => ['id' => $m->id, 'name' => $m->name])
             ->values();
 
+        // Same answer for an unknown id and one the user cannot see; 'new' opens the create panel.
+        $requested = $request->query('task');
+        $selectedTaskMissing = is_string($requested) && ctype_digit($requested)
+            && ! Task::query()->visibleTo($user)->whereKey((int) $requested)->exists();
+
         return Inertia::render('Todo/Index', [
+            'selectedTaskMissing' => $selectedTaskMissing,
             'timezone' => $timezone,
             'today' => now($timezone)->toDateString(),
             'canEdit' => $gate->allows($user, Module::Todo, AccessLevel::Edit),
@@ -60,26 +67,39 @@ class TaskController extends Controller
                 'isRecurring' => $t->isRecurring(),
                 'completedAt' => $t->completed_at?->toIso8601String(),
                 'memberIds' => $t->members->pluck('id')->values()->all(),
+                'abilities' => $access->abilities($user, $t),
             ])->values(),
         ]);
     }
 
-    public function store(StoreTaskRequest $request): RedirectResponse
+    public function store(StoreTaskRequest $request, TaskService $service): RedirectResponse
     {
-        $user = $request->user();
-
-        // Quick add: only the title comes from the request. Everything else is a server-side default.
-        $task = new Task(['title' => $request->validated('title')]);
-        $task->forceFill([
-            'creator_id' => $user->id,
-            'assignee_id' => $user->id,
-            'timezone' => config('family.timezone'),
-            'status' => TaskStatus::Todo,
-            'visibility' => TaskVisibility::Family,
-        ])->save();
+        $task = $service->create($request->user(), $request->validated());
 
         return back(303)
             ->with('flash_data', ['taskId' => $task->id])
-            ->with('toast', ['key' => 'todo.quick.added']);
+            ->with('toast', ['key' => count($request->validated()) > 1 ? 'todo.toast.saved' : 'todo.quick.added']);
+    }
+
+    public function update(UpdateTaskRequest $request, int $task, TaskAccess $access, TaskService $service): RedirectResponse
+    {
+        $user = $request->user();
+        $model = Task::query()->visibleTo($user)->findOrFail($task);
+        abort_unless($access->canEdit($user, $model), 403);
+
+        $service->update($model, $request->validated(), $user);
+
+        return back(303)->with('toast', ['key' => 'todo.toast.saved']);
+    }
+
+    public function destroy(Request $request, int $task, TaskAccess $access, TaskService $service): RedirectResponse
+    {
+        $user = $request->user();
+        $model = Task::query()->visibleTo($user)->findOrFail($task);
+        abort_unless($access->canDelete($user, $model), 403);
+
+        $service->delete($model);
+
+        return back(303)->with('toast', ['key' => 'todo.toast.deleted']);
     }
 }
