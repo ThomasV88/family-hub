@@ -9,3 +9,6 @@
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore
+
+# Synthetic bank fixtures must keep exact bytes (CRLF, legacy encodings)
+tests/fixtures/finance/*.csv -text
