@@ -68,3 +68,44 @@ describe('WR-03 mode change while open', () => {
         expect(document.body.style.overflow).toBe('');
     });
 });
+
+import { useFocusTrap } from '../../../resources/js/Components/ui/useFocusTrap.js';
+
+describe('WR-04 / WR-05 focus trap', () => {
+    const tabKey = (el, shiftKey = false) => {
+        const ev = new KeyboardEvent('keydown', { key: 'Tab', shiftKey, bubbles: true, cancelable: true });
+        el.dispatchEvent(ev);
+        return ev;
+    };
+    it('skips hidden elements when wrapping', () => {
+        const c = document.createElement('div');
+        c.innerHTML = '<button id="a">a</button><button id="b">b</button><div style="display:none"><button id="x">x</button></div><button id="h" hidden>h</button><input type="hidden" tabindex="0">';
+        document.body.append(c);
+        const trap = useFocusTrap({ value: c });
+        trap.activate();
+        c.querySelector('#b').focus();
+        tabKey(c.querySelector('#b'));
+        expect(document.activeElement.id).toBe('a');
+        tabKey(c.querySelector('#a'), true);
+        expect(document.activeElement.id).toBe('b');
+        trap.deactivate();
+    });
+    it('focuses a plain input returned as initialFocus (not its string value)', () => {
+        const c = document.createElement('div');
+        c.innerHTML = '<button id="a">a</button><input id="i" value="text">';
+        document.body.append(c);
+        const trap = useFocusTrap({ value: c }, { initialFocus: () => c.querySelector('#i') });
+        trap.activate();
+        expect(document.activeElement.id).toBe('i');
+        trap.deactivate();
+    });
+    it('does not throw when initialFocus returns a primitive', () => {
+        const c = document.createElement('div');
+        c.innerHTML = '<button id="a">a</button>';
+        document.body.append(c);
+        const trap = useFocusTrap({ value: c }, { initialFocus: () => 'nope' });
+        trap.activate();
+        expect(document.activeElement.id).toBe('a');
+        trap.deactivate();
+    });
+});
