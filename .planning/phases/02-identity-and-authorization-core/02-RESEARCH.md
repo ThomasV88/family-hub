@@ -462,7 +462,9 @@ Table `module_permissions`: `user_id` fk cascade, `module` string with CHECK in 
 | A11 | CF-Connecting-IP in nginx gives the true client IP for throttle keys and audit IPs | Pitfall 2 | Throttle keys collapse to Cloudflare IPs |
 | A12 | Fortify's published/`vendor` composer scripts have no unusual install hooks | Package audit | Supply-chain risk, check before install |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+RESOLVED by orchestrator decisions (see plans): queue + mail_failed_at (02-07); Google login cannot consume an invite (02-09); copy link and resend rotate the token (02-07); staging mail driver log (02-07, 02-10); denied access to health and finance audited (02-05).
 
 1. **Invite email: queue vs immediate failure feedback**
    - Known: owner wants mail on the queue; UI-SPEC shows a "could not send, copy the link" alert.
