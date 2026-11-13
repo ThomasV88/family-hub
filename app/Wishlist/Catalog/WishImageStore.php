@@ -18,8 +18,17 @@ final class WishImageStore
         $thumb = "{$dir}/{$name}-thumb.jpg";
         $oldPaths = array_filter([$wish->image_path, $wish->thumb_path]);
 
-        $disk->put($full, $image->fullBytes);
-        $disk->put($thumb, $image->thumbBytes);
+        // The disk is configured with throw=false, so a full disk or a bad volume owner returns false.
+        // Nothing is touched (row, old files) unless both writes are confirmed.
+        try {
+            $stored = $disk->put($full, $image->fullBytes) !== false && $disk->put($thumb, $image->thumbBytes) !== false;
+        } catch (\Throwable) {
+            $stored = false;
+        }
+        if (! $stored) {
+            $disk->delete([$full, $thumb]);
+            throw new WishImageWriteFailed('wish image write failed');
+        }
 
         $wish->forceFill([
             'image_path' => $full,

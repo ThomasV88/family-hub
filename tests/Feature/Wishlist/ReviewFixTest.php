@@ -48,3 +48,24 @@ it('resets pending in the job when an upload won the race, and keeps an older im
     (new \App\Wishlist\Catalog\FetchWishImage($fetched->id))->failed(new RuntimeException('boom'));
     expect($fetched->fresh()->image_status)->toBe('ready');
 });
+
+it('keeps the old image and does not mark ready when the disk write fails', function () {
+    $wish = Wish::factory()->create([
+        'owner_id' => $this->parent->id, 'image_status' => 'ready', 'image_source' => 'fetched',
+        'image_path' => 'wish-images/9/old-full.jpg', 'thumb_path' => 'wish-images/9/old-thumb.jpg',
+    ]);
+    Storage::disk('local')->put('wish-images/9/old-full.jpg', 'old');
+    Storage::disk('local')->put('wish-images/9/old-thumb.jpg', 'old');
+    $real = Storage::disk('local');
+    $failing = Mockery::mock($real)->makePartial();
+    $failing->shouldReceive('put')->andReturn(false);
+    Storage::set('local', $failing);
+
+    $store = app(\App\Wishlist\Catalog\WishImageStore::class);
+    expect(fn () => $store->put($wish, new \App\Wishlist\Catalog\ProcessedImage('a', 'b', 1, 1), 'uploaded', null))
+        ->toThrow(\App\Wishlist\Catalog\WishImageWriteFailed::class);
+
+    $fresh = $wish->fresh();
+    expect($fresh->image_source)->toBe('fetched')->and($fresh->image_path)->toBe('wish-images/9/old-full.jpg');
+    expect($real->exists('wish-images/9/old-full.jpg'))->toBeTrue();
+});

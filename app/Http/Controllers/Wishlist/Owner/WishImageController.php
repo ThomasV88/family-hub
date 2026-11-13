@@ -9,6 +9,7 @@ use App\Wishlist\Catalog\FetchWishImage;
 use App\Wishlist\Catalog\ImageProcessor;
 use App\Wishlist\Catalog\ImageRejected;
 use App\Wishlist\Catalog\WishImageStore;
+use App\Wishlist\Catalog\WishImageWriteFailed;
 use App\Wishlist\WishAccess;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -57,7 +58,11 @@ class WishImageController extends Controller
             };
             throw ValidationException::withMessages(['image' => $key]);
         }
-        $store->put($model, $processed, 'uploaded', null);
+        try {
+            $store->put($model, $processed, 'uploaded', null);
+        } catch (WishImageWriteFailed) {
+            throw ValidationException::withMessages(['image' => 'wishlist.image.err_upload']);
+        }
 
         return back(303)->with('toast', ['key' => 'wishlist.toast.saved']);
     }
