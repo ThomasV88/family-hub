@@ -8,7 +8,7 @@
 # Usage: backup.sh [nightly|pre-migrate|manual]   (run from the stack directory)
 # Env (from .env or the environment): COMPOSE_FILE, STACK_ENV, BACKUP_RESTIC_REPOSITORY,
 #   BACKUP_COPY_REPOSITORY, RESTIC_PASSWORD_FILE, BACKUP_COPY_PASSWORD_FILE, DB_NAME, DB_DUMP_USER,
-#   UPLOADS_PATH (directory inside the app container, default /var/www/html/storage/app/private/wish-images)
+#   BACKUP_LOG_FILE (default ./logs/backup.log), UPLOADS_PATH (directory inside the app container, default /var/www/html/storage/app/private/wish-images)
 set -euo pipefail
 
 KIND="${1:-nightly}"
@@ -19,7 +19,7 @@ load_env() {
   [ -f .env ] || return 0
   local key line val
   for key in COMPOSE_FILE STACK_ENV BACKUP_RESTIC_REPOSITORY BACKUP_COPY_REPOSITORY RESTIC_PASSWORD_FILE \
-             BACKUP_COPY_PASSWORD_FILE DB_NAME DB_DUMP_USER; do
+             BACKUP_COPY_PASSWORD_FILE DB_NAME DB_DUMP_USER UPLOADS_PATH BACKUP_LOG_FILE; do
     [ -n "${!key:-}" ] && continue
     line="$(grep -E "^${key}=" .env | tail -n 1 || true)"
     [ -z "$line" ] && continue
