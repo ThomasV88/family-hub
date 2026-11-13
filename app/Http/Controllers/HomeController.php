@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Access\AccessGate;
 use App\Access\AccessLevel;
 use App\Access\Module;
+use App\Finance\HomeSummary;
 use App\Models\SystemHeartbeat;
 use App\Models\Task;
 use App\Models\User;
@@ -18,12 +19,12 @@ class HomeController extends Controller
 {
     private const DUE_SOON_LIMIT = 5;
 
-    public function __invoke(Request $request, AccessGate $gate, UpcomingOccasions $occasions): Response
+    public function __invoke(Request $request, AccessGate $gate, UpcomingOccasions $occasions, HomeSummary $finance): Response
     {
         $latest = SystemHeartbeat::query()->orderByDesc('recorded_at')->first();
         $user = $request->user();
 
-        return Inertia::render('Home', [
+        $props = [
             'heartbeat' => [
                 'last_recorded_at' => $latest?->recorded_at->utc()->toIso8601String(),
                 'last_source' => $latest?->source,
@@ -38,7 +39,15 @@ class HomeController extends Controller
             'occasions' => fn () => $user && $gate->allows($user, Module::Wishlist, AccessLevel::View)
                 ? $occasions->strip()
                 : null,
-        ]);
+        ];
+
+        // Present only with finance access and at least one visible recurring item; the key is absent otherwise.
+        $card = $user ? $finance->forUser($user) : null;
+        if ($card !== null) {
+            $props['financeCard'] = $card;
+        }
+
+        return Inertia::render('Home', $props);
     }
 
     /** @return array<string, mixed> */
