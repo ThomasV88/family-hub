@@ -7,7 +7,7 @@ FROM php:8.4-fpm-alpine AS base
 RUN set -eux; \
     apk add --no-cache icu-libs libpq libzip; \
     apk add --no-cache --virtual .build-deps $PHPIZE_DEPS icu-dev libzip-dev postgresql-dev; \
-    docker-php-ext-install -j"$(nproc)" pdo_pgsql intl opcache pcntl zip; \
+    docker-php-ext-install -j"$(nproc)" pdo_pgsql intl opcache pcntl zip bcmath; \
     apk del .build-deps; \
     # php-fpm is run unprivileged in every target, so the pool user/group directives are not used
     sed -i 's/^user = /;user = /; s/^group = /;group = /' /usr/local/etc/php-fpm.d/www.conf
