@@ -214,5 +214,288 @@
             "contrast": "Kontrast",
             "result": "Výsledok"
         }
+    },
+    "auth": {
+        "title": {
+            "login": "Prihlásenie"
+        },
+        "email": "E-mail",
+        "password": "Heslo",
+        "password_confirm": "Potvrdenie hesla",
+        "remember": "Zostať prihlásený 30 dní",
+        "submit": {
+            "login": "Prihlásiť sa"
+        },
+        "google": "Prihlásiť sa cez Google",
+        "or": "alebo",
+        "forgot_link": "Zabudnuté heslo?",
+        "show_password": "Zobraziť heslo",
+        "hide_password": "Skryť heslo",
+        "invite_only": "Family Hub je len na pozvánku. Požiadajte správcu rodiny o pozvánku.",
+        "back_to_login": "Späť na prihlásenie",
+        "error": {
+            "failed": "E-mail alebo heslo nie je správne. Skontrolujte ich a skúste to znova.",
+            "email_invalid": "Zadajte platnú e-mailovú adresu, napríklad meno{'@'}example.com.",
+            "password_required": "Zadajte heslo.",
+            "throttle": "Príliš veľa pokusov. Skúste to znova o {minutes} minútu. | Príliš veľa pokusov. Skúste to znova o {minutes} minúty. | Príliš veľa pokusov. Skúste to znova o {minutes} minúty. | Príliš veľa pokusov. Skúste to znova o {minutes} minút.",
+            "google_not_invited": "Tento účet Google nie je pozvaný. Požiadajte správcu rodiny o pozvánku.",
+            "google_failed": "Prihlásenie cez Google sa nepodarilo. Skúste to znova alebo použite heslo.",
+            "email_required": "Zadajte e-mail.",
+            "password_compromised": "Toto heslo sa objavilo v známom úniku údajov. Zvoľte iné.",
+            "invite_invalid": "Túto pozvánku nemožno použiť."
+        },
+        "signed_out": "Boli ste odhlásený.",
+        "session_ended": "Boli ste odhlásený. Na pokračovanie sa prihláste znova.",
+        "forgot": {
+            "title": "Obnovenie hesla",
+            "body": "Zadajte e-mail a pošleme vám odkaz.",
+            "submit": "Poslať odkaz na obnovenie",
+            "sent": "Ak pre tento e-mail existuje účet, odkaz na obnovenie je na ceste. Odkaz platí 60 minút."
+        },
+        "reset": {
+            "title": "Nastavenie nového hesla",
+            "new_password": "Nové heslo",
+            "confirm": "Potvrdenie nového hesla",
+            "hint": "Na ostatných zariadeniach budete odhlásený.",
+            "submit": "Nastaviť nové heslo",
+            "done": "Heslo bolo zmenené. Prihláste sa novým heslom.",
+            "invalid_title": "Tento odkaz na obnovenie nemožno použiť",
+            "invalid_body": "Možno vypršal. Vyžiadajte si nový.",
+            "invalid_action": "Vyžiadať nový odkaz"
+        }
+    },
+    "invite": {
+        "accept": {
+            "title": "Pripojte sa k rodine vo Family Hub",
+            "body": "Pozvánka bola poslaná na {email}.",
+            "name": "Meno",
+            "password_hint": "Aspoň 12 znakov. Dobre funguje aj dlhá veta.",
+            "submit": "Vytvoriť účet",
+            "google": "Pokračovať cez Google",
+            "google_hint": "Použite účet Google pre {email}.",
+            "google_mismatch": "Tento účet Google používa iný e-mail. Použite účet Google pre {email}.",
+            "welcome": "Vitajte vo Family Hub, {name}.",
+            "error": {
+                "name_required": "Zadajte svoje meno.",
+                "password_short": "Použite aspoň 12 znakov.",
+                "password_mismatch": "Heslá sa nezhodujú. Zadajte rovnaké heslo dvakrát."
+            }
+        },
+        "invalid": {
+            "title": "Túto pozvánku nemožno použiť",
+            "expired": "Vypršala po 7 dňoch. Požiadajte správcu rodiny o novú.",
+            "used": "Už bola použitá. Skúste sa prihlásiť.",
+            "revoked": "Už neplatí. Požiadajte správcu rodiny o novú pozvánku.",
+            "action": "Prejsť na prihlásenie"
+        },
+        "dialog": {
+            "title": "Pozvať člena rodiny",
+            "preset": "Východzí prístup",
+            "language": "Jazyk",
+            "help": "Pozvánka platí 7 dní a dá sa použiť raz.",
+            "submit": "Poslať pozvánku",
+            "cancel": "Zrušiť",
+            "sent": "Pozvánka bola poslaná na {email}.",
+            "link_label": "Odkaz na pozvánku",
+            "mail_failed": "E-mail sa nepodarilo odoslať. Skopírujte odkaz a pošlite ho sami.",
+            "done": "Hotovo",
+            "another": "Pozvať ďalšieho",
+            "error": {
+                "exists": "Tento e-mail už patrí členovi. Požiadajte ho, aby sa prihlásil."
+            }
+        }
+    },
+    "settings": {
+        "nav_label": "Nastavenia",
+        "section": {
+            "members": "Členovia a prístup",
+            "audit": "Záznam aktivity",
+            "appearance": "Vzhľad a jazyk"
+        },
+        "back": "Späť do nastavení",
+        "members": {
+            "title": "Členovia",
+            "invite": "Pozvať člena",
+            "manage": "Spravovať",
+            "manage_aria": "Spravovať: {name}",
+            "you": "Vy",
+            "caption": "Členovia"
+        },
+        "role": {
+            "admin": "Správca",
+            "member": "Člen"
+        },
+        "status": {
+            "active": "Aktívny"
+        },
+        "invites": {
+            "title": "Pozvánky",
+            "pending": "Čaká, vyprší {date}",
+            "expired": "Vypršala",
+            "revoked": "Zrušená",
+            "resend": "Poslať znova",
+            "copy": "Kopírovať odkaz",
+            "copied": "Odkaz na pozvánku skopírovaný",
+            "revoke": "Zrušiť",
+            "empty_title": "Žiadne čakajúce pozvánky",
+            "empty_body": "Pozvite člena rodiny a začnite.",
+            "revoke_title": "Zrušiť pozvánku",
+            "revoke_body": "Zrušiť pozvánku pre {email}? Odkaz prestane fungovať.",
+            "revoke_keep": "Ponechať pozvánku",
+            "revoke_confirm": "Zrušiť pozvánku",
+            "resend_aria": "Poslať pozvánku znova na {email}",
+            "copy_aria": "Kopírovať odkaz na pozvánku pre {email}",
+            "revoke_aria": "Zrušiť pozvánku pre {email}",
+            "mail_failed": "E-mail sa neodoslal",
+            "rotated_note": "Bol vytvorený nový odkaz. Predchádzajúci odkaz už nefunguje.",
+            "resent_toast": "Pozvánka bola znova poslaná na {email}.",
+            "revoked_toast": "Pozvánka bola zrušená",
+            "caption": "Pozvánky",
+            "language": "Jazyk: {language}"
+        }
+    },
+    "permissions": {
+        "preset": {
+            "parent": "Rodič",
+            "child": "Dieťa",
+            "grandparent": "Starý rodič",
+            "guest": "Hosť",
+            "parent_hint": "Úlohy, Wishlist a Financie: úpravy. Zdravie: žiadny.",
+            "child_hint": "Úlohy a Wishlist: úpravy. Financie a Zdravie: žiadny.",
+            "grandparent_hint": "Úlohy a Wishlist: úpravy. Financie a Zdravie: žiadny.",
+            "guest_hint": "Úlohy: iba čítanie. Všetko ostatné: žiadny."
+        },
+        "apply_label": "Použiť predvoľbu",
+        "apply": "Použiť",
+        "applied": "Predvoľba použitá. Upravte, čo treba, a uložte.",
+        "level": {
+            "none": "Žiadny",
+            "view": "Čítanie",
+            "edit": "Úpravy"
+        },
+        "module": {
+            "todo": "Úlohy",
+            "wishlist": "Wishlist",
+            "finance": "Financie",
+            "health": "Zdravie",
+            "settings": "Nastavenia"
+        },
+        "restricted": "Predvolene obmedzené",
+        "settings_admin_only": "Iba správcovia",
+        "settings_always": "Vždy povolené",
+        "admin_no_sensitive": "Správcovia nedostávajú Zdravie ani Financie automaticky.",
+        "self_note": "Ste správca a k nastaveniam máte prístup vždy.",
+        "tab": {
+            "permissions": "Oprávnenia",
+            "sessions": "Relácie"
+        },
+        "save": "Uložiť oprávnenia",
+        "cancel": "Zrušiť",
+        "saved": "Oprávnenia uložené",
+        "save_failed": "Oprávnenia sa nepodarilo uložiť. Nič sa nezmenilo. Skúste to znova.",
+        "discard_title": "Zahodiť zmeny?",
+        "discard_body": "Zmeny oprávnení pre {name} nie sú uložené.",
+        "discard_confirm": "Zahodiť",
+        "discard_keep": "Pokračovať v úpravách",
+        "matrix_tab": "Matica oprávnení",
+        "members_tab": "Členovia",
+        "legend": "Žiadny: modul nevidí. Čítanie: môže čítať. Úpravy: môže čítať aj meniť.",
+        "select_aria": "{member}: {module}",
+        "preset_label": "Predvoľba",
+        "matrix_caption": "Matica oprávnení",
+        "settings_none": "Bez prístupu",
+        "matrix_row_aria": "Otvoriť oprávnenia: {name}"
+    },
+    "sessions": {
+        "device": "{browser} na {os}",
+        "last_active": "Naposledy aktívny {time}, IP {ip}",
+        "this_device": "Toto zariadenie",
+        "persistent": "Zostáva prihlásený",
+        "revoke": "Odhlásiť",
+        "revoke_aria": "Odhlásiť reláciu: {browser} na {os}",
+        "revoke_all": "Odhlásiť všetky relácie",
+        "revoke_title": "Odhlásiť reláciu",
+        "revoke_body": "Odhlásiť člena {name} v prehliadači {browser} na {os}? Bude sa musieť prihlásiť znova.",
+        "revoke_all_body": "Odhlásiť člena {name} všade? Na každom zariadení sa bude musieť prihlásiť znova.",
+        "revoke_keep": "Ponechať prihláseného",
+        "revoked_toast": "Relácia bola odhlásená",
+        "empty_title": "Žiadne aktívne relácie",
+        "empty_body": "Tento člen nie je nikde prihlásený.",
+        "caption": "Relácie",
+        "unknown_browser": "Neznámy prehliadač",
+        "unknown_os": "neznámy systém"
+    },
+    "audit": {
+        "title": "Záznam aktivity",
+        "intro": "Kto čo urobil a kedy. Obsah záznamov sa nikdy neukladá. Záznamy sa uchovávajú 2 roky.",
+        "filter": {
+            "member": "Člen",
+            "all_members": "Všetci členovia",
+            "event": "Typ udalosti",
+            "all_events": "Všetky udalosti",
+            "from": "Od",
+            "to": "Do",
+            "apply": "Použiť filtre",
+            "clear": "Zrušiť filtre"
+        },
+        "event": {
+            "login": "Prihlásenie",
+            "login_failed": "Neúspešné prihlásenie",
+            "invite": "Pozvánka",
+            "permission": "Zmena oprávnení",
+            "session_revoked": "Odhlásená relácia",
+            "health": "Zdravotné údaje",
+            "finance": "Finančné údaje",
+            "account": "Účet",
+            "access_denied": "Prístup zamietnutý"
+        },
+        "col": {
+            "when": "Kedy",
+            "member": "Člen",
+            "event": "Udalosť",
+            "details": "Podrobnosti",
+            "ip": "IP adresa"
+        },
+        "detail": {
+            "permission": "Zmena modulu {module} pre {name}: {from} na {to}",
+            "read": "Čítanie údajov: {module}",
+            "write": "Zmena údajov: {module}",
+            "login": "Prihlásenie do účtu",
+            "login_failed": "Prihlásenie zlyhalo",
+            "lockout": "Prihlásenie pozastavené po príliš mnohých pokusoch",
+            "password_reset": "Obnovenie hesla",
+            "admin_created": "Účet správcu bol vytvorený",
+            "invite_created": "Pozvánka pre {email} ako {preset}",
+            "invite_resent": "Nový odkaz na pozvánku poslaný na {email}",
+            "invite_revoked": "Pozvánka pre {email} bola zrušená",
+            "invite_accepted": "Pripojenie cez pozvánku",
+            "session_revoked": "Odhlásenie člena {name} na zariadení {device}",
+            "session_revoked_all": "Odhlásenie člena {name} všade",
+            "google_linked": "Prepojenie s účtom Google",
+            "access_denied": "Zamietnutý prístup k údajom: {module}"
+        },
+        "page": "Strana {n} z {total}",
+        "prev": "Predchádzajúca",
+        "next": "Ďalšia",
+        "empty_title": "Žiadne zhodné záznamy",
+        "empty_body": "Skúste širšie obdobie alebo zrušte filtre.",
+        "caption": "Záznamy aktivity",
+        "error": {
+            "range": "Začiatočný dátum musí byť rovnaký alebo skorší než koncový."
+        }
+    },
+    "account": {
+        "settings": "Nastavenia",
+        "logout": "Odhlásiť sa"
+    },
+    "access": {
+        "denied_title": "K tejto stránke nemáte prístup",
+        "denied_body": "Ak prístup potrebujete, požiadajte správcu rodiny.",
+        "denied_action": "Späť na prehľad"
+    },
+    "common": {
+        "try_again": "Skúsiť znova",
+        "load_error_title": "Niečo sa pokazilo",
+        "load_error_body": "Nepodarilo sa to načítať. Skontrolujte pripojenie a skúste to znova."
     }
 }

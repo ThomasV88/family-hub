@@ -214,5 +214,288 @@
             "contrast": "Kontrast",
             "result": "Wynik"
         }
+    },
+    "auth": {
+        "title": {
+            "login": "Logowanie"
+        },
+        "email": "E-mail",
+        "password": "Hasło",
+        "password_confirm": "Potwierdź hasło",
+        "remember": "Pozostań zalogowany przez 30 dni",
+        "submit": {
+            "login": "Zaloguj się"
+        },
+        "google": "Zaloguj się przez Google",
+        "or": "lub",
+        "forgot_link": "Nie pamiętasz hasła?",
+        "show_password": "Pokaż hasło",
+        "hide_password": "Ukryj hasło",
+        "invite_only": "Family Hub działa tylko na zaproszenie. Poproś administratora rodziny o zaproszenie.",
+        "back_to_login": "Wróć do logowania",
+        "error": {
+            "failed": "E-mail lub hasło są nieprawidłowe. Sprawdź je i spróbuj ponownie.",
+            "email_invalid": "Podaj prawidłowy adres e-mail, na przykład imie{'@'}example.com.",
+            "password_required": "Wpisz hasło.",
+            "throttle": "Zbyt wiele prób. Spróbuj ponownie za {minutes} minutę. | Zbyt wiele prób. Spróbuj ponownie za {minutes} minuty. | Zbyt wiele prób. Spróbuj ponownie za {minutes} minut. | Zbyt wiele prób. Spróbuj ponownie za {minutes} minuty.",
+            "google_not_invited": "To konto Google nie zostało zaproszone. Poproś administratora rodziny o zaproszenie.",
+            "google_failed": "Logowanie przez Google nie powiodło się. Spróbuj ponownie lub użyj hasła.",
+            "email_required": "Wpisz adres e-mail.",
+            "password_compromised": "To hasło pojawiło się w znanym wycieku danych. Wybierz inne.",
+            "invite_invalid": "Tego zaproszenia nie można użyć."
+        },
+        "signed_out": "Wylogowano.",
+        "session_ended": "Zostałeś wylogowany. Zaloguj się ponownie, aby kontynuować.",
+        "forgot": {
+            "title": "Resetowanie hasła",
+            "body": "Podaj adres e-mail, a wyślemy Ci link.",
+            "submit": "Wyślij link do resetu",
+            "sent": "Jeśli dla tego adresu istnieje konto, link do resetu jest w drodze. Link działa przez 60 minut."
+        },
+        "reset": {
+            "title": "Ustaw nowe hasło",
+            "new_password": "Nowe hasło",
+            "confirm": "Potwierdź nowe hasło",
+            "hint": "Zostaniesz wylogowany na innych urządzeniach.",
+            "submit": "Ustaw nowe hasło",
+            "done": "Hasło zostało zmienione. Zaloguj się nowym hasłem.",
+            "invalid_title": "Tego linku do resetu nie można użyć",
+            "invalid_body": "Mógł wygasnąć. Poproś o nowy.",
+            "invalid_action": "Poproś o nowy link"
+        }
+    },
+    "invite": {
+        "accept": {
+            "title": "Dołącz do rodziny w Family Hub",
+            "body": "Zaproszenie dotyczy adresu {email}.",
+            "name": "Imię",
+            "password_hint": "Co najmniej 12 znaków. Dobrze sprawdza się długie zdanie.",
+            "submit": "Utwórz konto",
+            "google": "Kontynuuj przez Google",
+            "google_hint": "Użyj konta Google dla {email}.",
+            "google_mismatch": "To konto Google używa innego adresu e-mail. Użyj konta Google dla {email}.",
+            "welcome": "Witaj w Family Hub, {name}.",
+            "error": {
+                "name_required": "Wpisz swoje imię.",
+                "password_short": "Użyj co najmniej 12 znaków.",
+                "password_mismatch": "Hasła nie są takie same. Wpisz to samo hasło dwa razy."
+            }
+        },
+        "invalid": {
+            "title": "Tego zaproszenia nie można użyć",
+            "expired": "Wygasło po 7 dniach. Poproś administratora rodziny o nowe.",
+            "used": "Zostało już wykorzystane. Spróbuj się zalogować.",
+            "revoked": "Nie jest już ważne. Poproś administratora rodziny o nowe zaproszenie.",
+            "action": "Przejdź do logowania"
+        },
+        "dialog": {
+            "title": "Zaproś członka rodziny",
+            "preset": "Początkowy dostęp",
+            "language": "Język",
+            "help": "Zaproszenie działa przez 7 dni i można go użyć raz.",
+            "submit": "Wyślij zaproszenie",
+            "cancel": "Anuluj",
+            "sent": "Zaproszenie wysłano na {email}.",
+            "link_label": "Link do zaproszenia",
+            "mail_failed": "Nie udało się wysłać e-maila. Skopiuj link i prześlij go samodzielnie.",
+            "done": "Gotowe",
+            "another": "Zaproś kolejną osobę",
+            "error": {
+                "exists": "Ten adres e-mail należy już do członka. Poproś o zalogowanie się."
+            }
+        }
+    },
+    "settings": {
+        "nav_label": "Ustawienia",
+        "section": {
+            "members": "Członkowie i dostęp",
+            "audit": "Dziennik zdarzeń",
+            "appearance": "Wygląd i język"
+        },
+        "back": "Wróć do ustawień",
+        "members": {
+            "title": "Członkowie",
+            "invite": "Zaproś członka",
+            "manage": "Zarządzaj",
+            "manage_aria": "Zarządzaj: {name}",
+            "you": "Ty",
+            "caption": "Członkowie"
+        },
+        "role": {
+            "admin": "Administrator",
+            "member": "Członek"
+        },
+        "status": {
+            "active": "Aktywny"
+        },
+        "invites": {
+            "title": "Zaproszenia",
+            "pending": "Oczekuje, wygasa {date}",
+            "expired": "Wygasło",
+            "revoked": "Odwołane",
+            "resend": "Wyślij ponownie",
+            "copy": "Kopiuj link",
+            "copied": "Skopiowano link do zaproszenia",
+            "revoke": "Odwołaj",
+            "empty_title": "Brak oczekujących zaproszeń",
+            "empty_body": "Zaproś członka rodziny, aby zacząć.",
+            "revoke_title": "Odwołaj zaproszenie",
+            "revoke_body": "Odwołać zaproszenie dla {email}? Link przestanie działać.",
+            "revoke_keep": "Zachowaj zaproszenie",
+            "revoke_confirm": "Odwołaj zaproszenie",
+            "resend_aria": "Wyślij zaproszenie ponownie na {email}",
+            "copy_aria": "Kopiuj link do zaproszenia dla {email}",
+            "revoke_aria": "Odwołaj zaproszenie dla {email}",
+            "mail_failed": "E-mail nie został wysłany",
+            "rotated_note": "Utworzono nowy link. Poprzedni link już nie działa.",
+            "resent_toast": "Zaproszenie wysłano ponownie na {email}.",
+            "revoked_toast": "Zaproszenie zostało odwołane",
+            "caption": "Zaproszenia",
+            "language": "Język: {language}"
+        }
+    },
+    "permissions": {
+        "preset": {
+            "parent": "Rodzic",
+            "child": "Dziecko",
+            "grandparent": "Dziadek lub babcia",
+            "guest": "Gość",
+            "parent_hint": "Zadania, Wishlist i Finanse: edycja. Zdrowie: brak.",
+            "child_hint": "Zadania i Wishlist: edycja. Finanse i Zdrowie: brak.",
+            "grandparent_hint": "Zadania i Wishlist: edycja. Finanse i Zdrowie: brak.",
+            "guest_hint": "Zadania: tylko odczyt. Wszystko inne: brak."
+        },
+        "apply_label": "Zastosuj ustawienie wstępne",
+        "apply": "Zastosuj",
+        "applied": "Zastosowano ustawienie. Dostosuj, co trzeba, i zapisz.",
+        "level": {
+            "none": "Brak",
+            "view": "Odczyt",
+            "edit": "Edycja"
+        },
+        "module": {
+            "todo": "Zadania",
+            "wishlist": "Wishlist",
+            "finance": "Finanse",
+            "health": "Zdrowie",
+            "settings": "Ustawienia"
+        },
+        "restricted": "Domyślnie ograniczone",
+        "settings_admin_only": "Tylko administratorzy",
+        "settings_always": "Zawsze dozwolone",
+        "admin_no_sensitive": "Administratorzy nie otrzymują Zdrowia ani Finansów automatycznie.",
+        "self_note": "Jesteś administratorem i zawsze masz dostęp do ustawień.",
+        "tab": {
+            "permissions": "Uprawnienia",
+            "sessions": "Sesje"
+        },
+        "save": "Zapisz uprawnienia",
+        "cancel": "Anuluj",
+        "saved": "Zapisano uprawnienia",
+        "save_failed": "Nie udało się zapisać uprawnień. Nic nie zostało zmienione. Spróbuj ponownie.",
+        "discard_title": "Odrzucić zmiany?",
+        "discard_body": "Zmiany uprawnień dla {name} nie zostały zapisane.",
+        "discard_confirm": "Odrzuć",
+        "discard_keep": "Wróć do edycji",
+        "matrix_tab": "Macierz uprawnień",
+        "members_tab": "Członkowie",
+        "legend": "Brak: nie widzi modułu. Odczyt: może czytać. Edycja: może czytać i zmieniać.",
+        "select_aria": "{member}: {module}",
+        "preset_label": "Ustawienie wstępne",
+        "matrix_caption": "Macierz uprawnień",
+        "settings_none": "Brak dostępu",
+        "matrix_row_aria": "Otwórz uprawnienia: {name}"
+    },
+    "sessions": {
+        "device": "{browser} na {os}",
+        "last_active": "Ostatnio aktywny {time}, IP {ip}",
+        "this_device": "To urządzenie",
+        "persistent": "Pozostaje zalogowany",
+        "revoke": "Odwołaj",
+        "revoke_aria": "Odwołaj sesję: {browser} na {os}",
+        "revoke_all": "Odwołaj wszystkie sesje",
+        "revoke_title": "Odwołaj sesję",
+        "revoke_body": "Wylogować {name} w przeglądarce {browser} na {os}? Będzie musiał zalogować się ponownie.",
+        "revoke_all_body": "Wylogować {name} wszędzie? Na każdym urządzeniu trzeba będzie zalogować się ponownie.",
+        "revoke_keep": "Pozostaw zalogowanego",
+        "revoked_toast": "Sesja została odwołana",
+        "empty_title": "Brak aktywnych sesji",
+        "empty_body": "Ten członek nie jest nigdzie zalogowany.",
+        "caption": "Sesje",
+        "unknown_browser": "Nieznana przeglądarka",
+        "unknown_os": "nieznany system"
+    },
+    "audit": {
+        "title": "Dziennik zdarzeń",
+        "intro": "Kto, co i kiedy zrobił. Treść rekordów nigdy nie jest zapisywana. Wpisy są przechowywane przez 2 lata.",
+        "filter": {
+            "member": "Członek",
+            "all_members": "Wszyscy członkowie",
+            "event": "Typ zdarzenia",
+            "all_events": "Wszystkie zdarzenia",
+            "from": "Od",
+            "to": "Do",
+            "apply": "Zastosuj filtry",
+            "clear": "Wyczyść filtry"
+        },
+        "event": {
+            "login": "Logowanie",
+            "login_failed": "Nieudane logowanie",
+            "invite": "Zaproszenie",
+            "permission": "Zmiana uprawnień",
+            "session_revoked": "Odwołana sesja",
+            "health": "Dane zdrowotne",
+            "finance": "Dane finansowe",
+            "account": "Konto",
+            "access_denied": "Odmowa dostępu"
+        },
+        "col": {
+            "when": "Kiedy",
+            "member": "Członek",
+            "event": "Zdarzenie",
+            "details": "Szczegóły",
+            "ip": "Adres IP"
+        },
+        "detail": {
+            "permission": "Zmiana modułu {module} dla {name}: {from} na {to}",
+            "read": "Odczyt danych: {module}",
+            "write": "Zmiana danych: {module}",
+            "login": "Logowanie do konta",
+            "login_failed": "Logowanie nie powiodło się",
+            "lockout": "Logowanie wstrzymane po zbyt wielu próbach",
+            "password_reset": "Reset hasła",
+            "admin_created": "Utworzono konto administratora",
+            "invite_created": "Zaproszenie dla {email} jako {preset}",
+            "invite_resent": "Nowy link do zaproszenia wysłano na {email}",
+            "invite_revoked": "Zaproszenie dla {email} zostało odwołane",
+            "invite_accepted": "Dołączenie z zaproszenia",
+            "session_revoked": "Wylogowanie {name} na urządzeniu {device}",
+            "session_revoked_all": "Wylogowanie {name} wszędzie",
+            "google_linked": "Powiązanie z kontem Google",
+            "access_denied": "Odmowa dostępu do danych: {module}"
+        },
+        "page": "Strona {n} z {total}",
+        "prev": "Poprzednia",
+        "next": "Następna",
+        "empty_title": "Brak pasujących wpisów",
+        "empty_body": "Spróbuj szerszego zakresu dat lub wyczyść filtry.",
+        "caption": "Wpisy dziennika zdarzeń",
+        "error": {
+            "range": "Data początkowa musi być taka sama lub wcześniejsza niż końcowa."
+        }
+    },
+    "account": {
+        "settings": "Ustawienia",
+        "logout": "Wyloguj się"
+    },
+    "access": {
+        "denied_title": "Nie masz dostępu do tej strony",
+        "denied_body": "Jeśli potrzebujesz dostępu, poproś administratora rodziny.",
+        "denied_action": "Wróć do przeglądu"
+    },
+    "common": {
+        "try_again": "Spróbuj ponownie",
+        "load_error_title": "Coś poszło nie tak",
+        "load_error_body": "Nie udało się tego wczytać. Sprawdź połączenie i spróbuj ponownie."
     }
 }

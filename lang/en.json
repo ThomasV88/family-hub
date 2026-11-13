@@ -214,5 +214,288 @@
             "contrast": "Contrast",
             "result": "Result"
         }
+    },
+    "auth": {
+        "title": {
+            "login": "Sign in"
+        },
+        "email": "Email",
+        "password": "Password",
+        "password_confirm": "Confirm password",
+        "remember": "Stay signed in for 30 days",
+        "submit": {
+            "login": "Sign in"
+        },
+        "google": "Sign in with Google",
+        "or": "or",
+        "forgot_link": "Forgot password?",
+        "show_password": "Show password",
+        "hide_password": "Hide password",
+        "invite_only": "Family Hub is by invitation only. Ask your family admin for an invite.",
+        "back_to_login": "Back to sign in",
+        "error": {
+            "failed": "Email or password is not correct. Check them and try again.",
+            "email_invalid": "Enter a valid email address, for example name{'@'}example.com.",
+            "password_required": "Enter your password.",
+            "throttle": "Too many attempts. Try again in {minutes} minute. | Too many attempts. Try again in {minutes} minutes.",
+            "google_not_invited": "This Google account is not invited. Ask your family admin for an invite.",
+            "google_failed": "Google sign-in did not work. Try again or use your password.",
+            "email_required": "Enter your email.",
+            "password_compromised": "This password appears in a known data breach. Choose a different one.",
+            "invite_invalid": "This invite cannot be used."
+        },
+        "signed_out": "You have been signed out.",
+        "session_ended": "You were signed out. Sign in again to continue.",
+        "forgot": {
+            "title": "Reset your password",
+            "body": "Enter your email and we will send you a link.",
+            "submit": "Send reset link",
+            "sent": "If an account exists for that email, a reset link is on its way. The link works for 60 minutes."
+        },
+        "reset": {
+            "title": "Choose a new password",
+            "new_password": "New password",
+            "confirm": "Confirm new password",
+            "hint": "You will be signed out on other devices.",
+            "submit": "Set new password",
+            "done": "Your password was changed. Sign in with the new one.",
+            "invalid_title": "This reset link cannot be used",
+            "invalid_body": "It may have expired. Request a new one.",
+            "invalid_action": "Request a new link"
+        }
+    },
+    "invite": {
+        "accept": {
+            "title": "Join your family on Family Hub",
+            "body": "You were invited as {email}.",
+            "name": "Name",
+            "password_hint": "At least 12 characters. A long sentence works well.",
+            "submit": "Create account",
+            "google": "Continue with Google",
+            "google_hint": "Use the Google account for {email}.",
+            "google_mismatch": "That Google account uses a different email. Use the Google account for {email}.",
+            "welcome": "Welcome to Family Hub, {name}.",
+            "error": {
+                "name_required": "Enter your name.",
+                "password_short": "Use at least 12 characters.",
+                "password_mismatch": "The passwords do not match. Type the same password twice."
+            }
+        },
+        "invalid": {
+            "title": "This invite cannot be used",
+            "expired": "It expired after 7 days. Ask your family admin to send a new one.",
+            "used": "It has already been used. Try signing in.",
+            "revoked": "It is no longer valid. Ask your family admin for a new invite.",
+            "action": "Go to sign in"
+        },
+        "dialog": {
+            "title": "Invite a family member",
+            "preset": "Starting access",
+            "language": "Language",
+            "help": "The invite works for 7 days and can be used once.",
+            "submit": "Send invite",
+            "cancel": "Cancel",
+            "sent": "Invite sent to {email}.",
+            "link_label": "Invite link",
+            "mail_failed": "We could not send the email. Copy the link and share it yourself.",
+            "done": "Done",
+            "another": "Invite another",
+            "error": {
+                "exists": "This email already belongs to a member. Ask them to sign in."
+            }
+        }
+    },
+    "settings": {
+        "nav_label": "Settings",
+        "section": {
+            "members": "Members and access",
+            "audit": "Audit log",
+            "appearance": "Appearance and language"
+        },
+        "back": "Back to settings",
+        "members": {
+            "title": "Members",
+            "invite": "Invite member",
+            "manage": "Manage",
+            "manage_aria": "Manage {name}",
+            "you": "You",
+            "caption": "Members"
+        },
+        "role": {
+            "admin": "Admin",
+            "member": "Member"
+        },
+        "status": {
+            "active": "Active"
+        },
+        "invites": {
+            "title": "Invitations",
+            "pending": "Pending, expires {date}",
+            "expired": "Expired",
+            "revoked": "Revoked",
+            "resend": "Resend",
+            "copy": "Copy link",
+            "copied": "Invite link copied",
+            "revoke": "Revoke",
+            "empty_title": "No pending invitations",
+            "empty_body": "Invite a family member to get started.",
+            "revoke_title": "Revoke invite",
+            "revoke_body": "Revoke the invite for {email}? The link will stop working.",
+            "revoke_keep": "Keep invite",
+            "revoke_confirm": "Revoke invite",
+            "resend_aria": "Resend invite to {email}",
+            "copy_aria": "Copy invite link for {email}",
+            "revoke_aria": "Revoke invite for {email}",
+            "mail_failed": "Email not sent",
+            "rotated_note": "A new link was created. The previous link no longer works.",
+            "resent_toast": "Invite sent again to {email}.",
+            "revoked_toast": "Invite revoked",
+            "caption": "Invitations",
+            "language": "Language: {language}"
+        }
+    },
+    "permissions": {
+        "preset": {
+            "parent": "Parent",
+            "child": "Child",
+            "grandparent": "Grandparent",
+            "guest": "Guest",
+            "parent_hint": "To-do, Wishlist and Finances: edit. Health: none.",
+            "child_hint": "To-do and Wishlist: edit. Finances and Health: none.",
+            "grandparent_hint": "To-do and Wishlist: edit. Finances and Health: none.",
+            "guest_hint": "To-do: view only. Everything else: none."
+        },
+        "apply_label": "Apply preset",
+        "apply": "Apply",
+        "applied": "Preset applied. Adjust anything, then save.",
+        "level": {
+            "none": "None",
+            "view": "View",
+            "edit": "Edit"
+        },
+        "module": {
+            "todo": "To-do",
+            "wishlist": "Wishlist",
+            "finance": "Finances",
+            "health": "Health",
+            "settings": "Settings"
+        },
+        "restricted": "Restricted by default",
+        "settings_admin_only": "Admins only",
+        "settings_always": "Always allowed",
+        "admin_no_sensitive": "Admins do not get Health or Finances automatically.",
+        "self_note": "You are the admin and always keep access to settings.",
+        "tab": {
+            "permissions": "Permissions",
+            "sessions": "Sessions"
+        },
+        "save": "Save permissions",
+        "cancel": "Cancel",
+        "saved": "Permissions saved",
+        "save_failed": "We could not save the permissions. Nothing was changed. Try again.",
+        "discard_title": "Discard changes?",
+        "discard_body": "Your permission changes for {name} are not saved.",
+        "discard_confirm": "Discard",
+        "discard_keep": "Keep editing",
+        "matrix_tab": "Permission matrix",
+        "members_tab": "Members",
+        "legend": "None: cannot see the module. View: can read. Edit: can read and change.",
+        "select_aria": "{member}: {module}",
+        "preset_label": "Preset",
+        "matrix_caption": "Permission matrix",
+        "settings_none": "No access",
+        "matrix_row_aria": "Open permissions for {name}"
+    },
+    "sessions": {
+        "device": "{browser} on {os}",
+        "last_active": "Last active {time}, IP {ip}",
+        "this_device": "This device",
+        "persistent": "Stays signed in",
+        "revoke": "Revoke",
+        "revoke_aria": "Revoke session: {browser} on {os}",
+        "revoke_all": "Revoke all sessions",
+        "revoke_title": "Revoke session",
+        "revoke_body": "Sign {name} out on {browser} on {os}? They will need to sign in again.",
+        "revoke_all_body": "Sign {name} out everywhere? They will need to sign in again on every device.",
+        "revoke_keep": "Keep signed in",
+        "revoked_toast": "Session revoked",
+        "empty_title": "No active sessions",
+        "empty_body": "This member is not signed in anywhere.",
+        "caption": "Sessions",
+        "unknown_browser": "Unknown browser",
+        "unknown_os": "unknown system"
+    },
+    "audit": {
+        "title": "Audit log",
+        "intro": "Who did what and when. Content of records is never logged. Entries are kept for 2 years.",
+        "filter": {
+            "member": "Member",
+            "all_members": "All members",
+            "event": "Event type",
+            "all_events": "All events",
+            "from": "From",
+            "to": "To",
+            "apply": "Apply filters",
+            "clear": "Clear filters"
+        },
+        "event": {
+            "login": "Sign-in",
+            "login_failed": "Failed sign-in",
+            "invite": "Invite",
+            "permission": "Permission change",
+            "session_revoked": "Session revoked",
+            "health": "Health data",
+            "finance": "Finance data",
+            "account": "Account",
+            "access_denied": "Access denied"
+        },
+        "col": {
+            "when": "When",
+            "member": "Member",
+            "event": "Event",
+            "details": "Details",
+            "ip": "IP address"
+        },
+        "detail": {
+            "permission": "Changed {module} for {name}: {from} to {to}",
+            "read": "Read {module} data",
+            "write": "Changed {module} data",
+            "login": "Signed in",
+            "login_failed": "Sign-in failed",
+            "lockout": "Sign-in paused after too many attempts",
+            "password_reset": "Reset the password",
+            "admin_created": "Admin account created",
+            "invite_created": "Invited {email} as {preset}",
+            "invite_resent": "Sent a new invite link to {email}",
+            "invite_revoked": "Revoked the invite for {email}",
+            "invite_accepted": "Joined from an invite",
+            "session_revoked": "Signed {name} out on {device}",
+            "session_revoked_all": "Signed {name} out everywhere",
+            "google_linked": "Linked a Google account",
+            "access_denied": "Was denied access to {module} data"
+        },
+        "page": "Page {n} of {total}",
+        "prev": "Previous",
+        "next": "Next",
+        "empty_title": "No entries match",
+        "empty_body": "Try a wider date range or clear the filters.",
+        "caption": "Audit log entries",
+        "error": {
+            "range": "The start date must be on or before the end date."
+        }
+    },
+    "account": {
+        "settings": "Settings",
+        "logout": "Log out"
+    },
+    "access": {
+        "denied_title": "You do not have access to this page",
+        "denied_body": "Ask your family admin if you need access.",
+        "denied_action": "Back to overview"
+    },
+    "common": {
+        "try_again": "Try again",
+        "load_error_title": "Something went wrong",
+        "load_error_body": "We could not load this. Check your connection and try again."
     }
 }
