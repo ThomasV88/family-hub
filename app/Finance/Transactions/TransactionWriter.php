@@ -3,6 +3,7 @@
 namespace App\Finance\Transactions;
 
 use App\Finance\Queries\TransactionQuery;
+use App\Finance\Recurring\RecurringMatchService;
 use App\Finance\Viewer;
 use App\Models\FinanceAccount;
 use App\Models\FinanceTransaction;
@@ -15,32 +16,55 @@ use Illuminate\Support\Str;
  */
 class TransactionWriter
 {
-    public function __construct(private readonly TransactionQuery $transactions) {}
+    public function __construct(
+        private readonly TransactionQuery $transactions,
+        private readonly RecurringMatchService $matching,
+    ) {}
 
-    public function createSingle(Viewer $viewer, FinanceAccount $account, string $kind, int $minor, string $date, string $description, ?string $categoryId, ?string $note): void
+    /** Automatic matching of the written leg(s) runs in the same database transaction unless $autoMatch is false. */
+    public function createSingle(Viewer $viewer, FinanceAccount $account, string $kind, int $minor, string $date, string $description, ?string $categoryId, ?string $note, bool $autoMatch = true): FinanceTransaction
     {
-        $this->insert($viewer, $account, $kind, $kind === 'income' ? $minor : -$minor, $date, $description, $categoryId, $note, null);
+        return DB::transaction(function () use ($viewer, $account, $kind, $minor, $date, $description, $categoryId, $note, $autoMatch) {
+            $row = $this->insert($viewer, $account, $kind, $kind === 'income' ? $minor : -$minor, $date, $description, $categoryId, $note, null);
+            if ($autoMatch) {
+                $this->matching->matchTransactions($viewer, [(string) $row->id]);
+            }
+
+            return $row;
+        });
     }
 
-    public function createTransfer(Viewer $viewer, FinanceAccount $from, FinanceAccount $to, int $minor, string $date, ?string $description, ?string $note): void
+    public function createTransfer(Viewer $viewer, FinanceAccount $from, FinanceAccount $to, int $minor, string $date, ?string $description, ?string $note, bool $autoMatch = true): void
     {
         $transferId = (string) Str::uuid7();
-        DB::transaction(function () use ($viewer, $from, $to, $minor, $date, $description, $note, $transferId) {
-            $this->insert($viewer, $from, 'transfer', -$minor, $date, $description, null, $note, $transferId);
-            $this->insert($viewer, $to, 'transfer', $minor, $date, $description, null, null, $transferId);
+        DB::transaction(function () use ($viewer, $from, $to, $minor, $date, $description, $note, $transferId, $autoMatch) {
+            $out = $this->insert($viewer, $from, 'transfer', -$minor, $date, $description, null, $note, $transferId);
+            $in = $this->insert($viewer, $to, 'transfer', $minor, $date, $description, null, null, $transferId);
+            if ($autoMatch) {
+                $this->matching->matchTransactions($viewer, [(string) $out->id, (string) $in->id]);
+            }
         });
     }
 
     /**
      * @param  array<string, mixed>  $changes  any of: magnitude (int), booked_on, description, category_id, note
      */
-    public function update(Viewer $viewer, FinanceTransaction $leg, ?FinanceTransaction $counterpart, array $changes): void
+    public function update(Viewer $viewer, FinanceTransaction $leg, ?FinanceTransaction $counterpart, array $changes, bool $autoMatch = true): void
     {
-        DB::transaction(function () use ($viewer, $leg, $counterpart, $changes) {
-            $this->applyChanges($viewer, $leg, $changes);
+        DB::transaction(function () use ($viewer, $leg, $counterpart, $changes, $autoMatch) {
+            $written = [];
+            if ($this->applyChanges($viewer, $leg, $changes)) {
+                $written[] = (string) $leg->id;
+            }
             if ($counterpart !== null) {
                 // Both accounts are visible: amount, date and description stay equal on both legs.
-                $this->applyChanges($viewer, $counterpart, array_intersect_key($changes, array_flip(['magnitude', 'booked_on', 'description'])));
+                if ($this->applyChanges($viewer, $counterpart, array_intersect_key($changes, array_flip(['magnitude', 'booked_on', 'description'])))) {
+                    $written[] = (string) $counterpart->id;
+                }
+            }
+            // Only legs actually written are matched, so a hidden counterpart is never read or written.
+            if ($autoMatch && $written !== []) {
+                $this->matching->matchTransactions($viewer, $written);
             }
         });
     }
@@ -55,7 +79,7 @@ class TransactionWriter
     }
 
     /** @param  array<string, mixed>  $changes */
-    private function applyChanges(Viewer $viewer, FinanceTransaction $row, array $changes): void
+    private function applyChanges(Viewer $viewer, FinanceTransaction $row, array $changes): bool
     {
         $attributes = [];
         if (array_key_exists('magnitude', $changes)) {
@@ -74,13 +98,14 @@ class TransactionWriter
             }
         }
         if ($attributes === []) {
-            return;
+            return false;
         }
         $attributes['edited_at'] = now();
-        $this->transactions->updateVisible($viewer, (string) $row->id, $attributes);
+
+        return $this->transactions->updateVisible($viewer, (string) $row->id, $attributes) > 0;
     }
 
-    private function insert(Viewer $viewer, FinanceAccount $account, string $kind, int $signedMinor, string $date, ?string $description, ?string $categoryId, ?string $note, ?string $transferId): void
+    private function insert(Viewer $viewer, FinanceAccount $account, string $kind, int $signedMinor, string $date, ?string $description, ?string $categoryId, ?string $note, ?string $transferId): FinanceTransaction
     {
         $row = new FinanceTransaction;
         $row->forceFill([
@@ -96,5 +121,7 @@ class TransactionWriter
             'source' => 'manual',
             'created_by' => $viewer->userId(),
         ])->save();
+
+        return $row;
     }
 }

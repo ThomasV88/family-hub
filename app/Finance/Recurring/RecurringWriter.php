@@ -14,10 +14,22 @@ use Illuminate\Support\Facades\DB;
  */
 class RecurringWriter
 {
-    public function __construct(private readonly RecurringQuery $recurring) {}
+    public function __construct(
+        private readonly RecurringQuery $recurring,
+        private readonly RecurringMatchService $matching,
+    ) {}
 
     /** @param  array<string, mixed>  $data  column => value as built by RecurringRequest */
     public function create(Viewer $viewer, FinanceAccount $account, array $data): void
+    {
+        DB::transaction(function () use ($viewer, $account, $data) {
+            $row = $this->insert($viewer, $account, $data);
+            $this->matching->backfill($viewer, $row);
+        });
+    }
+
+    /** @param  array<string, mixed>  $data */
+    private function insert(Viewer $viewer, FinanceAccount $account, array $data): FinanceRecurring
     {
         $row = new FinanceRecurring;
         $row->forceFill([
@@ -34,6 +46,8 @@ class RecurringWriter
             'text_hint' => $data['text_hint'] ?? null,
             'created_by' => $viewer->userId(),
         ])->save();
+
+        return $row;
     }
 
     /**
@@ -57,7 +71,10 @@ class RecurringWriter
             $attributes['schedule_effective_from'] = now((string) config('family.timezone'))->toDateString();
         }
 
-        DB::transaction(fn () => $this->recurring->updateVisible($viewer, (string) $item->id, $attributes));
+        DB::transaction(function () use ($viewer, $item, $attributes) {
+            $this->recurring->updateVisible($viewer, (string) $item->id, $attributes);
+            $this->matching->backfill($viewer, $item);
+        });
     }
 
     public function delete(Viewer $viewer, string $id): void
