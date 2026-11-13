@@ -161,7 +161,7 @@ final class CsvFixtures
         $whole = (string) intdiv($abs, 100);
         $frac = sprintf('%02d', $abs % 100);
         if ($o['grouping'] !== '') {
-            $whole = strrev(implode($o['grouping'], str_split(strrev($whole), 3)));
+            $whole = implode($o['grouping'], array_map('strrev', array_reverse(str_split(strrev($whole), 3))));
         }
         $text = $whole.$o['decimal'].$frac;
         if (! $sign || $minor >= 0) {
