@@ -18,19 +18,20 @@ class TaskAccess
 
     public function canEdit(User $user, Task $task): bool
     {
-        return $this->hasEditGrant($user)
+        return $this->hasEditGrant($user) && ! $task->isClosedOccurrence()
             && ($task->creator_id === $user->id || $task->assignee_id === $user->id);
     }
 
     /** A completed or skipped occurrence of a recurring task is history and cannot be undone. */
     public function canChangeStatus(User $user, Task $task): bool
     {
-        return $this->hasEditGrant($user) && ! $this->isClosedOccurrence($task);
+        return $this->hasEditGrant($user) && ! $task->isClosedOccurrence();
     }
 
-    public function isClosedOccurrence(Task $task): bool
+    /** The one place that makes history immutable: every mutating endpoint calls this after its grant check. */
+    public function abortIfClosed(Task $task): void
     {
-        return $task->isRecurring() && ($task->completed_at !== null || $task->skipped_at !== null);
+        abort_if($task->isClosedOccurrence(), 409);
     }
 
     public function mayChangeTodoStatus(User $user): bool
@@ -40,12 +41,17 @@ class TaskAccess
 
     public function canDelete(User $user, Task $task): bool
     {
-        return $this->hasEditGrant($user) && $task->creator_id === $user->id;
+        return $this->hasEditGrant($user) && ! $task->isClosedOccurrence() && $task->creator_id === $user->id;
     }
 
     public function canChangeVisibility(User $user, Task $task): bool
     {
         return $this->canDelete($user, $task);
+    }
+
+    public function mayEditAtAll(User $user): bool
+    {
+        return $this->hasEditGrant($user);
     }
 
     /** @return array{edit: bool, status: bool, delete: bool, visibility: bool} */

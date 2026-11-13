@@ -167,7 +167,7 @@ it('does not allow undoing a completed recurring occurrence', function () {
     $task = recurring(DAILY, 'schedule', '2027-05-10');
     completeAt($task, '2027-05-10 10:00:00 Europe/Bratislava');
 
-    $this->actingAs($this->parent)->patch("/todo/tasks/{$task->id}/status", ['status' => 'todo'])->assertStatus(422);
+    $this->actingAs($this->parent)->patch("/todo/tasks/{$task->id}/status", ['status' => 'todo'])->assertStatus(409);
     expect($task->fresh()->status->value)->toBe('done');
 
     $this->actingAs($this->parent)->get('/todo')->assertInertia(fn (Assert $p) => $p
@@ -221,4 +221,30 @@ it('hides personal rows of a series from another viewer in the history', functio
     Task::whereKey($first->id)->update(['visibility' => 'personal']);
 
     $this->actingAs($this->child)->get("/todo?task={$second->id}")->assertInertia(fn (Assert $p) => $p->has('history', 0));
+});
+
+it('keeps closed occurrences immutable: update, status, skip and delete answer 409', function () {
+    $task = recurring(DAILY, 'schedule', '2027-05-10');
+    completeAt($task, '2027-05-10 10:00:00 Europe/Bratislava');
+    $before = $task->fresh();
+    $open = Task::where('series_id', $task->series_id)->whereNull('completed_at')->first();
+
+    $this->actingAs($this->parent)->patch("/todo/tasks/{$task->id}", ['title' => 'Rewritten', 'recurrence' => null])->assertStatus(409);
+    $this->actingAs($this->parent)->patch("/todo/tasks/{$task->id}/status", ['status' => 'todo'])->assertStatus(409);
+    $this->actingAs($this->parent)->post("/todo/tasks/{$task->id}/skip")->assertStatus(409);
+    $this->actingAs($this->parent)->delete("/todo/tasks/{$task->id}")->assertStatus(409);
+
+    $after = $task->fresh();
+    expect($after->title)->toBe($before->title)->and($after->recurrence_rule)->toBe($before->recurrence_rule);
+    expect(Task::where('series_id', $task->series_id)->whereNull('completed_at')->whereNull('skipped_at')->count())->toBe(1);
+    expect($open)->not->toBeNull();
+});
+
+it('still treats a closed row as history after its rule was cleared', function () {
+    $task = recurring(DAILY, 'schedule', '2027-05-10');
+    completeAt($task, '2027-05-10 10:00:00 Europe/Bratislava');
+    $task->forceFill(['recurrence_rule' => null, 'recurrence_mode' => null])->save();
+
+    expect($task->fresh()->isClosedOccurrence())->toBeTrue();
+    $this->actingAs($this->parent)->patch("/todo/tasks/{$task->id}/status", ['status' => 'todo'])->assertStatus(409);
 });

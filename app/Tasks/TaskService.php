@@ -62,7 +62,7 @@ class TaskService
             $this->applyRecurrence($task, $validated, $dueChanged);
 
             // A closed occurrence of a series is history; its status is never changed again.
-            $status = isset($validated['status']) && $actor !== null && ! $this->isClosedOccurrence($task)
+            $status = isset($validated['status']) && $actor !== null && ! $task->isClosedOccurrence()
                 ? TaskStatus::from($validated['status']) : null;
             $completing = $status === TaskStatus::Done && $task->isRecurring() && $task->completed_at === null;
             if ($status !== null && ! $completing) {
@@ -98,11 +98,6 @@ class TaskService
             return;
         }
         $this->applyStatus($task, $status, $by)->save();
-    }
-
-    private function isClosedOccurrence(Task $task): bool
-    {
-        return $task->isRecurring() && ($task->completed_at !== null || $task->skipped_at !== null);
     }
 
     /**

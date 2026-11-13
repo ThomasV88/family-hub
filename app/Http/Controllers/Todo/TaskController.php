@@ -90,6 +90,8 @@ class TaskController extends Controller
     {
         $user = $request->user();
         $model = Task::query()->visibleTo($user)->findOrFail($task);
+        abort_unless($access->mayEditAtAll($user), 403);
+        $access->abortIfClosed($model);
         abort_unless($access->canEdit($user, $model), 403);
 
         // Only the creator changes who sees a task; the UI never sends these for other editors.
@@ -109,6 +111,8 @@ class TaskController extends Controller
     {
         $user = $request->user();
         $model = Task::query()->visibleTo($user)->findOrFail($task);
+        abort_unless($access->mayEditAtAll($user), 403);
+        $access->abortIfClosed($model);
         abort_unless($access->canDelete($user, $model), 403);
 
         $service->delete($model);

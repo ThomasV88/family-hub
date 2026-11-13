@@ -16,7 +16,8 @@ class TaskSkipController extends Controller
         $user = $request->user();
         $model = Task::query()->visibleTo($user)->findOrFail($task);
         abort_unless($access->mayChangeTodoStatus($user), 403);
-        abort_unless($model->isRecurring() && ! $access->isClosedOccurrence($model), 422);
+        $access->abortIfClosed($model);
+        abort_unless($model->isRecurring(), 422);
 
         $model->setRelation('nextOccurrence', $completion->skip($model, $user));
 

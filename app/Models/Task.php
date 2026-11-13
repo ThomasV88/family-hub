@@ -77,4 +77,14 @@ class Task extends Model
     {
         return $this->recurrence_rule !== null;
     }
+
+    /**
+     * A completed or skipped occurrence of a series is history and immutable. It is defined by series_id
+     * (kept when the rule is cleared), so clearing the recurrence cannot turn history back into a plain task.
+     */
+    public function isClosedOccurrence(): bool
+    {
+        return ($this->series_id !== null || $this->isRecurring())
+            && ($this->completed_at !== null || $this->skipped_at !== null);
+    }
 }
