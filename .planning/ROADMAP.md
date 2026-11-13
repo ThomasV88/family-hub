@@ -85,11 +85,11 @@ Plans:
   3. Admin can set no access, view or edit per member per module, start from a preset (Parent, Child, Grandparent, Guest) and adjust it
   4. A member without a grant cannot read or change a module's data through any endpoint, proven by an automated role-by-endpoint test matrix
   5. Admin can view an audit log of access to and changes of sensitive data
-**Plans:** 10 plans
+**Plans:** 1/10 plans executed
 **UI hint**: yes
 
 Plans:
-- [ ] 02-01-PLAN.md — Package approval (Fortify, Socialite), headless Fortify with no registration, full SK/PL/EN Phase 2 copy
+- [x] 02-01-PLAN.md — Package approval (Fortify, Socialite), headless Fortify with no registration, full SK/PL/EN Phase 2 copy
 - [ ] 02-02-PLAN.md — First admin command, email+password sign-in with lockout, 30-day remember, logout, Login page and account menu
 - [ ] 02-03-PLAN.md — Deny-by-default access layer (grants, presets, requireAccess, fail-closed guard), role-by-endpoint matrix, 403 page, access-aware nav
 - [ ] 02-04-PLAN.md — Enumeration-safe password reset that signs out other devices, SessionRevoker, Settings shell and Appearance page
@@ -199,7 +199,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and Infrastructure | 6/12 | In Progress|  |
-| 2. Identity and Authorization Core | 0/TBD | Not started | - |
+| 2. Identity and Authorization Core | 1/10 | In Progress|  |
 | 3. To-Do | 0/TBD | Not started | - |
 | 4. Wishlist | 0/TBD | Not started | - |
 | 5. Finance | 0/TBD | Not started | - |
