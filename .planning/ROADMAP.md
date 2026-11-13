@@ -138,8 +138,23 @@ Plans:
   3. Another member can reserve a gift and chip in with others, and the reservation is visible to other givers but never to the recipient in any view, count, badge, notification, export or search
   4. Birthdays, Slovak and Polish name days, Christmas and custom occasions are tracked per member
   5. Gift-givers receive reminders ahead of an occasion and the recipient never does
-**Plans**: TBD
+**Plans:** 13 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 04-01-PLAN.md — All Phase 4 copy up front: wishlist/occasions/gift reminders/managers in SK/PL/EN (pipe plurals) and server reminder strings
+- [ ] 04-02-PLAN.md — Infrastructure: gd + exif in the image, shared uploads volume (dev and server), upload limits on the upload route, uploads in backup and restore drill
+- [ ] 04-03-PLAN.md — Name-day data: SK vendored (MIT), PL compiled from Polish Wikipedia with provenance and validation; AnnualDate and NameDayCalendar
+- [ ] 04-04-PLAN.md — SafeFetcher (explicit denylist, resolve-once DNS pinning, manual redirects, byte caps, real-socket test) and MetaImageExtractor
+- [ ] 04-05-PLAN.md — Wish slice backend: schema, Catalog, ViewerContext/WishAccess, list and wish endpoints, wishlist managers, matrix, privacy arch test
+- [ ] 04-06-PLAN.md — Wish slice UI: Wishlist page, person chips, own and giver galleries, owner panel with links, giver panel, nav, managers tab, owner DOM privacy test
+- [ ] 04-07-PLAN.md — Product images: worker fetch from links, hardened upload pipeline, authenticated serving with ETag, panel controls and polling
+- [ ] 04-08-PLAN.md — Giving backend: reservations and co-buying in separate tables, giver list branch, shopping endpoint, manager purge, differential/canary/query-log leak tests
+- [ ] 04-09-PLAN.md — Occasions: birth dates and name days per member, custom occasions, Christmas, OccasionCalendar, Occasions screen and panel
+- [ ] 04-10-PLAN.md — Giver UI: status tags, ReservationBox with co-buy and share form, conflict alert, Your shopping summary
+- [ ] 04-11-PLAN.md — Giver-only occasion reminders on the outbox (mail, push), lead-day settings card, wishlist:prune retention
+- [ ] 04-12-PLAN.md — Occasion strip on the wishlist page and Upcoming occasions card on the Overview
+- [ ] 04-13-PLAN.md — DEFERRED with owner: staging/production release, server image/volume/backup checks, real shop images, device privacy and reminder checks
 
 ### Phase 5: Finance
 **Goal**: The family can see where money goes, with exact amounts, recurring expenses tracked against reality, budgets, charts and bank statement import.
