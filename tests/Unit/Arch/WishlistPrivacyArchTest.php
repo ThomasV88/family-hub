@@ -19,3 +19,15 @@ arch('owner side is blind to reservations')
         'App\Models\WishContribution',
         'App\Wishlist\Giving',
     ]);
+
+// The reverse direction: nothing outside the giving side may even mention the reservation models.
+arch('reservation models are used only by the giving side')
+    ->expect(['App\Models\WishReservation', 'App\Models\WishContribution'])
+    ->toOnlyBeUsedIn([
+        'App\Wishlist\Giving',
+        'App\Http\Controllers\Wishlist\Giving',
+        'App\Models\WishReservation',
+        'App\Models\WishContribution',
+        'Database\Factories',
+        'Tests\Support',
+    ]);
