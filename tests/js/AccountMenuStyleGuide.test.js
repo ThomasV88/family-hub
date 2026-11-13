@@ -5,7 +5,8 @@ import { createAppI18n } from '../../resources/js/i18n.js';
 
 let mockProps;
 const post = vi.fn();
-vi.mock('@inertiajs/vue3', () => ({ usePage: () => ({ props: mockProps }), router: { post: (...a) => post(...a), visit: vi.fn() } }));
+const visit = vi.fn();
+vi.mock('@inertiajs/vue3', () => ({ usePage: () => ({ props: mockProps }), router: { post: (...a) => post(...a), visit: (...a) => visit(...a) } }));
 const AccountMenu = (await import('../../resources/js/Shell/AccountMenu.vue')).default;
 const messages = JSON.parse(readFileSync(`${process.cwd()}/lang/en.json`, 'utf8'));
 
@@ -36,7 +37,16 @@ describe('account header and log out', () => {
         expect(header.closest('[role=menuitem]')).toBeNull();
         const entries = [...document.querySelectorAll('[role=menuitem],[role=menuitemradio]')];
         expect(entries.at(-1).textContent).toContain('Log out');
-        expect(document.body.textContent).not.toContain('Settings');
+        w.unmount();
+    });
+
+    it('lists Settings first, before Language and Theme, and navigates to /settings', async () => {
+        const w = await open({ app: { name: 'FH', env: 'local', styleGuide: false } });
+        const entries = [...document.querySelectorAll('[role=menuitem],[role=menuitemradio]')];
+        expect(entries[0].textContent).toContain('Settings');
+        const settings = [...document.querySelectorAll('[role=menuitem]')].find((e) => e.textContent.includes('Settings'));
+        settings.click();
+        expect(visit).toHaveBeenCalledWith('/settings');
         w.unmount();
     });
 
