@@ -2,9 +2,11 @@
 
 namespace App\Finance\Queries;
 
+use App\Finance\Import\ImportDatabaseError;
 use App\Finance\Viewer;
 use App\Finance\Visibility;
 use App\Models\FinanceImportProfile;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -57,6 +59,24 @@ class ImportQuery
             ->all();
     }
 
+    /**
+     * Runs a statement that carries CSV row content as bindings. A QueryException would put those bindings into the
+     * log, so it is replaced by an exception that carries only the SQLSTATE.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $run
+     * @return T
+     */
+    private function sanitised(callable $run): mixed
+    {
+        try {
+            return $run();
+        } catch (QueryException $e) {
+            throw new ImportDatabaseError($e->getPrevious()?->getCode() === null ? null : (string) $e->getPrevious()->getCode());
+        }
+    }
+
     /** Removes the viewer's earlier drafts for the account (their rows cascade). */
     public function deleteDraftsFor(Viewer $viewer, string $accountId): int
     {
@@ -81,24 +101,24 @@ class ImportQuery
         $batchId = (string) Str::uuid7();
         $now = now();
 
-        $created = DB::affectingStatement(
+        $created = $this->sanitised(fn () => DB::affectingStatement(
             'insert into finance_import_batches (id, account_id, user_id, status, profile_snapshot, row_count, added_count, matched_count, created_at, updated_at) '
             ."select ?::uuid, ?::uuid, ?::bigint, 'draft', ?::jsonb, ?::int, 0, 0, ?::timestamptz, ?::timestamptz "
             .'where exists (select 1 from finance_account_members where user_id = ? and account_id = ?)',
             [$batchId, $accountId, $viewer->userId(), json_encode($profileSnapshot, JSON_THROW_ON_ERROR), count($rows), $now, $now, $viewer->userId(), $accountId]
-        );
+        ));
         abort_if($created === 0, 404);
 
         foreach (array_chunk($rows, self::INSERT_CHUNK) as $chunk) {
             $payload = array_map(fn (array $r) => ['id' => (string) Str::uuid7()] + $r, $chunk);
-            DB::affectingStatement(
+            $this->sanitised(fn () => DB::affectingStatement(
                 'insert into finance_import_rows (id, batch_id, row_no, booked_on, amount_minor, kind, description, counterparty, reference, import_hash, state, error_code, include, probable_transaction_id, created_at) '
                 .'select x.id, ?::uuid, x.row_no, x.booked_on, x.amount_minor, x.kind, x.description, x.counterparty, x.reference, x.import_hash, x.state, x.error_code, x.include, x.probable_transaction_id, ?::timestamptz '
                 .'from jsonb_to_recordset(?::jsonb) as x(id uuid, row_no int, booked_on date, amount_minor bigint, kind text, description text, counterparty text, reference text, import_hash text, state text, error_code text, include boolean, probable_transaction_id uuid) '
                 .'where exists (select 1 from finance_import_batches b where b.id = ?::uuid and b.user_id = ? '
                 .'and b.account_id in (select account_id from finance_account_members where user_id = ?))',
                 [$batchId, $now, json_encode($payload, JSON_THROW_ON_ERROR), $batchId, $viewer->userId(), $viewer->userId()]
-            );
+            ));
         }
 
         return $batchId;
@@ -223,7 +243,7 @@ class ImportQuery
         $now = now();
         $ids = [];
         foreach (array_chunk($picked, self::INSERT_CHUNK) as $chunk) {
-            $rows = DB::select(
+            $rows = $this->sanitised(fn () => DB::select(
                 'insert into finance_transactions (id, account_id, currency, kind, amount_minor, booked_on, description, category_id, source, import_batch_id, import_hash, created_by, created_at, updated_at) '
                 ."select x.tx_id, b.account_id, a.currency, r.kind, r.amount_minor, r.booked_on, nullif(left(r.description, 160), ''), x.category_id, 'import', b.id, x.import_hash, ?::bigint, ?::timestamptz, ?::timestamptz "
                 .'from jsonb_to_recordset(?::jsonb) as x(tx_id uuid, row_id uuid, import_hash text, category_id uuid) '
@@ -234,7 +254,7 @@ class ImportQuery
                 .'and b.account_id in (select account_id from finance_account_members where user_id = ?) '
                 .'on conflict (account_id, import_hash) where import_hash is not null do nothing returning id',
                 [$viewer->userId(), $now, $now, json_encode($chunk, JSON_THROW_ON_ERROR), $batchId, $viewer->userId(), $viewer->userId()]
-            );
+            ));
             foreach ($rows as $row) {
                 $ids[] = (string) $row->id;
             }

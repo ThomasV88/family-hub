@@ -1,9 +1,11 @@
 <?php
 
 use App\Access\Preset;
+use App\Finance\Import\ImportDatabaseError;
 use App\Finance\Import\ImportError;
 use App\Finance\Import\ImportStager;
 use App\Finance\Import\ProfileSpec;
+use App\Finance\Queries\ImportQuery;
 use App\Finance\Viewer;
 use App\Models\FinanceAccount;
 use App\Models\FinanceImportBatch;
@@ -175,4 +177,46 @@ it('puts the membership subquery in every statement on a finance table while sta
     foreach ($touching as $sql) {
         expect(strtolower($sql))->toContain('finance_account_members');
     }
+});
+
+it('keeps CSV row text out of the log when a staging or commit statement fails', function () {
+    [$user, $account, $viewer] = fhImpSetup();
+    $logged = [];
+    Event::listen(MessageLogged::class, function (MessageLogged $e) use (&$logged) {
+        $logged[] = $e->message.json_encode(array_map(fn ($c) => $c instanceof Throwable ? (string) $c : $c, $e->context));
+    });
+    $row = ['row_no' => 1, 'booked_on' => '2026-01-05', 'amount_minor' => -100, 'kind' => 'expense', 'description' => 'SECRETROWTEXT', 'counterparty' => 'SECRETCOUNTERPARTY', 'reference' => 'SECRETREF', 'import_hash' => str_repeat('a', 64), 'state' => 'bogus-state', 'error_code' => null, 'include' => true, 'probable_transaction_id' => null];
+
+    $caught = null;
+    try {
+        DB::transaction(fn () => app(ImportQuery::class)->insertBatchWithRows($viewer, (string) $account->id, [], [$row]));
+    } catch (Throwable $e) {
+        $caught = $e;
+        report($e);
+    }
+
+    expect($caught)->toBeInstanceOf(ImportDatabaseError::class)
+        ->and($caught->getPrevious())->toBeNull()
+        ->and($caught->getMessage())->not->toContain('SECRET')
+        ->and($caught->getMessage())->toContain('SQLSTATE 23514')
+        ->and(implode('', $logged))->not->toContain('SECRET');
+});
+
+it('sanitises a failing commit statement too', function () {
+    [$user, $account, $viewer] = fhImpSetup();
+    $batchId = fhImpStage($viewer, $account);
+    $rows = array_values(array_filter(fhImpRows($batchId), fn ($r) => $r->state === 'new'));
+    $txId = (string) Illuminate\Support\Str::uuid7();
+    $picked = array_map(fn ($r) => ['tx_id' => $txId, 'row_id' => $r->id, 'import_hash' => $r->import_hash, 'category_id' => null], array_slice($rows, 0, 2));
+
+    $caught = null;
+    try {
+        DB::transaction(fn () => app(ImportQuery::class)->commitRows($viewer, $batchId, $picked));
+    } catch (Throwable $e) {
+        $caught = $e;
+    }
+
+    expect($caught)->toBeInstanceOf(ImportDatabaseError::class)
+        ->and($caught->getPrevious())->toBeNull()
+        ->and($caught->getMessage())->not->toContain('nájomné')->not->toContain('Škôlka');
 });
