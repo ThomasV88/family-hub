@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Task;
+use App\Observers\TaskReminderObserver;
 use App\Recurrence\RecurrenceEngine;
 use App\Recurrence\RRuleRecurrenceEngine;
 use App\Support\RequestInput;
@@ -36,6 +38,8 @@ class AppServiceProvider extends ServiceProvider
 
             return $this->app->environment(['production', 'staging']) ? $rule->uncompromised() : $rule;
         });
+
+        Task::observe(TaskReminderObserver::class);
 
         $this->configureRememberDuration();
         $this->configureLoginLimiter();
