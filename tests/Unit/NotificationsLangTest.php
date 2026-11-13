@@ -24,7 +24,9 @@ it('has identical keys in every locale', function (string $locale) {
 
     expect(array_keys($other))->toEqualCanonicalizing(array_keys($en));
     expect(array_keys($en))->toEqualCanonicalizing(
-        ['reminder_title', 'reminder_greeting', 'reminder_body', 'reminder_action', 'test_title']
+        ['reminder_title', 'reminder_greeting', 'reminder_body', 'reminder_action', 'test_title',
+            'gift_title', 'gift_title_family', 'gift_today', 'gift_in_days', 'gift_birthday', 'gift_nameday',
+            'gift_christmas', 'gift_body', 'gift_body_family', 'gift_action']
     );
     foreach ($other as $key => $value) {
         expect(trim($value))->not->toBe('', $key);
