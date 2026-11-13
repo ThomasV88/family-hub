@@ -110,8 +110,22 @@ Plans:
   2. User can mark a task personal (only they see it) or shared with the family or chosen members, and others see only what they are permitted to
   3. User can create daily, weekly, monthly or custom recurring tasks, recurring from the schedule or from completion, and month-end and daylight-saving changes produce correct due dates
   4. User receives due-task reminders by email and by push, with push working on iOS for the installed PWA
-**Plans**: TBD
+**Plans:** 12 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 03-01-PLAN.md — All Phase 3 copy up front: todo/notifications in SK/PL/EN (pipe plurals) and server reminder strings
+- [ ] 03-02-PLAN.md — Package approval (php-rrule, web-push), install, ext-curl check, spike tests pinning clamp/DST and web-push API
+- [ ] 03-03-PLAN.md — Board slice: tasks schema, visibleTo scope, person columns, filter chips, quick add on board and Overview, nav link
+- [ ] 03-04-PLAN.md — Reusable RecurrenceEngine (month-end clamp, DST wall-clock, schedule vs completion) and ReminderTimeCalculator
+- [ ] 03-05-PLAN.md — Task detail panel: create/edit/assign/status/delete with server-side edit rights, card checkbox
+- [ ] 03-06-PLAN.md — Overview Due-soon card and shell add entry points (FAB/topbar to /todo?task=new), edit-gated
+- [ ] 03-07-PLAN.md — Email reminders: remind_at observer, notification outbox, reminders:enqueue, SendOutboxItem with retry/dedupe
+- [ ] 03-08-PLAN.md — Visibility: Personal/Family/Selected in the panel, creator-only changes, admin no-bypass privacy tests
+- [ ] 03-09-PLAN.md — Recurring tasks in the panel: repeat fields, complete/skip with next occurrence, history, reminder choice
+- [ ] 03-10-PLAN.md — Push delivery: subscriptions with SSRF-safe endpoints, WebPushSender, push:vapid, outbox push channel, SW handlers
+- [ ] 03-11-PLAN.md — Settings > Notifications: channel switches, per-device push, iOS install hint
+- [ ] 03-12-PLAN.md — DEFERRED with owner: VAPID keys per environment, staging/production release, real iPhone push and email checks
 
 ### Phase 4: Wishlist
 **Goal**: Each member keeps a gift wishlist that relatives can reserve from and chip in on, without the recipient ever seeing reservations.
