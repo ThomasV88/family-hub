@@ -15,7 +15,7 @@ class ReauthMethods
             // the password is offered only when there is no authenticator code or passkey to ask for instead.
             'password' => self::passwordAllowed($user),
             'totp' => self::hasTotp($user),
-            'passkey' => (bool) config('security.passkeys_enabled') && $user->passkeys()->exists(),
+            'passkey' => $user->passkeys()->exists() // existing passkeys keep working with the enrolment switch off (WR-03),
         ];
     }
 

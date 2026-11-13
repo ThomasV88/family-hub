@@ -155,7 +155,7 @@ it('removes an own passkey only within the confirmation window', function () {
     expect(DB::table('passkeys')->where('id', $id)->exists())->toBeFalse()->and(pkAudit('passkey_removed'))->toHaveCount(1);
 });
 
-it('answers 404 on every passkey route when the flag is off', function () {
+it('answers 404 on every passkey MANAGEMENT route when the flag is off', function () {
     config(['security.passkeys_enabled' => false]);
     $user = pkMember();
     $id = pkRow($user);
@@ -165,10 +165,6 @@ it('answers 404 on every passkey route when the flag is off', function () {
     $this->postJson('/settings/security/passkeys', ['name' => 'x'])->assertNotFound();
     $this->patchJson("/settings/security/passkeys/{$id}", ['name' => 'x'])->assertNotFound();
     $this->deleteJson("/settings/security/passkeys/{$id}")->assertNotFound();
-    $this->getJson('/confirm-access/passkey/options')->assertNotFound();
-    $this->postJson('/confirm-access/passkey', [])->assertNotFound();
-    $this->getJson('/two-factor-challenge/passkey/options')->assertNotFound();
-    $this->postJson('/two-factor-challenge/passkey', [])->assertNotFound();
 
     expect(DB::table('passkeys')->where('id', $id)->value('name'))->toBe('Laptop');
 });

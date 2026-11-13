@@ -6,7 +6,8 @@ use App\Http\Controllers\Security\ReauthPasskeyController;
 use App\Http\Middleware\EnsurePasskeysEnabled;
 use Illuminate\Support\Facades\Route;
 
-// Always registered; EnsurePasskeysEnabled turns every route into a 404 while SECURITY_PASSKEYS_ENABLED is off.
+// Always registered; EnsurePasskeysEnabled turns the MANAGEMENT routes into a 404 while SECURITY_PASSKEYS_ENABLED is off.
+// The sign-in challenge and confirm-access passkey routes stay live for members who already have passkeys (WR-03).
 // Features::passkeys() stays disabled: there is deliberately no passkey-only sign-in route.
 $on = EnsurePasskeysEnabled::class;
 
@@ -22,12 +23,12 @@ Route::delete('/settings/security/passkeys/{passkey}', [PasskeyController::class
 
 // Second step of sign-in (the two-factor.passkey.* names get the challenge TTL guard).
 Route::get('/two-factor-challenge/passkey/options', [ChallengePasskeyController::class, 'options'])
-    ->middleware([$on, 'access:guest', 'throttle:two-factor'])->name('two-factor.passkey.options');
+    ->middleware(['access:guest', 'throttle:two-factor'])->name('two-factor.passkey.options');
 Route::post('/two-factor-challenge/passkey', [ChallengePasskeyController::class, 'store'])
-    ->middleware([$on, 'access:guest', 'throttle:two-factor'])->name('two-factor.passkey.store');
+    ->middleware(['access:guest', 'throttle:two-factor'])->name('two-factor.passkey.store');
 
 // Confirm it's you.
 Route::get('/confirm-access/passkey/options', [ReauthPasskeyController::class, 'options'])
-    ->middleware([$on, 'access:authenticated', 'throttle:reauth'])->name('confirm-access.passkey.options');
+    ->middleware(['access:authenticated', 'throttle:reauth'])->name('confirm-access.passkey.options');
 Route::post('/confirm-access/passkey', [ReauthPasskeyController::class, 'store'])
-    ->middleware([$on, 'access:authenticated', 'throttle:reauth'])->name('confirm-access.passkey.store');
+    ->middleware(['access:authenticated', 'throttle:reauth'])->name('confirm-access.passkey.store');

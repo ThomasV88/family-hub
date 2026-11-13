@@ -180,3 +180,37 @@ it('throttles repeated failures per pending member', function () {
         ->assertStatus(429)->assertJsonPath('error', 'throttle');
     $this->assertGuest();
 });
+
+// 06-REVIEW WR-03: the kill switch stops enrolment, not the sign-in of members who already have a passkey.
+it('keeps the passkey sign-in and the confirm-access passkey working for an existing passkey with the flag off', function () {
+    config(['security.passkeys_enabled' => false]);
+    $anna = pcMember();
+    $id = pcPasskey($anna);
+    FakePasskeys::verifies();
+
+    expect($anna->refresh()->hasSecondFactor())->toBeTrue();
+    expect(\App\Security\ReauthMethods::for($anna)['passkey'])->toBeTrue();
+
+    $this->withSession(pcPending($anna))->getJson('/two-factor-challenge/passkey/options')->assertOk();
+    $this->postJson('/two-factor-challenge/passkey', ['credential' => FakePasskeys::assertion($id)])->assertOk();
+    $this->assertAuthenticatedAs($anna);
+
+    $stale = ['auth.password_confirmed_at' => now()->subHour()->getTimestamp(), 'sensitive.active_at' => now()->subHour()->getTimestamp()];
+    $this->withSession($stale)->getJson('/confirm-access/passkey/options')->assertOk();
+    $this->postJson('/confirm-access/passkey', ['credential' => FakePasskeys::assertion($id), 'mode' => 'dialog'])->assertOk();
+
+    // The password step still hands over to the challenge (no lockout) and the page offers the passkey.
+    $this->postJson('/logout');
+    $this->withSession(pcPending($anna))->get('/two-factor-challenge')
+        ->assertInertia(fn ($p) => $p->where('passkey', true)->where('totp', false));
+
+    // Enrolment is closed.
+    $this->actingAs($anna)->getJson('/settings/security/passkeys/options')->assertNotFound();
+});
+
+it('does not let a member without any passkey use the passkey endpoints with the flag off', function () {
+    config(['security.passkeys_enabled' => false]);
+    $anna = pcMember();
+
+    $this->withSession(pcPending($anna))->getJson('/two-factor-challenge/passkey/options')->assertStatus(401);
+});

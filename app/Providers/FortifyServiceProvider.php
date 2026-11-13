@@ -200,7 +200,7 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::twoFactorChallengeView(function (Request $request) {
             $user = User::find($request->session()->get('login.id'));
             $totp = $user !== null && $user->two_factor_secret !== null && $user->two_factor_confirmed_at !== null;
-            $passkey = $user !== null && (bool) config('security.passkeys_enabled') && $user->passkeys()->exists();
+            $passkey = $user !== null && $user->passkeys()->exists();
 
             return Inertia::render('Auth/TwoFactorChallenge', ['totp' => $totp, 'passkey' => $passkey]);
         });

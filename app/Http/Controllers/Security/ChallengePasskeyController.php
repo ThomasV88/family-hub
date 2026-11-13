@@ -61,7 +61,8 @@ class ChallengePasskeyController extends Controller
     {
         $id = $request->session()->get('login.id');
 
-        if (! (bool) config('security.passkeys_enabled') || ! is_int($id) && ! (is_string($id) && ctype_digit($id))) {
+        // Not behind SECURITY_PASSKEYS_ENABLED: a member who already has passkeys must still be able to sign in (WR-03).
+        if (! is_int($id) && ! (is_string($id) && ctype_digit($id))) {
             return null;
         }
 
