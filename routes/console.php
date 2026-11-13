@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::job(new RecordHeartbeat('schedule'))->everyMinute()->name('record-heartbeat')->withoutOverlapping();
+Schedule::command('reminders:enqueue')->everyMinute()->name('reminders-enqueue')->withoutOverlapping();
