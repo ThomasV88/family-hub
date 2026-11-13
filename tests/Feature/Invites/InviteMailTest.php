@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Invitation;
-use App\Models\User;
 use App\Notifications\InviteNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;

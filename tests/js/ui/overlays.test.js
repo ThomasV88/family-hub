@@ -91,7 +91,7 @@ describe('UiConfirmDialog', () => {
         });
         await nextTick();
         await nextTick();
-        const buttons = [...document.querySelectorAll('[role=dialog] footer button')];
+        const buttons = [...document.querySelectorAll('[role=dialog] .ui-dialog__footer button')];
         expect(buttons.map((b) => b.textContent.trim())).toEqual(['Keep task', 'Delete task']);
         expect(document.activeElement).toBe(buttons[0]);
         expect(buttons[1].className).toContain('ui-button--danger');

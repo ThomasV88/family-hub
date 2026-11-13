@@ -7,15 +7,16 @@ use App\Models\User;
 use App\Notifications\InviteNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Testing\TestResponse;
 
-function inviteAs(User $admin, array $data = []): Illuminate\Testing\TestResponse
+function inviteAs(User $admin, array $data = []): TestResponse
 {
     return test()->actingAs($admin)->post('/settings/invitations', array_merge(
         ['email' => 'Eva@Example.test', 'preset' => 'child', 'locale' => 'sk'], $data,
     ));
 }
 
-function flashedToken(Illuminate\Testing\TestResponse $response): string
+function flashedToken(TestResponse $response): string
 {
     $link = $response->getSession()->get('flash_data.invite.link');
     expect($link)->toContain('/invite/');

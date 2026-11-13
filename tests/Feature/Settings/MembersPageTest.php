@@ -1,6 +1,7 @@
 <?php
 
 use App\Access\Preset;
+use App\Models\Invitation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -56,7 +57,7 @@ it('forbids non-admins and redirects guests', function () {
 
 it('lists non-accepted invitations newest first with state and mail failure, without token data', function () {
     $admin = User::factory()->admin()->create();
-    $make = fn (string $email, array $extra = []) => App\Models\Invitation::create(array_merge([
+    $make = fn (string $email, array $extra = []) => Invitation::create(array_merge([
         'email' => $email, 'token_hash' => hash('sha256', $email), 'preset' => 'child', 'locale' => 'sk',
         'expires_at' => now()->addDays(7),
     ], $extra));
