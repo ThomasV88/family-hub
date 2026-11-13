@@ -5,6 +5,7 @@ import UiDetailPanel from '../ui/UiDetailPanel.vue';
 import UiTabs from '../ui/UiTabs.vue';
 import UiConfirmDialog from '../ui/UiConfirmDialog.vue';
 import PermissionsTab from './PermissionsTab.vue';
+import SessionsTab from './SessionsTab.vue';
 
 const props = defineProps({
     member: { type: Object, required: true },
@@ -18,9 +19,10 @@ const tab = ref(props.initialTab);
 const dirty = ref(false);
 const confirming = ref(false);
 
-// One entry per tab. Plan 08 adds the Sessions tab here (one entry plus one panel slot below).
+// One entry per tab, plus one panel slot below.
 const tabs = computed(() => [
     { key: 'permissions', label: t('permissions.tab.permissions') },
+    { key: 'sessions', label: t('permissions.tab.sessions') },
 ]);
 
 function requestClose() {
@@ -38,6 +40,9 @@ function requestClose() {
         <UiTabs v-model="tab" :tabs="tabs" :label="member.name">
             <template #panel-permissions>
                 <PermissionsTab :member="member" :presets="presets" @dirty="dirty = $event" />
+            </template>
+            <template #panel-sessions>
+                <SessionsTab :member="member" />
             </template>
         </UiTabs>
         <UiConfirmDialog
