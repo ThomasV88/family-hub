@@ -162,7 +162,7 @@ async function reparse(next) {
     }
     applyPreview(result.data);
     const cols = { ...settings.value.cols };
-    for (const role of ROLES) if (cols[role] !== '' && Number(cols[role]) >= columnCount.value) cols[role] = '';
+    for (const role of ROLES) if (cols[role] !== '' && parseInt(cols[role], 10) >= columnCount.value) cols[role] = '';
     settings.value = { ...settings.value, cols };
 }
 
@@ -193,7 +193,7 @@ function spec() {
     const columns = {};
     for (const role of active) {
         if (s.cols[role] === '') continue;
-        const index = Number(s.cols[role]);
+        const index = parseInt(s.cols[role], 10);
         columns[role] = { name: s.hasHeader && headers.value[index] ? headers.value[index] : null, index };
     }
     return {

@@ -125,7 +125,7 @@ const cell = (row, i) => row[i] ?? '';
                 <UiSelect :model-value="settings.dateFormat" :options="dateOptions" @update:model-value="set({ dateFormat: $event })" />
             </UiField>
             <UiField v-if="settings.hasHeader" :label="t('finance.imp.header_row')">
-                <UiInput type="number" inputmode="numeric" min="1" :model-value="settings.headerRow" @update:model-value="set({ headerRow: Math.max(1, Number($event) || 1) }, true)" />
+                <UiInput type="number" inputmode="numeric" min="1" :model-value="settings.headerRow" @update:model-value="set({ headerRow: Math.max(1, parseInt($event, 10) || 1) }, true)" />
             </UiField>
         </div>
         <UiSwitch :model-value="settings.hasHeader" @update:model-value="set({ hasHeader: $event }, true)">{{ t('finance.imp.has_header') }}</UiSwitch>
