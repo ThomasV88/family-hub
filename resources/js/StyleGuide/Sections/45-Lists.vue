@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import StyleSection from '../StyleSection.vue';
 import UiList from '../../Components/ui/UiList.vue';
 import UiListRow from '../../Components/ui/UiListRow.vue';
+import UiCheckbox from '../../Components/ui/UiCheckbox.vue';
 import UiTag from '../../Components/ui/UiTag.vue';
 import UiTable from '../../Components/ui/UiTable.vue';
 
@@ -28,7 +29,7 @@ const rows = computed(() => [
         <UiList class="lists__list">
             <UiListRow as="button" @select="selected = 'milk'">
                 <template #leading>
-                    <label class="lists__check"><input type="checkbox" /><span class="visually-hidden">{{ t('style.demo.row_milk') }}</span></label>
+                    <UiCheckbox :aria-label="t('style.demo.row_milk')" />
                 </template>
                 {{ t('style.demo.row_milk') }}
                 <template #meta>{{ t('style.demo.row_today') }}</template>
@@ -36,7 +37,7 @@ const rows = computed(() => [
             </UiListRow>
             <UiListRow as="button" :selected="selected === 'bill'" :title="t('style.demo.row_bill')" @select="selected = 'bill'">
                 <template #leading>
-                    <label class="lists__check"><input type="checkbox" /><span class="visually-hidden">{{ t('style.demo.row_bill') }}</span></label>
+                    <UiCheckbox :aria-label="t('style.demo.row_bill')" />
                 </template>
                 {{ t('style.demo.row_bill') }}
                 <template #trailing><UiTag variant="danger">{{ t('style.demo.tag_overdue') }}</UiTag></template>
@@ -59,7 +60,5 @@ const rows = computed(() => [
 
 <style scoped>
 .lists__list { margin-bottom: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
-.lists__check { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
-.lists__check input { width: 20px; height: 20px; }
 .lists__narrow { max-width: 360px; margin-block: var(--space-6); }
 </style>

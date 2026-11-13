@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import UiField from './ui/UiField.vue';
+import UiSelect from './ui/UiSelect.vue';
 
 const { t } = useI18n();
 const page = usePage();
@@ -9,23 +11,18 @@ const current = computed(() => page.props.locale ?? 'en');
 
 // Native names, deliberately not translated so everyone can find their own language.
 const options = [
-    { code: 'sk', name: 'Slovenčina' },
-    { code: 'pl', name: 'Polski' },
-    { code: 'en', name: 'English' },
+    { value: 'sk', label: 'Slovenčina' },
+    { value: 'pl', label: 'Polski' },
+    { value: 'en', label: 'English' },
 ];
 
-function change(event) {
-    router.post('/locale', { locale: event.target.value }, { preserveScroll: true });
+function change(locale) {
+    router.post('/locale', { locale }, { preserveScroll: true });
 }
 </script>
 
 <template>
-    <label class="language-switcher">
-        <span class="language-switcher__label">{{ t('locale.label') }}</span>
-        <select data-testid="language-switcher" :value="current" @change="change">
-            <option v-for="o in options" :key="o.code" :value="o.code" :selected="o.code === current">
-                {{ o.name }}
-            </option>
-        </select>
-    </label>
+    <UiField :label="t('locale.label')" class="language-switcher">
+        <UiSelect data-testid="language-switcher" :model-value="current" :options="options" @update:model-value="change" />
+    </UiField>
 </template>

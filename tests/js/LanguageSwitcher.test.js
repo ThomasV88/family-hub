@@ -7,6 +7,7 @@ const post = vi.fn();
 vi.mock('@inertiajs/vue3', () => ({
     usePage: () => ({ props: { locale: 'sk' } }),
     router: { post: (...a) => post(...a) },
+    Link: { template: '<a><slot /></a>' },
 }));
 
 import LanguageSwitcher from '../../resources/js/Components/LanguageSwitcher.vue';
