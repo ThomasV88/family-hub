@@ -42,7 +42,7 @@ return [
     | Passkeys (relying party)
     |--------------------------------------------------------------------------
     |
-    | Read by Fortify's service provider to configure laravel/passkeys, even though Features::passkeys() stays
+    | Read by Fortify's service provider to configure laravel/passkeys, even though the passkeys feature stays
     | off. Unset values are dropped so Fortify's defaults apply (rp id and origin from APP_URL, user handle secret
     | from APP_KEY) instead of an explicit null. Each environment binds passkeys to its own domain.
     |

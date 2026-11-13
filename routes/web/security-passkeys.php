@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Security\ChallengePasskeyController;
 use App\Http\Controllers\Security\PasskeyController;
+use App\Http\Controllers\Security\ReauthPasskeyController;
 use App\Http\Middleware\EnsurePasskeysEnabled;
 use Illuminate\Support\Facades\Route;
 
@@ -17,3 +19,15 @@ Route::patch('/settings/security/passkeys/{passkey}', [PasskeyController::class,
     ->middleware([$on, 'access:authenticated', 'throttle:20,1'])->whereNumber('passkey')->name('passkeys.update');
 Route::delete('/settings/security/passkeys/{passkey}', [PasskeyController::class, 'destroy'])
     ->middleware([$on, 'access:authenticated', 'access:recent', 'throttle:20,1'])->whereNumber('passkey')->name('passkeys.destroy');
+
+// Second step of sign-in (the two-factor.passkey.* names get the challenge TTL guard).
+Route::get('/two-factor-challenge/passkey/options', [ChallengePasskeyController::class, 'options'])
+    ->middleware([$on, 'access:guest', 'throttle:two-factor'])->name('two-factor.passkey.options');
+Route::post('/two-factor-challenge/passkey', [ChallengePasskeyController::class, 'store'])
+    ->middleware([$on, 'access:guest', 'throttle:two-factor'])->name('two-factor.passkey.store');
+
+// Confirm it's you.
+Route::get('/confirm-access/passkey/options', [ReauthPasskeyController::class, 'options'])
+    ->middleware([$on, 'access:authenticated', 'throttle:reauth'])->name('confirm-access.passkey.options');
+Route::post('/confirm-access/passkey', [ReauthPasskeyController::class, 'store'])
+    ->middleware([$on, 'access:authenticated', 'throttle:reauth'])->name('confirm-access.passkey.store');
