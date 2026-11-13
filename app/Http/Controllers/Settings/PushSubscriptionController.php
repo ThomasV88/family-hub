@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\StorePushSubscriptionRequest;
 use App\Models\PushSubscription;
 use App\Push\PushConfig;
+use App\Push\PushResult;
 use App\Push\PushSender;
 use App\Support\UserAgentLabel;
 use Illuminate\Http\JsonResponse;
@@ -75,10 +76,10 @@ class PushSubscriptionController extends Controller
         $sent = 0;
         foreach ($subscriptions as $subscription) {
             $result = $sender->send($subscription, $message);
-            if ($result === \App\Push\PushResult::Success) {
+            if ($result === PushResult::Success) {
                 $subscription->forceFill(['last_success_at' => now()])->save();
                 $sent++;
-            } elseif ($result === \App\Push\PushResult::Expired) {
+            } elseif ($result === PushResult::Expired) {
                 $subscription->delete();
             }
         }

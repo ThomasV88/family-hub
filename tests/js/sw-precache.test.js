@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { checkPrecache } from '../../scripts/check-sw-precache.mjs';
 
 const cleanSource = `import { precacheAndRoute } from 'workbox-precaching';\nprecacheAndRoute(self.__WB_MANIFEST);`;
@@ -36,5 +37,22 @@ describe('checkPrecache', () => {
 
     it('fails when the built worker lists no urls', () => {
         expect(checkPrecache({ swSource: cleanSource, swBuilt: 'nothing' }).ok).toBe(false);
+    });
+});
+
+describe('the real service worker source', () => {
+    const swSource = readFileSync('resources/js/sw.js', 'utf8');
+
+    it('passes the precache guard against a clean built manifest', () => {
+        const r = checkPrecache({ swSource, swBuilt: built(good) });
+        expect(r.violations).toEqual([]);
+        expect(r.ok).toBe(true);
+    });
+
+    it('handles push and notificationclick', () => {
+        expect(swSource).toContain("addEventListener('push'");
+        expect(swSource).toContain("addEventListener('notificationclick'");
+        expect(swSource).toContain('showNotification');
+        expect(swSource).toContain('openWindow');
     });
 });

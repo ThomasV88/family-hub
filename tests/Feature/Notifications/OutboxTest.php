@@ -155,13 +155,13 @@ it('retries with backoff, records only the exception class, and fails after 5 at
         ->and($row->last_error)->not->toContain('secret');
 });
 
-it('fails an unsupported channel without sending', function () {
+it('skips a push row when the member has push turned off, without sending mail', function () {
     Notification::fake();
     $row = queued(outboxRow(channel: 'push'));
 
     runJob($row);
 
-    expect($row->fresh()->status->value)->toBe('failed')->and($row->fresh()->last_error)->toBe('unsupported_channel');
+    expect($row->fresh()->status->value)->toBe('skipped');
     Notification::assertNothingSent();
 });
 

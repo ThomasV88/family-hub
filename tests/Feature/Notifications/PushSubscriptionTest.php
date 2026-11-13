@@ -4,6 +4,7 @@ use App\Access\Preset;
 use App\Models\PushSubscription;
 use App\Models\User;
 use App\Push\PushEndpointRule;
+use App\Push\PushSender;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\DB;
 use Minishlink\WebPush\VAPID;
@@ -123,7 +124,7 @@ it('test endpoint sends the localized title through the sender', function () {
     $keys = VAPID::createVapidKeys();
     config(['push.subject' => 'mailto:test@example.test', 'push.public_key' => $keys['publicKey'], 'push.private_key' => $keys['privateKey']]);
     $fake = new FakePushSender;
-    app()->instance(App\Push\PushSender::class, $fake);
+    app()->instance(PushSender::class, $fake);
     $this->user->forceFill(['locale' => 'sk'])->save();
     $this->actingAs($this->user)->postJson('/settings/notifications/push', subBody())->assertCreated();
 

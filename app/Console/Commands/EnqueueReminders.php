@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\PushSubscription;
 use App\Models\Task;
 use App\Notifications\NotificationPreferences;
 use App\Notifications\Outbox\OutboxWriter;
@@ -30,15 +31,21 @@ class EnqueueReminders extends Command
             $inserted = 0;
             foreach ($tasks as $task) {
                 foreach ($recipients->for($task) as $user) {
-                    if (! $preferences->enabled($user, 'mail')) {
-                        continue;
-                    }
                     $at = $task->remind_at->timestamp;
-                    $inserted += $outbox->enqueue(
-                        'task_reminder', $user, 'mail', 'task', $task->id,
-                        "task_reminder:{$task->id}:{$at}:{$user->id}:mail",
-                        ['task_id' => $task->id, 'remind_at' => $at],
-                    ) ? 1 : 0;
+                    $channels = [];
+                    if ($preferences->enabled($user, 'mail')) {
+                        $channels[] = 'mail';
+                    }
+                    if ($preferences->enabled($user, 'push') && PushSubscription::query()->where('user_id', $user->id)->exists()) {
+                        $channels[] = 'push';
+                    }
+                    foreach ($channels as $channel) {
+                        $inserted += $outbox->enqueue(
+                            'task_reminder', $user, $channel, 'task', $task->id,
+                            "task_reminder:{$task->id}:{$at}:{$user->id}:{$channel}",
+                            ['task_id' => $task->id, 'remind_at' => $at],
+                        ) ? 1 : 0;
+                    }
                 }
                 // Consumed. A query update bypasses the observer.
                 Task::query()->whereKey($task->id)->update(['remind_at' => null]);
