@@ -3,9 +3,13 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\ResetUserPassword;
+use App\Auth\RedirectIfSecondFactor;
 use App\Http\Controllers\Auth\InviteAcceptController;
 use App\Models\User;
+use App\Security\SafeIntended;
+use App\Security\SensitiveSession;
 use App\Support\RequestInput;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -13,6 +17,13 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
+use Laravel\Fortify\Contracts\FailedTwoFactorLoginResponse;
+use Laravel\Fortify\Contracts\LoginResponse;
+use Laravel\Fortify\Contracts\RecoveryCodesGeneratedResponse;
+use Laravel\Fortify\Contracts\TwoFactorConfirmedResponse;
+use Laravel\Fortify\Contracts\TwoFactorDisabledResponse;
+use Laravel\Fortify\Contracts\TwoFactorEnabledResponse;
+use Laravel\Fortify\Contracts\TwoFactorLoginResponse;
 use Laravel\Fortify\Contracts\LogoutResponse;
 use Laravel\Fortify\Contracts\PasswordResetResponse;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
@@ -51,6 +62,9 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->singleton(SuccessfulPasswordResetLinkRequestResponse::class, $linkSent);
         $this->app->singleton(FailedPasswordResetLinkRequestResponse::class, $linkSent);
 
+        $this->registerSignInResponses();
+        $this->registerTwoFactorResponses();
+
         $this->app->singleton(PasswordResetResponse::class, fn () => new class implements PasswordResetResponse
         {
             public function toResponse($request): Response
@@ -58,6 +72,100 @@ class FortifyServiceProvider extends ServiceProvider
                 return redirect('/login', 303)->with('status', 'password_reset');
             }
         });
+    }
+
+    /**
+     * Completing an interactive sign-in counts as proof of identity for Health/Finances and the security
+     * actions. Done here (not on the Login event) so a remember-cookie restore never opens the window.
+     */
+    private function registerSignInResponses(): void
+    {
+        $this->app->singleton(LoginResponse::class, fn () => new class implements LoginResponse
+        {
+            public function toResponse($request): Response
+            {
+                app(SensitiveSession::class)->confirm();
+
+                return $request->wantsJson()
+                    ? new JsonResponse(['two_factor' => false])
+                    : redirect(SafeIntended::pull($request), 303);
+            }
+        });
+
+        $this->app->singleton(TwoFactorLoginResponse::class, fn () => new class implements TwoFactorLoginResponse
+        {
+            public function toResponse($request): Response
+            {
+                app(SensitiveSession::class)->confirm();
+                $request->session()->forget(['login.id', 'login.remember', 'login.at']);
+
+                if ($request->wantsJson()) {
+                    return new JsonResponse('', 204);
+                }
+
+                $redirect = redirect(SafeIntended::pull($request), 303);
+
+                if ($request->filled('recovery_code') && $request->user() !== null) {
+                    $remaining = count($request->user()->recoveryCodes());
+                    $redirect->with('toast', ['key' => 'twofactor.recovery.used', 'params' => ['n' => $remaining], 'count' => $remaining]);
+                }
+
+                return $redirect;
+            }
+        });
+
+        $this->app->singleton(FailedTwoFactorLoginResponse::class, fn () => new class implements FailedTwoFactorLoginResponse
+        {
+            public function toResponse($request): Response
+            {
+                $recovery = $request->filled('recovery_code');
+                $key = $recovery ? 'recovery_code' : 'code';
+                $message = $recovery ? 'twofactor.error.recovery' : 'twofactor.error.code';
+
+                if ($request->wantsJson()) {
+                    return new JsonResponse(['message' => $message, 'errors' => [$key => [$message]]], 422);
+                }
+
+                return redirect()->route('two-factor.login')->withErrors([$key => $message]);
+            }
+        });
+    }
+
+    /** Factor management answers JSON only; secrets and codes are never cached. */
+    private function registerTwoFactorResponses(): void
+    {
+        $this->app->singleton(TwoFactorEnabledResponse::class, fn () => new class implements TwoFactorEnabledResponse
+        {
+            public function toResponse($request): Response
+            {
+                return $request->wantsJson() ? new JsonResponse(['enabled' => true]) : back();
+            }
+        });
+
+        $this->app->singleton(TwoFactorDisabledResponse::class, fn () => new class implements TwoFactorDisabledResponse
+        {
+            public function toResponse($request): Response
+            {
+                return $request->wantsJson() ? new JsonResponse(['disabled' => true]) : back();
+            }
+        });
+
+        $codes = fn () => new class implements RecoveryCodesGeneratedResponse, TwoFactorConfirmedResponse
+        {
+            public function toResponse($request): Response
+            {
+                if (! $request->wantsJson()) {
+                    return back();
+                }
+
+                $response = new JsonResponse(['recoveryCodes' => array_values($request->user()->recoveryCodes())]);
+                $response->headers->set('Cache-Control', 'no-store, private');
+
+                return $response;
+            }
+        };
+        $this->app->singleton(RecoveryCodesGeneratedResponse::class, $codes);
+        $this->app->singleton(TwoFactorConfirmedResponse::class, $codes);
     }
 
     /**
@@ -85,6 +193,17 @@ class FortifyServiceProvider extends ServiceProvider
 
         // Fortify always registers the password-confirmation routes; the app has no such screen, so a GET is a plain 404 instead of a missing-view 500.
         Fortify::confirmPasswordView(fn () => abort(404));
+
+        Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfSecondFactor::class);
+
+        // Booleans only: no ids, names or emails reach the page.
+        Fortify::twoFactorChallengeView(function (Request $request) {
+            $user = User::find($request->session()->get('login.id'));
+            $totp = $user !== null && $user->two_factor_secret !== null && $user->two_factor_confirmed_at !== null;
+            $passkey = $user !== null && (bool) config('security.passkeys_enabled') && $user->passkeys()->exists();
+
+            return Inertia::render('Auth/TwoFactorChallenge', ['totp' => $totp, 'passkey' => $passkey]);
+        });
 
         Fortify::authenticateUsing(function (Request $request) {
             $user = User::where('email', RequestInput::email($request))->first();

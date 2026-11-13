@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\Events\RecoveryCodeReplaced;
+use Laravel\Fortify\Fortify;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Passkeys\Contracts\PasskeyUser;
@@ -45,6 +47,21 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
     {
         // Checked explicitly (secret AND confirmation) so it holds whether or not Fortify's confirm option is on.
         return ($this->two_factor_secret !== null && $this->two_factor_confirmed_at !== null) || $this->passkeys()->exists();
+    }
+
+    /**
+     * A used recovery code is removed, not swapped for a new unseen one (Fortify's default), so the member
+     * is told the truthful number of codes they still hold. Regeneration creates a full set again.
+     */
+    public function replaceRecoveryCode($code)
+    {
+        $remaining = array_values(array_filter($this->recoveryCodes(), fn ($c) => ! hash_equals((string) $c, (string) $code)));
+
+        $this->forceFill([
+            'two_factor_recovery_codes' => Fortify::currentEncrypter()->encrypt(json_encode($remaining)),
+        ])->save();
+
+        RecoveryCodeReplaced::dispatch($this, $code);
     }
 
     public function preferredLocale(): ?string

@@ -22,9 +22,23 @@ class EnsureRouteDeclaresAccess
         'password.email' => ['guest'],
         'password.reset' => ['guest'],
         'password.update' => ['guest'],
-        'password.confirm' => ['authenticated'],
-        'password.confirm.store' => ['authenticated'],
-        'password.confirmation' => ['authenticated'],
+        // Fortify's password-confirm endpoints are an unthrottled password oracle: denied (unknown rule = deny).
+        'password.confirm' => ['disabled'],
+        'password.confirm.store' => ['disabled'],
+        'password.confirmation' => ['disabled'],
+        'two-factor.login' => ['guest'],
+        'two-factor.login.store' => ['guest'],
+        // Enrolling a factor needs the 10-minute security confirmation (423 confirm_required when stale).
+        'two-factor.enable' => ['recent'],
+        'two-factor.confirm' => ['recent'],
+        // Reachable only while a pending secret exists (GuardTwoFactorRoutes); disable checks recency itself
+        // so "Cancel setup" of an unconfirmed secret never needs a confirmation.
+        'two-factor.disable' => ['authenticated'],
+        'two-factor.qr-code' => ['authenticated'],
+        'two-factor.secret-key' => ['authenticated'],
+        'two-factor.regenerate-recovery-codes' => ['recent'],
+        // Returns the plaintext recovery codes at any time: never.
+        'two-factor.recovery-codes' => ['disabled'],
     ];
 
     public function __construct(private readonly RequireAccess $access) {}

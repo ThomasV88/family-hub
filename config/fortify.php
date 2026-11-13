@@ -11,8 +11,10 @@ return [
     'lowercase_usernames' => true,
 
     // Named limiter 'login' is defined in AppServiceProvider (5/min per email+IP, 10/15min per email, 30/min per IP).
+    // Named limiter 'two-factor' (SecurityServiceProvider) is keyed by the pending login id, not the session.
     'limiters' => [
         'login' => 'login',
+        'two-factor' => 'two-factor',
     ],
 
     /*
@@ -26,12 +28,13 @@ return [
     |
     */
 
-    // Phase 2 policy: registration, emailVerification, updateProfileInformation,
-    // updatePasswords, twoFactorAuthentication and passkeys must never be enabled here
-    // (invites are the only way in; 2FA and passkeys are Phase 6). resetPasswords is
-    // enabled in plan 04 together with its views.
+    // Policy: registration, emailVerification, updateProfileInformation, updatePasswords and passkeys
+    // must never be enabled here (invites are the only way in; Features::passkeys() would register
+    // passwordless login, passkeys use their own routes). Two-factor runs headless: confirmPassword is
+    // false because Fortify's password.confirm routes are denied; recency comes from the `recent` rule.
     'features' => [
         Features::resetPasswords(),
+        Features::twoFactorAuthentication(['confirm' => true, 'confirmPassword' => false, 'secret-length' => 32]),
     ],
 
 ];
