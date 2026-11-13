@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-11-13T10:22:51.154Z"
+last_updated: "2026-11-13T10:29:36.182Z"
 last_activity: 2026-11-13
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 29
-  completed_plans: 17
+  completed_plans: 18
   percent: 10
 ---
 
@@ -29,7 +29,7 @@ Plan: 6 of 12 in current phase
 Status: Ready to execute
 Last activity: 2026-11-13
 
-Progress: [██████░░░░] 59%
+Progress: [██████░░░░] 62%
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [██████░░░░] 59%
 
 *Updated after each plan completion*
 | Phase 02 P01 | 30min | 3 tasks | 18 files |
+| Phase 02 P02 | 25min | 3 tasks | 25 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,7 @@ Recent decisions affecting current work:
 - [Roadmap]: Step-up security (AUTH-09, AUTH-10) is Phase 6, before Medical goes live
 - [Roadmap]: Subscription CLI logins are done once on the server; app stores no tokens
 - [Phase 02]: 02-01: Fortify features empty until plan 04; only login limiter kept; sk/pl throttle as 4-segment pipe plural
+- [Phase 02]: 02-02: remember duration via Auth::resolved setRememberDuration(43200), verified 29-31 days; AuthLayout renders its own h1
 
 ### Pending Todos
 
@@ -93,6 +95,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-11-13T10:22:46.476Z
+Last session: 2026-11-13T10:29:23.731Z
 Stopped at: Roadmap created
 Resume file: None
