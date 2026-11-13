@@ -15,7 +15,8 @@ use RRule\RRule;
  */
 final class RRuleRecurrenceEngine implements RecurrenceEngine
 {
-    private const MAX_OCCURRENCES = 1000;
+    /** Hard iteration guard (about 136 years of a daily rule); the real horizon is MAX_YEARS from the first possible result. */
+    private const MAX_ITERATIONS = 50000;
 
     private const MAX_YEARS = 10;
 
@@ -29,6 +30,7 @@ final class RRuleRecurrenceEngine implements RecurrenceEngine
     ): ?CarbonImmutable {
         $pattern = RuleBuilder::fromRrule($rrule);
         $zone = new DateTimeZone($timezone);
+        $nowLocal = $now->setTimezone($timezone);
         $anchor = $anchorLocal->setTimezone($timezone);
         $time = $anchor->format('H:i');
 
@@ -50,17 +52,18 @@ final class RRuleRecurrenceEngine implements RecurrenceEngine
                 : $o->format('Y-m-d') > $completedDay;
         } else {
             $start = $anchor;
-            $nowLocal = $now->setTimezone($timezone);
             $accept = fn (CarbonImmutable $o): bool => $o->greaterThan($anchor) && $o->greaterThan($nowLocal);
         }
 
-        $limit = $start->addYears(self::MAX_YEARS);
+        // The horizon counts from where a result can first appear, so a long-overdue series still continues.
+        $horizonFrom = $mode === RecurrenceMode::Schedule && $nowLocal->greaterThan($start) ? $nowLocal : $start;
+        $limit = $horizonFrom->addYears(self::MAX_YEARS);
         $iterator = new RRule($rrule, DateTimeImmutable::createFromInterface($start)->setTimezone($zone));
 
         $seen = 0;
         foreach ($iterator as $occurrence) {
             $local = CarbonImmutable::instance($occurrence)->setTimezone($timezone);
-            if (++$seen > self::MAX_OCCURRENCES || $local->greaterThan($limit)) {
+            if (++$seen > self::MAX_ITERATIONS || $local->greaterThan($limit)) {
                 return null;
             }
             if ($accept($local)) {

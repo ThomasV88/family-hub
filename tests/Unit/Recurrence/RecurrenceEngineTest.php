@@ -78,11 +78,11 @@ it('returns date-only (00:00) results for date-only anchors', function () {
     expect($next->format('Y-m-d H:i'))->toBe('2027-05-11 00:00');
 });
 
-it('returns null beyond the iteration cap', function () {
-    // more than 1000 daily occurrences overdue
-    expect(engineNext('FREQ=DAILY;INTERVAL=1', '2027-01-01 08:00', RecurrenceMode::Schedule, null, '2031-01-01 00:00'))->toBeNull()
-        // more than 10 years overdue with a sparse rule
-        ->and(engineNext('FREQ=MONTHLY;INTERVAL=99;BYMONTHDAY=1', '2027-01-01 08:00', RecurrenceMode::Schedule, null, '2040-01-01 00:00'))->toBeNull();
+it('continues beyond 1000 overdue occurrences and counts the horizon from now', function () {
+    // four years of daily occurrences overdue: the next one after now, not the end of the series
+    expect(engineNext('FREQ=DAILY;INTERVAL=1', '2027-01-01 08:00', RecurrenceMode::Schedule, null, '2031-01-01 10:00')->format('Y-m-d H:i'))->toBe('2031-01-02 08:00')
+        // a sparse rule 13 years overdue still finds its next aligned instance (2027-01 + 99 months steps: 2043-07)
+        ->and(engineNext('FREQ=MONTHLY;INTERVAL=99;BYMONTHDAY=1', '2027-01-01 08:00', RecurrenceMode::Schedule, null, '2040-01-01 00:00')->format('Y-m-d'))->toBe('2043-07-01');
 });
 
 it('returns the result in the requested timezone', function () {

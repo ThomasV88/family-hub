@@ -248,3 +248,21 @@ it('still treats a closed row as history after its rule was cleared', function (
     expect($task->fresh()->isClosedOccurrence())->toBeTrue();
     $this->actingAs($this->parent)->patch("/todo/tasks/{$task->id}/status", ['status' => 'todo'])->assertStatus(409);
 });
+
+it('continues a daily schedule series that is overdue by three years', function () {
+    $task = recurring(DAILY, 'schedule', '2024-05-10', '18:30');
+
+    $next = completeAt($task, '2027-05-10 09:00:00 Europe/Bratislava');
+
+    expect($next)->not->toBeNull()->and($next->due_date->format('Y-m-d'))->toBe('2027-05-10')
+        ->and(substr((string) $next->due_time, 0, 5))->toBe('18:30');
+});
+
+it('keeps a weekly every-2-weeks rule aligned when overdue for years', function () {
+    $task = recurring('FREQ=WEEKLY;INTERVAL=2', 'schedule', '2024-05-06');
+
+    $next = completeAt($task, '2027-05-11 09:00:00 Europe/Bratislava');
+
+    // 2024-05-06 + n*14 days: 2027-05-10 is +1099 days (odd week), so the next aligned Monday is 2027-05-17.
+    expect($next->due_date->format('Y-m-d'))->toBe('2027-05-17');
+});
