@@ -3,7 +3,9 @@
 namespace App\Notifications;
 
 use App\Wishlist\Occasions\OccasionOccurrence;
+use Illuminate\Mail\Markdown;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\HtmlString;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -61,17 +63,43 @@ class WishOccasionNotification extends Notification
         $locale = method_exists($notifiable, 'preferredLocale') ? ($notifiable->preferredLocale() ?? 'en') : 'en';
         $o = $this->occurrence;
         $date = $o->date->locale($locale)->isoFormat('LL');
-        $occasion = self::plain(self::occasionLabel($o, $locale));
+        $escape = fn (string $text): string => self::plain($text);
+        $body = $this->body($o, $locale, $date, $escape);
+        $greeting = trans('notifications.reminder_greeting', ['name' => $escape($notifiable->name)], $locale);
+        $action = trans('notifications.gift_action', [], $locale);
+        $salutation = trans('mail.salutation', [], $locale);
+        $url = url(self::url($o));
 
-        $body = ($o->ownerName === null || $o->ownerId === null)
-            ? trans('notifications.gift_body_family', ['occasion' => $occasion, 'date' => $date], $locale)
-            : trans('notifications.gift_body', ['name' => self::plain($o->ownerName), 'occasion' => $occasion, 'date' => $date], $locale);
-
-        return (new MailMessage)
+        $mail = (new MailMessage)
             ->subject(self::title($o, $locale))
-            ->greeting(trans('notifications.reminder_greeting', ['name' => self::plain($notifiable->name)], $locale))
+            ->greeting($greeting)
             ->line($body)
-            ->action(trans('notifications.gift_action', [], $locale), url(self::url($o)))
-            ->salutation(trans('mail.salutation', [], $locale));
+            ->action($action, $url)
+            ->salutation($salutation);
+
+        // The Markdown part needs the escapes above; the text/plain alternative is real plain text without them.
+        $plain = implode("\n\n", [
+            trans('notifications.reminder_greeting', ['name' => $notifiable->name], $locale),
+            $this->body($o, $locale, $date, fn (string $text): string => $text),
+            $action.': '.$url,
+            $salutation,
+        ]);
+        $data = $mail->data();
+        $theme = $mail->theme;
+
+        return $mail->view([
+            'html' => fn () => app(Markdown::class)->theme($theme ?: app(Markdown::class)->getTheme())->render('notifications::email', $data),
+            'text' => new HtmlString($plain),
+        ], $data);
+    }
+
+    /** @param  callable(string): string  $escape */
+    private function body(OccasionOccurrence $o, string $locale, string $date, callable $escape): string
+    {
+        $occasion = $escape(self::occasionLabel($o, $locale));
+
+        return ($o->ownerName === null || $o->ownerId === null)
+            ? trans('notifications.gift_body_family', ['occasion' => $occasion, 'date' => $date], $locale)
+            : trans('notifications.gift_body', ['name' => $escape($o->ownerName), 'occasion' => $occasion, 'date' => $date], $locale);
     }
 }

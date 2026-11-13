@@ -166,3 +166,20 @@ it('skips the row at send time when it is no longer relevant', function (string 
     expect($row->fresh()->status->value)->toBe('skipped');
     expect(app('mailer')->getSymfonyTransport()->messages())->toHaveCount(0);
 })->with(['birth date moved', 'birth date removed', 'occasion deleted', 'lost wishlist edit', 'became manager', 'lead removed']);
+
+it('sends a real plain-text alternative without Markdown escapes while the HTML part stays escaped', function () {
+    $giver = giverWith('en');
+    $owner = User::factory()->withPreset(Preset::Child)->create(['name' => "Mary-Ann O'Brien [x](https://evil.example/n)"]);
+    $occasion = WishOccasion::factory()->create(['title' => 'St. Nick-day *b*', 'month' => 3, 'day' => 15, 'year' => 2027]);
+    $occasion->forceFill(['owner_id' => $owner->id])->save();
+    $occurrence = app(OccasionCalendar::class)->occurrenceOn('wish_occasion', $occasion->id, '2027-03-15');
+
+    $giver->notifyNow(new WishOccasionNotification($occurrence));
+
+    $message = app('mailer')->getSymfonyTransport()->messages()->last()->getOriginalMessage();
+    $text = $message->getTextBody();
+    $html = $message->getHtmlBody();
+    expect($text)->toContain("Mary-Ann O'Brien [x](https://evil.example/n)")->toContain('St. Nick-day *b*')
+        ->not->toContain('\\')
+        ->and($html)->not->toContain('href="https://evil.example')->not->toContain('<strong>b');
+});
