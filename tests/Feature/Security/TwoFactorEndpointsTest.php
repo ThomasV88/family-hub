@@ -269,3 +269,36 @@ it('does not crash or accept a code for a passkey-only member', function () {
 
     $this->assertGuest();
 });
+
+// 06-REVIEW WR-02: the pending seed needs the recent window and expires after 15 minutes.
+it('refuses to read the pending seed on a stale window', function () {
+    $user = User::factory()->create();
+    Totp::enable($user, confirm: false);
+
+    $this->actingAs($user)->withSession(stale())->getJson('/user/two-factor-qr-code')->assertStatus(423)->assertExactJson(['error' => 'confirm_required']);
+    $this->getJson('/user/two-factor-secret-key')->assertStatus(423);
+    $this->withSession(freshWindow())->getJson('/user/two-factor-secret-key')->assertOk();
+});
+
+it('expires an abandoned pending secret after 15 minutes, wiping it on read', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user)->withSession(freshWindow())->postJson('/user/two-factor-authentication')->assertOk();
+    $this->getJson('/user/two-factor-secret-key')->assertOk();
+
+    $this->travel(14)->minutes();
+    $this->withSession(freshWindow())->getJson('/user/two-factor-secret-key')->assertOk();
+
+    $this->travel(16)->minutes();
+    $this->withSession(freshWindow())->getJson('/user/two-factor-secret-key')->assertNotFound();
+    $this->getJson('/user/two-factor-qr-code')->assertNotFound();
+    expect($user->fresh()->two_factor_secret)->toBeNull()->and($user->fresh()->two_factor_recovery_codes)->toBeNull();
+});
+
+it('refuses to confirm an expired pending secret', function () {
+    $user = User::factory()->create();
+    $secret = Totp::enable($user, confirm: false);
+    $this->travel(16)->minutes();
+
+    $this->actingAs($user)->withSession(freshWindow())->postJson('/user/confirmed-two-factor-authentication', ['code' => Totp::code($secret)])->assertNotFound();
+    expect($user->fresh()->two_factor_confirmed_at)->toBeNull();
+});

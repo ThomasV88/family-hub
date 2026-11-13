@@ -34,8 +34,9 @@ class EnsureRouteDeclaresAccess
         // Reachable only while a pending secret exists (GuardTwoFactorRoutes); disable checks recency itself
         // so "Cancel setup" of an unconfirmed secret never needs a confirmation.
         'two-factor.disable' => ['authenticated'],
-        'two-factor.qr-code' => ['authenticated'],
-        'two-factor.secret-key' => ['authenticated'],
+        // Reading the pending seed needs the security confirmation too (06-REVIEW WR-02).
+        'two-factor.qr-code' => ['recent'],
+        'two-factor.secret-key' => ['recent'],
         'two-factor.regenerate-recovery-codes' => ['recent'],
         // Returns the plaintext recovery codes at any time: never.
         'two-factor.recovery-codes' => ['disabled'],

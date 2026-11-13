@@ -20,6 +20,9 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class GuardTwoFactorRoutes
 {
+    /** How long an unconfirmed authenticator secret stays readable and confirmable. */
+    public const PENDING_TTL_MINUTES = 15;
+
     private const PENDING_KEYS = ['login.id', 'login.remember', 'login.at'];
 
     public function __construct(private readonly AuditLogger $audit) {}
@@ -62,7 +65,7 @@ class GuardTwoFactorRoutes
                 ? response()->json(['error' => 'already_enabled'], 409)
                 : $next($request),
             'two-factor.qr-code', 'two-factor.secret-key' => $this->pending($user) ? $next($request) : abort(404),
-            'two-factor.confirm' => $this->confirm($request, $next, $user),
+            'two-factor.confirm' => $this->pending($user) ? $this->confirm($request, $next, $user) : abort(404),
             'two-factor.disable' => $this->disable($request, $next, $user),
             'two-factor.regenerate-recovery-codes' => $this->confirmed($user) ? $next($request) : abort(404),
             default => $next($request),
@@ -151,9 +154,24 @@ class GuardTwoFactorRoutes
         return $user->two_factor_secret !== null && $user->two_factor_confirmed_at !== null;
     }
 
+    /**
+     * A started but unconfirmed TOTP secret. It lives for PENDING_TTL_MINUTES from the moment it was written
+     * (Fortify saves the row on enable, so updated_at is that moment): an expired seed is wiped on read and no
+     * longer served or confirmable (06-REVIEW WR-02).
+     */
     private function pending(User $user): bool
     {
-        return $user->two_factor_secret !== null && $user->two_factor_confirmed_at === null;
+        if ($user->two_factor_secret === null || $user->two_factor_confirmed_at !== null) {
+            return false;
+        }
+
+        if ($user->updated_at === null || $user->updated_at->lt(now()->subMinutes(self::PENDING_TTL_MINUTES))) {
+            $user->forceFill(['two_factor_secret' => null, 'two_factor_recovery_codes' => null])->saveQuietly();
+
+            return false;
+        }
+
+        return true;
     }
 
     private function wantsJson(Request $request): bool

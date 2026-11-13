@@ -123,6 +123,10 @@ async function loadSecret() {
         securityFetch('/user/two-factor-qr-code'),
         securityFetch('/user/two-factor-secret-key'),
     ]);
+    // The security window can lapse mid-setup: ask to confirm again, then begin() shows the same pending secret.
+    if (qr.error === 'confirm_required' || key.error === 'confirm_required') {
+        return confirmNeeded('enable');
+    }
     if (!qr.ok || !key.ok) {
         failed.value = true;
         return;
