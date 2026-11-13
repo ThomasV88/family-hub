@@ -33,6 +33,14 @@ describe('ReauthForm', () => {
         expect(post).toHaveBeenCalledWith('/confirm-access', { password: 'secret' }, expect.any(Object));
     });
 
+    it('for a member with a second factor shows only the authenticator code and the passkey, never the password', () => {
+        mountForm({ methods: { password: false, totp: true, passkey: true } });
+        expect(wrapper.find('input[autocomplete="current-password"]').exists()).toBe(false);
+        expect(wrapper.find('input[autocomplete="one-time-code"]').exists()).toBe(true);
+        expect(wrapper.find('[data-testid="use-password"]').exists()).toBe(false);
+        expect(wrapper.find('[data-testid="use-passkey"]').exists()).toBe(true);
+    });
+
     it('swaps to the code input and back, and offers no recovery option', async () => {
         mountForm();
         await wrapper.find('[data-testid="use-code"]').trigger('click');

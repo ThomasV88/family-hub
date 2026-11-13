@@ -121,7 +121,7 @@ it('keeps secrets, codes, names, credentials and passwords out of audit rows and
     Cache::flush();
     $this->actingAs($member)->withSession(sacStale())->post('/confirm-access', ['password' => SAC_WRONG_PASSWORD]);
     $this->post('/confirm-access', ['code' => SAC_WRONG_CODE]);
-    $this->postJson('/confirm-access', ['password' => 'password'])->assertSuccessful();
+    $this->postJson('/confirm-access', ['code' => Totp::code($secret, -1)])->assertSuccessful(); // a member with a factor confirms with the factor, never the password alone
     $this->postJson('/confirm-access', ['code' => Totp::code($secret, -2)]);
 
     // --- admin: policy toggle and reset ----------------------------------------------------------------------

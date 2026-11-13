@@ -20,7 +20,7 @@ use Inertia\Response;
 use Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider;
 use Laravel\Fortify\Fortify;
 
-/** "Confirm it's you": password or authenticator code (recovery codes are deliberately not accepted here). */
+/** "Confirm it's you": authenticator code or passkey for members with a second factor, the password only for members without one (recovery codes are deliberately not accepted here). */
 class ReauthController extends Controller
 {
     public function __construct(private readonly AuditLogger $audit) {}
@@ -76,7 +76,7 @@ class ReauthController extends Controller
 
     private function passwordValid(User $user, string $password): bool
     {
-        return $user->password_set && $password !== '' && Hash::check($password, (string) $user->password);
+        return ReauthMethods::passwordAllowed($user) && $password !== '' && Hash::check($password, (string) $user->password);
     }
 
     private function codeValid(User $user, string $code): bool

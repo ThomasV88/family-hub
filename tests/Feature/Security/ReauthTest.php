@@ -163,3 +163,38 @@ it('has no Google re-auth route and sends a signed-in member away from the Googl
     $this->actingAs($user)->get('/auth/google/callback')->assertRedirect('/');
     expect(array_keys(ReauthMethods::for($user)))->toBe(['password', 'totp', 'passkey']);
 });
+
+// 06-REVIEW CR-03 / WR-01: a second factor is never bypassed by the password at re-authentication.
+it('refuses a password-only confirmation for a member with an authenticator app', function () {
+    $user = reauthUser();
+    $secret = Totp::enable($user);
+
+    expect(ReauthMethods::for($user->refresh()))->toBe(['password' => false, 'totp' => true, 'passkey' => false]);
+
+    $this->actingAs($user)->postJson('/confirm-access', ['password' => 'password'])
+        ->assertStatus(422)->assertJsonPath('errors.password', 'reauth.error.password');
+    expect(session('auth.password_confirmed_at'))->toBeNull()->and(session('sensitive.active_at'))->toBeNull();
+    expect(reauthRows('reauth_confirmed'))->toHaveCount(0)->and(reauthRows('second_factor_failed'))->toHaveCount(1);
+    $this->getJson('/finance')->assertStatus(423);
+
+    // The factor itself still works, and then opens both windows.
+    $this->postJson('/confirm-access', ['code' => Totp::code($secret, -1)])->assertOk()->assertExactJson(['confirmed' => true]);
+    $this->getJson('/finance')->assertOk();
+});
+
+it('refuses a password-only confirmation for a member with a passkey and offers the passkey instead', function () {
+    $user = reauthUser();
+    reauthPasskey($user);
+
+    $this->actingAs($user)->get('/confirm-access')->assertInertia(fn (Assert $p) => $p
+        ->where('methods.password', false)->where('methods.passkey', true));
+    $this->postJson('/confirm-access', ['password' => 'password'])->assertStatus(422);
+    expect(session('auth.password_confirmed_at'))->toBeNull();
+});
+
+it('still accepts the password for a member with no second factor', function () {
+    $user = reauthUser();
+
+    $this->actingAs($user)->postJson('/confirm-access', ['password' => 'password'])->assertOk();
+    $this->getJson('/finance')->assertOk();
+});
