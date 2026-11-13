@@ -25,6 +25,7 @@ enum AuditEvent: string
     case FinanceRead = 'finance_read';
     case FinanceWrite = 'finance_write';
     case FinanceVisibilityChanged = 'finance_visibility_changed';
+    case FinanceCategoryChanged = 'finance_category_changed';
 
     /** UI filter groups, in display order. */
     public const GROUPS = ['login', 'login_failed', 'invite', 'permission', 'session_revoked', 'health', 'finance', 'account'];
@@ -48,6 +49,7 @@ enum AuditEvent: string
             self::SessionRevoked => ['device'],
             self::AccessDenied => ['level'],
             self::FinanceVisibilityChanged => ['change'],
+            self::FinanceCategoryChanged => ['change'],
             default => [],
         };
     }
@@ -62,7 +64,7 @@ enum AuditEvent: string
             self::PermissionChanged => 'permission',
             self::SessionRevoked, self::SessionRevokedAll => 'session_revoked',
             self::HealthRead, self::HealthWrite => 'health',
-            self::FinanceRead, self::FinanceWrite, self::FinanceVisibilityChanged => 'finance',
+            self::FinanceRead, self::FinanceWrite, self::FinanceVisibilityChanged, self::FinanceCategoryChanged => 'finance',
             self::AccessDenied => $module === 'finance' ? 'finance' : 'health',
             self::PasswordReset, self::AdminCreated, self::GoogleLinked => 'account',
         };

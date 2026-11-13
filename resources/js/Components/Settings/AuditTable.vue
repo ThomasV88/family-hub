@@ -56,6 +56,8 @@ function details(row) {
             return t(`audit.detail.${row.event}`, { email: meta.email ?? '' });
         case 'finance_visibility_changed':
             return t(`audit.detail.finance_visibility_${meta.change === 'removed' ? 'removed' : 'added'}`, { name });
+        case 'finance_category_changed':
+            return t('audit.detail.finance_category_deleted');
         case 'session_revoked':
             return t('audit.detail.session_revoked', { name, device: meta.device ?? '' });
         case 'session_revoked_all':

@@ -2,6 +2,9 @@
 
 namespace App\Finance\Categories;
 
+use App\Access\Module;
+use App\Audit\AuditEvent;
+use App\Audit\AuditLogger;
 use App\Finance\Queries\CategoryQuery;
 use App\Models\FinanceCategory;
 use Illuminate\Support\Facades\DB;
@@ -9,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 /** Family category list changes. All row changes go through CategoryQuery. */
 class CategoryWriter
 {
-    public function __construct(private readonly CategoryQuery $categories) {}
+    public function __construct(private readonly CategoryQuery $categories, private readonly AuditLogger $audit) {}
 
     public function create(string $kind, string $name): FinanceCategory
     {
@@ -27,6 +30,9 @@ class CategoryWriter
         DB::transaction(function () use ($category, $target) {
             $this->categories->reassign((string) $category->id, (string) $target->id);
             $this->categories->remove((string) $category->id);
+            // Content-free: the reassignment reaches rows on accounts the actor cannot see, so it leaves a trace
+            // without naming categories, accounts or counts.
+            $this->audit->record(AuditEvent::FinanceCategoryChanged, request()->user(), ['change' => 'deleted'], null, Module::Finance);
         });
     }
 }

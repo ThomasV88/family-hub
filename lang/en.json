@@ -484,7 +484,8 @@
             "google_linked": "Linked a Google account",
             "access_denied": "Was denied access to {module} data",
             "finance_visibility_added": "Shared a finance account with {name}",
-            "finance_visibility_removed": "Stopped sharing a finance account with {name}"
+            "finance_visibility_removed": "Stopped sharing a finance account with {name}",
+            "finance_category_deleted": "Deleted a finance category and moved its entries"
         },
         "page": "Page {n} of {total}",
         "prev": "Previous",

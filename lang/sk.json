@@ -484,7 +484,8 @@
             "google_linked": "Prepojenie s účtom Google",
             "access_denied": "Zamietnutý prístup k údajom: {module}",
             "finance_visibility_added": "Sprístupnil(a) finančný účet pre {name}",
-            "finance_visibility_removed": "Zrušil(a) prístup k finančnému účtu pre {name}"
+            "finance_visibility_removed": "Zrušil(a) prístup k finančnému účtu pre {name}",
+            "finance_category_deleted": "Odstránil(a) finančnú kategóriu a presunul(a) jej záznamy"
         },
         "page": "Strana {n} z {total}",
         "prev": "Predchádzajúca",

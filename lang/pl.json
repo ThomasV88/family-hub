@@ -484,7 +484,8 @@
             "google_linked": "Powiązanie z kontem Google",
             "access_denied": "Odmowa dostępu do danych: {module}",
             "finance_visibility_added": "Udostępnił(a) konto finansowe dla {name}",
-            "finance_visibility_removed": "Cofnął(ęła) dostęp do konta finansowego dla {name}"
+            "finance_visibility_removed": "Cofnął(ęła) dostęp do konta finansowego dla {name}",
+            "finance_category_deleted": "Usunął(ęła) kategorię finansową i przeniósł(osła) jej wpisy"
         },
         "page": "Strona {n} z {total}",
         "prev": "Poprzednia",

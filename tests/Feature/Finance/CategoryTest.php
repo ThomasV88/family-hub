@@ -256,3 +256,20 @@ it('answers PATCH and DELETE byte-identically with and without hidden usage', fu
     expect($outputs[1])->toBe($outputs[0]);
     expect($outputs[0][0])->not->toContain('ZxCanaryFin');
 })->with(['patch', 'delete']);
+
+it('audits a category delete as one content-free entry', function () {
+    $user = fhCatUser();
+    $account = FinanceAccount::factory()->withMembers($user)->create(['name' => 'Hidden Savings']);
+    $from = FinanceCategory::factory()->create(['name' => 'Pets']);
+    FinanceTransaction::factory()->onAccount($account)->expense(500)->create(['category_id' => $from->id]);
+
+    $this->actingAs($user)->delete('/finance/categories/'.$from->id, ['move_to' => fhCatDefault('other')->id])->assertStatus(303);
+
+    $rows = \App\Models\AuditEntry::query()->where('event', 'finance_category_changed')->get();
+    expect($rows)->toHaveCount(1)
+        ->and((array) $rows->first()->meta)->toBe(['change' => 'deleted'])
+        ->and($rows->first()->actor_id)->toBe($user->id)
+        ->and($rows->first()->module)->toBe('finance');
+    $json = json_encode($rows->first()->toArray());
+    expect($json)->not->toContain('Pets')->not->toContain('Hidden Savings')->not->toContain($account->id);
+});
