@@ -8,14 +8,18 @@ use App\Http\Controllers\Controller;
 use App\Models\Invitation;
 use App\Models\User;
 use App\Models\WishlistManager;
+use App\Security\ReauthMethods;
+use App\Security\SecondFactorPolicy;
+use App\Security\SensitiveSession;
 use App\Support\SettingsSections;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class MembersController extends Controller
 {
-    public function index(Request $request, AccessGate $gate): Response
+    public function index(Request $request, AccessGate $gate, SecondFactorPolicy $policy, SensitiveSession $sensitive): Response
     {
         $viewer = $request->user();
 
@@ -23,8 +27,13 @@ class MembersController extends Controller
             ->groupBy('owner_id')
             ->map(fn ($rows) => $rows->pluck('manager_id')->map(fn ($id) => (int) $id)->values()->all());
 
+        // One grouped query for all passkey counts.
+        $passkeyCounts = DB::table('passkeys')->selectRaw('user_id, count(*) as total')->groupBy('user_id')->pluck('total', 'user_id');
+
         // Explicit field mapping: never expose password, remember_token, google_id or other columns.
-        $members = User::query()->orderBy('name')->orderBy('id')->get(['id', 'name', 'email', 'is_admin'])
+        // The two_factor_* columns are read only to compute booleans, never passed on.
+        $members = User::query()->orderBy('name')->orderBy('id')
+            ->get(['id', 'name', 'email', 'is_admin', 'two_factor_secret', 'two_factor_confirmed_at'])
             ->map(fn (User $member) => [
                 'id' => $member->id,
                 'name' => $member->name,
@@ -33,6 +42,12 @@ class MembersController extends Controller
                 'isSelf' => $member->id === $viewer->id,
                 'access' => $gate->levels($member),
                 'wishlistManagerIds' => $managerIds->get($member->id, []),
+                'security' => [
+                    'totp' => ReauthMethods::hasTotp($member),
+                    'passkeys' => (int) ($passkeyCounts[$member->id] ?? 0),
+                    'required' => $policy->required() && $policy->appliesTo($member),
+                    'needs' => $policy->mustEnrol($member),
+                ],
             ])->values();
 
         $presets = [];
@@ -58,6 +73,9 @@ class MembersController extends Controller
             'members' => $members,
             'presets' => $presets,
             'invitations' => $invitations,
+            'securityPolicy' => ['required' => $policy->required(), 'pending' => $policy->pendingCount()],
+            'confirmFresh' => $sensitive->recentlyConfirmed(),
+            'methods' => ReauthMethods::for($viewer),
             'openMember' => $open > 0 && $members->contains('id', $open) ? $open : null,
         ]);
     }
