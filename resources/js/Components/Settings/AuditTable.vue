@@ -54,6 +54,8 @@ function details(row) {
         case 'invite_resent':
         case 'invite_revoked':
             return t(`audit.detail.${row.event}`, { email: meta.email ?? '' });
+        case 'finance_visibility_changed':
+            return t(`audit.detail.finance_visibility_${meta.change === 'removed' ? 'removed' : 'added'}`, { name });
         case 'session_revoked':
             return t('audit.detail.session_revoked', { name, device: meta.device ?? '' });
         case 'session_revoked_all':

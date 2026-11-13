@@ -52,6 +52,15 @@ function mountPage({ locale = 'en', ...props } = {}) {
 afterEach(() => { current?.unmount(); current = null; document.body.innerHTML = ''; get.mockClear(); });
 
 describe('Audit page', () => {
+    it('describes finance visibility changes with the target member', () => {
+        mountPage({ entries: [
+            { id: 5, occurredAt: '2026-05-12T10:00:00+00:00', actorLabel: 'Anna', event: 'finance_visibility_changed', group: 'finance', module: 'finance', targetLabel: 'Bob', meta: { change: 'added' }, ip: null },
+            { id: 4, occurredAt: '2026-05-12T09:00:00+00:00', actorLabel: 'Anna', event: 'finance_visibility_changed', group: 'finance', module: 'finance', targetLabel: 'Cyril', meta: { change: 'removed' }, ip: null },
+        ] });
+        expect(current.text()).toContain('Shared a finance account with Bob');
+        expect(current.text()).toContain('Stopped sharing a finance account with Cyril');
+    });
+
     it('shows heading, intro, hidden caption, scoped headers and composed details', () => {
         mountPage();
         expect(current.find('h1').text()).toBe('Audit log');
