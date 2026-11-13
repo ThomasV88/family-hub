@@ -7,6 +7,7 @@ use App\Access\Preset;
 use App\Http\Controllers\Controller;
 use App\Models\Invitation;
 use App\Models\User;
+use App\Models\WishlistManager;
 use App\Support\SettingsSections;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,6 +19,10 @@ class MembersController extends Controller
     {
         $viewer = $request->user();
 
+        $managerIds = WishlistManager::query()->orderBy('manager_id')->get(['owner_id', 'manager_id'])
+            ->groupBy('owner_id')
+            ->map(fn ($rows) => $rows->pluck('manager_id')->map(fn ($id) => (int) $id)->values()->all());
+
         // Explicit field mapping: never expose password, remember_token, google_id or other columns.
         $members = User::query()->orderBy('name')->orderBy('id')->get(['id', 'name', 'email', 'is_admin'])
             ->map(fn (User $member) => [
@@ -27,6 +32,7 @@ class MembersController extends Controller
                 'isAdmin' => (bool) $member->is_admin,
                 'isSelf' => $member->id === $viewer->id,
                 'access' => $gate->levels($member),
+                'wishlistManagerIds' => $managerIds->get($member->id, []),
             ])->values();
 
         $presets = [];
