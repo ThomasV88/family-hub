@@ -1,9 +1,11 @@
 <script setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import UiListRow from '../ui/UiListRow.vue';
 import UiAvatar from '../ui/UiAvatar.vue';
 import UiTag from '../ui/UiTag.vue';
 import UiButton from '../ui/UiButton.vue';
+import { ShieldCheck, ShieldOff, TriangleAlert } from '@lucide/vue';
 
 const props = defineProps({
     member: { type: Object, required: true },
@@ -12,6 +14,7 @@ const props = defineProps({
 const emit = defineEmits(['manage']);
 const { t } = useI18n();
 
+const factorOn = computed(() => !!(props.member.security?.totp || props.member.security?.passkeys > 0));
 const tint = ((props.member.id ?? 0) % 6) + 1;
 </script>
 
@@ -25,6 +28,9 @@ const tint = ((props.member.id ?? 0) % 6) + 1;
                 <UiTag>{{ member.isAdmin ? t('settings.role.admin') : t('settings.role.member') }}</UiTag>
                 <UiTag v-if="member.isSelf">{{ t('settings.members.you') }}</UiTag>
                 <UiTag variant="success">{{ t('settings.status.active') }}</UiTag>
+                <UiTag v-if="member.security?.needs" variant="warn" :icon="TriangleAlert">{{ t('security.tag.needs') }}</UiTag>
+                <UiTag v-else-if="member.security && factorOn" variant="success" :icon="ShieldCheck">{{ t('members.security.tag_on') }}</UiTag>
+                <UiTag v-else-if="member.security" :icon="ShieldOff">{{ t('members.security.tag_off') }}</UiTag>
             </span>
         </template>
         <template #trailing>

@@ -6,6 +6,7 @@ import UiTabs from '../ui/UiTabs.vue';
 import UiConfirmDialog from '../ui/UiConfirmDialog.vue';
 import PermissionsTab from './PermissionsTab.vue';
 import SessionsTab from './SessionsTab.vue';
+import MemberSecurityTab from './MemberSecurityTab.vue';
 import WishlistManagersTab from './WishlistManagersTab.vue';
 
 const props = defineProps({
@@ -13,6 +14,9 @@ const props = defineProps({
     presets: { type: Object, required: true },
     // All members, for the wishlist managers tab.
     members: { type: Array, default: () => [] },
+    securityPolicy: { type: Object, default: () => ({ required: false, pending: 0 }) },
+    confirmFresh: { type: Boolean, default: false },
+    methods: { type: Object, default: () => ({}) },
     initialTab: { type: String, default: 'permissions' },
 });
 const emit = defineEmits(['close']);
@@ -29,6 +33,7 @@ const tabs = computed(() => [
     { key: 'permissions', label: t('permissions.tab.permissions') },
     { key: 'wishlist', label: t('settings.members.wishlist_managers.tab') },
     { key: 'sessions', label: t('permissions.tab.sessions') },
+    { key: 'security', label: t('members.security.tab') },
 ]);
 
 function requestClose() {
@@ -52,6 +57,9 @@ function requestClose() {
             </template>
             <template #panel-sessions>
                 <SessionsTab :member="member" />
+            </template>
+            <template #panel-security>
+                <MemberSecurityTab :member="member" :security-policy="securityPolicy" :confirm-fresh="confirmFresh" :methods="methods" />
             </template>
         </UiTabs>
         <UiConfirmDialog

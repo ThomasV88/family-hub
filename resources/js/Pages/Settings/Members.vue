@@ -15,6 +15,7 @@ import InvitationRow from '../../Components/Settings/InvitationRow.vue';
 import InviteDialog from '../../Components/Settings/InviteDialog.vue';
 import MemberRow from '../../Components/Settings/MemberRow.vue';
 import MemberPanel from '../../Components/Settings/MemberPanel.vue';
+import SecurityRequirementCard from '../../Components/Settings/SecurityRequirementCard.vue';
 import PermissionMatrix from '../../Components/Settings/PermissionMatrix.vue';
 
 const props = defineProps({
@@ -23,6 +24,9 @@ const props = defineProps({
     presets: { type: Object, default: () => ({}) },
     openMember: { type: Number, default: null },
     invitations: { type: Array, default: () => [] },
+    securityPolicy: { type: Object, default: () => ({ required: false, pending: 0 }) },
+    confirmFresh: { type: Boolean, default: false },
+    methods: { type: Object, default: () => ({}) },
 });
 
 const { t } = useI18n();
@@ -88,6 +92,7 @@ function open(id, tab = 'permissions') {
         </div>
         <UiTabs v-model="view" :tabs="viewTabs" :label="t('settings.section.members')">
             <template #panel-members>
+                <SecurityRequirementCard class="members__card" :security-policy="securityPolicy" :confirm-fresh="confirmFresh" :methods="methods" />
                 <UiCard :title="t('settings.members.title')" class="members__card">
                     <UiList>
                         <MemberRow v-for="member in members" :key="member.id" :member="member" :selected="member.id === openId" @manage="open(member.id)" />
@@ -133,7 +138,7 @@ function open(id, tab = 'permissions') {
             @confirm="confirmRevoke"
         />
         <template #panel>
-            <MemberPanel v-if="opened" :key="`${opened.id}-${openTab}`" :member="opened" :presets="presets" :members="members" :initial-tab="openTab" @close="openId = null" />
+            <MemberPanel v-if="opened" :key="`${opened.id}-${openTab}`" :member="opened" :presets="presets" :members="members" :security-policy="securityPolicy" :confirm-fresh="confirmFresh" :methods="methods" :initial-tab="openTab" @close="openId = null" />
         </template>
     </SettingsLayout>
 </template>
