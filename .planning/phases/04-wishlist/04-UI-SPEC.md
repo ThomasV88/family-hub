@@ -1,7 +1,8 @@
 ---
 phase: 04
 slug: wishlist
-status: draft
+status: approved
+reviewed_at: 2026-11-13
 shadcn_initialized: false
 preset: none
 created: 2026-11-13
