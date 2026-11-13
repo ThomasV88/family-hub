@@ -11,6 +11,7 @@ use App\Models\FinanceTransaction;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Support\FinancePrivacy;
 
 function fhOvUser(): User
 {
@@ -109,7 +110,7 @@ it('shows blocks [] for a viewer with no visible account and one identical 403 f
     $a = fhOvGet($user, '?budget='.$hidden->id);
     $b = fhOvGet($user, '?budget='.Str::uuid());
     $a->assertForbidden();
-    expect(Tests\Support\FinancePrivacy::normalise($a))->toBe(Tests\Support\FinancePrivacy::normalise($b));
+    expect(FinancePrivacy::normalise($a))->toBe(FinancePrivacy::normalise($b));
     fhOvGet($user, '?budget=not-a-uuid')->assertForbidden();
 });
 

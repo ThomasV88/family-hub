@@ -1,10 +1,10 @@
 <?php
 
 use App\Access\Preset;
+use App\Finance\HomeSummary;
 use App\Models\FinanceAccount;
 use App\Models\FinanceRecurring;
 use App\Models\User;
-use Illuminate\Support\Facades\Date;
 use Inertia\Testing\AssertableInertia as Assert;
 
 function fhHomeRecurring(FinanceAccount $account, string $startsOn): void
@@ -20,7 +20,7 @@ it('shows the card with counts for a parent with a visible recurring item', func
     fhHomeRecurring($a, now($tz)->startOfMonth()->toDateString());
     fhHomeRecurring($hidden, now($tz)->startOfMonth()->toDateString());
 
-    $expected = app(App\Finance\HomeSummary::class)->forUser($user);
+    $expected = app(HomeSummary::class)->forUser($user);
 
     $this->actingAs($user)->get('/')->assertInertia(fn (Assert $page) => $page
         ->component('Home')
