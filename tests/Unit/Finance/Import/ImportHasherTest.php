@@ -28,8 +28,22 @@ it('uses the bank reference when present and scopes by account', function () {
     $c = ImportHasher::apply('acc2', [nrow(2, '2026-01-20', -250, 'Kava', 'REF1')]);
     $d = ImportHasher::apply('acc2', [nrow(2, '2026-01-20', -250, 'Kava')]);
     $e = ImportHasher::apply('acc1', [nrow(2, '2026-01-20', -250, 'Kava')]);
-    expect($a[0]->importHash)->toBe($b[0]->importHash)->and($a[0]->importHash)->not->toBe($c[0]->importHash)
+    expect($a[0]->importHash)->not->toBe($b[0]->importHash)->and($a[0]->importHash)->not->toBe($c[0]->importHash)
         ->and($d[0]->importHash)->not->toBe($e[0]->importHash);
+});
+
+it('does not collapse a recycled reference onto a different transaction', function () {
+    $old = ImportHasher::apply('acc', [nrow(2, '2026-01-20', -250, 'Rent', '0000')]);
+    $new = ImportHasher::apply('acc', [nrow(2, '2026-02-20', -250, 'Rent', '0000')]);
+    $other = ImportHasher::apply('acc', [nrow(2, '2026-01-20', -999, 'Rent', '0000')]);
+    expect($old[0]->importHash)->not->toBe($new[0]->importHash)->and($old[0]->importHash)->not->toBe($other[0]->importHash);
+});
+
+it('keeps two rows with the same reference in one file distinct and stable', function () {
+    $a = ImportHasher::apply('acc', [nrow(2, '2026-01-20', -250, 'Shop', '0000'), nrow(3, '2026-01-21', -300, 'Bar', '0000'), nrow(4, '2026-01-20', -250, 'Shop', '0000')]);
+    expect(array_unique([$a[0]->importHash, $a[1]->importHash, $a[2]->importHash]))->toHaveCount(3);
+    $b = ImportHasher::apply('acc', [nrow(7, '2026-01-20', -250, 'Shop', '0000')]);
+    expect($b[0]->importHash)->toBe($a[0]->importHash);
 });
 
 it('leaves invalid rows unhashed', function () {
