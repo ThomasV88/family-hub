@@ -161,3 +161,14 @@ it('reports the state of an expired invitation and still allows resend', functio
 it('returns 404 for an unknown invitation id as admin', function () {
     test()->actingAs(User::factory()->admin()->create())->post('/settings/invitations/99999/resend')->assertNotFound();
 });
+
+it('takes a per-email advisory lock so concurrent creates cannot race the open-invite index', function () {
+    Notification::fake();
+    $admin = User::factory()->admin()->create();
+
+    inviteAs($admin)->assertRedirect();
+
+    // The test transaction keeps the xact-level lock visible; a real request releases it on commit.
+    $held = DB::selectOne("select count(*) as c from pg_locks where locktype = 'advisory' and pid = pg_backend_pid() and granted")->c;
+    expect($held)->toBeGreaterThanOrEqual(1);
+});

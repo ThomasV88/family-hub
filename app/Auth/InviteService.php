@@ -33,6 +33,10 @@ class InviteService
         $token = Str::random(40);
 
         $invitation = DB::transaction(function () use ($admin, $email, $preset, $locale, $token) {
+            // lockForUpdate locks nothing when no open row exists, so serialize creates per email explicitly;
+            // otherwise two concurrent creates both pass and the loser hits the invitations_one_open index (500).
+            DB::select('select pg_advisory_xact_lock(hashtext(?))', ['invite:'.$email]);
+
             $open = Invitation::query()->whereRaw('lower(email) = ?', [$email])
                 ->whereNull('accepted_at')->whereNull('revoked_at')->lockForUpdate()->get();
             foreach ($open as $old) {
