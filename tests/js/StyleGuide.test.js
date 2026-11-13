@@ -4,7 +4,7 @@ import { expectNoAxeViolations } from './helpers/axe.js';
 
 vi.mock('@inertiajs/vue3', () => ({
     usePage: () => ({ props: { locale: 'en', app: { name: 'Family Hub', env: 'local' } } }),
-    router: { post: vi.fn() },
+    router: { post: vi.fn(), visit: vi.fn(), on: vi.fn() },
     Link: { template: '<a><slot /></a>' },
 }));
 

@@ -1,6 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
-import BaseLayout from '../Layouts/BaseLayout.vue';
+import ThemeSwitch from '../Components/ThemeSwitch.vue';
+import AppShell from '../Layouts/AppShell.vue';
 
 const { t } = useI18n();
 
@@ -12,16 +13,16 @@ const sections = Object.keys(modules)
 </script>
 
 <template>
-    <BaseLayout>
+    <AppShell current="">
         <div data-testid="style-guide">
             <div class="style-guide__head">
-                <!-- The theme switch sits in the layout header at the top of the page. -->
+                <ThemeSwitch />
                 <h1 class="style-guide__title">{{ t('style.title') }}</h1>
                 <p class="style-guide__intro">{{ t('style.intro') }}</p>
             </div>
             <component :is="section.component" v-for="section in sections" :key="section.path" />
         </div>
-    </BaseLayout>
+    </AppShell>
 </template>
 
 <style scoped>

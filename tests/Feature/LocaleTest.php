@@ -32,7 +32,7 @@ it('uses the locale cookie and exposes messages and html lang', function () {
         ->where('availableLocales', ['sk', 'pl', 'en'])
         ->has('messages.home.title')
     );
-    expect($response->getContent())->toContain('<html lang="sk"');
+    expect($response->getContent())->toContain('<html lang="sk-SK"');
 });
 
 it('picks the locale from Accept-Language when there is no cookie', function () {

@@ -1,6 +1,6 @@
 @php($themePref = \App\Support\ThemePreference::fromRequest(request()))
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-pref="{{ $themePref }}"@if ($themePref !== 'system') data-theme="{{ $themePref }}"@endif>
+<html lang="{{ ['sk' => 'sk-SK', 'pl' => 'pl-PL', 'en' => 'en-GB'][app()->getLocale()] ?? 'en-GB' }}" data-theme-pref="{{ $themePref }}"@if ($themePref !== 'system') data-theme="{{ $themePref }}"@endif>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">

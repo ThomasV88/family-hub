@@ -1,6 +1,6 @@
 import { createApp, h } from 'vue';
 import { createInertiaApp, router } from '@inertiajs/vue3';
-import { createAppI18n, setAppLocale } from './i18n.js';
+import { INTL_LOCALES, createAppI18n, setAppLocale } from './i18n.js';
 import { initTheme } from './theme.js';
 
 initTheme();
@@ -13,12 +13,13 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         const shared = props.initialPage.props;
         const i18n = createAppI18n(shared.locale, shared.messages);
-        document.documentElement.lang = shared.locale;
+        document.documentElement.lang = INTL_LOCALES[shared.locale] ?? INTL_LOCALES.en;
 
         // Switching language posts to /locale and redirects back; apply the new messages without a reload.
         router.on('navigate', (event) => {
             const p = event.detail.page.props;
             setAppLocale(i18n, p.locale, p.messages);
+            document.documentElement.lang = INTL_LOCALES[p.locale] ?? INTL_LOCALES.en;
         });
 
         createApp({ render: () => h(App, props) })

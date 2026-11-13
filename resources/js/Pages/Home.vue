@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import BaseLayout from '../Layouts/BaseLayout.vue';
+import AppShell from '../Layouts/AppShell.vue';
 
 const { t, d, n } = useI18n();
 const page = usePage();
@@ -27,7 +27,7 @@ function runCheck() {
 </script>
 
 <template>
-    <BaseLayout>
+    <AppShell current="overview">
         <div data-testid="home">
             <h1>{{ t('home.title') }}</h1>
             <p>{{ t('home.intro') }}</p>
@@ -47,5 +47,5 @@ function runCheck() {
                 </button>
             </section>
         </div>
-    </BaseLayout>
+    </AppShell>
 </template>

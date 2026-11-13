@@ -5,10 +5,14 @@ import { createAppI18n } from '../../resources/js/i18n.js';
 
 let mockProps = {};
 const post = vi.fn();
-vi.mock('@inertiajs/vue3', () => ({
-    usePage: () => ({ props: mockProps }),
-    router: { post: (...args) => post(...args) },
-}));
+vi.mock('@inertiajs/vue3', async () => {
+    const { h } = await import('vue');
+    return {
+        usePage: () => ({ props: mockProps }),
+        router: { post: (...args) => post(...args), visit: vi.fn(), on: vi.fn() },
+        Link: { props: ['href'], render() { return h('a', { href: this.href }, this.$slots.default?.()); } },
+    };
+});
 
 const load = (l) => JSON.parse(readFileSync(`${process.cwd()}/lang/${l}.json`, 'utf8'));
 const mountHome = (locale = 'en') => mount(Home, { global: { plugins: [createAppI18n(locale, load(locale))] } });
