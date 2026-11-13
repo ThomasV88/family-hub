@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\RequestInput;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -25,10 +26,17 @@ class ThrottleAuthRoutes
             return $response;
         }
 
+        // Fortify lowercases the email before it validates, so array-valued fields would end in a 500.
+        if (in_array($name, ['password.email', 'password.update'], true)) {
+            foreach (['email', 'token', 'password', 'password_confirmation'] as $field) {
+                abort_if($request->has($field) && ! is_string($request->input($field)), 422);
+            }
+        }
+
         $limits = match ($name) {
             'password.email' => [
                 ['forgot-ip:'.$request->ip(), 5, 60],
-                ['forgot-email:'.Str::lower((string) $request->input('email')), 5, 3600],
+                ['forgot-email:'.RequestInput::email($request), 5, 3600],
             ],
             'password.update' => [
                 ['reset-ip:'.$request->ip(), 10, 60],

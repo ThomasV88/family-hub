@@ -115,3 +115,13 @@ it('stores the locale on the account and uses it without a cookie', function () 
 
     $this->actingAs($user)->get('/')->assertInertia(fn (Assert $page) => $page->where('locale', 'pl'));
 });
+
+it('answers array-valued email and password input without a server error', function () {
+    foreach ([
+        ['/login', ['email' => ['a@example.test'], 'password' => ['x']]],
+        ['/forgot-password', ['email' => ['a@example.test']]],
+        ['/reset-password', ['token' => 't', 'email' => ['a@example.test'], 'password' => 'x', 'password_confirmation' => 'x']],
+    ] as [$uri, $data]) {
+        expect($this->post($uri, $data)->getStatusCode())->toBeLessThan(500, $uri);
+    }
+});

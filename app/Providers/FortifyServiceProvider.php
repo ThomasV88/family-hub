@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\RequestInput;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Controllers\Auth\InviteAcceptController;
 use App\Models\User;
@@ -83,9 +84,9 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::confirmPasswordView(fn () => abort(404));
 
         Fortify::authenticateUsing(function (Request $request) {
-            $user = User::where('email', Str::lower((string) $request->input('email')))->first();
+            $user = User::where('email', RequestInput::email($request))->first();
 
-            $matches = Hash::check((string) $request->input('password'), $user?->password ?? self::DUMMY_HASH);
+            $matches = Hash::check(RequestInput::string($request, 'password'), $user?->password ?? self::DUMMY_HASH);
 
             return ($user && $matches) ? $user : null;
         });

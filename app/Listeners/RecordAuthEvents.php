@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Support\RequestInput;
 use App\Audit\AuditEvent;
 use App\Audit\AuditLogger;
 use App\Models\User;
@@ -28,14 +29,14 @@ class RecordAuthEvents
     {
         // Fortify's custom authenticator fires Failed without a user, so resolve the actor from the typed
         // email. Only the id is kept; the typed email and password are never stored.
-        $user = $event->user instanceof User ? $event->user : $this->findByEmail((string) ($event->credentials['email'] ?? ''));
+        $user = $event->user instanceof User ? $event->user : $this->findByEmail(is_string($event->credentials['email'] ?? null) ? $event->credentials['email'] : '');
 
         $this->audit->record(AuditEvent::LoginFailed, $user);
     }
 
     public function handleLockout(Lockout $event): void
     {
-        $this->audit->record(AuditEvent::Lockout, $this->findByEmail((string) $event->request->input('email')));
+        $this->audit->record(AuditEvent::Lockout, $this->findByEmail(RequestInput::string($event->request, 'email')));
     }
 
     private function findByEmail(string $email): ?User

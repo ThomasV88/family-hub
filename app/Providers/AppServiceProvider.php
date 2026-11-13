@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\RequestInput;
 use App\Access\AccessGate;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -58,7 +59,7 @@ class AppServiceProvider extends ServiceProvider
         };
 
         RateLimiter::for('login', function (Request $request) use ($respond) {
-            $email = Str::lower((string) $request->input('email'));
+            $email = RequestInput::email($request);
 
             return [
                 Limit::perMinute(5)->by($email.'|'.$request->ip())->response($respond),
