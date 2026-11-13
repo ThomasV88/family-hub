@@ -14,6 +14,8 @@ $subscription = [
 ];
 
 return [
+    'settings.notifications' => ['method' => 'GET', 'uri' => '/settings/notifications', 'expect' => $allUsers(200)],
+    'settings.notifications.update' => ['method' => 'PUT', 'uri' => '/settings/notifications/mail', 'data' => ['enabled' => true], 'expect' => $allUsers(303)],
     'settings.notifications.push.store' => ['method' => 'POST', 'uri' => '/settings/notifications/push', 'data' => $subscription, 'expect' => $allUsers(201)],
     'settings.notifications.push.destroy' => ['method' => 'DELETE', 'uri' => '/settings/notifications/push', 'data' => ['endpoint' => $subscription['endpoint']], 'expect' => $allUsers(204)],
     // Matrix users have no subscription of their own, so the test route answers 422.
