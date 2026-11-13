@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Access\AccessGate;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -16,7 +17,10 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->scoped(AccessGate::class);
+    }
 
     /**
      * Bootstrap any application services.

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Access\AccessGate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Inertia\Middleware;
@@ -52,6 +53,7 @@ class HandleInertiaRequests extends Middleware
                     'locale' => $request->user()->locale,
                     'isAdmin' => (bool) $request->user()->is_admin,
                 ] : null,
+                'access' => $request->user() ? app(AccessGate::class)->levels($request->user()) : (object) [],
             ],
             'flash' => [
                 'status' => $request->session()->get('status'),

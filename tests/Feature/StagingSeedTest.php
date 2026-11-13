@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\ModulePermission;
 use App\Models\User;
 
 beforeEach(function () {
@@ -33,13 +34,28 @@ it('requires --force to seed', function () {
     expect(User::count())->toBe(0);
 });
 
-it('seeds exactly six synthetic users on staging', function () {
+it('seeds six synthetic members and one synthetic admin on staging', function () {
     setEnv('staging');
 
     $this->artisan('staging:seed --force')->assertExitCode(0);
 
-    expect(User::count())->toBe(6)
-        ->and(User::where('email', 'not like', '%@example.test')->count())->toBe(0);
+    expect(User::count())->toBe(7)
+        ->and(User::where('email', 'not like', '%@example.test')->count())->toBe(0)
+        ->and(User::where('is_admin', true)->count())->toBe(1)
+        ->and(User::where('is_admin', true)->first()->email)->toBe('admin@example.test');
+});
+
+it('gives members preset grants and the admin none', function () {
+    setEnv('staging');
+
+    $this->artisan('staging:seed --force')->assertExitCode(0);
+
+    $admin = User::where('is_admin', true)->first();
+    expect($admin->modulePermissions()->count())->toBe(0);
+    foreach (User::where('is_admin', false)->get() as $member) {
+        expect($member->modulePermissions()->count())->toBe(4);
+    }
+    expect(ModulePermission::where('module', 'health')->where('level', '>', 0)->count())->toBe(0);
 });
 
 it('is idempotent', function () {
@@ -48,7 +64,7 @@ it('is idempotent', function () {
     $this->artisan('staging:seed --force')->assertExitCode(0);
     $this->artisan('staging:seed --force')->assertExitCode(0);
 
-    expect(User::count())->toBe(6);
+    expect(User::count())->toBe(7);
 });
 
 it('audit passes when all users are synthetic', function () {

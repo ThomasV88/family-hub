@@ -1,12 +1,17 @@
 <?php
 
+use App\Http\Middleware\EnsureRouteDeclaresAccess;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\NoStoreDynamicResponses;
+use App\Http\Middleware\RequireAccess;
 use App\Http\Middleware\SetLocale;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -28,9 +33,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo('/');
         $middleware->authenticateSessions();
         $middleware->encryptCookies(except: ['fh_theme']);
+        $middleware->alias(['access' => RequireAccess::class]);
         $middleware->web(append: [
             SetLocale::class,
             HandleInertiaRequests::class,
+            EnsureRouteDeclaresAccess::class,
             NoStoreDynamicResponses::class,
         ]);
     })
@@ -38,4 +45,26 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        $forbidden = fn (Request $request) => Inertia::render('Errors/Forbidden')->toResponse($request)->setStatusCode(403);
+
+        $exceptions->render(function (HttpExceptionInterface $e, Request $request) use ($forbidden) {
+            // Expired CSRF token (419, prepared from TokenMismatchException): back to login with a clear message.
+            if ($e->getStatusCode() === 419 && ! ($request->expectsJson() && ! $request->header('X-Inertia'))) {
+                return redirect('/login')->with('status', 'session_ended');
+            }
+
+            if ($e->getStatusCode() === 403 && ! $request->is('api/*') && ! ($request->expectsJson() && ! $request->header('X-Inertia'))) {
+                return $forbidden($request);
+            }
+
+            return null;
+        });
+        $exceptions->render(function (AuthorizationException $e, Request $request) use ($forbidden) {
+            if (! $request->is('api/*') && ! ($request->expectsJson() && ! $request->header('X-Inertia'))) {
+                return $forbidden($request);
+            }
+
+            return null;
+        });
     })->create();
