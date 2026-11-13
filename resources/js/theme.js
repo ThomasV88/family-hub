@@ -48,6 +48,11 @@ export function applyTheme(pref, { root = document.documentElement, matchMedia =
     }
 }
 
+function writeThemeCookie(pref) {
+    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${THEME_COOKIE}=${pref}; path=/; max-age=31536000; SameSite=Lax${secure}`;
+}
+
 export function setThemePreference(pref) {
     pref = valid(pref);
     try {
@@ -55,11 +60,15 @@ export function setThemePreference(pref) {
     } catch {
         // storage unavailable
     }
-    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
-    document.cookie = `${THEME_COOKIE}=${pref}; path=/; max-age=31536000; SameSite=Lax${secure}`;
+    writeThemeCookie(pref);
     applyTheme(pref);
 }
 
 export function initTheme() {
-    applyTheme(getThemePreference());
+    const pref = getThemePreference();
+    // The server renders from the cookie. If localStorage disagrees (cookie cleared or expired), re-sync
+    // the cookie so the next server render matches and the wrong-theme flash stops.
+    const rendered = document.documentElement.getAttribute('data-theme-pref');
+    if (rendered !== pref) writeThemeCookie(pref);
+    applyTheme(pref);
 }

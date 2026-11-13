@@ -79,3 +79,20 @@ describe('applyTheme', () => {
         expect(root.getAttribute('data-theme')).toBe('dark');
     });
 });
+
+import { initTheme, THEME_COOKIE } from '../../resources/js/theme.js';
+
+describe('WR-07 initTheme cookie re-sync', () => {
+    it('rewrites the cookie when localStorage differs from the server-rendered preference', () => {
+        localStorage.setItem(THEME_STORAGE_KEY, 'dark');
+        root.setAttribute('data-theme-pref', 'system');
+        initTheme();
+        expect(document.cookie).toContain(`${THEME_COOKIE}=dark`);
+    });
+    it('does not touch the cookie when they already agree', () => {
+        localStorage.setItem(THEME_STORAGE_KEY, 'dark');
+        root.setAttribute('data-theme-pref', 'dark');
+        initTheme();
+        expect(document.cookie).not.toContain(THEME_COOKIE);
+    });
+});
