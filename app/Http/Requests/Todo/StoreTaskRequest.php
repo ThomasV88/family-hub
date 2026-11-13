@@ -50,6 +50,7 @@ class StoreTaskRequest extends FormRequest
             'member_ids.*' => ['integer', new HasTodoAccess],
             'due_date' => ['nullable', 'date_format:Y-m-d'],
             'due_time' => ['nullable', 'date_format:H:i', Rule::prohibitedIf(fn () => blank($this->input('due_date')))],
+            'remind_before_minutes' => ['nullable', 'integer', Rule::in([0, 15, 60, 1440])],
             'recurrence' => ['nullable', 'array'],
             'recurrence_mode' => ['required_with:recurrence', 'nullable', Rule::in(['schedule', 'completion'])],
         ];
@@ -59,6 +60,15 @@ class StoreTaskRequest extends FormRequest
     public function after(): array
     {
         return [function (Validator $validator) {
+            $remind = $this->input('remind_before_minutes');
+            if ($remind !== null && ! $validator->errors()->has('remind_before_minutes')) {
+                if (blank($this->input('due_date'))) {
+                    $validator->errors()->add('remind_before_minutes', 'todo.reminder.need_date');
+                } elseif (in_array((int) $remind, [15, 60], true) && blank($this->input('due_time'))) {
+                    $validator->errors()->add('remind_before_minutes', 'todo.reminder.need_time');
+                }
+            }
+
             $recurrence = $this->input('recurrence');
             if (! is_array($recurrence) || $validator->errors()->has('recurrence')) {
                 return;
@@ -106,6 +116,7 @@ class StoreTaskRequest extends FormRequest
             'due_date.date_format' => 'todo.error.date_invalid',
             'due_time.date_format' => 'todo.error.time_invalid',
             'due_time.prohibited' => 'todo.error.time_invalid',
+            'remind_before_minutes.*' => 'todo.error.save_failed',
             'recurrence.array' => 'todo.error.save_failed',
             'recurrence_mode.*' => 'todo.error.save_failed',
         ];

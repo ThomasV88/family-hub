@@ -171,7 +171,7 @@ class TaskService
      */
     private function fields(array $validated): array
     {
-        return array_intersect_key($validated, array_flip(['title', 'notes', 'assignee_id', 'due_date', 'due_time']));
+        return array_intersect_key($validated, array_flip(['title', 'notes', 'assignee_id', 'due_date', 'due_time', 'remind_before_minutes']));
     }
 
     /**
