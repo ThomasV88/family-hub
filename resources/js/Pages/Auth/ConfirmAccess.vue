@@ -1,11 +1,12 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppShell from '../../Layouts/AppShell.vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import UiCard from '../../Components/ui/UiCard.vue';
+import GoogleGlyph from '../../Components/GoogleGlyph.vue';
 import ReauthForm from '../../Components/Security/ReauthForm.vue';
 
 const props = defineProps({
@@ -14,9 +15,11 @@ const props = defineProps({
     interrupted: { type: Boolean, default: false },
 });
 const { t } = useI18n();
+const page = usePage();
 
 const hasPassword = computed(() => !!props.methods.password);
 const hasForm = computed(() => hasPassword.value || !!props.methods.totp);
+const googleFailed = computed(() => page.props.flash?.status === 'google_reauth_failed');
 const hasAny = computed(() => hasForm.value || !!props.methods.passkey);
 
 const restarting = ref(false);
@@ -39,6 +42,10 @@ function signInAgain() {
                     {{ t('reauth.interrupted') }}
                 </UiAlert>
 
+                <UiAlert v-if="googleFailed" variant="danger" live class="confirm__alert" data-testid="google-failed-alert">
+                    {{ t('reauth.google_failed') }}
+                </UiAlert>
+
                 <template v-if="hasAny">
                     <p class="confirm__body">
                         {{ hasPassword ? t('reauth.body', { minutes }) : t('reauth.passkey_only_body') }}
@@ -51,6 +58,11 @@ function signInAgain() {
                     <p class="confirm__body">{{ t('reauth.no_method') }}</p>
                     <UiButton variant="primary" class="confirm__full" :loading="restarting" data-testid="sign-in-again" @click="signInAgain">
                         {{ t('reauth.cta.sign_in_again') }}
+                    </UiButton>
+                    <!-- Full-page navigation (not Inertia): the member leaves for Google. Only sent for an eligible member with the flag on. -->
+                    <UiButton v-if="methods.google" href="/confirm-access/google" variant="secondary" class="confirm__full confirm__google" data-testid="google-again">
+                        <GoogleGlyph />
+                        {{ t('reauth.google') }}
                     </UiButton>
                 </template>
 
@@ -67,6 +79,7 @@ function signInAgain() {
 .confirm__body { margin: 0 0 var(--space-4); color: var(--color-text-muted); }
 .confirm__alert { margin-bottom: var(--space-4); }
 .confirm__full { display: flex; width: 100%; }
+.confirm__google { margin-top: var(--space-3); }
 .confirm__back { margin: var(--space-4) 0 0; text-align: center; font-size: var(--text-sm); }
 .confirm__back a { color: var(--color-primary); }
 </style>
