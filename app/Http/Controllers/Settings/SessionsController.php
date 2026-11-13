@@ -30,8 +30,11 @@ class SessionsController extends Controller
         $row = DB::table('sessions')->where('id', $session)->where('user_id', $member->getKey())->first(['user_agent']);
         abort_if($row === null, 404);
 
-        $revoker->revokeOne($member, $session);
-        $audit->record(AuditEvent::SessionRevoked, $request->user(), ['device' => UserAgentLabel::device($row->user_agent)], $member);
+        // One transaction: the revoke and its audit row commit together or not at all.
+        DB::transaction(function () use ($revoker, $audit, $request, $member, $session, $row): void {
+            $revoker->revokeOne($member, $session);
+            $audit->record(AuditEvent::SessionRevoked, $request->user(), ['device' => UserAgentLabel::device($row->user_agent)], $member);
+        });
 
         return back(303)->with('toast', ['key' => 'sessions.revoked_toast']);
     }
@@ -40,8 +43,10 @@ class SessionsController extends Controller
     {
         $member = User::query()->findOrFail($user);
 
-        $revoker->revokeAll($member);
-        $audit->record(AuditEvent::SessionRevokedAll, $request->user(), [], $member);
+        DB::transaction(function () use ($revoker, $audit, $request, $member): void {
+            $revoker->revokeAll($member);
+            $audit->record(AuditEvent::SessionRevokedAll, $request->user(), [], $member);
+        });
 
         return back(303)->with('toast', ['key' => 'sessions.revoked_toast']);
     }

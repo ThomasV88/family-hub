@@ -3,7 +3,7 @@
 use App\Models\AuditEntry;
 use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
-use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -51,10 +51,14 @@ it('records lockout, storing only the id of a matching user', function () {
     expect(json_encode($rows->map->getAttributes()))->not->toContain('ghost');
 });
 
-it('records password_reset', function () {
-    $user = User::factory()->create();
+it('records password_reset once, inside the reset action', function () {
+    $user = User::factory()->create(['email' => 'anna@example.test']);
+    $token = Password::broker()->createToken($user);
 
-    event(new PasswordReset($user));
+    $this->post('/reset-password', [
+        'token' => $token, 'email' => 'anna@example.test',
+        'password' => 'a long new passphrase', 'password_confirmation' => 'a long new passphrase',
+    ])->assertRedirect('/login');
 
     $row = AuditEntry::sole();
     expect($row->event)->toBe('password_reset')->and($row->actor_id)->toBe($user->id);

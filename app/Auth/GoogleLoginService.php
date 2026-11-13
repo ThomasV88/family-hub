@@ -6,6 +6,7 @@ use App\Audit\AuditEvent;
 use App\Audit\AuditLogger;
 use App\Models\Invitation;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 
 /**
@@ -69,8 +70,10 @@ class GoogleLoginService
             return [self::FAILED, null];
         }
 
-        $byEmail->forceFill(['google_id' => $sub])->save();
-        $this->audit->record(AuditEvent::GoogleLinked, $byEmail);
+        DB::transaction(function () use ($byEmail, $sub): void {
+            $byEmail->forceFill(['google_id' => $sub])->save();
+            $this->audit->record(AuditEvent::GoogleLinked, $byEmail);
+        });
 
         return ['login', $byEmail];
     }

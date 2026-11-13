@@ -8,10 +8,9 @@ use App\Models\User;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;
-use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
 
-/** Account events. Never stores typed emails or passwords: only the id of a matching user. */
+/** Account events (password_reset is audited inside ResetUserPassword's transaction). Never stores typed emails or passwords: only the id of a matching user. */
 class RecordAuthEvents
 {
     public function __construct(private readonly AuditLogger $audit) {}
@@ -37,11 +36,6 @@ class RecordAuthEvents
     public function handleLockout(Lockout $event): void
     {
         $this->audit->record(AuditEvent::Lockout, $this->findByEmail((string) $event->request->input('email')));
-    }
-
-    public function handlePasswordReset(PasswordReset $event): void
-    {
-        $this->audit->record(AuditEvent::PasswordReset, $event->user instanceof User ? $event->user : null);
     }
 
     private function findByEmail(string $email): ?User

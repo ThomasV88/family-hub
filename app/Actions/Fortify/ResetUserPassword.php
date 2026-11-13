@@ -2,8 +2,11 @@
 
 namespace App\Actions\Fortify;
 
+use App\Audit\AuditEvent;
+use App\Audit\AuditLogger;
 use App\Auth\SessionRevoker;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -31,11 +34,15 @@ class ResetUserPassword implements ResetsUserPasswords
             'password.uncompromised' => 'auth.error.password_compromised',
         ])->validate();
 
-        $user->forceFill([
-            'password' => Hash::make($input['password']),
-        ])->save();
+        // One transaction: password change, session revoke and audit row commit together or not at all.
+        DB::transaction(function () use ($user, $input): void {
+            $user->forceFill([
+                'password' => Hash::make($input['password']),
+            ])->save();
 
-        // Revoke means revoke: other devices are signed out. Audit rows come from the PasswordReset event (plan 05).
-        app(SessionRevoker::class)->revokeAll($user);
+            // Revoke means revoke: other devices are signed out.
+            app(SessionRevoker::class)->revokeAll($user);
+            app(AuditLogger::class)->record(AuditEvent::PasswordReset, $user);
+        });
     }
 }

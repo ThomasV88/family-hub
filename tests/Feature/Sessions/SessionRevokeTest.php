@@ -84,3 +84,17 @@ it('does not let the old remember cookie bring a revoked member back', function 
 
     $this->withCookie($name, $recaller)->get('/')->assertRedirect('/login');
 });
+
+it('rolls the revoke back when the audit row cannot be written', function () {
+    $admin = User::factory()->admin()->create();
+    $member = User::factory()->create(['remember_token' => 'old-token']);
+    $id = str_repeat('a', 40);
+    revRow($member, $id);
+    $this->mock(\App\Audit\AuditLogger::class)->shouldReceive('record')->andThrow(new RuntimeException('audit down'));
+    $this->withoutExceptionHandling();
+
+    expect(fn () => $this->actingAs($admin)->delete("/settings/members/{$member->id}/sessions/{$id}"))->toThrow(RuntimeException::class);
+
+    expect(DB::table('sessions')->where('id', $id)->exists())->toBeTrue();
+    expect($member->fresh()->remember_token)->toBe('old-token');
+});
