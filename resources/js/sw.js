@@ -26,7 +26,15 @@ self.addEventListener('push', (event) => {
     if (!data || typeof data !== 'object') data = {};
 
     const title = typeof data.title === 'string' && data.title !== '' ? data.title : 'Family Hub';
-    const url = typeof data.url === 'string' && data.url.startsWith('/') && !data.url.startsWith('//') ? data.url : '/';
+    // Same-origin paths only: '/x' passes, '//x' and '/\\x' (which WHATWG parsing turns into a host) do not.
+    let url = '/';
+    if (typeof data.url === 'string' && data.url.startsWith('/') && !data.url.startsWith('//') && !data.url.includes('\\')) {
+        try {
+            if (new URL(data.url, self.location.origin).origin === self.location.origin) url = data.url;
+        } catch {
+            url = '/';
+        }
+    }
     const options = {
         icon: '/icons/pwa-192x192.png',
         badge: '/icons/pwa-192x192.png',
