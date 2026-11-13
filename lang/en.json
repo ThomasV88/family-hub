@@ -485,7 +485,8 @@
             "access_denied": "Was denied access to {module} data",
             "finance_visibility_added": "Shared a finance account with {name}",
             "finance_visibility_removed": "Stopped sharing a finance account with {name}",
-            "finance_category_deleted": "Deleted a finance category and moved its entries"
+            "finance_category_deleted": "Deleted a finance category and moved its entries",
+            "finance_admin_self_added": "Added themselves to a finance account"
         },
         "page": "Page {n} of {total}",
         "prev": "Previous",

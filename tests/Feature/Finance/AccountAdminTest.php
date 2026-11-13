@@ -115,7 +115,7 @@ it('audits each share and unshare as its own content-free entry', function () {
 
     $rows = AuditEntry::query()->where('event', 'finance_visibility_changed')->orderBy('id')->get();
     expect($rows)->toHaveCount(2)
-        ->and($rows->pluck('meta')->map(fn ($m) => (array) $m)->all())->toBe([['change' => 'added'], ['change' => 'added']])
+        ->and($rows->pluck('meta')->map(fn ($m) => (array) $m)->all())->toBe([['change' => 'added', 'account' => FinanceAccount::query()->value('id')], ['change' => 'added', 'account' => FinanceAccount::query()->value('id')]])
         ->and($rows->pluck('target_user_id')->all())->toBe([$a->id, $b->id])
         ->and($rows->first()->actor_id)->toBe($admin->id)
         ->and($rows->first()->module)->toBe('finance');
@@ -128,9 +128,32 @@ it('audits each share and unshare as its own content-free entry', function () {
     $byTarget = $new->mapWithKeys(fn ($r) => [$r->target_user_id => ((array) $r->meta)['change']])->all();
     expect($byTarget)->toBe([$c->id => 'added', $b->id => 'removed']);
 
+    // The only account reference is the opaque public id inside the allowlisted `account` meta key; no names.
     foreach (AuditEntry::query()->get() as $row) {
-        expect(json_encode($row->toArray()))->not->toContain('Secret Savings')->not->toContain($account->id);
+        expect(json_encode($row->toArray()))->not->toContain('Secret Savings');
+        if ($row->meta !== null) {
+            expect(array_keys((array) $row->meta))->each->toBeIn(['change', 'account']);
+        }
     }
+    expect($new->every(fn ($r) => ((array) $r->meta)['account'] === $account->id))->toBeTrue();
+});
+
+it('audits an admin adding themselves to an account as a distinct event naming the account id', function () {
+    $admin = fhAdminUser(AccessLevel::Edit);
+    $a = fhParent('Anna');
+    $this->actingAs($admin)->post('/settings/finance-accounts', fhStore(['name' => 'Secret Savings', 'member_ids' => [$a->id, $admin->id]]))->assertStatus(303);
+    $account = FinanceAccount::query()->first();
+
+    $self = AuditEntry::query()->where('event', 'finance_admin_self_added')->get();
+    expect($self)->toHaveCount(1)
+        ->and((array) $self->first()->meta)->toBe(['account' => $account->id])
+        ->and($self->first()->target_user_id)->toBe($admin->id)
+        ->and(AuditEntry::query()->where('event', 'finance_visibility_changed')->where('target_user_id', $admin->id)->count())->toBe(0);
+
+    // Ticking themselves on an existing account is the same distinct event.
+    $other = FinanceAccount::factory()->withMembers($a)->create();
+    $this->actingAs($admin)->patch("/settings/finance-accounts/{$other->id}", ['name' => $other->name, 'type' => 'bank', 'member_ids' => [$a->id, $admin->id]])->assertStatus(303);
+    expect(AuditEntry::query()->where('event', 'finance_admin_self_added')->get()->map(fn ($r) => ((array) $r->meta)['account'])->all())->toBe([$account->id, $other->id]);
 });
 
 it('gives an unticked admin no opening data and prohibits money fields identically with or without transactions', function () {

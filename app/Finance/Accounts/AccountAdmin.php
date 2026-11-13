@@ -48,8 +48,14 @@ class AccountAdmin
         foreach (['added' => $diff['added'], 'removed' => $diff['removed']] as $change => $ids) {
             foreach ($ids as $id) {
                 $member = User::query()->find($id);
-                if ($member !== null) {
-                    $this->audit->record(AuditEvent::FinanceVisibilityChanged, $admin, ['change' => $change], $member, Module::Finance);
+                if ($member === null) {
+                    continue;
+                }
+                // The account's opaque public id is the only account reference an audit row may carry.
+                if ($change === 'added' && $member->id === $admin->id) {
+                    $this->audit->record(AuditEvent::FinanceAdminSelfAdded, $admin, ['account' => $accountId], $member, Module::Finance);
+                } else {
+                    $this->audit->record(AuditEvent::FinanceVisibilityChanged, $admin, ['change' => $change, 'account' => $accountId], $member, Module::Finance);
                 }
             }
         }
