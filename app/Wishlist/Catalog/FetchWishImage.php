@@ -40,6 +40,8 @@ final class FetchWishImage implements ShouldBeUnique, ShouldQueue
     {
         $wish = Wish::query()->find($this->wishId);
         if ($wish === null || $wish->image_source === 'uploaded') {
+            $this->restoreState($wish);
+
             return;
         }
 
@@ -74,6 +76,8 @@ final class FetchWishImage implements ShouldBeUnique, ShouldQueue
 
                 $fresh = Wish::query()->find($this->wishId);
                 if ($fresh === null || $fresh->image_source === 'uploaded') {
+                    $this->restoreState($fresh);
+
                     return;
                 }
                 $store->put($fresh, $processed, 'fetched', $pageHost);
@@ -95,9 +99,20 @@ final class FetchWishImage implements ShouldBeUnique, ShouldQueue
     {
         $wish = Wish::query()->find($this->wishId);
         if ($wish !== null && $wish->image_source !== 'uploaded' && $wish->image_status === 'pending') {
-            $wish->forceFill(['image_status' => 'failed'])->save();
+            // A still-valid earlier image stays visible; only a wish without one shows the failed state.
+            $wish->forceFill(['image_status' => $wish->image_path !== null ? 'ready' : 'failed'])->save();
+        } else {
+            $this->restoreState($wish);
         }
         $this->note('no_image');
+    }
+
+    /** Never leave a wish stuck in pending when the job exits without storing a new image. */
+    private function restoreState(?Wish $wish): void
+    {
+        if ($wish !== null && $wish->image_status === 'pending') {
+            $wish->forceFill(['image_status' => $wish->image_path !== null ? 'ready' : 'none'])->save();
+        }
     }
 
     private function note(string $reason): void

@@ -72,6 +72,8 @@ class WishImageController extends Controller
     public function fetch(Request $request, int $wish, WishAccess $access): RedirectResponse
     {
         $model = $this->editable($request, $wish, $access);
+        // An uploaded image is never replaced by an automatic one, and must stay visible (not pending).
+        abort_if($model->image_source === 'uploaded', 409);
         if ($model->urls()->doesntExist()) {
             return back(303);
         }
