@@ -1237,6 +1237,7 @@
             "type_card": "Card",
             "field_currency": "Currency",
             "currency_locked": "The currency cannot be changed after the first transaction.",
+            "opening_locked": "The opening date cannot be changed while the account has recurring items or an open import.",
             "field_opening": "Opening balance",
             "field_opening_date": "Balance as of",
             "visible_legend": "Visible to",

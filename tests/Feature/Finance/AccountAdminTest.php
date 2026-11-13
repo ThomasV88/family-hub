@@ -245,3 +245,28 @@ it('keeps non-admins out of the write routes', function () {
     $this->actingAs($parent)->post('/settings/finance-accounts', fhStore())->assertForbidden();
     expect(FinanceAccount::query()->count())->toBe(0);
 });
+
+it('refuses currency and opening date changes while recurring items or a draft import depend on the account', function () {
+    $admin = fhAdminUser(AccessLevel::Edit);
+    $account = FinanceAccount::factory()->withMembers($admin)->create(['currency' => 'EUR', 'balance_as_of' => '2026-01-01']);
+    $url = "/settings/finance-accounts/{$account->id}";
+    $base = ['name' => 'Acc', 'type' => 'bank', 'member_ids' => [$admin->id]];
+
+    // Recurring item, no transactions: locked.
+    $rec = \App\Models\FinanceRecurring::factory()->onAccount($account)->create();
+    $this->actingAs($admin)->patch($url, $base + ['currency' => 'PLN'])->assertSessionHasErrors(['currency' => 'finance.acc.currency_locked']);
+    $this->actingAs($admin)->patch($url, $base + ['balance_as_of' => '2026-02-01'])->assertSessionHasErrors(['balance_as_of' => 'finance.acc.opening_locked']);
+    // An unchanged value is not a change.
+    $this->actingAs($admin)->patch($url, $base + ['currency' => 'EUR', 'balance_as_of' => '2026-01-01'])->assertStatus(303);
+    $this->actingAs($admin)->get('/settings/finance-accounts')->assertInertia(fn (Assert $p) => $p->where('accounts.0.opening.currencyLocked', true));
+
+    // Open draft import only: also locked.
+    $rec->delete();
+    $batch = \App\Models\FinanceImportBatch::factory()->create(['account_id' => $account->id, 'user_id' => $admin->id, 'status' => 'draft']);
+    $this->actingAs($admin)->patch($url, $base + ['currency' => 'PLN'])->assertSessionHasErrors(['currency' => 'finance.acc.currency_locked']);
+
+    // Nothing depends any more: allowed.
+    $batch->delete();
+    $this->actingAs($admin)->patch($url, $base + ['currency' => 'PLN', 'balance_as_of' => '2026-02-01'])->assertStatus(303);
+    expect($account->fresh()->currency)->toBe('PLN');
+});

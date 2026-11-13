@@ -1237,6 +1237,7 @@
             "type_card": "Karta",
             "field_currency": "Waluta",
             "currency_locked": "Waluty nie można zmienić po pierwszej transakcji.",
+            "opening_locked": "Daty otwarcia nie można zmienić, dopóki konto ma pozycje cykliczne lub otwarty import.",
             "field_opening": "Saldo początkowe",
             "field_opening_date": "Saldo na dzień",
             "visible_legend": "Widoczne dla",

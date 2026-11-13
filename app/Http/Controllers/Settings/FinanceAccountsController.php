@@ -49,7 +49,7 @@ class FinanceAccountsController extends Controller
                     $opening = [
                         'minor' => (string) $row['minor'],
                         'asOf' => $row['asOf'],
-                        'currencyLocked' => $this->accounts->hasTransactions($viewer, $a['id']),
+                        'currencyLocked' => $this->accounts->hasTransactions($viewer, $a['id']) || $this->accounts->hasDependents($viewer, $a['id']),
                     ];
                 }
             }

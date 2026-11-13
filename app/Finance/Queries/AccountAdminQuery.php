@@ -84,6 +84,13 @@ class AccountAdminQuery
         return Visibility::apply(DB::table('finance_transactions')->where('account_id', $accountId), $viewer)->exists();
     }
 
+    /** Recurring items or open draft imports on the account: their amounts and dates assume its currency and opening date. */
+    public function hasDependents(Viewer $viewer, string $accountId): bool
+    {
+        return Visibility::apply(DB::table('finance_recurring')->where('account_id', $accountId), $viewer)->exists()
+            || Visibility::apply(DB::table('finance_import_batches')->where('account_id', $accountId)->where('status', 'draft'), $viewer)->exists();
+    }
+
     public function earliestBookedOn(Viewer $viewer, string $accountId): ?string
     {
         $min = Visibility::apply(DB::table('finance_transactions')->where('account_id', $accountId), $viewer)->min('booked_on');

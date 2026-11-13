@@ -139,8 +139,13 @@ class FinanceAccountRequest extends FormRequest
                 return;
             }
             $currency = (string) $this->input('currency', $account->currency);
-            if ($this->has('currency') && $currency !== $account->currency && $query->hasTransactions($viewer, $accountId)) {
+            if ($this->has('currency') && $currency !== $account->currency
+                && ($query->hasTransactions($viewer, $accountId) || $query->hasDependents($viewer, $accountId))) {
                 $validator->errors()->add('currency', 'finance.acc.currency_locked');
+            }
+            if ($this->has('balance_as_of') && (string) $this->input('balance_as_of') !== (string) ($query->opening($viewer, $accountId)['asOf'] ?? '')
+                && $query->hasDependents($viewer, $accountId)) {
+                $validator->errors()->add('balance_as_of', 'finance.acc.opening_locked');
             }
             if ($this->has('balance_as_of')) {
                 $earliest = $query->earliestBookedOn($viewer, $accountId);

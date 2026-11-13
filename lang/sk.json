@@ -1237,6 +1237,7 @@
             "type_card": "Karta",
             "field_currency": "Mena",
             "currency_locked": "Menu nie je možné zmeniť po prvej transakcii.",
+            "opening_locked": "Dátum otvorenia nie je možné zmeniť, kým účet má opakované položky alebo otvorený import.",
             "field_opening": "Počiatočný zostatok",
             "field_opening_date": "Zostatok k dátumu",
             "visible_legend": "Viditeľné pre",
