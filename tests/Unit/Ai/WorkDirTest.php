@@ -95,3 +95,19 @@ it('treats a work dir under a hidden-ish name or a missing dir as nothing to swe
 
     expect(WorkDir::sweepStale(0))->toBe(0);
 });
+
+it('also sweeps stale rasterizer scratch dirs under the system temp dir, and only those named like them', function () {
+    $stale = WorkDir::makeTempDir();
+    touch($stale, time() - 7200);
+    $fresh = WorkDir::makeTempDir();
+    $foreign = sys_get_temp_dir().'/fh-not-ours-'.bin2hex(random_bytes(4));
+    mkdir($foreign, 0700);
+    touch($foreign, time() - 7200);
+
+    expect(WorkDir::sweepStale(30))->toBeGreaterThanOrEqual(1)
+        ->and(file_exists($stale))->toBeFalse()
+        ->and(file_exists($fresh))->toBeTrue()
+        ->and(file_exists($foreign))->toBeTrue();
+    WorkDir::removeTree($fresh);
+    WorkDir::removeTree($foreign);
+});

@@ -98,19 +98,30 @@ final class WorkDir
     }
 
     /**
-     * Removes job directories (and nothing else) older than the given age. Refuses to touch anything when the work dir
+     * Removes job directories and stale rasterizer scratch dirs (and nothing else) older than the given age. Refuses to touch anything when the work dir
      * is not safe (see root()), whatever the configuration says.
      */
     public static function sweepStale(int $minutes = 30): int
     {
+        $cutoff = time() - $minutes * 60;
+        // Rasterizer scratch dirs (page images of a medical document) live under the system temp dir and are normally
+        // removed in a finally block; a SIGKILL or OOM leaves them behind, so they are swept here too.
+        $removed = self::sweepOld(sys_get_temp_dir(), '/^fh-[0-9a-z]{26}$/', $cutoff);
+
         $root = self::root();
         if ($root === null || ! is_dir($root)) {
-            return 0;
+            return $removed;
         }
+
+        return $removed + self::sweepOld($root, self::JOB_DIR, $cutoff);
+    }
+
+    /** Removes direct child directories of $base whose name matches $pattern and whose mtime is before $cutoff. */
+    private static function sweepOld(string $base, string $pattern, int $cutoff): int
+    {
         $removed = 0;
-        $cutoff = time() - $minutes * 60;
-        foreach (glob($root.'/*', GLOB_ONLYDIR) ?: [] as $dir) {
-            if (is_link($dir) || preg_match(self::JOB_DIR, basename($dir)) !== 1) {
+        foreach (glob(rtrim($base, '/').'/*', GLOB_ONLYDIR) ?: [] as $dir) {
+            if (is_link($dir) || preg_match($pattern, basename($dir)) !== 1) {
                 continue;
             }
             $mtime = @filemtime($dir);
