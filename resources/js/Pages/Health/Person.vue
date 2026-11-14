@@ -60,6 +60,7 @@ function go(params, only) {
     });
 }
 const openNew = () => go({ panel: 'new-person' }, ['panel']);
+const openEditPerson = () => go({ panel: 'edit-person' }, ['panel']);
 const openNewVisit = () => go({ panel: 'new-visit' }, ['panel']);
 const openVisit = (id) => go({ panel: 'visit', id }, ['panel']);
 const openNewAllergy = () => go({ panel: 'new-allergy' }, ['panel']);
@@ -97,7 +98,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
 
             <template v-if="person">
                 <PersonSwitcher :people="people" :current-id="person.id" :can-create="canCreate" @add="openNew" />
-                <PersonHeader :person="person" @add-visit="openNewVisit" @add-document="openNewDocument" />
+                <PersonHeader :person="person" @add-visit="openNewVisit" @add-document="openNewDocument" @edit-person="openEditPerson" />
                 <UiAlert v-if="vaccinationAttention > 0" variant="warning" data-testid="vaccination-alert">
                     <strong>{{ t('health.vaccination.attention_title') }}</strong>
                     {{ t('health.vacc.attention', { n: vaccinationAttention }, vaccinationAttention) }}
@@ -138,7 +139,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                 </template>
             </UiEmptyState>
         </div>
-        <PersonPanel :open="panel?.kind === 'new-person'" @close="closePanel" />
+        <PersonPanel :open="panel?.kind === 'new-person' || (panel?.kind === 'edit-person' && Boolean(person))" :person="panel?.kind === 'edit-person' ? person : null" @close="closePanel" />
         <VisitPanel v-if="person" :open="visitPanelOpen" :person-id="person.id" :visit="activeVisit" :can-edit="canAddVisit" :specialties="specialties" :documents="documents" @close="closePanel" @open-document="openDocument" @upload-document="openNewDocument" />
         <AllergyPanel v-if="person" :open="allergyPanelOpen" :person-id="person.id" :allergy="activeAllergy" :can-edit="canAddVisit" @close="closePanel" />
         <MedicationPanel v-if="person" :open="medicationPanelOpen" :person-id="person.id" :medication="activeMedication" :can-edit="canAddVisit" @close="closePanel" />
