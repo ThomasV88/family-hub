@@ -83,7 +83,6 @@ function cancel() {
         </template>
         <UiTag v-else :variant="value ? 'success' : 'neutral'" :icon="Bot" data-testid="ai-tag">{{ value ? t('health.ai.tag_on') : t('health.ai.tag_off') }}</UiTag>
         <p :id="explainId" class="ai-consent__text">{{ t('health.ai.explain') }}</p>
-        <p class="ai-consent__text">{{ t('health.ai.not_available') }}</p>
         <UiAlert v-if="failed" variant="danger" live data-testid="ai-failed">{{ t('health.ai.failed') }}</UiAlert>
 
         <UiDialog :open="confirmOpen" :title="t('health.ai.confirm_title')" :initial-focus="() => keepOff" @update:open="(v) => { if (!v) cancel(); }">

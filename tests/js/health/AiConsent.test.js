@@ -20,10 +20,10 @@ const click = async (el) => { el.click(); await flush(); };
 afterEach(() => { current?.unmount(); current = null; document.body.innerHTML = ''; document.documentElement.classList.remove('dark'); vi.clearAllMocks(); });
 
 describe('AiConsentControl', () => {
-    it('shows the labelled switch, explanation and not-available line to editors', async () => {
+    it('shows the labelled switch, explanation to editors', async () => {
         mountControl();
         expect(document.body.textContent).toContain('Allow AI to read documents of this person');
-        expect(document.body.textContent).toContain('AI reading is not available yet');
+        expect(document.body.textContent).not.toContain('AI reading is not available yet');
         const text = document.getElementById(sw().getAttribute('aria-describedby'));
         expect(text.textContent).toContain('Off by default');
         expect(sw().checked).toBe(false);

@@ -1992,7 +1992,6 @@
         "ai": {
             "label": "Povoliť AI čítať dokumenty tejto osoby",
             "explain": "Predvolene vypnuté. Keď je zapnuté, dokumenty tejto osoby sa odosielajú externej AI spoločnosti (poskytovateľovi, ktorého nastavil správca rodiny), ktorá ich môže uchovávať podľa vlastných podmienok. Každý návrh skontrolujete skôr, než sa uloží. Vypnutie nevymaže nič, čo už bolo uložené.",
-            "not_available": "Čítanie pomocou AI zatiaľ nie je dostupné. Vaša voľba sa uloží na neskôr.",
             "confirm_title": "Povoliť AI pre túto osobu?",
             "confirm_body": "Dokumenty tejto osoby sa odošlú externej AI spoločnosti (poskytovateľovi, ktorého nastavil správca rodiny), ktorá ich môže uchovávať podľa vlastných podmienok. Zapnite to, iba ak s tým táto osoba alebo jej rodič či zákonný zástupca súhlasí. Môžete to kedykoľvek vypnúť.",
             "allow": "Povoliť AI",

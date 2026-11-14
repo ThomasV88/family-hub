@@ -94,8 +94,8 @@ describe('Phase 8 copy parity', () => {
         expect(messages.en.health.ai.run.sends_line).toBe('Sends this document to OpenAI.');
     });
 
-    it('keeps the 07 not_available line for plan 08-16 to remove', () => {
-        expect(messages.en.health.ai.not_available).toBeTruthy();
+    it('no longer carries the obsolete 07 unavailable line', () => {
+        for (const l of ['en', 'sk', 'pl']) expect(messages[l].health.ai[['not', 'available'].join('_')]).toBeUndefined();
     });
 });
 

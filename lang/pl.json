@@ -1992,7 +1992,6 @@
         "ai": {
             "label": "Zezwól AI na czytanie dokumentów tej osoby",
             "explain": "Domyślnie wyłączone. Po włączeniu dokumenty tej osoby są wysyłane do zewnętrznej firmy AI (dostawcy skonfigurowanego przez administratora rodziny), która może je przechowywać zgodnie z własnymi warunkami. Każdą propozycję sprawdzasz, zanim zostanie zapisana. Wyłączenie nie usuwa niczego, co już zapisano.",
-            "not_available": "Odczyt przez AI nie jest jeszcze dostępny. Twój wybór zostanie zapisany na później.",
             "confirm_title": "Zezwolić na AI dla tej osoby?",
             "confirm_body": "Dokumenty tej osoby zostaną wysłane do zewnętrznej firmy AI (dostawcy skonfigurowanego przez administratora rodziny), która może je przechowywać zgodnie z własnymi warunkami. Włącz to tylko wtedy, gdy ta osoba lub jej rodzic albo opiekun wyraża zgodę. Możesz to wyłączyć w dowolnym momencie.",
             "allow": "Zezwól na AI",
