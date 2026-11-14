@@ -58,6 +58,18 @@ class SystemQuery
         return array_keys($known);
     }
 
+    /** Whether any document row exists (ids only; a restored-empty database is the orphan sweep's danger sign). */
+    public function hasDocuments(): bool
+    {
+        return DB::table('medical_documents')->exists();
+    }
+
+    /** Whether any subject row exists. */
+    public function hasSubjects(): bool
+    {
+        return DB::table('medical_subjects')->exists();
+    }
+
     /**
      * Which of the given ids are subjects that still exist (non-uuid entries are never matched).
      *

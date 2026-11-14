@@ -231,6 +231,43 @@ describe('medical:prune-orphans', function () {
             ->and($disk->directoryExists('not-a-person'))->toBeTrue();
     });
 
+    it('aborts without deleting when a bulk of files looks orphaned, and --force or --dry-run behave', function () {
+        [, $person] = manageEditor();
+        $disk = Storage::disk('medical');
+        $referenced = MedicalDocument::factory()->image()->create(['subject_id' => $person->id]);
+        foreach ([$referenced->path, $referenced->thumb_path] as $p) {
+            $disk->put($p, ImageFixtures::jpeg());
+            ageFile($p, 86400);
+        }
+        $orphans = [];
+        foreach (range(1, 25) as $i) {
+            $orphans[] = $path = $person->id.'/'.strtoupper((string) Str::ulid()).'.pdf';
+            $disk->put($path, 'x');
+            ageFile($path, 7200);
+        }
+
+        $this->artisan('medical:prune-orphans')->assertExitCode(1);
+        expect(collect($orphans)->every(fn ($p) => $disk->exists($p)))->toBeTrue()->and($disk->exists($referenced->path))->toBeTrue();
+
+        $this->artisan('medical:prune-orphans', ['--force' => true, '--dry-run' => true])->expectsOutput('Dry run: would prune 25 orphan files and 0 directories.')->assertExitCode(0);
+        expect(collect($orphans)->every(fn ($p) => $disk->exists($p)))->toBeTrue();
+
+        $this->artisan('medical:prune-orphans', ['--force' => true])->expectsOutput('Pruned 25 orphan files and 0 directories.')->assertExitCode(0);
+        expect(collect($orphans)->some(fn ($p) => $disk->exists($p)))->toBeFalse()->and($disk->exists($referenced->path))->toBeTrue();
+    });
+
+    it('aborts when the document table is empty but old files exist, and when no person exists but directories do', function () {
+        $disk = Storage::disk('medical');
+        $ghost = (string) Str::uuid();
+        $file = $ghost.'/'.strtoupper((string) Str::ulid()).'.pdf';
+        $disk->put($file, 'x');
+        ageFile($file, 7200);
+        touch($disk->path($ghost), time() - 7200);
+
+        $this->artisan('medical:prune-orphans')->assertExitCode(1);
+        expect($disk->exists($file))->toBeTrue()->and($disk->directoryExists($ghost))->toBeTrue();
+    });
+
     it('never touches Storage itself and is scheduled daily', function () {
         $source = (string) file_get_contents(app_path('Console/Commands/PruneMedicalOrphans.php'));
         expect($source)->not->toContain('Storage::');

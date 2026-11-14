@@ -11,5 +11,8 @@ return [
     'reminder_hour' => 8,
     'due_soon_days' => 30,
     'orphan_grace_minutes' => 60,
+    // Circuit breaker of medical:prune-orphans: more than this many candidates AND more than this share of the inventory aborts.
+    'orphan_max_delete' => 20,
+    'orphan_max_ratio' => 0.25,
     'export_large_visit_threshold' => 500,
 ];
