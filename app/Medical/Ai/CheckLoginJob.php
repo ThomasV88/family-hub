@@ -19,7 +19,7 @@ class CheckLoginJob implements ShouldBeUnique, ShouldQueue
     public function __construct()
     {
         $this->onConnection('database');
-        $this->onQueue((string) config('ai.queue'));
+        $this->onQueue((string) config('ai.control_queue'));
     }
 
     public function handle(AgentRegistry $registry, AgentHealth $health): void

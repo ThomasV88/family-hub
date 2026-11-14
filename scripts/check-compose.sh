@@ -106,8 +106,8 @@ if aenv.get("DB_USERNAME") != "fh_app":
     fail("ai-worker does not use the runtime role fh_app")
 if aenv.get("DB_QUEUE_RETRY_AFTER") != "900":
     fail("ai-worker DB_QUEUE_RETRY_AFTER is not 900")
-if "queue=ai" not in " ".join(ai.get("command", [])):
-    fail("ai-worker does not work the ai queue")
+if "queue=ai-control,ai " not in " ".join(ai.get("command", [])):
+    fail("ai-worker does not work ai-control before ai")
 if not any("/ai-work" in t for t in (ai.get("tmpfs") or [])):
     fail("ai-worker has no tmpfs work dir")
 for name, svc in svcs.items():

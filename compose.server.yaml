@@ -104,7 +104,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["sh", "-c", "php artisan ai:preflight && exec php artisan queue:work database --queue=ai --sleep=3 --tries=1 --timeout=360 --max-jobs=100 --max-time=3600"]
+    command: ["sh", "-c", "php artisan ai:preflight && exec php artisan queue:work database --queue=ai-control,ai --sleep=3 --tries=1 --timeout=360 --max-jobs=100 --max-time=3600"]
     init: true
     mem_limit: ${MEM_AI:-384m}
     volumes:

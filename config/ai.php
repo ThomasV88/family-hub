@@ -68,4 +68,6 @@ return [
     'login_stale_minutes' => 15,
     'call_retention_months' => 12,
     'queue' => 'ai',
+    // Login checks: listed before 'ai' in the worker's --queue option, so they never wait behind a backlog of extractions.
+    'control_queue' => 'ai-control',
 ];

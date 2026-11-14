@@ -3,10 +3,12 @@
 use App\Medical\Ai\AgentHealth;
 use App\Medical\Ai\CheckLoginJob;
 use App\Medical\Ai\LoginState;
+use App\Medical\Ai\RunExtractionJob;
 use App\Models\AiAgentStatus;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\Support\FakeCodex;
 
 beforeEach(function () {
@@ -90,18 +92,18 @@ it('clears a stale auth failure once a later check sees the login present', func
     expect($h->display())->toBe('logged_in');
 });
 
-it('is a unique one-try job on the ai queue and database connection', function () {
+it('is a unique one-try job on the ai-control queue and database connection', function () {
     $job = new CheckLoginJob;
 
     expect($job)->toBeInstanceOf(ShouldBeUnique::class)
         ->and($job->uniqueFor)->toBe(300)
         ->and($job->tries)->toBe(1)
-        ->and($job->queue)->toBe('ai')
+        ->and($job->queue)->toBe('ai-control')
         ->and($job->connection)->toBe('database');
 
     CheckLoginJob::dispatch();
     CheckLoginJob::dispatch();
-    expect(DB::table('jobs')->where('queue', 'ai')->count())->toBe(1);
+    expect(DB::table('jobs')->where('queue', 'ai-control')->count())->toBe(1);
 });
 
 it('stores only enums and timestamps in the status row', function () {
@@ -114,5 +116,16 @@ it('stores only enums and timestamps in the status row', function () {
         ->and($row['login_state'])->toBeIn(['logged_in', 'logged_out', 'wrong_mode', 'unknown']);
     foreach (['checked_at', 'last_success_at', 'last_auth_failure_at', 'updated_at'] as $c) {
         expect($row[$c] === null || strtotime((string) $row[$c]) !== false)->toBeTrue();
+    }
+});
+
+it('queues the login check apart from extractions, so a backlog cannot starve it', function () {
+    expect(config('ai.control_queue'))->not->toBe(config('ai.queue'))
+        ->and((new CheckLoginJob)->queue)->toBe(config('ai.control_queue'))
+        ->and((new RunExtractionJob((string) Str::uuid()))->queue)->toBe(config('ai.queue'));
+
+    // The worker command lists the control queue first (checked statically by scripts/check-compose.sh).
+    foreach (['compose.yaml', 'compose.server.yaml'] as $file) {
+        expect(file_get_contents(base_path($file)))->toContain('--queue=ai-control,ai ');
     }
 });

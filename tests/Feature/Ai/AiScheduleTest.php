@@ -29,9 +29,9 @@ it('schedules the call prune daily', function () {
     expect($e->expression)->toBe('0 0 * * *')->and($e->command)->toContain('ai:prune-calls');
 });
 
-it('runs the scheduled login check on the ai queue of the database connection', function () {
+it('runs the scheduled login check on the ai-control queue of the database connection', function () {
     Queue::fake();
     aiScheduled('ai-check-login')->run(app());
 
-    Queue::assertPushed(CheckLoginJob::class, fn (CheckLoginJob $j) => $j->connection === 'database' && $j->queue === 'ai');
+    Queue::assertPushed(CheckLoginJob::class, fn (CheckLoginJob $j) => $j->connection === 'database' && $j->queue === 'ai-control');
 });
