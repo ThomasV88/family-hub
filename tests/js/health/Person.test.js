@@ -103,10 +103,11 @@ describe('Health Person page', () => {
         expect(again.textContent).toContain('You can view this record but not change it.');
     });
 
-    it('shows the visits empty state and an empty side column', () => {
+    it('shows the visits empty state and only the allergies card in the side column', () => {
         mountPage();
         expect(document.querySelector('[data-testid="person-main"]').textContent).toContain('No visits yet');
-        expect(document.querySelector('[data-testid="person-side"]').children).toHaveLength(0);
+        expect(document.querySelector('[data-testid="person-side"]').children).toHaveLength(1);
+        expect(document.querySelector('[data-testid="person-side"] [data-testid="allergy-card"]')).not.toBeNull();
     });
 
     it('titles the page Health and never with a person name', () => {

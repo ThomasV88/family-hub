@@ -6,6 +6,8 @@ import { HeartPulse, Plus } from '@lucide/vue';
 import AppShell from '../../Layouts/AppShell.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
+import AllergyList from '../../Health/AllergyList.vue';
+import AllergyPanel from '../../Health/AllergyPanel.vue';
 import PersonHeader from '../../Health/PersonHeader.vue';
 import PersonPanel from '../../Health/PersonPanel.vue';
 import PersonSwitcher from '../../Health/PersonSwitcher.vue';
@@ -29,6 +31,7 @@ const props = defineProps({
     view: { type: String, default: 'folders' },
     filter: { type: String, default: 'all' },
     specialties: { type: Array, default: () => [] },
+    allergies: { type: Array, default: () => [] },
 });
 const { t } = useI18n();
 
@@ -47,6 +50,8 @@ function go(params, only) {
 const openNew = () => go({ panel: 'new-person' }, ['panel']);
 const openNewVisit = () => go({ panel: 'new-visit' }, ['panel']);
 const openVisit = (id) => go({ panel: 'visit', id }, ['panel']);
+const openNewAllergy = () => go({ panel: 'new-allergy' }, ['panel']);
+const openAllergy = (id) => go({ panel: 'allergy', id }, ['panel']);
 const closePanel = () => go({}, ['panel']);
 const setView = (view) => go({ view: view === 'folders' ? undefined : view, filter: undefined }, ['view', 'filter', 'timeline']);
 const setFilter = (filter) => go({ filter: filter === 'all' ? undefined : filter }, ['timeline', 'filter']);
@@ -54,6 +59,8 @@ const setFilter = (filter) => go({ filter: filter === 'all' ? undefined : filter
 const canAddVisit = computed(() => Boolean(props.person?.canEdit));
 const activeVisit = computed(() => (props.panel?.kind === 'visit' ? props.visits.find((v) => v.id === props.panel.id) ?? null : null));
 const visitPanelOpen = computed(() => props.panel?.kind === 'new-visit' || (props.panel?.kind === 'visit' && activeVisit.value !== null));
+const activeAllergy = computed(() => (props.panel?.kind === 'allergy' ? props.allergies.find((a) => a.id === props.panel.id) ?? null : null));
+const allergyPanelOpen = computed(() => props.panel?.kind === 'new-allergy' || (props.panel?.kind === 'allergy' && activeAllergy.value !== null));
 const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.includes(v.id));
 </script>
 
@@ -67,7 +74,9 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                 <PersonSwitcher :people="people" :current-id="person.id" :can-create="canCreate" @add="openNew" />
                 <PersonHeader :person="person" @add-visit="openNewVisit" />
                 <div class="health-person__area">
-                    <div class="health-person__side" data-testid="person-side" />
+                    <div class="health-person__side" data-testid="person-side">
+                        <AllergyList :allergies="allergies" :can-edit="canAddVisit" @add="openNewAllergy" @open="openAllergy" />
+                    </div>
                     <section class="health-person__main" data-testid="person-main">
                         <UiEmptyState v-if="visits.length === 0" :title="t('health.visits.empty_title')" :body="t('health.visits.empty_body')" :icon="HeartPulse">
                             <template v-if="canAddVisit" #action>
@@ -99,6 +108,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
         </div>
         <PersonPanel :open="panel?.kind === 'new-person'" @close="closePanel" />
         <VisitPanel v-if="person" :open="visitPanelOpen" :person-id="person.id" :visit="activeVisit" :can-edit="canAddVisit" :specialties="specialties" @close="closePanel" />
+        <AllergyPanel v-if="person" :open="allergyPanelOpen" :person-id="person.id" :allergy="activeAllergy" :can-edit="canAddVisit" @close="closePanel" />
         <ShellAdd :enabled="canAddVisit" :label="t('health.fab.add_visit')" @add="openNewVisit" />
     </AppShell>
 </template>
