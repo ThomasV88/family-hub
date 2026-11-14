@@ -3,7 +3,6 @@
 namespace App\Medical;
 
 use App\Access\AccessLevel;
-use App\Medical\Ai\AgentHealth;
 use App\Medical\Queries\AiRunQuery;
 use App\Medical\Queries\AllergyQuery;
 use App\Medical\Queries\ContactQuery;
@@ -36,7 +35,7 @@ class PersonPage
 
     private const WITH_ID = ['visit', 'allergy', 'medication', 'vaccination', 'document'];
 
-    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations, private readonly DocumentQuery $documents, private readonly ContactQuery $contacts, private readonly AiRunQuery $aiRuns, private readonly AgentHealth $aiHealth) {}
+    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations, private readonly DocumentQuery $documents, private readonly ContactQuery $contacts, private readonly AiRunQuery $aiRuns) {}
 
     public function render(Viewer $viewer, ?MedicalSubject $subject, Request $request): Response
     {
@@ -74,13 +73,14 @@ class PersonPage
      * Whether Run AI may be offered and each document's AI state. Statuses only: no proposal content, and counts only
      * for members who can change the person.
      *
-     * @return array{canRun: bool, available: bool, noticeAcknowledged: bool, statuses: array<string, mixed>}
+     * @return array{canRun: bool, available: bool, providers: list<string>, noticeAcknowledged: bool, statuses: array<string, mixed>}
      */
     private function aiProps(Viewer $viewer, ?MedicalSubject $subject): array
     {
         return [
             'canRun' => $subject !== null && $this->subjects->levelFor($viewer, $subject) === AccessLevel::Edit,
-            'available' => $this->aiHealth->runnable(),
+            'available' => $this->aiRuns->available(),
+            'providers' => $this->aiRuns->providers(),
             'noticeAcknowledged' => $this->aiRuns->noticeAcknowledged($viewer),
             'statuses' => $subject === null ? (object) [] : (object) $this->aiRuns->statusMap($viewer, $subject),
         ];

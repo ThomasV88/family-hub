@@ -174,3 +174,41 @@ it('never shows proposal content to anyone but the Edit member', function () {
     $response = $this->actingAs($stranger)->get(reviewUrl($person, $document->id));
     expect($response->getStatusCode())->toBe(403)->and($response->getContent())->not->toContain(MedicalPrivacy::CANARY);
 });
+
+describe('agents and waiting runs', function () {
+    it('names the producing agent and model, and null for the default model', function () {
+        [$user, $person, $document, $extraction] = reviewSetup();
+        $url = reviewUrl($person, $document->id);
+
+        $this->actingAs($user)->get($url)->assertInertia(fn (Assert $page) => $page
+            ->where('provenance.agent', 'codex')->where('provenance.model', null)->where('newerWaiting', null));
+
+        DB::table('medical_ai_extractions')->where('id', $extraction->id)->update(['agent' => 'copilot', 'model' => 'gpt-test-copilot']);
+        $this->actingAs($user)->get($url)->assertInertia(fn (Assert $page) => $page
+            ->where('provenance.agent', 'copilot')->where('provenance.model', 'gpt-test-copilot'));
+    });
+
+    it('keeps an older proposal reviewable beside a newer waiting run', function () {
+        [$user, $person, $document, $extraction] = reviewSetup();
+        DB::table('medical_ai_extractions')->where('id', $extraction->id)->update(['queued_at' => now()->subHour()]);
+        $waiting = MedicalAiExtraction::factory()->forDocument($document)->waiting(now()->addMinutes(30))->create(['started_by' => $user->id]);
+
+        $this->actingAs($user)->get(reviewUrl($person, $document->id))->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->where('extraction.id', $extraction->id)->where('extraction.pending', 3)
+            ->where('newerWaiting.id', $waiting->id)->has('newerWaiting.availableAt'));
+
+        $this->actingAs($user)->postJson("/health/people/{$person->id}/ai/{$extraction->id}/entries/visit-0/accept")->assertSuccessful();
+    });
+
+    it('returns the waiting status block and no entries when a waiting run is opened', function () {
+        [$user, $person] = reviewSetup();
+        $document = MedicalDocument::factory()->pdf()->create(['subject_id' => $person->id]);
+        $waiting = MedicalAiExtraction::factory()->forDocument($document)->waiting(now()->addMinutes(30))->create(['started_by' => $user->id]);
+
+        foreach (['', '?extraction='.$waiting->id] as $query) {
+            $this->actingAs($user)->get(reviewUrl($person, $document->id, $query))->assertOk()->assertInertia(fn (Assert $page) => $page
+                ->where('extraction.status', 'waiting')->has('extraction.availableAt')
+                ->where('extraction.sections.visits', [])->where('extraction.pending', 0)->where('provenance', null));
+        }
+    });
+});

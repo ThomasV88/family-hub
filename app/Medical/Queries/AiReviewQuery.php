@@ -73,7 +73,7 @@ class AiReviewQuery
             'subject_id',
             AccessLevel::Edit,
         );
-        $columns = ['id', 'status', 'payload', 'queued_at', 'finished_at', 'pages_read', 'pages_total'];
+        $columns = ['id', 'status', 'payload', 'queued_at', 'finished_at', 'pages_read', 'pages_total', 'agent', 'model', 'available_at'];
         if ($extractionId !== null) {
             $row = $scoped()->where('id', $extractionId)->first($columns);
             if ($row === null) {
@@ -81,9 +81,16 @@ class AiReviewQuery
             }
         } else {
             $row = $scoped()->where('status', '!=', 'superseded')->orderByDesc('queued_at')->orderByDesc('id')->first($columns);
+            if ($row !== null && $row->status === 'waiting') {
+                // A newer waiting run does not hide an older proposal that can still be reviewed.
+                $row = $scoped()->where('status', 'ready')->orderByDesc('queued_at')->orderByDesc('id')->first($columns) ?? $row;
+            }
         }
-        if ($row === null || ! in_array($row->status, ['ready', 'superseded'], true)) {
+        if ($row === null || ! in_array($row->status, ['ready', 'superseded', 'waiting'], true)) {
             return ['redirect' => true];
+        }
+        if ($row->status === 'waiting') {
+            return $this->waitingProps($viewer, $subjectId, $document, $row);
         }
 
         $payload = $this->payload($row->payload);
@@ -116,6 +123,9 @@ class AiReviewQuery
             $newest = $newestId === null ? null : (string) $newestId;
         }
 
+        $newerWaiting = $scoped()->where('status', 'waiting')->where('queued_at', '>', $row->queued_at)
+            ->orderByDesc('queued_at')->orderByDesc('id')->first(['id', 'available_at']);
+
         return [
             'person' => ['id' => $subjectId],
             'document' => [
@@ -123,6 +133,11 @@ class AiReviewQuery
                 'kind' => (string) $document->kind,
                 'title' => (string) $document->title,
                 'pageCount' => $this->pageCount($document),
+            ],
+            'provenance' => $this->provenance($row),
+            'newerWaiting' => $newerWaiting === null ? null : [
+                'id' => (string) $newerWaiting->id,
+                'availableAt' => Carbon::parse($newerWaiting->available_at)->toIso8601String(),
             ],
             'extraction' => [
                 'id' => (string) $row->id,
@@ -137,6 +152,51 @@ class AiReviewQuery
                 'sections' => $sections,
             ],
             'newestExtractionId' => $newest,
+            'consentOn' => $this->consentOn($viewer, $subjectId),
+            'specialties' => array_map(fn (Specialty $s) => $s->value, Specialty::cases()),
+        ];
+    }
+
+    /** @return array{agent: string, model: string|null} */
+    private function provenance(object $row): array
+    {
+        return [
+            'agent' => (string) $row->agent,
+            'model' => ($row->model === null || $row->model === 'default') ? null : (string) $row->model,
+        ];
+    }
+
+    /**
+     * The status block for a run that is waiting for AI quota: no entries, only the resume time.
+     *
+     * @return array<string, mixed>
+     */
+    private function waitingProps(Viewer $viewer, string $subjectId, object $document, object $row): array
+    {
+        return [
+            'person' => ['id' => $subjectId],
+            'document' => [
+                'id' => (string) $document->id,
+                'kind' => (string) $document->kind,
+                'title' => (string) $document->title,
+                'pageCount' => $this->pageCount($document),
+            ],
+            'provenance' => null,
+            'newerWaiting' => null,
+            'extraction' => [
+                'id' => (string) $row->id,
+                'status' => 'waiting',
+                'availableAt' => Carbon::parse($row->available_at)->toIso8601String(),
+                'runAt' => Carbon::parse((string) $row->queued_at)->toIso8601String(),
+                'pagesRead' => null,
+                'pagesTotal' => null,
+                'documentDate' => null,
+                'specialtyKey' => null,
+                'readOnly' => true,
+                'pending' => 0,
+                'sections' => array_fill_keys(array_keys(self::SECTIONS), []),
+            ],
+            'newestExtractionId' => null,
             'consentOn' => $this->consentOn($viewer, $subjectId),
             'specialties' => array_map(fn (Specialty $s) => $s->value, Specialty::cases()),
         ];

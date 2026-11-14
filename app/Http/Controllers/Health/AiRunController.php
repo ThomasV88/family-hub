@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Health;
 use App\Access\AccessLevel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Health\AiRunRequest;
-use App\Medical\Ai\AgentHealth;
+use App\Medical\Ai\Agents\AgentRegistry;
 use App\Medical\Ai\RunExtractionJob;
 use App\Medical\Queries\AiJobQuery;
 use App\Medical\Queries\AiRunQuery;
@@ -51,12 +51,12 @@ class AiRunController extends Controller
         return response()->json($result);
     }
 
-    public function status(Request $request, SubjectQuery $subjects, AiRunQuery $runs, AgentHealth $health, string $person): JsonResponse
+    public function status(Request $request, SubjectQuery $subjects, AiRunQuery $runs, AgentRegistry $agents, string $person): JsonResponse
     {
         $viewer = Viewer::for($request->user());
         $subject = $subjects->findVisible($viewer, $person);
         abort_if($subject === null, 403);
 
-        return response()->json(['documents' => (object) $runs->statusMap($viewer, $subject), 'available' => $health->runnable()]);
+        return response()->json(['documents' => (object) $runs->statusMap($viewer, $subject), 'available' => $agents->anyRunnable()]);
     }
 }

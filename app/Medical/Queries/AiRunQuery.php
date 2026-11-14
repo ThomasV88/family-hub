@@ -6,7 +6,6 @@ use App\Access\AccessLevel;
 use App\Access\Module;
 use App\Audit\AuditEvent;
 use App\Audit\AuditLogger;
-use App\Medical\Ai\AgentHealth;
 use App\Medical\Ai\Agents\AgentRegistry;
 use App\Medical\Ai\ExtractionSchema;
 use App\Medical\Ai\StartResult;
@@ -27,21 +26,41 @@ use RuntimeException;
  */
 class AiRunQuery
 {
-    private const ACTIVE = ['queued', 'running'];
+    private const ACTIVE = ['queued', 'running', 'waiting'];
 
     private const QUOTA_FAILURES = ['timeout', 'idle_timeout', 'no_output', 'invalid_output', 'output_too_large', 'cli_error', 'auth'];
 
     public function __construct(
         private readonly AuditLogger $audit,
         private readonly DocumentQuery $documents,
-        private readonly AgentHealth $health,
         private readonly AgentRegistry $agents,
     ) {}
 
-    /** Whether this member has already acknowledged the one-time "document leaves the server" notice. */
+    /**
+     * Whether this member has already acknowledged the "document leaves the server" notice for every enabled provider.
+     * Enabling a further provider asks again once; removing one never does.
+     */
     public function noticeAcknowledged(Viewer $viewer): bool
     {
-        return DB::table('ai_notice_acks')->where('user_id', $viewer->userId())->exists();
+        $providers = DB::table('ai_notice_acks')->where('user_id', $viewer->userId())->value('providers');
+        if ($providers === null) {
+            return false;
+        }
+        $acked = explode(',', (string) $providers);
+
+        return array_diff($this->agents->providers(), $acked) === [];
+    }
+
+    /** @return list<string> the enabled provider keys, in saved order */
+    public function providers(): array
+    {
+        return array_values($this->agents->providers());
+    }
+
+    /** Run AI is offered while at least one enabled agent has a usable login; cooling down still counts. */
+    public function available(): bool
+    {
+        return $this->agents->anyRunnable();
     }
 
     /**
@@ -80,7 +99,7 @@ class AiRunQuery
                 if (! AiConsent::allows($subjectId)) {
                     return new StartResult('consent_off');
                 }
-                if (! $this->health->runnable()) {
+                if (! $this->agents->anyRunnable()) {
                     return new StartResult('unavailable');
                 }
                 $acked = $this->noticeAcknowledged($viewer);
@@ -96,6 +115,8 @@ class AiRunQuery
                     return new StartResult('busy');
                 }
 
+                $enabledKeys = $this->agents->providers();
+                $first = $this->agents->candidates([], false, $enabledKeys)[0] ?? $this->agents->enabled()[0] ?? $this->agents->primary();
                 $this->audit->record(AuditEvent::MedicalAiRunRequested, $user, ['subject' => $subjectId, 'document' => $documentId], null, Module::Health);
 
                 $id = (string) Str::uuid();
@@ -106,7 +127,7 @@ class AiRunQuery
                         'subject_id' => $subjectId,
                         'document_id' => $documentId,
                         'status' => 'queued',
-                        'agent' => $this->agents->primary()->key(),
+                        'agent' => $first->key(),
                         'model' => null,
                         'schema_version' => ExtractionSchema::SCHEMA_VERSION,
                         'prompt_version' => ExtractionSchema::PROMPT_VERSION,
@@ -129,14 +150,20 @@ class AiRunQuery
                     'subject_id' => $subjectId,
                     'document_id' => $documentId,
                     'started_by' => $viewer->userId(),
-                    'agent' => $this->agents->primary()->key(),
+                    'agent' => $first->key(),
                     'model' => null,
                     'attempt' => 1,
                     'status' => 'queued',
                     'queued_at' => $now,
                 ]);
                 if (! $acked) {
-                    DB::table('ai_notice_acks')->insertOrIgnore(['user_id' => $viewer->userId(), 'acknowledged_at' => $now]);
+                    $set = $enabledKeys;
+                    sort($set);
+                    DB::table('ai_notice_acks')->upsert(
+                        [['user_id' => $viewer->userId(), 'acknowledged_at' => $now, 'providers' => implode(',', $set)]],
+                        ['user_id'],
+                        ['acknowledged_at', 'providers'],
+                    );
                 }
 
                 return new StartResult('queued', $id);
@@ -176,9 +203,10 @@ class AiRunQuery
             }
             $now = Carbon::now();
 
-            if ($row->status === 'queued') {
-                $changed = $scoped()->where('status', 'queued')->update([
+            if (in_array($row->status, ['queued', 'waiting'], true)) {
+                $changed = $scoped()->where('status', $row->status)->update([
                     'status' => 'cancelled', 'cancel_reason' => 'user', 'model' => 'default', 'finished_at' => $now, 'updated_at' => $now,
+                    'available_at' => null,
                 ]);
                 if ($changed > 0) {
                     DB::table('ai_calls')->where('extraction_id', $extractionId)->where('status', 'queued')->update([
@@ -221,7 +249,7 @@ class AiRunQuery
                 ->where('status', '!=', 'superseded'),
             $viewer,
         )->orderByDesc('queued_at')->orderByDesc('id')
-            ->select(['id', 'document_id', 'status', 'cancel_reason', 'pages_read', 'pages_total', 'entry_count']);
+            ->select(['id', 'document_id', 'status', 'cancel_reason', 'available_at', 'failure_code', 'agent', 'model', 'pages_read', 'pages_total', 'entry_count']);
         if ($withCounts) {
             $query->selectSub(
                 DB::table('medical_ai_decisions')->selectRaw('count(*)')->whereColumn('medical_ai_decisions.extraction_id', 'medical_ai_extractions.id'),
@@ -242,6 +270,16 @@ class AiRunQuery
                     'pagesTotal' => $row->pages_total === null ? null : (int) $row->pages_total,
                     'readyExtractionId' => null,
                 ];
+                if ($row->status === 'waiting') {
+                    $map[$doc]['availableAt'] = Carbon::parse($row->available_at)->toIso8601String();
+                }
+                if ($row->status === 'failed') {
+                    $map[$doc]['failureCode'] = (string) $row->failure_code;
+                }
+                if ($row->status === 'ready') {
+                    $map[$doc]['agent'] = (string) $row->agent;
+                    $map[$doc]['model'] = ($row->model === null || $row->model === 'default') ? null : (string) $row->model;
+                }
             }
             if ($row->status === 'ready') {
                 $map[$doc]['readyExtractionId'] = (string) $row->id;
@@ -269,7 +307,8 @@ class AiRunQuery
         if ($active()->count() >= (int) config('ai.limits.max_active_global')) {
             return true;
         }
-        if ($active()->where('started_by', $viewer->userId())->count() >= (int) config('ai.limits.max_active_per_user')) {
+        // Bulk rows do not use up the starter's personal limit; the global limit above still counts them.
+        if ($active()->whereNull('bulk_run_id')->where('started_by', $viewer->userId())->count() >= (int) config('ai.limits.max_active_per_user')) {
             return true;
         }
         $cooldown = (int) config('ai.limits.document_cooldown_minutes');
