@@ -16,3 +16,4 @@ Schedule::command('outbox:prune')->daily()->name('outbox-prune');
 Schedule::command('occasions:enqueue')->hourly()->name('occasions-enqueue')->withoutOverlapping();
 Schedule::command('wishlist:prune')->daily()->name('wishlist-prune');
 Schedule::command('finance:prune-imports')->daily()->name('finance-prune-imports');
+Schedule::command('medical:prune-orphans')->daily()->name('medical-prune-orphans');
