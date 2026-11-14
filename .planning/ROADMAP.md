@@ -265,8 +265,32 @@ Plans:
   2. Extraction returns data in the exact JSON structure, validated against a versioned schema, and appears as a proposal that is not applied to the record
   3. User reviews the proposal side by side with the document and can accept, edit or reject it, and only then does the data enter the record
   4. Every call to an external AI is recorded with who, document, agent, model and time, and admins can see it
-**Plans**: TBD
+**Plans:** 22 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 08-01-PLAN.md — All Phase 8 copy (EN/SK/PL, plurals, checker wording) and three content-free AI audit events
+- [ ] 08-02-PLAN.md — Owner approval of @openai/codex 0.169.0 and poppler-utils; poppler in base, Codex only in the ai-worker image
+- [ ] 08-03-PLAN.md — Extraction schema v1, server-side validator and normaliser, entry keys, failure codes, static untrusted-data prompt
+- [ ] 08-04-PLAN.md — Proposal, decision and call-log tables (lifecycle guard, definer prune), agent status, notice acks, leak-net registration
+- [ ] 08-05-PLAN.md — CodexRunner seam (env -i, setsid, group kill, caps), login-status classification, fake CLI, AI arch rules
+- [ ] 08-06-PLAN.md — Record queries accept source 'ai', scoped verify transition, one shared rule set per record type
+- [ ] 08-07-PLAN.md — ai-worker service, env split, codex-home isolation checks, deploy/smoke/CI, runbook
+- [ ] 08-08-PLAN.md — PdfRasterizer, tmpfs work dir, ai:preflight (subscription-only startup)
+- [ ] 08-09-PLAN.md — Verify routes for AI records and provenance on person-page record rows
+- [ ] 08-10-PLAN.md — Agent registry with the Codex agent, outcome classification, login health and check job
+- [ ] 08-11-PLAN.md — PDF page-image route for side-by-side review (no-store, identical 403)
+- [ ] 08-12-PLAN.md — Extraction job: claim, run-time consent/access recheck, abort, supersede on ready, cleanup, leak tests
+- [ ] 08-13-PLAN.md — Run, cancel and status routes with consent, notice and availability checks; person-page AI props
+- [ ] 08-14-PLAN.md — Admin AI calls backend (names only), check-again, schedules for check/reap/prune
+- [ ] 08-15-PLAN.md — Review page props and atomic, idempotent accept / edit-accept / reject / undo
+- [ ] 08-16-PLAN.md — Run AI control, one-time OpenAI notice, status states and polling, list tags, consent line removal
+- [ ] 08-17-PLAN.md — Settings > AI calls page with login health card, filters and table
+- [ ] 08-18-PLAN.md — Side-by-side review screen with PDF pager and per-entry accept / reject / undo
+- [ ] 08-19-PLAN.md — Edit-in-place suggestion forms with server error flagging and discard rules
+- [ ] 08-20-PLAN.md — AI-extracted / Unverified / Verified tags on records and "Mark as verified"
+- [ ] 08-21-PLAN.md — Leak-suite completeness, privacy differentials, cache/SW/staging/a11y sweeps, validation sign-off
+- [ ] 08-22-PLAN.md — Live: owner decisions and data-use check, real Codex login per stack, one real run, release (deferred, with owner)
 
 ### Phase 9: Multi-Agent, Quota and Bulk Re-generation
 **Goal**: Admin controls which AI agents are used and in what order, extraction survives exhausted usage limits, and past documents can be re-processed safely in bulk.
