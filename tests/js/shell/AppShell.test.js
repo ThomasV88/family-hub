@@ -6,6 +6,7 @@ import { expectNoAxeViolations } from '../helpers/axe.js';
 import { pseudoLong } from '../helpers/pseudoLong.js';
 import { createAppI18n } from '../../../resources/js/i18n.js';
 import { mount } from '@vue/test-utils';
+import { useShell } from '../../../resources/js/Shell/shellState.js';
 
 let mockProps = {};
 const visit = vi.fn();
@@ -77,11 +78,22 @@ describe('AppShell desktop', () => {
         expect(wrapper.find('button[aria-controls="fh-sidebar"]').attributes('aria-expanded')).toBe('false');
     });
 
-    it('opens and closes the coming-soon panel, returning focus', async () => {
+    it('links Health in the nav to /health with no badge or count', () => {
         setWidth(1280);
         mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' } };
         mountShell();
-        const soon = wrapper.findAll('nav li').at(4).find('button');
+        const item = wrapper.findAll('nav li').at(4);
+        expect(item.find('a').attributes('href')).toBe('/health');
+        expect(item.find('button').exists()).toBe(false);
+        expect(item.text()).toBe(en.nav.health);
+    });
+
+    it('opens and closes the coming-soon panel, returning focus', async () => {
+        setWidth(1280);
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' } };
+        const Opener = { setup() { const shell = useShell(); return () => h('button', { type: 'button', 'data-testid': 'opener', onClick: (e) => shell.openComingSoon('health', e.currentTarget) }, 'Soon'); } };
+        wrapper = mount(AppShell, { slots: { default: () => h(Opener) }, attachTo: document.body, global: { plugins: [createAppI18n('en', en)] } });
+        const soon = wrapper.find('[data-testid=opener]');
         soon.element.focus();
         await soon.trigger('click');
         await flushPromises();

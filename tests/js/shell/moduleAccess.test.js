@@ -4,9 +4,9 @@ import { MODULES, visibleModules } from '../../../resources/js/Shell/modules.js'
 const keys = (access) => visibleModules(access).map((m) => m.key);
 
 describe('visibleModules', () => {
-    it('links Finance to /finance (built) and keeps Health on the coming-soon null href', () => {
+    it('links Finance to /finance and Health to /health (both built)', () => {
         expect(MODULES.find((m) => m.key === 'finances').href).toBe('/finance');
-        expect(MODULES.find((m) => m.key === 'health').href).toBeNull();
+        expect(MODULES.find((m) => m.key === 'health').href).toBe('/health');
     });
 
     it('shows overview and tasks for a view-only todo grant', () => {

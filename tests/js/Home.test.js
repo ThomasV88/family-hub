@@ -93,7 +93,7 @@ describe('Home page', () => {
             const h2 = w.findAll('main h2').map((h) => h.text());
             expect(h2).toEqual(['To-do', 'Wishlist', 'Finances', 'Health', 'System status']);
             const empties = w.findAll('main h3').map((h) => h.text());
-            expect(empties.slice(0, 4)).toEqual(['No tasks yet', 'No wishes yet', 'No transactions yet', 'No health records yet']);
+            expect(empties.slice(0, 3)).toEqual(['No tasks yet', 'No wishes yet', 'No transactions yet']);
         });
 
         it('Enter with text posts the title to /todo/tasks and clears the input on success', async () => {
@@ -135,6 +135,27 @@ describe('Home page', () => {
             const w = mountHome();
             await w.findAll('main button').find((b) => b.text() === 'Open').trigger('click');
             expect(soonOpen()).toBe(true);
+        });
+
+        it('renders a static Health card linking to /health and none without Health access', () => {
+            mockProps = base;
+            const w = mountHome();
+            const card = w.find('[data-testid=home-health]');
+            expect(card.exists()).toBe(true);
+            expect(card.find('h2').text()).toBe('Health');
+            expect(card.text()).toContain('Records, medications and vaccinations for your family.');
+            expect(card.find('a').attributes('href')).toBe('/health');
+            expect(card.find('a').text()).toBe('Open Health');
+            expect(card.findAll('li, [class*=tag]')).toHaveLength(0);
+            current.unmount();
+            mockProps = { ...base, auth: { access: { todo: 'view', wishlist: 'edit', finance: 'edit', health: 'none' } } };
+            const w2 = mountHome();
+            expect(w2.find('[data-testid=home-health]').exists()).toBe(false);
+        });
+
+        it('HomeHealthCard takes no props', () => {
+            const source = readFileSync(`${process.cwd()}/resources/js/Dashboard/HomeHealthCard.vue`, 'utf8');
+            expect(source).not.toMatch(/defineProps/);
         });
 
         it('QuickAdd no longer registers a shell add handler', () => {

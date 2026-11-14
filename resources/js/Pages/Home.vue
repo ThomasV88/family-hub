@@ -7,6 +7,7 @@ import UiCard from '../Components/ui/UiCard.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import QuickAdd from '../Dashboard/QuickAdd.vue';
 import ModuleCard from '../Dashboard/ModuleCard.vue';
+import HomeHealthCard from '../Dashboard/HomeHealthCard.vue';
 import DueSoonCard from '../Dashboard/DueSoonCard.vue';
 import UpcomingOccasionsCard from '../Dashboard/UpcomingOccasionsCard.vue';
 import HomeStillToPayCard from '../Dashboard/HomeStillToPayCard.vue';
@@ -60,7 +61,7 @@ function runCheck() {
                     <HomeStillToPayCard v-if="financeCard" :card="financeCard" />
                     <ModuleCard v-else module-key="finances" />
                 </template>
-                <ModuleCard v-if="allowed.has('health')" module-key="health" />
+                <HomeHealthCard v-if="allowed.has('health')" />
             </div>
             <UiCard :title="t('dashboard.system_status')" class="home__status">
                 <section data-testid="heartbeat">
