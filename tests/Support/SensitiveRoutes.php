@@ -62,6 +62,12 @@ class SensitiveRoutes
             // Changes where medical documents are sent (which agent, which model, in what order) (09-12).
             'settings.ai_agents.update',
             'settings.ai_agents.move',
+            // Bulk re-generation sends many documents to external AI (09-13).
+            'settings.ai_agents.bulk.dry_run',
+            'settings.ai_agents.bulk.start',
+            'settings.ai_agents.bulk.pause',
+            'settings.ai_agents.bulk.resume',
+            'settings.ai_agents.bulk.cancel',
         ];
     }
 
@@ -83,6 +89,7 @@ class SensitiveRoutes
             'settings.finance_accounts.index' => 'read-only listing (metadata, no money)',
             'settings.ai_calls' => 'admin AI call log: names, agent, model, status, times; no medical content (08-14)',
             'settings.ai_agents' => 'admin agent settings: agent keys, booleans, positions, model ids, health enums; no medical content',
+            'settings.ai_agents.bulk' => 'bulk run counts only: integers, enums and times; no person, title or content (09-13)',
         ];
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Medical\Ai\AgentHealth;
 use App\Medical\Ai\ModelId;
+use App\Medical\Queries\AdminAiBulkQuery;
 use App\Medical\Queries\AiAgentSettingsQuery;
 use App\Support\SettingsSections;
 use Illuminate\Http\JsonResponse;
@@ -16,14 +17,80 @@ use Inertia\Response;
 /** Admin AI agent settings: enable, order and model per agent plus login health. No credential is accepted or shown. */
 final class AiAgentsController extends Controller
 {
-    public function index(Request $request, AiAgentSettingsQuery $settings, AgentHealth $health): Response
+    public function index(Request $request, AiAgentSettingsQuery $settings, AgentHealth $health, AdminAiBulkQuery $bulk): Response
     {
         return Inertia::render('Settings/AiAgents', [
             'sections' => SettingsSections::for($request->user()),
             'agents' => $this->agents($settings, $health),
             'providers' => $settings->enabledKeys(),
             'checkRoute' => 'settings.ai_calls.check',
+            'bulk' => $bulk->panel(),
+            'bulkConfig' => [
+                'defaultCap' => (int) config('ai.bulk.default_cap'),
+                'maxCap' => (int) config('ai.bulk.max_cap'),
+                'startHour' => (int) config('ai.bulk.start_hour'),
+                'timezone' => (string) config('ai.local_timezone'),
+                'validMinutes' => (int) config('ai.bulk.dry_run_ttl_minutes'),
+            ],
         ]);
+    }
+
+    /** Counts-only panel for polling. */
+    public function bulk(AdminAiBulkQuery $bulk): JsonResponse
+    {
+        return $this->json($bulk->panel());
+    }
+
+    public function bulkDryRun(Request $request, AdminAiBulkQuery $bulk): JsonResponse
+    {
+        $valid = $request->validate([
+            'scope' => ['required', 'string', 'in:no_proposal,last_failed,all'],
+            'cap' => ['required', 'integer', 'min:1', 'max:'.(int) config('ai.bulk.max_cap')],
+        ]);
+
+        return $this->json($bulk->dryRun($request->user(), $valid['scope'], (int) $valid['cap']));
+    }
+
+    public function bulkStart(Request $request, AdminAiBulkQuery $bulk): JsonResponse
+    {
+        $valid = $request->validate([
+            'token' => ['required', 'uuid'],
+            'acknowledged' => ['accepted'],
+        ]);
+
+        $result = $bulk->start($request->user(), $valid['token'], true);
+
+        return match ($result['result']) {
+            'ok' => $this->json(['panel' => $result['panel']], 201),
+            'active' => $this->json(['reason' => 'active', 'panel' => $result['panel']], 409),
+            'stale' => $this->json(['reason' => 'stale'], 409),
+            default => $this->json(['reason' => 'expired'], 410),
+        };
+    }
+
+    public function bulkPause(Request $request, AdminAiBulkQuery $bulk, string $run): JsonResponse
+    {
+        return $this->control($bulk, $bulk->pause($request->user(), $run));
+    }
+
+    public function bulkResume(Request $request, AdminAiBulkQuery $bulk, string $run): JsonResponse
+    {
+        return $this->control($bulk, $bulk->resume($request->user(), $run));
+    }
+
+    public function bulkCancel(Request $request, AdminAiBulkQuery $bulk, string $run): JsonResponse
+    {
+        return $this->control($bulk, $bulk->cancel($request->user(), $run));
+    }
+
+    /** @param array{result: string, panel?: array<string, mixed>} $result */
+    private function control(AdminAiBulkQuery $bulk, array $result): JsonResponse
+    {
+        abort_if($result['result'] === 'missing', 404);
+
+        return $result['result'] === 'ok'
+            ? $this->json(['panel' => $result['panel']])
+            : $this->json(['reason' => 'conflict', 'panel' => $bulk->panel()], 409);
     }
 
     public function update(Request $request, AiAgentSettingsQuery $settings, AgentHealth $health, string $agent): JsonResponse
