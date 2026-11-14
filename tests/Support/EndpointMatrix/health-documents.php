@@ -57,6 +57,19 @@ return [
         'params' => $pdfDocument,
         'expect' => $read,
     ],
+    'health.documents.page' => [
+        'method' => 'GET',
+        'uri' => '/health/people/{person}/documents/{document}/pages/{page}',
+        'params' => function (array $users) {
+            Storage::fake('medical');
+            $params = MedicalFixtures::matrixParent($users);
+            $document = MedicalDocument::factory()->pdf()->create(['subject_id' => $params['person']]);
+            Storage::disk('medical')->put($document->path, MedicalFileFixtures::pdfPages(2));
+
+            return $params + ['document' => (string) $document->getKey(), 'page' => '1'];
+        },
+        'expect' => $read,
+    ],
     'health.documents.update' => [
         'method' => 'PATCH',
         'uri' => '/health/people/{person}/documents/{document}',

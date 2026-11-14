@@ -8,6 +8,7 @@ use App\Http\Requests\Health\StoreDocumentRequest;
 use App\Http\Requests\Health\UpdateDocumentRequest;
 use App\Medical\Documents\DocumentRejected;
 use App\Medical\Documents\MedicalDocumentStore;
+use App\Medical\Documents\PdfRasterizer;
 use App\Medical\Queries\DocumentQuery;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Viewer;
@@ -18,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class DocumentController extends Controller
@@ -111,6 +113,36 @@ class DocumentController extends Controller
         $response->headers->set('Cache-Control', 'no-store, private');
 
         return $response;
+    }
+
+    /**
+     * One page of a PDF as a JPEG, rendered per request and never stored. A malformed or out-of-range page, a non-PDF, an
+     * unreadable PDF and every hidden or unknown id end in the same 403. No-store comes from NoStoreDynamicResponses.
+     */
+    public function page(Request $request, string $person, string $document, string $page, SubjectQuery $subjects, DocumentQuery $documents, MedicalDocumentStore $store, PdfRasterizer $rasterizer): Response
+    {
+        $row = $this->visibleDocument($request, $person, $document, $subjects, $documents);
+        abort_unless($row->kind === 'pdf' && preg_match('/^[1-9][0-9]{0,2}$/', $page) === 1, 403);
+        $number = (int) $page;
+        abort_if($number > (int) config('ai.pdf.view_max_pages'), 403);
+
+        try {
+            $absolute = $store->absolutePath((string) $row->path);
+        } catch (\InvalidArgumentException) {
+            abort(403);
+        }
+        abort_unless(is_file($absolute), 403);
+
+        $bytes = $rasterizer->page($absolute, $number);
+        abort_if($bytes === null, 403);
+
+        return response($bytes, 200, [
+            'Content-Type' => 'image/jpeg',
+            'Content-Disposition' => HeaderUtils::makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE, 'page-'.$number.'.jpg'),
+            'X-Content-Type-Options' => 'nosniff',
+            'Content-Security-Policy' => "default-src 'none'",
+            'Vary' => 'Cookie',
+        ]);
     }
 
     public function update(UpdateDocumentRequest $request, string $person, string $document, DocumentQuery $documents): RedirectResponse

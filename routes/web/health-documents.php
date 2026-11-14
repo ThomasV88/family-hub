@@ -11,6 +11,8 @@ Route::get('/health/people/{person}/documents/{document}/preview/{variant}', [Do
     ->middleware(['access:module,health,view', 'throttle:120,1,health.documents.preview'])->name('health.documents.preview');
 Route::get('/health/people/{person}/documents/{document}/file', [DocumentController::class, 'file'])
     ->middleware(['access:module,health,view', 'throttle:30,1,health.documents.file'])->name('health.documents.file');
+Route::get('/health/people/{person}/documents/{document}/pages/{page}', [DocumentController::class, 'page'])
+    ->middleware(['access:module,health,view', 'throttle:120,1,health.documents.page'])->name('health.documents.page');
 Route::patch('/health/people/{person}/documents/{document}', [DocumentController::class, 'update'])
     ->middleware(['access:module,health,edit', 'throttle:60,1,health.documents.update'])->name('health.documents.update');
 Route::delete('/health/people/{person}/documents/{document}', [DocumentController::class, 'destroy'])
