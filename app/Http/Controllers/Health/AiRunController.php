@@ -7,22 +7,32 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Health\AiRunRequest;
 use App\Medical\Ai\AgentHealth;
 use App\Medical\Ai\RunExtractionJob;
+use App\Medical\Queries\AiJobQuery;
 use App\Medical\Queries\AiRunQuery;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Viewer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
+use Throwable;
 
 class AiRunController extends Controller
 {
-    public function run(AiRunRequest $request, AiRunQuery $runs, string $person, string $document): JsonResponse
+    public function run(AiRunRequest $request, AiRunQuery $runs, AiJobQuery $jobs, string $person, string $document): JsonResponse
     {
         $viewer = Viewer::for($request->user());
         $result = $runs->start($viewer, $request->subject(), $document, $request->user(), $request->boolean('acknowledged'));
         abort_if($result->outcome === 'denied', 403);
 
         if ($result->outcome === 'queued') {
-            RunExtractionJob::dispatch((string) $result->extractionId)->afterCommit();
+            try {
+                Bus::dispatch(new RunExtractionJob((string) $result->extractionId));
+            } catch (Throwable $e) {
+                // The row is already committed: close it, or the document stays blocked until the stale-queue reaper.
+                $jobs->failQueued((string) $result->extractionId);
+
+                throw $e;
+            }
 
             return response()->json(['status' => 'queued', 'extractionId' => $result->extractionId], 202);
         }

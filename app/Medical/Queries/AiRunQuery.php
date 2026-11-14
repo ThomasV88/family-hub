@@ -29,6 +29,8 @@ class AiRunQuery
 {
     private const ACTIVE = ['queued', 'running'];
 
+    private const QUOTA_FAILURES = ['timeout', 'idle_timeout', 'no_output', 'invalid_output', 'output_too_large', 'cli_error', 'auth'];
+
     public function __construct(
         private readonly AuditLogger $audit,
         private readonly DocumentQuery $documents,
@@ -256,7 +258,7 @@ class AiRunQuery
 
     /**
      * The quota guard: a cap on active runs per starter, a global cap, and a cool-down after the document's last
-     * finished run. A transaction-scoped advisory lock serializes the counting across people, so the bounds hold under
+     * run that used quota (ready, or failed after the CLI ran). A transaction-scoped advisory lock serializes the counting across people, so the bounds hold under
      * concurrent starts. Cancelled runs do not start a cool-down.
      */
     private function busy(Viewer $viewer, string $documentId): bool
@@ -274,8 +276,10 @@ class AiRunQuery
 
         return $cooldown > 0 && DB::table('medical_ai_extractions')
             ->where('document_id', $documentId)
-            ->whereIn('status', ['ready', 'superseded', 'failed'])
             ->where('finished_at', '>', Carbon::now()->subMinutes($cooldown))
+            ->where(fn ($q) => $q->whereIn('status', ['ready', 'superseded'])
+                // Only failures after the CLI really ran used quota; a lost worker, a bad file or a dispatch failure did not.
+                ->orWhere(fn ($f) => $f->where('status', 'failed')->whereIn('failure_code', self::QUOTA_FAILURES)))
             ->exists();
     }
 

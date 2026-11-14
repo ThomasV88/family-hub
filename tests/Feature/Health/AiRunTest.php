@@ -10,6 +10,7 @@ use App\Models\MedicalDocument;
 use App\Models\MedicalSubject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
@@ -365,17 +366,40 @@ describe('quota guard', function () {
 
     it('holds a document back for the cool-down after a finished run, but not after a cancel or once it has passed', function (string $state, bool $blocked) {
         [$user, $person, $document] = aiSetup();
-        MedicalAiExtraction::factory()->forDocument($document)->{$state}(...($state === 'ready' ? [['entries' => []], 0] : []))->create(['started_by' => $user->id]);
+        MedicalAiExtraction::factory()->forDocument($document)->{$state}(...($state === 'ready' ? [['entries' => []], 0] : ($state === 'failed' ? ['invalid_output'] : [])))->create(['started_by' => $user->id]);
 
         $response = $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true]);
 
         $blocked ? $response->assertStatus(409)->assertExactJson(['reason' => 'busy']) : $response->assertStatus(202);
     })->with([['ready', true], ['failed', true], ['cancelled', false]]);
 
+    it('does not start a cool-down after a lost worker or an unreadable file', function (string $code) {
+        [$user, $person, $document] = aiSetup();
+        MedicalAiExtraction::factory()->forDocument($document)->failed($code)->create(['started_by' => $user->id]);
+
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+    })->with(['worker_lost', 'unreadable_document', 'preflight']);
+
     it('allows a re-run once the cool-down has passed', function () {
         [$user, $person, $document] = aiSetup();
         MedicalAiExtraction::factory()->forDocument($document)->ready(['entries' => []], 0)->create(['started_by' => $user->id, 'finished_at' => now()->subMinutes(11)]);
 
         $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+    });
+});
+
+describe('failed dispatch', function () {
+    it('closes the queued row when the job cannot be queued, so the document is not blocked', function () {
+        [$user, $person, $document] = aiSetup();
+        Bus::shouldReceive('dispatch')->once()->andThrow(new RuntimeException('queue down'));
+
+        $this->withoutExceptionHandling();
+
+        expect(fn () => $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true]))->toThrow(RuntimeException::class, 'queue down');
+
+        $row = MedicalAiExtraction::query()->sole();
+        expect($row->status)->toBe('failed')->and($row->failure_code)->toBe('worker_lost')
+            ->and(DB::table('ai_calls')->sole()->status)->toBe('failed')
+            ->and(MedicalAiExtraction::query()->whereIn('status', ['queued', 'running'])->count())->toBe(0);
     });
 });

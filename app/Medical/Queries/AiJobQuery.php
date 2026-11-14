@@ -158,6 +158,29 @@ class AiJobQuery
         });
     }
 
+    /**
+     * Closes a run that was committed as queued but never reached the queue (the dispatch failed), so the document is
+     * not blocked until the stale-queue reaper. Only a still-queued row is touched.
+     */
+    public function failQueued(string $id): bool
+    {
+        if (! Str::isUuid($id)) {
+            return false;
+        }
+        $now = Carbon::now();
+
+        return DB::transaction(function () use ($id, $now) {
+            $changed = DB::table('medical_ai_extractions')->where('id', $id)->where('status', 'queued')->update([
+                'status' => 'failed', 'failure_code' => FailureCode::WorkerLost->value, 'model' => 'default', 'finished_at' => $now, 'updated_at' => $now,
+            ]);
+            if ($changed > 0) {
+                $this->closeCall($id, 'failed', FailureCode::WorkerLost->value, 'default', null, $now);
+            }
+
+            return $changed > 0;
+        });
+    }
+
     /** @param  'user'|'consent'|'access'  $reason */
     public function finishCancelled(string $id, string $reason, string $model, int $durationMs): bool
     {
