@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Dev-stack smoke for the scoped nginx body limit of the wish image upload (plan 04-02 / 04-07).
+# Dev-stack smoke for the scoped nginx body limits of the wish image upload (plan 04-02 / 04-07) and the medical
+# document upload (plan 07-10: 12m on /health/people/<uuid>/documents).
 # Usage: bash scripts/check-upload-limit.sh [compose-project]   (run from the repo root, default fh0407)
 # A well-formed 2 MiB multipart body must reach PHP on the upload route (any status except 413 and 404;
 # 419 from the CSRF check is expected and proves the pinned SCRIPT_NAME matched the route), while the same
@@ -47,6 +48,15 @@ post() {
 }
 echo "upload=$(post /wishlist/wishes/1/image)"
 echo "other=$(post /login)"
+# 11 MiB body: above the 2m default, below the 12m scoped limit, so it must reach PHP on the medical route.
+rm -f "$F"
+{
+  printf -- "--%s\r\nContent-Disposition: form-data; name=\"file\"; filename=\"x.pdf\"\r\nContent-Type: application/pdf\r\n\r\n" "$B"
+  head -c 11534336 /dev/urandom
+  printf "\r\n--%s--\r\n" "$B"
+} > "$F"
+echo "medical=$(post /health/people/00000000-0000-4000-8000-000000000000/documents)"
+echo "medicalother=$(post /login)"
 rm -f "$F"
 INNER
 )
@@ -58,8 +68,19 @@ if [ -z "$upload" ] || [ "$upload" = "413" ] || [ "$upload" = "404" ]; then
   echo "FAIL: upload route answered '${upload:-none}' (must reach PHP, not 413 or 404)" >&2
   exit 1
 fi
+medical=$(printf '%s\n' "$out" | sed -n 's/^medical=//p')
+medicalother=$(printf '%s\n' "$out" | sed -n 's/^medicalother=//p')
+
+if [ -z "$medical" ] || [ "$medical" = "413" ] || [ "$medical" = "404" ]; then
+  echo "FAIL: medical upload route answered '${medical:-none}' (must reach PHP, not 413 or 404)" >&2
+  exit 1
+fi
+if [ "$medicalother" != "413" ]; then
+  echo "FAIL: 11 MiB body on /login answered '${medicalother:-none}' (expected 413)" >&2
+  exit 1
+fi
 if [ "$other" != "413" ]; then
   echo "FAIL: other route answered '${other:-none}' (expected 413)" >&2
   exit 1
 fi
-echo "UPLOAD-LIMIT OK upload=$upload other=$other"
+echo "UPLOAD-LIMIT OK upload=$upload other=$other medical=$medical medicalother=$medicalother"
