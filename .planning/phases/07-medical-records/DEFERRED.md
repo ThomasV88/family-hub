@@ -24,3 +24,10 @@ HEIC/JPEG/PDF upload on iPhone and iPad (Safari and PWA), print emergency card a
 ## Notes
 - Shared component `UiDetailPanel.vue` modal variant now uses `div` instead of `header`/`footer` (07-19 axe fix); affects panels in every module at phone width, sanity-check visually.
 - Suite peak memory 275 MiB against the 512M phpunit limit.
+
+## Review findings left for owner decision (from 07-REVIEW.md, not fixed)
+- **WR-05, preview cache policy:** image previews are `private, no-cache` with an ETag, so scans stay in the browser disk cache after logout on shared devices. Options: (a) `no-store, private` for previews too (re-download about 40 KB thumbnails, drop the 304 path); (b) keep revalidation as a recorded trade-off (current).
+- **WR-06, who may hard-delete a person:** any Edit-level member, including a person on their own record, deletes the person and every document in one request, with no confirmation or recovery outside backups. Options: (a) soft delete with a retention window; (b) restrict to creator or admin plus `access:recent`; (c) keep Edit but add a server-validated typed confirmation; (d) keep as is (Decision B1).
+- **WR-07, who may switch AI consent on:** any Edit member can enable AI processing for a person who has their own account, without that person agreeing or being told. Options: (a) when `user_id` is set only that user may change it; (b) allow Edit members but notify the linked user; (c) guardian or minor rule; (d) keep as is.
+- **WR-11, person name in reminder mail and push:** subject and push title read "Vaccination due: <name>", visible in mailboxes and on lock screens. Options: (a) neutral text ("A reminder is waiting in Family Hub"); (b) first name or initials only; (c) keep the full name (current, accepted earlier).
+- **WR-12, image pixel cap and quality:** the medical pipeline shares `wishlist.image_max_pixels`, and images are re-encoded to JPEG q82 at 2400 px with the original discarded, so small print on scans can be lost. Options: (a) add `medical.image_max_pixels` only; (b) also raise to 3000 px and q90 for documents; (c) keep the sanitized original for documents; (d) keep as is.
