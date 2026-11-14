@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import ProvenanceTags from './ProvenanceTags.vue';
 import UiAlert from '../Components/ui/UiAlert.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiConfirmDialog from '../Components/ui/UiConfirmDialog.vue';
@@ -24,6 +25,15 @@ const props = defineProps({
     documents: { type: Array, default: () => [] },
 });
 const emit = defineEmits(['close', 'open-document', 'upload-document']);
+const verifying = ref(false);
+function verify() {
+    if (!props.visit || verifying.value) return;
+    router.post(`/health/people/${props.personId}/visits/${props.visit.id}/verify`, {}, {
+        preserveScroll: true,
+        onStart: () => { verifying.value = true; },
+        onFinish: () => { verifying.value = false; },
+    });
+}
 const { t, te, locale } = useI18n();
 
 const blank = () => ({ visited_on: '', doctor: '', specialty_key: '', specialty_other: '', diagnosis: '', notes: '' });
@@ -153,6 +163,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
 
 <template>
     <UiDetailPanel :open="open" :title="title" @update:open="(v) => (v ? null : requestClose())">
+        <ProvenanceTags v-if="visit" :provenance="visit.provenance" :can-verify="!readOnly" :verifying="verifying" class="panel-prov" data-testid="panel-provenance" @verify="verify" />
         <dl v-if="readOnly && visit" class="visit-read" data-testid="visit-readonly">
             <div><dt>{{ t('health.visit.date') }}</dt><dd>{{ visit.visitedOn }}</dd></div>
             <div v-if="visit.doctor"><dt>{{ t('health.visit.doctor') }}</dt><dd>{{ visit.doctor }}</dd></div>
@@ -227,6 +238,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
 </template>
 
 <style scoped>
+.panel-prov { margin-bottom: var(--space-3); align-items: center; }
 .visit-form { display: flex; flex-direction: column; }
 .visit-read { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; }
 .visit-read dt { font-size: var(--text-sm); color: var(--color-text-muted); }

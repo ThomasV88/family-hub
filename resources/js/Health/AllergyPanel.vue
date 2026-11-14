@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import ProvenanceTags from './ProvenanceTags.vue';
 import UiAlert from '../Components/ui/UiAlert.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiConfirmDialog from '../Components/ui/UiConfirmDialog.vue';
@@ -19,6 +20,15 @@ const props = defineProps({
     canEdit: { type: Boolean, default: false },
 });
 const emit = defineEmits(['close']);
+const verifying = ref(false);
+function verify() {
+    if (!props.allergy || verifying.value) return;
+    router.post(`/health/people/${props.personId}/allergies/${props.allergy.id}/verify`, {}, {
+        preserveScroll: true,
+        onStart: () => { verifying.value = true; },
+        onFinish: () => { verifying.value = false; },
+    });
+}
 const { t, te } = useI18n();
 
 const blank = () => ({ substance: '', reaction: '', severity: '' });
@@ -104,6 +114,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
 
 <template>
     <UiDetailPanel :open="open" :title="title" @update:open="(v) => (v ? null : requestClose())">
+        <ProvenanceTags v-if="allergy" :provenance="allergy.provenance" :can-verify="!readOnly" :verifying="verifying" class="panel-prov" data-testid="panel-provenance" @verify="verify" />
         <dl v-if="readOnly && allergy" class="allergy-read" data-testid="allergy-readonly">
             <div><dt>{{ t('health.allergy.substance') }}</dt><dd>{{ allergy.substance }}</dd></div>
             <div v-if="allergy.reaction"><dt>{{ t('health.allergy.reaction') }}</dt><dd>{{ allergy.reaction }}</dd></div>
@@ -148,6 +159,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
 </template>
 
 <style scoped>
+.panel-prov { margin-bottom: var(--space-3); align-items: center; }
 .allergy-form { display: flex; flex-direction: column; }
 .allergy-read { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; }
 .allergy-read dt { font-size: var(--text-sm); color: var(--color-text-muted); }

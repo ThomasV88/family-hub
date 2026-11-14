@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import ProvenanceTags from './ProvenanceTags.vue';
 import UiAlert from '../Components/ui/UiAlert.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiConfirmDialog from '../Components/ui/UiConfirmDialog.vue';
@@ -18,6 +19,15 @@ const props = defineProps({
     canEdit: { type: Boolean, default: false },
 });
 const emit = defineEmits(['close']);
+const verifying = ref(false);
+function verify() {
+    if (!props.vaccination || verifying.value) return;
+    router.post(`/health/people/${props.personId}/vaccinations/${props.vaccination.id}/verify`, {}, {
+        preserveScroll: true,
+        onStart: () => { verifying.value = true; },
+        onFinish: () => { verifying.value = false; },
+    });
+}
 const { t, te } = useI18n();
 
 const blank = () => ({ vaccine: '', given_on: '', next_due_on: '' });
@@ -121,6 +131,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
 
 <template>
     <UiDetailPanel :open="open" :title="title" @update:open="(v) => (v ? null : requestClose())">
+        <ProvenanceTags v-if="vaccination" :provenance="vaccination.provenance" :can-verify="!readOnly" :verifying="verifying" class="panel-prov" data-testid="panel-provenance" @verify="verify" />
         <dl v-if="readOnly && vaccination" class="vacc-read" data-testid="vaccination-readonly">
             <div><dt>{{ t('health.vaccination.vaccine') }}</dt><dd>{{ vaccination.vaccine }}</dd></div>
             <div><dt>{{ t('health.vaccination.given_on') }}</dt><dd>{{ vaccination.givenOn }}</dd></div>
@@ -182,6 +193,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
 </template>
 
 <style scoped>
+.panel-prov { margin-bottom: var(--space-3); align-items: center; }
 .vacc-form { display: flex; flex-direction: column; }
 .vacc-mark { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border); display: flex; flex-direction: column; align-items: flex-start; }
 .vacc-mark__actions { display: flex; gap: var(--space-2); }

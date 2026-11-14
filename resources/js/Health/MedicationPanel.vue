@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import ProvenanceTags from './ProvenanceTags.vue';
 import UiAlert from '../Components/ui/UiAlert.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiConfirmDialog from '../Components/ui/UiConfirmDialog.vue';
@@ -18,6 +19,15 @@ const props = defineProps({
     canEdit: { type: Boolean, default: false },
 });
 const emit = defineEmits(['close']);
+const verifying = ref(false);
+function verify() {
+    if (!props.medication || verifying.value) return;
+    router.post(`/health/people/${props.personId}/medications/${props.medication.id}/verify`, {}, {
+        preserveScroll: true,
+        onStart: () => { verifying.value = true; },
+        onFinish: () => { verifying.value = false; },
+    });
+}
 const { t, te } = useI18n();
 
 const blank = () => ({ name: '', dose: '', schedule: '', started_on: '', ended_on: '' });
@@ -99,6 +109,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
 
 <template>
     <UiDetailPanel :open="open" :title="title" @update:open="(v) => (v ? null : requestClose())">
+        <ProvenanceTags v-if="medication" :provenance="medication.provenance" :can-verify="!readOnly" :verifying="verifying" class="panel-prov" data-testid="panel-provenance" @verify="verify" />
         <dl v-if="readOnly && medication" class="med-read" data-testid="medication-readonly">
             <div><dt>{{ t('health.medication.name') }}</dt><dd>{{ medication.name }}</dd></div>
             <div v-if="medication.dose"><dt>{{ t('health.medication.dose') }}</dt><dd>{{ medication.dose }}</dd></div>
@@ -151,6 +162,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
 </template>
 
 <style scoped>
+.panel-prov { margin-bottom: var(--space-3); align-items: center; }
 .med-form { display: flex; flex-direction: column; }
 .med-read { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; }
 .med-read dt { font-size: var(--text-sm); color: var(--color-text-muted); }
