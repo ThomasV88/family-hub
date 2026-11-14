@@ -3,6 +3,7 @@
 use App\Medical\Ai\CodexRequest;
 use App\Medical\Ai\CodexRunner;
 use App\Medical\Ai\LoginState;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Tests\Support\FakeCodex;
 use Tests\TestCase;
@@ -70,10 +71,10 @@ it('records the exact argv, scrubbed env, cwd and stdin', function () {
 
     $keys = array_map(fn ($l) => explode('=', $l, 2)[0], array_filter(explode("\n", trim($env))));
     sort($keys);
-    $allowed = ['CODEX_HOME', 'HOME', 'LANG', 'PATH', 'PWD', 'SHLVL', 'TMPDIR', '_', 'OLDPWD'];
+    $allowed = ['CODEX_HOME', 'HOME', 'LANG', 'PATH', 'PWD', 'SHLVL', 'TMPDIR', 'TZ', '_', 'OLDPWD'];
     expect(array_diff($keys, $allowed))->toBe([])
         ->and($env)->not->toContain('sk-secret')->not->toContain('DB_PASSWORD')->not->toContain('APP_KEY')
-        ->and($env)->toContain('TMPDIR='.$this->work.'/tmp')
+        ->and($env)->toContain('TMPDIR='.$this->work.'/tmp')->toContain('TZ=UTC')
         ->and(trim($pwd))->toBe(realpath($this->work))
         ->and(explode("\n", trim($ls)))->toContain('a.jpg', 'b.jpg', 'tmp')
         ->and($stdin)->toBe('PROMPT TEXT');
@@ -174,3 +175,47 @@ it('classifies login status', function (int $exit, string $text, LoginState $sta
     [1, 'Not logged in', LoginState::LoggedOut],
     [2, 'Error checking login status', LoginState::Unknown],
 ]);
+
+it('reports a usage limit on stderr as flags and a reset time', function () {
+    CarbonImmutable::setTestNow('2026-11-14 10:00:00');
+    ($this->fake)(FakeCodex::quota("You've hit your usage limit. Please try again in 2 hours 5 minutes."));
+    $res = (new CodexRunner)->exec(($this->req)());
+
+    expect($res->quotaSignature)->toBeTrue()
+        ->and($res->quotaMinutes)->toBe(60)
+        ->and($res->quotaResetAt?->toIso8601String())->toBe(CarbonImmutable::parse('2026-11-14 12:06:00', 'UTC')->toIso8601String());
+    CarbonImmutable::setTestNow();
+});
+
+it('reports a usage limit from a JSONL turn.failed event', function () {
+    ($this->fake)(FakeCodex::quotaEvent("You've hit your usage limit."));
+    expect((new CodexRunner)->exec(($this->req)())->quotaSignature)->toBeTrue();
+});
+
+it('never counts quota words that appear only in the answer', function () {
+    ($this->fake)(FakeCodex::quotaInAnswer("You've hit your usage limit."));
+    $res = (new CodexRunner)->exec(($this->req)());
+
+    expect($res->quotaSignature)->toBeFalse()->and($res->quotaResetAt)->toBeNull();
+});
+
+it('keeps echoed text out of every result field and sees no quota in it', function () {
+    $canary = 'CANARY-'.bin2hex(random_bytes(4));
+    ($this->fake)(FakeCodex::echoing($canary));
+    $res = (new CodexRunner)->exec(($this->req)());
+
+    expect($res->quotaSignature)->toBeFalse()->and(var_export($res, true))->not->toContain($canary);
+});
+
+it('delegates the model rule to ModelId', function (string $m, bool $ok) {
+    expect(CodexRunner::isValidModel($m))->toBe($ok);
+})->with([['gpt-5.1', true], ['-m', false], ['a b', false], ['x=y', false], [str_repeat('a', 61), false], ['', false]]);
+
+it('lets the caller shorten the process timeout', function () {
+    config(['ai.timeouts.process' => 300]);
+    ($this->fake)(FakeCodex::hanging());
+    $t = microtime(true);
+    $res = (new CodexRunner)->exec(($this->req)(), null, 1.0);
+
+    expect($res->timedOut)->toBeTrue()->and(microtime(true) - $t)->toBeLessThan(4.0);
+});

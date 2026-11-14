@@ -78,6 +78,34 @@ final class FakeCodex
         return self::script(self::PARSE.'cat >/dev/null; printf %s '.$c.'; printf %s '.$c.' >&2; printf %s '.$c.' > "$out"; exit 0');
     }
 
+    /** Usage limit on stderr, exit 1, no result file. */
+    public static function quota(string $stderr): string
+    {
+        return self::script('cat >/dev/null; printf %s\\\\n '.escapeshellarg($stderr).' >&2; exit 1');
+    }
+
+    /** A JSONL turn.failed event carrying the message, exit 1. */
+    public static function quotaEvent(string $message): string
+    {
+        $line = json_encode(['type' => 'turn.failed', 'error' => ['message' => $message]], JSON_UNESCAPED_SLASHES);
+
+        return self::script('cat >/dev/null; printf %s\\\\n '.escapeshellarg($line).'; exit 1');
+    }
+
+    /** The message appears only in the answer (invalid -o file and stdout), exit 0. */
+    public static function quotaInAnswer(string $message): string
+    {
+        $m = escapeshellarg($message);
+
+        return self::script(self::PARSE.'cat >/dev/null; printf %s '.$m.'; printf %s '.$m.' > "$out"; exit 0');
+    }
+
+    /** A golden result file plus quota text on stderr, exit 0. */
+    public static function quotaWithValidResult(string $stderr, string $json): string
+    {
+        return self::script(self::PARSE.'cat >/dev/null; printf %s\\\\n '.escapeshellarg($stderr).' >&2; printf %s '.escapeshellarg($json).' > "$out"; exit 0');
+    }
+
     /** Emits one JSONL event with the given raw model value, then exits 0. */
     public static function emittingModel(string $model): string
     {

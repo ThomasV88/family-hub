@@ -7,6 +7,7 @@ use App\Medical\Ai\ExtractionSchema;
 use App\Medical\Ai\FailureCode;
 use App\Medical\Ai\PromptBuilder;
 use App\Medical\Ai\Work\WorkDir;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Tests\Support\FakeCodex;
 use Tests\TestCase;
@@ -143,4 +144,66 @@ it('records the configured model, never text the CLI echoed, and drops an invali
         config(['ai.codex.model' => $bad]);
         expect((new CodexAgent)->modelLabel())->toBe('default');
     }
+});
+
+it('maps a usage limit to quota_exhausted with the reset time', function () {
+    CarbonImmutable::setTestNow('2026-11-14 10:00:00');
+    $out = ($this->use)(FakeCodex::quota("You've hit your usage limit. Try again in 3 hours."));
+
+    expect($out->ok)->toBeFalse()
+        ->and($out->failure)->toBe(FailureCode::QuotaExhausted)
+        ->and($out->quotaMinutes)->toBe(60)
+        ->and($out->quotaResetAt?->toIso8601String())->toBe(CarbonImmutable::parse('2026-11-14 13:01:00', 'UTC')->toIso8601String());
+    CarbonImmutable::setTestNow();
+});
+
+it('lets a valid result win over quota text and exit code', function () {
+    $out = ($this->use)(FakeCodex::quotaWithValidResult("You've hit your usage limit.", json_encode(agentPayload())));
+
+    expect($out->ok)->toBeTrue()->and($out->payload)->toBe(agentPayload());
+});
+
+it('does not treat quota words in the answer as quota', function () {
+    $out = ($this->use)(FakeCodex::quotaInAnswer("You've hit your usage limit."));
+
+    expect($out->failure)->toBe(FailureCode::InvalidOutput);
+});
+
+it('takes the admin model override and ignores an invalid one', function () {
+    $rec = $this->root.'-rec.txt';
+    $this->scripts[] = $rec;
+    $script = FakeCodex::recording($rec, json_encode(agentPayload()));
+    $this->scripts[] = $script;
+    config(['ai.codex.binary' => $script, 'ai.codex.model' => 'gpt-conf']);
+
+    $out = (new CodexAgent(null, 'gpt-test-2'))->extract(new AgentInput($this->dir, ['page-1.jpg']));
+    expect($out->model)->toBe('gpt-test-2')->and(file_get_contents($rec))->toContain("\n-m\ngpt-test-2\n");
+
+    config(['ai.codex.model' => null]);
+    $out = (new CodexAgent(null, '-x'))->extract(new AgentInput($this->dir, ['page-1.jpg']));
+    expect($out->model)->toBe('default')->and(file_get_contents($rec))->not->toContain("\n-m\n");
+});
+
+it('returns a timeout without spawning when the deadline leaves too little', function () {
+    $rec = $this->root.'-rec2.txt';
+    $this->scripts[] = $rec;
+    $script = FakeCodex::recording($rec, json_encode(agentPayload()));
+    $this->scripts[] = $script;
+    config(['ai.codex.binary' => $script]);
+
+    $out = (new CodexAgent)->extract(new AgentInput($this->dir, ['page-1.jpg'], time() + 20));
+
+    expect($out->failure)->toBe(FailureCode::Timeout)->and(is_file($rec))->toBeFalse();
+});
+
+it('fits the process timeout inside the remaining deadline', function () {
+    config(['ai.timeouts.process' => 300, 'ai.timeouts.idle' => 300, 'ai.timeouts.min_call' => 1]);
+    $script = FakeCodex::hanging();
+    $this->scripts[] = $script;
+    config(['ai.codex.binary' => $script]);
+
+    $t = microtime(true);
+    $out = (new CodexAgent)->extract(new AgentInput($this->dir, ['page-1.jpg'], time() + 8));
+
+    expect($out->failure)->toBe(FailureCode::Timeout)->and(microtime(true) - $t)->toBeLessThan(6.0);
 });

@@ -2,6 +2,7 @@
 
 namespace App\Medical\Ai;
 
+use Carbon\CarbonImmutable;
 use Closure;
 use RuntimeException;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
@@ -18,7 +19,8 @@ final class CodexRunner
 
     private const POLL_US = 250_000;
 
-    public function exec(CodexRequest $r, ?Closure $shouldAbort = null): ProcessResult
+    /** @param  ?float  $timeout  per-call process timeout in seconds; never longer than the configured one */
+    public function exec(CodexRequest $r, ?Closure $shouldAbort = null, ?float $timeout = null): ProcessResult
     {
         $this->assertWrappers();
 
@@ -51,7 +53,8 @@ final class CodexRunner
         }
 
         $p = new Process($this->wrap($r->workDir, $args, $tmp), $r->workDir);
-        $p->setTimeout((float) config('ai.timeouts.process'))
+        $configured = (float) config('ai.timeouts.process');
+        $p->setTimeout($timeout !== null ? min($configured, $timeout) : $configured)
             ->setIdleTimeout((float) config('ai.timeouts.idle'))
             ->setInput($r->prompt);
 
@@ -67,10 +70,11 @@ final class CodexRunner
         $errWindow = '';
         $outLine = '';
         $auth = $timedOut = $idleTimedOut = $aborted = $capped = false;
+        $quota = null;
         $model = null;
         $lastCheck = null;
 
-        $scan = function () use ($p, &$out, &$err, &$errWindow, &$outLine, &$auth, &$model): void {
+        $scan = function () use ($p, &$out, &$err, &$errWindow, &$outLine, &$auth, &$model, &$quota): void {
             $o = $p->getIncrementalOutput();
             $e = $p->getIncrementalErrorOutput();
             $out += strlen($o);
@@ -79,6 +83,7 @@ final class CodexRunner
             if ($e !== '') {
                 $errWindow = substr($errWindow.$e, -self::WINDOW);
                 $auth = $auth || $this->matchesAuth($errWindow);
+                $quota ??= QuotaSignatures::match('codex', $errWindow, CarbonImmutable::now());
                 if ($model === null && preg_match('/^model:\s*(\S+)\s*$/mi', $errWindow, $m) === 1) {
                     $model = $this->validModel($m[1]);
                 }
@@ -101,6 +106,7 @@ final class CodexRunner
                     }
                     if (in_array($j['type'] ?? null, ['error', 'turn.failed'], true)) {
                         $auth = $auth || $this->matchesAuth(substr($line, -self::WINDOW));
+                        $quota ??= QuotaSignatures::match('codex', substr($line, -self::WINDOW), CarbonImmutable::now());
                     }
                 }
             }
@@ -145,6 +151,9 @@ final class CodexRunner
             authSignature: $auth,
             durationMs: (int) ((hrtime(true) - $started) / 1_000_000),
             reportedModel: $model,
+            quotaSignature: $quota !== null,
+            quotaMinutes: $quota['minutes'] ?? null,
+            quotaResetAt: $quota['resetAt'] ?? null,
         );
     }
 
@@ -188,6 +197,7 @@ final class CodexRunner
             'HOME='.$home,
             'CODEX_HOME='.$home,
             'LANG=C.UTF-8',
+            'TZ=UTC',
             'TMPDIR='.$tmpDir,
             '/usr/bin/setsid', $binary, ...$args,
         ];
@@ -229,6 +239,6 @@ final class CodexRunner
     /** A model identifier: at most 60 characters of [A-Za-z0-9._:-], starting with a letter or digit (never an option). */
     public static function isValidModel(string $value): bool
     {
-        return preg_match('/^[A-Za-z0-9][A-Za-z0-9._:-]{0,59}$/', $value) === 1;
+        return ModelId::isValid($value);
     }
 }
