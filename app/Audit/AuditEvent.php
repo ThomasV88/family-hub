@@ -44,6 +44,9 @@ enum AuditEvent: string
     case MedicalAdminSelfAdded = 'medical_admin_self_added';
     case MedicalExported = 'medical_exported';
     case MedicalConsentChanged = 'medical_consent_changed';
+    case MedicalAiRunRequested = 'medical_ai_run_requested';
+    case MedicalAiRunFinished = 'medical_ai_run_finished';
+    case MedicalAiEntryDecided = 'medical_ai_entry_decided';
 
     /** UI filter groups, in display order. */
     public const GROUPS = ['login', 'login_failed', 'invite', 'permission', 'session_revoked', 'health', 'finance', 'account', 'security'];
@@ -77,6 +80,9 @@ enum AuditEvent: string
             self::MedicalAccessChanged => ['subject', 'change'],
             self::MedicalExported => ['subject', 'scope', 'format'],
             self::MedicalConsentChanged => ['subject', 'value'],
+            self::MedicalAiRunRequested => ['subject', 'document'],
+            self::MedicalAiRunFinished => ['subject', 'document', 'status'],
+            self::MedicalAiEntryDecided => ['subject', 'document', 'decision'],
             default => [],
         };
     }
@@ -92,7 +98,8 @@ enum AuditEvent: string
             self::SessionRevoked, self::SessionRevokedAll => 'session_revoked',
             self::HealthRead, self::HealthWrite,
             self::MedicalSubjectCreated, self::MedicalSubjectDeleted, self::MedicalAccessChanged,
-            self::MedicalAdminSelfAdded, self::MedicalExported, self::MedicalConsentChanged => 'health',
+            self::MedicalAdminSelfAdded, self::MedicalExported, self::MedicalConsentChanged,
+            self::MedicalAiRunRequested, self::MedicalAiRunFinished, self::MedicalAiEntryDecided => 'health',
             self::FinanceRead, self::FinanceWrite, self::FinanceVisibilityChanged, self::FinanceAdminSelfAdded, self::FinanceCategoryChanged => 'finance',
             self::AccessDenied => $module === 'finance' ? 'finance' : 'health',
             self::PasswordReset, self::AdminCreated, self::GoogleLinked => 'account',

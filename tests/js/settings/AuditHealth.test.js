@@ -7,6 +7,7 @@ import AuditTable from '../../../resources/js/Components/Settings/AuditTable.vue
 
 const load = (l) => JSON.parse(readFileSync(`${process.cwd()}/lang/${l}.json`, 'utf8'));
 const SUBJECT = '8f14e45f-ceea-467a-9575-1c5a3d1b2f10';
+const DOCUMENT = '3b9d7c1e-5a42-4f7e-8e0a-6d2f4c9a1b77';
 const base = { occurredAt: '2026-05-12T10:00:00+00:00', actorLabel: 'Anna', group: 'health', module: 'health', targetLabel: null, ip: '203.0.113.7' };
 const Events = [
     { id: 1, event: 'medical_subject_created', meta: { subject: SUBJECT } },
@@ -16,6 +17,9 @@ const Events = [
     { id: 5, event: 'medical_admin_self_added', meta: { subject: SUBJECT } },
     { id: 6, event: 'medical_exported', meta: { subject: SUBJECT, scope: 'specialty', format: 'json' } },
     { id: 7, event: 'medical_consent_changed', meta: { subject: SUBJECT, value: 'on' } },
+    { id: 8, event: 'medical_ai_run_requested', meta: { subject: SUBJECT, document: DOCUMENT } },
+    { id: 9, event: 'medical_ai_run_finished', meta: { subject: SUBJECT, document: DOCUMENT, status: 'succeeded' } },
+    { id: 10, event: 'medical_ai_entry_decided', meta: { subject: SUBJECT, document: DOCUMENT, decision: 'accepted' } },
 ].map((e) => ({ ...base, ...e }));
 
 let current;
@@ -33,6 +37,7 @@ describe('Audit table medical rows', () => {
             'Added a person to Health', 'Deleted a person from Health', 'Changed access to a person in Health: Access granted',
             'Own-record access turned off', 'Gave themselves access to a person in Health',
             'Exported health records: One specialty: Data file (JSON)', 'Changed the AI setting for a person in Health: AI turned on',
+            'Started an AI run on a document in Health', 'An AI run on a document in Health finished', 'Decided on an AI suggestion in Health',
         ]) expect(text).toContain(expected);
     });
 
@@ -41,6 +46,9 @@ describe('Audit table medical rows', () => {
             { ...base, id: 99, event: 'medical_exported', meta: { subject: SUBJECT, scope: 'LEAK-SCOPE', format: 'LEAK-FMT' } },
         ]));
         expect(current.text()).not.toContain(SUBJECT);
+        expect(current.text()).not.toContain(DOCUMENT);
+        expect(current.text()).not.toContain('succeeded');
+        expect(current.text()).not.toContain('accepted');
         expect(current.text()).not.toContain('LEAK');
     });
 
@@ -61,6 +69,8 @@ describe('Audit table medical rows', () => {
             expect(current.text()).toContain(d.medical_change_granted);
             expect(current.text()).toContain(d.medical_format_json);
             expect(current.text()).toContain(d.medical_value_on);
+            expect(current.text()).toContain(d.medical_ai_run_requested);
+            expect(current.text()).toContain(d.medical_ai_entry_decided);
         }
     });
 
