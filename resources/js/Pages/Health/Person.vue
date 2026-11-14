@@ -8,6 +8,8 @@ import UiButton from '../../Components/ui/UiButton.vue';
 import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
 import AllergyList from '../../Health/AllergyList.vue';
 import AllergyPanel from '../../Health/AllergyPanel.vue';
+import MedicationList from '../../Health/MedicationList.vue';
+import MedicationPanel from '../../Health/MedicationPanel.vue';
 import PersonHeader from '../../Health/PersonHeader.vue';
 import PersonPanel from '../../Health/PersonPanel.vue';
 import PersonSwitcher from '../../Health/PersonSwitcher.vue';
@@ -32,6 +34,7 @@ const props = defineProps({
     filter: { type: String, default: 'all' },
     specialties: { type: Array, default: () => [] },
     allergies: { type: Array, default: () => [] },
+    medications: { type: Array, default: () => [] },
 });
 const { t } = useI18n();
 
@@ -52,6 +55,8 @@ const openNewVisit = () => go({ panel: 'new-visit' }, ['panel']);
 const openVisit = (id) => go({ panel: 'visit', id }, ['panel']);
 const openNewAllergy = () => go({ panel: 'new-allergy' }, ['panel']);
 const openAllergy = (id) => go({ panel: 'allergy', id }, ['panel']);
+const openNewMedication = () => go({ panel: 'new-medication' }, ['panel']);
+const openMedication = (id) => go({ panel: 'medication', id }, ['panel']);
 const closePanel = () => go({}, ['panel']);
 const setView = (view) => go({ view: view === 'folders' ? undefined : view, filter: undefined }, ['view', 'filter', 'timeline']);
 const setFilter = (filter) => go({ filter: filter === 'all' ? undefined : filter }, ['timeline', 'filter']);
@@ -61,6 +66,8 @@ const activeVisit = computed(() => (props.panel?.kind === 'visit' ? props.visits
 const visitPanelOpen = computed(() => props.panel?.kind === 'new-visit' || (props.panel?.kind === 'visit' && activeVisit.value !== null));
 const activeAllergy = computed(() => (props.panel?.kind === 'allergy' ? props.allergies.find((a) => a.id === props.panel.id) ?? null : null));
 const allergyPanelOpen = computed(() => props.panel?.kind === 'new-allergy' || (props.panel?.kind === 'allergy' && activeAllergy.value !== null));
+const activeMedication = computed(() => (props.panel?.kind === 'medication' ? props.medications.find((m) => m.id === props.panel.id) ?? null : null));
+const medicationPanelOpen = computed(() => props.panel?.kind === 'new-medication' || (props.panel?.kind === 'medication' && activeMedication.value !== null));
 const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.includes(v.id));
 </script>
 
@@ -76,6 +83,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                 <div class="health-person__area">
                     <div class="health-person__side" data-testid="person-side">
                         <AllergyList :allergies="allergies" :can-edit="canAddVisit" @add="openNewAllergy" @open="openAllergy" />
+                        <MedicationList :medications="medications" :can-edit="canAddVisit" @add="openNewMedication" @open="openMedication" />
                     </div>
                     <section class="health-person__main" data-testid="person-main">
                         <UiEmptyState v-if="visits.length === 0" :title="t('health.visits.empty_title')" :body="t('health.visits.empty_body')" :icon="HeartPulse">
@@ -109,6 +117,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
         <PersonPanel :open="panel?.kind === 'new-person'" @close="closePanel" />
         <VisitPanel v-if="person" :open="visitPanelOpen" :person-id="person.id" :visit="activeVisit" :can-edit="canAddVisit" :specialties="specialties" @close="closePanel" />
         <AllergyPanel v-if="person" :open="allergyPanelOpen" :person-id="person.id" :allergy="activeAllergy" :can-edit="canAddVisit" @close="closePanel" />
+        <MedicationPanel v-if="person" :open="medicationPanelOpen" :person-id="person.id" :medication="activeMedication" :can-edit="canAddVisit" @close="closePanel" />
         <ShellAdd :enabled="canAddVisit" :label="t('health.fab.add_visit')" @add="openNewVisit" />
     </AppShell>
 </template>

@@ -124,7 +124,10 @@ class MedicationQuery
     {
         $out = [];
         foreach (self::FIELDS as $field) {
-            $out[$field] = $data[$field] ?? null;
+            // A field the client did not send (notes has no input yet) keeps its stored value on update.
+            if (array_key_exists($field, $data)) {
+                $out[$field] = $data[$field];
+            }
         }
 
         return $out;
