@@ -169,6 +169,8 @@ function grantSnapshot(): array
         'invitations' => \Illuminate\Support\Facades\DB::table('invitations')->orderBy('id')->get()->toArray(),
         'accounts' => FinanceAccount::query()->orderBy('id')->get()->toArray(),
         'members' => \Illuminate\Support\Facades\DB::table('finance_account_members')->get()->toArray(),
+        'medical_members' => \Illuminate\Support\Facades\DB::table('medical_subject_members')->orderBy('subject_id')->orderBy('user_id')->get()->toArray(),
+        'medical_links' => \Illuminate\Support\Facades\DB::table('medical_subjects')->orderBy('id')->get(['id', 'user_id', 'self_access_enabled'])->toArray(),
     ]), true);
 }
 

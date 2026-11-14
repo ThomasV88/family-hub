@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Route;
  * `medical`, so the naming safety net in SensitiveGateMatrixTest catches a route that forgets the middleware.
  * File and JSON routes included. The controller must also live under App\Http\Controllers\Health (or Medical):
  * the namespace net in offenders() catches a route that serves the data under an innocent name or URI.
+ *
+ * PROVISIONAL (orchestrator), owner confirms in 07-20: the admin sees person NAMES and member lists on
+ * Settings > Members (a `healthPeople` prop from AdminSubjectQuery::listForAdmin), never records or record counts.
+ * There is no GET under settings.health_people.; the two PUT routes change who can open a record and are listed in
+ * accessGranting() (admin plus access:recent).
  */
 class SensitiveRoutes
 {
@@ -50,6 +55,8 @@ class SensitiveRoutes
             'settings.invitations.destroy',
             'settings.finance_accounts.store',
             'settings.finance_accounts.update',
+            'settings.health_people.members.update',
+            'settings.health_people.link.update',
         ];
     }
 
@@ -61,7 +68,7 @@ class SensitiveRoutes
      */
     public static function grantPrefixes(): array
     {
-        return ['settings.members.permissions.', 'settings.invitations.', 'settings.finance_accounts.'];
+        return ['settings.members.permissions.', 'settings.invitations.', 'settings.finance_accounts.', 'settings.health_people.'];
     }
 
     /** @return array<string, string> exact route name => reason it does not grant access */
