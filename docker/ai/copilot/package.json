@@ -1,0 +1,8 @@
+{
+  "name": "family-hub-copilot-cli",
+  "private": true,
+  "description": "Pins the GitHub Copilot CLI for the ai-worker image (build stage only, see docker/app/Dockerfile)",
+  "dependencies": {
+    "@github/copilot": "1.0.112"
+  }
+}
