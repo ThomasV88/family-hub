@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\RecordHeartbeat;
+use App\Medical\Ai\CheckLoginJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -18,3 +19,8 @@ Schedule::command('wishlist:prune')->daily()->name('wishlist-prune');
 Schedule::command('finance:prune-imports')->daily()->name('finance-prune-imports');
 Schedule::command('medical:prune-orphans')->daily()->name('medical-prune-orphans');
 Schedule::command('medical:enqueue-reminders')->hourly()->withoutOverlapping()->name('medical-enqueue-reminders');
+
+// AI extraction maintenance (08-14): login health, stuck runs, 12-month call history.
+Schedule::job(new CheckLoginJob)->everyFiveMinutes()->name('ai-check-login');
+Schedule::command('ai:reap-stuck')->everyFiveMinutes()->withoutOverlapping()->name('ai-reap-stuck');
+Schedule::command('ai:prune-calls')->daily()->name('ai-prune-calls');
