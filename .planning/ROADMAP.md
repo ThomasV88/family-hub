@@ -230,8 +230,30 @@ Plans:
   3. User can upload PDFs and photos including HEIC, attach them to a person and optionally a visit, and only authorized users can open the files
   4. User can export records by specialty, export everything for one person, and export in an AI-friendly format in which unverified AI-extracted data is labeled as such
   5. Each person has a one-screen emergency card with allergies, medications, blood type and contacts, and an AI-consent flag that is off by default
-**Plans**: TBD
+**Plans:** 20 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 07-01-PLAN.md — All Health copy (EN/SK/PL, 30 specialties, notifications) and the six medical audit events
+- [ ] 07-02-PLAN.md — Medical disk and volume, scoped nginx upload limit, /medical.tar backups, freshness and restore drill
+- [ ] 07-03-PLAN.md — Person slice: subjects and members, two-branch Visibility scope, create/open person, identical 403
+- [ ] 07-04-PLAN.md — Health nav link, static Home card, medical audit rows, clearHistory on idle lock
+- [ ] 07-05-PLAN.md — Doctor visits with the 30-key taxonomy, specialty folders and timeline
+- [ ] 07-06-PLAN.md — Medical leak net: harness, differential/canary/query-log, write parity, arch and mutation scans
+- [ ] 07-07-PLAN.md — Per-person access admin on Settings > Members (grant, link, own-record switch, access:recent)
+- [ ] 07-08-PLAN.md — Allergies side card and panel
+- [ ] 07-09-PLAN.md — AI-consent flag with consent dialog, transactional audit and AiConsent::allows
+- [ ] 07-10-PLAN.md — Document upload pipeline: byte sniffing, PDF/HEIC rules, sanitized images, medical disk
+- [ ] 07-11-PLAN.md — Medications side card and panel
+- [ ] 07-12-PLAN.md — Document delivery and management, cache split, orphan sweep, transfer helpers
+- [ ] 07-13-PLAN.md — Vaccinations with due status, mark as given, alert and timeline entries
+- [ ] 07-14-PLAN.md — Documents on the person page: uploader, panel, previews, attach to visits
+- [ ] 07-15-PLAN.md — Vaccination due reminders through the outbox (title-only push, vaccine-free mail)
+- [ ] 07-16-PLAN.md — Exports: print view, JSON and AI Markdown with unverified labeling, audit first, never stored
+- [ ] 07-17-PLAN.md — Person edit/delete with emergency contacts and header actions
+- [ ] 07-18-PLAN.md — Emergency card (view level, audited, printable, no public link)
+- [ ] 07-19-PLAN.md — Leak-suite completeness, cache/audit/staging/SW/a11y sweeps, validation sign-off
+- [ ] 07-20-PLAN.md — Live release, server and device checks, owner decisions (deferred, with owner)
 
 ### Phase 8: AI Extraction Platform
 **Goal**: A user can have a medical document read by AI into structured data and review it side by side with the document before anything is saved to the record.
