@@ -23,4 +23,5 @@ Schedule::command('medical:enqueue-reminders')->hourly()->withoutOverlapping()->
 // AI extraction maintenance (08-14): login health, stuck runs, 12-month call history.
 Schedule::job(new CheckLoginJob)->everyFiveMinutes()->name('ai-check-login');
 Schedule::command('ai:reap-stuck')->everyFiveMinutes()->withoutOverlapping()->name('ai-reap-stuck');
+Schedule::command('ai:resume-waiting')->everyMinute()->withoutOverlapping()->name('ai-resume-waiting');
 Schedule::command('ai:prune-calls')->daily()->name('ai-prune-calls');

@@ -43,8 +43,8 @@ return [
     'timeouts' => [
         'process' => 300,
         'idle' => 120,
-        'job' => 330,
-        // Shortest per-call timeout the attempt loop will start (seconds); 09-10 raises 'job' with the loop.
+        'job' => 660,
+        // Shortest per-call timeout the attempt loop will start (seconds); 'job' covers up to two attempts plus one repair each.
         'min_call' => 30,
         'login' => 10,
         'abort_check_seconds' => 2,

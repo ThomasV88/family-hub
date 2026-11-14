@@ -1,10 +1,13 @@
 <?php
 
 use App\Access\AccessLevel;
+use App\Medical\Ai\AgentHealth;
+use App\Medical\Ai\FailureCode;
 use App\Medical\Ai\RunExtractionJob;
 use App\Medical\Ai\Work\WorkDir;
 use App\Medical\Queries\AiJobQuery;
 use App\Medical\Queries\SystemQuery;
+use App\Models\AiAgentSetting;
 use App\Models\AiAgentStatus;
 use App\Models\AiCall;
 use App\Models\AuditEntry;
@@ -16,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\Support\FakeCodex;
+use Tests\Support\FakeCopilot;
 use Tests\Support\MedicalFileFixtures;
 use Tests\Support\MedicalFixtures;
 
@@ -54,6 +58,8 @@ function ejSetup(string $kind = 'image', ?string $bytes = null): array
 {
     $user = User::factory()->create();
     MedicalFixtures::grantHealth($user, AccessLevel::Edit);
+    // The starter has acknowledged the notice for Codex (the run-time provider filter needs it).
+    DB::table('ai_notice_acks')->insert(['user_id' => $user->id, 'providers' => 'codex']);
     $subject = MedicalFixtures::subject(['ai_consent' => true], [[$user, AccessLevel::Edit]]);
     $doc = match ($kind) {
         'pdf' => MedicalDocument::factory()->pdf(),
@@ -110,6 +116,7 @@ beforeEach(function () {
     config([
         'ai.work_dir' => $this->root, 'ai.codex.home' => $this->root, 'ai.codex.model' => null,
         'ai.timeouts.abort_check_seconds' => 0.2,
+        'ai.copilot.home' => $this->root.'-copilot', 'ai.copilot.cache' => $this->root.'-cache', 'ai.copilot.model' => null,
     ]);
 });
 
@@ -301,7 +308,7 @@ it('discards a result that arrives after consent was switched off', function () 
 
 it('turns every bad outcome into a payload-less failure with a content-free code', function (string $kind, string $code) {
     $s = ejSetup();
-    config(['ai.timeouts.process' => 2, 'ai.timeouts.idle' => 60]);
+    config(['ai.timeouts.process' => 2, 'ai.timeouts.idle' => 60, 'ai.timeouts.min_call' => 1]);
     ejUse(match ($kind) {
         'invalid' => FakeCodex::invalidJson(),
         'empty' => FakeCodex::emptyOutput(),
@@ -357,7 +364,7 @@ it('goes to the ai queue on the database connection with the id as its only payl
     $job = new RunExtractionJob('0b0f2f3a-0000-4000-8000-000000000001');
 
     expect($job->connection)->toBe('database')->and($job->queue)->toBe('ai')
-        ->and($job->tries)->toBe(1)->and($job->timeout)->toBe(330)->and($job->failOnTimeout)->toBeTrue()
+        ->and($job->tries)->toBe(1)->and($job->timeout)->toBe(660)->and($job->failOnTimeout)->toBeTrue()
         ->and(get_object_vars($job)['extractionId'])->toBe('0b0f2f3a-0000-4000-8000-000000000001');
 });
 
@@ -396,4 +403,133 @@ it('finishes as cancelled and keeps the old proposal when a cancel lands between
         ->and(DB::table('medical_ai_extractions')->where('id', $old->id)->value('status'))->toBe('ready')
         ->and(ejCall($s['run'])->status)->toBe('cancelled');
     expect(AuditEntry::query()->where('event', 'medical_ai_run_finished')->first()->meta['status'])->toBe('cancelled');
+});
+
+/** Both agents on (Codex first), the starter acknowledged both. */
+function ejBoth(array $s, string $acks = 'codex,copilot'): void
+{
+    AiAgentSetting::query()->toBase()->where('agent', 'copilot')->update(['enabled' => true]);
+    DB::table('ai_notice_acks')->where('user_id', $s['user']->id)->update(['providers' => $acks]);
+}
+
+function ejUseCopilot(string $script): string
+{
+    $GLOBALS['ej_scripts'][] = $script;
+    config(['ai.copilot.binary' => $script]);
+
+    return $script;
+}
+
+function ejCalls(MedicalAiExtraction $run): array
+{
+    return DB::table('ai_calls')->where('extraction_id', $run->id)->orderBy('attempt')->get()->all();
+}
+
+it('falls through to the next agent when the first hits its usage limit', function () {
+    $s = ejSetup();
+    ejBoth($s);
+    ejUse(FakeCodex::quota('You have hit your usage limit. Try again later.'));
+    ejUseCopilot(FakeCopilot::replying(json_encode(ejPayload())));
+
+    ejRun($s['run']);
+
+    $row = ejRow($s['run']);
+    $calls = ejCalls($s['run']);
+    expect($row->status)->toBe('ready')->and($row->agent)->toBe('copilot')
+        ->and($calls)->toHaveCount(2)
+        ->and([$calls[0]->attempt, $calls[0]->agent, $calls[0]->status, $calls[0]->failure_code])->toBe([1, 'codex', 'failed', 'quota_exhausted'])
+        ->and([$calls[1]->attempt, $calls[1]->agent, $calls[1]->status])->toBe([2, 'copilot', 'succeeded'])
+        ->and((new AgentHealth)->coolingDown('codex'))->toBeTrue()
+        ->and(AuditEntry::query()->where('event', 'medical_ai_run_finished')->count())->toBe(1);
+});
+
+it('falls through on an expired login too and marks the agent', function () {
+    $s = ejSetup();
+    ejBoth($s);
+    ejUse(FakeCodex::failing(1, '401 Unauthorized'));
+    ejUseCopilot(FakeCopilot::replying(json_encode(ejPayload())));
+
+    ejRun($s['run']);
+
+    expect(ejRow($s['run'])->status)->toBe('ready')->and(ejRow($s['run'])->agent)->toBe('copilot')
+        ->and(AiAgentStatus::find('codex')->last_auth_failure_at)->not->toBeNull();
+});
+
+it('keeps every other failure terminal and never starts the second agent', function () {
+    $s = ejSetup();
+    ejBoth($s);
+    $record = sys_get_temp_dir().'/ej-rec-'.bin2hex(random_bytes(4));
+    $this->files[] = $record;
+    ejUse(FakeCodex::invalidJson());
+    ejUseCopilot(FakeCopilot::recording($record, json_encode(ejPayload())));
+
+    ejRun($s['run']);
+
+    expect(ejRow($s['run'])->status)->toBe('failed')->and(ejRow($s['run'])->failure_code)->toBe('invalid_output')
+        ->and(file_exists($record))->toBeFalse()->and(ejCalls($s['run']))->toHaveCount(1);
+});
+
+it('never starts the next agent when consent is withdrawn during the first attempt', function () {
+    $s = ejSetup();
+    ejBoth($s);
+    $flag = sys_get_temp_dir().'/ej-flag-'.bin2hex(random_bytes(4));
+    $record = sys_get_temp_dir().'/ej-rec-'.bin2hex(random_bytes(4));
+    $this->files[] = $flag;
+    $this->files[] = $record;
+    ejFlagConsent($flag);
+    ejUse(ejScript('cat >/dev/null; touch '.escapeshellarg($flag).'; echo "hit your usage limit" >&2; exit 1'));
+    ejUseCopilot(FakeCopilot::recording($record, json_encode(ejPayload())));
+
+    ejRun($s['run']);
+
+    expect(ejRow($s['run'])->status)->toBe('cancelled')->and(ejRow($s['run'])->cancel_reason)->toBe('consent')
+        ->and(file_exists($record))->toBeFalse();
+});
+
+it('never starts the next agent when a cancel lands between attempts', function () {
+    $s = ejSetup();
+    ejBoth($s);
+    $record = sys_get_temp_dir().'/ej-rec-'.bin2hex(random_bytes(4));
+    $this->files[] = $record;
+    ejUse(FakeCodex::quota('You have hit your usage limit. Try again later.'));
+    ejUseCopilot(FakeCopilot::recording($record, json_encode(ejPayload())));
+    app()->instance(AiJobQuery::class, new class extends AiJobQuery
+    {
+        public function closeAttempt(string $id, string $status, FailureCode $code, string $model, int $durationMs): void
+        {
+            parent::closeAttempt($id, $status, $code, $model, $durationMs);
+            DB::table('medical_ai_extractions')->where('id', $id)->update(['cancel_requested_at' => now()]);
+        }
+    });
+
+    ejRun($s['run']);
+
+    expect(ejRow($s['run'])->status)->toBe('cancelled')->and(ejRow($s['run'])->cancel_reason)->toBe('user')
+        ->and(file_exists($record))->toBeFalse();
+});
+
+it('fails as timeout instead of starting an attempt with too little budget left', function () {
+    $s = ejSetup();
+    config(['ai.timeouts.job' => 50]);
+    $record = sys_get_temp_dir().'/ej-rec-'.bin2hex(random_bytes(4));
+    $this->files[] = $record;
+    ejUse(FakeCodex::recording($record, json_encode(ejPayload())));
+
+    ejRun($s['run']);
+
+    expect(ejRow($s['run'])->failure_code)->toBe('timeout')->and(file_exists($record))->toBeFalse();
+});
+
+it('records attempt 2 for another agent when the admin changed the enabled agents before pickup', function () {
+    $s = ejSetup();
+    ejBoth($s);
+    AiAgentSetting::query()->toBase()->where('agent', 'codex')->update(['enabled' => false]);
+    ejUseCopilot(FakeCopilot::replying(json_encode(ejPayload())));
+
+    ejRun($s['run']);
+
+    $calls = ejCalls($s['run']);
+    expect(ejRow($s['run'])->status)->toBe('ready')
+        ->and([$calls[0]->agent, $calls[0]->status, $calls[0]->attempt])->toBe(['codex', 'cancelled', 1])
+        ->and([$calls[1]->agent, $calls[1]->status, $calls[1]->attempt])->toBe(['copilot', 'succeeded', 2]);
 });

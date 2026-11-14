@@ -31,6 +31,7 @@ function lkSetup(): array
 {
     $user = User::factory()->create();
     MedicalFixtures::grantHealth($user, AccessLevel::Edit);
+    DB::table('ai_notice_acks')->insert(['user_id' => $user->id, 'providers' => 'codex']);
     $subject = MedicalFixtures::subject(['ai_consent' => true, 'name' => 'Person '.MedicalPrivacy::CANARY], [[$user, AccessLevel::Edit]]);
     $doc = MedicalDocument::factory()->image()->forSubject($subject)->create(['title' => 'Title '.MedicalPrivacy::CANARY]);
     Storage::disk('medical')->put($doc->path, 'jpeg-bytes '.MedicalPrivacy::CANARY);

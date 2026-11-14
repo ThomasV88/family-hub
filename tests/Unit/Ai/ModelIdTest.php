@@ -19,7 +19,7 @@ it('refuses invalid model ids', function (string $id) {
 
 it('carries the phase 9 config defaults', function () {
     expect(config('ai.timeouts.min_call'))->toBe(30)
-        ->and(config('ai.timeouts.job'))->toBe(330)
+        ->and(config('ai.timeouts.job'))->toBe(660)
         ->and(config('ai.bulk.default_cap'))->toBeLessThanOrEqual(config('ai.bulk.max_cap'))
         ->and(config('ai.bulk.queue'))->toBe('ai-bulk')
         ->and(config('ai.quota.ladder'))->toBe([60, 180, 720, 1440]);

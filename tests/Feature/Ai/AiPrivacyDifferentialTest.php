@@ -173,6 +173,7 @@ it('keeps proposal and document-title canaries out of other members, every admin
     $subject = MedicalFixtures::subject(['name' => 'Clean Name', 'ai_consent' => true], [[$member, AccessLevel::Edit]]);
     $document = MedicalDocument::factory()->image()->forSubject($subject)->create(['title' => 'Scan '.MedicalPrivacy::CANARY]);
     Storage::disk('medical')->put($document->path, 'jpeg-bytes');
+    DB::table('ai_notice_acks')->insert(['user_id' => $member->id, 'providers' => 'codex']);
     $run = MedicalAiExtraction::factory()->forDocument($document)->create(['started_by' => $member->id]);
     AiCall::factory()->create(['extraction_id' => $run->id, 'subject_id' => $subject->getKey(), 'document_id' => $document->id, 'started_by' => $member->id]);
 

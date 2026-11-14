@@ -24,6 +24,17 @@ it('schedules the stuck-run reaper every five minutes without overlapping', func
         ->and($e->withoutOverlapping)->toBeTrue();
 });
 
+it('schedules the waiting-run resumer every minute without overlapping', function () {
+    $e = aiScheduled('ai-resume-waiting');
+    expect($e->expression)->toBe('* * * * *')
+        ->and($e->command)->toContain('ai:resume-waiting')
+        ->and($e->withoutOverlapping)->toBeTrue();
+});
+
+it('gives the job a 660 second budget below the worker timeout', function () {
+    expect(config('ai.timeouts.job'))->toBe(660);
+});
+
 it('schedules the call prune daily', function () {
     $e = aiScheduled('ai-prune-calls');
     expect($e->expression)->toBe('0 0 * * *')->and($e->command)->toContain('ai:prune-calls');

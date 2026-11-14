@@ -1,15 +1,27 @@
 <?php
 
 use App\Access\AccessLevel;
+use App\Medical\Ai\AgentHealth;
 use App\Medical\Ai\FailureCode;
+use App\Medical\Ai\LoginState;
+use App\Medical\Ai\RunExtractionJob;
+use App\Medical\Ai\Work\WorkDir;
 use App\Medical\Queries\AiJobQuery;
+use App\Models\AiAgentSetting;
 use App\Models\AiBulkRun;
 use App\Models\AiCall;
 use App\Models\MedicalAiExtraction;
 use App\Models\MedicalDocument;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Bus\Dispatcher;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Tests\Support\FakeCodex;
+use Tests\Support\FakeCopilot;
 use Tests\Support\MedicalFixtures;
 
 /** A person with consent, one document and a claimed (running) run with its running call row. */
@@ -181,4 +193,259 @@ it('reads provider acknowledgments and a cancelled bulk run', function () {
     expect($jobs->bulkRunCancelled($active->id))->toBeFalse();
     DB::table('ai_bulk_runs')->where('id', $active->id)->update(['status' => 'cancelled']);
     expect($jobs->bulkRunCancelled($active->id))->toBeTrue();
+});
+
+// ---- the job: waiting, notice acknowledgment, bulk rule, resumer ----
+
+function wrPayload(): array
+{
+    return [
+        'schema_version' => 1, 'document_date' => null, 'specialty_key' => null,
+        'visits' => [], 'medications' => [['name' => 'Enalapril', 'dose' => null, 'schedule' => null, 'started_on' => null, 'ended_on' => null, 'notes' => null]],
+        'allergies' => [], 'vaccinations' => [],
+    ];
+}
+
+/**
+ * A queued run (interactive, or bulk for an admin who is not a member of the person), its call row and the starter's
+ * acknowledgment of $acks.
+ */
+function wrQueued(string $acks = 'codex', bool $bulk = false): array
+{
+    if ($bulk) {
+        $user = User::factory()->admin()->create();
+        $subject = MedicalFixtures::subject(['ai_consent' => true]);
+    } else {
+        $user = User::factory()->create();
+        MedicalFixtures::grantHealth($user, AccessLevel::Edit);
+        $subject = MedicalFixtures::subject(['ai_consent' => true], [[$user, AccessLevel::Edit]]);
+    }
+    $doc = MedicalDocument::factory()->image()->forSubject($subject)->create(['title' => 'Scan']);
+    Storage::disk('medical')->put($doc->path, 'jpeg-bytes');
+    DB::table('ai_notice_acks')->insert(['user_id' => $user->id, 'providers' => $acks]);
+    $bulkRun = $bulk ? AiBulkRun::factory()->create(['started_by' => $user->id]) : null;
+    $run = MedicalAiExtraction::factory()->forDocument($doc)->create(['started_by' => $user->id, 'bulk_run_id' => $bulkRun?->id]);
+    AiCall::factory()->create(['extraction_id' => $run->id, 'subject_id' => $subject->id, 'document_id' => $doc->id, 'started_by' => $user->id, 'bulk_run_id' => $bulkRun?->id]);
+
+    return ['user' => $user, 'subject' => $subject, 'doc' => $doc, 'run' => $run, 'bulk' => $bulkRun];
+}
+
+function wrRunJob(string $id): void
+{
+    (new RunExtractionJob($id))->handle();
+}
+
+function wrCopilotOn(): void
+{
+    AiAgentSetting::query()->toBase()->where('agent', 'copilot')->update(['enabled' => true]);
+}
+
+function wrBin(string $agent, string $script): string
+{
+    $GLOBALS['wr_scripts'][] = $script;
+    config(["ai.{$agent}.binary" => $script]);
+
+    return $script;
+}
+
+beforeEach(function () {
+    Storage::fake('medical');
+    $this->root = sys_get_temp_dir().'/wr-work-'.strtolower((string) Str::ulid());
+    $GLOBALS['wr_scripts'] = [];
+    config([
+        'ai.work_dir' => $this->root, 'ai.codex.home' => $this->root.'-codex', 'ai.codex.model' => null,
+        'ai.copilot.home' => $this->root.'-copilot', 'ai.copilot.cache' => $this->root.'-cache', 'ai.copilot.model' => null,
+    ]);
+});
+
+afterEach(function () {
+    foreach ($GLOBALS['wr_scripts'] as $f) {
+        @unlink($f);
+    }
+    $GLOBALS['wr_scripts'] = [];
+    if (is_dir($this->root)) {
+        WorkDir::removeTree($this->root);
+    }
+});
+
+it('parks the run on the other agent cooldown when the first hits its limit and the second is cooling down', function () {
+    $s = wrQueued('codex,copilot');
+    wrCopilotOn();
+    (new AgentHealth)->recordQuotaHit('copilot', CarbonImmutable::now()->addMinutes(40), null);
+    wrBin('codex', FakeCodex::quota('You have hit your usage limit. Try again later.'));
+
+    wrRunJob($s['run']->id);
+
+    $row = wrRow($s['run']->id);
+    $calls = wrCalls($s['run']->id);
+    expect($row->status)->toBe('waiting')->and($row->waiting_since)->not->toBeNull()
+        ->and(CarbonImmutable::parse($row->available_at)->between(now()->addMinutes(39), now()->addMinutes(41)))->toBeTrue()
+        ->and(array_map(fn ($c) => [$c->agent, $c->status, $c->failure_code], $calls))->toBe([['codex', 'failed', 'quota_exhausted']])
+        ->and(DB::table('failed_jobs')->count())->toBe(0)
+        ->and(DB::table('audit_logs')->where('event', 'medical_ai_run_finished')->count())->toBe(0)
+        ->and(glob($this->root.'/*'))->toBe([]);
+});
+
+it('fails at once when the only agent will not reset within the cap, and waits when it will', function () {
+    $far = wrQueued();
+    (new AgentHealth)->recordQuotaHit('codex', CarbonImmutable::now()->addHours(30), null);
+    wrRunJob($far['run']->id);
+    expect(wrRow($far['run']->id)->status)->toBe('failed')->and(wrRow($far['run']->id)->failure_code)->toBe('quota_exhausted');
+
+    $near = wrQueued();
+    (new AgentHealth)->recordQuotaHit('codex', CarbonImmutable::now()->addHours(2), null);
+    wrRunJob($near['run']->id);
+    expect(wrRow($near['run']->id)->status)->toBe('waiting');
+});
+
+it('measures the cap from the first park', function () {
+    $s = wrQueued();
+    DB::table('medical_ai_extractions')->where('id', $s['run']->id)->update(['waiting_since' => now()->subHours(23)]);
+    (new AgentHealth)->recordQuotaHit('codex', CarbonImmutable::now()->addHours(2), null);
+
+    wrRunJob($s['run']->id);
+
+    expect(wrRow($s['run']->id)->status)->toBe('failed')->and(wrRow($s['run']->id)->failure_code)->toBe('quota_exhausted');
+});
+
+it('fails as no_agent when no enabled agent has a usable login and nothing was tried', function () {
+    $s = wrQueued('codex,copilot');
+    wrCopilotOn();
+    foreach (['codex', 'copilot'] as $agent) {
+        (new AgentHealth)->recordCheck($agent, LoginState::LoggedOut);
+    }
+
+    wrRunJob($s['run']->id);
+
+    expect(wrRow($s['run']->id)->failure_code)->toBe('no_agent');
+});
+
+it('never gives the document to a provider the starter has not acknowledged, and parks on the acknowledged one', function () {
+    $s = wrQueued('codex');
+    wrCopilotOn();
+    $record = sys_get_temp_dir().'/wr-rec-'.bin2hex(random_bytes(4));
+    $GLOBALS['wr_scripts'][] = $record;
+    wrBin('codex', FakeCodex::quota('You have hit your usage limit. Try again later.'));
+    wrBin('copilot', FakeCopilot::recording($record, json_encode(wrPayload())));
+
+    wrRunJob($s['run']->id);
+
+    expect(wrRow($s['run']->id)->status)->toBe('waiting')->and(file_exists($record))->toBeFalse()
+        ->and(array_map(fn ($c) => $c->agent, wrCalls($s['run']->id)))->toBe(['codex']);
+});
+
+it('holds a resumed run to the acknowledgment at resume time, and lets it use Copilot once acknowledged', function () {
+    Queue::fake();
+    $record = sys_get_temp_dir().'/wr-rec-'.bin2hex(random_bytes(4));
+    $GLOBALS['wr_scripts'][] = $record;
+    wrBin('copilot', FakeCopilot::recording($record, json_encode(wrPayload())));
+    wrBin('codex', FakeCodex::recording($record.'-codex', json_encode(wrPayload())));
+    $GLOBALS['wr_scripts'][] = $record.'-codex';
+
+    // Waiting while Codex was the agent; since then Copilot was enabled and Codex disabled.
+    $s = wrQueued('codex');
+    DB::table('ai_calls')->where('extraction_id', $s['run']->id)->update(['status' => 'cancelled', 'finished_at' => now()]);
+    DB::table('medical_ai_extractions')->where('id', $s['run']->id)->update(['status' => 'waiting', 'available_at' => now()->subMinute(), 'waiting_since' => now()->subHour()]);
+    wrCopilotOn();
+    AiAgentSetting::query()->toBase()->where('agent', 'codex')->update(['enabled' => false]);
+
+    Artisan::call('ai:resume-waiting');
+    expect(wrRow($s['run']->id)->status)->toBe('queued');
+    wrRunJob($s['run']->id);
+
+    expect(wrRow($s['run']->id)->status)->toBe('failed')->and(wrRow($s['run']->id)->failure_code)->toBe('notice_required')
+        ->and(file_exists($record))->toBeFalse()->and(file_exists($record.'-codex'))->toBeFalse();
+
+    // The member acknowledges both providers: a new, resumed run may use Copilot.
+    DB::table('ai_notice_acks')->where('user_id', $s['user']->id)->update(['providers' => 'codex,copilot']);
+    $again = MedicalAiExtraction::factory()->forDocument($s['doc'])->create(['started_by' => $s['user']->id, 'status' => 'waiting', 'available_at' => now()->subMinute(), 'waiting_since' => now()->subHour()]);
+    Artisan::call('ai:resume-waiting');
+    wrRunJob($again->id);
+
+    expect(wrRow($again->id)->status)->toBe('ready')->and(wrRow($again->id)->agent)->toBe('copilot');
+});
+
+it('uses the starting admin acknowledgment for a bulk run and never Copilot beyond it', function () {
+    config(['ai.bulk.fallback_agents' => true]);
+    $s = wrQueued('codex', true);
+    wrCopilotOn();
+    $record = sys_get_temp_dir().'/wr-rec-'.bin2hex(random_bytes(4));
+    $GLOBALS['wr_scripts'][] = $record;
+    wrBin('codex', FakeCodex::quota('You have hit your usage limit. Try again later.'));
+    wrBin('copilot', FakeCopilot::recording($record, json_encode(wrPayload())));
+
+    wrRunJob($s['run']->id);
+
+    expect(wrRow($s['run']->id)->status)->toBe('waiting')->and(file_exists($record))->toBeFalse()
+        ->and(wrCalls($s['run']->id)[0]->bulk_run_id)->toBe($s['bulk']->id);
+});
+
+it('runs a bulk row for an admin who is not a member of the person', function () {
+    $s = wrQueued('codex', true);
+    wrBin('codex', FakeCodex::succeeding(json_encode(wrPayload())));
+
+    wrRunJob($s['run']->id);
+
+    $row = wrRow($s['run']->id);
+    expect($row->status)->toBe('ready')->and($row->agent)->toBe('codex')->and(wrCalls($s['run']->id)[0]->bulk_run_id)->toBe($s['bulk']->id);
+});
+
+it('cancels a bulk row before any spawn when the admin was demoted, the run cancelled or consent withdrawn', function (string $case, string $reason) {
+    $s = wrQueued('codex', true);
+    $record = sys_get_temp_dir().'/wr-rec-'.bin2hex(random_bytes(4));
+    $GLOBALS['wr_scripts'][] = $record;
+    wrBin('codex', FakeCodex::recording($record, json_encode(wrPayload())));
+    match ($case) {
+        'demoted' => DB::table('users')->where('id', $s['user']->id)->update(['is_admin' => false]),
+        'cancelled' => DB::table('ai_bulk_runs')->where('id', $s['bulk']->id)->update(['status' => 'cancelled']),
+        'consent' => DB::table('medical_subjects')->where('id', $s['subject']->id)->update(['ai_consent' => false]),
+    };
+
+    wrRunJob($s['run']->id);
+
+    $row = wrRow($s['run']->id);
+    expect($row->status)->toBe('cancelled')->and($row->cancel_reason)->toBe($reason)->and(file_exists($record))->toBeFalse();
+})->with([['demoted', 'access'], ['cancelled', 'user'], ['consent', 'consent']]);
+
+it('finishes a bulk result as cancelled(decided) when a proposal with accepted entries exists', function () {
+    $s = wrQueued('codex', true);
+    $old = MedicalAiExtraction::factory()->forDocument($s['doc'])->ready(wrPayload(), 1)->create(['started_by' => $s['user']->id]);
+    DB::table('medical_ai_decisions')->insert(['extraction_id' => $old->id, 'entry_key' => 'medication-0', 'decision' => 'accepted',
+        'record_type' => 'medication', 'record_id' => '1', 'decided_by' => $s['user']->id]);
+    wrBin('codex', FakeCodex::succeeding(json_encode(wrPayload())));
+
+    wrRunJob($s['run']->id);
+
+    expect(wrRow($s['run']->id)->status)->toBe('cancelled')->and(wrRow($s['run']->id)->cancel_reason)->toBe('decided')
+        ->and(wrRow($old->id)->status)->toBe('ready')
+        ->and(DB::table('audit_logs')->where('event', 'medical_ai_run_finished')->count())->toBe(1);
+});
+
+it('resumes due rows on the ai queue, bulk rows on ai-bulk, and prints a number only', function () {
+    Queue::fake();
+    $doc = MedicalDocument::factory()->image()->forSubject(MedicalFixtures::subject(['ai_consent' => true]))->create();
+    $interactive = MedicalAiExtraction::factory()->forDocument($doc)->waiting(now()->subMinute())->create();
+    $bulkRun = AiBulkRun::factory()->create();
+    $doc2 = MedicalDocument::factory()->image()->forSubject(MedicalFixtures::subject(['ai_consent' => true]))->create();
+    $bulk = MedicalAiExtraction::factory()->forDocument($doc2)->waiting(now()->subMinute())->bulk($bulkRun->id)->create();
+
+    expect(Artisan::call('ai:resume-waiting'))->toBe(0)->and(trim(Artisan::output()))->toBe('2');
+
+    Queue::assertPushed(RunExtractionJob::class, fn ($j) => $j->extractionId === $interactive->id && $j->queue === 'ai' && $j->connection === 'database');
+    Queue::assertPushed(RunExtractionJob::class, fn ($j) => $j->extractionId === $bulk->id && $j->queue === 'ai-bulk');
+    expect(wrRow($interactive->id)->status)->toBe('queued')->and(wrRow($bulk->id)->status)->toBe('queued');
+});
+
+it('puts a row back to waiting when its dispatch fails', function () {
+    $doc = MedicalDocument::factory()->image()->forSubject(MedicalFixtures::subject(['ai_consent' => true]))->create();
+    $row = MedicalAiExtraction::factory()->forDocument($doc)->waiting(now()->subMinute())->create();
+    $bus = Mockery::mock(Dispatcher::class);
+    $bus->shouldReceive('dispatch')->andThrow(new RuntimeException('queue down'));
+    app()->instance(Dispatcher::class, $bus);
+
+    Artisan::call('ai:resume-waiting');
+
+    $after = wrRow($row->id);
+    expect(trim(Artisan::output()))->toBe('1')->and($after->status)->toBe('waiting')
+        ->and(CarbonImmutable::parse($after->available_at)->between(now()->addSeconds(30), now()->addMinutes(2)))->toBeTrue();
 });
