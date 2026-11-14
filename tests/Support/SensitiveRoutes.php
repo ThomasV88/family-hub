@@ -59,6 +59,9 @@ class SensitiveRoutes
             'settings.health_people.link.update',
             // Queues a login check in the AI worker. Grants nothing; listed so it needs a recent confirmation (08-14).
             'settings.ai_calls.check',
+            // Changes where medical documents are sent (which agent, which model, in what order) (09-12).
+            'settings.ai_agents.update',
+            'settings.ai_agents.move',
         ];
     }
 
@@ -70,7 +73,7 @@ class SensitiveRoutes
      */
     public static function grantPrefixes(): array
     {
-        return ['settings.members.permissions.', 'settings.invitations.', 'settings.finance_accounts.', 'settings.health_people.', 'settings.ai_calls.'];
+        return ['settings.members.permissions.', 'settings.invitations.', 'settings.finance_accounts.', 'settings.health_people.', 'settings.ai_calls.', 'settings.ai_agents.'];
     }
 
     /** @return array<string, string> exact route name => reason it does not grant access */
@@ -79,6 +82,7 @@ class SensitiveRoutes
         return [
             'settings.finance_accounts.index' => 'read-only listing (metadata, no money)',
             'settings.ai_calls' => 'admin AI call log: names, agent, model, status, times; no medical content (08-14)',
+            'settings.ai_agents' => 'admin agent settings: agent keys, booleans, positions, model ids, health enums; no medical content',
         ];
     }
 

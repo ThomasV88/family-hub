@@ -31,6 +31,8 @@ arch('medical queries are used only by the medical layers')
         'App\Http\Controllers\Settings\MembersController',
         // admin AI call log, names only (08-14); pinned to AdminAiCallQuery below
         'App\Http\Controllers\Settings\AiCallsController',
+        // admin AI agents and bulk counts, content-free (09-12); pinned below
+        'App\Http\Controllers\Settings\AiAgentsController',
         'App\Http\Requests\Health',
         'App\Http\Requests\Settings\HealthPeople',
         'App\Console\Commands',
@@ -71,8 +73,8 @@ function mdArchSettingsLeaks(array $sources): array
 {
     $bad = [];
     foreach ($sources as $path => $src) {
-        // AiCallsController (08-14) is exempt here and pinned separately by mdArchAiCallsViolations().
-        if (in_array($path, ['Http/Controllers/Settings/HealthPeopleController.php', 'Http/Controllers/Settings/MembersController.php', 'Http/Controllers/Settings/AiCallsController.php'], true)) {
+        // AiCallsController (08-14) is exempt here and pinned separately by mdArchAiCallsViolations(); AiAgentsController (09-12) by mdArchAiAgentsViolations().
+        if (in_array($path, ['Http/Controllers/Settings/HealthPeopleController.php', 'Http/Controllers/Settings/MembersController.php', 'Http/Controllers/Settings/AiCallsController.php', 'Http/Controllers/Settings/AiAgentsController.php'], true)) {
             continue;
         }
         if (preg_match(MD_ARCH_MEDICAL_REF, $src) === 1) {
@@ -193,4 +195,37 @@ it('pins AiCallsController to AdminAiCallQuery, AgentHealth and CheckLoginJob', 
         ->and(mdArchAiCallsViolations("<?php\nuse App\\Medical\\Queries\\SubjectQuery;"))->toBe(['references App\\Medical\\Queries\\SubjectQuery'])
         ->and(mdArchAiCallsViolations("<?php\nuse App\\Models\\MedicalSubject;"))->toBe(['references App\\Models\\MedicalSubject'])
         ->and(mdArchAiCallsViolations("<?php\nuse App\\Medical\\Queries\\AdminAiCallQuery;"))->toBe([]);
+});
+
+/**
+ * AiAgentsController (admin AI agents and bulk counts, content-free, 09-12) may reference only the settings and bulk
+ * count queries, agent health, the registry, the login check job and the audit logger. No subject query, no medical model.
+ *
+ * @return list<string>
+ */
+function mdArchAiAgentsViolations(string $src): array
+{
+    $bad = [];
+    $allowed = [
+        'App\Medical\Queries\AiAgentSettingsQuery', 'App\Medical\Queries\AdminAiBulkQuery', 'App\Medical\Ai\AgentHealth',
+        'App\Medical\Ai\Agents\AgentRegistry', 'App\Medical\Ai\CheckLoginJob', 'App\Medical\Ai\ModelId',
+    ];
+    preg_match_all('/App\\\\(?:Medical\b|Models\\\\Medical)[\\\\\w]*/', $src, $refs);
+    foreach (array_unique($refs[0]) as $ref) {
+        if (! in_array($ref, $allowed, true)) {
+            $bad[] = 'references '.$ref;
+        }
+    }
+
+    return $bad;
+}
+
+it('pins AiAgentsController to the agent settings and bulk count queries', function () {
+    $src = mdArchSources('Http/Controllers/Settings')['Http/Controllers/Settings/AiAgentsController.php'] ?? '';
+    expect($src)->not->toBe('')
+        ->and(mdArchAiAgentsViolations($src))->toBe([])
+        ->and(mdArchAiAgentsViolations("<?php\nuse App\\Medical\\Queries\\SubjectQuery;"))->toBe(['references App\\Medical\\Queries\\SubjectQuery'])
+        ->and(mdArchAiAgentsViolations("<?php\nuse App\\Models\\MedicalSubject;"))->toBe(['references App\\Models\\MedicalSubject'])
+        ->and(mdArchAiAgentsViolations("<?php\nuse App\\Models\\MedicalDocument;"))->toBe(['references App\\Models\\MedicalDocument'])
+        ->and(mdArchAiAgentsViolations("<?php\nuse App\\Medical\\Queries\\AdminAiBulkQuery;\nuse App\\Medical\\Queries\\AiAgentSettingsQuery;"))->toBe([]);
 });

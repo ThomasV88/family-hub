@@ -25,6 +25,9 @@ class SettingsSections
         if ($user->is_admin && Route::has('settings.ai_calls')) {
             $sections[] = ['key' => 'ai_calls', 'href' => route('settings.ai_calls', absolute: false), 'labelKey' => 'settings.section.ai_calls', 'icon' => 'bot'];
         }
+        if ($user->is_admin && Route::has('settings.ai_agents')) {
+            $sections[] = ['key' => 'ai_agents', 'href' => route('settings.ai_agents', absolute: false), 'labelKey' => 'settings.section.ai_agents', 'icon' => 'bot'];
+        }
         if (Route::has('settings.notifications')) {
             $sections[] = ['key' => 'notifications', 'href' => route('settings.notifications', absolute: false), 'labelKey' => 'notifications.nav', 'icon' => 'bell'];
         }
