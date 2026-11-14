@@ -36,7 +36,13 @@ const waitingQuota = computed(() => status.value === 'waiting');
 const waiting = computed(() => status.value === 'queued' || status.value === 'running' || waitingQuota.value);
 const appLocale = computed(() => ({ 'sk-SK': 'sk', 'pl-PL': 'pl', 'en-GB': 'en' }[locale.value] ?? locale.value));
 const availableAt = computed(() => (waitingQuota.value ? entry.value?.availableAt ?? null : null));
-const providers = computed(() => (Array.isArray(props.ai?.providers) && props.ai.providers.length > 0 ? props.ai.providers : ['codex']));
+// The set a 409 answer reported as current wins over the page-load prop until the prop changes again.
+const providersLocal = ref(null);
+watch(() => props.ai?.providers, () => { providersLocal.value = null; });
+const providers = computed(() => {
+    if (Array.isArray(providersLocal.value) && providersLocal.value.length > 0) return providersLocal.value;
+    return Array.isArray(props.ai?.providers) && props.ai.providers.length > 0 ? props.ai.providers : ['codex'];
+});
 const providerLine = computed(() => {
     const hasCodex = providers.value.includes('codex');
     const hasCopilot = providers.value.includes('copilot');
@@ -140,16 +146,17 @@ function proceed() {
     send(false);
 }
 
-function confirmNotice() {
+// The acknowledgment names the provider set the dialog showed; the server refuses it when that set is no longer the enabled one.
+function confirmNotice(shown) {
     noticeOpen.value = false;
-    send(true);
+    send(true, Array.isArray(shown) ? shown : providers.value);
 }
 
-async function send(withAck) {
+async function send(withAck, shown = null) {
     busy.value = true;
     const result = await securityFetch(`/health/people/${props.personId}/documents/${props.document.id}/ai`, {
         method: 'POST',
-        body: withAck ? { acknowledged: true } : {},
+        body: withAck ? { acknowledged: true, providers: [...shown] } : {},
     });
     busy.value = false;
     if (result.ok) {
@@ -168,7 +175,13 @@ async function send(withAck) {
         if (reason === 'unavailable') { availableLocal.value = false; return; }
         if (reason === 'unsupported') { unsupportedLocal.value = true; return; }
         if (reason === 'active') { props.poller.refresh(); return; }
-        if (reason === 'notice_required') { ackLocal.value = false; noticeOpen.value = true; return; }
+        if (reason === 'notice_required') {
+            // The enabled providers changed after the page loaded: ask again with the current set.
+            if (Array.isArray(result.data?.providers) && result.data.providers.length > 0) providersLocal.value = result.data.providers;
+            ackLocal.value = false;
+            noticeOpen.value = true;
+            return;
+        }
     }
     failed.value = true;
 }
@@ -240,7 +253,7 @@ const pollFailed = computed(() => props.poller.failedPolls.value >= 3);
             </template>
         </template>
 
-        <AiNoticeDialog :open="noticeOpen" :variant="noticeVariant" @confirm="confirmNotice" @cancel="noticeOpen = false" />
+        <AiNoticeDialog :open="noticeOpen" :variant="noticeVariant" :providers="providers" @confirm="confirmNotice" @cancel="noticeOpen = false" />
         <UiDialog :open="rerunOpen" :title="t('health.ai.run.rerun_title')" :initial-focus="() => keepCurrent" @update:open="(v) => { if (!v) rerunOpen = false; }">
             <p class="run-ai__body">{{ t('health.ai.run.rerun_body') }}</p>
             <template #footer>

@@ -38,9 +38,12 @@ class AiRunQuery
 
     /**
      * Whether this member has already acknowledged the "document leaves the server" notice for every enabled provider.
-     * Enabling a further provider asks again once; removing one never does.
+     * Enabling a further provider asks again once; removing one never does. $enabled lets a caller that already read
+     * the set under the settings lock reuse it.
+     *
+     * @param  list<string>|null  $enabled
      */
-    public function noticeAcknowledged(Viewer $viewer): bool
+    public function noticeAcknowledged(Viewer $viewer, ?array $enabled = null): bool
     {
         $providers = DB::table('ai_notice_acks')->where('user_id', $viewer->userId())->value('providers');
         if ($providers === null) {
@@ -48,7 +51,7 @@ class AiRunQuery
         }
         $acked = explode(',', (string) $providers);
 
-        return array_diff($this->agents->providers(), $acked) === [];
+        return array_diff($enabled ?? $this->agents->providers(), $acked) === [];
     }
 
     /** @return list<string> the enabled provider keys, in saved order */
@@ -68,8 +71,14 @@ class AiRunQuery
      * FOR UPDATE and so serializes with this), then document kind, consent, availability and notice are checked, and the
      * audit row, the queued extraction, the call-log row and the acknowledgment are written together. The caller
      * dispatches the job after commit.
+     *
+     * The acknowledgment names the provider set the member saw ($shownProviders). It is stored only when that set equals
+     * the enabled set read under a shared lock that provider changes take exclusively; otherwise the answer is
+     * 'notice_required' with the current set, so the dialog opens again with what is true now.
+     *
+     * @param  list<string>|null  $shownProviders
      */
-    public function start(Viewer $viewer, MedicalSubject $subject, string $documentId, User $user, bool $acknowledged): StartResult
+    public function start(Viewer $viewer, MedicalSubject $subject, string $documentId, User $user, bool $acknowledged, ?array $shownProviders = null): StartResult
     {
         if (! $viewer->canEdit()) {
             return new StartResult('denied');
@@ -79,7 +88,7 @@ class AiRunQuery
         $raced = false;
 
         try {
-            return DB::transaction(function () use (&$raced, $viewer, $subject, $subjectId, $documentId, $user, $acknowledged): StartResult {
+            return DB::transaction(function () use (&$raced, $viewer, $subject, $subjectId, $documentId, $user, $acknowledged, $shownProviders): StartResult {
                 $locked = Visibility::apply(
                     DB::table('medical_subjects')->where('id', $subjectId)->sharedLock(),
                     $viewer,
@@ -102,9 +111,12 @@ class AiRunQuery
                 if (! $this->agents->anyRunnable()) {
                     return new StartResult('unavailable');
                 }
-                $acked = $this->noticeAcknowledged($viewer);
-                if (! $acked && ! $acknowledged) {
-                    return new StartResult('notice_required');
+                // Enabling or disabling a provider takes this lock exclusively, so the set below cannot change before commit.
+                DB::select("select pg_advisory_xact_lock_shared(hashtext('ai-agent-settings'))");
+                $enabledKeys = $this->agents->providers();
+                $acked = $this->noticeAcknowledged($viewer, $enabledKeys);
+                if (! $acked && (! $acknowledged || ! self::sameSet($shownProviders, $enabledKeys))) {
+                    return new StartResult('notice_required', null, array_values($enabledKeys));
                 }
                 $active = $this->activeId($viewer, $subjectId, $documentId);
                 if ($active !== null) {
@@ -115,7 +127,6 @@ class AiRunQuery
                     return new StartResult('busy');
                 }
 
-                $enabledKeys = $this->agents->providers();
                 $first = $this->agents->candidates([], false, $enabledKeys)[0] ?? $this->agents->enabled()[0] ?? $this->agents->primary();
                 $this->audit->record(AuditEvent::MedicalAiRunRequested, $user, ['subject' => $subjectId, 'document' => $documentId], null, Module::Health);
 
@@ -320,6 +331,23 @@ class AiRunQuery
                 // Only failures after the CLI really ran used quota; a lost worker, a bad file or a dispatch failure did not.
                 ->orWhere(fn ($f) => $f->where('status', 'failed')->whereIn('failure_code', self::QUOTA_FAILURES)))
             ->exists();
+    }
+
+    /**
+     * @param  list<string>|null  $shown
+     * @param  list<string>  $enabled
+     */
+    private static function sameSet(?array $shown, array $enabled): bool
+    {
+        if ($shown === null) {
+            return false;
+        }
+        $a = array_values(array_unique(array_map('strval', $shown)));
+        $b = array_values(array_unique($enabled));
+        sort($a);
+        sort($b);
+
+        return $a === $b;
     }
 
     /** The queued or running extraction of the document, inside the viewer's scope. */

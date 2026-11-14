@@ -342,7 +342,7 @@ function btE2e(): array
     DB::table('ai_notice_acks')->insert(['user_id' => $admin->id, 'providers' => 'codex']);
     $admin2 = app(AdminAiBulkQuery::class);
     $token = $admin2->dryRun($admin, 'all', 5)['token'];
-    expect($admin2->start($admin, $token, true)['result'])->toBe('ok');
+    expect($admin2->start($admin, $token, true, ['codex'])['result'])->toBe('ok');
 
     return $a;
 }

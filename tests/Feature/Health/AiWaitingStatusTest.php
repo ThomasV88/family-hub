@@ -108,7 +108,7 @@ describe('waiting is the active run', function () {
         $row = MedicalAiExtraction::factory()->forDocument($document)->waiting()->create(['started_by' => $user->id]);
         DB::table('ai_notice_acks')->insert(['user_id' => $user->id]);
 
-        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true])
+        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])
             ->assertStatus(409)->assertExactJson(['reason' => 'active', 'extractionId' => $row->id]);
     });
 
@@ -136,10 +136,10 @@ describe('waiting is the active run', function () {
             MedicalAiExtraction::factory()->forDocument($doc)->waiting()->bulk($runId)->create(['started_by' => $user->id]);
         }
 
-        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202);
 
         $second = MedicalDocument::factory()->image()->create(['subject_id' => $person->id]);
-        $this->actingAs($user)->postJson(waitRunUrl($person, $second->id), ['acknowledged' => true])
+        $this->actingAs($user)->postJson(waitRunUrl($person, $second->id), ['acknowledged' => true, 'providers' => ['codex']])
             ->assertStatus(409)->assertExactJson(['reason' => 'busy']);
     });
 
@@ -147,7 +147,7 @@ describe('waiting is the active run', function () {
         [$user, $person, $document] = waitSetup();
         MedicalAiExtraction::factory()->forDocument($document)->failed($code)->create(['started_by' => $user->id]);
 
-        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202);
     })->with(['quota_exhausted', 'quota_timeout']);
 });
 
@@ -160,7 +160,7 @@ describe('availability and selection', function () {
         }
 
         $this->actingAs($user)->getJson(waitStatusUrl($person))->assertJsonPath('available', true);
-        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex', 'copilot']])->assertStatus(202);
         expect(MedicalAiExtraction::query()->sole()->agent)->toBe('codex');
     });
 
@@ -171,7 +171,7 @@ describe('availability and selection', function () {
         app(AgentHealth::class)->recordCheck('copilot', LoginState::LoggedOut);
 
         $this->actingAs($user)->getJson(waitStatusUrl($person))->assertJsonPath('available', false);
-        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true])
+        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])
             ->assertStatus(409)->assertJson(['reason' => 'unavailable']);
     });
 
@@ -179,7 +179,7 @@ describe('availability and selection', function () {
         [$user, $person, $document] = waitSetup();
         waitEnableCopilot(first: true);
 
-        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex', 'copilot']])->assertStatus(202);
 
         expect(MedicalAiExtraction::query()->sole()->agent)->toBe('copilot')->and(DB::table('ai_calls')->sole()->agent)->toBe('copilot');
     });
@@ -205,7 +205,7 @@ describe('provider notice', function () {
         $acked(false);
         $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), [])->assertStatus(409)->assertJson(['reason' => 'notice_required']);
 
-        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+        $this->actingAs($user)->postJson(waitRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex', 'copilot']])->assertStatus(202);
         expect(DB::table('ai_notice_acks')->where('user_id', $user->id)->value('providers'))->toBe('codex,copilot');
         $acked(true);
 

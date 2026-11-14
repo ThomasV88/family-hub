@@ -87,7 +87,7 @@ describe('Run AI start flow', () => {
         await flush();
         $('[data-testid="ai-notice-confirm"]').click();
         await flush();
-        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: { acknowledged: true } });
+        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: { acknowledged: true, providers: ['codex'] } });
         expect(useToast().toasts.map((x) => x.message)).toContain('AI run started');
         expect(poller.refresh).toHaveBeenCalled();
         expect($('[data-testid="ai-status-tag"]').textContent).toBe('Waiting for AI');
@@ -497,7 +497,27 @@ describe('waiting for AI quota, provenance and providers', () => {
         expect(document.activeElement).toBe($('[data-testid="ai-notice-cancel"]'));
         $('[data-testid="ai-notice-confirm"]').click();
         await flush();
-        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: { acknowledged: true } });
+        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: { acknowledged: true, providers } });
+    });
+
+    it('re-opens the notice with the current provider set when the server says another provider was enabled meanwhile', async () => {
+        // The dialog named OpenAI only; the server answers that GitHub was enabled in the meantime.
+        fetchMock.mockResolvedValueOnce({ ok: false, status: 409, error: 'failed', data: { reason: 'notice_required', providers: ['codex', 'copilot'] } });
+        fetchMock.mockResolvedValueOnce({ ok: true, status: 202, data: { extractionId: 'ex9' } });
+        mountControl({ ai: { ...AI, providers: ['codex'] } });
+        $('[data-testid="ai-run"]').click();
+        await flush();
+        expect($('[role="dialog"]').textContent).toContain('Send this document to OpenAI?');
+        $('[data-testid="ai-notice-confirm"]').click();
+        await flush();
+        expect(fetchMock).toHaveBeenNthCalledWith(1, runUrl, { method: 'POST', body: { acknowledged: true, providers: ['codex'] } });
+        // Nothing started; the dialog is open again and now names both providers.
+        expect(poller.markQueued).not.toHaveBeenCalled();
+        expect($('[role="dialog"]').textContent).toContain('or to GitHub if OpenAI is not available');
+        $('[data-testid="ai-notice-confirm"]').click();
+        await flush();
+        expect(fetchMock).toHaveBeenNthCalledWith(2, runUrl, { method: 'POST', body: { acknowledged: true, providers: ['codex', 'copilot'] } });
+        expect(poller.markQueued).toHaveBeenCalled();
     });
 
     it('treats Esc in the notice like "Keep document private"', async () => {

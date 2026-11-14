@@ -6,5 +6,6 @@ namespace App\Medical\Ai;
 final readonly class StartResult
 {
     /** @param 'queued'|'active'|'busy'|'consent_off'|'unavailable'|'unsupported'|'notice_required'|'denied' $outcome */
-    public function __construct(public string $outcome, public ?string $extractionId = null) {}
+    /** @param list<string>|null $providers the enabled provider keys, set with 'notice_required' so the dialog can name what is true now */
+    public function __construct(public string $outcome, public ?string $extractionId = null, public ?array $providers = null) {}
 }

@@ -206,7 +206,7 @@ it('marks the AI agents page, the bulk poll and every agent and bulk JSON respon
         'agents page' => $this->get('/settings/ai-agents'),
         'bulk poll' => $this->getJson('/settings/ai-agents/bulk'),
         'dry run' => $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 5]),
-        'start (expired token)' => $this->postJson('/settings/ai-agents/bulk', ['token' => (string) Str::uuid(), 'acknowledged' => true]),
+        'start (expired token)' => $this->postJson('/settings/ai-agents/bulk', ['token' => (string) Str::uuid(), 'acknowledged' => true, 'providers' => ['codex']]),
         'pause (unknown run)' => $this->postJson("/settings/ai-agents/bulk/$run/pause"),
         'resume (unknown run)' => $this->postJson("/settings/ai-agents/bulk/$run/resume"),
         'cancel (unknown run)' => $this->postJson("/settings/ai-agents/bulk/$run/cancel"),

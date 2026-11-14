@@ -53,6 +53,7 @@ return [
         'data' => fn (array $users) => [
             'token' => app(AdminAiBulkQuery::class)->dryRun($users['admin'], 'all', 5)['token'],
             'acknowledged' => true,
+            'providers' => ['codex'],
         ],
         'expect' => ['guest' => 302, 'admin' => 201] + $nonAdmins,
     ],

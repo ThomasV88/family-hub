@@ -21,7 +21,7 @@ class AiRunController extends Controller
     public function run(AiRunRequest $request, AiRunQuery $runs, AiJobQuery $jobs, string $person, string $document): JsonResponse
     {
         $viewer = Viewer::for($request->user());
-        $result = $runs->start($viewer, $request->subject(), $document, $request->user(), $request->boolean('acknowledged'));
+        $result = $runs->start($viewer, $request->subject(), $document, $request->user(), $request->boolean('acknowledged'), $request->has('providers') ? array_values((array) $request->input('providers')) : null);
         abort_if($result->outcome === 'denied', 403);
 
         if ($result->outcome === 'queued') {
@@ -37,7 +37,7 @@ class AiRunController extends Controller
             return response()->json(['status' => 'queued', 'extractionId' => $result->extractionId], 202);
         }
 
-        return response()->json(array_filter(['reason' => $result->outcome, 'extractionId' => $result->extractionId], fn ($v) => $v !== null), 409);
+        return response()->json(array_filter(['reason' => $result->outcome, 'extractionId' => $result->extractionId, 'providers' => $result->providers], fn ($v) => $v !== null), 409);
     }
 
     public function cancel(Request $request, SubjectQuery $subjects, AiRunQuery $runs, string $person, string $extraction): JsonResponse

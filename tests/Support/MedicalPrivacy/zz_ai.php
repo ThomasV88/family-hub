@@ -48,7 +48,7 @@ return [
     ],
 
     'payloads' => [
-        'health.documents.ai.run' => fn (array $ctx): array => ['acknowledged' => true],
+        'health.documents.ai.run' => fn (array $ctx): array => ['acknowledged' => true, 'providers' => ['codex']],
         'health.ai.cancel' => fn (array $ctx): array => [],
         'health.ai.entries.accept' => fn (array $ctx): array => [],
         'health.ai.entries.reject' => fn (array $ctx): array => [],

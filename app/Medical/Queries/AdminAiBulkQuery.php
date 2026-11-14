@@ -59,8 +59,15 @@ final class AdminAiBulkQuery
         });
     }
 
-    /** @return array{result: string, panel?: array<string, mixed>} result is ok, expired, stale or active */
-    public function start(User $admin, string $token, bool $acknowledged): array
+    /**
+     * $shownProviders is the provider set the confirm dialog named. It is compared, under the lock provider changes take
+     * exclusively, with the enabled set; on a difference nothing is consumed or stored and the answer is
+     * 'providers_changed' with the current set, so the dialog opens again with what is true now.
+     *
+     * @param  list<string>|null  $shownProviders
+     * @return array{result: string, panel?: array<string, mixed>, providers?: list<string>} result is ok, expired, stale, active or providers_changed
+     */
+    public function start(User $admin, string $token, bool $acknowledged, ?array $shownProviders = null): array
     {
         if (! $acknowledged) {
             throw new InvalidArgumentException('Start needs the acknowledgment.');
@@ -69,12 +76,22 @@ final class AdminAiBulkQuery
             return ['result' => 'expired'];
         }
 
-        $result = DB::transaction(function () use ($admin, $token) {
+        $current = [];
+        $result = DB::transaction(function () use ($admin, $token, $shownProviders, &$current) {
             $row = DB::table('ai_bulk_dry_runs')->where('id', $token)->lockForUpdate()->first();
             $now = Carbon::now();
             if ($row === null || (int) $row->requested_by !== $admin->id || $row->consumed_at !== null
                 || Carbon::parse($row->created_at)->addMinutes((int) config('ai.bulk.dry_run_ttl_minutes'))->lt($now)) {
                 return 'expired';
+            }
+            DB::select("select pg_advisory_xact_lock_shared(hashtext('ai-agent-settings'))");
+            $current = $this->agents->enabledKeys();
+            $shown = array_values(array_unique(array_map('strval', $shownProviders ?? [])));
+            $enabled = $current;
+            sort($shown);
+            sort($enabled);
+            if ($shownProviders === null || $shown !== $enabled) {
+                return 'providers_changed';
             }
             $scope = (string) $row->scope;
             if ($this->eligibility->counts($scope)['eligible'] !== (int) $row->eligible) {
@@ -97,9 +114,8 @@ final class AdminAiBulkQuery
             }
 
             DB::table('ai_bulk_dry_runs')->where('id', $token)->update(['consumed_at' => $now]);
-            // The confirm dialog names the enabled providers. Bulk attempts use only what this admin acknowledged here.
-            $providers = $this->agents->enabledKeys();
-            sort($providers);
+            // Exactly the set the dialog named (verified above under the lock). Bulk attempts use only this.
+            $providers = $enabled;
             DB::table('ai_notice_acks')->upsert(
                 [['user_id' => $admin->id, 'acknowledged_at' => $now, 'providers' => implode(',', $providers)]],
                 ['user_id'],
@@ -109,6 +125,10 @@ final class AdminAiBulkQuery
 
             return 'ok';
         });
+
+        if ($result === 'providers_changed') {
+            return ['result' => $result, 'providers' => array_values($current)];
+        }
 
         return $result === 'ok' || $result === 'active'
             ? ['result' => $result, 'panel' => $this->panel()]

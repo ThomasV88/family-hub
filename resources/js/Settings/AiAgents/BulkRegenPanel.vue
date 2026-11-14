@@ -122,8 +122,14 @@ function stamp(iso) {
 // The start hour is a wall-clock hour in the family time zone, so it is formatted as a plain clock time.
 const hour = computed(() => new Intl.DateTimeFormat(locale.value, { hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })
     .format(new Date(Date.UTC(2000, 0, 1, config.value.startHour))));
+// A 409 answer carries the enabled set as it is now; it wins over the page-load prop until the prop changes.
+const providersLocal = ref(null);
+watch(() => props.providers, () => { providersLocal.value = null; });
+const effectiveProviders = computed(() => (Array.isArray(providersLocal.value) && providersLocal.value.length > 0 ? providersLocal.value : (props.providers ?? [])));
+// The set the confirm dialog named when it opened; Start sends exactly this.
+const shownProviders = ref([]);
 const providerWords = computed(() => {
-    const keys = props.providers ?? [];
+    const keys = effectiveProviders.value;
     const both = keys.includes('codex') && keys.includes('copilot');
     return t(`settings.ai_bulk.providers_${both ? 'both' : (keys.includes('copilot') ? 'copilot' : 'codex')}`);
 });
@@ -212,6 +218,7 @@ function pressStart() {
         say(reason.value);
         return;
     }
+    shownProviders.value = [...effectiveProviders.value];
     confirmOpen.value = true;
 }
 
@@ -220,7 +227,7 @@ async function start() {
     if (!ready.value || !result.value) return;
     starting.value = true;
     problem.value = '';
-    const response = await securityFetch(START_URL, { method: 'POST', body: { token: result.value.token, acknowledged: true } });
+    const response = await securityFetch(START_URL, { method: 'POST', body: { token: result.value.token, acknowledged: true, providers: [...shownProviders.value] } });
     starting.value = false;
     const data = response.data ?? {};
     if (response.ok && response.status === 201 && data.panel) {
@@ -237,6 +244,13 @@ async function start() {
         if (data.panel) status.adopt(data.panel, { quiet: true });
         result.value = null;
         say(t('settings.ai_bulk.already_active'));
+        return;
+    }
+    if (response.status === 409 && data.reason === 'providers_changed') {
+        // An agent was enabled or disabled after the dialog opened. Nothing was started; ask again with the current set.
+        if (Array.isArray(data.providers) && data.providers.length > 0) providersLocal.value = data.providers;
+        shownProviders.value = [...effectiveProviders.value];
+        confirmOpen.value = true;
         return;
     }
     if (response.status === 410 || (response.status === 409 && data.reason === 'stale')) {

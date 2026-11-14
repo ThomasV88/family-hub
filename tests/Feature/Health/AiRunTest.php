@@ -58,7 +58,7 @@ describe('start', function () {
     it('queues one run with call row, notice ack, audit row and an id-only job', function () {
         [$user, $person, $document] = aiSetup();
 
-        $response = $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+        $response = $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202);
 
         $extraction = MedicalAiExtraction::query()->sole();
         $response->assertJson(['status' => 'queued', 'extractionId' => $extraction->id]);
@@ -77,10 +77,10 @@ describe('start', function () {
 
     it('reports the running one instead of starting a second run', function () {
         [$user, $person, $document] = aiSetup();
-        $first = $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])->json('extractionId');
+        $first = $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])->json('extractionId');
         $before = aiTables();
 
-        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])
             ->assertStatus(409)->assertExactJson(['reason' => 'active', 'extractionId' => $first]);
 
         expect(aiTables())->toBe($before)->and(MedicalAiExtraction::query()->whereIn('status', ['queued', 'running'])->count())->toBe(1);
@@ -93,7 +93,7 @@ describe('start', function () {
         }
         $before = aiTables();
 
-        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])
             ->assertStatus(409)->assertExactJson(['reason' => $case]);
 
         expect(aiTables())->toBe($before);
@@ -102,11 +102,11 @@ describe('start', function () {
     it('treats a service of unknown state as available and one that does not answer as unavailable', function () {
         [$user, $person, $document] = aiSetup();
         expect(app(AgentHealth::class)->display())->toBe('unknown');
-        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202);
 
         [$user, $person, $document] = aiSetup();
         app(AgentHealth::class)->recordCheck('codex', LoginState::Unknown);
-        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(409)->assertJson(['reason' => 'unavailable']);
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(409)->assertJson(['reason' => 'unavailable']);
     });
 
     it('needs the notice acknowledged the first time only', function () {
@@ -114,10 +114,10 @@ describe('start', function () {
         $other = MedicalDocument::factory()->image()->create(['subject_id' => $person->id]);
         $before = aiTables();
 
-        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id))->assertStatus(409)->assertExactJson(['reason' => 'notice_required']);
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id))->assertStatus(409)->assertExactJson(['reason' => 'notice_required', 'providers' => ['codex']]);
         expect(aiTables())->toBe($before);
 
-        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202);
         expect(DB::table('ai_notice_acks')->count())->toBe(1);
         $this->actingAs($user)->postJson(aiRunUrl($person, $other->id))->assertStatus(202);
         expect(DB::table('ai_notice_acks')->count())->toBe(1);
@@ -145,7 +145,7 @@ describe('start', function () {
         ];
         $bodies = [];
         foreach ($cases as $label => [$actor, $url]) {
-            foreach ([['acknowledged' => true], ['acknowledged' => 'garbage']] as $body) {
+            foreach ([['acknowledged' => true, 'providers' => ['codex']], ['acknowledged' => 'garbage']] as $body) {
                 $response = $this->actingAs($actor)->postJson($url, $body)->assertForbidden();
                 $bodies[] = aiShape($response);
             }
@@ -159,7 +159,7 @@ describe('start', function () {
         $this->withoutExceptionHandling();
         $before = aiTables();
 
-        expect(fn () => $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true]))->toThrow(RuntimeException::class);
+        expect(fn () => $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']]))->toThrow(RuntimeException::class);
 
         expect(aiTables())->toBe($before);
     });
@@ -284,6 +284,44 @@ describe('status', function () {
     });
 });
 
+describe('notice acknowledgment binds to the provider set shown', function () {
+    it('refuses and stores nothing when a provider was enabled between the dialog and the confirm', function () {
+        [$user, $person, $document] = aiSetup();
+        Bus::fake();
+        DB::table('ai_agent_settings')->where('agent', 'copilot')->update(['enabled' => true]);
+        $before = aiTables();
+
+        // The dialog named OpenAI only.
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])
+            ->assertStatus(409)->assertJson(['reason' => 'notice_required', 'providers' => ['codex', 'copilot']]);
+        expect(aiTables())->toBe($before)->and(DB::table('ai_notice_acks')->where('user_id', $user->id)->exists())->toBeFalse();
+        Bus::assertNothingDispatched();
+
+        // A bare boolean, or no list, never acknowledges anything.
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(409)->assertJson(['reason' => 'notice_required']);
+        expect(aiTables())->toBe($before);
+
+        // The re-opened dialog names the current set; confirming it stores exactly that set.
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['copilot', 'codex']])->assertStatus(202);
+        expect(DB::table('ai_notice_acks')->where('user_id', $user->id)->value('providers'))->toBe('codex,copilot');
+    });
+
+    it('accepts the shown set in any order and with repeated keys', function () {
+        [$user, $person, $document] = aiSetup();
+        Bus::fake();
+        DB::table('ai_agent_settings')->where('agent', 'copilot')->update(['enabled' => true]);
+
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex', 'copilot', 'codex']])->assertStatus(202);
+        expect(DB::table('ai_notice_acks')->where('user_id', $user->id)->value('providers'))->toBe('codex,copilot');
+    });
+
+    it('rejects an unknown provider key in the list', function () {
+        [$user, $person, $document] = aiSetup();
+
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['evil']])->assertStatus(422);
+    });
+});
+
 describe('person page props', function () {
     it('gives an edit member canRun, the notice state and statuses with counts, never proposal content', function () {
         [$user, $person, $document] = aiSetup();
@@ -340,7 +378,7 @@ describe('quota guard', function () {
         aiExtra($user, $person, 'running');
         $before = aiTables();
 
-        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])
             ->assertStatus(409)->assertExactJson(['reason' => 'busy']);
         expect(aiTables())->toBe($before);
 
@@ -349,7 +387,7 @@ describe('quota guard', function () {
         MedicalFixtures::grantHealth($other);
         $otherPerson = MedicalFixtures::subject(['ai_consent' => true], [[$other, AccessLevel::Edit]]);
         $otherDoc = MedicalDocument::factory()->image()->create(['subject_id' => $otherPerson->id]);
-        $this->actingAs($other)->postJson(aiRunUrl($otherPerson, $otherDoc->id), ['acknowledged' => true])->assertStatus(202);
+        $this->actingAs($other)->postJson(aiRunUrl($otherPerson, $otherDoc->id), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202);
     });
 
     it('refuses a start beyond the global cap', function () {
@@ -360,7 +398,7 @@ describe('quota guard', function () {
         aiExtra($other, $otherPerson);
         aiExtra($other, $otherPerson, 'running');
 
-        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])
             ->assertStatus(409)->assertExactJson(['reason' => 'busy']);
     });
 
@@ -368,7 +406,7 @@ describe('quota guard', function () {
         [$user, $person, $document] = aiSetup();
         MedicalAiExtraction::factory()->forDocument($document)->{$state}(...($state === 'ready' ? [['entries' => []], 0] : ($state === 'failed' ? ['invalid_output'] : [])))->create(['started_by' => $user->id]);
 
-        $response = $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true]);
+        $response = $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']]);
 
         $blocked ? $response->assertStatus(409)->assertExactJson(['reason' => 'busy']) : $response->assertStatus(202);
     })->with([['ready', true], ['failed', true], ['cancelled', false]]);
@@ -377,14 +415,14 @@ describe('quota guard', function () {
         [$user, $person, $document] = aiSetup();
         MedicalAiExtraction::factory()->forDocument($document)->failed($code)->create(['started_by' => $user->id]);
 
-        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202);
     })->with(['worker_lost', 'unreadable_document', 'preflight']);
 
     it('allows a re-run once the cool-down has passed', function () {
         [$user, $person, $document] = aiSetup();
         MedicalAiExtraction::factory()->forDocument($document)->ready(['entries' => []], 0)->create(['started_by' => $user->id, 'finished_at' => now()->subMinutes(11)]);
 
-        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202);
     });
 });
 
@@ -395,7 +433,7 @@ describe('failed dispatch', function () {
 
         $this->withoutExceptionHandling();
 
-        expect(fn () => $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true]))->toThrow(RuntimeException::class, 'queue down');
+        expect(fn () => $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']]))->toThrow(RuntimeException::class, 'queue down');
 
         $row = MedicalAiExtraction::query()->sole();
         expect($row->status)->toBe('failed')->and($row->failure_code)->toBe('worker_lost')

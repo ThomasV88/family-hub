@@ -46,7 +46,7 @@ return [
         'method' => 'POST',
         'uri' => '/health/people/{person}/documents/{document}/ai',
         'params' => $withImage,
-        'data' => ['acknowledged' => true],
+        'data' => ['acknowledged' => true, 'providers' => ['codex']],
         'expect' => $expect(202),
     ],
     'health.ai.cancel' => [

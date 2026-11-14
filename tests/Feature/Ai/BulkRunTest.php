@@ -228,7 +228,7 @@ it('starts a run from a fresh token with scope and cap from the token', function
     $admin = bkAdmin();
     $dry = bkQuery()->dryRun($admin, 'no_proposal', 9);
 
-    $result = bkQuery()->start($admin, $dry['token'], true);
+    $result = bkQuery()->start($admin, $dry['token'], true, ['copilot', 'codex']);
 
     $run = DB::table('ai_bulk_runs')->first();
     expect($result['result'])->toBe('ok')
@@ -244,29 +244,62 @@ it('starts a run from a fresh token with scope and cap from the token', function
         ->and(AuditEntry::where('event', 'ai_bulk_run_changed')->get()->pluck('meta.action')->all())->toBe(['dry_run', 'started']);
 });
 
+it('refuses a start whose shown provider set is no longer the enabled one and consumes nothing', function () {
+    bkDoc();
+    $admin = bkAdmin();
+    $dry = bkQuery()->dryRun($admin, 'all', 5);
+    // Copilot was enabled after the confirm dialog (which named OpenAI only) was rendered.
+    DB::table('ai_agent_settings')->where('agent', 'copilot')->update(['enabled' => true]);
+
+    $result = bkQuery()->start($admin, $dry['token'], true, ['codex']);
+
+    expect($result['result'])->toBe('providers_changed')
+        ->and($result['providers'])->toBe(['codex', 'copilot'])
+        ->and(DB::table('ai_bulk_runs')->count())->toBe(0)
+        ->and(DB::table('ai_notice_acks')->where('user_id', $admin->id)->exists())->toBeFalse()
+        ->and(DB::table('ai_bulk_dry_runs')->where('id', $dry['token'])->value('consumed_at'))->toBeNull();
+
+    // The token is still good: confirming the set the dialog now names starts the run, and stores exactly that set.
+    expect(bkQuery()->start($admin, $dry['token'], true, ['codex', 'copilot'])['result'])->toBe('ok')
+        ->and(DB::table('ai_notice_acks')->where('user_id', $admin->id)->value('providers'))->toBe('codex,copilot');
+});
+
+it('answers 409 providers_changed over HTTP and requires the provider list', function () {
+    bkDoc();
+    $this->actingAs($admin = bkAdmin());
+    $token = $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 5])->json('token');
+    $this->postJson('/settings/ai-agents/bulk', ['token' => $token, 'acknowledged' => true])->assertStatus(422);
+    DB::table('ai_agent_settings')->where('agent', 'copilot')->update(['enabled' => true]);
+
+    $this->postJson('/settings/ai-agents/bulk', ['token' => $token, 'acknowledged' => true, 'providers' => ['codex']])
+        ->assertStatus(409)->assertExactJson(['reason' => 'providers_changed', 'providers' => ['codex', 'copilot']]);
+    expect(DB::table('ai_bulk_runs')->count())->toBe(0)
+        ->and(DB::table('ai_notice_acks')->where('user_id', $admin->id)->exists())->toBeFalse();
+});
+
 it('refuses a reused, old or foreign token and a changed eligible count', function () {
     bkDoc();
     $admin = bkAdmin();
     $q = bkQuery();
 
     $dry = $q->dryRun($admin, 'all', 5);
-    expect($q->start($admin, $dry['token'], true)['result'])->toBe('ok')
-        ->and($q->start($admin, $dry['token'], true)['result'])->toBe('expired');
+    expect($q->start($admin, $dry['token'], true, ['codex'])['result'])->toBe('ok')
+        ->and($q->start($admin, $dry['token'], true, ['codex'])['result'])->toBe('expired');
     DB::table('ai_bulk_runs')->update(['status' => 'cancelled', 'finished_at' => now()]);
 
     $old = $q->dryRun($admin, 'all', 5);
     DB::table('ai_bulk_dry_runs')->where('id', $old['token'])->update(['created_at' => now()->subMinutes(16)]);
-    expect($q->start($admin, $old['token'], true)['result'])->toBe('expired');
+    expect($q->start($admin, $old['token'], true, ['codex'])['result'])->toBe('expired');
 
     $justInside = $q->dryRun($admin, 'all', 5);
     DB::table('ai_bulk_dry_runs')->where('id', $justInside['token'])->update(['created_at' => now()->subMinutes(14)]);
     $foreign = $q->dryRun($admin, 'all', 5);
-    expect($q->start(bkAdmin(), $foreign['token'], true)['result'])->toBe('expired')
-        ->and($q->start($admin, (string) Str::uuid(), true)['result'])->toBe('expired')
-        ->and($q->start($admin, 'not-a-uuid', true)['result'])->toBe('expired');
+    expect($q->start(bkAdmin(), $foreign['token'], true, ['codex'])['result'])->toBe('expired')
+        ->and($q->start($admin, (string) Str::uuid(), true, ['codex'])['result'])->toBe('expired')
+        ->and($q->start($admin, 'not-a-uuid', true, ['codex'])['result'])->toBe('expired');
 
     bkDoc();
-    expect($q->start($admin, $justInside['token'], true)['result'])->toBe('stale')
+    expect($q->start($admin, $justInside['token'], true, ['codex'])['result'])->toBe('stale')
         ->and(DB::table('ai_bulk_runs')->where('status', 'active')->count())->toBe(0)
         ->and(DB::table('ai_bulk_dry_runs')->where('id', $justInside['token'])->value('consumed_at'))->toBeNull();
 });
@@ -279,8 +312,8 @@ it('yields one run when a second fresh token starts while one is open', function
     $a = $q->dryRun($admin, 'all', 5);
     $b = $q->dryRun($other, 'all', 5);
 
-    expect($q->start($admin, $a['token'], true)['result'])->toBe('ok');
-    $second = $q->start($other, $b['token'], true);
+    expect($q->start($admin, $a['token'], true, ['codex'])['result'])->toBe('ok');
+    $second = $q->start($other, $b['token'], true, ['codex']);
 
     expect($second['result'])->toBe('active')
         ->and($second['panel']['active'])->not->toBeNull()
@@ -431,14 +464,14 @@ it('runs the whole flow over HTTP', function () {
         ->assertJsonPath('counts.eligible', 1)->assertJsonPath('validMinutes', 15)->assertHeader('Cache-Control', 'no-store, private');
     $token = $dry->json('token');
 
-    $this->postJson('/settings/ai-agents/bulk', ['token' => $token, 'acknowledged' => true])->assertCreated()
+    $this->postJson('/settings/ai-agents/bulk', ['token' => $token, 'acknowledged' => true, 'providers' => ['codex']])->assertCreated()
         ->assertJsonPath('panel.active.state', 'running');
     $runId = DB::table('ai_bulk_runs')->value('id');
 
-    $this->postJson('/settings/ai-agents/bulk', ['token' => $token, 'acknowledged' => true])->assertStatus(410)->assertJson(['reason' => 'expired']);
+    $this->postJson('/settings/ai-agents/bulk', ['token' => $token, 'acknowledged' => true, 'providers' => ['codex']])->assertStatus(410)->assertJson(['reason' => 'expired']);
 
     $second = $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 5])->json('token');
-    $this->postJson('/settings/ai-agents/bulk', ['token' => $second, 'acknowledged' => true])->assertStatus(409)
+    $this->postJson('/settings/ai-agents/bulk', ['token' => $second, 'acknowledged' => true, 'providers' => ['codex']])->assertStatus(409)
         ->assertJsonPath('reason', 'active')->assertJsonPath('panel.active.id', $runId);
 
     $this->getJson('/settings/ai-agents/bulk')->assertOk()->assertJsonPath('active.id', $runId);
@@ -456,7 +489,7 @@ it('answers 409 stale when the eligible count changed after the dry run', functi
     $token = $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 5])->json('token');
     bkDoc();
 
-    $this->postJson('/settings/ai-agents/bulk', ['token' => $token, 'acknowledged' => true])->assertStatus(409)->assertExactJson(['reason' => 'stale']);
+    $this->postJson('/settings/ai-agents/bulk', ['token' => $token, 'acknowledged' => true, 'providers' => ['codex']])->assertStatus(409)->assertExactJson(['reason' => 'stale']);
 });
 
 it('validates scope, cap, token and acknowledgment', function () {
@@ -466,7 +499,7 @@ it('validates scope, cap, token and acknowledgment', function () {
     $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 0])->assertStatus(422);
     $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 31])->assertStatus(422);
     $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all'])->assertStatus(422);
-    $this->postJson('/settings/ai-agents/bulk', ['token' => 'x', 'acknowledged' => true])->assertStatus(422);
+    $this->postJson('/settings/ai-agents/bulk', ['token' => 'x', 'acknowledged' => true, 'providers' => ['codex']])->assertStatus(422);
     $this->postJson('/settings/ai-agents/bulk', ['token' => (string) Str::uuid()])->assertStatus(422);
     $this->postJson('/settings/ai-agents/bulk', ['token' => (string) Str::uuid(), 'acknowledged' => false])->assertStatus(422);
     $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 30])->assertOk();
@@ -477,7 +510,7 @@ it('gives every non-admin the same 403 on every bulk route and sends guests to l
     $routes = [
         ['GET', '/settings/ai-agents/bulk', []],
         ['POST', '/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 5]],
-        ['POST', '/settings/ai-agents/bulk', ['token' => (string) Str::uuid(), 'acknowledged' => true]],
+        ['POST', '/settings/ai-agents/bulk', ['token' => (string) Str::uuid(), 'acknowledged' => true, 'providers' => ['codex']]],
         ['POST', "/settings/ai-agents/bulk/$run/pause", []],
         ['POST', "/settings/ai-agents/bulk/$run/resume", []],
         ['POST', "/settings/ai-agents/bulk/$run/cancel", []],
@@ -504,7 +537,7 @@ it('refuses the POST routes without a recent confirmation', function () {
     $this->actingAs(bkAdmin());
 
     $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 5])->assertStatus(423);
-    $this->postJson('/settings/ai-agents/bulk', ['token' => (string) Str::uuid(), 'acknowledged' => true])->assertStatus(423);
+    $this->postJson('/settings/ai-agents/bulk', ['token' => (string) Str::uuid(), 'acknowledged' => true, 'providers' => ['codex']])->assertStatus(423);
     $this->postJson('/settings/ai-agents/bulk/'.Str::uuid().'/cancel')->assertStatus(423);
     expect(DB::table('ai_bulk_dry_runs')->count())->toBe(0);
 });

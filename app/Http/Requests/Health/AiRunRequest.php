@@ -38,6 +38,11 @@ class AiRunRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
-        return ['acknowledged' => ['sometimes', 'nullable', 'boolean']];
+        return [
+            'acknowledged' => ['sometimes', 'nullable', 'boolean'],
+            // The provider keys the member saw in the notice dialog; the server compares them with the enabled set.
+            'providers' => ['sometimes', 'nullable', 'array', 'max:5'],
+            'providers.*' => ['string', 'in:codex,copilot'],
+        ];
     }
 }

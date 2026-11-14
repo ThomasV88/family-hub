@@ -115,6 +115,8 @@ final class AiAgentSettingsQuery
     private function change(User $admin, string $agent, callable $apply): array
     {
         $reason = DB::transaction(function () use ($agent, $apply) {
+            // Run and bulk starts take this lock shared, so an acknowledgment is never stored against a set that changes under it.
+            DB::select("select pg_advisory_xact_lock(hashtext('ai-agent-settings'))");
             $stored = AiAgentSetting::query()->lockForUpdate()->get()->all();
             $rows = [];
             foreach ($this->rows($stored) as $row) {

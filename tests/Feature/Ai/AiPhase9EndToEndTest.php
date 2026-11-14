@@ -90,7 +90,7 @@ function e2eMember(): array
 /** Presses Run AI over HTTP and returns the new extraction id (the queue is faked, nothing runs yet). */
 function e2eStart(object $test, array $m): string
 {
-    return (string) $test->actingAs($m['user'])->postJson("/health/people/{$m['subject']->id}/documents/{$m['doc']->id}/ai", ['acknowledged' => true])
+    return (string) $test->actingAs($m['user'])->postJson("/health/people/{$m['subject']->id}/documents/{$m['doc']->id}/ai", ['acknowledged' => true, 'providers' => (DB::table('ai_agent_settings')->where('enabled', true)->pluck('agent')->all() ?: ['codex'])])
         ->assertStatus(202)->json('extractionId');
 }
 
@@ -234,7 +234,7 @@ it('runs a bulk re-read from dry run to completion without touching accepted dat
 
     $this->actingAs($admin);
     $dry = $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 5])->assertOk()->assertJsonPath('counts.eligible', 2);
-    $this->postJson('/settings/ai-agents/bulk', ['token' => $dry->json('token'), 'acknowledged' => true])->assertCreated();
+    $this->postJson('/settings/ai-agents/bulk', ['token' => $dry->json('token'), 'acknowledged' => true, 'providers' => ['codex']])->assertCreated();
     $runId = (string) DB::table('ai_bulk_runs')->value('id');
 
     $tick = function (string $local) {
@@ -288,7 +288,7 @@ it('refuses a bulk job for a document that gained an accepted decision on a supe
 
     $this->actingAs($admin);
     $dry = $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 5])->assertOk()->assertJsonPath('counts.eligible', 1);
-    $this->postJson('/settings/ai-agents/bulk', ['token' => $dry->json('token'), 'acknowledged' => true])->assertCreated();
+    $this->postJson('/settings/ai-agents/bulk', ['token' => $dry->json('token'), 'acknowledged' => true, 'providers' => ['codex']])->assertCreated();
     $this->travelTo(CarbonImmutable::parse('2026-03-10 01:05', 'Europe/Bratislava')->utc());
     Artisan::call('ai:bulk-tick');
     $id = (string) DB::table('medical_ai_extractions')->whereNotNull('bulk_run_id')->value('id');

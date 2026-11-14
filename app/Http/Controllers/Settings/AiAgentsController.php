@@ -56,14 +56,18 @@ final class AiAgentsController extends Controller
         $valid = $request->validate([
             'token' => ['required', 'uuid'],
             'acknowledged' => ['accepted'],
+            // The provider keys the confirm dialog named; the server compares them with the enabled set.
+            'providers' => ['required', 'array', 'min:1', 'max:5'],
+            'providers.*' => ['string', 'in:codex,copilot'],
         ]);
 
-        $result = $bulk->start($request->user(), $valid['token'], true);
+        $result = $bulk->start($request->user(), $valid['token'], true, array_values($valid['providers']));
 
         return match ($result['result']) {
             'ok' => $this->json(['panel' => $result['panel']], 201),
             'active' => $this->json(['reason' => 'active', 'panel' => $result['panel']], 409),
             'stale' => $this->json(['reason' => 'stale'], 409),
+            'providers_changed' => $this->json(['reason' => 'providers_changed', 'providers' => $result['providers'] ?? []], 409),
             default => $this->json(['reason' => 'expired'], 410),
         };
     }

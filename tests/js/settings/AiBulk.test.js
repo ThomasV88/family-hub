@@ -268,13 +268,25 @@ describe('Bulk panel: start confirmation', () => {
 
     it('sends the token and acknowledged true, then 201 shows block B and focuses the Progress heading', async () => {
         await confirmStart({ ok: true, status: 201, data: { panel: PANEL(RUN()) } });
-        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk', { method: 'POST', body: { token: '11111111-1111-4111-8111-111111111111', acknowledged: true } });
+        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk', { method: 'POST', body: { token: '11111111-1111-4111-8111-111111111111', acknowledged: true, providers: ['codex'] } });
         expect(useToast().toasts.map((x) => x.message)).toContain('Bulk run started');
         expect(current.text()).toContain('A bulk run is active. Pause or cancel it before planning another.');
         expect(current.find('[role="radiogroup"]').exists()).toBe(false);
         const heading = current.findAll('h3').find((h) => h.text() === 'Progress');
         expect(document.activeElement).toBe(heading.element);
         expect(startBtn().exists()).toBe(false);
+    });
+
+    it('409 providers_changed starts nothing and re-opens the confirm with the current providers, which the next Start sends', async () => {
+        await confirmStart({ ok: false, status: 409, error: 'failed', data: { reason: 'providers_changed', providers: ['codex', 'copilot'] } });
+        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk', { method: 'POST', body: { token: '11111111-1111-4111-8111-111111111111', acknowledged: true, providers: ['codex'] } });
+        expect(dialog()).not.toBeNull();
+        expect(dialog().textContent).toContain('sent to OpenAI or GitHub to');
+        expect(current.text()).not.toContain('Bulk run started');
+        fetchMock.mockResolvedValueOnce({ ok: true, status: 201, data: { panel: PANEL(RUN()) } });
+        dialogButton('Start bulk run').click();
+        await flushPromises();
+        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk', { method: 'POST', body: { token: '11111111-1111-4111-8111-111111111111', acknowledged: true, providers: ['codex', 'copilot'] } });
     });
 
     it('410 closes the dialog and shows the stale alert', async () => {

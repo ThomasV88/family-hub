@@ -278,7 +278,7 @@ it('keeps document and proposal canaries and person and member names out of ever
     $captured = [];
     $captured['dry'] = (string) $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 5])->assertOk()->getContent();
     $token = json_decode($captured['dry'], true)['token'];
-    $captured['start'] = (string) $this->postJson('/settings/ai-agents/bulk', ['token' => $token, 'acknowledged' => true])->assertCreated()->getContent();
+    $captured['start'] = (string) $this->postJson('/settings/ai-agents/bulk', ['token' => $token, 'acknowledged' => true, 'providers' => (DB::table('ai_agent_settings')->where('enabled', true)->pluck('agent')->all() ?: ['codex'])])->assertCreated()->getContent();
     foreach (['01:05', '01:20', '01:35'] as $at) {
         $this->travelTo(CarbonImmutable::parse("2026-03-10 $at", 'Europe/Bratislava')->utc());
         Artisan::call('ai:bulk-tick');
