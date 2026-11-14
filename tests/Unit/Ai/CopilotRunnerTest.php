@@ -192,8 +192,18 @@ it('times out a hanging run and kills the group', function () {
         ->and(microtime(true) - $t)->toBeLessThan(4.0);
 });
 
-it('idle-times-out a silent run', function () {
+it('does not kill a run that stays silent and then answers (--stream off prints only the final answer)', function () {
+    // The Codex idle bound is short, and Copilot has none by default: only the total time applies.
     config(['ai.timeouts.idle' => 1]);
+    ($this->fake)(FakeCopilot::script('sleep 3; printf %s "{\"ok\":true}"; exit 0'));
+    $res = (new CopilotRunner)->exec(($this->req)(null, [], 20));
+
+    expect($res->exitCode)->toBe(0)->and($res->idleTimedOut)->toBeFalse()->and($res->timedOut)->toBeFalse()
+        ->and(file_get_contents($this->dir->file('reply.txt')))->toBe('{"ok":true}');
+});
+
+it('idle-times-out a silent run when a Copilot idle bound is configured', function () {
+    config(['ai.copilot.idle_timeout' => 1]);
     ($this->fake)(FakeCopilot::hanging());
     $res = (new CopilotRunner)->exec(($this->req)());
     expect($res->idleTimedOut)->toBeTrue()->and($res->timedOut)->toBeFalse();

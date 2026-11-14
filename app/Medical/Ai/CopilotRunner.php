@@ -50,8 +50,10 @@ final class CopilotRunner
         }
 
         $p = new Process($this->wrap($home, $tmp, $args), $r->workDir);
+        // Total time only by default: with --stream off the CLI is silent until it answers, so silence is not a stall.
+        $idle = config('ai.copilot.idle_timeout');
         $p->setTimeout((float) max(1, $r->timeoutSeconds))
-            ->setIdleTimeout((float) config('ai.timeouts.idle'));
+            ->setIdleTimeout(is_numeric($idle) && (float) $idle > 0 ? (float) $idle : null);
 
         $capOut = (int) config('ai.caps.result');
         $capErr = (int) config('ai.caps.stderr');

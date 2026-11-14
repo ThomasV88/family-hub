@@ -28,6 +28,10 @@ return [
         // [PROVISIONAL] AUP guard: runs per local day, 0 = unlimited.
         'daily_runs' => 30,
         'repair_min_seconds' => 45,
+        // Seconds without output before a Copilot run is killed as idle; null = none, the total time bound alone applies.
+        // The CLI runs with --stream off and --log-level none, so it prints nothing until its single final answer; an idle
+        // bound shorter than a slow answer would kill a healthy run.
+        'idle_timeout' => null,
         // First entry VERIFIED, the rest ASSUMED until the live check L4.
         'auth_failure_patterns' => [
             'no authentication information found', 'not authenticated', 'authentication failed',
