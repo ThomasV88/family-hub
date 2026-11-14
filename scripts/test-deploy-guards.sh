@@ -146,6 +146,12 @@ expect fail "secret with mode 0644" "$d" "$TAG" guard_secrets
 d=$(make_fixture mode2 family-hub-staging staging 0 staging)
 chmod 640 "$d/secrets/restic_password"
 expect fail "secret with mode 0640" "$d" "$TAG" guard_secrets
+d=$(make_fixture dbmode family-hub-staging staging 0 staging)
+chmod 640 "$d/secrets/db_app_password" "$d/secrets/db_owner_password" "$d/secrets/db_root_password"
+expect pass "database passwords at 0640 (postgres group)" "$d" "$TAG" guard_secrets
+d=$(make_fixture dbmode2 family-hub-staging staging 0 staging)
+chmod 660 "$d/secrets/db_app_password"
+expect fail "database password with mode 0660" "$d" "$TAG" guard_secrets
 
 # stale_images: keeps the deployed and the last good tag, lists other sha-* images of this stack only
 d=$(make_fixture img family-hub-staging staging 0 staging)

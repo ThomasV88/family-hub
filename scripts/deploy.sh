@@ -84,16 +84,20 @@ stale_images() {
   done
 }
 
-# secrets/* must be exactly 0600; the env files must not be accessible to others.
+# secrets/* must be exactly 0600, except the three database passwords, which the postgres image user (gid 70) reads
+# through Docker secrets and which are 0600 or 0640 (server-provision.sh sets 0640 with group 70). The env files
+# must not be accessible to others.
 guard_secrets() {
-  local f mode bad=0
+  local f mode want bad=0
   for f in "${REQUIRED_SECRETS[@]}"; do
     [ -e "$f" ] || continue
     mode=$(stat -c %a "$f")
-    if [ "$mode" != 600 ]; then
-      err "$f has mode $mode (expected 600)"
-      bad=1
-    fi
+    want="600"
+    case "$f" in secrets/db_root_password|secrets/db_owner_password|secrets/db_app_password) want="600 640" ;; esac
+    case " $want " in
+      *" $mode "*) ;;
+      *) err "$f has mode $mode (expected ${want// / or })"; bad=1 ;;
+    esac
   done
   for f in .env app.env migrate.env ai-worker.env; do
     [ -e "$f" ] || continue
