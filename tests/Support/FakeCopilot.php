@@ -11,9 +11,9 @@ final class FakeCopilot
     /** Finds the -p and --usage-output-file values. */
     private const PARSE = 'prompt=; usage=; prev=; for a in "$@"; do [ "$prev" = "-p" ] && prompt="$a"; [ "$prev" = "--usage-output-file" ] && usage="$a"; prev="$a"; done; ';
 
-    public static function replying(string $stdout): string
+    public static function replying(string $stdout, int $exit = 0): string
     {
-        return self::script('printf %s '.escapeshellarg($stdout).'; exit 0');
+        return self::script('printf %s '.escapeshellarg($stdout).'; exit '.$exit);
     }
 
     public static function fenced(string $json): string
