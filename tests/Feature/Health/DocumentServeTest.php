@@ -195,3 +195,24 @@ it('serves an uploaded photo without any EXIF segment', function () {
         expect($body)->not->toContain('Exif')->and(strpos($body, "\xFF\xE1"))->toBeFalse();
     }
 });
+
+it('audits reads with the subject and document id, never the thumbnails, and throttles preview and file', function () {
+    [$user, $person] = serveViewer();
+    $document = serveImage($person, 'Secret title');
+
+    $this->actingAs($user)->get("/health/people/{$person->id}")->assertOk();
+    $this->actingAs($user)->get(previewUrl($person->id, $document->id))->assertOk();
+    $this->actingAs($user)->get(fileUrl($person->id, $document->id))->assertOk();
+
+    $rows = App\Models\AuditEntry::where('event', 'health_read')->orderBy('id')->get();
+    expect($rows->map->meta->all())->toBe([
+        ['subject' => $person->id],
+        ['subject' => $person->id, 'document' => $document->id],
+    ]);
+    expect(json_encode($rows->map->meta))->not->toContain('Secret title');
+
+    foreach (range(1, 40) as $i) {
+        $status = $this->actingAs($user)->get(fileUrl($person->id, $document->id))->getStatusCode();
+    }
+    expect($status)->toBe(429);
+});

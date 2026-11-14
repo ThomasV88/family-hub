@@ -12,6 +12,7 @@ use App\Security\SensitiveGate;
 use App\Security\SensitiveSession;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -95,7 +96,35 @@ class RequireAccess
         }
 
         $write = ! in_array($request->method(), ['GET', 'HEAD'], true);
-        $this->audit->record(AuditEvent::forModule($module, $write), $user, [], null, $module);
+
+        // Thumbnails are fetched one per <img>; the person page and the file download already carry the subject row.
+        if ($module === Module::Health && ! $write && $request->route()?->getName() === 'health.documents.preview') {
+            return;
+        }
+
+        $this->audit->record(AuditEvent::forModule($module, $write), $user, $this->healthSubjectMeta($request, $module), null, $module);
+    }
+
+    /**
+     * Which person and document a health request targets, so the log can answer "who opened whose record". Only
+     * UUID-shaped route values are recorded (an id the request made up is still just an id, never content).
+     *
+     * @return array<string, string>
+     */
+    private function healthSubjectMeta(Request $request, Module $module): array
+    {
+        if ($module !== Module::Health) {
+            return [];
+        }
+        $meta = [];
+        foreach (['person' => 'subject', 'document' => 'document'] as $param => $key) {
+            $value = $request->route($param);
+            if (is_string($value) && Str::isUuid($value)) {
+                $meta[$key] = strtolower($value);
+            }
+        }
+
+        return $meta;
     }
 
     /** Stale proof of identity: 423 for JSON callers, otherwise to the confirm page (no audit row). */

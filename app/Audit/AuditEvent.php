@@ -72,6 +72,7 @@ enum AuditEvent: string
             self::SecondFactorFailed => ['method', 'context'],
             self::ReauthConfirmed => ['method'],
             self::SecurityPolicyChanged => ['setting', 'value'],
+            self::HealthRead, self::HealthWrite => ['subject', 'document'],
             self::MedicalSubjectCreated, self::MedicalSubjectDeleted, self::MedicalAdminSelfAdded => ['subject'],
             self::MedicalAccessChanged => ['subject', 'change'],
             self::MedicalExported => ['subject', 'scope', 'format'],
