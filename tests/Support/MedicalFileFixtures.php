@@ -11,6 +11,33 @@ final class MedicalFileFixtures
             ."3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 10 10]>>endobj\n% {$marker}\ntrailer<</Root 1 0 R>>\n%%EOF\n";
     }
 
+    /** A valid minimal PDF with $n blank pages (correct xref offsets) that poppler renders. */
+    public static function pdfPages(int $n): string
+    {
+        $objs = [1 => '<</Type/Catalog/Pages 2 0 R>>'];
+        $kids = [];
+        for ($i = 0; $i < $n; $i++) {
+            $kids[] = (3 + $i).' 0 R';
+        }
+        $objs[2] = '<</Type/Pages/Kids['.implode(' ', $kids).']/Count '.$n.'>>';
+        for ($i = 0; $i < $n; $i++) {
+            $objs[3 + $i] = '<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 300]>>';
+        }
+        $out = "%PDF-1.4\n";
+        $offsets = [];
+        foreach ($objs as $num => $body) {
+            $offsets[$num] = strlen($out);
+            $out .= $num." 0 obj\n".$body."\nendobj\n";
+        }
+        $xref = strlen($out);
+        $out .= "xref\n0 ".(count($objs) + 1)."\n0000000000 65535 f \n";
+        foreach ($offsets as $off) {
+            $out .= sprintf("%010d 00000 n \n", $off);
+        }
+
+        return $out.'trailer<</Size '.(count($objs) + 1)."/Root 1 0 R>>\nstartxref\n".$xref."\n%%EOF\n";
+    }
+
     /** A PDF header followed by markup: accepted as a PDF (it is only ever served as an attachment). */
     public static function pdfWithScriptTail(): string
     {
