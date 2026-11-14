@@ -1,11 +1,12 @@
 # syntax=docker/dockerfile:1
-# php-fpm image for Family Hub. Targets: dev (bind-mounted code, uid 1000) and prod (code baked in, www-data).
+# php-fpm image for Family Hub. Targets: dev (bind-mounted code, uid 1000) and prod (code baked in, www-data),
+# plus ai-worker-dev / ai-worker, the only images that carry the pinned Codex CLI (never in dev or prod).
 # Build context is the repository root: docker build -f docker/app/Dockerfile --target prod .
 
 FROM php:8.4-fpm-alpine AS base
 
 RUN set -eux; \
-    apk add --no-cache icu-libs libpq libzip libjpeg-turbo libpng libwebp; \
+    apk add --no-cache icu-libs libpq libzip libjpeg-turbo libpng libwebp poppler-utils; \
     apk add --no-cache --virtual .build-deps $PHPIZE_DEPS icu-dev libzip-dev postgresql-dev libjpeg-turbo-dev libpng-dev libwebp-dev; \
     docker-php-ext-configure gd --with-jpeg --with-webp; \
     docker-php-ext-install -j"$(nproc)" pdo_pgsql intl opcache pcntl zip bcmath gd exif; \
@@ -65,4 +66,51 @@ RUN set -eux; \
     mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs storage/app/private/wish-images storage/app/medical bootstrap/cache; \
     chmod 0700 storage/app/medical; \
     chown -R www-data:www-data storage bootstrap/cache
+USER www-data
+
+# ---- codex: build stage only. Installs the pinned CLI and hands over just the native directory ----
+# Node and the JS wrapper never reach a runtime image. Select by `uname -m` (x86_64 and aarch64).
+FROM node:22-alpine AS codex
+WORKDIR /opt/codex-build
+COPY docker/ai/package.json docker/ai/package-lock.json ./
+RUN set -eux; \
+    npm ci --ignore-scripts --omit=dev; \
+    triple="$(uname -m)-unknown-linux-musl"; \
+    d="$(find node_modules -type d -path "*vendor/${triple}" | head -1)"; \
+    test -x "$d/bin/codex"; \
+    mkdir /opt/codex; \
+    cp -a "$d"/. /opt/codex/; \
+    rm -rf /opt/codex/codex-resources/voice
+
+# ---- ai-runtime: base + native Codex (large layer sits below the per-commit code layer) ----
+FROM base AS ai-runtime
+COPY --from=codex /opt/codex /opt/codex
+RUN set -eux; \
+    ln -s /opt/codex/bin/codex /usr/local/bin/codex; \
+    mkdir -p /codex /ai-work
+
+# ---- ai-worker-dev: bind-mounted code, non-root `app` user ----
+FROM ai-runtime AS ai-worker-dev
+ARG UID=1000
+ARG GID=1000
+RUN set -eux; \
+    addgroup -g "${GID}" app; \
+    adduser -D -u "${UID}" -G app app; \
+    mkdir -p /var/www/html/storage/app/private/wish-images /var/www/html/storage/app/medical; \
+    chmod 0700 /var/www/html/storage/app/medical; \
+    chown -R app:app /var/www/html/storage /codex /ai-work
+USER app
+
+# ---- ai-worker: prod flavour without the Vite assets, runs as www-data (same uid as app: medical files are 0600) ----
+FROM ai-runtime AS ai-worker
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY docker/app/php-prod.ini "$PHP_INI_DIR/conf.d/zz-prod.ini"
+COPY docker/app/php-fpm-prod.conf /usr/local/etc/php-fpm.d/zz-prod.conf
+COPY --from=vendor /var/www/html/vendor ./vendor
+COPY . .
+RUN set -eux; \
+    composer dump-autoload --no-dev --optimize --no-interaction; \
+    mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs storage/app/private/wish-images storage/app/medical bootstrap/cache; \
+    chmod 0700 storage/app/medical; \
+    chown -R www-data:www-data storage bootstrap/cache /codex /ai-work
 USER www-data

@@ -4,6 +4,7 @@
 .claude
 .playwright-mcp
 node_modules
+docker/ai/node_modules
 vendor
 public/build
 public/hot
