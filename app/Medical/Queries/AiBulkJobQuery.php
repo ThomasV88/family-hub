@@ -44,6 +44,7 @@ final class AiBulkJobQuery
             DB::select("SELECT pg_advisory_xact_lock(hashtext('ai-bulk-tick'))");
 
             DB::table('ai_bulk_dry_runs')->where('created_at', '<', $now->subDay())->delete();
+            $this->failUndispatched($now);
             $reconciled = $this->reconcile();
 
             $run = DB::table('ai_bulk_runs')->where('status', 'active')->lockForUpdate()->first();
@@ -100,6 +101,21 @@ final class AiBulkJobQuery
 
             return ['enqueued' => $id, 'reconciled' => $reconciled, 'completed' => 0];
         });
+    }
+
+    /**
+     * A tick that died between its commit and the dispatch leaves a queued row with no job. A bulk row still queued after
+     * the grace period (the bulk queue runs last, so it is long, not a few minutes) is closed through the same path as a
+     * failed dispatch; reconcile then records the item as failed and the run goes on.
+     */
+    private function failUndispatched(CarbonImmutable $now): void
+    {
+        $grace = max(1, (int) config('ai.bulk.dispatch_grace_minutes', 60));
+        $ids = DB::table('medical_ai_extractions')->whereNotNull('bulk_run_id')->where('status', 'queued')
+            ->where('queued_at', '<', $now->subMinutes($grace))->pluck('id');
+        foreach ($ids as $id) {
+            app(AiJobQuery::class)->failQueued((string) $id);
+        }
     }
 
     private function starterIsAdmin(object $run): bool

@@ -140,6 +140,9 @@ return [
         'spacing_minutes' => 10,
         'max_global_active' => 10,
         'queue' => 'ai-bulk',
+        // A bulk row still queued after this long never got its job (the tick died after commit): it is failed through
+        // failQueued so the run goes on, instead of waiting for the 6 h stale-queue reaper.
+        'dispatch_grace_minutes' => 60,
         'fallback_agents' => false,
         'dry_run_ttl_minutes' => 15,
         'history' => 10,

@@ -538,3 +538,24 @@ it('counts the daily cap from the same local-day start in the tick and in the pa
     'day after spring-forward (UTC+2 start)' => ['2026-03-30 01:30', '2026-03-29 22:00:00', '2026-03-29 21:59:59'],
     'fall-back day' => ['2026-10-25 01:30', '2026-10-24 22:00:00', '2026-10-24 21:59:59'],
 ]);
+
+it('fails a bulk row whose job was never dispatched after the grace period and goes on with the run', function () {
+    btDoc(when: '2026-01-01 10:00:00');
+    btDoc(when: '2026-01-01 11:00:00');
+    $run = btRun();
+    $now = btAt('2026-03-10 01:05');
+    $first = btTick($now)['enqueued'];
+    expect($first)->not->toBeNull();
+
+    // The tick died before dispatch: nothing ever runs the job. Inside the grace period the item stays open.
+    expect(btTick($now->addMinutes(30))['enqueued'])->toBeNull()
+        ->and(DB::table('medical_ai_extractions')->where('id', $first)->value('status'))->toBe('queued');
+
+    $r = btTick($now->addMinutes(61));
+    $row = DB::table('medical_ai_extractions')->where('id', $first)->first();
+    expect($row->status)->toBe('failed')->and($row->failure_code)->toBe('worker_lost')
+        ->and($r['reconciled'])->toBe(1)
+        ->and(DB::table('ai_bulk_run_items')->where('extraction_id', $first)->value('outcome'))->toBe('failed')
+        ->and(DB::table('ai_calls')->where('extraction_id', $first)->value('status'))->toBe('failed')
+        ->and($r['enqueued'])->not->toBeNull();
+});
