@@ -160,7 +160,7 @@ class RunExtractionJob implements ShouldQueue
 
         $health = new AgentHealth;
         if ($outcome->ok && $outcome->payload !== null) {
-            $done = $query->finishReady($id, $outcome->payload, (int) $outcome->entryCount, $pagesRead, $pagesTotal, $outcome->model, $outcome->durationMs);
+            $done = $query->finishReady($id, $outcome->payload, (int) $outcome->entryCount, $pagesRead, $pagesTotal, $agent->key(), $outcome->model, $outcome->durationMs);
             if ($done) {
                 $this->safely(fn () => $health->recordSuccess($agent->key()));
 

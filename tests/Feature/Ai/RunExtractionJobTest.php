@@ -381,11 +381,11 @@ it('finishes as cancelled and keeps the old proposal when a cancel lands between
     ejUse(FakeCodex::succeeding(json_encode(ejPayload())));
     app()->instance(AiJobQuery::class, new class extends AiJobQuery
     {
-        public function finishReady(string $id, array $payload, int $entryCount, ?int $pagesRead, ?int $pagesTotal, string $model, int $durationMs): bool
+        public function finishReady(string $id, array $payload, int $entryCount, ?int $pagesRead, ?int $pagesTotal, string $agent, string $model, int $durationMs): bool
         {
             DB::table('medical_ai_extractions')->where('id', $id)->update(['cancel_requested_at' => now()]);
 
-            return parent::finishReady($id, $payload, $entryCount, $pagesRead, $pagesTotal, $model, $durationMs);
+            return parent::finishReady($id, $payload, $entryCount, $pagesRead, $pagesTotal, $agent, $model, $durationMs);
         }
     });
 
