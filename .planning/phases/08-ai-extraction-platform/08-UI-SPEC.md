@@ -1,7 +1,7 @@
 ---
 phase: 08
 slug: ai-extraction-platform
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-11-14
@@ -400,3 +400,11 @@ Long-string behaviour (SK and PL run about 20-40% longer than EN): no label, tag
 - [ ] Dimension 6 Registry Safety: PASS
 
 **Approval:** pending
+
+## Checker follow-ups (2026-11-14, approved with flags)
+- Lang files are `lang/en.json`, `lang/sk.json`, `lang/pl.json` (verified in the repo; the 07 spec's `en-GB` style names are stale).
+- Phase 8 REMOVES the 07 line "AI reading is not available yet. Your choice is saved for when it is." from `AiConsentControl` (behind the feature being live; no contradiction with Run AI).
+- Status tag "Nothing to suggest" (zero entries) is a neutral tag variant.
+- Prefer "AI service not responding" over "Worker not responding" in admin copy; dialog safe button "Keep document private"; edit footer "Discard edit".
+- 12px token is used only for field label rows inside entry cards (accepted 01.1 extension).
+- PDF side-by-side needs a server page-image derivative (pdftoppm); the plan MUST deliver it.
