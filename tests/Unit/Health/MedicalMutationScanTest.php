@@ -9,8 +9,8 @@ const MD_MUT_TOKENS = ['->update(', '->delete(', '->forceDelete(', '->increment(
 
 const MD_MUT_OWNED = [
     'medical_subjects', 'medical_visits', 'medical_medications', 'medical_allergies', 'medical_vaccinations',
-    'medical_contacts', 'medical_documents', 'medical_subject_members',
-    'MedicalSubject', 'MedicalVisit', 'MedicalMedication', 'MedicalAllergy', 'MedicalVaccination', 'MedicalContact', 'MedicalDocument',
+    'medical_contacts', 'medical_documents', 'medical_subject_members', 'medical_ai_extractions', 'medical_ai_decisions',
+    'MedicalAiExtraction', 'MedicalAiDecision', 'MedicalSubject', 'MedicalVisit', 'MedicalMedication', 'MedicalAllergy', 'MedicalVaccination', 'MedicalContact', 'MedicalDocument',
 ];
 
 /** Whole classes exempt from the Visibility:: rule, by exact class name, each with its documented reason. */

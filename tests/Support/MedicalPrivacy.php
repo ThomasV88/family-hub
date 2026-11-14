@@ -44,12 +44,16 @@ class MedicalPrivacy
     private const READ_TABLES = [
         'medical_subjects', 'medical_visits', 'medical_medications', 'medical_allergies',
         'medical_vaccinations', 'medical_contacts', 'medical_documents',
+        // medical_ai_decisions carries no subject_id: its statements must join medical_ai_extractions and carry the
+        // membership predicate through that join.
+        'medical_ai_extractions', 'medical_ai_decisions',
     ];
 
     /** Every READ_TABLES table plus the membership table (settings writes are admin-only and tested in 07-07). */
     private const MUTATION_TABLES = [
         'medical_subjects', 'medical_visits', 'medical_medications', 'medical_allergies',
         'medical_vaccinations', 'medical_contacts', 'medical_documents', 'medical_subject_members',
+        'medical_ai_extractions', 'medical_ai_decisions',
     ];
 
     /**
