@@ -82,6 +82,7 @@ it('refuses a level for a member without the Health module and malformed payload
 it('links, unlinks and switches own-record access, with one neutral refusal shape', function () {
     $admin = freshAdmin();
     $m = User::factory()->create();
+    MedicalFixtures::grantHealth($m);
     $other = User::factory()->create();
     $a = MedicalSubject::factory()->create();
     $b = MedicalSubject::factory()->linkedTo($other)->create();
@@ -106,6 +107,30 @@ it('links, unlinks and switches own-record access, with one neutral refusal shap
     $this->actingAs($admin)->put(linkUrl($a), ['user_id' => null, 'self_access_enabled' => true])->assertRedirect();
     expect($a->fresh()->user_id)->toBeNull();
     expect(AuditEntry::where('event', 'medical_access_changed')->get()->every(fn ($r) => collect(array_keys($r->meta))->sort()->values()->all() === ['change', 'subject']))->toBeTrue();
+});
+
+it('records an admin linking themselves as the self-added event, not a plain link', function () {
+    $admin = freshAdmin();
+    MedicalFixtures::grantHealth($admin);
+    $s = MedicalSubject::factory()->create();
+
+    $this->actingAs($admin)->put(linkUrl($s), ['user_id' => $admin->id, 'self_access_enabled' => true])->assertRedirect();
+
+    expect($s->fresh()->user_id)->toBe($admin->id);
+    $row = AuditEntry::where('event', 'medical_admin_self_added')->sole();
+    expect($row->meta)->toBe(['subject' => $s->id])
+        ->and(AuditEntry::where('event', 'medical_access_changed')->count())->toBe(0);
+});
+
+it('refuses to link an account without the Health module with the same neutral error', function () {
+    $admin = freshAdmin();
+    $plain = User::factory()->create();
+    $s = MedicalSubject::factory()->create();
+
+    $this->actingAs($admin)->put(linkUrl($s), ['user_id' => $plain->id, 'self_access_enabled' => true])
+        ->assertSessionHasErrors(['user_id' => 'health.access.link_failed']);
+
+    expect($s->fresh()->user_id)->toBeNull()->and(AuditEntry::count())->toBe(0);
 });
 
 it('answers 404 for an unknown person and 403 for a non-admin', function () {

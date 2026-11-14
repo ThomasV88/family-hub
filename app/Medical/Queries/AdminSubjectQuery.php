@@ -2,6 +2,7 @@
 
 namespace App\Medical\Queries;
 
+use App\Access\AccessGate;
 use App\Access\AccessLevel;
 use App\Access\Module;
 use App\Audit\AuditEvent;
@@ -122,7 +123,9 @@ class AdminSubjectQuery
             if ($userId !== $current) {
                 if ($userId !== null) {
                     $taken = DB::table('medical_subjects')->where('user_id', $userId)->where('id', '!=', $subjectId)->exists();
-                    if ($taken || User::query()->whereKey($userId)->doesntExist()) {
+                    $target = $taken ? null : User::query()->find($userId);
+                    // Same single error for an unusable account, including one without the Health module (as in syncMembers).
+                    if ($target === null || app(AccessGate::class)->level($target, Module::Health) === AccessLevel::None) {
                         throw $refuse();
                     }
                 }
@@ -131,11 +134,16 @@ class AdminSubjectQuery
                 } catch (UniqueConstraintViolationException) {
                     throw $refuse();
                 }
-                $this->audit->record(
-                    AuditEvent::MedicalAccessChanged, $actor,
-                    ['subject' => $subjectId, 'change' => $userId === null ? 'unlinked' : 'linked'],
-                    User::query()->find($userId ?? $current), Module::Health,
-                );
+                // Linking yourself grants yourself the own-record Edit branch, so it is the same event as a self-added member.
+                if ($userId !== null && $userId === $actor->id) {
+                    $this->audit->record(AuditEvent::MedicalAdminSelfAdded, $actor, ['subject' => $subjectId], $actor, Module::Health);
+                } else {
+                    $this->audit->record(
+                        AuditEvent::MedicalAccessChanged, $actor,
+                        ['subject' => $subjectId, 'change' => $userId === null ? 'unlinked' : 'linked'],
+                        User::query()->find($userId ?? $current), Module::Health,
+                    );
+                }
             }
 
             $effective = $userId !== null ? $selfAccess : (bool) $row->self_access_enabled;
