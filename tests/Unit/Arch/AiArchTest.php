@@ -45,7 +45,7 @@ const AI_ARCH_PROCESS_PATTERNS = [
     "'pdfinfo'" => "/'pdfinfo'/",
 ];
 
-const AI_ARCH_PROCESS_ALLOWED = ['Medical/Ai/CodexRunner.php', 'Medical/Documents/PdfRasterizer.php'];
+const AI_ARCH_PROCESS_ALLOWED = ['Medical/Ai/CodexRunner.php', 'Medical/Documents/PdfRasterizer.php', 'Medical/Ai/Preflight.php'];
 
 const AI_ARCH_LOG_PATTERNS = [
     'Log::' => '/\bLog::/',
