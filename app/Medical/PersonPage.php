@@ -4,9 +4,11 @@ namespace App\Medical;
 
 use App\Access\AccessLevel;
 use App\Medical\Queries\AllergyQuery;
+use App\Medical\Queries\MedicationQuery;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Queries\VisitQuery;
 use App\Models\MedicalAllergy;
+use App\Models\MedicalMedication;
 use App\Models\MedicalSubject;
 use App\Models\MedicalVisit;
 use Illuminate\Http\Request;
@@ -22,11 +24,11 @@ use Inertia\Response;
 class PersonPage
 {
     /** Panel kinds that exist so far; those listed in WITH_ID resolve a record id inside the visible person. */
-    private const PANELS = ['new-person', 'new-visit', 'visit', 'new-allergy', 'allergy'];
+    private const PANELS = ['new-person', 'new-visit', 'visit', 'new-allergy', 'allergy', 'new-medication', 'medication'];
 
-    private const WITH_ID = ['visit', 'allergy'];
+    private const WITH_ID = ['visit', 'allergy', 'medication'];
 
-    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies) {}
+    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications) {}
 
     public function render(Viewer $viewer, ?MedicalSubject $subject, Request $request): Response
     {
@@ -40,6 +42,7 @@ class PersonPage
 
         return $this->visitProps($viewer, $subject, $request) + [
             'allergies' => $this->allergyProps($viewer, $subject),
+            'medications' => $this->medicationProps($viewer, $subject),
             'people' => $people->map(fn (MedicalSubject $p) => [
                 'id' => (string) $p->getKey(),
                 'name' => $p->name,
@@ -133,6 +136,30 @@ class PersonPage
         ])->values()->all();
     }
 
+    /**
+     * Ongoing is decided here with the family-timezone date, so the client never compares dates.
+     *
+     * @return list<array{id: string, name: string, dose: ?string, schedule: ?string, startedOn: ?string, endedOn: ?string, notes: ?string, ongoing: bool}>
+     */
+    private function medicationProps(Viewer $viewer, ?MedicalSubject $subject): array
+    {
+        if ($subject === null) {
+            return [];
+        }
+        $today = now((string) config('family.timezone'))->toDateString();
+
+        return $this->medications->forSubject($viewer, $subject, $today)->map(fn (MedicalMedication $m) => [
+            'id' => (string) $m->getKey(),
+            'name' => $m->name,
+            'dose' => $m->dose,
+            'schedule' => $m->schedule,
+            'startedOn' => $m->started_on?->format('Y-m-d'),
+            'endedOn' => $m->ended_on?->format('Y-m-d'),
+            'notes' => $m->notes,
+            'ongoing' => $m->ended_on === null || $m->ended_on->format('Y-m-d') >= $today,
+        ])->values()->all();
+    }
+
     /** @return array{kind: string, id: ?string}|null */
     private function panel(Viewer $viewer, ?MedicalSubject $subject, Request $request): ?array
     {
@@ -147,6 +174,7 @@ class PersonPage
         if (in_array($kind, self::WITH_ID, true)) {
             $found = $subject !== null && is_string($id) && match ($kind) {
                 'visit' => $this->visits->find($viewer, $subject, $id) !== null,
+                'medication' => $this->medications->find($viewer, $subject, $id) !== null,
                 default => $this->allergies->find($viewer, $subject, $id) !== null,
             };
             abort_unless($found, 403);
@@ -160,7 +188,7 @@ class PersonPage
         if ($kind === 'new-person' && ! $viewer->canEdit()) {
             return null;
         }
-        if ($kind === 'new-visit' || $kind === 'new-allergy') {
+        if (in_array($kind, ['new-visit', 'new-allergy', 'new-medication'], true)) {
             abort_if($subject === null || $this->subjects->levelFor($viewer, $subject) !== AccessLevel::Edit, 403);
         }
 
