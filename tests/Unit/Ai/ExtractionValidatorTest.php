@@ -1,5 +1,6 @@
 <?php
 
+use App\Medical\Ai\ExtractionOutcome;
 use App\Medical\Ai\ExtractionSchema;
 use App\Medical\Ai\ExtractionValidator;
 use App\Medical\Ai\FailureCode;
@@ -24,7 +25,7 @@ function goldenPayload(): array
     ];
 }
 
-function validate(array|string $payload): App\Medical\Ai\ExtractionOutcome
+function validate(array|string $payload): ExtractionOutcome
 {
     return (new ExtractionValidator)->validate(is_string($payload) ? $payload : json_encode($payload));
 }
