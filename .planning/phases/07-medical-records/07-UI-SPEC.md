@@ -1,7 +1,8 @@
 ---
 phase: 07
 slug: medical-records
-status: draft
+status: approved
+reviewed_at: 2026-11-14
 shadcn_initialized: false
 preset: none
 created: 2026-11-14
@@ -79,7 +80,7 @@ Exactly the 01.1 set: 4 sizes (14, 16, 20, 24), 2 weights (400, 600). No new siz
 | Heading | 20px | 600 | 1.2 | Page h1, person name, card titles, panel titles, dialog titles |
 | Display | 24px | 600 | 1.2 | Blood type value and person name on the emergency card (screen) |
 
-Print stylesheet exception (discretion, `@media print` only): body 11pt/400, labels 10pt/600 is NOT used (labels follow body 11pt/600), headings 14pt/600, title 20pt/600; three print sizes, same two weights. Print never uses sizes below 11pt.
+Print stylesheet exception (discretion, `@media print` only), at most 4 sizes and the same 2 weights (400, 600): body 11pt/400; labels 11pt/600; section headings 14pt/600; emergency card name and blood type value 20pt/600 (also the print page title). Print never uses sizes below 11pt. Accepted exception: the 2-line clamp on the timeline diagnosis excerpt (Screen 3) is allowed because the detail panel shows the full text.
 
 ---
 
@@ -88,7 +89,7 @@ Print stylesheet exception (discretion, `@media print` only): body 11pt/400, lab
 Reuse 01.1/02 values. 60/30/10 holds: dominant `--color-bg`, secondary `--color-surface`/`--color-surface-2` (cards, folder headers hover, side cards, upload queue), accent `--color-primary`, destructive `--color-danger`.
 
 Accent reserved for (subset of the 01.1 closed list):
-1. The single primary button per view region: "Add visit" (person page), "Save visit", "Save medication", "Save allergy", "Save vaccination", "Save person", "Add document" in the uploader, "Save access", "Create export" on the export screen, "Print" on print screens
+1. The single primary button per view region: "Add visit" (person page), "Save visit", "Save medication", "Save allergy", "Save vaccination", "Save person", "Add document" in the uploader, "Save access", "Create export" on the export screen, "Print card" (emergency card screen) and "Print export" (print export screen), "Allow AI" (primary in the AI consent dialog), and the empty-state "Add person" (Screen 1)
 2. FAB "Add visit" (phone)
 3. Selected person chip and selected view-switch option and selected filter chips (soft fill plus primary label)
 4. Checked `UiSwitch` (AI consent, own-record switch) and checked checkbox/radio
@@ -123,10 +124,10 @@ Overdue/due-soon/ongoing are computed by the server and displayed only (UI never
 
 A viewer who cannot access a person gets an app that behaves exactly as if that person did not exist.
 
-- The server returns only permitted people and only their data. No placeholders: no lock icon, no "restricted" tag, no "other people" line, no counts of hidden people, no hint text. A member with zero permitted people sees the same empty state as a family with no people.
-- Person, visit, medication, allergy, vaccination and document ids are opaque UUIDs. `?panel=...&id=`, `/health/people/{uuid}` with a hidden or unknown id render the identical 403 `UiErrorState` (Phase 2 copy "You do not have access to this").
+- The server returns only permitted people and only their data. No placeholders: no lock icon, no "restricted" tag, no "other people" line, no counts of hidden people, no hint text. A member with zero permitted people (including a child whose own-record access was disabled) sees the same empty state as a family with no people.
+- Person, visit, medication, allergy, vaccination and document ids are opaque UUIDs. `?panel=...&id=`, `/health/people/{uuid}` with a hidden or unknown id render the identical 403 `UiErrorState` (Phase 2 copy "You do not have access to this"). Non-UUID path segments (for example `/health/people/abc`) return the same 403, never a route 404 (no UUID route constraint that falls through to 404). The 403 page offers one link "Back to Health" (to `/health`), identical for hidden and unknown ids.
 - Names never appear in: URLs, `<title>` (always "Health"), `document.title` updates, breadcrumbs of other pages, toasts for other people, Inertia shared props, Home card, global search, audit page text (content-free), service worker or `localStorage`/`sessionStorage`. Person selection is not remembered client-side. The server picks the first permitted person (alphabetical) when none is given.
-- Admins have no automatic view. Exception (discretion, recorded): the Settings access admin lists people by name only (no records, no counts of records, no documents) so access can be granted, mirroring Finance account metadata. An admin never sees a person's records unless granted.
+- Admins have no automatic view. Exception (discretion, recorded): the Settings access admin lists people by name only (no records, no counts of records, no documents) so access can be granted, mirroring Finance account metadata. An admin never sees a person's records unless granted. **PROVISIONAL:** this admin-sees-person-names-only exception is not yet owner-confirmed; the owner confirms or removes it at the end of the run.
 - Own-record rule: a linked member sees and can edit their own profile; the switch to disable this applies to child profiles only and is set by an admin (Screen 10).
 - Reminders and push show the title only: "Vaccination due: {person}". No vaccine name, date or diagnosis in any notification or email subject.
 - Home card is static (no names, no counts, no data) and the Health nav item shows no badge.
@@ -142,8 +143,10 @@ Every Health page already sits behind `access:module,health`, the second factor 
 - JSON, file and fetch requests (document upload, document download, export download, AI-consent toggle if done via fetch, preview fallbacks) receive 423 with `error`. All go through `securityFetch` / `securityDownload` / `securityUpload`. Handler (shared `handleHealthRefusal(code)`, same logic as the finance import wizard): `reauth_required` or `confirm_required` -> `router.visit('/confirm-access')` after setting `allowLeave = true` so the unsaved-leave guard does not interrupt; `second_factor_required` -> `router.visit('/settings/security')`. The confirm page already shows the polite info alert "Your last change was not saved. Confirm it's you, then repeat it." Nothing is replayed automatically.
 - Data discarded on redirect: picked files, form drafts and export blobs live in component memory only. No medical draft is written to `localStorage`, `sessionStorage` or IndexedDB (deliberate: shared family devices). Consequence stated in copy for the longest form (visit notes): none shown; the confirm alert is the notice.
 - Non-GET Inertia form submits that the gate rejects are treated the same (Inertia error handler maps 423 to the same visit).
-- `<img>` previews cannot read status codes: `DocumentPreview` handles `onerror` by showing an inline state "The preview could not be loaded." with secondary button "Confirm it's you" (links to `/confirm-access`) and ghost "Try again". It never loops reloads.
+- `<img>` previews cannot read status codes: `DocumentPreview` handles `onerror` by showing an inline state "The preview could not be loaded." with secondary button "Confirm it's you" (links to `/confirm-access`) and ghost "Try loading again". It never loops reloads.
 - Security-style confirm windows (10 minutes, `ReauthForm`) are not used in this phase: no Health action is a factor or credential change. Destructive deletes use the plain confirm dialog.
+- History and form state: Health pages must not use Inertia `remember` / `rememberKey` for forms (no draft persisted in history state). Inertia history encryption (`encryptHistory`) is on for all Health pages, and `clearHistory` runs on idle lock and on logout, so Back after the idle gate cannot show medical data. A Vitest/Pest assertion covers this (see Tests).
+- Visit form hint (one line under Notes): "If the page locks before you save, long notes are lost. Save often." (SK/PL translated in the lang plan.)
 - All Health responses are `Cache-Control: private, no-store`; the service worker never caches `/health*` pages, document routes or exports (extends 01.1/02/05/06).
 
 ---
@@ -157,8 +160,8 @@ Routes (Inertia pages, all `no-store`, health-ish names): `/health` (redirects t
 Focal point: the single sentence "No people to show" with the next step.
 
 - `UiEmptyState` (icon `HeartPulse` muted 32px), heading "No people to show", body "When a family member is added to Health and shared with you, their record appears here." Action "Add person" (primary) only for members who may create people (module edit); otherwise no action. Same copy for "no people exist" and "none shared with you" (no hint of the difference).
-- A member with a linked profile never sees this state (their own record is always present).
-- Loading: `UiSkeleton` (chip row plus two cards). Error: `UiErrorState` "Something went wrong" with "Try again".
+- A member with a linked profile normally never sees this state (their own record is always present). Exception: a child profile whose own-record access was disabled by the admin and who has no other grants sees this same standard empty state, identical to a family with no people (no hint of the reason).
+- Loading: `UiSkeleton` (chip row plus two cards). Error: `UiErrorState` "Something went wrong" with "Try loading again".
 
 ### 2. Person page (`/health/people/{person}`)
 
@@ -179,7 +182,7 @@ Region order (16px gap): h1 "Health"; `PersonSwitcher` (plus ghost "Add person" 
 
 Focal point: the date on each entry, because chronological order is the point.
 
-- `TimelineList`: `<ol>`, each `<li>` a `TimelineEntry` = rail (dot 12px + 2px line) then a button row (min 44px, whole row opens the panel). Row content: line 1 `<time datetime>` (14/600, locale `Intl` medium date), line 2 title (16/600: visit = doctor name or, if empty, the specialty; document = document name; vaccination = vaccine), line 3 meta (14/400 muted: diagnosis excerpt clamped to 2 lines, "{n} documents" pipe plural with `Paperclip`). Icon by type (`Stethoscope`, `FileText`/`ImageIcon`, `Syringe`) at 20px before the title, `aria-hidden`.
+- `TimelineList`: `<ol>`, each `<li>` a `TimelineEntry` = rail (dot 12px + 2px line) then a button row (min 44px, whole row opens the panel). Row content: line 1 `<time datetime>` (14/600, locale `Intl` medium date), line 2 title (16/600: visit = doctor name or, if empty, the specialty; document = document name; vaccination = vaccine), line 3 meta (14/400 muted: diagnosis excerpt clamped to 2 lines (accepted exception to the no-truncation rule: the panel shows the full text), "{n} documents" pipe plural with `Paperclip`). Icon by type (`Stethoscope`, `FileText`/`ImageIcon`, `Syringe`) at 20px before the title, `aria-hidden`.
 - At 320px: single column, date above title, no side-by-side columns, text wraps (no ellipsis for titles in this list; long doctor names wrap), no horizontal scroll. Rail stays 16px.
 - Folder header shows specialty name and "{n} visits" count; counts exist only for visits of the visible person.
 - Empty folder body (cannot normally occur) and empty person state: `UiEmptyState` "No visits yet", body "Add the first visit to start this person's record.", action "Add visit" (edit only; viewers see no action).
@@ -204,7 +207,8 @@ Shared: `UiDetailPanel`, h2 titles ("Add visit"/"Edit visit", and so on), `UiFie
 - Medication: Name (required), Dose (text, hint "For example: 5 mg."), Schedule (text, hint "For example: one tablet in the morning."), Start date, End date (hint "Leave empty if the medication continues."). Validation: end not before start.
 - Allergy: Substance (required), Reaction (text), Severity (`UiSelect`: Mild, Moderate, Severe; required, default none selected so it is a conscious choice).
 - Vaccination: Vaccine (required), Date given (required), Next due (optional; hint "Members who can edit this record get a reminder before this date. The reminder names the person only.").
-- Person (create/edit): Name (required), Birth date, Sex (`UiSelect`: Female, Male, Not specified), Blood type (`UiSelect`: Unknown, A+, A-, B+, B-, AB+, AB-, 0+, 0-), Notes (textarea), Emergency contacts (up to 3 rows, each Name, Relationship, Phone with `type="tel"` `autocomplete="off"`; ghost "Add contact" / "Remove contact"), and for creators/admins "Linked account" (`UiSelect` of active members plus "No account"; changes the "No account" marker). Linked-account select lists members by name (family-wide fact, not medical).
+- Person (create/edit): Name (required), Birth date, Sex (`UiSelect`: Female, Male, Not specified), Blood type (`UiSelect`: Unknown, A+, A-, B+, B-, AB+, AB-, 0+, 0-), Notes (textarea), Emergency contacts (up to 3 rows, each Name, Relationship, Phone with `type="tel"` `autocomplete="off"`; ghost "Add contact" / "Remove contact"), and for creators/admins "Linked account" (`UiSelect` of active members plus "No account"; changes the "No account" marker). Linked-account select lists members by name (family-wide fact, not medical). It never marks or greys out members already linked elsewhere and never reveals hidden profiles. Selecting a member who cannot be linked (any reason) returns one neutral server error with identical shape and text: "This member can't be linked. Choose another."
+- Person creation: the creator is auto-granted "Can change" on the new person at creation; the grant is audited (content-free, no name). After "Save person" the creator lands on the new person page (`/health/people/{uuid}`).
 - Destructive confirms (dialog per 01.1 pattern, default focus on the safe button):
 
 | Action | Title | Body | Danger / safe buttons |
@@ -224,7 +228,7 @@ Focal point: the file picker (upload) and the preview image (view).
 
 - Upload entry: header "Add document" button, visit panel "Upload a new document", and the folder "Documents without a visit" action. Opens `DocumentPanel` in create mode.
 - `DocumentUploader`: `UiField` "Files" with native `<input type="file" multiple accept="application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,.pdf,.jpg,.jpeg,.png,.webp,.heic,.heif">`, hint "PDF or photos, up to {max} MB each, {count} files at a time." (`{max}` and `{count}` come from the server limits; never hardcoded). On phones the browser offers camera and library natively. Client pre-check of extension and size only (server sniffs MIME from bytes and is authoritative). Optional field "Name" (single file only; for several files each uses its original name) and `UiSelect` "Attach to visit" (this person's visits by date and doctor/specialty, default "No visit").
-- Queue: `<ul>` of rows (icon, file name, size, `UiProgress` with value, status text). Files upload one at a time via `securityUpload`; row states: waiting, uploading ("Uploading..."), done (`Check`, "Added"), failed (danger text with reason and ghost "Retry"). Footer: primary "Add document" (disabled until a file is chosen; label becomes "Add {n} documents" pipe plural when several), secondary "Cancel" (aborts the running upload via `xhr.abort()`; completed files stay). Leaving with an upload running opens the Inertia leave guard "Leave while uploading?" ("Leave" danger, "Keep uploading" default focus). 423 mid-upload: handled per Gate behavior; files already added stay.
+- Queue: `<ul>` of rows (icon, file name, size, `UiProgress` with value, status text). Files upload one at a time via `securityUpload`; row states: waiting, uploading ("Uploading..."), done (`Check`, "Added"), failed (danger text with reason and ghost "Retry upload"). Footer: primary "Add document" (disabled until a file is chosen; label becomes "Add {n} documents" pipe plural when several), secondary "Cancel" (aborts the running upload via `xhr.abort()`; completed files stay). Leaving with an upload running opens the Inertia leave guard "Leave while uploading?" ("Leave page" danger, "Keep uploading" default focus). 423 mid-upload: handled per Gate behavior; files already added stay.
 - Errors (inline per file, `role="alert"` once): wrong type "This file type is not supported. Use a PDF, JPG, PNG, WebP or HEIC file."; too large "This file is larger than {max} MB. Choose a smaller file or reduce its size."; unreadable "This file could not be read. Try saving it again and upload the new copy."; server/network "We could not upload this file. Nothing was saved. Try again."
 - Document panel (existing): h2 = document name (user text, escaped); fields Name (editable with edit), Attached visit select, then `DocumentPreview`, then actions "Open in new tab" (anchor, `target="_blank" rel="noopener"`), "Download document" (`securityDownload`, `Download`), ghost danger "Delete document".
 - `DocumentPreview`:
@@ -246,15 +250,15 @@ Focal point: the due tag of the soonest item.
 
 Focal point: the switch with its explanation directly beneath.
 
-- Placed in `PersonHeader` below the name block. Layout: `UiSwitch` with visible label "Allow AI to read documents of this person" (`Bot` icon before the label), explanation paragraph (14/400 muted, always visible, linked by `aria-describedby`): "Off by default. When on, documents of this person can be sent to the AI agent your family admin set up, to suggest record entries. You check every suggestion before it is saved. Turning this off does not delete anything already saved." and a second muted line "AI reading is not available yet. Your choice is saved for when it is." (shown until Phase 8 ships; removable by flag).
-- Interaction: turning on opens a confirm dialog (consent notice): title "Allow AI for this person?", body "Documents of this person will leave this server and be processed by an AI service. Only turn this on if the family agrees. You can turn it off at any time.", primary "Allow AI" (not danger; this is the consent), safe default focus "Keep AI off". Confirm saves (`aria-busy` on the switch, toast "AI is on for this person"). Turning off saves immediately without a dialog (toast "AI is off for this person"). Audited server side.
+- Placed in `PersonHeader` below the name block. Layout: `UiSwitch` with visible label "Allow AI to read documents of this person" (`Bot` icon before the label), explanation paragraph (14/400 muted, always visible, linked by `aria-describedby`): "Off by default. When on, documents of this person are sent to an outside AI company (the provider your family admin has set up), which may keep them under its own terms. You check every suggestion before it is saved. Turning this off does not delete anything already saved." and a second muted line "AI reading is not available yet. Your choice is saved for when it is." (kept until Phase 8 ships; removable by flag).
+- Interaction: turning on opens a confirm dialog (consent notice): title "Allow AI for this person?", body "Documents of this person will be sent to an outside AI company (the provider your family admin has set up), which may keep them under its own terms. Only turn this on if this person, or their parent or guardian, agrees. You can turn it off at any time.", primary "Allow AI" (accent, not danger; this is the consent), safe default focus "Keep AI off". Confirm saves (`aria-busy` on the switch, toast "AI is on for this person"). Turning off saves immediately without a dialog (toast "AI is off for this person"). Audited server side. The same wording (EN/SK/PL, all in the lang plan) is used everywhere AI consent is described.
 - Only editors can toggle. View-only viewers see the read-only tag "AI: on" / "AI: off" and the explanation without the switch. Failure: inline `UiAlert` danger "We could not save this setting. Try again." and the switch returns to its previous state.
 
 ### 9. Emergency card and printable views (no app shell)
 
 Focal point (emergency card): the allergies block at the top, because it is the safety-critical fact; blood type directly beside the name.
 
-- Route renders in `PrintLayout`: no `AppShell`, no sidebar, bottom bar, FAB, topbar or toast region; `lang` attribute set; the page works when opened directly or printed. Screen version: centered column (max 720px), top toolbar (hidden when printing): ghost "Back to person" (link), secondary "Print" (`Printer`, calls `window.print()`). Forced light colors on screen and print (`color-scheme: light`, white background) regardless of the user's dark theme so printouts are never dark.
+- Route renders in `PrintLayout`: no `AppShell`, no sidebar, bottom bar, FAB, topbar or toast region; `lang` attribute set; the page works when opened directly or printed. Screen version: centered column (max 720px), top toolbar (hidden when printing): ghost "Back to person" (link), primary "Print card" (`Printer`, calls `window.print()`; primary and accent on this screen; on the print export screen the label is "Print export"). Forced light colors on screen and print (`color-scheme: light`, white background) regardless of the user's dark theme so printouts are never dark.
 - `@page { size: A4 portrait; margin: 15mm }`. `@media print`: hide toolbar, links lose underline and URL expansion, `break-inside: avoid` on sections and list items, borders 0.5pt black, text black on white, tags rendered as bordered text (severity word always printed), no background fills required (works in black and white).
 - Emergency card content, single column in this order: Header (name 24/600, age and birth date, blood type as bordered block "Blood type" + value 24/600), Allergies (all, each "substance, reaction, severity word"; "No allergies recorded" when empty), Current medications (active only: name, dose, schedule; "No current medications recorded" when empty), Emergency contacts (name, relationship, phone as `tel:` link on screen, plain text in print; "No emergency contacts recorded" when empty), footer "Printed {date}. Check that this is up to date." One A4 page for typical data (up to about 10 allergies and 15 medications); longer lists flow to a second page with the name repeated in a page header. Safety data is never truncated or collapsed.
 - No public link, no QR, no share button (deferred). Reading the card is an audited read (server).
@@ -285,7 +289,7 @@ Focal point: the scope and format choices, with the single "Create export" butto
 - Page h1 "Export records" with muted line naming the person ("Person: {name}" form, no declension). Needs edit (assumption). Single `UiCard`, two radiogroups, one primary button.
 - Scope (radiogroup, `UiRadio`): "Everything for this person" (default) / "One specialty" (reveals `UiSelect` "Specialty", listing only specialties with visits; v-if).
 - Format (radiogroup): 
-  - "For a doctor" hint "A printable page. Use Print and choose Save as PDF." -> navigates to `/export/print?scope=...` in `PrintLayout` (visits, medications, allergies, vaccinations, document list with names only; document files are not embedded).
+  - "For a doctor" hint "A printable page. Use Print export and choose Save as PDF." -> navigates to `/export/print?scope=...` in `PrintLayout` (visits, medications, allergies, vaccinations, document list with names only; document files are not embedded).
   - "Data file" hint "A structured file (JSON) you can keep or import elsewhere." -> download.
   - "For AI" hint "A Markdown file for an AI assistant. The person's name and birth date are left out; notes are included as written." -> download.
 - `UiCheckbox` "Include AI-suggested data nobody has checked yet" (default off, unchecked), hint "Each such item is labeled Unverified in the export." Rendered only when the server reports unverified items exist for this person (always absent until Phase 8 populates the flag).
@@ -308,7 +312,7 @@ Focal point: the scope and format choices, with the single "Create export" butto
 - Motion: durations 150-200ms; folder expand uses height/opacity only, disabled under `prefers-reduced-motion`.
 - Color: never color alone; every status tag has text and icon; selected states use fill plus weight/border.
 - Forced-colors: tags and timeline rail fall back to `currentColor` borders.
-- Tests: Vitest + axe on person page (folders expanded and collapsed, timeline with filters, empty, loading, error, view-only), each panel (create, edit, read-only, delete confirm), uploader (each file state), document preview (image, PDF card, no-preview, load failure), emergency card (screen and print layout), export form (each format, scope select), AI consent (off, confirm dialog, on, read-only, failure), access card and panel (admin), Home card; each in light and dark (print views forced light) and en/sk/pl, plus a 320px viewport pass and a pseudo-long (+40%) text test on chips, folder headers, tags, buttons, panel titles and timeline rows. Gate tests: 423 responses to upload, download and export map to the confirm page and leave no file or draft in storage. Privacy differential tests per the Privacy contract.
+- Tests: Vitest + axe on person page (folders expanded and collapsed, timeline with filters, empty, loading, error, view-only), each panel (create, edit, read-only, delete confirm), uploader (each file state), document preview (image, PDF card, no-preview, load failure), emergency card (screen and print layout), export form (each format, scope select), AI consent (off, confirm dialog, on, read-only, failure), access card and panel (admin), Home card; each in light and dark (print views forced light) and en/sk/pl, plus a 320px viewport pass and a pseudo-long (+40%) text test on chips, folder headers, tags, buttons, panel titles and timeline rows. Gate tests: 423 responses to upload, download and export map to the confirm page and leave no file or draft in storage. Privacy differential tests per the Privacy contract. History tests (Vitest + Pest): no Health page uses `remember`/`rememberKey`; Health responses set `encryptHistory`; `clearHistory` is invoked on idle lock and on logout. Gate test plan also covers the "Open in new tab" anchors (document file/preview routes behind the gate: a stale session opened via the anchor lands on `/confirm-access`, no file served) and non-UUID path segments returning the same 403 as hidden ids.
 
 ### Plurals: pipe plurals (vue-i18n), not ICU
 
@@ -338,7 +342,8 @@ Tone from 01.1: calm, plain, short, no exclamation marks. Keys live under `healt
 | Emergency card | Emergency card | Núdzová karta | Karta awaryjna |
 | Export records | Export records | Exportovať záznamy | Eksportuj dokumentację |
 | Create export | Create export | Vytvoriť export | Utwórz eksport |
-| Print | Print | Tlačiť | Drukuj |
+| Print card | Print card | Tlačiť kartu | Drukuj kartę |
+| Print export | Print export | Tlačiť export | Drukuj eksport |
 | Download document | Download document | Stiahnuť dokument | Pobierz dokument |
 | Allow AI | Allow AI | Povoliť AI | Zezwól na AI |
 | Open Health | Open Health | Otvoriť Zdravie | Otwórz Zdrowie |
@@ -353,8 +358,8 @@ Tone from 01.1: calm, plain, short, no exclamation marks. Keys live under `healt
 | Empty (no visits) heading | No visits yet | Zatiaľ žiadne návštevy | Brak wizyt |
 | Empty (no visits) body | Add the first visit to start this person's record. | Pridajte prvú návštevu a začnite záznam tejto osoby. | Dodaj pierwszą wizytę, aby rozpocząć dokumentację tej osoby. |
 | View-only line | You can view this record but not change it. | Tento záznam môžete len čítať, nie meniť. | Możesz przeglądać ten zapis, ale nie możesz go zmieniać. |
-| Error (generic) | Something went wrong. We could not load this. Check your connection and try again. (action "Try again") | pattern from 01.1 | pattern from 01.1 |
-| Error (hidden or unknown person) | You do not have access to this (Phase 2 403 copy, identical for hidden and unknown) | Phase 2 | Phase 2 |
+| Error (generic) | Something went wrong. We could not load this. Check your connection and try again. (action "Try loading again") | pattern from 01.1 | pattern from 01.1 |
+| Error (hidden or unknown person) | You do not have access to this (Phase 2 403 copy, identical for hidden and unknown, with link "Back to Health") | Phase 2 | Phase 2 |
 | Preview failed | The preview could not be loaded. | Náhľad sa nepodarilo načítať. | Nie udało się wczytać podglądu. |
 | No preview (HEIC) | This photo format cannot be previewed here. Download the original to view it. | Tento formát fotografie sa tu nedá zobraziť. Stiahnite si originál. | Tego formatu zdjęcia nie można tu wyświetlić. Pobierz oryginał. |
 | Not available (AI) | AI reading is not available yet. Your choice is saved for when it is. | Čítanie pomocou AI zatiaľ nie je dostupné. Vaša voľba sa uloží na neskôr. | Odczyt przez AI nie jest jeszcze dostępny. Twój wybór zostanie zapisany na później. |
@@ -394,7 +399,7 @@ Sorted by locale collation in selects (`Other` always last). The planner may ext
 | Primary CTA | "Add visit" |
 | Empty state heading | "No people to show" (module), "No visits yet" (person) |
 | Empty state body | "When a family member is added to Health and shared with you, their record appears here." / "Add the first visit to start this person's record." |
-| Error state | "Something went wrong. We could not load this. Check your connection and try again." with "Try again" |
+| Error state | "Something went wrong. We could not load this. Check your connection and try again." with "Try loading again" |
 | Upload error | "We could not upload this file. Nothing was saved. Try again." |
 | Destructive confirmation | "Delete person: Delete this person with every visit, medication, allergy, vaccination and document? This cannot be undone." Buttons "Delete person" (danger) and "Keep person" (default focus). Other delete confirms per the Screen 5 table |
 | Stale session | Handled by the Phase 6 confirm page ("Your last change was not saved. Confirm it's you, then repeat it.") |
@@ -412,11 +417,11 @@ Sorted by locale collation in selects (`Other` always last). The planner may ext
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved with revisions 2026-11-14 (flags F1-F10 resolved in spec)
