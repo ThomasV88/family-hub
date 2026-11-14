@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Medical\Ai\Agents\AgentRegistry;
 use App\Models\Task;
 use App\Observers\TaskReminderObserver;
 use App\Push\PushSender;
@@ -28,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(AccessGate::class);
         $this->app->singleton(RecurrenceEngine::class, RRuleRecurrenceEngine::class);
+        $this->app->singleton(AgentRegistry::class);
         $this->app->bind(PushSender::class, WebPushSender::class);
     }
 
