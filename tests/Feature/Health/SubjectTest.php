@@ -173,3 +173,175 @@ describe('create', function () {
             ->toThrow(Symfony\Component\HttpKernel\Exception\HttpException::class);
     });
 });
+
+/** @return array{component: string, props: array<string, mixed>} the Inertia page of an html response */
+function inertiaPage($response): array
+{
+    return $response->viewData('page');
+}
+
+function healthRows(string $event): int
+{
+    return AuditEntry::where('event', $event)->count();
+}
+
+describe('routes', function () {
+    it('redirects /health to the first visible person alphabetically, or shows the empty page', function () {
+        $user = User::factory()->create();
+        MedicalFixtures::grantHealth($user);
+        $this->actingAs($user)->get('/health')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Health/Person')->where('person', null)->where('people', [])->where('canCreate', true));
+
+        $zed = MedicalFixtures::subject(['name' => 'Zed'], [[$user, AccessLevel::View]]);
+        $amy = MedicalFixtures::subject(['name' => 'amy'], [[$user, AccessLevel::View]]);
+        $this->actingAs($user)->get('/health')->assertRedirect('/health/people/'.$amy->id);
+        expect($zed->id)->not->toBe($amy->id);
+    });
+
+    it('answers hidden, unknown, malformed and mismatched panel ids with one identical 403 and no access_denied row', function () {
+        $v = User::factory()->create();
+        MedicalFixtures::grantHealth($v);
+        $mine = MedicalFixtures::subject(['name' => 'Mine'], [[$v, AccessLevel::Edit]]);
+        $hidden = MedicalFixtures::subject(['name' => 'Hidden canary'], [[User::factory()->create(), AccessLevel::Edit]]);
+        $random = (string) Str::uuid();
+
+        $urls = [
+            "/health/people/{$hidden->id}",
+            "/health/people/{$random}",
+            '/health/people/abc',
+            "/health/people/{$mine->id}?panel=new-person&id={$random}",
+            "/health/people/{$mine->id}?panel=new-person&id={$hidden->id}",
+        ];
+        $baseline = null;
+        foreach ($urls as $url) {
+            $before = healthRows('health_read');
+            $response = $this->actingAs($v)->get($url);
+            $response->assertForbidden();
+            $page = inertiaPage($response);
+            expect($page['component'])->toBe('Errors/Forbidden');
+            expect(json_encode($page))->not->toContain('canary');
+            $baseline ??= $page;
+            expect($page['props'])->toEqual($baseline['props'], $url);
+            expect(healthRows('health_read') - $before)->toBe(1, $url);
+        }
+        expect(healthRows('access_denied'))->toBe(0);
+    });
+
+    it('answers a member without the Health grant with the same 403 shape', function () {
+        $v = User::factory()->create();
+        MedicalFixtures::grantHealth($v);
+        $mine = MedicalFixtures::subject([], [[$v, AccessLevel::Edit]]);
+        $none = User::factory()->create();
+        $linked = User::factory()->create();
+        $own = MedicalSubject::factory()->linkedTo($linked)->create();
+
+        $reference = inertiaPage($this->actingAs($v)->get('/health/people/abc'));
+        foreach ([[$none, "/health/people/{$mine->id}"], [$none, '/health/people/abc'], [$linked, "/health/people/{$own->id}"]] as [$user, $url]) {
+            $response = $this->actingAs($user)->get($url);
+            $response->assertForbidden();
+            $page = inertiaPage($response);
+            expect($page['component'])->toBe($reference['component']);
+            expect(array_keys($page['props']))->toEqual(array_keys($reference['props']));
+            expect($page['props'])->not->toHaveKeys(['people', 'person']);
+        }
+    });
+
+    it('creates a person, grants the creator Can change and lands on the person page', function () {
+        $user = User::factory()->create();
+        MedicalFixtures::grantHealth($user);
+
+        $response = $this->actingAs($user)->post('/health/people', [
+            'name' => 'Ada Novak', 'birth_date' => '2015-03-04', 'sex' => 'female', 'blood_type' => 'AB-', 'notes' => 'Note',
+        ]);
+        $subject = MedicalSubject::firstOrFail();
+        $response->assertRedirect('/health/people/'.$subject->id);
+        $response->assertSessionHas('toast', ['key' => 'health.person.saved']);
+        $row = AuditEntry::where('event', 'medical_subject_created')->firstOrFail();
+        expect($row->meta)->toBe(['subject' => $subject->id]);
+        expect(json_encode($row->getAttributes()))->not->toContain('Ada');
+
+        $this->actingAs($user)->get('/health/people/'.$subject->id)->assertInertia(fn ($page) => $page
+            ->component('Health/Person')
+            ->where('person.name', 'Ada Novak')
+            ->where('person.bloodType', 'AB-')
+            ->where('person.canEdit', true)
+            ->where('person.hasAccount', false)
+            ->where('people.0.initials', 'AN')
+            ->missing('person.user_id')
+            ->missing('person.userId'));
+    });
+
+    it('refuses invalid input on create', function (array $data, string $field) {
+        $user = User::factory()->create();
+        MedicalFixtures::grantHealth($user);
+
+        $this->actingAs($user)->post('/health/people', $data)->assertSessionHasErrors($field);
+        expect(MedicalSubject::count())->toBe(0);
+    })->with([
+        'empty name' => [['name' => ''], 'name'],
+        'long name' => [['name' => str_repeat('a', 121)], 'name'],
+        'invalid utf8' => [['name' => "bad\xC3\x28"], 'name'],
+        'future birth date' => [['name' => 'X', 'birth_date' => '2999-01-01'], 'birth_date'],
+        'sex' => [['name' => 'X', 'sex' => 'x'], 'sex'],
+        'blood type' => [['name' => 'X', 'blood_type' => 'C+'], 'blood_type'],
+    ]);
+
+    it('refuses creation to a Health view member', function () {
+        $user = User::factory()->create();
+        MedicalFixtures::grantHealth($user, AccessLevel::View);
+
+        $this->actingAs($user)->post('/health/people', ['name' => 'X'])->assertForbidden();
+        expect(MedicalSubject::count())->toBe(0);
+    });
+
+    it('lists only visible people and never leaks another person into the props', function () {
+        $v = User::factory()->create();
+        MedicalFixtures::grantHealth($v);
+        $mine = MedicalFixtures::subject(['name' => 'Visible', 'notes' => 'n1'], [[$v, AccessLevel::View]]);
+        MedicalFixtures::subject(['name' => 'Canary Other', 'notes' => 'canary-note'], [[User::factory()->create(), AccessLevel::Edit]]);
+
+        $response = $this->actingAs($v)->get('/health/people/'.$mine->id);
+        $response->assertInertia(fn ($page) => $page->where('people', fn ($p) => collect($p)->pluck('name')->all() === ['Visible'])->where('person.canEdit', false));
+        expect(json_encode(inertiaPage($response)))->not->toContain('anary');
+    });
+
+    it('shows a child with self access off the same page as a family without people', function () {
+        $child = User::factory()->create();
+        MedicalFixtures::grantHealth($child);
+        MedicalSubject::factory()->linkedTo($child, false)->create(['name' => 'Canary Child']);
+        $lonely = User::factory()->create();
+        MedicalFixtures::grantHealth($lonely);
+
+        $pick = fn ($response) => array_intersect_key(inertiaPage($response)['props'], array_flip(['people', 'person', 'canCreate', 'panel']));
+        $childPage = $this->actingAs($child)->get('/health');
+        $childPage->assertOk();
+        expect($pick($childPage))->toEqual($pick($this->actingAs($lonely)->get('/health')));
+        expect(json_encode(inertiaPage($childPage)))->not->toContain('Canary');
+    });
+
+    it('shows a linked member their own profile while self access is on', function () {
+        $user = User::factory()->create();
+        MedicalFixtures::grantHealth($user);
+        $own = MedicalSubject::factory()->linkedTo($user)->create(['name' => 'Me']);
+
+        $this->actingAs($user)->get('/health')->assertRedirect('/health/people/'.$own->id);
+        $this->actingAs($user)->get('/health/people/'.$own->id)->assertInertia(fn ($page) => $page->where('person.canEdit', true)->where('person.hasAccount', true));
+    });
+
+    it('ignores an unknown panel kind and the new-person panel for a view-only member', function () {
+        $user = User::factory()->create();
+        MedicalFixtures::grantHealth($user, AccessLevel::View);
+        $subject = MedicalFixtures::subject([], [[$user, AccessLevel::View]]);
+
+        $this->actingAs($user)->get("/health/people/{$subject->id}?panel=whatever&id=zzz")->assertOk()->assertInertia(fn ($page) => $page->where('panel', null));
+        $this->actingAs($user)->get("/health/people/{$subject->id}?panel=new-person")->assertOk()->assertInertia(fn ($page) => $page->where('panel', null));
+    });
+
+    it('opens the new-person panel for a creator', function () {
+        $user = User::factory()->create();
+        MedicalFixtures::grantHealth($user);
+
+        $this->actingAs($user)->get('/health?panel=new-person')->assertInertia(fn ($page) => $page->where('panel', ['kind' => 'new-person', 'id' => null]));
+    });
+});
