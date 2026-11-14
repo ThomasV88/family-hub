@@ -182,3 +182,32 @@ it('enforces the kind and thumbnail checks', function () {
     expect(fn () => DB::transaction(fn () => MedicalDocument::factory()->image()->forSubject($person)->create(['thumb_path' => null])))->toThrow(QueryException::class);
     expect(fn () => DB::transaction(fn () => MedicalDocument::factory()->forSubject($person)->create(['kind' => 'gif'])))->toThrow(QueryException::class);
 });
+
+it('re-checks the per-person cap inside the insert transaction and keeps the row count at the cap', function () {
+    [$user, $person] = docEditor();
+    config(['medical.max_documents_per_subject' => 2]);
+    MedicalDocument::factory()->count(2)->forSubject($person)->create();
+    $stored = app(App\Medical\Documents\MedicalDocumentStore::class)->put($person->id, MedicalFileFixtures::pdf());
+    $viewer = App\Medical\Viewer::for($user);
+
+    expect(fn () => app(App\Medical\Queries\DocumentQuery::class)->create($viewer, $person, $stored, 'Late', null))
+        ->toThrow(App\Medical\Documents\DocumentRejected::class);
+    expect(MedicalDocument::where('subject_id', $person->id)->count())->toBe(2);
+});
+
+it('answers a visit deleted between lookup and update with the one visit_id error instead of a 500', function () {
+    [$user, $person] = docEditor();
+    $visit = MedicalVisit::factory()->create(['subject_id' => $person->id]);
+    $document = MedicalDocument::factory()->forSubject($person)->create();
+    $done = false;
+    DB::listen(function ($query) use (&$done, $visit) {
+        if (! $done && str_contains($query->sql, 'from "medical_visits"')) {
+            $done = true;
+            DB::table('medical_visits')->where('id', $visit->id)->delete();
+        }
+    });
+
+    $this->withoutMiddleware(PreventRequestForgery::class)->actingAs($user)
+        ->patch("/health/people/{$person->id}/documents/{$document->id}", ['title' => 'T', 'visit_id' => $visit->id])
+        ->assertSessionHasErrors(['visit_id' => 'health.upload.err_visit']);
+});

@@ -55,6 +55,11 @@ class DocumentController extends Controller
             unset($bytes);
             $document = $documents->create($viewer, $subject, $stored, $title, $visitId);
         } catch (DocumentRejected $e) {
+            // limit_reached can come from the locked re-check in create(), after the files were written.
+            if ($stored !== null) {
+                $store->delete(array_values(array_filter([$stored['path'], $stored['thumb_path']])));
+            }
+
             return $this->refuse($request, $e->reason);
         } catch (\Throwable $e) {
             if ($stored !== null) {
