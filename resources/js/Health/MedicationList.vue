@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { Check, ChevronDown, Plus } from '@lucide/vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiTag from '../Components/ui/UiTag.vue';
+import ProvenanceTags from './ProvenanceTags.vue';
 
 // Medications side card. Ongoing or ended is decided by the server (family time zone) and arrives as `ongoing`; the
 // client never compares dates. Ended medications sit behind a disclosure.
@@ -37,6 +38,7 @@ const dateText = (iso) => {
                         <span class="meds__text">
                             <span class="meds__name">{{ m.name }}</span>
                             <span v-if="detail(m)" class="meds__detail">{{ detail(m) }}</span>
+                            <ProvenanceTags :provenance="m.provenance" class="meds__prov" />
                         </span>
                         <UiTag variant="success" :icon="Check">{{ t('health.medication.ongoing') }}</UiTag>
                     </button>
@@ -60,6 +62,7 @@ const dateText = (iso) => {
                             <span class="meds__text">
                                 <span class="meds__name">{{ m.name }}</span>
                                 <span v-if="detail(m)" class="meds__detail">{{ detail(m) }}</span>
+                                <ProvenanceTags :provenance="m.provenance" class="meds__prov" />
                             </span>
                             <UiTag>{{ t('health.medication.ended', { date: dateText(m.endedOn) }) }}</UiTag>
                         </button>
@@ -79,6 +82,7 @@ const dateText = (iso) => {
 .meds__row:focus-visible, .meds__toggle:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .meds__text { display: flex; flex-direction: column; min-width: 0; }
 .meds__name { font-size: var(--text-base); font-weight: 600; overflow-wrap: anywhere; }
+.meds__prov { margin-top: var(--space-1); }
 .meds__detail { font-size: var(--text-sm); color: var(--color-text-muted); overflow-wrap: anywhere; }
 .meds__empty { margin: 0; font-weight: 600; }
 .meds__toggle { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--color-text-muted); font: inherit; font-size: var(--text-sm); cursor: pointer; align-self: flex-start; }

@@ -46,6 +46,8 @@ const personLine = computed(() => {
     return parts.join(' · ');
 });
 const unverified = (item) => item.verification === 'unverified';
+// Printed as words so it survives black and white: "AI-extracted, Unverified".
+const provenanceWords = computed(() => `${t('health.ai.provenance.ai_extracted')}, ${t('health.ai.provenance.unverified')}`);
 </script>
 
 <template>
@@ -62,7 +64,7 @@ const unverified = (item) => item.verification === 'unverified';
                     <thead><tr><th scope="col">{{ t('health.export.col_substance') }}</th><th scope="col">{{ t('health.export.col_reaction') }}</th><th scope="col">{{ t('health.export.col_severity') }}</th></tr></thead>
                     <tbody>
                         <tr v-for="(a, i) in list('allergies')" :key="i">
-                            <td :data-label="t('health.export.col_substance')">{{ a.substance }}<UiTag v-if="unverified(a)" variant="warn" :icon="TriangleAlert" class="xp__tag" data-testid="unverified-tag">{{ t('health.export.unverified') }}</UiTag></td>
+                            <td :data-label="t('health.export.col_substance')">{{ a.substance }}<UiTag v-if="unverified(a)" variant="warn" :icon="TriangleAlert" class="xp__tag" data-testid="unverified-tag">{{ provenanceWords }}</UiTag></td>
                             <td :data-label="t('health.export.col_reaction')">{{ a.reaction }}</td>
                             <td :data-label="t('health.export.col_severity')">{{ severity(a.severity) }}</td>
                         </tr>
@@ -76,7 +78,7 @@ const unverified = (item) => item.verification === 'unverified';
                     <thead><tr><th scope="col">{{ t('health.export.col_name') }}</th><th scope="col">{{ t('health.export.col_dose') }}</th><th scope="col">{{ t('health.export.col_schedule') }}</th><th scope="col">{{ t('health.export.col_period') }}</th></tr></thead>
                     <tbody>
                         <tr v-for="(m, i) in list('medications')" :key="i">
-                            <td :data-label="t('health.export.col_name')">{{ m.name }}<UiTag v-if="unverified(m)" variant="warn" :icon="TriangleAlert" class="xp__tag" data-testid="unverified-tag">{{ t('health.export.unverified') }}</UiTag></td>
+                            <td :data-label="t('health.export.col_name')">{{ m.name }}<UiTag v-if="unverified(m)" variant="warn" :icon="TriangleAlert" class="xp__tag" data-testid="unverified-tag">{{ provenanceWords }}</UiTag></td>
                             <td :data-label="t('health.export.col_dose')">{{ m.dose }}</td>
                             <td :data-label="t('health.export.col_schedule')">{{ m.schedule }}</td>
                             <td :data-label="t('health.export.col_period')">{{ period(m) }}</td>
@@ -91,7 +93,7 @@ const unverified = (item) => item.verification === 'unverified';
                     <thead><tr><th scope="col">{{ t('health.export.col_vaccine') }}</th><th scope="col">{{ t('health.export.col_date') }}</th><th scope="col">{{ t('health.export.col_next_due') }}</th></tr></thead>
                     <tbody>
                         <tr v-for="(v, i) in list('vaccinations')" :key="i">
-                            <td :data-label="t('health.export.col_vaccine')">{{ v.vaccine }}<UiTag v-if="unverified(v)" variant="warn" :icon="TriangleAlert" class="xp__tag" data-testid="unverified-tag">{{ t('health.export.unverified') }}</UiTag></td>
+                            <td :data-label="t('health.export.col_vaccine')">{{ v.vaccine }}<UiTag v-if="unverified(v)" variant="warn" :icon="TriangleAlert" class="xp__tag" data-testid="unverified-tag">{{ provenanceWords }}</UiTag></td>
                             <td :data-label="t('health.export.col_date')">{{ dateText(v.given_on) }}</td>
                             <td :data-label="t('health.export.col_next_due')">{{ dateText(v.next_due_on) }}</td>
                         </tr>
@@ -105,7 +107,7 @@ const unverified = (item) => item.verification === 'unverified';
                     <thead><tr><th scope="col">{{ t('health.export.col_date') }}</th><th scope="col">{{ t('health.export.col_doctor') }}</th><th scope="col">{{ t('health.export.col_specialty') }}</th><th scope="col">{{ t('health.export.col_diagnosis') }}</th><th scope="col">{{ t('health.export.col_notes') }}</th></tr></thead>
                     <tbody>
                         <tr v-for="(v, i) in list('visits')" :key="i">
-                            <td :data-label="t('health.export.col_date')">{{ dateText(v.visited_on) }}<UiTag v-if="unverified(v)" variant="warn" :icon="TriangleAlert" class="xp__tag" data-testid="unverified-tag">{{ t('health.export.unverified') }}</UiTag></td>
+                            <td :data-label="t('health.export.col_date')">{{ dateText(v.visited_on) }}<UiTag v-if="unverified(v)" variant="warn" :icon="TriangleAlert" class="xp__tag" data-testid="unverified-tag">{{ provenanceWords }}</UiTag></td>
                             <td :data-label="t('health.export.col_doctor')">{{ v.doctor }}</td>
                             <td :data-label="t('health.export.col_specialty')">{{ v.specialty_label }}</td>
                             <td :data-label="t('health.export.col_diagnosis')" class="xp__text">{{ v.diagnosis_text }}</td>
@@ -120,7 +122,7 @@ const unverified = (item) => item.verification === 'unverified';
                 <ul class="xp__docs">
                     <li v-for="(d, i) in list('documents')" :key="i">
                         <span>{{ d.title }}</span>
-                        <UiTag v-if="unverified(d)" variant="warn" :icon="TriangleAlert" class="xp__tag" data-testid="unverified-tag">{{ t('health.export.unverified') }}</UiTag>
+                        <UiTag v-if="unverified(d)" variant="warn" :icon="TriangleAlert" class="xp__tag" data-testid="unverified-tag">{{ provenanceWords }}</UiTag>
                         <span class="xp__date">{{ d.uploaded_on ? dateText(d.uploaded_on) : '' }}</span>
                     </li>
                 </ul>
@@ -143,7 +145,7 @@ const unverified = (item) => item.verification === 'unverified';
 .xp__table { width: 100%; border-collapse: collapse; }
 .xp__table th, .xp__table td { padding: var(--space-2); border: 0.5pt solid var(--color-border-strong); text-align: start; vertical-align: top; overflow-wrap: anywhere; }
 .xp__text { white-space: pre-wrap; }
-.xp__tag { margin-inline-start: var(--space-2); }
+.xp__tag { margin-inline-start: var(--space-2); border: 0.5pt solid currentColor; white-space: normal; }
 .xp__docs { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1); }
 .xp__docs li { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: baseline; border-bottom: 0.5pt solid var(--color-border-strong); padding-block: var(--space-1); }
 .xp__date { margin-inline-start: auto; color: var(--color-text-muted); }

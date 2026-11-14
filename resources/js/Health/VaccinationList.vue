@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { Clock, Plus } from '@lucide/vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiTag from '../Components/ui/UiTag.vue';
+import ProvenanceTags from './ProvenanceTags.vue';
 
 // Vaccinations side card. Due status (overdue, due soon, later) and the day count are decided by the server in the
 // family time zone; the client only formats them. Due items come first, then past vaccinations.
@@ -36,6 +37,7 @@ const dateText = (iso) => {
                         <span class="vacc__text">
                             <span class="vacc__name">{{ v.vaccine }}</span>
                             <span class="vacc__detail">{{ t('health.vaccination.given', { date: dateText(v.givenOn) }) }}</span>
+                            <ProvenanceTags :provenance="v.provenance" class="vacc__prov" />
                         </span>
                         <UiTag v-if="v.status === 'overdue'" variant="danger" :icon="Clock" data-testid="vaccination-tag">{{ t('health.vaccination.overdue') }}</UiTag>
                         <UiTag v-else-if="v.status === 'due_soon'" variant="warn" :icon="Clock" data-testid="vaccination-tag">{{ t('health.vacc.due_days', { n: v.dueInDays }, v.dueInDays) }}</UiTag>
@@ -49,6 +51,7 @@ const dateText = (iso) => {
                         <span class="vacc__text">
                             <span class="vacc__name">{{ v.vaccine }}</span>
                             <span class="vacc__detail">{{ dateText(v.givenOn) }}</span>
+                            <ProvenanceTags :provenance="v.provenance" class="vacc__prov" />
                         </span>
                     </button>
                 </li>
@@ -67,6 +70,7 @@ const dateText = (iso) => {
 .vacc__row:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .vacc__text { display: flex; flex-direction: column; min-width: 0; }
 .vacc__name { font-size: var(--text-base); font-weight: 600; overflow-wrap: anywhere; }
+.vacc__prov { margin-top: var(--space-1); }
 .vacc__detail { font-size: var(--text-sm); color: var(--color-text-muted); }
 .vacc__empty { margin: 0; font-weight: 600; }
 @container (min-width: 900px) {

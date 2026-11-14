@@ -5,6 +5,7 @@ import { FileText, Image as ImageIcon, Paperclip, Stethoscope, Syringe } from '@
 import UiButton from '../Components/ui/UiButton.vue';
 import UiChip from '../Components/ui/UiChip.vue';
 import AiStatusTag from './Ai/AiStatusTag.vue';
+import ProvenanceTags from './ProvenanceTags.vue';
 
 // Chronological <ol> of entries (newest first, order comes from the server). With `filters` it also shows the chip
 // row; without (inside a specialty folder) it is only the list. Free text is interpolated, never rendered as HTML.
@@ -69,6 +70,7 @@ const dateText = (iso) => {
                         <Syringe :size="20" :stroke-width="1.75" aria-hidden="true" />
                         <span>{{ row.vaccination.vaccine }}</span>
                     </span>
+                    <ProvenanceTags :provenance="row.vaccination.provenance" />
                 </button>
                 <button v-else-if="row.document" type="button" class="timeline__row" data-testid="timeline-entry" @click="emit('open-document', row.document.id)">
                     <time class="timeline__date" :datetime="row.date">{{ dateText(row.date) }}</time>
@@ -90,6 +92,7 @@ const dateText = (iso) => {
                             <Paperclip :size="16" :stroke-width="1.75" aria-hidden="true" />{{ t('health.docs.attached', { n: row.visit.documentCount }, row.visit.documentCount) }}
                         </span>
                     </span>
+                    <ProvenanceTags :provenance="row.visit.provenance" />
                 </button>
             </li>
         </ol>

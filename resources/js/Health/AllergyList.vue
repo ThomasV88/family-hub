@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { Plus, TriangleAlert } from '@lucide/vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiTag from '../Components/ui/UiTag.vue';
+import ProvenanceTags from './ProvenanceTags.vue';
 
 // Allergies side card. The server sends the list severe first; severity is always text plus icon, never colour alone.
 const props = defineProps({
@@ -33,7 +34,10 @@ const empty = computed(() => props.allergies.length === 0);
                         <span class="allergies__substance">{{ allergy.substance }}</span>
                         <span v-if="allergy.reaction" class="allergies__reaction">{{ allergy.reaction }}</span>
                     </span>
-                    <UiTag :variant="variant(allergy.severity)" :icon="TriangleAlert" :data-severity="allergy.severity">{{ label(allergy.severity) }}</UiTag>
+                    <span class="allergies__tags">
+                        <UiTag :variant="variant(allergy.severity)" :icon="TriangleAlert" :data-severity="allergy.severity">{{ label(allergy.severity) }}</UiTag>
+                        <ProvenanceTags :provenance="allergy.provenance" />
+                    </span>
                 </button>
             </li>
         </ul>
@@ -47,6 +51,7 @@ const empty = computed(() => props.allergies.length === 0);
 .allergies__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .allergies__row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); width: 100%; min-height: 44px; padding: var(--space-2) 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: start; cursor: pointer; border-radius: var(--radius-md); }
 .allergies__row:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.allergies__tags { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-2); min-width: 0; }
 .allergies__text { display: flex; flex-direction: column; min-width: 0; }
 .allergies__substance { font-size: var(--text-base); font-weight: 600; overflow-wrap: anywhere; }
 .allergies__reaction { font-size: var(--text-sm); color: var(--color-text-muted); overflow-wrap: anywhere; }
