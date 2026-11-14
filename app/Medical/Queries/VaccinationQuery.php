@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 /**
  * Vaccinations of one subject, with the MedicationQuery semantics: every statement is constrained to the subject and to
- * the viewer's scope, source is always 'manual', and the public uuid is the only record id callers handle. $today is the
+ * the viewer's scope, source is 'manual' unless the caller passes 'ai' (never from client input), and the public uuid is the only record id callers handle. $today is the
  * family-timezone date computed by the caller in PHP, never the database clock.
  */
 class VaccinationQuery
@@ -74,13 +74,14 @@ class VaccinationQuery
     }
 
     /** @param  array<string, mixed>  $data */
-    public function create(Viewer $viewer, MedicalSubject $subject, array $data): MedicalVaccination
+    public function create(Viewer $viewer, MedicalSubject $subject, array $data, string $source = 'manual'): MedicalVaccination
     {
+        self::assertSource($source);
         abort_unless($viewer->canEdit(), 403);
         $allowed = Visibility::apply(DB::table('medical_subjects')->where('id', $subject->getKey()), $viewer, 'id', AccessLevel::Edit)->exists();
         abort_unless($allowed, 403);
 
-        return $this->insert($viewer, $subject, $data);
+        return $this->insert($viewer, $subject, $data, $source);
     }
 
     /** @param  array<string, mixed>  $data */
@@ -129,12 +130,12 @@ class VaccinationQuery
     }
 
     /** @param  array<string, mixed>  $data */
-    private function insert(Viewer $viewer, MedicalSubject $subject, array $data): MedicalVaccination
+    private function insert(Viewer $viewer, MedicalSubject $subject, array $data, string $source = 'manual'): MedicalVaccination
     {
         $vaccination = new MedicalVaccination;
         $vaccination->forceFill($this->attributes($data) + [
             'subject_id' => $subject->getKey(),
-            'source' => 'manual',
+            'source' => $source,
             'verified_at' => null,
             'created_by' => $viewer->userId(),
         ])->save();
@@ -155,6 +156,29 @@ class VaccinationQuery
             $days <= (int) config('medical.due_soon_days') => ['due_soon', $days],
             default => ['later', $days],
         };
+    }
+
+    /**
+     * Marks an AI-sourced, still unverified record as verified by this viewer. One scoped UPDATE (Edit scope); false
+     * when nothing changed (manual, already verified, hidden, view-only or unknown id).
+     */
+    public function verify(Viewer $viewer, MedicalSubject $subject, string $publicId): bool
+    {
+        if (! Str::isUuid($publicId) || ! $viewer->canEdit()) {
+            return false;
+        }
+
+        return $this->scoped($viewer, $subject, $publicId)
+            ->where('source', 'ai')
+            ->whereNull('verified_at')
+            ->update(['verified_at' => now(), 'verified_by' => $viewer->userId(), 'updated_at' => now()]) > 0;
+    }
+
+    private static function assertSource(string $source): void
+    {
+        if (! in_array($source, ['manual', 'ai'], true)) {
+            throw new \InvalidArgumentException('Invalid record source.');
+        }
     }
 
     private function scoped(Viewer $viewer, MedicalSubject $subject, string $publicId): Builder
