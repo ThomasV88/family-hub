@@ -88,6 +88,75 @@ describe('useAiStatus polling', () => {
         expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 
+    describe('waiting for AI quota', () => {
+        const waiting = { [DOC]: { ...running[DOC], status: 'waiting', availableAt: '2026-11-14T02:10:00+00:00' } };
+
+        it('polls every 60 s and not faster', async () => {
+            fetchMock.mockResolvedValue(ok(waiting));
+            setup(waiting);
+            await vi.advanceTimersByTimeAsync(59999);
+            expect(fetchMock).not.toHaveBeenCalled();
+            await vi.advanceTimersByTimeAsync(1);
+            expect(fetchMock).toHaveBeenCalledTimes(1);
+            await vi.advanceTimersByTimeAsync(60000);
+            expect(fetchMock).toHaveBeenCalledTimes(2);
+        });
+
+        it('does not request while the tab is hidden and resumes when visible again', async () => {
+            fetchMock.mockResolvedValue(ok(waiting));
+            setup(waiting);
+            setHidden(true);
+            await vi.advanceTimersByTimeAsync(5 * 60000);
+            expect(fetchMock).not.toHaveBeenCalled();
+            setHidden(false);
+            await vi.advanceTimersByTimeAsync(0);
+            expect(fetchMock).toHaveBeenCalledTimes(1);
+            await vi.advanceTimersByTimeAsync(60000);
+            expect(fetchMock).toHaveBeenCalledTimes(2);
+        });
+
+        it('stops after 60 minutes of visible waiting and flags stalled', async () => {
+            fetchMock.mockResolvedValue(ok(waiting));
+            const api = setup(waiting);
+            await vi.advanceTimersByTimeAsync(60 * 60000 + 1000);
+            expect(api.stalled.value).toBe(true);
+            const stopped = fetchMock.mock.calls.length;
+            expect(stopped).toBe(60);
+            await vi.advanceTimersByTimeAsync(10 * 60000);
+            expect(fetchMock.mock.calls.length).toBe(stopped);
+        });
+
+        it('does not count hidden time towards the 60 minutes', async () => {
+            fetchMock.mockResolvedValue(ok(waiting));
+            const api = setup(waiting);
+            await vi.advanceTimersByTimeAsync(30 * 60000);
+            setHidden(true);
+            await vi.advanceTimersByTimeAsync(60 * 60000);
+            setHidden(false);
+            await vi.advanceTimersByTimeAsync(0);
+            expect(api.stalled.value).toBe(false);
+        });
+
+        it('returns to the 5 s schedule when the run becomes queued or running', async () => {
+            fetchMock.mockResolvedValueOnce(ok(running)).mockResolvedValue(ok(running));
+            const api = setup(waiting);
+            await vi.advanceTimersByTimeAsync(60000);
+            expect(fetchMock).toHaveBeenCalledTimes(1);
+            expect(api.statuses.value[DOC].status).toBe('running');
+            await vi.advanceTimersByTimeAsync(5000);
+            expect(fetchMock).toHaveBeenCalledTimes(2);
+        });
+
+        it('stops on a terminal state', async () => {
+            fetchMock.mockResolvedValueOnce(ok(ready));
+            setup(waiting);
+            await vi.advanceTimersByTimeAsync(60000);
+            expect(fetchMock).toHaveBeenCalledTimes(1);
+            await vi.advanceTimersByTimeAsync(10 * 60000);
+            expect(fetchMock).toHaveBeenCalledTimes(1);
+        });
+    });
+
     it('sends a 423 to the refusal handler and stops polling', async () => {
         fetchMock.mockResolvedValue({ ok: false, status: 423, error: 'reauth_required', data: {} });
         setup(running);

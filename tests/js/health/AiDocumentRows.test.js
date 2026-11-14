@@ -44,6 +44,14 @@ describe('TimelineList document rows', () => {
         expect(rowTags()).toEqual(['Waiting for AI', 'AI is reading', 'Suggestions ready', 'Nothing to suggest', 'AI could not read this', 'Cancelled', null, null]);
     });
 
+    it('shows the short waiting tag without a time on a row', () => {
+        const withWaiting = { ...STATUSES, [D[7].id]: st('waiting', { availableAt: '2099-01-01T02:10:00+00:00' }) };
+        current = mountUi(TimelineList, { props: { entries, documents: D, aiStatuses: withWaiting } });
+        expect(rowTags()[7]).toBe('Waiting for AI quota');
+        expect(document.querySelectorAll('[data-testid="timeline-entry"] time[datetime^="2099"]')).toHaveLength(0);
+        expect(rowTags().slice(0, 7)).toEqual(['Waiting for AI', 'AI is reading', 'Suggestions ready', 'Nothing to suggest', 'AI could not read this', 'Cancelled', null]);
+    });
+
     it('has no actions on rows and works without the prop', () => {
         current = mountUi(TimelineList, { props: { entries, documents: D } });
         expect(tags()).toHaveLength(0);
