@@ -31,3 +31,6 @@ HEIC/JPEG/PDF upload on iPhone and iPad (Safari and PWA), print emergency card a
 - **WR-07, who may switch AI consent on:** any Edit member can enable AI processing for a person who has their own account, without that person agreeing or being told. Options: (a) when `user_id` is set only that user may change it; (b) allow Edit members but notify the linked user; (c) guardian or minor rule; (d) keep as is.
 - **WR-11, person name in reminder mail and push:** subject and push title read "Vaccination due: <name>", visible in mailboxes and on lock screens. Options: (a) neutral text ("A reminder is waiting in Family Hub"); (b) first name or initials only; (c) keep the full name (current, accepted earlier).
 - **WR-12, image pixel cap and quality:** the medical pipeline shares `wishlist.image_max_pixels`, and images are re-encoded to JPEG q82 at 2400 px with the original discarded, so small print on scans can be lost. Options: (a) add `medical.image_max_pixels` only; (b) also raise to 3000 px and q90 for documents; (c) keep the sanitized original for documents; (d) keep as is.
+
+## Server env to set at the live session (review WR-09)
+Server `.env` for staging and production needs `LOG_LEVEL=warning` and `APP_DEBUG=false` (QueryException logs for medical tables are already stripped of bindings in code, this is defence in depth). Never print the `.env`.
