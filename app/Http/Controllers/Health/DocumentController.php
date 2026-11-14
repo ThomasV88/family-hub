@@ -2,14 +2,23 @@
 
 namespace App\Http\Controllers\Health;
 
+use App\Access\AccessLevel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Health\StoreDocumentRequest;
+use App\Http\Requests\Health\UpdateDocumentRequest;
 use App\Medical\Documents\DocumentRejected;
 use App\Medical\Documents\MedicalDocumentStore;
 use App\Medical\Queries\DocumentQuery;
+use App\Medical\Queries\SubjectQuery;
 use App\Medical\Viewer;
+use App\Models\MedicalDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class DocumentController extends Controller
 {
@@ -60,6 +69,108 @@ class DocumentController extends Controller
 
         return redirect()->route('health.people.show', ['person' => $subject->getKey()])
             ->with('toast', ['key' => 'health.upload.done']);
+    }
+
+    /**
+     * Image derivative, inline. The only file response that may be revalidated (private, no-cache + ETag, see
+     * NoStoreDynamicResponses); the 304 can only follow the scoped lookup, so a hidden document never answers 304.
+     */
+    public function preview(Request $request, string $person, string $document, string $variant, SubjectQuery $subjects, DocumentQuery $documents, MedicalDocumentStore $store): BinaryFileResponse
+    {
+        $row = $this->visibleDocument($request, $person, $document, $subjects, $documents);
+        abort_unless($row->kind === 'image' && in_array($variant, ['thumb', 'view'], true), 403);
+        $relative = $variant === 'thumb' ? (string) $row->thumb_path : (string) $row->path;
+
+        $response = $this->fileResponse($store, $relative, 'image/jpeg', HeaderUtils::makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE, 'preview.jpg'));
+        $response->headers->set('Cache-Control', 'private, no-cache');
+        $response->headers->set('ETag', '"'.substr((string) $row->sha256, 0, 32).$variant.'"');
+        $response->isNotModified($request);
+
+        return $response;
+    }
+
+    /** The original (PDF, HEIC) or the full JPEG as a download. Never cacheable (the middleware sets no-store). */
+    public function file(Request $request, string $person, string $document, SubjectQuery $subjects, DocumentQuery $documents, MedicalDocumentStore $store): BinaryFileResponse
+    {
+        $row = $this->visibleDocument($request, $person, $document, $subjects, $documents);
+        $ext = match ($row->kind) {
+            'pdf' => 'pdf',
+            'heic' => 'heic',
+            default => 'jpg',
+        };
+        $mime = $row->kind === 'image' ? 'image/jpeg' : (string) $row->mime;
+        $slug = trim(mb_substr(Str::slug((string) $row->title), 0, 60), '-');
+        $name = ($slug !== '' ? $slug : 'document').'.'.$ext;
+
+        $response = $this->fileResponse($store, (string) $row->path, $mime, HeaderUtils::makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $name));
+        $response->headers->set('Cache-Control', 'no-store, private');
+
+        return $response;
+    }
+
+    public function update(UpdateDocumentRequest $request, string $person, string $document, DocumentQuery $documents): RedirectResponse
+    {
+        $viewer = Viewer::for($request->user());
+        $subject = $request->subject();
+        abort_if($documents->find($viewer, $subject, $document, AccessLevel::Edit) === null, 403);
+
+        $visit = $request->input('visit_id');
+        $saved = $documents->update(
+            $viewer,
+            $subject,
+            $document,
+            (string) $request->validated('title'),
+            $request->has('visit_id'),
+            is_string($visit) && $visit !== '' ? $visit : null,
+        );
+        abort_unless($saved, 403);
+
+        return redirect()->route('health.people.show', ['person' => $subject->getKey()])
+            ->with('toast', ['key' => 'health.doc.saved']);
+    }
+
+    public function destroy(Request $request, string $person, string $document, SubjectQuery $subjects, DocumentQuery $documents, MedicalDocumentStore $store): RedirectResponse
+    {
+        $viewer = Viewer::for($request->user());
+        $subject = $subjects->findVisible($viewer, $person, AccessLevel::Edit);
+        abort_if($subject === null, 403);
+        $paths = $documents->delete($viewer, $subject, $document);
+        abort_if($paths === null, 403);
+        // After the commit: a failed file removal leaves an orphan for the daily sweep, never a dangling row.
+        $store->delete($paths);
+
+        return redirect()->route('health.people.show', ['person' => $subject->getKey()])
+            ->with('toast', ['key' => 'health.doc.deleted']);
+    }
+
+    /** Hidden, unknown, malformed and mismatched ids all end in the same 403. */
+    private function visibleDocument(Request $request, string $person, string $document, SubjectQuery $subjects, DocumentQuery $documents): MedicalDocument
+    {
+        $viewer = Viewer::for($request->user());
+        $subject = $subjects->findVisible($viewer, $person);
+        abort_if($subject === null, 403);
+
+        return $documents->find($viewer, $subject, $document) ?? abort(403);
+    }
+
+    /** Hardened file response; a missing or malformed stored path is the same 403 as any other refusal. */
+    private function fileResponse(MedicalDocumentStore $store, string $relative, string $mime, string $disposition): BinaryFileResponse
+    {
+        try {
+            $absolute = $store->absolutePath($relative);
+        } catch (\InvalidArgumentException) {
+            abort(403);
+        }
+        abort_unless(is_file($absolute), 403);
+
+        $response = new BinaryFileResponse($absolute, 200, [], false, null, false, false);
+        $response->headers->set('Content-Type', $mime);
+        $response->headers->set('Content-Disposition', $disposition);
+        $response->headers->set('X-Content-Type-Options', 'nosniff');
+        $response->headers->set('Content-Security-Policy', "default-src 'none'");
+        $response->headers->set('Vary', 'Cookie');
+
+        return $response;
     }
 
     private function refuse(StoreDocumentRequest $request, string $reason): JsonResponse|RedirectResponse
