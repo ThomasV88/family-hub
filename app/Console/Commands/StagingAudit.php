@@ -38,6 +38,10 @@ class StagingAudit extends Command
             ['finance_import_profiles', $createdByReal],
             ['finance_import_batches', "(user_id not in {$synthetic})"],
             ['finance_account_members', "(user_id not in {$synthetic})"],
+            // Phase 7: staging must never hold real medical data. A subject created by a deleted (null) or real user, or
+            // linked to a real user, fails; so does any membership of a real user.
+            ['medical_subjects', "{$createdByReal} or (user_id is not null and user_id not in {$synthetic})"],
+            ['medical_subject_members', "(user_id not in {$synthetic})"],
         ];
     }
 

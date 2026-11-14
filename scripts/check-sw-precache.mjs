@@ -7,6 +7,8 @@ const ALLOW = [
     /^offline\.html$/,
     /^manifest\.webmanifest$/,
 ];
+/** Authenticated medical and finance screens must never be precached, whatever the allowlist says. */
+const FORBIDDEN_URL = /(^|\/)(health|finance)(\/|$|\?)/i;
 const FORBIDDEN = ['registerRoute', 'runtimeCaching', 'NetworkFirst', 'StaleWhileRevalidate', 'CacheFirst', 'cache.put', 'caches.open'];
 
 export function checkPrecache({ swSource, swBuilt }) {
@@ -18,6 +20,7 @@ export function checkPrecache({ swSource, swBuilt }) {
     const urls = raw.map((u) => u.replace(/^\//, ''));
     if (urls.length === 0) violations.push('no precache urls found in built worker');
     urls.forEach((url, i) => {
+        if (FORBIDDEN_URL.test(url)) violations.push(`health or finance url in precache: ${raw[i]}`);
         if (!ALLOW.some((re) => re.test(url))) violations.push(`precache url outside allowlist: ${raw[i]}`);
     });
     return { ok: violations.length === 0, urls, violations };
