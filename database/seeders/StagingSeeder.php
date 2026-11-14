@@ -22,6 +22,15 @@ class StagingSeeder extends Seeder
     {
         User::where('email', 'like', '%@example.test')->delete();
 
+        // A shared, server-side password makes the synthetic accounts usable and survives the reseed on every deploy.
+        // Without it each account gets a random password nobody knows (nobody can log in).
+        $shared = (string) config('family.staging_seed_password');
+        $usable = strlen($shared) >= 16;
+        $credentials = fn (): array => [
+            'password' => Hash::make($usable ? $shared : Str::random(32)),
+            'password_set' => $usable,
+        ];
+
         $created = 0;
         $presets = [Preset::Parent, Preset::Child, Preset::Grandparent, Preset::Guest];
         foreach (['sk_SK' => 2, 'pl_PL' => 2, 'en_GB' => 2] as $locale => $n) {
@@ -31,7 +40,7 @@ class StagingSeeder extends Seeder
                 User::factory()->withPreset($presets[($created - 1) % count($presets)])->create([
                     'name' => $faker->name().' (demo)',
                     'email' => strtolower($locale).".{$created}@example.test",
-                    'password' => Hash::make(Str::random(32)),
+                    ...$credentials(),
                 ]);
             }
         }
@@ -40,7 +49,7 @@ class StagingSeeder extends Seeder
         $admin = User::factory()->create([
             'name' => 'Admin (demo)',
             'email' => 'admin@example.test',
-            'password' => Hash::make(Str::random(32)),
+            ...$credentials(),
         ]);
         $admin->forceFill(['is_admin' => true])->save();
 

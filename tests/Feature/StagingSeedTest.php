@@ -116,3 +116,42 @@ it('audit passes when invitations and audit rows only reference synthetic data',
 
     $this->artisan('staging:audit')->assertExitCode(0);
 });
+
+it('gives every synthetic account the shared staging password when one is configured', function () {
+    setEnv('staging');
+    config(['family.staging_seed_password' => 'a-shared-staging-pass-1']);
+
+    $this->artisan('staging:seed --force')->assertExitCode(0);
+
+    foreach (User::all() as $user) {
+        expect(Hash::check('a-shared-staging-pass-1', $user->password))->toBeTrue()
+            ->and($user->password_set)->toBeTrue();
+    }
+
+    // a reseed (every staging deploy) keeps the same login
+    $this->artisan('staging:seed --force')->assertExitCode(0);
+    expect(Hash::check('a-shared-staging-pass-1', User::where('email', 'admin@example.test')->first()->password))->toBeTrue();
+});
+
+it('keeps random, unusable passwords when no shared password is set or it is too short', function () {
+    setEnv('staging');
+
+    foreach ([null, '', 'too-short'] as $value) {
+        config(['family.staging_seed_password' => $value]);
+        $this->artisan('staging:seed --force')->assertExitCode(0);
+
+        foreach (User::all() as $user) {
+            expect($user->password_set)->toBeFalse()
+                ->and(Hash::check((string) $value, $user->password))->toBeFalse();
+        }
+    }
+});
+
+it('never reads the shared password in production', function () {
+    setEnv('production');
+    config(['family.staging_seed_password' => 'a-shared-staging-pass-1']);
+
+    $this->artisan('staging:seed --force')->assertExitCode(1);
+
+    expect(User::count())->toBe(0);
+});
