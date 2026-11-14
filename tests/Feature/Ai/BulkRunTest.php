@@ -240,6 +240,7 @@ it('starts a run from a fresh token with scope and cap from the token', function
         ->and($run->dry_run_id)->toBe($dry['token'])
         ->and($run->started_by)->toBe($admin->id)
         ->and(DB::table('ai_bulk_dry_runs')->where('id', $dry['token'])->value('consumed_at'))->not->toBeNull()
+        ->and($run->providers)->toBe('codex,copilot')
         ->and(DB::table('ai_notice_acks')->where('user_id', $admin->id)->value('providers'))->toBe('codex,copilot')
         ->and(AuditEntry::where('event', 'ai_bulk_run_changed')->get()->pluck('meta.action')->all())->toBe(['dry_run', 'started']);
 });
@@ -261,6 +262,7 @@ it('refuses a start whose shown provider set is no longer the enabled one and co
 
     // The token is still good: confirming the set the dialog now names starts the run, and stores exactly that set.
     expect(bkQuery()->start($admin, $dry['token'], true, ['codex', 'copilot'])['result'])->toBe('ok')
+        ->and(DB::table('ai_bulk_runs')->value('providers'))->toBe('codex,copilot')
         ->and(DB::table('ai_notice_acks')->where('user_id', $admin->id)->value('providers'))->toBe('codex,copilot');
 });
 

@@ -223,7 +223,7 @@ function wrQueued(string $acks = 'codex', bool $bulk = false): array
     $doc = MedicalDocument::factory()->image()->forSubject($subject)->create(['title' => 'Scan']);
     Storage::disk('medical')->put($doc->path, 'jpeg-bytes');
     DB::table('ai_notice_acks')->insert(['user_id' => $user->id, 'providers' => $acks]);
-    $bulkRun = $bulk ? AiBulkRun::factory()->create(['started_by' => $user->id]) : null;
+    $bulkRun = $bulk ? AiBulkRun::factory()->create(['started_by' => $user->id, 'providers' => $acks]) : null;
     $run = MedicalAiExtraction::factory()->forDocument($doc)->create(['started_by' => $user->id, 'bulk_run_id' => $bulkRun?->id]);
     AiCall::factory()->create(['extraction_id' => $run->id, 'subject_id' => $subject->id, 'document_id' => $doc->id, 'started_by' => $user->id, 'bulk_run_id' => $bulkRun?->id]);
 
@@ -378,6 +378,22 @@ it('uses the starting admin acknowledgment for a bulk run and never Copilot beyo
 
     expect(wrRow($s['run']->id)->status)->toBe('waiting')->and(file_exists($record))->toBeFalse()
         ->and(wrCalls($s['run']->id)[0]->bulk_run_id)->toBe($s['bulk']->id);
+});
+
+it('keeps a bulk row on the run\'s frozen providers when the admin later acknowledges more', function () {
+    config(['ai.bulk.fallback_agents' => true]);
+    $s = wrQueued('codex', true);
+    wrCopilotOn();
+    // A later interactive acknowledgment of both providers by the same admin.
+    DB::table('ai_notice_acks')->where('user_id', $s['user']->id)->update(['providers' => 'codex,copilot']);
+    $record = sys_get_temp_dir().'/wr-rec-'.bin2hex(random_bytes(4));
+    $GLOBALS['wr_scripts'][] = $record;
+    wrBin('codex', FakeCodex::quota('You have hit your usage limit. Try again later.'));
+    wrBin('copilot', FakeCopilot::recording($record, json_encode(wrPayload())));
+
+    wrRunJob($s['run']->id);
+
+    expect(wrRow($s['run']->id)->status)->not->toBe('ready')->and(file_exists($record))->toBeFalse();
 });
 
 it('runs a bulk row for an admin who is not a member of the person', function () {

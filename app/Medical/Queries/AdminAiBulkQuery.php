@@ -100,12 +100,14 @@ final class AdminAiBulkQuery
             }
 
             $runId = (string) Str::uuid();
+            // Exactly the set the dialog named (verified above under the lock); frozen on the run.
+            $providers = $enabled;
             try {
                 // The nested transaction is a savepoint: a unique violation must not poison the outer one.
                 DB::transaction(fn () => DB::table('ai_bulk_runs')->insert([
                     'id' => $runId, 'started_by' => $admin->id, 'scope' => $scope, 'daily_cap' => (int) $row->daily_cap,
                     'status' => 'active', 'dry_run_id' => $token, 'eligible_total' => (int) $row->eligible,
-                    'skipped_count' => 0, 'created_at' => $now, 'updated_at' => $now,
+                    'skipped_count' => 0, 'providers' => implode(',', $providers), 'created_at' => $now, 'updated_at' => $now,
                 ]));
             } catch (QueryException $e) {
                 if (($e->errorInfo[0] ?? null) === '23505') {
@@ -115,8 +117,7 @@ final class AdminAiBulkQuery
             }
 
             DB::table('ai_bulk_dry_runs')->where('id', $token)->update(['consumed_at' => $now]);
-            // Exactly the set the dialog named (verified above under the lock). Bulk attempts use only this.
-            $providers = $enabled;
+            // The admin's own interactive acknowledgment records the same set; bulk attempts read the run's copy.
             DB::table('ai_notice_acks')->upsert(
                 [['user_id' => $admin->id, 'acknowledged_at' => $now, 'providers' => implode(',', $providers)]],
                 ['user_id'],

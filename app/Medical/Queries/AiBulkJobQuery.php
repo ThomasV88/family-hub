@@ -87,8 +87,8 @@ final class AiBulkJobQuery
                 return ['enqueued' => null, 'reconciled' => $reconciled, 'completed' => 0];
             }
 
-            // The same acknowledged set the job re-applies before each attempt, so the tick never picks an agent the job would refuse.
-            $agent = $this->agents->candidates([], true, $this->ackedProviders((int) $run->started_by))[0] ?? null;
+            // The run's frozen provider set, the same one the job re-applies before each attempt, so the tick never picks an agent the job would refuse.
+            $agent = $this->agents->candidates([], true, $this->runProviders($run))[0] ?? null;
             if ($agent === null) {
                 if ($run->blocked_since === null) {
                     DB::table('ai_bulk_runs')->where('id', $runId)->update(['blocked_since' => $now, 'updated_at' => $now]);
@@ -123,12 +123,10 @@ final class AiBulkJobQuery
         return (bool) User::query()->whereKey((int) $run->started_by)->value('is_admin');
     }
 
-    /** @return list<string> */
-    private function ackedProviders(int $userId): array
+    /** @return list<string> the provider keys acknowledged at Start and frozen on the run */
+    private function runProviders(object $run): array
     {
-        $providers = DB::table('ai_notice_acks')->where('user_id', $userId)->value('providers');
-
-        return $providers === null ? [] : array_values(array_filter(array_map('trim', explode(',', (string) $providers)), fn ($p) => $p !== ''));
+        return array_values(array_filter(array_map('trim', explode(',', (string) $run->providers)), fn ($p) => $p !== ''));
     }
 
     /** The starting admin is gone or no longer an admin: end the run, stop its queued work and say so in the audit trail. */

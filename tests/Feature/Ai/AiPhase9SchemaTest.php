@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
@@ -219,7 +220,24 @@ it('keeps the bulk tables free of any column that could hold content', function 
     expect($cols('ai_bulk_dry_runs'))->toBe($sorted(['id', 'requested_by', 'scope', 'daily_cap', 'eligible', 'skipped_consent',
         'skipped_unsupported', 'skipped_decided', 'skipped_active', 'created_at', 'consumed_at']))
         ->and($cols('ai_bulk_runs'))->toBe($sorted(['id', 'started_by', 'scope', 'daily_cap', 'status', 'dry_run_id', 'eligible_total',
-            'skipped_count', 'last_enqueued_at', 'blocked_since', 'created_at', 'paused_at', 'finished_at', 'updated_at']))
+            'skipped_count', 'last_enqueued_at', 'blocked_since', 'created_at', 'paused_at', 'finished_at', 'updated_at', 'providers']))
         ->and($cols('ai_bulk_run_items'))->toBe($sorted(['bulk_run_id', 'document_id', 'extraction_id', 'enqueued_at', 'outcome']))
         ->and($cols('ai_agent_settings'))->toBe($sorted(['agent', 'enabled', 'position', 'model', 'updated_by', 'updated_at']));
+});
+
+it('gives bulk runs that exist before the providers migration the Phase 8 default and rolls back cleanly', function () {
+    $migration = require database_path('migrations/2026_11_23_100000_add_providers_to_ai_bulk_runs.php');
+    $id = (string) Str::uuid();
+
+    // Postgres DDL is transactional: take the column away, add an old-shape run, migrate and look, then undo it all.
+    DB::beginTransaction();
+    $migration->down();
+    expect(Schema::hasColumn('ai_bulk_runs', 'providers'))->toBeFalse();
+    DB::table('ai_bulk_runs')->insert(['id' => $id, 'started_by' => 1, 'scope' => 'all', 'daily_cap' => 5, 'status' => 'active',
+        'dry_run_id' => (string) Str::uuid(), 'eligible_total' => 1, 'skipped_count' => 0, 'created_at' => now(), 'updated_at' => now()]);
+    $migration->up();
+    $providers = DB::table('ai_bulk_runs')->where('id', $id)->value('providers');
+    DB::rollBack();
+
+    expect($providers)->toBe('codex')->and(Schema::hasColumn('ai_bulk_runs', 'providers'))->toBeTrue();
 });

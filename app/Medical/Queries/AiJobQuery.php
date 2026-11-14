@@ -412,6 +412,22 @@ class AiJobQuery
         return ! in_array($status, ['active', 'paused'], true);
     }
 
+    /**
+     * The providers a run may send documents to. Bulk rows use the set frozen on the run at Start (empty when the run is
+     * gone: fail closed); interactive rows use the starter's live acknowledgment.
+     *
+     * @return list<string>
+     */
+    public function allowedProviders(?int $userId, ?string $bulkRunId): array
+    {
+        if ($bulkRunId === null) {
+            return $this->ackedProviders($userId);
+        }
+        $providers = Str::isUuid($bulkRunId) ? DB::table('ai_bulk_runs')->where('id', $bulkRunId)->value('providers') : null;
+
+        return $providers === null ? [] : array_values(array_filter(array_map('trim', explode(',', (string) $providers)), fn ($p) => $p !== ''));
+    }
+
     /** @return list<string> provider keys the user acknowledged in the notice; empty when there is no row or no user */
     public function ackedProviders(?int $userId): array
     {

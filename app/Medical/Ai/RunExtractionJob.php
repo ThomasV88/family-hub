@@ -146,8 +146,9 @@ class RunExtractionJob implements ShouldQueue
         $deadline = time() + (int) config('ai.timeouts.job') - 30;
 
         while (true) {
-            // Re-read before every attempt: an acknowledgment (or a settings change) made meanwhile counts.
-            $allowed = $query->ackedProviders($claim['started_by']);
+            // Re-read before every attempt: an interactive acknowledgment (or a settings change) made meanwhile counts.
+            // A bulk row never reads the live acknowledgment: it uses the set frozen on its run at Start.
+            $allowed = $query->allowedProviders($claim['started_by'], $claim['bulk_run_id']);
             $agent = $registry->nextCandidate($tried, $bulk, $allowed);
             if ($agent === null) {
                 break;
