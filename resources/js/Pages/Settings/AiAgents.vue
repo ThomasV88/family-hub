@@ -12,6 +12,7 @@ import UiSkeleton from '../../Components/ui/UiSkeleton.vue';
 import { useToast } from '../../Components/ui/useToast.js';
 import { securityFetch } from '../../Security/securityFetch.js';
 import AgentCard from '../../Settings/AiAgents/AgentCard.vue';
+import BulkRegenPanel from '../../Settings/AiAgents/BulkRegenPanel.vue';
 import { agentName } from '../../Settings/AiAgents/agentNames.js';
 
 const props = defineProps({
@@ -21,6 +22,9 @@ const props = defineProps({
     providers: { type: Array, default: () => [] },
     // Route name of the login check; the card posts to the matching URL.
     checkRoute: { type: String, default: 'settings.ai_calls.check' },
+    // Bulk re-generation panel (09-13): { active, history } counts only, and its limits.
+    bulk: { type: Object, default: null },
+    bulkConfig: { type: Object, default: () => ({}) },
 });
 
 const { t } = useI18n();
@@ -158,6 +162,8 @@ function reload() {
             </template>
 
             <p class="visually-hidden" role="status">{{ announcement }}</p>
+
+            <BulkRegenPanel class="agents__bulk" :bulk="bulk" :bulk-config="bulkConfig" :providers="providers" :agents="list" />
         </div>
     </SettingsLayout>
 </template>
@@ -167,6 +173,7 @@ function reload() {
 .agents__intro, .agents__note { margin: 0 0 var(--space-4); font-size: var(--text-sm); color: var(--color-text-muted); }
 .agents__list { display: flex; flex-direction: column; gap: var(--space-4); margin: 0 0 var(--space-4); padding: 0; list-style: none; }
 .agents__loading { display: flex; flex-direction: column; gap: var(--space-4); }
+.agents__bulk { margin-top: var(--space-6); }
 .agents__skeleton-row { margin-top: var(--space-4); }
 .agents__note a { color: var(--color-primary); }
 </style>

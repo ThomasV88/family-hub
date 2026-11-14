@@ -67,7 +67,7 @@ describe('AI agents page: list', () => {
         expect(current.find('h1').text()).toBe('AI agents');
         expect(current.find('ol').attributes('aria-label')).toBe('AI agents in order');
         expect(current.findAll('ol > li').map((l) => l.attributes('data-agent'))).toEqual(['codex', 'copilot']);
-        expect(current.findAll('h3').map((h) => h.text())).toEqual(['OpenAI Codex', 'GitHub Copilot']);
+        expect(current.findAll('ol h3').map((h) => h.text())).toEqual(['OpenAI Codex', 'GitHub Copilot']);
         await current.setProps({ agents: [codex({ position: 2 }), copilot({ position: 1 })] });
         expect(current.findAll('ol > li').map((l) => l.attributes('data-agent'))).toEqual(['copilot', 'codex']);
     });
