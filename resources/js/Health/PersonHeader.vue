@@ -1,14 +1,16 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { UserX } from '@lucide/vue';
+import { Plus, UserX } from '@lucide/vue';
 import UiAvatar from '../Components/ui/UiAvatar.vue';
+import UiButton from '../Components/ui/UiButton.vue';
 import UiTag from '../Components/ui/UiTag.vue';
 
 // Name, age line, blood type and the "No account" marker. Free text is interpolated, never rendered as HTML.
 const props = defineProps({
     person: { type: Object, required: true },
 });
+const emit = defineEmits(['add-visit']);
 const { t } = useI18n();
 
 const ageLine = computed(() => {
@@ -37,6 +39,9 @@ const bloodLabel = computed(() => {
             <UiTag v-if="bloodLabel">{{ t('health.blood.label') }} {{ bloodLabel }}</UiTag>
             <UiTag v-if="!person.hasAccount" :icon="UserX">{{ t('health.person.no_account') }}</UiTag>
         </div>
+        <div v-if="person.canEdit" class="person-header__actions">
+            <UiButton variant="primary" :icon="Plus" data-testid="header-add-visit" @click="emit('add-visit')">{{ t('health.visit.add') }}</UiButton>
+        </div>
         <p v-if="!person.canEdit" class="person-header__view-only">{{ t('health.view_only') }}</p>
     </header>
 </template>
@@ -47,5 +52,7 @@ const bloodLabel = computed(() => {
 .person-header__name { margin: 0; font-size: var(--text-xl); font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
 .person-header__line { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 .person-header__tags { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.person-header__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-inline-start: auto; }
+@container (max-width: 640px) { .person-header__actions { display: none; } }
 .person-header__view-only { flex-basis: 100%; margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 </style>

@@ -184,3 +184,60 @@ describe('identical 403', function () {
         }
     });
 });
+
+describe('person page', function () {
+    it('groups visits into folders, builds the timeline and honours view and filter', function () {
+        [$user, $person] = visitEditor();
+        MedicalVisit::factory()->forSubject($person)->specialty('cardiology')->create(['visited_on' => '2026-02-01', 'doctor' => 'A']);
+        MedicalVisit::factory()->forSubject($person)->specialty('cardiology')->create(['visited_on' => '2025-05-01', 'doctor' => 'B']);
+        MedicalVisit::factory()->forSubject($person)->other('Sleep clinic')->create(['visited_on' => '2026-03-01', 'doctor' => 'C']);
+        $hidden = MedicalFixtures::subject([], [[User::factory()->create(), AccessLevel::Edit]]);
+        MedicalVisit::factory()->forSubject($hidden)->specialty('neurology')->create(['doctor' => 'ZxCanaryMed']);
+
+        $response = $this->actingAs($user)->get("/health/people/{$person->id}");
+        $response->assertInertia(fn ($page) => $page
+            ->has('visits', 3)->has('specialties', 30)->where('view', 'folders')->where('filter', 'all')
+            ->where('folders.0.key', 'other')->where('folders.0.otherLabel', 'Sleep clinic')->where('folders.0.count', 1)
+            ->where('folders.1.key', 'cardiology')->where('folders.1.count', 2)->where('folders.1.latestOn', '2026-02-01')
+            ->where('timeline.0.date', '2026-03-01')->has('timeline', 3)
+            ->where('timelineFilters', fn ($f) => collect($f)->sort()->values()->all() === ['cardiology', 'other']));
+        expect(json_encode($response->viewData('page')))->not->toContain('ZxCanaryMed')->not->toContain('"specialtyKey":"neurology"');
+
+        $this->actingAs($user)->get("/health/people/{$person->id}?view=timeline&filter=cardiology")
+            ->assertInertia(fn ($page) => $page->where('view', 'timeline')->where('filter', 'cardiology')->has('timeline', 2));
+        $this->actingAs($user)->get("/health/people/{$person->id}?filter=neurology")
+            ->assertInertia(fn ($page) => $page->where('filter', 'all')->has('timeline', 3));
+        $this->actingAs($user)->get("/health/people/{$person->id}?filter=nonsense&view=x")
+            ->assertInertia(fn ($page) => $page->where('filter', 'all')->where('view', 'folders'));
+    });
+
+    it('resolves visit and new-visit panels inside the person and aborts 403 otherwise', function () {
+        [$user, $person] = visitEditor();
+        $mine = MedicalVisit::factory()->forSubject($person)->create();
+        $hidden = MedicalFixtures::subject([], [[User::factory()->create(), AccessLevel::Edit]]);
+        $theirs = MedicalVisit::factory()->forSubject($hidden)->create();
+        $random = (string) Str::uuid();
+
+        $this->actingAs($user)->get("/health/people/{$person->id}?panel=visit&id={$mine->id}")
+            ->assertInertia(fn ($page) => $page->where('panel', ['kind' => 'visit', 'id' => $mine->id]));
+        $this->actingAs($user)->get("/health/people/{$person->id}?panel=new-visit")
+            ->assertInertia(fn ($page) => $page->where('panel', ['kind' => 'new-visit', 'id' => null]));
+
+        $reference = $this->actingAs($user)->get("/health/people/{$hidden->id}")->assertForbidden()->viewData('page');
+        foreach (["panel=visit&id={$theirs->id}", "panel=visit&id={$random}", 'panel=visit&id=abc', 'panel=visit', "panel=new-visit&id={$mine->id}"] as $query) {
+            $page = $this->actingAs($user)->get("/health/people/{$person->id}?{$query}")->assertForbidden()->viewData('page');
+            expect($page['props'])->toEqual($reference['props'], $query);
+        }
+    });
+
+    it('shows a view-only member visits read-only and refuses new-visit', function () {
+        $user = User::factory()->create();
+        MedicalFixtures::grantHealth($user, AccessLevel::View);
+        $person = MedicalFixtures::subject([], [[$user, AccessLevel::View]]);
+        $visit = MedicalVisit::factory()->forSubject($person)->create();
+
+        $this->actingAs($user)->get("/health/people/{$person->id}?panel=visit&id={$visit->id}")
+            ->assertInertia(fn ($page) => $page->where('person.canEdit', false)->has('visits', 1)->where('panel.kind', 'visit'));
+        $this->actingAs($user)->get("/health/people/{$person->id}?panel=new-visit")->assertForbidden();
+    });
+});

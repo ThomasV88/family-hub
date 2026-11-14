@@ -1,29 +1,60 @@
 <script setup>
+import { computed, ref } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { HeartPulse } from '@lucide/vue';
+import { HeartPulse, Plus } from '@lucide/vue';
 import AppShell from '../../Layouts/AppShell.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
 import PersonHeader from '../../Health/PersonHeader.vue';
 import PersonPanel from '../../Health/PersonPanel.vue';
 import PersonSwitcher from '../../Health/PersonSwitcher.vue';
+import SpecialtyFolder from '../../Health/SpecialtyFolder.vue';
+import TimelineList from '../../Health/TimelineList.vue';
+import ViewSwitch from '../../Health/ViewSwitch.vue';
+import VisitPanel from '../../Health/VisitPanel.vue';
+import ShellAdd from '../../Wishlist/ShellAdd.vue';
 
 // Person page. The server decides who is shown; no selection or draft is kept on the client (no Inertia
 // history state, no storage), and the title is always the module name, never a person.
-defineProps({
+const props = defineProps({
     people: { type: Array, default: () => [] },
     person: { type: Object, default: null },
     canCreate: { type: Boolean, default: false },
     panel: { type: Object, default: null },
+    visits: { type: Array, default: () => [] },
+    folders: { type: Array, default: () => [] },
+    timeline: { type: Array, default: () => [] },
+    timelineFilters: { type: Array, default: () => [] },
+    view: { type: String, default: 'folders' },
+    filter: { type: String, default: 'all' },
+    specialties: { type: Array, default: () => [] },
 });
 const { t } = useI18n();
 
-function visit(query) {
-    router.get(window.location.pathname, query, { preserveState: true, preserveScroll: true, replace: true, only: ['panel'] });
+const busy = ref(false);
+// The view and filter live in the URL; a panel change keeps them and an id-less query drops the panel.
+function go(params, only) {
+    const query = {};
+    if (props.view !== 'folders') query.view = props.view;
+    if (props.filter !== 'all') query.filter = props.filter;
+    router.get(window.location.pathname, { ...query, ...params }, {
+        preserveState: true, preserveScroll: true, replace: true, only,
+        onStart: () => { busy.value = true; },
+        onFinish: () => { busy.value = false; },
+    });
 }
-const openNew = () => visit({ panel: 'new-person' });
-const closePanel = () => visit({});
+const openNew = () => go({ panel: 'new-person' }, ['panel']);
+const openNewVisit = () => go({ panel: 'new-visit' }, ['panel']);
+const openVisit = (id) => go({ panel: 'visit', id }, ['panel']);
+const closePanel = () => go({}, ['panel']);
+const setView = (view) => go({ view: view === 'folders' ? undefined : view, filter: undefined }, ['view', 'filter', 'timeline']);
+const setFilter = (filter) => go({ filter: filter === 'all' ? undefined : filter }, ['timeline', 'filter']);
+
+const canAddVisit = computed(() => Boolean(props.person?.canEdit));
+const activeVisit = computed(() => (props.panel?.kind === 'visit' ? props.visits.find((v) => v.id === props.panel.id) ?? null : null));
+const visitPanelOpen = computed(() => props.panel?.kind === 'new-visit' || (props.panel?.kind === 'visit' && activeVisit.value !== null));
+const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.includes(v.id));
 </script>
 
 <template>
@@ -34,11 +65,29 @@ const closePanel = () => visit({});
 
             <template v-if="person">
                 <PersonSwitcher :people="people" :current-id="person.id" :can-create="canCreate" @add="openNew" />
-                <PersonHeader :person="person" />
+                <PersonHeader :person="person" @add-visit="openNewVisit" />
                 <div class="health-person__area">
                     <div class="health-person__side" data-testid="person-side" />
                     <section class="health-person__main" data-testid="person-main">
-                        <UiEmptyState :title="t('health.visits.empty_title')" :body="t('health.visits.empty_body')" :icon="HeartPulse" />
+                        <UiEmptyState v-if="visits.length === 0" :title="t('health.visits.empty_title')" :body="t('health.visits.empty_body')" :icon="HeartPulse">
+                            <template v-if="canAddVisit" #action>
+                                <UiButton variant="primary" :icon="Plus" data-testid="empty-add-visit" @click="openNewVisit">{{ t('health.visit.add') }}</UiButton>
+                            </template>
+                        </UiEmptyState>
+                        <template v-else>
+                            <ViewSwitch :view="view" @change="setView" />
+                            <div v-if="view === 'folders'" class="health-person__folders" data-testid="folders">
+                                <SpecialtyFolder
+                                    v-for="(folder, index) in folders"
+                                    :key="folder.key"
+                                    :folder="folder"
+                                    :visits="folderVisits(folder)"
+                                    :default-open="index === 0"
+                                    @open="openVisit"
+                                />
+                            </div>
+                            <TimelineList v-else :entries="timeline" :visits="visits" :filters="timelineFilters" :filter="filter" :busy="busy" @open="openVisit" @filter="setFilter" />
+                        </template>
                     </section>
                 </div>
             </template>
@@ -49,6 +98,8 @@ const closePanel = () => visit({});
             </UiEmptyState>
         </div>
         <PersonPanel :open="panel?.kind === 'new-person'" @close="closePanel" />
+        <VisitPanel v-if="person" :open="visitPanelOpen" :person-id="person.id" :visit="activeVisit" :can-edit="canAddVisit" :specialties="specialties" @close="closePanel" />
+        <ShellAdd :enabled="canAddVisit" :label="t('health.fab.add_visit')" @add="openNewVisit" />
     </AppShell>
 </template>
 
@@ -58,7 +109,8 @@ const closePanel = () => visit({});
 .health-person__area { display: flex; flex-direction: column; gap: var(--space-8); }
 .health-person__side { order: -1; display: flex; flex-direction: column; gap: var(--space-4); }
 .health-person__side:empty { display: none; }
-.health-person__main { min-width: 0; }
+.health-person__main { min-width: 0; display: flex; flex-direction: column; gap: var(--space-4); }
+.health-person__folders { display: flex; flex-direction: column; gap: var(--space-3); }
 @container (min-width: 900px) {
     .health-person__area { flex-direction: row; align-items: flex-start; }
     .health-person__main { flex: 1; order: 0; }

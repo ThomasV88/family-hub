@@ -4,7 +4,9 @@ namespace App\Medical;
 
 use App\Access\AccessLevel;
 use App\Medical\Queries\SubjectQuery;
+use App\Medical\Queries\VisitQuery;
 use App\Models\MedicalSubject;
+use App\Models\MedicalVisit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
@@ -17,10 +19,12 @@ use Inertia\Response;
  */
 class PersonPage
 {
-    /** Panel kinds that exist so far. */
-    private const PANELS = ['new-person'];
+    /** Panel kinds that exist so far; those listed in WITH_ID resolve a record id inside the visible person. */
+    private const PANELS = ['new-person', 'new-visit', 'visit'];
 
-    public function __construct(private readonly SubjectQuery $subjects) {}
+    private const WITH_ID = ['visit'];
+
+    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits) {}
 
     public function render(Viewer $viewer, ?MedicalSubject $subject, Request $request): Response
     {
@@ -32,7 +36,7 @@ class PersonPage
     {
         $people = $this->subjects->visible($viewer);
 
-        return [
+        return $this->visitProps($viewer, $subject, $request) + [
             'people' => $people->map(fn (MedicalSubject $p) => [
                 'id' => (string) $p->getKey(),
                 'name' => $p->name,
@@ -40,7 +44,7 @@ class PersonPage
             ])->values()->all(),
             'person' => $subject === null ? null : $this->person($viewer, $subject),
             'canCreate' => $viewer->canEdit(),
-            'panel' => $this->panel($viewer, $request),
+            'panel' => $this->panel($viewer, $subject, $request),
         ];
     }
 
@@ -63,21 +67,79 @@ class PersonPage
         ];
     }
 
+    /**
+     * visits, folders, timeline, timelineFilters, view, filter, specialties. Everything comes from the visible
+     * person's scoped list, so a count can never include a record the viewer may not see.
+     *
+     * @return array<string, mixed>
+     */
+    private function visitProps(Viewer $viewer, ?MedicalSubject $subject, Request $request): array
+    {
+        $list = $subject === null ? collect() : $this->visits->forSubject($viewer, $subject);
+        $visits = $list->map(fn (MedicalVisit $v) => [
+            'id' => (string) $v->getKey(),
+            'visitedOn' => $v->visited_on->format('Y-m-d'),
+            'doctor' => $v->doctor,
+            'specialtyKey' => $v->specialty_key,
+            'specialtyOther' => $v->specialty_other,
+            'diagnosis' => $v->diagnosis,
+            'notes' => $v->notes,
+            'documentCount' => 0,
+        ])->values();
+
+        $folders = $visits->groupBy('specialtyKey')->map(fn ($group, $key) => [
+            'key' => (string) $key,
+            'otherLabel' => $key === 'other' ? $group->first()['specialtyOther'] : null,
+            'count' => $group->count(),
+            'latestOn' => $group->max('visitedOn'),
+            'visitIds' => $group->pluck('id')->values()->all(),
+        ])->sort(fn (array $a, array $b) => [$b['latestOn'], $a['key']] <=> [$a['latestOn'], $b['key']])->values();
+
+        $filterKeys = $visits->pluck('specialtyKey')->unique()->values()->all();
+        $requested = $request->query('filter');
+        $filter = is_string($requested) && in_array($requested, $filterKeys, true) ? $requested : 'all';
+
+        $timeline = $visits
+            ->when($filter !== 'all', fn ($c) => $c->where('specialtyKey', $filter))
+            ->map(fn (array $v) => ['type' => 'visit', 'id' => $v['id'], 'date' => $v['visitedOn']])
+            ->values();
+
+        return [
+            'visits' => $visits->all(),
+            'folders' => $folders->all(),
+            'timeline' => $timeline->all(),
+            'timelineFilters' => $filterKeys,
+            'view' => $request->query('view') === 'timeline' ? 'timeline' : 'folders',
+            'filter' => $filter,
+            'specialties' => array_map(fn (Specialty $s) => $s->value, Specialty::cases()),
+        ];
+    }
+
     /** @return array{kind: string, id: ?string}|null */
-    private function panel(Viewer $viewer, Request $request): ?array
+    private function panel(Viewer $viewer, ?MedicalSubject $subject, Request $request): ?array
     {
         $kind = $request->query('panel');
         if (! is_string($kind) || ! in_array($kind, self::PANELS, true)) {
             return null;
         }
 
-        // No panel kind resolves a record yet, so any id is a miss: same 403 as a hidden person.
+        // A kind without a record takes no id, and a kind with one must resolve it inside this person: any miss is the
+        // same 403 as a hidden person.
+        $id = $request->query('id');
+        if (in_array($kind, self::WITH_ID, true)) {
+            abort_if($subject === null || ! is_string($id) || $this->visits->find($viewer, $subject, $id) === null, 403);
+
+            return ['kind' => $kind, 'id' => $id];
+        }
         if ($request->query->has('id')) {
             abort(403);
         }
 
         if ($kind === 'new-person' && ! $viewer->canEdit()) {
             return null;
+        }
+        if ($kind === 'new-visit') {
+            abort_if($subject === null || $this->subjects->levelFor($viewer, $subject) !== AccessLevel::Edit, 403);
         }
 
         return ['kind' => $kind, 'id' => null];
