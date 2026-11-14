@@ -51,3 +51,47 @@ it('sweeps only stale dirs', function () {
         ->and(file_exists($old->path()))->toBeFalse()
         ->and(file_exists($new->path()))->toBeTrue();
 });
+
+it('refuses to sweep or create under an empty, relative, root, dotted or Codex-parent work dir', function (string $value) {
+    $victim = $this->root.'/victim';
+    mkdir($victim, 0700);
+    touch($victim, time() - 7200);
+    config(['ai.work_dir' => $value, 'ai.codex.home' => '/codex']);
+
+    expect(WorkDir::root())->toBeNull()
+        ->and(WorkDir::sweepStale(30))->toBe(0)
+        ->and(fn () => WorkDir::create())->toThrow(RuntimeException::class)
+        ->and(is_dir($victim))->toBeTrue();
+})->with(['', '   ', '/', '//', 'relative/dir', './x', '/tmp/../etc', '/tmp/x/..', '/codex']);
+
+it('refuses a work dir that is a parent of the Codex home', function () {
+    config(['ai.work_dir' => $this->root, 'ai.codex.home' => $this->root.'/login']);
+
+    expect(WorkDir::root())->toBeNull()->and(WorkDir::sweepStale(0))->toBe(0);
+});
+
+it('sweeps only entries named like a job dir and never follows a link', function () {
+    $job = WorkDir::create();
+    touch($job->path(), time() - 7200);
+    $other = $this->root.'/not-a-job-dir';
+    mkdir($other, 0700);
+    touch($other, time() - 7200);
+    $target = sys_get_temp_dir().'/wd-target-'.strtolower((string) Str::ulid());
+    mkdir($target, 0700);
+    $link = $this->root.'/'.strtolower((string) Str::ulid());
+    symlink($target, $link);
+    touch($target, time() - 7200);
+
+    expect(WorkDir::sweepStale(30))->toBe(1)
+        ->and(file_exists($job->path()))->toBeFalse()
+        ->and(is_dir($other))->toBeTrue()
+        ->and(is_dir($target))->toBeTrue();
+    @unlink($link);
+    WorkDir::removeTree($target);
+});
+
+it('treats a work dir under a hidden-ish name or a missing dir as nothing to sweep', function () {
+    config(['ai.work_dir' => $this->root.'/missing']);
+
+    expect(WorkDir::sweepStale(0))->toBe(0);
+});

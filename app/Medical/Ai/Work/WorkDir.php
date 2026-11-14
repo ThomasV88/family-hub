@@ -13,8 +13,8 @@ final class WorkDir
 
     public static function create(): self
     {
-        $root = rtrim((string) config('ai.work_dir'), '/');
-        if (! is_dir($root) && ! @mkdir($root, 0700, true) && ! is_dir($root)) {
+        $root = self::root();
+        if ($root === null || (! is_dir($root) && ! @mkdir($root, 0700, true) && ! is_dir($root))) {
             throw new RuntimeException('ai work dir unavailable');
         }
         $path = $root.'/'.strtolower((string) Str::ulid());
@@ -68,13 +68,49 @@ final class WorkDir
         self::removeTree($this->path);
     }
 
+    /** Names the app gives its job directories: a lower-case ULID. Nothing else is ever swept. */
+    private const JOB_DIR = '/^[0-9a-z]{26}$/';
+
+    /**
+     * The configured work dir, or null when it is not safe to create into or delete from: it must be an absolute path
+     * without dot segments, not the filesystem root, and not a parent of the Codex home (which holds the login).
+     */
+    public static function root(): ?string
+    {
+        $raw = trim((string) config('ai.work_dir'));
+        if ($raw === '' || $raw[0] !== '/' || preg_match('#(^|/)\.\.?(/|$)#', $raw) === 1 || str_contains($raw, "\0")) {
+            return null;
+        }
+        $root = rtrim($raw, '/');
+        if ($root === '') {
+            return null;
+        }
+        $codex = rtrim(trim((string) config('ai.codex.home')), '/');
+        if ($codex !== '' && str_starts_with($codex.'/', $root.'/') && $codex !== $root) {
+            return null;
+        }
+        // The fixed production login location is protected even when the config points elsewhere.
+        if (str_starts_with('/codex/', $root.'/')) {
+            return null;
+        }
+
+        return $root;
+    }
+
+    /**
+     * Removes job directories (and nothing else) older than the given age. Refuses to touch anything when the work dir
+     * is not safe (see root()), whatever the configuration says.
+     */
     public static function sweepStale(int $minutes = 30): int
     {
-        $root = rtrim((string) config('ai.work_dir'), '/');
+        $root = self::root();
+        if ($root === null || ! is_dir($root)) {
+            return 0;
+        }
         $removed = 0;
         $cutoff = time() - $minutes * 60;
         foreach (glob($root.'/*', GLOB_ONLYDIR) ?: [] as $dir) {
-            if (is_link($dir)) {
+            if (is_link($dir) || preg_match(self::JOB_DIR, basename($dir)) !== 1) {
                 continue;
             }
             $mtime = @filemtime($dir);
