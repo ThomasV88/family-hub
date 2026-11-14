@@ -101,6 +101,10 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
   `ai:preflight` refuses to start if one is set (codes `app_key_present`, `forbidden_env`, `forbidden_secret`; names are matched by
   `ai.forbidden_env_patterns`, values are never printed). The dev `ai-worker` reads `ops/env/ai-worker.dev.env` and has the repo `.env` masked. `deploy.sh` refuses to run without `ai-worker.env`. It uses the runtime role `fh_app`
   (provisional: no dedicated database role for now). `DB_QUEUE_RETRY_AFTER=900` must stay above the job timeout.
+- Deploy coupling: `deploy.sh` does not gate on the ai-worker. The core services (`app worker scheduler nginx`) decide the
+  deploy and the rollback; the ai-worker is started afterwards (`up -d --wait ai-worker`) and a failure only logs a warning (AI is
+  unavailable, the rest of the deploy stands). The rollback restarts the ai-worker only when `$IMAGE_PREFIX-ai:<last good tag>` exists
+  locally (the first Phase 8 rollout has none) and otherwise stops it. `check-compose.sh` and `test-deploy-guards.sh` enforce this.
 - Mounts: volume `codex-home` at `/codex` (writable, holds `auth.json`, refreshed in place) and `medical` read-only. Work dir `/ai-work` is a
   tmpfs (mode 0700), discarded on stop. No other service mounts `codex-home`; `scripts/check-compose.sh` fails on any drift.
 - `codex-home` is never backed up: it holds a subscription login. `backup.sh`, `restore-drill.sh` and `backup-freshness.sh` never mention it

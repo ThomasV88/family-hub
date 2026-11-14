@@ -101,13 +101,36 @@ d=$(make_fixture aimode family-hub-staging staging 0 staging)
 chmod 644 "$d/ai-worker.env"
 expect fail "ai-worker.env readable by others" "$d" "$TAG" guard_secrets
 
-# the new service is in every up list and the image lists of deploy.sh
-if [ "$(grep -c 'app worker scheduler ai-worker nginx' "$DEPLOY")" -ge 2 ] && grep -q 'dc pull app nginx ai-worker' "$DEPLOY" \
-  && grep -q '\$prefix-ai:\$IMAGE_TAG' "$DEPLOY"; then
-  PASS=$((PASS + 1)); echo "ok   deploy.sh knows ai-worker in pull, inspect and both up lists"
+# the ai-worker is optional: pull, inspect and start are non-fatal, and it is in no gate or rollback list
+core_lists=$(grep -c 'up -d --wait --remove-orphans app worker scheduler nginx' "$DEPLOY")
+if [ "$core_lists" -ge 2 ] && ! grep -E 'up -d --wait --remove-orphans' "$DEPLOY" | grep -q ai-worker \
+  && grep -q 'dc pull ai-worker ||' "$DEPLOY" && grep -q 'ai_image_available "\$good"' "$DEPLOY" \
+  && grep -q 'if ! dc up -d --wait ai-worker; then' "$DEPLOY"; then
+  PASS=$((PASS + 1)); echo "ok   deploy.sh keeps ai-worker out of the gate and rollback lists, and starts it non-gating"
 else
-  FAILS=$((FAILS + 1)); echo "FAIL deploy.sh lacks ai-worker in pull, inspect or up lists" >&2
+  FAILS=$((FAILS + 1)); echo "FAIL deploy.sh gates or rolls back on ai-worker, or lacks the guards" >&2
 fi
+
+# ai_image_available: true only when docker finds the -ai image of that tag
+d=$(make_fixture aiimg family-hub-staging staging 0 staging)
+for case in has:0:pass missing:1:fail; do
+  IFS=: read -r label code want <<<"$case"
+  (
+    cd "$d" || exit 99
+    export IMAGE_TAG=sha-aaaaaaa DEPLOY_SH_SOURCE_ONLY=1
+    # shellcheck disable=SC1090
+    source "$DEPLOY"
+    set +e
+    docker() { [ "$1 $2" = "image inspect" ] && [ "$3" = "ghcr.io/example/family-hub-ai:sha-bbbbbbb" ] && return "$code"; return 1; }
+    ai_image_available sha-bbbbbbb
+  )
+  rc=$?
+  if { [ "$want" = pass ] && [ "$rc" = 0 ]; } || { [ "$want" = fail ] && [ "$rc" != 0 ]; }; then
+    PASS=$((PASS + 1)); echo "ok   ai_image_available when the image is $label"
+  else
+    FAILS=$((FAILS + 1)); echo "FAIL ai_image_available when the image is $label (rc=$rc)" >&2
+  fi
+done
 
 d=$(make_fixture mode family-hub-staging staging 0 staging)
 chmod 644 "$d/secrets/db_app_password"

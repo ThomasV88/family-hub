@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Server deploy for the production and staging stacks. Run from the stack directory:
 #   IMAGE_TAG=sha-<commit> bash ./deploy.sh
-# Exit 0 only when the stack is healthy.
+# Exit 0 only when the core stack (app, worker, scheduler, nginx) is healthy and the smoke test passed. The optional ai-worker is
+# started afterwards and never gates the deploy or the rollback.
 #
 # Order: guards -> pull -> postgres -> encrypted pre-migrate backup (restic, backup.sh) -> migrate
 #        (one-shot owner-role container) -> [staging reseed + audit] -> certificate -> up (healthchecks)
-#        -> .last-good-tag. Migrations never run without a fresh backup. If `up` fails, the previous
+#        -> .last-good-tag -> ai-worker (non-gating). Migrations never run without a fresh backup. If `up` fails, the previous
 #        good tag is started again. Migrations are additive in this project; a destructive migration
 #        needs a manual restore from the `pre-migrate` restic snapshot (restore-drill.sh documents it).
 # Never prints the content of .env, app.env, migrate.env, ai-worker.env or secrets/*.
@@ -123,6 +124,14 @@ guard_reseed() {
   fi
 }
 
+# True when the ai image of a tag exists locally. The first Phase 8 rollout has no -ai image for the last good tag, and a
+# rollback must not name a service whose image is missing (compose would abort and leave the broken tag running).
+ai_image_available() {
+  local prefix
+  prefix=$(env_get IMAGE_PREFIX)
+  docker image inspect "$prefix-ai:$1" >/dev/null 2>&1
+}
+
 guard_host() {
   if ! docker network inspect edge >/dev/null 2>&1; then
     err "Docker network 'edge' is missing. Nothing deployed."
@@ -170,10 +179,13 @@ main() {
     log "Skipping pull (SKIP_PULL=1), checking local images"
     local prefix
     prefix=$(env_get IMAGE_PREFIX)
-    docker image inspect "$prefix-app:$IMAGE_TAG" "$prefix-nginx:$IMAGE_TAG" "$prefix-ai:$IMAGE_TAG" >/dev/null
+    docker image inspect "$prefix-app:$IMAGE_TAG" "$prefix-nginx:$IMAGE_TAG" >/dev/null
+    ai_image_available "$IMAGE_TAG" || err "WARNING: image $prefix-ai:$IMAGE_TAG is missing; the ai-worker will not start (AI extraction unavailable)."
   else
     log "Pulling images"
-    dc pull app nginx ai-worker
+    dc pull app nginx
+    # The ai-worker is optional for the app: a missing or broken ai image never blocks the deploy.
+    dc pull ai-worker || err "WARNING: could not pull the ai image; the ai-worker will not start (AI extraction unavailable)."
   fi
 
   log "Starting postgres"
@@ -211,8 +223,9 @@ main() {
   fi
 
   log "Starting services"
-  # The tag is recorded as good only after the containers are healthy AND the live smoke test passes.
-  if dc up -d --wait --remove-orphans app worker scheduler ai-worker nginx \
+  # The tag is recorded as good only after the core containers are healthy AND the live smoke test passes. The
+  # ai-worker is deliberately not part of this gate (it is optional, and a first rollout may have no ai image yet).
+  if dc up -d --wait --remove-orphans app worker scheduler nginx \
      && { [ "${SKIP_SMOKE:-}" = 1 ] || bash ./smoke-server.sh "$app_domain" "$(env_get STACK_ENV)"; }; then
     printf '%s\n' "$IMAGE_TAG" > .last-good-tag
     log "Healthy and smoke test passed. Recorded $IMAGE_TAG as last good tag."
@@ -222,11 +235,23 @@ main() {
       local good
       good=$(cat .last-good-tag)
       err "Rolling back to $good"
-      IMAGE_TAG=$good dc up -d --wait --remove-orphans app worker scheduler ai-worker nginx || err "Rollback to $good also failed."
+      IMAGE_TAG=$good dc up -d --wait --remove-orphans app worker scheduler nginx || err "Rollback to $good also failed."
+      if ai_image_available "$good"; then
+        IMAGE_TAG=$good dc up -d --wait ai-worker || err "ai-worker of $good did not start (AI extraction unavailable)."
+      else
+        err "No ai image for $good; stopping the ai-worker of the failed deploy (AI extraction unavailable)."
+        dc stop ai-worker >/dev/null 2>&1 || true
+      fi
     else
       err "No .last-good-tag to roll back to."
     fi
     exit 1
+  fi
+
+  # Second, non-gating step: an ai-worker problem (preflight, missing env value, missing image) disables AI only.
+  log "Starting the ai-worker (non-gating)"
+  if ! dc up -d --wait ai-worker; then
+    err "WARNING: the ai-worker did not become healthy. The app deploy stands; AI extraction is unavailable until it is fixed (docker compose logs ai-worker)."
   fi
 
   docker image prune -f >/dev/null || true

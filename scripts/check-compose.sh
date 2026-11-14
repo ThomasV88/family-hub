@@ -150,12 +150,27 @@ deploy = open("scripts/deploy.sh").read()
 up_lists = re.findall(r"up -d --wait[^\n]*", deploy)
 services = re.findall(r"^  ([a-z][a-z-]*):\n", raw.split("\nservices:\n", 1)[1].split("\nnetworks:\n", 1)[0], re.M)
 long_running = [s for s in services if s not in ("postgres", "migrate", "certbot")]
+core = [s for s in long_running if s != "ai-worker"]
+gate_lists = []
 for line in up_lists:
-    if "postgres" in line.split("up -d --wait")[1].split()[:1]:
+    words = line.split("up -d --wait")[1].replace(";", " ").split()
+    if "postgres" in words[:1]:
         continue
-    for s in long_running:
-        if s not in line.split():
+    if "ai-worker" in words[:1]:
+        continue
+    gate_lists.append(line)
+    # The ai-worker is optional: it must never be part of the gate or the rollback list.
+    if "ai-worker" in words:
+        fail("deploy.sh gates or rolls back on ai-worker: %s" % line.strip())
+    for s in core:
+        if s not in words:
             fail("deploy.sh up list lacks service %s: %s" % (s, line.strip()))
+if len(gate_lists) < 2:
+    fail("deploy.sh needs a gated up list and a rollback up list")
+if not any(re.search(r"up -d --wait ai-worker\b", l) for l in up_lists):
+    fail("deploy.sh never starts the ai-worker separately")
+if not re.search(r"dc up -d --wait ai-worker\s*;?\s*then", deploy) and "ai_image_available" not in deploy:
+    fail("deploy.sh lacks the non-gating ai-worker step or the ai image rollback guard")
 PY
 
 
