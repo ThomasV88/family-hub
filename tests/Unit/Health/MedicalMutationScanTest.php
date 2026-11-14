@@ -17,6 +17,7 @@ const MD_MUT_OWNED = [
 const MD_MUT_ALLOWLIST = [
     'AdminSubjectQuery' => 'admin settings by design: the admin manages membership and links with no medical content (07-07)',
     'SystemQuery' => 'no viewer: system jobs touch ids and booleans only, never content (07-09, 07-12, 07-15)',
+    'AiJobQuery' => 'ai-worker lifecycle columns, no viewer, after run-time re-verification',
 ];
 
 /**
@@ -180,6 +181,7 @@ const MD_STORE_USERS = [
     'Http/Controllers/Health/DocumentController.php',
     'Medical/Queries/SubjectQuery.php',
     'Console/Commands/PruneMedicalOrphans.php',
+    'Medical/Ai/RunExtractionJob.php',
 ];
 
 /** Store method => the only files that may call it (path relative to app/). */
@@ -190,6 +192,7 @@ const MD_STORE_METHODS = [
     'absolutePath' => ['Http/Controllers/Health/DocumentController.php'],
     'files' => ['Console/Commands/PruneMedicalOrphans.php'],
     'subjectDirectories' => ['Console/Commands/PruneMedicalOrphans.php'],
+    'copyTo' => ['Medical/Ai/RunExtractionJob.php'],
 ];
 
 /**
@@ -248,7 +251,7 @@ it('documents every allowlisted class with a reason and skips only by exact clas
     foreach (MD_MUT_ALLOWLIST as $class => $reason) {
         expect($reason)->not->toBe('');
     }
-    expect(array_keys(MD_MUT_ALLOWLIST))->toBe(['AdminSubjectQuery', 'SystemQuery']);
+    expect(array_keys(MD_MUT_ALLOWLIST))->toBe(['AdminSubjectQuery', 'SystemQuery', 'AiJobQuery']);
 
     $body = "{ DB::update('update medical_subject_members set level = 1'); }";
     expect(mdMutUnscoped("<?php class AdminSubjectQuery { public function a() $body }"))->toBe([])
@@ -324,7 +327,12 @@ it('reports a planted file-store breach in each shape (scanner self-test)', func
         'Medical/Queries/SubjectQuery.php' => "<?php\nclass S { public function x() { app(MedicalDocumentStore::class)->put(1, 2); } }",
     ];
 
+    $copy = ['Medical/Ai/RunExtractionJob.php' => "<?php\nclass J { public function h() { app(MedicalDocumentStore::class)->copyTo(1, 2); } }"];
+    $copyElsewhere = ['Http/Controllers/Health/DocumentController.php' => "<?php\nclass D { public function __construct(private MedicalDocumentStore \$store) {} public function x() { \$this->store->copyTo(1, 2); } }"];
+
     expect(mdStoreViolations($legitimate))->toBe([])
+        ->and(mdStoreViolations($copy))->toBe([])
+        ->and(mdStoreViolations($copyElsewhere))->toBe(['Http/Controllers/Health/DocumentController.php: calls store copyTo()'])
         ->and(mdStoreViolations($disk))->toBe(['Http/Controllers/HomeController.php: medical disk used outside MedicalDocumentStore'])
         ->and(mdStoreViolations($doubleQuoted))->toHaveCount(1)
         ->and(mdStoreViolations($reference))->toBe(['Http/Controllers/Health/ExportController.php: references MedicalDocumentStore'])

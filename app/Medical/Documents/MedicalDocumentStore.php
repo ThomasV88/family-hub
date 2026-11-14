@@ -83,6 +83,21 @@ final class MedicalDocumentStore
         return Storage::disk('medical')->path($relative);
     }
 
+    /** Copies a stored file to $destination (0600); false on any failure. For the AI job's private work dir only. */
+    public function copyTo(string $relativePath, string $destination): bool
+    {
+        try {
+            $source = $this->absolutePath($relativePath);
+            if (! is_file($source) || ! @copy($source, $destination)) {
+                return false;
+            }
+
+            return @chmod($destination, 0600);
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
     /** @param  list<string>  $paths */
     public function delete(array $paths): void
     {
