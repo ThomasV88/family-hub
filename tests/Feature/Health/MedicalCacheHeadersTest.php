@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\MedicalDocument;
+use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -195,4 +196,46 @@ it('serves the review page with encrypted browser history and lands a stale sess
     $this->flushSession();
     $stale = $this->actingAs($ctx['viewer'])->withSession(mchStale())->get($url);
     expect($stale->getStatusCode())->toBe(302)->and((string) $stale->headers->get('Location'))->toContain('confirm-access');
+});
+
+it('marks the AI agents page, the bulk poll and every agent and bulk JSON response no-store and private', function () {
+    $admin = User::factory()->admin()->create();
+    $this->actingAs($admin);
+    $run = (string) Str::uuid();
+    $responses = [
+        'agents page' => $this->get('/settings/ai-agents'),
+        'bulk poll' => $this->getJson('/settings/ai-agents/bulk'),
+        'dry run' => $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 5]),
+        'start (expired token)' => $this->postJson('/settings/ai-agents/bulk', ['token' => (string) Str::uuid(), 'acknowledged' => true]),
+        'pause (unknown run)' => $this->postJson("/settings/ai-agents/bulk/$run/pause"),
+        'resume (unknown run)' => $this->postJson("/settings/ai-agents/bulk/$run/resume"),
+        'cancel (unknown run)' => $this->postJson("/settings/ai-agents/bulk/$run/cancel"),
+        'agent update' => $this->patchJson('/settings/ai-agents/codex', ['model' => 'gpt-test']),
+        'agent move' => $this->postJson('/settings/ai-agents/codex/move', ['direction' => 'down']),
+        'agent update (unknown agent)' => $this->patchJson('/settings/ai-agents/nope', ['enabled' => true]),
+        'validation error' => $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'everything']),
+    ];
+    foreach ($responses as $label => $response) {
+        $header = (string) $response->headers->get('Cache-Control');
+        expect(str_contains($header, 'no-store') && str_contains($header, 'private'))->toBeTrue("$label answered ".$response->getStatusCode()." with '$header'");
+    }
+
+    // A member who is not an admin gets the same no-store refusal.
+    $member = User::factory()->create();
+    foreach (['/settings/ai-agents', '/settings/ai-agents/bulk'] as $url) {
+        app('auth')->forgetGuards();
+        $refused = $this->actingAs($member)->get($url);
+        expect($refused->getStatusCode())->toBe(403)->and((string) $refused->headers->get('Cache-Control'))->toContain('no-store');
+    }
+});
+
+it('keeps the extended AI status poll no-store and private while a run waits or failed with a quota code', function () {
+    $ctx = MedicalPrivacy::scenario();
+    MedicalPrivacy::seedVisible($ctx);
+    $url = route('health.people.ai.status', ['person' => $ctx['person']->getKey()], false);
+    $response = $this->actingAs($ctx['viewer'])->getJson($url);
+    $header = (string) $response->headers->get('Cache-Control');
+    expect($response->getStatusCode())->toBe(200)->and(str_contains($header, 'no-store') && str_contains($header, 'private'))->toBeTrue($header)
+        ->and($response->headers->get('ETag'))->toBeNull()
+        ->and(collect($response->json('documents'))->pluck('status')->all())->toContain('waiting');
 });

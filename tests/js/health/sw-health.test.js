@@ -54,4 +54,28 @@ describe('service worker and health', () => {
             expect(r.urls.filter((u) => /ai-status|review|pages\/|ai-calls/.test(u))).toEqual([]);
         }
     });
+    it('rejects the Phase 9 admin urls: AI agents page, bulk poll and bulk controls', () => {
+        const clean = `import { precacheAndRoute } from 'workbox-precaching';\nprecacheAndRoute(self.__WB_MANIFEST);`;
+        for (const url of [
+            'settings/ai-agents',
+            '/settings/ai-agents/bulk',
+            'settings/ai-agents/bulk/dry-run',
+            '/settings/ai-agents/codex',
+            '/settings/ai-agents/bulk/3f2a/pause',
+        ]) {
+            const r = checkPrecache({ swSource: clean, swBuilt: `var x=[{url:"offline.html",revision:null},{url:"${url}",revision:null}]` });
+            expect(r.ok, url).toBe(false);
+            expect(r.violations.join('\n')).toMatch(/outside allowlist/);
+        }
+    });
+
+    it('registers no runtime route that could match the agents page or its bulk poll, and lists none in the built worker', () => {
+        expect(source).not.toMatch(/ai-agents|\/bulk/);
+        if (built !== null) {
+            const r = checkPrecache({ swSource: source, swBuilt: built });
+            expect(r.ok).toBe(true);
+            expect(r.urls.filter((u) => /ai-agents|bulk/.test(u))).toEqual([]);
+            expect(built).not.toMatch(/ai-agents/);
+        }
+    });
 });
