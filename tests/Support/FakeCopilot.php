@@ -117,7 +117,7 @@ final class FakeCopilot
         return $dir;
     }
 
-    private static function script(string $body): string
+    public static function script(string $body): string
     {
         $path = sys_get_temp_dir().'/fake-copilot-'.bin2hex(random_bytes(6));
         file_put_contents($path, "#!/bin/sh\n".$body."\n");

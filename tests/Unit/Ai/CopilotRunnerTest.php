@@ -118,7 +118,6 @@ it('records the denial flags, scrubbed env, per-run home, cwd and closed stdin',
         ->and(explode("\n", trim($ls)))->toContain('page-1.jpg', 'page-2.jpg')
         ->and(explode("\n", trim($homeLs)))->toContain('config.json', 'settings.json')
         ->and(trim($mode))->toBe('600')
-        ->and(file_get_contents($work.'/copilot-home/settings.json'))->toBe('{}')
         ->and($stdin)->toBe('');
 });
 
@@ -147,12 +146,30 @@ it('removes everything the CLI writes with the work dir and keeps the persistent
     ($this->fake)(FakeCopilot::writesSession($canary));
     (new CopilotRunner)->exec(($this->req)());
 
-    expect(copilotFilesContaining($this->dir->path(), $canary))->not->toBe([]);
+    // The run's home and temp dir are gone as soon as the process ends, not only with the work dir.
+    expect(copilotFilesContaining($this->dir->path(), $canary))->toBe([])
+        ->and(is_dir($this->dir->path().'/copilot-home'))->toBeFalse();
     $this->dir->cleanup();
 
     expect(copilotFilesContaining($this->root, $canary))->toBe([])
         ->and(copilotFilesContaining($this->persist, $canary))->toBe([])
         ->and(scandir($this->persist))->toBe(['.', '..', 'config.json']);
+});
+
+it('gives a second call (the repair call) a fresh home with none of the first call\'s files or temp files', function () {
+    FakeCopilot::loginHome($this->persist, true);
+    ($this->fake)(FakeCopilot::script('mkdir -p "$COPILOT_HOME/session-state/x"; printf first > "$COPILOT_HOME/session-state/x/e"; printf first > "$TMPDIR/scratch"; printf %s "{}"; exit 0'));
+    (new CopilotRunner)->exec(($this->req)());
+    expect(scandir($this->dir->path().'/tmp'))->toBe(['.', '..']);
+
+    $rec = $this->root.'-rec.txt';
+    $this->scripts[] = $rec;
+    ($this->fake)(FakeCopilot::script(': > '.escapeshellarg($rec).'; ls -A "$COPILOT_HOME" >> '.escapeshellarg($rec).'; echo --- >> '.escapeshellarg($rec).'; ls -A "$TMPDIR" >> '.escapeshellarg($rec).'; exit 0'));
+    (new CopilotRunner)->exec(($this->req)());
+
+    [$home, $tmp] = explode("---\n", (string) file_get_contents($rec), 2);
+    expect(array_filter(explode("\n", trim($home))))->each->not->toBe('session-state')
+        ->and(trim($tmp))->toBe('');
 });
 
 it('caps output flooding and bounds stderr', function (string $stream) {

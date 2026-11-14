@@ -533,3 +533,24 @@ it('records attempt 2 for another agent when the admin changed the enabled agent
         ->and([$calls[0]->agent, $calls[0]->status, $calls[0]->attempt])->toBe(['codex', 'cancelled', 1])
         ->and([$calls[1]->agent, $calls[1]->status, $calls[1]->attempt])->toBe(['copilot', 'succeeded', 2]);
 });
+
+it('clears the previous agent home, its login copy and temp files between attempts, keeping only the page images', function () {
+    config(['ai.work_dir' => sys_get_temp_dir().'/rej-clear-'.strtolower((string) Str::ulid()), 'ai.codex.home' => sys_get_temp_dir().'/rej-codex-x', 'ai.copilot.home' => sys_get_temp_dir().'/rej-cop-x']);
+    $dir = WorkDir::create();
+    $base = $dir->path();
+    mkdir($base.'/copilot-home/logs', 0700, true);
+    file_put_contents($base.'/copilot-home/config.json', 'LOGIN-COPY');
+    file_put_contents($base.'/copilot-home/logs/x.log', 'log');
+    file_put_contents($base.'/tmp/scratch', 'tmp-file');
+    mkdir($base.'/tmp/sub', 0700);
+    file_put_contents($base.'/tmp/sub/deep', 'deep');
+    file_put_contents($base.'/reply.txt', 'previous result');
+    file_put_contents($base.'/page-1.jpg', 'img');
+
+    $method = new ReflectionMethod(RunExtractionJob::class, 'clearAttemptFiles');
+    $method->invoke(new RunExtractionJob((string) Str::uuid()), $dir, ['page-1.jpg']);
+
+    expect(array_values(array_diff(scandir($base), ['.', '..'])))->toBe(['page-1.jpg', 'tmp'])
+        ->and(scandir($base.'/tmp'))->toBe(['.', '..']);
+    $dir->cleanup();
+});

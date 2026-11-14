@@ -261,12 +261,33 @@ class RunExtractionJob implements ShouldQueue
         return $query->finishCancelled($id, 'user', $label, 0) ? 'cancelled' : null;
     }
 
-    /** Whatever an earlier attempt left in the work dir (result or schema files) is gone before the next agent starts. @param list<string> $images */
+    /**
+     * Whatever an earlier attempt left in the work dir is gone before the next agent starts: result and schema files, the
+     * previous agent's per-run home (with its login copy) and its temp dir contents. Only the page images stay.
+     *
+     * @param  list<string>  $images
+     */
     private function clearAttemptFiles(WorkDir $workDir, array $images): void
     {
-        foreach (glob($workDir->path().'/*') ?: [] as $path) {
-            if (is_file($path) && ! in_array(basename($path), $images, true)) {
+        $base = $workDir->path();
+        foreach (glob($base.'/*') ?: [] as $path) {
+            if (basename($path) === 'tmp' && is_dir($path) && ! is_link($path)) {
+                foreach (scandir($path) ?: [] as $entry) {
+                    if ($entry !== '.' && $entry !== '..') {
+                        WorkDir::removeTree($path.'/'.$entry);
+                    }
+                }
+
+                continue;
+            }
+            if (in_array(basename($path), $images, true)) {
+                continue;
+            }
+            if (is_file($path) || is_link($path)) {
                 @unlink($path);
+            } elseif (is_dir($path)) {
+                // A per-agent home such as copilot-home, with whatever the CLI wrote into it.
+                WorkDir::removeTree($path);
             }
         }
     }

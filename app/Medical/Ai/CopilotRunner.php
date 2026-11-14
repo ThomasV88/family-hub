@@ -2,6 +2,7 @@
 
 namespace App\Medical\Ai;
 
+use App\Medical\Ai\Work\WorkDir;
 use Carbon\CarbonImmutable;
 use Closure;
 use JsonException;
@@ -110,6 +111,9 @@ final class CopilotRunner
         $scan();
         // Reap, and sweep any grandchild that outlived the CLI.
         $this->killGroup($p, $pid);
+        // The login copy and everything the CLI wrote go now, before the reply is read and before any later call or agent
+        // runs in this work dir. The next exec (the repair call) seeds a fresh home.
+        $this->discardScratch($home, $tmp);
 
         if ($out > $capOut) {
             $capped = true;
@@ -201,6 +205,17 @@ final class CopilotRunner
         }
 
         return $home;
+    }
+
+    /** Removes the per-run home (with the login copy) and empties the per-run temp dir; the dir itself stays for the work dir owner. */
+    private function discardScratch(string $home, string $tmp): void
+    {
+        WorkDir::removeTree($home);
+        foreach (scandir($tmp) ?: [] as $entry) {
+            if ($entry !== '.' && $entry !== '..') {
+                WorkDir::removeTree($tmp.'/'.$entry);
+            }
+        }
     }
 
     /**
