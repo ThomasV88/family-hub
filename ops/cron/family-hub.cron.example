@@ -1,6 +1,7 @@
 # Family Hub cron schedule, installed for user `deploy` (crontab -e). Replace <STACK_DIR>.
 # Times avoid 03:17 (task-tracker certs), 03:30 (mail backup) and 04:10 (mail cert renew).
-# Scripts live in the stack directory (copied there by deploy.sh).
+# Scripts live in the stack directory (copied there by deploy.sh). server-provision.sh --install-cron writes this same block.
+# audit:prune runs as the owner through the migrate profile (fh_app has no DELETE on audit_logs); IMAGE_TAG comes from .last-good-tag.
 
 # --- production: /opt/family-hub ---
 45 3 * * *  cd /opt/family-hub && bash ./backup.sh nightly >> logs/cron.log 2>&1
@@ -8,7 +9,7 @@
 0 5 * * 0   cd /opt/family-hub && restic -r "$(grep -E '^BACKUP_RESTIC_REPOSITORY=' .env | cut -d= -f2-)" --password-file ./secrets/restic_password check >> logs/cron.log 2>&1
 30 5 1 * *  cd /opt/family-hub && bash ./restore-drill.sh >> logs/cron.log 2>&1
 0 9 * * *   cd /opt/family-hub && bash ./backup-freshness.sh >> logs/cron.log 2>&1
-40 5 2 * *  cd /opt/family-hub && docker compose --profile migrate run --rm migrate php artisan audit:prune >> logs/cron.log 2>&1
+40 5 2 * *  cd /opt/family-hub && IMAGE_TAG="$(cat .last-good-tag)" docker compose -f compose.server.yaml --profile migrate run --rm --no-deps -T migrate php artisan audit:prune >> logs/cron.log 2>&1
 
 # --- staging: /opt/family-hub-staging (offset +5 minutes) ---
 50 3 * * *  cd /opt/family-hub-staging && bash ./backup.sh nightly >> logs/cron.log 2>&1
@@ -16,4 +17,4 @@
 5 5 * * 0   cd /opt/family-hub-staging && restic -r "$(grep -E '^BACKUP_RESTIC_REPOSITORY=' .env | cut -d= -f2-)" --password-file ./secrets/restic_password check >> logs/cron.log 2>&1
 35 5 1 * *  cd /opt/family-hub-staging && bash ./restore-drill.sh >> logs/cron.log 2>&1
 5 9 * * *   cd /opt/family-hub-staging && bash ./backup-freshness.sh >> logs/cron.log 2>&1
-45 5 2 * *  cd /opt/family-hub-staging && docker compose --profile migrate run --rm migrate php artisan audit:prune >> logs/cron.log 2>&1
+45 5 2 * *  cd /opt/family-hub-staging && IMAGE_TAG="$(cat .last-good-tag)" docker compose -f compose.server.yaml --profile migrate run --rm --no-deps -T migrate php artisan audit:prune >> logs/cron.log 2>&1

@@ -228,6 +228,9 @@ cron_block() {
   printf '%s 5 * * 0   cd %s && restic -r "$(grep -E '"'"'^BACKUP_RESTIC_REPOSITORY='"'"' .env | cut -d= -f2-)" --password-file ./secrets/restic_password check >> logs/cron.log 2>&1\n' "$o" "$d"
   printf '%s 5 1 * *  cd %s && bash ./restore-drill.sh >> logs/cron.log 2>&1\n' $((30 + o)) "$d"
   printf '%s 9 * * *   cd %s && bash ./backup-freshness.sh >> logs/cron.log 2>&1\n' "$o" "$d"
+  # audit:prune needs DELETE on audit_logs, which fh_app lacks: it runs as owner through the migrate profile (never in the
+  # scheduler). compose.server.yaml needs IMAGE_TAG (not in .env), so it is read from .last-good-tag like cert-renew.sh does.
+  printf '%s 5 2 * *  cd %s && IMAGE_TAG="$(cat .last-good-tag)" docker compose -f compose.server.yaml --profile migrate run --rm --no-deps -T migrate php artisan audit:prune >> logs/cron.log 2>&1\n' $((40 + o)) "$d"
 }
 if [ "$INSTALL_CRON" = 1 ] && [ "$DRY" = 0 ]; then
   existing="$(crontab -u deploy -l 2>/dev/null || true)"

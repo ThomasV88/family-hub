@@ -69,6 +69,8 @@ The `secrets/` directory itself is 0700. Values are never written to this docume
 
 (Filled by plan 01-11.)
 
+Audit log retention: `php artisan audit:prune` is not in the Laravel scheduler because the runtime role `fh_app` has no DELETE on `audit_logs`. `server-provision.sh --install-cron` adds a monthly cron line (02nd, 05:40, staging +5 min) for user `deploy` that runs it as the owner through the migrate profile: `cd /opt/<stack> && IMAGE_TAG="$(cat .last-good-tag)" docker compose -f compose.server.yaml --profile migrate run --rm --no-deps -T migrate php artisan audit:prune >> logs/cron.log 2>&1`. The explicit `-f` is needed because a provisioned `.env` has no `COMPOSE_FILE`; `IMAGE_TAG` is needed because the compose file requires it. `ops/cron/family-hub.cron.example` shows the same lines.
+
 Freshness alerting: `backup-freshness.sh` (cron, 09:xx) checks only snapshots tagged `nightly`. When the newest one
 is older than 26 h it prints `BACKUP STALE` to `logs/cron.log`, appends to `logs/backup.log`, exits non-zero and,
 if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script with the message as its argument

@@ -53,6 +53,14 @@ for env in staging production; do
   bash scripts/server-provision.sh "$env" "$dom" --root "$T" --cert-email ops@example.test >/dev/null
   grep -q "^DB_USERNAME=fh_app" "$D/ai-worker.env" || fail "empty ai-worker.env placeholder was not filled"
 
+  # The cron block carries audit:prune with an explicit compose file, IMAGE_TAG and the stack directory
+  prune=$(grep 'audit:prune' "$D/logs/cron.preview" || true)
+  [ "$(printf '%s\n' "$prune" | grep -c .)" = 1 ] || fail "cron block needs exactly one audit:prune line"
+  case "$prune" in *"cd /opt/$slug && "*) ;; *) fail "audit:prune cron line has no cd to the stack dir" ;; esac
+  case "$prune" in *"-f compose.server.yaml --profile migrate run --rm --no-deps -T migrate php artisan audit:prune"*) ;; *) fail "audit:prune cron line is not the explicit migrate run" ;; esac
+  case "$prune" in *'IMAGE_TAG="$(cat .last-good-tag)"'*) ;; *) fail "audit:prune cron line lacks IMAGE_TAG" ;; esac
+  case "$prune" in *">> logs/cron.log 2>&1") ;; *) fail "audit:prune cron line does not log to logs/cron.log" ;; esac
+
   # Idempotent: a second run changes nothing
   before=$(cd "$D" && find . -type f -not -name cron.preview -print0 | sort -z | xargs -0 sha256sum | sha256sum)
   bash scripts/server-provision.sh "$env" "$dom" --root "$T" --cert-email ops@example.test --install-cron >/dev/null
