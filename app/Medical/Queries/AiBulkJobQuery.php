@@ -7,6 +7,7 @@ use App\Audit\AuditEvent;
 use App\Audit\AuditLogger;
 use App\Medical\Ai\Agents\AgentRegistry;
 use App\Medical\Ai\ExtractionSchema;
+use App\Medical\Ai\LocalDay;
 use App\Medical\AiConsent;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -73,7 +74,7 @@ final class AiBulkJobQuery
 
             $local = $now->setTimezone((string) config('ai.local_timezone'));
             $enqueuedToday = DB::table('ai_bulk_run_items')->where('bulk_run_id', $runId)
-                ->where('enqueued_at', '>=', $local->startOfDay())->count();
+                ->where('enqueued_at', '>=', LocalDay::startBinding($now))->count();
             $spacing = (int) config('ai.bulk.spacing_minutes');
             $last = $run->last_enqueued_at === null ? null : CarbonImmutable::parse($run->last_enqueued_at);
 

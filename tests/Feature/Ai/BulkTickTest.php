@@ -512,3 +512,29 @@ describe('through the job', function () {
         expect($r['reconciled'])->toBe(1)->and(btItems(AiBulkRun::query()->first()))->toBe(['skipped']);
     });
 });
+
+it('counts the daily cap from the same local-day start in the tick and in the panel, around local midnight and DST', function (string $nowLocal, string $insideUtc, string $outsideUtc) {
+    btDoc();
+    $run = btRun(['daily_cap' => 1, 'eligible_total' => 5]);
+    $now = btAt($nowLocal);
+    // One item just before the local day started (outside) and, in a second case, one just after it (inside).
+    DB::table('ai_bulk_run_items')->insert(['bulk_run_id' => $run->id, 'document_id' => (string) Str::uuid(), 'extraction_id' => null, 'enqueued_at' => CarbonImmutable::parse($outsideUtc, 'UTC'), 'outcome' => 'skipped']);
+    Carbon::setTestNow($now);
+    $panel = fn () => app(AdminAiBulkQuery::class)->panel()['active']['todayUsed'];
+    expect($panel())->toBe(0)
+        ->and(btTick($now)['enqueued'])->not->toBeNull()
+        ->and($panel())->toBe(1);
+
+    // The cap of 1 is reached in both: the tick enqueues nothing more and the panel says so.
+    expect(btTick($now->addMinutes(11))['enqueued'])->toBeNull()
+        ->and(app(AdminAiBulkQuery::class)->panel()['active']['state'])->toBe('next_batch');
+
+    // An item enqueued exactly at the local day start counts for that day, one second earlier does not.
+    DB::table('ai_bulk_run_items')->insert(['bulk_run_id' => $run->id, 'document_id' => (string) Str::uuid(), 'extraction_id' => null, 'enqueued_at' => CarbonImmutable::parse($insideUtc, 'UTC'), 'outcome' => 'skipped']);
+    expect($panel())->toBe(2);
+})->with([
+    'winter, just after local midnight' => ['2026-01-10 01:30', '2026-01-09 23:00:00', '2026-01-09 22:59:59'],
+    'spring-forward day' => ['2026-03-29 01:30', '2026-03-28 23:00:00', '2026-03-28 22:59:59'],
+    'day after spring-forward (UTC+2 start)' => ['2026-03-30 01:30', '2026-03-29 22:00:00', '2026-03-29 21:59:59'],
+    'fall-back day' => ['2026-10-25 01:30', '2026-10-24 22:00:00', '2026-10-24 21:59:59'],
+]);

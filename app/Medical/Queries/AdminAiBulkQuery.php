@@ -4,6 +4,7 @@ namespace App\Medical\Queries;
 
 use App\Audit\AuditEvent;
 use App\Audit\AuditLogger;
+use App\Medical\Ai\LocalDay;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
@@ -290,7 +291,7 @@ final class AdminAiBulkQuery
         $local = $now->setTimezone($tz);
         $startHour = (int) config('ai.bulk.start_hour');
         $todayUsed = (int) DB::table('ai_bulk_run_items')->where('bulk_run_id', $run->id)
-            ->where('enqueued_at', '>=', $local->startOfDay()->utc())->count();
+            ->where('enqueued_at', '>=', LocalDay::startBinding($now))->count();
         $cap = (int) $run->daily_cap;
         $beforeStart = $local->hour < $startHour;
 
@@ -305,8 +306,9 @@ final class AdminAiBulkQuery
             $state = 'waiting_quota';
         } elseif ($beforeStart || $todayUsed >= $cap) {
             $state = 'next_batch';
-            $next = $local->startOfDay()->addHours($startHour);
-            $nextBatch = ($beforeStart ? $next : $next->addDay())->utc()->toIso8601String();
+            // Wall-clock arithmetic: on a 23 or 25 hour day the start hour is still the local clock hour.
+            $day = $beforeStart ? $local : $local->addDay();
+            $nextBatch = $day->startOfDay()->setTime($startHour, 0)->utc()->toIso8601String();
         }
 
         $done = $t['read'] + $t['failed'] + $t['skipped'] + $t['cancelled'] + $t['gone'];

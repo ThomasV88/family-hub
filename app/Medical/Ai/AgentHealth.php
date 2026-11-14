@@ -75,7 +75,7 @@ final class AgentHealth
         if ($agent !== 'copilot' || $limit <= 0) {
             return false;
         }
-        $start = CarbonImmutable::now((string) config('ai.local_timezone', 'UTC'))->startOfDay();
+        $start = LocalDay::startBinding();
         $count = AiCall::query()->toBase()
             ->where('agent', 'copilot')
             ->whereIn('status', ['succeeded', 'failed'])
@@ -91,7 +91,7 @@ final class AgentHealth
             return null;
         }
 
-        return CarbonImmutable::now((string) config('ai.local_timezone', 'UTC'))->addDay()->startOfDay();
+        return LocalDay::nextStartUtc();
     }
 
     /** @return 'logged_in'|'expired'|'not_responding'|'unknown' */
