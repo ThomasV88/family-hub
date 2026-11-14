@@ -23,7 +23,11 @@ final class ImageProcessor
 
     private const QUALITY = 82;
 
-    public function process(string $bytes, int $maxBytes): ProcessedImage
+    /**
+     * @param  ?int  $fullPx  longest edge of the full image (null: config wishlist.image_full_px)
+     * @param  ?int  $thumbPx  longest edge of the thumbnail (null: config wishlist.image_thumb_px)
+     */
+    public function process(string $bytes, int $maxBytes, ?int $fullPx = null, ?int $thumbPx = null): ProcessedImage
     {
         if (strlen($bytes) > $maxBytes) {
             throw new ImageRejected('too_large');
@@ -45,11 +49,16 @@ final class ImageProcessor
 
         // Only one decode per container at a time: a full-size bitmap is ~4 bytes per pixel, and several in
         // parallel would exceed the container memory limit (see the budget in the class docblock).
-        return $this->exclusive(fn () => $this->render($bytes, $info));
+        return $this->exclusive(fn () => $this->render(
+            $bytes,
+            $info,
+            $fullPx ?? (int) config('wishlist.image_full_px'),
+            $thumbPx ?? (int) config('wishlist.image_thumb_px'),
+        ));
     }
 
     /** @param  array<int, mixed>  $info  getimagesizefromstring result */
-    private function render(string $bytes, array $info): ProcessedImage
+    private function render(string $bytes, array $info, int $fullMax, int $thumbMax): ProcessedImage
     {
         [$width, $height] = $info;
         $orientation = $info[2] === IMAGETYPE_JPEG ? $this->orientation($bytes) : 1;
@@ -63,7 +72,7 @@ final class ImageProcessor
         $swap = $orientation >= 5;
         $orientedW = $swap ? $height : $width;
         $orientedH = $swap ? $width : $height;
-        [$fullW, $fullH] = $this->fit($orientedW, $orientedH, (int) config('wishlist.image_full_px'));
+        [$fullW, $fullH] = $this->fit($orientedW, $orientedH, $fullMax);
         $resized = $this->resample($source, $swap ? $fullH : $fullW, $swap ? $fullW : $fullH);
         imagedestroy($source);
         unset($source);
@@ -71,7 +80,7 @@ final class ImageProcessor
         $full = $this->orient($resized, $orientation);
         unset($resized);
 
-        [$thumbW, $thumbH] = $this->fit(imagesx($full), imagesy($full), (int) config('wishlist.image_thumb_px'));
+        [$thumbW, $thumbH] = $this->fit(imagesx($full), imagesy($full), $thumbMax);
         $thumb = $this->resample($full, $thumbW, $thumbH);
 
         $result = new ProcessedImage($this->encode($full), $this->encode($thumb), imagesx($full), imagesy($full));
