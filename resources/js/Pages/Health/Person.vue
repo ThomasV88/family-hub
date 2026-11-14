@@ -23,6 +23,7 @@ import VaccinationPanel from '../../Health/VaccinationPanel.vue';
 import ViewSwitch from '../../Health/ViewSwitch.vue';
 import VisitPanel from '../../Health/VisitPanel.vue';
 import ShellAdd from '../../Wishlist/ShellAdd.vue';
+import { useAiStatus } from '../../Health/Ai/useAiStatus.js';
 
 // Person page. The server decides who is shown; no selection or draft is kept on the client (no Inertia
 // history state, no storage), and the title is always the module name, never a person.
@@ -45,8 +46,12 @@ const props = defineProps({
     documents: { type: Array, default: () => [] },
     unattachedDocumentIds: { type: Array, default: () => [] },
     limits: { type: Object, default: () => ({ maxMb: 10, filesAtOnce: 10 }) },
+    ai: { type: Object, default: () => ({ canRun: false, available: false, noticeAcknowledged: false, statuses: {} }) },
 });
 const { t } = useI18n();
+
+// One status poller per page; the document panel and (08-23) the document lists read the same instance.
+const aiStatuses = useAiStatus(() => props.person?.id ?? null, () => props.ai?.statuses ?? {});
 
 const busy = ref(false);
 // The view and filter live in the URL; a panel change keeps them and an id-less query drops the panel.
@@ -146,7 +151,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
         <AllergyPanel v-if="person" :open="allergyPanelOpen" :person-id="person.id" :allergy="activeAllergy" :can-edit="canAddVisit" @close="closePanel" />
         <MedicationPanel v-if="person" :open="medicationPanelOpen" :person-id="person.id" :medication="activeMedication" :can-edit="canAddVisit" @close="closePanel" />
         <VaccinationPanel v-if="person" :open="vaccinationPanelOpen" :person-id="person.id" :vaccination="activeVaccination" :can-edit="canAddVisit" @close="closePanel" />
-        <DocumentPanel v-if="person" :open="documentPanelOpen" :person-id="person.id" :document="activeDocument" :visits="visits" :limits="limits" :can-edit="canAddVisit" :initial-visit="panel?.visit ?? null" @close="closePanel" />
+        <DocumentPanel v-if="person" :open="documentPanelOpen" :person-id="person.id" :document="activeDocument" :visits="visits" :limits="limits" :can-edit="canAddVisit" :initial-visit="panel?.visit ?? null" :ai="ai" :ai-status="aiStatuses" :consent-on="Boolean(person.aiConsent)" @close="closePanel" />
         <ShellAdd :enabled="canAddVisit" :label="t('health.fab.add_visit')" @add="openNewVisit" />
     </AppShell>
 </template>

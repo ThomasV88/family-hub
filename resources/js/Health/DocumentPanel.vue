@@ -16,6 +16,7 @@ import DocumentPreview from './DocumentPreview.vue';
 import DocumentUploader from './DocumentUploader.vue';
 import { documentUrl, visitLabel } from './documentFormat.js';
 import { handleHealthRefusal } from './healthRefusal.js';
+import RunAiControl from './Ai/RunAiControl.vue';
 
 // Create (uploader) and view/edit/read-only presentation of one document. Drafts, picked files and downloaded blobs
 // live in component memory only; an object URL is revoked as soon as the download was started. Titles are
@@ -28,6 +29,10 @@ const props = defineProps({
     limits: { type: Object, default: () => ({ maxMb: 10, filesAtOnce: 10 }) },
     canEdit: { type: Boolean, default: false },
     initialVisit: { type: String, default: null },
+    // AI run state of the page: `ai` is the PersonPage prop, `aiStatus` the page's useAiStatus() instance.
+    ai: { type: Object, default: null },
+    aiStatus: { type: Object, default: null },
+    consentOn: { type: Boolean, default: false },
 });
 const emit = defineEmits(['close']);
 const { t, te } = useI18n();
@@ -115,6 +120,11 @@ async function download() {
     }
     saveBlob(result.blob, result.filename ?? 'document');
 }
+// "Go to person header": leave the panel, then put focus on the consent switch of the header.
+function goToHeader() {
+    emit('close');
+    setTimeout(() => document.querySelector('[data-testid="ai-switch"]')?.focus?.(), 60);
+}
 const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preventDefault(); };
 </script>
 
@@ -130,6 +140,15 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
                 <UiButton variant="secondary" :icon="ExternalLink" :href="openUrl" target="_blank" rel="noopener" data-testid="doc-open">{{ t('health.doc.open_new_tab') }}</UiButton>
                 <UiButton variant="secondary" :icon="Download" :loading="downloading" data-testid="doc-download" @click="download">{{ t('health.doc.download') }}</UiButton>
             </div>
+            <RunAiControl
+                v-if="ai && aiStatus"
+                :person-id="personId"
+                :document="document"
+                :ai="ai"
+                :poller="aiStatus"
+                :consent-on="consentOn"
+                @go-header="goToHeader"
+            />
 
             <form v-if="!readOnly" novalidate class="doc-panel__form" data-testid="document-form" @submit.prevent="save" @keydown.enter="onEnter">
                 <UiField :label="t('health.doc.title_field')" :error="errors.title">
