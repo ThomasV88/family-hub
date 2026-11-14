@@ -57,7 +57,9 @@ class SensitiveGate
             return redirect(url('/confirm-access'), $get ? 302 : 303);
         }
 
-        if (! $passive) {
+        // A write always counts as activity: a client-set passive header must not keep a script from extending the window honestly,
+        // nor let writes run without accounting. Only reads can be passive.
+        if (! $passive || ! $request->isMethodSafe()) {
             app(SensitiveSession::class)->touch();
         }
 

@@ -57,6 +57,18 @@ it('refuses prefetch and passive requests when stale and never slides when fresh
     expect(session('sensitive.active_at'))->toBe($old);
 })->with([['Purpose', 'prefetch'], ['X-Fh-Passive', '1']]);
 
+it('counts a write with a passive header as activity (reads stay passive)', function () {
+    $user = User::factory()->create();
+    Tests\Support\MedicalFixtures::grantHealth($user);
+    $person = Tests\Support\MedicalFixtures::subject([], [[$user, App\Access\AccessLevel::Edit]]);
+    $old = now()->subSeconds(60)->getTimestamp();
+
+    $this->actingAs($user)->withSession(['sensitive.active_at' => $old])->withHeaders(['X-Fh-Passive' => '1'])
+        ->patch("/health/people/{$person->id}", ['name' => 'Renamed'])->assertRedirect();
+
+    expect(session('sensitive.active_at'))->toBeGreaterThan($old);
+});
+
 it('answers a stale JSON request with 423 and remembers the same-origin referer', function () {
     $user = gateParent();
 
