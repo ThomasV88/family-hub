@@ -3,8 +3,10 @@
 namespace App\Medical;
 
 use App\Access\AccessLevel;
+use App\Medical\Queries\AllergyQuery;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Queries\VisitQuery;
+use App\Models\MedicalAllergy;
 use App\Models\MedicalSubject;
 use App\Models\MedicalVisit;
 use Illuminate\Http\Request;
@@ -20,11 +22,11 @@ use Inertia\Response;
 class PersonPage
 {
     /** Panel kinds that exist so far; those listed in WITH_ID resolve a record id inside the visible person. */
-    private const PANELS = ['new-person', 'new-visit', 'visit'];
+    private const PANELS = ['new-person', 'new-visit', 'visit', 'new-allergy', 'allergy'];
 
-    private const WITH_ID = ['visit'];
+    private const WITH_ID = ['visit', 'allergy'];
 
-    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits) {}
+    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies) {}
 
     public function render(Viewer $viewer, ?MedicalSubject $subject, Request $request): Response
     {
@@ -37,6 +39,7 @@ class PersonPage
         $people = $this->subjects->visible($viewer);
 
         return $this->visitProps($viewer, $subject, $request) + [
+            'allergies' => $this->allergyProps($viewer, $subject),
             'people' => $people->map(fn (MedicalSubject $p) => [
                 'id' => (string) $p->getKey(),
                 'name' => $p->name,
@@ -115,6 +118,21 @@ class PersonPage
         ];
     }
 
+    /** @return list<array{id: string, substance: string, reaction: ?string, severity: string}> severe first */
+    private function allergyProps(Viewer $viewer, ?MedicalSubject $subject): array
+    {
+        if ($subject === null) {
+            return [];
+        }
+
+        return $this->allergies->forSubject($viewer, $subject)->map(fn (MedicalAllergy $a) => [
+            'id' => (string) $a->getKey(),
+            'substance' => $a->substance,
+            'reaction' => $a->reaction,
+            'severity' => $a->severity,
+        ])->values()->all();
+    }
+
     /** @return array{kind: string, id: ?string}|null */
     private function panel(Viewer $viewer, ?MedicalSubject $subject, Request $request): ?array
     {
@@ -127,7 +145,11 @@ class PersonPage
         // same 403 as a hidden person.
         $id = $request->query('id');
         if (in_array($kind, self::WITH_ID, true)) {
-            abort_if($subject === null || ! is_string($id) || $this->visits->find($viewer, $subject, $id) === null, 403);
+            $found = $subject !== null && is_string($id) && match ($kind) {
+                'visit' => $this->visits->find($viewer, $subject, $id) !== null,
+                default => $this->allergies->find($viewer, $subject, $id) !== null,
+            };
+            abort_unless($found, 403);
 
             return ['kind' => $kind, 'id' => $id];
         }
@@ -138,7 +160,7 @@ class PersonPage
         if ($kind === 'new-person' && ! $viewer->canEdit()) {
             return null;
         }
-        if ($kind === 'new-visit') {
+        if ($kind === 'new-visit' || $kind === 'new-allergy') {
             abort_if($subject === null || $this->subjects->levelFor($viewer, $subject) !== AccessLevel::Edit, 403);
         }
 
