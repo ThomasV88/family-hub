@@ -17,7 +17,12 @@ for env in staging production; do
   if bash scripts/server-provision.sh "$env" "$dom" --root "$M" >/dev/null 2>&1; then fail "must refuse without cloudflare.ini"; fi
 
   bash scripts/server-provision.sh "$env" "$dom" --root "$T" --cert-email ops@example.test --install-cron >/dev/null
-  [ "$(stat -c %a "$D/secrets/db_app_password")" = 600 ] || fail "db_app_password mode"
+  # database passwords are read by the postgres image user (uid/gid 70): 0640 (group 70 is set only on a real run)
+  for s in db_root_password db_owner_password db_app_password; do
+    [ "$(stat -c %a "$D/secrets/$s")" = 640 ] || fail "$s mode"
+  done
+  [ "$(stat -c %a "$D/secrets/restic_password")" = 600 ] || fail "restic_password mode"
+  [ "$(stat -c %a "$D/postgres-init")" = 755 ] || fail "postgres-init must be traversable by the postgres user"
   [ "$(stat -c %a "$D/secrets")" = 700 ] || fail "secrets dir mode"
   [ "$(stat -c %a "$D/app.env")" = 600 ] || fail "app.env mode"
   [ "$(stat -c %a "$D/ai-worker.env")" = 600 ] || fail "ai-worker.env mode"

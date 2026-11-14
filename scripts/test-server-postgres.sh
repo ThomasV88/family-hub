@@ -24,6 +24,15 @@ cp docker/postgres/init/01-roles.sh "$TMP/postgres-init/"
 for s in db_root_password db_owner_password db_app_password restic_password cloudflare.ini; do
   echo "throwaway-$s-$$" > "$TMP/secrets/$s"
 done
+# Same modes as scripts/server-provision.sh on the server: the postgres image user (uid/gid 70) reads the three database
+# passwords through Docker secrets and lists postgres-init. A world-readable fixture hid the real failure once.
+chmod 755 "$TMP/postgres-init"
+for s in db_root_password db_owner_password db_app_password; do
+  chmod 640 "$TMP/secrets/$s"
+  if sudo -n true 2>/dev/null; then sudo chgrp 70 "$TMP/secrets/$s"
+  else chmod 644 "$TMP/secrets/$s"; echo "note: no sudo, database secrets are 0644 in this run (CI uses 0640 group 70)" >&2
+  fi
+done
 
 dc() { docker compose -f "$ROOT/compose.server.yaml" --project-directory "$TMP" --env-file "$TMP/.env" "$@"; }
 

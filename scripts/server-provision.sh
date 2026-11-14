@@ -72,7 +72,9 @@ mkdir_own "$TARGET_DIR" 750
 mkdir_own "$TARGET_DIR/secrets" 700
 mkdir_own "$TARGET_DIR/logs" 750
 mkdir_own "$TARGET_DIR/letsencrypt" 750
-mkdir_own "$TARGET_DIR/postgres-init" 750
+# 0755: mounted read-only into the postgres container, whose user (uid 70) must be able to list it. It holds only
+# the non-secret role bootstrap script.
+mkdir_own "$TARGET_DIR/postgres-init" 755
 
 # The Cloudflare DNS token is placed by the owner (it is not generated here).
 if [ ! -s "$TARGET_DIR/secrets/cloudflare.ini" ]; then
@@ -88,9 +90,16 @@ fi
 
 gen_secret() {  # gen_secret <name>: random value into secrets/<name> only if absent; never printed
   local f="$TARGET_DIR/secrets/$1"
-  if [ -s "$f" ]; then KEPT+=("secrets/$1"); return; fi
-  openssl rand -base64 36 | tr -d '\n' > "$f"
-  chmod 600 "$f"; own "$f"; CREATED+=("secrets/$1")
+  if [ -s "$f" ]; then KEPT+=("secrets/$1")
+  else
+    openssl rand -base64 36 | tr -d '\n' > "$f"
+    chmod 600 "$f"; own "$f"; CREATED+=("secrets/$1")
+  fi
+  # The three database passwords are bind-mounted as Docker secrets and read by the postgres image's own user
+  # (uid/gid 70, alpine): the entrypoint and 01-roles.sh fail with "required" when the file is 0600 deploy-only.
+  # 0640 with group 70 keeps every other host user out (the secrets/ directory is 0700 as well). Applied on every
+  # run so an existing stack is repaired too.
+  case "$1" in db_*) chmod 640 "$f"; [ "$DRY" = 1 ] || chgrp 70 "$f" ;; esac
 }
 gen_secret db_root_password
 gen_secret db_owner_password
