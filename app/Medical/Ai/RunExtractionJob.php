@@ -14,6 +14,7 @@ use App\Medical\AiConsent;
 use App\Medical\Documents\MedicalDocumentStore;
 use App\Medical\Documents\PdfRasterizer;
 use App\Medical\Queries\AiJobQuery;
+use App\Medical\Queries\AiRunAudit;
 use App\Medical\Queries\SystemQuery;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -325,7 +326,7 @@ class RunExtractionJob implements ShouldQueue
             app(AuditLogger::class)->record(
                 AuditEvent::MedicalAiRunFinished,
                 $user,
-                ['subject' => $claim['subject_id'], 'document' => $claim['document_id'], 'status' => $status],
+                AiRunAudit::meta($claim['subject_id'], $claim['document_id'], $claim['bulk_run_id'], $status),
                 null,
                 Module::Health,
             );

@@ -42,8 +42,8 @@ it('has all nine medical audit events in the health group with content-free meta
         'medical_admin_self_added' => ['subject'],
         'medical_exported' => ['subject', 'scope', 'format'],
         'medical_consent_changed' => ['subject', 'value'],
-        'medical_ai_run_requested' => ['subject', 'document'],
-        'medical_ai_run_finished' => ['subject', 'document', 'status'],
+        'medical_ai_run_requested' => ['subject', 'document', 'bulk'],
+        'medical_ai_run_finished' => ['subject', 'document', 'status', 'bulk'],
         'medical_ai_entry_decided' => ['subject', 'document', 'decision'],
     ];
 

@@ -258,7 +258,7 @@ class AiJobQuery
             // available_at must go in the same statement (CHECK: set exactly while waiting); waiting_since stays as the anchor.
             $waiting = DB::select(
                 "update medical_ai_extractions set status = 'failed', failure_code = ?, model = 'default', available_at = NULL, finished_at = ?, updated_at = ? "
-                ."where status = 'waiting' and waiting_since < ? returning id, subject_id, document_id, started_by",
+                ."where status = 'waiting' and waiting_since < ? returning id, subject_id, document_id, started_by, bulk_run_id",
                 [FailureCode::QuotaTimeout->value, $now, $now, $waitingCutoff],
             );
             foreach ($waiting as $row) {
@@ -273,7 +273,7 @@ class AiJobQuery
                 app(AuditLogger::class)->record(
                     AuditEvent::MedicalAiRunFinished,
                     User::query()->find((int) $row->started_by),
-                    ['subject' => (string) $row->subject_id, 'document' => (string) $row->document_id, 'status' => 'failed'],
+                    AiRunAudit::meta((string) $row->subject_id, (string) $row->document_id, $row->bulk_run_id === null ? null : (string) $row->bulk_run_id, 'failed'),
                     null,
                     Module::Health,
                 );

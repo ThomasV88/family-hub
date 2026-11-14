@@ -1,11 +1,15 @@
 <?php
 
 use App\Access\AccessLevel;
+use App\Access\Module;
+use App\Audit\AuditEvent;
+use App\Audit\AuditLogger;
 use App\Medical\Ai\AgentHealth;
 use App\Medical\Ai\RunExtractionJob;
 use App\Medical\Ai\Work\WorkDir;
 use App\Medical\Queries\AdminAiBulkQuery;
 use App\Medical\Queries\AiBulkJobQuery;
+use App\Medical\Queries\AiJobQuery;
 use App\Models\AiAgentSetting;
 use App\Models\AiBulkRun;
 use App\Models\AuditEntry;
@@ -217,6 +221,34 @@ it('ends the run and its queued work when the starting admin is no longer an adm
         ->and(DB::table('ai_bulk_runs')->where('id', $run->id)->value('finished_at'))->not->toBeNull()
         ->and(DB::table('medical_ai_extractions')->value('status'))->toBe('cancelled')
         ->and(AuditEntry::where('event', 'ai_bulk_run_changed')->get()->pluck('meta.action')->all())->toContain('cancelled');
+});
+
+it('writes no person or document id into the audit rows of a bulk run and the audit page lists none', function () {
+    $a = btDoc();
+    $run = btRun();
+    $id = btTick(btAt('2026-03-10 01:05'))['enqueued'];
+    // A second, waiting bulk row that the reaper times out.
+    $b = btDoc();
+    $waiting = MedicalAiExtraction::factory()->forDocument($b['doc'])->waiting()->bulk($run->id)->create(['started_by' => $this->admin->id]);
+    DB::table('medical_ai_extractions')->where('id', $waiting->id)->update(['waiting_since' => now()->subDays(3), 'available_at' => now()->subDays(2)]);
+    app(AiJobQuery::class)->reapStuck(900, 6);
+    app(AiBulkJobQuery::class)->cancelRunExtractions($run->id, $this->admin->id);
+
+    $rows = DB::table('audit_logs')->whereIn('event', ['medical_ai_run_requested', 'medical_ai_run_finished'])->get();
+    expect($rows->count())->toBeGreaterThanOrEqual(3);
+    foreach ($rows as $row) {
+        expect(json_decode($row->meta, true))->toHaveKey('bulk', true)->not->toHaveKeys(['subject', 'document']);
+    }
+    $ids = [$a['doc']->id, $a['subject']->id, $b['doc']->id, $b['subject']->id, $id];
+    $page = $this->actingAs($this->admin)->get('/settings/audit')->assertOk()->getContent();
+    foreach ($ids as $uuid) {
+        expect($page)->not->toContain($uuid);
+    }
+
+    // An older row that still carries ids is masked by the controller once it is marked bulk.
+    app(AuditLogger::class)->record(AuditEvent::MedicalAiRunFinished, $this->admin, ['bulk' => true, 'subject' => $a['subject']->id, 'document' => $a['doc']->id, 'status' => 'failed'], null, Module::Health);
+    $page = $this->actingAs($this->admin)->get('/settings/audit')->assertOk()->getContent();
+    expect($page)->not->toContain($a['subject']->id)->not->toContain($a['doc']->id);
 });
 
 it('does nothing for a paused or cancelled run and never completes a paused one', function () {
@@ -441,6 +473,9 @@ describe('through the job', function () {
         $r = btTick($now->addMinutes(11));
         expect($r['reconciled'])->toBe(1)->and($r['completed'])->toBe(1)
             ->and(DB::table('ai_bulk_run_items')->where('document_id', $a['doc']->id)->value('outcome'))->toBe('read');
+        // The job's finish row names no person or document either.
+        $finished = DB::table('audit_logs')->where('event', 'medical_ai_run_finished')->get();
+        expect($finished)->toHaveCount(1)->and(json_decode($finished[0]->meta, true))->toEqual(['status' => 'succeeded', 'bulk' => true]);
     });
 
     it('parks on quota with the other agent cooling, shows waiting_quota and enqueues nothing meanwhile', function () {

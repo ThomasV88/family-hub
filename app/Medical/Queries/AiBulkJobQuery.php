@@ -217,7 +217,7 @@ final class AiBulkJobQuery
             'bulk_run_id' => $runId, 'document_id' => $docId, 'extraction_id' => $id, 'enqueued_at' => $now,
         ]);
         $actor = User::query()->find((int) $run->started_by);
-        $this->audit->record(AuditEvent::MedicalAiRunRequested, $actor, ['subject' => $subjectId, 'document' => $docId], null, Module::Health);
+        $this->audit->record(AuditEvent::MedicalAiRunRequested, $actor, AiRunAudit::meta($subjectId, $docId, $runId), null, Module::Health);
         DB::table('ai_bulk_runs')->where('id', $runId)->update(['last_enqueued_at' => $now, 'blocked_since' => null, 'updated_at' => $now]);
 
         return $id;
@@ -255,9 +255,7 @@ final class AiBulkJobQuery
                 ]);
                 DB::table('ai_bulk_run_items')->where('bulk_run_id', $runId)->where('extraction_id', $row->id)->whereNull('outcome')
                     ->update(['outcome' => 'cancelled']);
-                $this->audit->record(AuditEvent::MedicalAiRunFinished, $actor, [
-                    'subject' => (string) $row->subject_id, 'document' => (string) $row->document_id, 'status' => 'cancelled',
-                ], null, Module::Health);
+                $this->audit->record(AuditEvent::MedicalAiRunFinished, $actor, AiRunAudit::meta((string) $row->subject_id, (string) $row->document_id, $runId, 'cancelled'), null, Module::Health);
             }
 
             $count += DB::table('medical_ai_extractions')->where('bulk_run_id', $runId)->where('status', 'running')

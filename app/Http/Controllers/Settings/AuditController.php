@@ -65,6 +65,10 @@ class AuditController extends Controller
         $event = AuditEvent::tryFrom($entry->event);
         $allowed = $event?->metaKeys() ?? [];
         $meta = array_intersect_key((array) $entry->meta, array_flip($allowed));
+        // A bulk row is never listed with a person or document id, whatever an older row may still carry.
+        if (! empty($meta['bulk'])) {
+            unset($meta['subject'], $meta['document']);
+        }
 
         return [
             'id' => $entry->id,
