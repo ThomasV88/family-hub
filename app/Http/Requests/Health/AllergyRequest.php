@@ -33,6 +33,12 @@ class AllergyRequest extends FormRequest
     /** @return array<string, mixed> 'unknown' is reserved for AI rows, so it is not accepted here */
     public function rules(): array
     {
+        return self::fieldRules();
+    }
+
+    /** @return array<string, mixed> the one rule set shared with the AI accept path */
+    public static function fieldRules(): array
+    {
         return [
             'substance' => ['required', 'string', 'max:120', new ValidUtf8('health.allergy.err_substance')],
             'reaction' => ['nullable', 'string', 'max:200', new ValidUtf8('health.error.load')],
@@ -42,6 +48,12 @@ class AllergyRequest extends FormRequest
 
     /** @return array<string, string> */
     public function messages(): array
+    {
+        return self::fieldMessages();
+    }
+
+    /** @return array<string, string> */
+    public static function fieldMessages(): array
     {
         return [
             'substance.required' => 'health.allergy.err_substance',

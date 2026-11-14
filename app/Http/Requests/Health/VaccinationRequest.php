@@ -33,6 +33,12 @@ class VaccinationRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
+        return self::fieldRules();
+    }
+
+    /** @return array<string, mixed> the one rule set shared with the AI accept path */
+    public static function fieldRules(): array
+    {
         return [
             'vaccine' => ['required', 'string', 'max:120', new ValidUtf8('health.vaccination.err_vaccine')],
             'given_on' => ['required', 'date_format:Y-m-d', 'before_or_equal:'.now((string) config('family.timezone'))->toDateString()],
@@ -43,6 +49,12 @@ class VaccinationRequest extends FormRequest
 
     /** @return array<string, string> */
     public function messages(): array
+    {
+        return self::fieldMessages();
+    }
+
+    /** @return array<string, string> */
+    public static function fieldMessages(): array
     {
         return [
             'vaccine.required' => 'health.vaccination.err_vaccine',

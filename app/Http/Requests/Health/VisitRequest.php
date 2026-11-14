@@ -35,6 +35,12 @@ class VisitRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
+        return self::fieldRules();
+    }
+
+    /** @return array<string, mixed> the one rule set shared with the AI accept path */
+    public static function fieldRules(): array
+    {
         $today = now((string) config('family.timezone'))->toDateString();
 
         return [
@@ -49,6 +55,12 @@ class VisitRequest extends FormRequest
 
     /** @return array<string, string> */
     public function messages(): array
+    {
+        return self::fieldMessages();
+    }
+
+    /** @return array<string, string> */
+    public static function fieldMessages(): array
     {
         return [
             'visited_on.required' => 'health.visit.err_date',

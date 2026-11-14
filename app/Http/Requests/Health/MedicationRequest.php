@@ -33,6 +33,12 @@ class MedicationRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
+        return self::fieldRules();
+    }
+
+    /** @return array<string, mixed> the one rule set shared with the AI accept path */
+    public static function fieldRules(): array
+    {
         return [
             'name' => ['required', 'string', 'max:120', new ValidUtf8('health.medication.err_name')],
             'dose' => ['nullable', 'string', 'max:120', new ValidUtf8('health.error.load')],
@@ -45,6 +51,12 @@ class MedicationRequest extends FormRequest
 
     /** @return array<string, string> */
     public function messages(): array
+    {
+        return self::fieldMessages();
+    }
+
+    /** @return array<string, string> */
+    public static function fieldMessages(): array
     {
         return [
             'name.required' => 'health.medication.err_name',
