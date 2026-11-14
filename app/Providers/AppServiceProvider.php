@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Access\AccessGate;
 use App\Medical\Ai\Agents\AgentRegistry;
 use App\Models\Task;
 use App\Observers\TaskReminderObserver;
@@ -10,14 +11,12 @@ use App\Push\WebPushSender;
 use App\Recurrence\RecurrenceEngine;
 use App\Recurrence\RRuleRecurrenceEngine;
 use App\Support\RequestInput;
-use App\Access\AccessGate;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
