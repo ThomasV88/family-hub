@@ -170,6 +170,7 @@ function grantSnapshot(): array
         'accounts' => FinanceAccount::query()->orderBy('id')->get()->toArray(),
         'members' => \Illuminate\Support\Facades\DB::table('finance_account_members')->get()->toArray(),
         'medical_members' => \Illuminate\Support\Facades\DB::table('medical_subject_members')->orderBy('subject_id')->orderBy('user_id')->get()->toArray(),
+        'wishlist_managers' => \Illuminate\Support\Facades\DB::table('wishlist_managers')->orderBy('id')->get()->toArray(),
         'medical_links' => \Illuminate\Support\Facades\DB::table('medical_subjects')->orderBy('id')->get(['id', 'user_id', 'self_access_enabled'])->toArray(),
     ]), true);
 }
@@ -204,6 +205,29 @@ it('refuses a stale admin session on every access-granting route and changes not
 
         expect(grantSnapshot())->toBe($before, "$name changed state while stale");
     }
+});
+
+it('refuses a stale admin on the wishlist manager route and leaves the managers alone, while a fresh one may save', function () {
+    $users = Roles::make();
+    $url = '/settings/members/'.$users['child']->id.'/wishlist-managers';
+    $payload = ['manager_ids' => [$users['parent']->id]];
+
+    $stale = $this->actingAs($users['admin'])->putJson($url, $payload);
+    expect($stale->getStatusCode())->toBe(423);
+    expect($stale->json('error'))->toBe('confirm_required');
+    expect(\Illuminate\Support\Facades\DB::table('wishlist_managers')->count())->toBe(0);
+
+    $this->app['auth']->forgetGuards();
+    $this->actingAs($users['admin'])->withSession([\App\Security\SensitiveSession::CONFIRMED_KEY => now()->getTimestamp()])->putJson($url, $payload)->assertRedirect();
+    expect(\Illuminate\Support\Facades\DB::table('wishlist_managers')->count())->toBe(1);
+});
+
+it('classifies the second-factor reset and wishlist manager routes as access-granting and leaves session revokes outside', function () {
+    expect(SensitiveRoutes::accessGranting())->toContain('settings.members.wishlist_managers.update', 'settings.members.second_factor.destroy')
+        ->and(SensitiveRoutes::unclassifiedGrantRoutes())->not->toContain('settings.members.sessions.destroy')
+        ->and(SensitiveRoutes::grantPrefixes())->not->toContain('settings.members.sessions.');
+    $revoke = Route::getRoutes()->getByName('settings.members.sessions.destroy');
+    expect($revoke->gatherMiddleware())->not->toContain('access:recent');
 });
 
 it('keeps a member without admin at 403 on access-granting routes even when stale', function () {

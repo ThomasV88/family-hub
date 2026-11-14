@@ -1,7 +1,7 @@
 <?php
 
 return [
-    // Target is the child; no payload means an empty set, which keeps rows independent. Non-Inertia PUT answers 302 for the admin.
+    // Target is the child; no payload means an empty set, which keeps rows independent. Non-Inertia PUT answers 302 for a fresh admin; a stale one is answered by the access-granting proof (access:recent, 423/confirm-access).
     'settings.members.wishlist_managers.update' => [
         'method' => 'PUT',
         'uri' => '/settings/members/{id}/wishlist-managers',

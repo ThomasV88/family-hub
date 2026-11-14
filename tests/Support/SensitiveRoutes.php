@@ -57,6 +57,10 @@ class SensitiveRoutes
             'settings.finance_accounts.update',
             'settings.health_people.members.update',
             'settings.health_people.link.update',
+            // Lets a chosen member manage another member's wishlist (widens who can act for them) (v1.0 gap W3).
+            'settings.members.wishlist_managers.update',
+            // Removes a member's authenticator, passkeys and recovery codes: it lowers the protection of their account (v1.0 gap W3).
+            'settings.members.second_factor.destroy',
             // Queues a login check in the AI worker. Grants nothing; listed so it needs a recent confirmation (08-14).
             'settings.ai_calls.check',
             // Changes where medical documents are sent (which agent, which model, in what order) (09-12).
@@ -79,8 +83,11 @@ class SensitiveRoutes
      */
     public static function grantPrefixes(): array
     {
-        return ['settings.members.permissions.', 'settings.invitations.', 'settings.finance_accounts.', 'settings.health_people.', 'settings.ai_calls.', 'settings.ai_agents.'];
+        return ['settings.members.permissions.', 'settings.invitations.', 'settings.finance_accounts.', 'settings.health_people.', 'settings.ai_calls.', 'settings.ai_agents.', 'settings.members.wishlist_managers.', 'settings.members.second_factor.'];
     }
+
+    // settings.members.sessions.* is deliberately NOT a grant prefix: listing and revoking sessions only removes access (a
+    // revoke is defensible without a recent confirmation) and grants nothing (v1.0 gap W3).
 
     /** @return array<string, string> exact route name => reason it does not grant access */
     public static function grantAllowlist(): array
