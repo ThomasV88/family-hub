@@ -165,3 +165,10 @@ it('prints codes only and never a variable value', function () {
     expect(Artisan::call('ai:preflight'))->toBe(0)
         ->and(Artisan::output())->toContain('AI preflight OK');
 });
+
+it('flags a configured model that is not a plain identifier', function (string $model, bool $bad) {
+    ($this->good)();
+    config(['ai.codex.model' => $model]);
+
+    expect((new Preflight)->problems())->toBe($bad ? ['model_invalid'] : []);
+})->with([['gpt-5.1-codex', false], ['', false], ['--config', true], ['a=b', true], ['-x', true]]);

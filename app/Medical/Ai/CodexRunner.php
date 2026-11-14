@@ -223,6 +223,12 @@ final class CodexRunner
 
     private function validModel(string $value): ?string
     {
-        return preg_match('/^[A-Za-z0-9._:-]{1,60}$/', $value) === 1 ? $value : null;
+        return self::isValidModel($value) ? $value : null;
+    }
+
+    /** A model identifier: at most 60 characters of [A-Za-z0-9._:-], starting with a letter or digit (never an option). */
+    public static function isValidModel(string $value): bool
+    {
+        return preg_match('/^[A-Za-z0-9][A-Za-z0-9._:-]{0,59}$/', $value) === 1;
     }
 }

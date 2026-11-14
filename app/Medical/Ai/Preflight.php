@@ -79,6 +79,11 @@ final class Preflight
             $out[] = 'codex_home_in_tmp';
         }
 
+        $model = config('ai.codex.model');
+        if (is_string($model) && trim($model) !== '' && ! CodexRunner::isValidModel(trim($model))) {
+            $out[] = 'model_invalid';
+        }
+
         if (! is_executable('/usr/bin/setsid')) {
             $out[] = 'setsid_missing';
         }

@@ -38,7 +38,8 @@ final class CodexAgent implements Agent
             new CodexRequest($dir->path(), $schemaPath, $resultPath, $images, (new PromptBuilder)->build(), $this->configuredModel()),
             $shouldAbort,
         );
-        $model = $result->reportedModel ?? $this->modelLabel();
+        // With a configured model the recorded name is that one: text the CLI echoes can never choose the label.
+        $model = $this->configuredModel() ?? $result->reportedModel ?? $this->modelLabel();
 
         $fail = fn (FailureCode $code, bool $aborted = false) => new AgentOutcome(false, null, null, $code, $aborted, $result->durationMs, $model);
 
@@ -78,6 +79,9 @@ final class CodexAgent implements Agent
     {
         $m = config('ai.codex.model');
 
-        return is_string($m) && trim($m) !== '' ? trim($m) : null;
+        $m = is_string($m) ? trim($m) : '';
+
+        // An invalid value (leading dash, an equals sign, spaces) never reaches the CLI argv; ai:preflight reports it.
+        return $m !== '' && CodexRunner::isValidModel($m) ? $m : null;
     }
 }

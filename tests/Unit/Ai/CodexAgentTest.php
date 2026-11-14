@@ -133,3 +133,14 @@ it('registers exactly the codex agent', function () {
         ->and($registry->primary()->modelLabel())->toBe('default')
         ->and(app(AgentRegistry::class))->toBe($registry);
 });
+
+it('records the configured model, never text the CLI echoed, and drops an invalid configured value', function () {
+    config(['ai.codex.model' => 'gpt-conf']);
+    $out = ($this->use)(FakeCodex::emittingModel('gpt-injected'));
+    expect($out->model)->toBe('gpt-conf');
+
+    foreach (['--sandbox', '-m', 'a b', 'x=y', str_repeat('a', 61), '-evil'] as $bad) {
+        config(['ai.codex.model' => $bad]);
+        expect((new CodexAgent)->modelLabel())->toBe('default');
+    }
+});
