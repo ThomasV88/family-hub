@@ -22,9 +22,9 @@ it('decodes a jpeg through gd', function () {
     expect(imagesx($decoded))->toBe(2);
 });
 
-it('carries the upload limits for the wish image route', function () {
-    expect(ini_get('upload_max_filesize'))->toBe('6M');
-    expect(ini_get('post_max_size'))->toBe('8M');
+it('carries the upload limits for the wish image and medical document routes', function () {
+    expect(ini_get('upload_max_filesize'))->toBe('11M');
+    expect(ini_get('post_max_size'))->toBe('13M');
 });
 
 it('has a writable private wish-images directory', function () {
