@@ -18,6 +18,7 @@ const MD_MUT_ALLOWLIST = [
     'AdminSubjectQuery' => 'admin settings by design: the admin manages membership and links with no medical content (07-07)',
     'SystemQuery' => 'no viewer: system jobs touch ids and booleans only, never content (07-09, 07-12, 07-15)',
     'AiJobQuery' => 'ai-worker lifecycle columns, no viewer, after run-time re-verification',
+    'AiBulkJobQuery' => 'ai-bulk scheduler and bulk cancel: queued extraction rows and lifecycle columns only, no viewer, no content (09-13)',
 ];
 
 /**
@@ -252,7 +253,7 @@ it('documents every allowlisted class with a reason and skips only by exact clas
     foreach (MD_MUT_ALLOWLIST as $class => $reason) {
         expect($reason)->not->toBe('');
     }
-    expect(array_keys(MD_MUT_ALLOWLIST))->toBe(['AdminSubjectQuery', 'SystemQuery', 'AiJobQuery']);
+    expect(array_keys(MD_MUT_ALLOWLIST))->toBe(['AdminSubjectQuery', 'SystemQuery', 'AiJobQuery', 'AiBulkJobQuery']);
 
     $body = "{ DB::update('update medical_subject_members set level = 1'); }";
     expect(mdMutUnscoped("<?php class AdminSubjectQuery { public function a() $body }"))->toBe([])
