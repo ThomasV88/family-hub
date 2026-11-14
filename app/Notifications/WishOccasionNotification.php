@@ -2,10 +2,9 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\PlainTextMail;
 use App\Wishlist\Occasions\OccasionOccurrence;
-use Illuminate\Mail\Markdown;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Support\HtmlString;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -14,13 +13,9 @@ use Illuminate\Notifications\Notification;
  */
 class WishOccasionNotification extends Notification
 {
-    public function __construct(public readonly OccasionOccurrence $occurrence) {}
+    use PlainTextMail;
 
-    /** Backslash-escape ASCII punctuation so a name or custom title cannot become a link, image or emphasis. */
-    private static function plain(string $text): string
-    {
-        return preg_replace('/([!-\/:-@\[-`{-~])/', '\\\\$1', $text) ?? '';
-    }
+    public function __construct(public readonly OccasionOccurrence $occurrence) {}
 
     public static function url(OccasionOccurrence $occurrence): string
     {
@@ -84,13 +79,8 @@ class WishOccasionNotification extends Notification
             $action.': '.$url,
             $salutation,
         ]);
-        $data = $mail->data();
-        $theme = $mail->theme;
 
-        return $mail->view([
-            'html' => fn () => app(Markdown::class)->theme($theme ?: app(Markdown::class)->getTheme())->render('notifications::email', $data),
-            'text' => new HtmlString($plain),
-        ], $data);
+        return self::withPlainPart($mail, $plain);
     }
 
     /** @param  callable(string): string  $escape */

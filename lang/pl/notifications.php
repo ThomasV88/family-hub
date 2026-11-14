@@ -17,7 +17,7 @@ return [
     'gift_body_family' => ':occasion wypada :date. Zajrzyj na listy życzeń.',
     'gift_action' => 'Otwórz listę życzeń',
     'vaccination_title' => 'Termin szczepienia: :person',
-    'vaccination_body' => 'Szczepienie, :person: termin to :date. Zajrzyj do dokumentacji.',
+    'vaccination_body' => 'Szczepienie, :person: termin się zbliża. Zajrzyj do dokumentacji.',
     'vaccination_due_in' => 'za :count dzień|za :count dni|za :count dni',
     'vaccination_action' => 'Otwórz zapis',
 ];

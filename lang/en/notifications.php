@@ -17,7 +17,7 @@ return [
     'gift_body_family' => ':occasion is on :date. Take a look at the wishlists.',
     'gift_action' => 'Open the wishlist',
     'vaccination_title' => 'Vaccination due: :person',
-    'vaccination_body' => 'A vaccination for :person is due :date. Take a look at the record.',
+    'vaccination_body' => 'A vaccination for :person is due. Take a look at the record.',
     'vaccination_due_in' => 'in :count day|in :count days',
     'vaccination_action' => 'Open record',
 ];

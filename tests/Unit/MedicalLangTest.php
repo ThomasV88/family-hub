@@ -9,7 +9,7 @@ it('puts the person in the vaccination title', function (string $locale) {
     expect(__('notifications.vaccination_title', ['person' => 'Eva'], $locale))->toContain('Eva');
     expect(__('notifications.vaccination_body', ['person' => 'Eva', 'date' => '5 Mar'], $locale))
         ->toContain('Eva')
-        ->toContain('5 Mar');
+        ->not->toContain('5 Mar');
     expect(trim(__('notifications.vaccination_action', [], $locale)))->not->toBe('notifications.vaccination_action');
 })->with(['en', 'sk', 'pl']);
 
@@ -25,7 +25,7 @@ it('never uses a vaccine placeholder in notification copy', function (string $lo
     }
 
     preg_match_all('/:(\w+)/', $lines['vaccination_title'].' '.$lines['vaccination_body'], $m);
-    expect(array_values(array_unique($m[1])))->toEqualCanonicalizing(['person', 'date']);
+    expect(array_values(array_unique($m[1])))->toEqualCanonicalizing(['person']);
 })->with(['en', 'sk', 'pl']);
 
 it('pluralises the due-in phrase', function (string $locale, int $n) {
