@@ -20,8 +20,12 @@ err() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 env_get() { sed -n "s/^$1=//p" .env 2>/dev/null | head -n1 | tr -d "'\"\r"; }
 appenv_get() { sed -n "s/^$1=//p" app.env 2>/dev/null | head -n1 | tr -d "'\"\r "; }
 
-REQUIRED_FILES=(.env app.env migrate.env ai-worker.env compose.server.yaml backup.sh smoke-server.sh postgres-init/01-roles.sh)
+# ai-worker.env is deliberately not required: the ai-worker never gates the app deploy (see ai_env_present).
+REQUIRED_FILES=(.env app.env migrate.env compose.server.yaml backup.sh smoke-server.sh postgres-init/01-roles.sh)
 REQUIRED_SECRETS=(secrets/db_root_password secrets/db_owner_password secrets/db_app_password secrets/restic_password secrets/cloudflare.ini)
+
+# The ai-worker is optional. Without a non-empty ai-worker.env its steps are skipped with a warning and the core app deploys.
+ai_env_present() { [ -s ai-worker.env ]; }
 
 guard_inputs() {
   if [ -z "${IMAGE_TAG:-}" ]; then
@@ -47,6 +51,9 @@ guard_inputs() {
     fi
   done
   [ "$bad" = 0 ] || { err "Nothing deployed."; return 1; }
+  if ! ai_env_present; then
+    err "WARNING: ai-worker.env is missing or empty; the ai-worker is skipped (AI extraction unavailable). The app deploy continues."
+  fi
 }
 
 # .env is read by compose and this script only; credentials belong in app.env, migrate.env or secrets/.
@@ -168,6 +175,10 @@ main() {
   # The CI registry token must not stay on the server disk.
   trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
 
+  # compose resolves env_file of every service when it loads the project, so an absent ai-worker.env would break even
+  # `up app ...`. An empty mode-600 placeholder lets the core load; the ai-worker steps stay skipped while it is empty.
+  [ -e ai-worker.env ] || (umask 077; : > ai-worker.env)
+
   dc() { docker compose -f compose.server.yaml "$@"; }
 
   log "Deploying $IMAGE_TAG to $COMPOSE_PROJECT_NAME ($here)"
@@ -180,12 +191,14 @@ main() {
     local prefix
     prefix=$(env_get IMAGE_PREFIX)
     docker image inspect "$prefix-app:$IMAGE_TAG" "$prefix-nginx:$IMAGE_TAG" >/dev/null
-    ai_image_available "$IMAGE_TAG" || err "WARNING: image $prefix-ai:$IMAGE_TAG is missing; the ai-worker will not start (AI extraction unavailable)."
+    if ai_env_present; then ai_image_available "$IMAGE_TAG" || err "WARNING: image $prefix-ai:$IMAGE_TAG is missing; the ai-worker will not start (AI extraction unavailable)."; fi
   else
     log "Pulling images"
     dc pull app nginx
     # The ai-worker is optional for the app: a missing or broken ai image never blocks the deploy.
-    dc pull ai-worker || err "WARNING: could not pull the ai image; the ai-worker will not start (AI extraction unavailable)."
+    if ai_env_present; then
+      dc pull ai-worker || err "WARNING: could not pull the ai image; the ai-worker will not start (AI extraction unavailable)."
+    fi
   fi
 
   log "Starting postgres"
@@ -236,7 +249,9 @@ main() {
       good=$(cat .last-good-tag)
       err "Rolling back to $good"
       IMAGE_TAG=$good dc up -d --wait --remove-orphans app worker scheduler nginx || err "Rollback to $good also failed."
-      if ai_image_available "$good"; then
+      if ! ai_env_present; then
+        err "ai-worker.env is missing or empty; leaving the ai-worker alone."
+      elif ai_image_available "$good"; then
         IMAGE_TAG=$good dc up -d --wait ai-worker || err "ai-worker of $good did not start (AI extraction unavailable)."
       else
         err "No ai image for $good; stopping the ai-worker of the failed deploy (AI extraction unavailable)."
@@ -250,7 +265,9 @@ main() {
 
   # Second, non-gating step: an ai-worker problem (preflight, missing env value, missing image) disables AI only.
   log "Starting the ai-worker (non-gating)"
-  if ! dc up -d --wait ai-worker; then
+  if ! ai_env_present; then
+    err "WARNING: skipping the ai-worker: ai-worker.env is missing or empty (create it from ops/env/ai-worker.env.example, mode 600). The app deploy stands."
+  elif ! dc up -d --wait ai-worker; then
     err "WARNING: the ai-worker did not become healthy. The app deploy stands; AI extraction is unavailable until it is fixed (docker compose logs ai-worker)."
   fi
 

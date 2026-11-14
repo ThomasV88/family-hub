@@ -99,7 +99,7 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
   (`queue:work --queue=ai-control,ai,ai-bulk --tries=1 --timeout=720`: the login check runs on the priority queue `ai-control`, so an extraction backlog never makes the agent look "not responding"), `init: true`, no ports, `mem_limit` `MEM_AI` (default 768m, PROVISIONAL, confirmed in 09-20).
 - Env file `ai-worker.env` (template `ops/env/ai-worker.env.example`), never `app.env`: no `APP_KEY`, `MAIL_*`, `GOOGLE_*`, `VAPID_*`, `AWS_*`, `STRIPE_*`, `*_API_KEY`, `*_SECRET`.
   `ai:preflight` refuses to start if one is set (codes `app_key_present`, `forbidden_env`, `forbidden_secret`; names are matched by
-  `ai.forbidden_env_patterns`, values are never printed). The dev `ai-worker` reads `ops/env/ai-worker.dev.env` and has the repo `.env` masked. `deploy.sh` refuses to run without `ai-worker.env`. It uses the runtime role `fh_app`
+  `ai.forbidden_env_patterns`, values are never printed). The dev `ai-worker` reads `ops/env/ai-worker.dev.env` and has the repo `.env` masked. `server-provision.sh` creates `ai-worker.env` (mode 600, never overwritten); `deploy.sh` does not require it: without a non-empty file it skips every ai-worker step with a warning and the core app deploys. It uses the runtime role `fh_app`
   (provisional: no dedicated database role for now). `DB_QUEUE_RETRY_AFTER=900` must stay above the job timeout.
 - Deploy coupling: `deploy.sh` does not gate on the ai-worker. The core services (`app worker scheduler nginx`) decide the
   deploy and the rollback; the ai-worker is started afterwards (`up -d --wait ai-worker`) and a failure only logs a warning (AI is
@@ -143,7 +143,7 @@ reports "login expired" once the health check exists). Never set `OPENAI_API_KEY
 
 (Filled by plan 01-12.)
 
-The server directory needs `ai-worker.env` (mode 600) next to `app.env` before the first deploy of Phase 8; create it from `ops/env/ai-worker.env.example`.
+`server-provision.sh` creates `ai-worker.env` (mode 600, from the same keys as `ops/env/ai-worker.env.example`, `DB_PASSWORD` = the generated `fh_app` password) next to `app.env` and never overwrites an existing one. `deploy.sh` does not abort when it is missing or empty: it logs a warning, creates an empty mode-600 placeholder so compose can load the project, and skips the ai-worker pull, start and rollback restart (AI extraction unavailable). Re-run `server-provision.sh` to fill the placeholder.
 
 ## Two-step verification and re-authentication
 

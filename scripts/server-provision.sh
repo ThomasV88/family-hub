@@ -145,11 +145,21 @@ DB_DATABASE=family_hub
 DB_USERNAME=fh_app
 DB_PASSWORD=$DB_APP_PW
 SESSION_DRIVER=database
+SESSION_EXPIRE_ON_CLOSE=true
 SESSION_SECURE_COOKIE=true
 SESSION_SAME_SITE=lax
 SESSION_HTTP_ONLY=true
 CACHE_STORE=database
 QUEUE_CONNECTION=database
+# Mail: log driver until go-live (nothing is sent); switch to smtp per ops/env/app.env.example
+MAIL_MAILER=log
+# Google sign-in (empty = hidden)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# Web Push (VAPID): generate per environment with php artisan push:vapid
+VAPID_SUBJECT=
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
 EOF
   unset APP_KEY_VALUE DB_APP_PW
 else
@@ -167,6 +177,33 @@ EOF
   unset DB_OWNER_PW
 else
   KEPT+=("migrate.env")
+fi
+
+# --- ai-worker.env: ai-worker service only, runtime role fh_app, no app secrets (mirrors ops/env/ai-worker.env.example) ---
+if [ ! -s "$TARGET_DIR/ai-worker.env" ]; then
+  DB_APP_PW="$(cat "$TARGET_DIR/secrets/db_app_password")"
+  write_file ai-worker.env <<EOF
+# Environment of the ai-worker service only (never app.env). Runtime role fh_app, queue and database access.
+# No APP_KEY, MAIL_*, GOOGLE_*, VAPID_*, AWS_*, STRIPE_*, *_API_KEY, *_SECRET. Never set GH_TOKEN, GITHUB_TOKEN,
+# COPILOT_GITHUB_TOKEN, COPILOT_PROVIDER_*, COPILOT_ALLOW_ALL or COPILOT_OFFLINE (see ops/env/ai-worker.env.example).
+APP_ENV=$STACK_ENV
+APP_DEBUG=false
+LOG_CHANNEL=stderr
+LOG_LEVEL=warning
+DB_CONNECTION=pgsql
+DB_HOST=postgres
+DB_PORT=5432
+DB_DATABASE=family_hub
+DB_USERNAME=fh_app
+DB_PASSWORD=$DB_APP_PW
+QUEUE_CONNECTION=database
+DB_QUEUE_RETRY_AFTER=900
+AI_CODEX_MODEL=
+AI_WORK_DIR=/ai-work
+EOF
+  unset DB_APP_PW
+else
+  KEPT+=("ai-worker.env")
 fi
 
 # --- restic repository ---

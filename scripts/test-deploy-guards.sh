@@ -96,7 +96,15 @@ expect fail "missing backup.sh" "$d" "$TAG" guard_inputs
 
 d=$(make_fixture noai family-hub-staging staging 0 staging)
 rm "$d/ai-worker.env"
-expect fail "missing ai-worker.env" "$d" "$TAG" guard_inputs
+expect pass "missing ai-worker.env does not abort the deploy (non-gating)" "$d" "$TAG" guard_inputs
+: > "$d/ai-worker.env"
+expect pass "empty ai-worker.env does not abort the deploy" "$d" "$TAG" guard_inputs
+rm "$d/ai-worker.env"
+expect pass "guard_secrets skips a missing ai-worker.env" "$d" "$TAG" guard_secrets
+warn=$(cd "$d" && DEPLOY_SH_SOURCE_ONLY=1 IMAGE_TAG="$TAG" bash -c 'source "$0"; guard_inputs' "$DEPLOY" 2>&1 >/dev/null)
+case "$warn" in *"ai-worker.env is missing or empty"*) PASS=$((PASS + 1)); echo "ok   missing ai-worker.env warns" ;; *) FAILS=$((FAILS + 1)); echo "FAIL missing ai-worker.env gives no warning" >&2 ;; esac
+(cd "$d" && DEPLOY_SH_SOURCE_ONLY=1 bash -c 'source "$0"; ai_env_present' "$DEPLOY") \
+  && { FAILS=$((FAILS + 1)); echo "FAIL ai_env_present true without the file" >&2; } || { PASS=$((PASS + 1)); echo "ok   ai_env_present false without the file"; }
 d=$(make_fixture aimode family-hub-staging staging 0 staging)
 chmod 644 "$d/ai-worker.env"
 expect fail "ai-worker.env readable by others" "$d" "$TAG" guard_secrets
@@ -105,7 +113,7 @@ expect fail "ai-worker.env readable by others" "$d" "$TAG" guard_secrets
 core_lists=$(grep -c 'up -d --wait --remove-orphans app worker scheduler nginx' "$DEPLOY")
 if [ "$core_lists" -ge 2 ] && ! grep -E 'up -d --wait --remove-orphans' "$DEPLOY" | grep -q ai-worker \
   && grep -q 'dc pull ai-worker ||' "$DEPLOY" && grep -q 'ai_image_available "\$good"' "$DEPLOY" \
-  && grep -q 'if ! dc up -d --wait ai-worker; then' "$DEPLOY"; then
+  && grep -q 'elif ! dc up -d --wait ai-worker; then' "$DEPLOY" && grep -q 'ai_env_present' "$DEPLOY"; then
   PASS=$((PASS + 1)); echo "ok   deploy.sh keeps ai-worker out of the gate and rollback lists, and starts it non-gating"
 else
   FAILS=$((FAILS + 1)); echo "FAIL deploy.sh gates or rolls back on ai-worker, or lacks the guards" >&2

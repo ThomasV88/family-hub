@@ -20,6 +20,11 @@ for env in staging production; do
   [ "$(stat -c %a "$D/secrets/db_app_password")" = 600 ] || fail "db_app_password mode"
   [ "$(stat -c %a "$D/secrets")" = 700 ] || fail "secrets dir mode"
   [ "$(stat -c %a "$D/app.env")" = 600 ] || fail "app.env mode"
+  [ "$(stat -c %a "$D/ai-worker.env")" = 600 ] || fail "ai-worker.env mode"
+  grep -q "^DB_PASSWORD=$(cat "$D/secrets/db_app_password")\$" "$D/ai-worker.env" || fail "ai-worker.env DB_PASSWORD != db_app_password"
+  grep -q "^DB_USERNAME=fh_app\$" "$D/ai-worker.env" || fail "ai-worker.env user"
+  grep -q "^APP_ENV=$env\$" "$D/ai-worker.env" || fail "ai-worker.env APP_ENV"
+  ! grep -Eq '^(APP_KEY|MAIL_|GOOGLE_|VAPID_|AWS_|STRIPE_|GH_TOKEN|GITHUB_TOKEN|COPILOT_GITHUB_TOKEN)' "$D/ai-worker.env" || fail "ai-worker.env holds an app secret or token"
   ! grep -qi password "$D/.env" || fail ".env holds a password"
   grep -q "APP_ENV=$env" "$D/app.env" || fail "APP_ENV"
   grep -q "^APP_KEY=base64:.\{20,\}" "$D/app.env" || fail "APP_KEY"
@@ -37,6 +42,16 @@ for env in staging production; do
   check_keys ops/env/compose.env.example "$D/.env"
   check_keys ops/env/app.env.example "$D/app.env"
   check_keys ops/env/migrate.env.example "$D/migrate.env"
+  check_keys ops/env/ai-worker.env.example "$D/ai-worker.env"
+
+  # An existing ai-worker.env is never overwritten (an empty placeholder from deploy.sh is filled)
+  echo "AI_CODEX_MODEL=keep-me" > "$D/ai-worker.env"
+  bash scripts/server-provision.sh "$env" "$dom" --root "$T" --cert-email ops@example.test >/dev/null
+  grep -qx "AI_CODEX_MODEL=keep-me" "$D/ai-worker.env" || fail "existing ai-worker.env was overwritten"
+  [ "$(wc -l < "$D/ai-worker.env")" = 1 ] || fail "existing ai-worker.env was changed"
+  : > "$D/ai-worker.env"
+  bash scripts/server-provision.sh "$env" "$dom" --root "$T" --cert-email ops@example.test >/dev/null
+  grep -q "^DB_USERNAME=fh_app" "$D/ai-worker.env" || fail "empty ai-worker.env placeholder was not filled"
 
   # Idempotent: a second run changes nothing
   before=$(cd "$D" && find . -type f -not -name cron.preview -print0 | sort -z | xargs -0 sha256sum | sha256sum)
