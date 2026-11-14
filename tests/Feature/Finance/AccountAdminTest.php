@@ -57,7 +57,7 @@ it('lists metadata for the admin with nothing money-shaped for accounts they are
         ->where('accounts.0.opening', null)
         ->has('members', 2)
         ->where('panel', null)
-        ->has('sections', 6));
+        ->has('sections', 7));
 
     $json = $this->actingAs($admin)->get('/settings/finance-accounts', ['X-Inertia' => 'true', 'X-Inertia-Version' => Inertia\Inertia::getVersion()])->getContent();
     expect($json)->not->toContain('987654')->not->toContain('9876');

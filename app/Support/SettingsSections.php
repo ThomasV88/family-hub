@@ -22,6 +22,9 @@ class SettingsSections
         if ($user->is_admin && Route::has('settings.finance_accounts.index')) {
             $sections[] = ['key' => 'finance_accounts', 'href' => route('settings.finance_accounts.index', absolute: false), 'labelKey' => 'settings.section.finance_accounts', 'icon' => 'wallet'];
         }
+        if ($user->is_admin && Route::has('settings.ai_calls')) {
+            $sections[] = ['key' => 'ai_calls', 'href' => route('settings.ai_calls', absolute: false), 'labelKey' => 'settings.section.ai_calls', 'icon' => 'bot'];
+        }
         if (Route::has('settings.notifications')) {
             $sections[] = ['key' => 'notifications', 'href' => route('settings.notifications', absolute: false), 'labelKey' => 'notifications.nav', 'icon' => 'bell'];
         }

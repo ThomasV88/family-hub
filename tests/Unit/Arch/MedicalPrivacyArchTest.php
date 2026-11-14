@@ -29,6 +29,8 @@ arch('medical queries are used only by the medical layers')
         'App\Http\Controllers\Health',
         'App\Http\Controllers\Settings\HealthPeopleController',
         'App\Http\Controllers\Settings\MembersController',
+        // admin AI call log, names only (08-14); pinned to AdminAiCallQuery below
+        'App\Http\Controllers\Settings\AiCallsController',
         'App\Http\Requests\Health',
         'App\Http\Requests\Settings\HealthPeople',
         'App\Console\Commands',
@@ -69,7 +71,8 @@ function mdArchSettingsLeaks(array $sources): array
 {
     $bad = [];
     foreach ($sources as $path => $src) {
-        if (in_array($path, ['Http/Controllers/Settings/HealthPeopleController.php', 'Http/Controllers/Settings/MembersController.php'], true)) {
+        // AiCallsController (08-14) is exempt here and pinned separately by mdArchAiCallsViolations().
+        if (in_array($path, ['Http/Controllers/Settings/HealthPeopleController.php', 'Http/Controllers/Settings/MembersController.php', 'Http/Controllers/Settings/AiCallsController.php'], true)) {
             continue;
         }
         if (preg_match(MD_ARCH_MEDICAL_REF, $src) === 1) {
@@ -161,4 +164,33 @@ it('pins MembersController to AdminSubjectQuery::listForAdmin as the only medica
         ->and(mdArchMembersViolations("<?php\nuse App\Medical\Queries\AdminSubjectQuery;\nclass M { function a() { return app(AdminSubjectQuery::class)->update(); } }"))->toBe(['calls update'])
         ->and(mdArchMembersViolations($ok."\nuse App\Medical\Visibility;"))->toContain('imports App\Medical\Visibility')
         ->and(mdArchMembersViolations($ok."\nuse App\Models\MedicalSubject;"))->toContain('imports App\Models\MedicalSubject');
+});
+
+/**
+ * AiCallsController (admin AI call log, 08-14) may reference only AdminAiCallQuery (the one Queries class), plus
+ * AgentHealth and CheckLoginJob for login health. No other App\Medical class and no medical model.
+ *
+ * @return list<string>
+ */
+function mdArchAiCallsViolations(string $src): array
+{
+    $bad = [];
+    $allowed = ['App\Medical\Queries\AdminAiCallQuery', 'App\Medical\Ai\AgentHealth', 'App\Medical\Ai\CheckLoginJob'];
+    preg_match_all('/App\\\\(?:Medical\b|Models\\\\Medical)[\\\\\w]*/', $src, $refs);
+    foreach (array_unique($refs[0]) as $ref) {
+        if (! in_array($ref, $allowed, true)) {
+            $bad[] = 'references '.$ref;
+        }
+    }
+
+    return $bad;
+}
+
+it('pins AiCallsController to AdminAiCallQuery, AgentHealth and CheckLoginJob', function () {
+    $src = mdArchSources('Http/Controllers/Settings')['Http/Controllers/Settings/AiCallsController.php'] ?? '';
+    expect($src)->not->toBe('')
+        ->and(mdArchAiCallsViolations($src))->toBe([])
+        ->and(mdArchAiCallsViolations("<?php\nuse App\\Medical\\Queries\\SubjectQuery;"))->toBe(['references App\\Medical\\Queries\\SubjectQuery'])
+        ->and(mdArchAiCallsViolations("<?php\nuse App\\Models\\MedicalSubject;"))->toBe(['references App\\Models\\MedicalSubject'])
+        ->and(mdArchAiCallsViolations("<?php\nuse App\\Medical\\Queries\\AdminAiCallQuery;"))->toBe([]);
 });

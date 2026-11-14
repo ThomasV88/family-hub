@@ -26,7 +26,7 @@ it('lists members sorted by name with access levels and the presets from the ser
         ->where('presets.parent', ['todo' => 'edit', 'wishlist' => 'edit', 'finance' => 'edit', 'health' => 'none'])
         ->has('presets', 4)
         ->where('openMember', null)
-        ->has('sections', 6));
+        ->has('sections', 7));
 });
 
 it('opens a member panel from the query and ignores unknown ids', function () {
