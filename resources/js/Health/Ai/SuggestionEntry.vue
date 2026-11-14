@@ -1,14 +1,16 @@
 <script setup>
-import { computed, nextTick, ref, useId } from 'vue';
+import { computed, inject, nextTick, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Ban, Check, CircleDashed, Pill, ShieldAlert, Stethoscope, Syringe, Undo2 } from '@lucide/vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import UiCard from '../../Components/ui/UiCard.vue';
+import UiConfirmDialog from '../../Components/ui/UiConfirmDialog.vue';
 import UiTag from '../../Components/ui/UiTag.vue';
 import { useToast } from '../../Components/ui/useToast.js';
 import { securityFetch } from '../../Security/securityFetch.js';
 import { handleHealthRefusal } from '../healthRefusal.js';
+import EntryEditForm from './EntryEditForm.vue';
 
 // One proposed entry. Everything the model wrote is rendered by text interpolation only (never HTML, never in a
 // toast). No optimistic UI: the server answer decides the state, a repeat answer simply shows the real state. Nothing
@@ -28,6 +30,24 @@ const root = ref(null);
 const busy = ref(false);
 const failed = ref(false);
 const serverErrors = ref([]);
+
+// Edit-in-place state is coordinated by the page (one edit at a time) and reached through provide/inject, so the
+// list in between needs no extra props. Without a provider the entry simply has no edit form.
+const edit = inject('reviewEdit', null);
+const editing = computed(() => Boolean(edit) && edit.editingKey.value === props.entry.key && props.entry.state === 'pending' && !props.readOnly);
+const formErrors = ref(null);
+const formRef = ref(null);
+const dirty = ref(false);
+const discardOpen = ref(false);
+watch(editing, (open) => {
+    dirty.value = false;
+    formErrors.value = open && edit.errors.value ? { ...edit.errors.value } : null;
+    if (open) nextTick(() => formRef.value?.focusFirst());
+}, { immediate: true });
+function onDirty(value) {
+    dirty.value = value;
+    edit?.setDirty(props.entry.key, value);
+}
 
 const TYPE_ICONS = { visit: Stethoscope, medication: Pill, allergy: ShieldAlert, vaccination: Syringe };
 const TYPE_SECTION = { visit: 'section_visits', medication: 'section_medications', allergy: 'section_allergies', vaccination: 'section_vaccinations' };
@@ -111,19 +131,26 @@ async function focusAction(name) {
 }
 
 // One server call; returns the answer's entry state or null when the entry was not changed.
-async function call(method, tail) {
+async function call(method, tail, body, inForm = false) {
     busy.value = true;
     failed.value = false;
     serverErrors.value = [];
-    const result = await securityFetch(`${base.value}/${tail}`, { method });
+    const result = await securityFetch(`${base.value}/${tail}`, body === undefined ? { method } : { method, body });
     busy.value = false;
     if (result.ok) return result.data;
     if (result.status === 409) {
+        if (inForm) edit?.close(props.entry.key);
         emit('superseded');
         return null;
     }
     if (result.status === 423) {
+        // The draft is discarded and nothing is replayed; the refusal flow takes over.
+        if (inForm) edit?.close(props.entry.key);
         handleHealthRefusal(result.error);
+        return null;
+    }
+    if (result.status === 422 && inForm) {
+        formErrors.value = { ...(result.errors ?? {}) };
         return null;
     }
     if (result.status === 422) {
@@ -153,6 +180,38 @@ async function accept() {
     emit('decided', { key: props.entry.key, action: 'accept', state: next, recordId: data.recordId ?? null, edited: Boolean(data.edited) });
     if (next === 'accepted') toast.show(t(`health.ai.review.saved_${props.entry.type}`));
     if (next === 'rejected') focusAction('undo');
+}
+// Save the edited values through the accept endpoint (the server re-validates with the Phase 7 rules).
+async function saveEdit(values) {
+    if (busy.value) return;
+    formErrors.value = null;
+    const data = await call('POST', 'accept', { values }, true);
+    if (data === null) {
+        if (editing.value && failed.value) formRef.value?.focusFirst();
+        return;
+    }
+    const next = data.state;
+    edit?.close(props.entry.key);
+    emit('decided', { key: props.entry.key, action: 'accept', state: next, recordId: data.recordId ?? null, edited: next === 'accepted' ? true : Boolean(data.edited) });
+    if (next === 'accepted') toast.show(t(`health.ai.review.saved_${props.entry.type}`));
+    if (next === 'rejected') focusAction('undo');
+}
+async function collapse() {
+    edit?.close(props.entry.key);
+    await focusAction('edit');
+}
+function cancelEdit() {
+    if (busy.value) return;
+    if (dirty.value) discardOpen.value = true;
+    else collapse();
+}
+function keepEditing() {
+    // The dialog restores focus to the button that opened it; the form takes it back right after.
+    setTimeout(() => formRef.value?.focusFirst(), 0);
+}
+function discard() {
+    dirty.value = false;
+    collapse();
 }
 async function reject() {
     if (busy.value) return;
@@ -186,7 +245,30 @@ async function undo() {
                     <UiTag :id="ids.tag" :variant="tag.variant" :icon="tag.icon" class="entry__tag" data-testid="entry-tag">{{ tag.text }}</UiTag>
                 </div>
 
-                <template v-if="state !== 'rejected'">
+                <EntryEditForm
+                    v-if="editing"
+                    ref="formRef"
+                    :type="entry.type"
+                    :fields="fields"
+                    :errors="formErrors"
+                    :saving="busy"
+                    :specialties="edit.specialties.value"
+                    @save="saveEdit"
+                    @cancel="cancelEdit"
+                    @dirty-change="onDirty"
+                />
+                <UiConfirmDialog
+                    v-if="editing"
+                    v-model:open="discardOpen"
+                    :title="t('health.ai.review.discard_title')"
+                    :body="shownTitle"
+                    :confirm-label="t('health.ai.review.discard_confirm')"
+                    :cancel-label="t('health.ai.review.keep_editing')"
+                    @confirm="discard"
+                    @cancel="keepEditing"
+                />
+
+                <template v-if="state !== 'rejected' && !editing">
                     <dl v-if="rows.length > 0" class="entry__fields" data-testid="entry-fields">
                         <div v-for="row in rows" :key="row.label" class="entry__row">
                             <dt>{{ row.label }}</dt>
@@ -196,7 +278,7 @@ async function undo() {
                     <p v-if="state === 'accepted' && entry.edited" class="entry__detail" data-testid="entry-edited">{{ t('health.ai.review.edited_detail') }}</p>
                 </template>
 
-                <ul v-if="serverErrors.length > 0" class="entry__errors" data-testid="entry-errors">
+                <ul v-if="serverErrors.length > 0 && !editing" class="entry__errors" data-testid="entry-errors">
                     <li v-for="message in serverErrors" :key="message">{{ message }}</li>
                 </ul>
                 <UiAlert v-if="failed" variant="danger" live data-testid="entry-failed">{{ t('health.ai.review.action_failed') }}</UiAlert>
@@ -204,7 +286,7 @@ async function undo() {
                 <div v-if="state === 'accepted' && entry.recordId" class="entry__actions">
                     <UiButton variant="secondary" :href="recordHref" data-action="open" data-testid="entry-open">{{ t('health.ai.review.open_in_record') }}</UiButton>
                 </div>
-                <div v-else-if="state === 'pending' && !readOnly" class="entry__actions">
+                <div v-else-if="state === 'pending' && !readOnly && !editing" class="entry__actions">
                     <UiButton variant="secondary" :loading="busy" :disabled="busy" :aria-label="named('health.ai.review.accept_aria')" data-action="accept" data-testid="entry-accept" @click="accept">{{ t('health.ai.review.accept') }}</UiButton>
                     <UiButton variant="secondary" :disabled="busy" :aria-label="named('health.ai.review.edit_aria')" data-action="edit" data-testid="entry-edit" @click="emit('edit-requested', { key: entry.key, errors: null })">{{ t('health.ai.review.edit') }}</UiButton>
                     <UiButton variant="ghost" :disabled="busy" :aria-label="named('health.ai.review.reject_aria')" data-action="reject" data-testid="entry-reject" @click="reject">{{ t('health.ai.review.reject') }}</UiButton>
