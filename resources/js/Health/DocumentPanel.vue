@@ -11,6 +11,7 @@ import UiField from '../Components/ui/UiField.vue';
 import UiInput from '../Components/ui/UiInput.vue';
 import UiSelect from '../Components/ui/UiSelect.vue';
 import { securityDownload } from '../Security/securityTransfer.js';
+import { saveBlob } from '../Security/saveBlob.js';
 import DocumentPreview from './DocumentPreview.vue';
 import DocumentUploader from './DocumentUploader.vue';
 import { documentUrl, visitLabel } from './documentFormat.js';
@@ -112,15 +113,7 @@ async function download() {
         downloadError.value = true;
         return;
     }
-    const url = URL.createObjectURL(result.blob);
-    const link = window.document.createElement('a');
-    link.href = url;
-    link.download = result.filename ?? 'document';
-    link.rel = 'noopener';
-    window.document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+    saveBlob(result.blob, result.filename ?? 'document');
 }
 const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preventDefault(); };
 </script>

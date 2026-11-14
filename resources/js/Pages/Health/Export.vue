@@ -12,6 +12,7 @@ import UiRadio from '../../Components/ui/UiRadio.vue';
 import UiSelect from '../../Components/ui/UiSelect.vue';
 import { useToast } from '../../Components/ui/useToast.js';
 import { securityDownload } from '../../Security/securityTransfer.js';
+import { saveBlob } from '../../Security/saveBlob.js';
 import { handleHealthRefusal } from '../../Health/healthRefusal.js';
 
 // Export form. Nothing is kept: the choices live in this component only, downloads are blobs in memory that are
@@ -45,18 +46,6 @@ function queryString(extra = {}) {
     return query.toString();
 }
 
-function saveBlob(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const link = window.document.createElement('a');
-    link.href = url;
-    link.download = filename ?? 'health-export';
-    link.rel = 'noopener';
-    window.document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-}
-
 async function create() {
     if (busy.value) return;
     failed.value = false;
@@ -72,7 +61,7 @@ async function create() {
         failed.value = true;
         return;
     }
-    saveBlob(result.blob, result.filename);
+    saveBlob(result.blob, result.filename ?? 'health-export');
     show(t('health.export.downloaded'));
 }
 </script>

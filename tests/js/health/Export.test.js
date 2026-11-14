@@ -108,15 +108,21 @@ describe('export form', () => {
         expect(download).not.toHaveBeenCalled();
     });
 
-    it('downloads a data file through securityDownload, hands it to the browser and revokes the URL', async () => {
+    it('downloads a data file through securityDownload, hands it to the browser and revokes the URL only after a delay', async () => {
         const revoked = [];
+        const delayed = [];
+        const realSetTimeout = globalThis.setTimeout;
+        vi.spyOn(globalThis, 'setTimeout').mockImplementation((fn, ms, ...rest) => (ms === 30_000 ? (delayed.push(fn), 0) : realSetTimeout(fn, ms, ...rest)));
         URL.createObjectURL = vi.fn(() => 'blob:x');
         URL.revokeObjectURL = vi.fn((u) => { revoked.push(u); });
         download.mockResolvedValue({ ok: true, status: 200, blob: new Blob(['{}']), filename: 'health-export-all-2026-11-14.json' });
         mountPage(Export, form());
         await choose('input[data-testid="format-json"]');
         $('[data-testid="export-create"]').click();
-        await vi.waitFor(() => expect(revoked).toEqual(['blob:x']));
+        await vi.waitFor(() => expect(delayed).toHaveLength(1));
+        expect(revoked).toEqual([]);
+        delayed[0]();
+        expect(revoked).toEqual(['blob:x']);
         expect(download).toHaveBeenCalledWith(`/health/people/${ID}/export/download?scope=all&format=json`);
         await vi.waitFor(() => expect(document.body.textContent).toContain('Export downloaded'));
     });

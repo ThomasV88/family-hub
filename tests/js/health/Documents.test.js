@@ -142,16 +142,22 @@ describe('document panel', () => {
         await expectNoAxeViolations(document.body);
     });
 
-    it('downloads through securityDownload and revokes the object URL right after the click', async () => {
+    it('downloads through securityDownload and revokes the object URL only after a delay', async () => {
         const created = [];
         const revoked = [];
+        const delayed = [];
+        const realSetTimeout = globalThis.setTimeout;
+        vi.spyOn(globalThis, 'setTimeout').mockImplementation((fn, ms, ...rest) => (ms === 30_000 ? (delayed.push(fn), 0) : realSetTimeout(fn, ms, ...rest)));
         URL.createObjectURL = vi.fn((blob) => { created.push(blob); return 'blob:x'; });
         URL.revokeObjectURL = vi.fn((url) => { revoked.push(url); });
         download.mockResolvedValue({ ok: true, status: 200, blob: new Blob(['x']), filename: 'lab.pdf' });
         mountPage({ panel: { kind: 'document', id: D1.id } });
         await nextTick();
         $('[data-testid="doc-download"]').click();
-        await vi.waitFor(() => expect(revoked).toEqual(['blob:x']));
+        await vi.waitFor(() => expect(delayed).toHaveLength(1));
+        expect(revoked).toEqual([]);
+        delayed[0]();
+        expect(revoked).toEqual(['blob:x']);
         expect(download).toHaveBeenCalledWith(docUrl(D1.id, 'file'));
         expect(created).toHaveLength(1);
     });
