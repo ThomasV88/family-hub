@@ -14,6 +14,11 @@ Plans 08-01..08-21 are built and tested against the fake CLI (`tests/Support/Fak
 - **B: WR-07, who may switch AI consent on.** Consent now triggers sending documents to OpenAI (options in 07 DEFERRED.md).
 - **C: append-only reading of ai_calls** (lifecycle-guarded row vs terminal-only inserts).
 - PROVISIONAL defaults built in this phase: ai-worker uses fh_app + own env file (no fh_ai role); no weekly keep-alive run; proposals kept until superseded or the document is deleted (no time prune); supersede on ready; HEIC not sent to AI; PDF page cap 10 with a pages-read line; admin sections 6 -> 7; AiCallsController arch allowlist extension; `zz_ai.php` area name; Run AI allowed while health is "Not checked yet"; dedicated JSON status route for polling; single accept endpoint for edit-accept; CLI default model; ai-worker mem_limit 384m; UI-SPEC PROVISIONAL 1-9.
+- Explicit questions added by the plan checker: convert HEIC to JPEG server-side (would need a decoder and a new package approval) or keep refusing it; keep the 10-page PDF cap or raise it.
+- ai_calls.model and medical_ai_extractions.model are NULL while queued/running and set once at finish (CLI-reported model, else 'default').
+
+## Requirements after the live session
+AI-01..AI-03 get ticked in 08-22. AI-04 is NOT ticked: it is annotated "Codex part complete in Phase 8; Copilot part in Phase 9". The requirement wording is left unchanged.
 
 ## Notes
 - Verify action for AI records did not exist in Phase 7 (UI-SPEC assumed 07-16 had one); 08-06/08-09/08-20 build it.

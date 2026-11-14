@@ -744,32 +744,39 @@ printf '%s' '{"schema_version":1,"document_date":null,"specialty_key":null,"visi
 | A12 | Proposal retention 90 days; weekly keep-alive run | Q6, Q1 | Owner decisions, not technical risks |
 | A13 | `login status` source read from `main`, behaviour identical in 0.169.0 | Q1 | Exit codes differ; the live session runs `codex login status; echo $?` in both states |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Superseding timing and UI gaps (HEIC, page cap, wording)**
    - What we know: UI-SPEC supersedes at queueing, never mentions HEIC or page caps, and the checker asked for changed wording.
    - What's unclear: whether the owner accepts the deviations.
    - Recommendation: supersede on `ready`; HEIC refused with a new line; cap line with plural key; add all keys in the early lang plan.
+   - RESOLVED: supersede on ready (08-12); HEIC refused with its own line, 10-page cap with pages-read line, wording keys (08-01, 08-13, 08-16); owner may revisit HEIC conversion and the cap in 08-22.
 
 2. **Is "append-only `ai_calls`" satisfied by a lifecycle-guarded row?**
    - What we know: statuses must progress for Waiting/Running to show; identity immutability, forward-only status and no delete/truncate for `fh_app` are enforceable and verified.
    - Recommendation: accept this reading; the alternative (terminal-only inserts) loses Waiting/Running in the admin table.
+   - RESOLVED: provisional default lifecycle-guarded row (08-04), owner confirms in 08-22 (Decision C).
 
 3. **Dedicated Postgres role `fh_ai` instead of `fh_app` for `ai-worker`?**
    - What we know: needs a superuser `CREATE ROLE` on the existing server and edits to the init script and migrations; column grants add maintenance.
    - Recommendation: ship `fh_app` + separate env file now, record `fh_ai` as optional hardening with the exact GRANT list for the live session.
+   - RESOLVED: provisional default fh_app + separate ai-worker.env (08-07), owner confirms in 08-22.
 
 4. **Memory budget for two stacks.**
    - What we know: about 1.44 GB used by both stacks of 2.7 GB available (docs/ops/server.md); Codex RSS unknown.
    - Recommendation: default `MEM_AI=384m`, measure live, and run the staging `ai-worker` only during tests if needed.
+   - RESOLVED: provisional default MEM_AI=384m (08-07), measured live in 08-22.
 
 5. **Keep-alive for the refresh token.**
    - What we know: Codex refreshes during normal runs; long idle periods may let it lapse; `login status` cannot detect it.
    - Recommendation: optional weekly tiny `codex exec` job; owner decides on quota use.
+   - RESOLVED: provisional default no keep-alive job (08-10), owner decides in 08-22 after observing refresh metadata.
 
 6. **WR-07 (who may switch consent on).** Becomes consequential now; recommend the live-session decision (linked user only, or notification).
+   - RESOLVED: behaviour unchanged in Phase 8, flagged as owner Decision B in 08-22.
 
 7. **Proposal retention and admin visibility of `ai_calls.model` when the model is `default`.** Defaults given above; low risk.
+   - RESOLVED: provisional default no time-based proposal prune (08-04); ai_calls.model NULL at queue time, set once at finish to the CLI-reported name or 'default' (08-04, 08-12); owner confirms in 08-22.
 
 ## Live-session verification checklist (what could not be verified here)
 
