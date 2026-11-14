@@ -2,6 +2,8 @@
 
 namespace App\Medical\Export;
 
+use App\Medical\PlainText;
+
 /**
  * The "For AI" file. Always anonymized in its structured fields: no name, no birth date (age in years only). Free-text
  * fields are copied as written and may still contain identifying details; that limit is stated in the file itself and
@@ -150,14 +152,6 @@ final class MarkdownFormat
     /** Strips control and invisible formatting characters; newlines survive only when asked for. */
     private static function clean(string $text, bool $keepNewlines): string
     {
-        $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8');
-        $text = str_replace(["\r\n", "\r"], "\n", $text);
-        $text = str_replace("\t", ' ', $text);
-        if (! $keepNewlines) {
-            $text = str_replace("\n", ' ', $text);
-        }
-
-        // Cc (control, minus the newline kept above), Cf (bidi marks, zero-width) and line/paragraph separators.
-        return preg_replace($keepNewlines ? '/[^\P{Cc}\n]|[\p{Cf}\x{2028}\x{2029}]/u' : '/[\p{Cc}\p{Cf}\x{2028}\x{2029}]/u', '', $text) ?? '';
+        return PlainText::clean($text, $keepNewlines) ?? '';
     }
 }
