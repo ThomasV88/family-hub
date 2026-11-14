@@ -183,15 +183,40 @@ it('keeps the user handle secret falling back to the app key and derives rp id a
         ->and(config('passkeys.allowed_origins'))->toBe(['https://stage.example.test'])
         ->and(config('passkeys.user_handle_secret'))->toBe('base64:abc');
 
-    putenv('PASSKEYS_USER_HANDLE_SECRET=handle-secret');
-    putenv('PASSKEYS_RP_ID=rp.example.test');
-    putenv('PASSKEYS_ALLOWED_ORIGINS=https://a.example.test, https://b.example.test');
+    // env() reads $_ENV/$_SERVER before getenv(), so a value that is already present there (CI copies .env.example, which
+    // declares PASSKEYS_USER_HANDLE_SECRET= empty and docker passes it into the container) would shadow putenv alone.
+    $overrides = [
+        'PASSKEYS_USER_HANDLE_SECRET' => 'handle-secret',
+        'PASSKEYS_RP_ID' => 'rp.example.test',
+        'PASSKEYS_ALLOWED_ORIGINS' => 'https://a.example.test, https://b.example.test',
+    ];
+    $previous = [];
+    foreach ($overrides as $key => $value) {
+        $previous[$key] = [
+            'getenv' => getenv($key),
+            'env' => array_key_exists($key, $_ENV) ? $_ENV[$key] : null,
+            'server' => array_key_exists($key, $_SERVER) ? $_SERVER[$key] : null,
+        ];
+        putenv("$key=$value");
+        $_ENV[$key] = $value;
+        $_SERVER[$key] = $value;
+    }
     try {
         $fortify = require config_path('fortify.php');
     } finally {
-        putenv('PASSKEYS_USER_HANDLE_SECRET');
-        putenv('PASSKEYS_RP_ID');
-        putenv('PASSKEYS_ALLOWED_ORIGINS');
+        foreach ($previous as $key => $was) {
+            putenv($was['getenv'] === false ? $key : "$key={$was['getenv']}");
+            if ($was['env'] === null) {
+                unset($_ENV[$key]);
+            } else {
+                $_ENV[$key] = $was['env'];
+            }
+            if ($was['server'] === null) {
+                unset($_SERVER[$key]);
+            } else {
+                $_SERVER[$key] = $was['server'];
+            }
+        }
     }
     expect($fortify['passkeys'])->toBe([
         'relying_party_id' => 'rp.example.test',
