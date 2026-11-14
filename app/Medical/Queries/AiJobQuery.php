@@ -171,7 +171,7 @@ class AiJobQuery
     {
         return DB::table('medical_ai_decisions as x')
             ->join('medical_ai_extractions as e', 'e.id', '=', 'x.extraction_id')
-            ->where('e.document_id', $documentId)->where('e.status', 'ready')->where('x.decision', 'accepted')
+            ->where('e.document_id', $documentId)->where('x.decision', 'accepted')
             ->exists();
     }
 

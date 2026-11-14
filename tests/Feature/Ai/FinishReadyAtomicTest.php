@@ -114,3 +114,20 @@ it('lets a bulk row supersede a proposal nobody accepted anything from, and an i
     expect(app(AiJobQuery::class)->finishReady($i['run']->id, frPayload(), 1, 1, 1, 'codex', 'default', 10))->toBeTrue()
         ->and(frStatus($i['old']->id))->toBe('superseded');
 });
+
+it('treats an accepted decision on a superseded extraction as accepted data for a bulk row', function () {
+    $s = frSetup();
+    $bulk = AiBulkRun::factory()->create(['started_by' => $s['user']->id]);
+    DB::table('medical_ai_extractions')->where('id', $s['run']->id)->update(['bulk_run_id' => $bulk->id]);
+    // The decision exists only on a superseded row; the ready one has none.
+    DB::table('medical_ai_extractions')->where('id', $s['old']->id)->update(['status' => 'superseded']);
+    $current = MedicalAiExtraction::factory()->forDocument($s['doc'])->ready(frPayload(), 1)->create(['started_by' => $s['user']->id]);
+    frAccept($s);
+
+    $ok = app(AiJobQuery::class)->finishReady($s['run']->id, frPayload(), 1, 1, 1, 'codex', 'default', 10);
+
+    $row = DB::table('medical_ai_extractions')->where('id', $s['run']->id)->first();
+    expect($ok)->toBeFalse()->and($row->status)->toBe('cancelled')->and($row->cancel_reason)->toBe('decided')
+        ->and($row->payload)->toBeNull()->and(frStatus($current->id))->toBe('ready')
+        ->and(app(AiJobQuery::class)->finishedAsDecided($s['run']->id))->toBeTrue();
+});
