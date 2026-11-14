@@ -27,6 +27,9 @@ class ReauthController extends Controller
 
     public function show(Request $request): Response
     {
+        // The idle gate lands here: Back must not resurrect cached pages (medical data) in the browser history.
+        Inertia::clearHistory();
+
         return Inertia::render('Auth/ConfirmAccess', [
             'methods' => ReauthMethods::for($request->user()),
             'minutes' => intdiv((int) config('security.idle_seconds'), 60),

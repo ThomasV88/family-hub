@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ShieldAlert, ShieldCheck } from '@lucide/vue';
+import { HeartPulse, ShieldAlert, ShieldCheck } from '@lucide/vue';
 import UiTable from '../ui/UiTable.vue';
 import UiTag from '../ui/UiTag.vue';
 import UiButton from '../ui/UiButton.vue';
@@ -28,7 +28,17 @@ const when = (iso) => formatter.value.format(new Date(iso));
 
 const DANGER = ['login_failed', 'lockout', 'second_factor_failed'];
 const variant = (row) => (DANGER.includes(row.event) ? 'danger' : 'neutral');
-const tagIcon = (row) => (row.event === 'second_factor_failed' ? ShieldAlert : row.group === 'security' ? ShieldCheck : null);
+const tagIcon = (row) => (row.event === 'second_factor_failed' ? ShieldAlert : row.group === 'security' ? ShieldCheck : row.event?.startsWith('medical_') ? HeartPulse : null);
+
+// Medical meta is opaque enums only; anything outside the allowlist prints nothing.
+const MEDICAL_META = {
+    change: ['granted', 'revoked', 'level', 'linked', 'unlinked', 'self_access_on', 'self_access_off'],
+    scope: ['person', 'specialty', 'emergency'],
+    format: ['html', 'json', 'md'],
+    value: ['on', 'off'],
+};
+const medicalPhrase = (field, value) => (MEDICAL_META[field].includes(value) ? t(`audit.detail.medical_${field}_${value}`) : '');
+const joinPhrases = (base, ...parts) => [base, ...parts.filter(Boolean)].join(': ');
 const eventLabel = (row) => (row.event === 'access_denied' ? t('audit.event.access_denied') : t(`audit.event.${row.group}`));
 
 const moduleName = (key) => (key ? t(`permissions.module.${key}`) : '');
@@ -86,6 +96,16 @@ function details(row) {
             return t(`audit.detail.requirement_${meta.value === true || meta.value === 1 || meta.value === '1' ? 'on' : 'off'}`);
         case 'reauth_confirmed':
             return t('audit.detail.reauth_confirmed');
+        case 'medical_access_changed':
+            return joinPhrases(t('audit.detail.medical_access_changed'), medicalPhrase('change', meta.change));
+        case 'medical_exported':
+            return joinPhrases(t('audit.detail.medical_exported'), medicalPhrase('scope', meta.scope), medicalPhrase('format', meta.format));
+        case 'medical_consent_changed':
+            return joinPhrases(t('audit.detail.medical_consent_changed'), medicalPhrase('value', meta.value));
+        case 'medical_subject_created':
+        case 'medical_subject_deleted':
+        case 'medical_admin_self_added':
+            return t(`audit.detail.${row.event}`);
         default:
             return t(`audit.detail.${row.event}`);
     }
