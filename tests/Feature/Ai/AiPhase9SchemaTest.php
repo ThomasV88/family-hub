@@ -155,6 +155,26 @@ it('rolls the waiting migration back only when no row is waiting', function () {
         ->and(DB::table('information_schema.columns')->where('table_name', 'medical_ai_extractions')->pluck('column_name')->all())->toContain('available_at');
 });
 
+it('refuses the waiting migration rollback while a decided row exists, before changing anything', function () {
+    $migration = require database_path('migrations/2026_11_21_110000_extractions_waiting_and_bulk_columns.php');
+    $run = (string) Str::uuid();
+    MedicalAiExtraction::factory()->forDocument(p9Doc())->bulk($run)->cancelled('decided')->create();
+    $columnsBefore = DB::table('information_schema.columns')->where('table_name', 'medical_ai_extractions')->pluck('column_name')->sort()->values()->all();
+
+    expect(fn () => $migration->down())->toThrow(RuntimeException::class, "1 extraction row(s) have cancel_reason 'decided'");
+
+    // Nothing was touched: same columns, and the new rules still hold.
+    expect(DB::table('information_schema.columns')->where('table_name', 'medical_ai_extractions')->pluck('column_name')->sort()->values()->all())->toBe($columnsBefore)
+        ->and(MedicalAiExtraction::factory()->forDocument(p9Doc())->waiting()->create()->exists)->toBeTrue();
+
+    // Once the decided row is resolved the rollback runs through.
+    DB::table('medical_ai_extractions')->where('cancel_reason', 'decided')->delete();
+    DB::beginTransaction();
+    DB::table('medical_ai_extractions')->where('status', 'waiting')->delete();
+    $migration->down();
+    DB::rollBack();
+});
+
 it('allows one open bulk run and a completed run beside a new active one', function () {
     AiBulkRun::factory()->active()->create();
 

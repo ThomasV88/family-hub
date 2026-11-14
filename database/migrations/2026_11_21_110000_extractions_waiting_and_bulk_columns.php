@@ -32,9 +32,15 @@ return new class extends Migration
 
     public function down(): void
     {
+        // Both guards run before any change, so a refusal leaves the schema exactly as it was.
         $waiting = (int) DB::table('medical_ai_extractions')->where('status', 'waiting')->count();
         if ($waiting > 0) {
             throw new RuntimeException("Refusing to roll back: {$waiting} extraction row(s) are in status 'waiting'. Resolve them first (they are never rewritten silently).");
+        }
+        // 'decided' is a bulk-only cancel reason; the narrower check of the old schema would refuse these rows halfway through.
+        $decided = (int) DB::table('medical_ai_extractions')->where('cancel_reason', 'decided')->count();
+        if ($decided > 0) {
+            throw new RuntimeException("Refusing to roll back: {$decided} extraction row(s) have cancel_reason 'decided'. Resolve them first (they are never rewritten silently).");
         }
 
         DB::unprepared($this->guardFunction(false));
@@ -49,7 +55,7 @@ return new class extends Migration
 
         DB::statement('ALTER TABLE medical_ai_extractions DROP CONSTRAINT medical_ai_extractions_waiting_check');
         DB::statement('ALTER TABLE medical_ai_extractions DROP COLUMN available_at, DROP COLUMN waiting_since, DROP COLUMN bulk_run_id');
-        // A 'decided' cancel would violate the narrower check; they are bulk-only rows and are reported, not rewritten.
+        // No 'decided' row can exist here: the guard above refused to start while there was one.
         DB::statement('ALTER TABLE medical_ai_extractions DROP CONSTRAINT medical_ai_extractions_cancel_reason_check');
         DB::statement("ALTER TABLE medical_ai_extractions ADD CONSTRAINT medical_ai_extractions_cancel_reason_check CHECK (cancel_reason IS NULL OR cancel_reason IN ('user', 'consent', 'access'))");
         DB::statement('ALTER TABLE medical_ai_extractions DROP CONSTRAINT medical_ai_extractions_status_check');
