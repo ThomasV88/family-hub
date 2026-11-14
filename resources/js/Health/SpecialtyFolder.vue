@@ -10,6 +10,7 @@ const props = defineProps({
     folder: { type: Object, default: null },
     visits: { type: Array, default: () => [] },
     documents: { type: Array, default: () => [] },
+    aiStatuses: { type: Object, default: () => ({}) },
     defaultOpen: { type: Boolean, default: false },
 });
 const emit = defineEmits(['open', 'open-document']);
@@ -36,7 +37,7 @@ const entries = () => (unattached() ? props.documents.map((d) => ({ type: 'docum
             </button>
         </h3>
         <div v-show="open" :id="bodyId" role="region" :aria-labelledby="headerId" class="folder__body">
-            <TimelineList :entries="entries()" :visits="visits" :documents="documents" @open="(id) => emit('open', id)" @open-document="(id) => emit('open-document', id)" />
+            <TimelineList :entries="entries()" :visits="visits" :documents="documents" :ai-statuses="aiStatuses" @open="(id) => emit('open', id)" @open-document="(id) => emit('open-document', id)" />
         </div>
     </section>
 </template>

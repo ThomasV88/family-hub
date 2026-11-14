@@ -133,9 +133,9 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                                     :default-open="index === 0"
                                     @open="openVisit"
                                 />
-                                <SpecialtyFolder v-if="unattachedDocuments.length > 0" :documents="unattachedDocuments" :default-open="folders.length === 0" @open-document="openDocument" />
+                                <SpecialtyFolder v-if="unattachedDocuments.length > 0" :documents="unattachedDocuments" :default-open="folders.length === 0" :ai-statuses="aiStatuses.statuses.value" @open-document="openDocument" />
                             </div>
-                            <TimelineList v-else :entries="timeline" :visits="visits" :vaccinations="vaccinations" :documents="documents" :filters="timelineFilters" :filter="filter" :busy="busy" @open="openVisit" @open-vaccination="openVaccination" @open-document="openDocument" @filter="setFilter" />
+                            <TimelineList v-else :entries="timeline" :visits="visits" :vaccinations="vaccinations" :documents="documents" :filters="timelineFilters" :filter="filter" :busy="busy" :ai-statuses="aiStatuses.statuses.value" @open="openVisit" @open-vaccination="openVaccination" @open-document="openDocument" @filter="setFilter" />
                         </template>
                     </section>
                 </div>

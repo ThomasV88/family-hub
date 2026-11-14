@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { FileText, Image as ImageIcon, Paperclip, Stethoscope, Syringe } from '@lucide/vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiChip from '../Components/ui/UiChip.vue';
+import AiStatusTag from './Ai/AiStatusTag.vue';
 
 // Chronological <ol> of entries (newest first, order comes from the server). With `filters` it also shows the chip
 // row; without (inside a specialty folder) it is only the list. Free text is interpolated, never rendered as HTML.
@@ -15,6 +16,8 @@ const props = defineProps({
     filters: { type: Array, default: null },
     filter: { type: String, default: 'all' },
     busy: { type: Boolean, default: false },
+    // Map of document id to its AI run state, from the page's single useAiStatus instance. Rows show the tag only.
+    aiStatuses: { type: Object, default: () => ({}) },
 });
 const emit = defineEmits(['open', 'open-vaccination', 'open-document', 'filter']);
 const { t, locale, te } = useI18n();
@@ -30,6 +33,12 @@ const rows = computed(() => props.entries
         document: e.type === 'document' ? docById.value.get(e.id) : null,
     }))
     .filter((r) => r.visit || r.vaccination || r.document));
+
+// A tag only for a run that exists and was not superseded by a ready one; nothing for rows without a run.
+const aiTag = (id) => {
+    const s = props.aiStatuses?.[id];
+    return s && s.status && s.status !== 'superseded' ? s : null;
+};
 
 const specialtyName = (visit) => (visit.specialtyKey === 'other' && visit.specialtyOther ? visit.specialtyOther : t(`health.specialty.${visit.specialtyKey}`));
 const chipLabel = (key) => (te(`health.specialty.${key}`) ? t(`health.specialty.${key}`) : t(`health.timeline.filter_${key}`));
@@ -67,6 +76,7 @@ const dateText = (iso) => {
                         <component :is="row.document.kind === 'image' ? ImageIcon : FileText" :size="20" :stroke-width="1.75" aria-hidden="true" />
                         <span>{{ row.document.title }}</span>
                     </span>
+                    <AiStatusTag v-if="aiTag(row.document.id)" :status="aiTag(row.document.id).status" :cancel-reason="aiTag(row.document.id).cancelReason ?? null" :entry-count="aiTag(row.document.id).entryCount ?? null" class="timeline__ai" />
                 </button>
                 <button v-else type="button" class="timeline__row" data-testid="timeline-entry" @click="emit('open', row.visit.id)">
                     <time class="timeline__date" :datetime="row.date">{{ dateText(row.date) }}</time>
