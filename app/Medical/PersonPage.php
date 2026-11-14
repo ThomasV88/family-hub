@@ -6,10 +6,12 @@ use App\Access\AccessLevel;
 use App\Medical\Queries\AllergyQuery;
 use App\Medical\Queries\MedicationQuery;
 use App\Medical\Queries\SubjectQuery;
+use App\Medical\Queries\VaccinationQuery;
 use App\Medical\Queries\VisitQuery;
 use App\Models\MedicalAllergy;
 use App\Models\MedicalMedication;
 use App\Models\MedicalSubject;
+use App\Models\MedicalVaccination;
 use App\Models\MedicalVisit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -24,11 +26,11 @@ use Inertia\Response;
 class PersonPage
 {
     /** Panel kinds that exist so far; those listed in WITH_ID resolve a record id inside the visible person. */
-    private const PANELS = ['new-person', 'new-visit', 'visit', 'new-allergy', 'allergy', 'new-medication', 'medication'];
+    private const PANELS = ['new-person', 'new-visit', 'visit', 'new-allergy', 'allergy', 'new-medication', 'medication', 'new-vaccination', 'vaccination'];
 
-    private const WITH_ID = ['visit', 'allergy', 'medication'];
+    private const WITH_ID = ['visit', 'allergy', 'medication', 'vaccination'];
 
-    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications) {}
+    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations) {}
 
     public function render(Viewer $viewer, ?MedicalSubject $subject, Request $request): Response
     {
@@ -43,6 +45,8 @@ class PersonPage
         return $this->visitProps($viewer, $subject, $request) + [
             'allergies' => $this->allergyProps($viewer, $subject),
             'medications' => $this->medicationProps($viewer, $subject),
+            'vaccinations' => $this->vaccinationProps($viewer, $subject),
+            'vaccinationAttention' => $this->vaccinationAttention($viewer, $subject),
             'people' => $people->map(fn (MedicalSubject $p) => [
                 'id' => (string) $p->getKey(),
                 'name' => $p->name,
@@ -101,14 +105,21 @@ class PersonPage
             'visitIds' => $group->pluck('id')->values()->all(),
         ])->sort(fn (array $a, array $b) => [$b['latestOn'], $a['key']] <=> [$a['latestOn'], $b['key']])->values();
 
+        $vaccinations = $subject === null ? collect() : $this->vaccinationProps($viewer, $subject);
         $filterKeys = $visits->pluck('specialtyKey')->unique()->values()->all();
+        if (count($vaccinations) > 0) {
+            $filterKeys[] = 'vaccinations';
+        }
         $requested = $request->query('filter');
         $filter = is_string($requested) && in_array($requested, $filterKeys, true) ? $requested : 'all';
 
-        $timeline = $visits
+        $visitEntries = $filter === 'vaccinations' ? collect() : $visits
             ->when($filter !== 'all', fn ($c) => $c->where('specialtyKey', $filter))
-            ->map(fn (array $v) => ['type' => 'visit', 'id' => $v['id'], 'date' => $v['visitedOn']])
-            ->values();
+            ->map(fn (array $v) => ['type' => 'visit', 'id' => $v['id'], 'date' => $v['visitedOn']]);
+        $vaccinationEntries = in_array($filter, ['all', 'vaccinations'], true)
+            ? collect($vaccinations)->map(fn (array $v) => ['type' => 'vaccination', 'id' => $v['id'], 'date' => $v['givenOn']])
+            : collect();
+        $timeline = $visitEntries->concat($vaccinationEntries)->sortByDesc('date')->values();
 
         return [
             'visits' => $visits->all(),
@@ -160,6 +171,39 @@ class PersonPage
         ])->values()->all();
     }
 
+    /**
+     * Status and day counts are decided here with the family-timezone date; ids are the public uuids.
+     *
+     * @return list<array{id: string, vaccine: string, givenOn: string, nextDueOn: ?string, notes: ?string, status: string, dueInDays: ?int}>
+     */
+    private function vaccinationProps(Viewer $viewer, ?MedicalSubject $subject): array
+    {
+        if ($subject === null) {
+            return [];
+        }
+
+        return $this->vaccinations->forSubject($viewer, $subject, $this->today())->map(fn (MedicalVaccination $v) => [
+            'id' => (string) $v->public_id,
+            'vaccine' => $v->vaccine,
+            'givenOn' => $v->given_on->format('Y-m-d'),
+            'nextDueOn' => $v->next_due_on?->format('Y-m-d'),
+            'notes' => $v->notes,
+            'status' => (string) $v->getAttribute('status'),
+            'dueInDays' => $v->getAttribute('dueInDays'),
+        ])->values()->all();
+    }
+
+    /** This person only; never summed across people. */
+    private function vaccinationAttention(Viewer $viewer, ?MedicalSubject $subject): int
+    {
+        return $subject === null ? 0 : $this->vaccinations->attentionCount($viewer, $subject, $this->today());
+    }
+
+    private function today(): string
+    {
+        return now((string) config('family.timezone'))->toDateString();
+    }
+
     /** @return array{kind: string, id: ?string}|null */
     private function panel(Viewer $viewer, ?MedicalSubject $subject, Request $request): ?array
     {
@@ -175,6 +219,7 @@ class PersonPage
             $found = $subject !== null && is_string($id) && match ($kind) {
                 'visit' => $this->visits->find($viewer, $subject, $id) !== null,
                 'medication' => $this->medications->find($viewer, $subject, $id) !== null,
+                'vaccination' => $this->vaccinations->find($viewer, $subject, $id) !== null,
                 default => $this->allergies->find($viewer, $subject, $id) !== null,
             };
             abort_unless($found, 403);
@@ -188,7 +233,7 @@ class PersonPage
         if ($kind === 'new-person' && ! $viewer->canEdit()) {
             return null;
         }
-        if (in_array($kind, ['new-visit', 'new-allergy', 'new-medication'], true)) {
+        if (in_array($kind, ['new-visit', 'new-allergy', 'new-medication', 'new-vaccination'], true)) {
             abort_if($subject === null || $this->subjects->levelFor($viewer, $subject) !== AccessLevel::Edit, 403);
         }
 

@@ -106,7 +106,7 @@ describe('Health Person page', () => {
     it('shows the visits empty state and the allergies and medications cards in the side column', () => {
         mountPage();
         expect(document.querySelector('[data-testid="person-main"]').textContent).toContain('No visits yet');
-        expect(document.querySelector('[data-testid="person-side"]').children).toHaveLength(2);
+        expect(document.querySelector('[data-testid="person-side"]').children).toHaveLength(3);
         expect(document.querySelector('[data-testid="person-side"] [data-testid="allergy-card"]')).not.toBeNull();
         expect(document.querySelector('[data-testid="person-side"] [data-testid="medication-card"]')).not.toBeNull();
     });

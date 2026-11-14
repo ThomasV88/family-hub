@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { HeartPulse, Plus } from '@lucide/vue';
 import AppShell from '../../Layouts/AppShell.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
+import UiAlert from '../../Components/ui/UiAlert.vue';
 import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
 import AllergyList from '../../Health/AllergyList.vue';
 import AllergyPanel from '../../Health/AllergyPanel.vue';
@@ -15,6 +16,8 @@ import PersonPanel from '../../Health/PersonPanel.vue';
 import PersonSwitcher from '../../Health/PersonSwitcher.vue';
 import SpecialtyFolder from '../../Health/SpecialtyFolder.vue';
 import TimelineList from '../../Health/TimelineList.vue';
+import VaccinationList from '../../Health/VaccinationList.vue';
+import VaccinationPanel from '../../Health/VaccinationPanel.vue';
 import ViewSwitch from '../../Health/ViewSwitch.vue';
 import VisitPanel from '../../Health/VisitPanel.vue';
 import ShellAdd from '../../Wishlist/ShellAdd.vue';
@@ -35,6 +38,8 @@ const props = defineProps({
     specialties: { type: Array, default: () => [] },
     allergies: { type: Array, default: () => [] },
     medications: { type: Array, default: () => [] },
+    vaccinations: { type: Array, default: () => [] },
+    vaccinationAttention: { type: Number, default: 0 },
 });
 const { t } = useI18n();
 
@@ -57,6 +62,8 @@ const openNewAllergy = () => go({ panel: 'new-allergy' }, ['panel']);
 const openAllergy = (id) => go({ panel: 'allergy', id }, ['panel']);
 const openNewMedication = () => go({ panel: 'new-medication' }, ['panel']);
 const openMedication = (id) => go({ panel: 'medication', id }, ['panel']);
+const openNewVaccination = () => go({ panel: 'new-vaccination' }, ['panel']);
+const openVaccination = (id) => go({ panel: 'vaccination', id }, ['panel']);
 const closePanel = () => go({}, ['panel']);
 const setView = (view) => go({ view: view === 'folders' ? undefined : view, filter: undefined }, ['view', 'filter', 'timeline']);
 const setFilter = (filter) => go({ filter: filter === 'all' ? undefined : filter }, ['timeline', 'filter']);
@@ -68,6 +75,8 @@ const activeAllergy = computed(() => (props.panel?.kind === 'allergy' ? props.al
 const allergyPanelOpen = computed(() => props.panel?.kind === 'new-allergy' || (props.panel?.kind === 'allergy' && activeAllergy.value !== null));
 const activeMedication = computed(() => (props.panel?.kind === 'medication' ? props.medications.find((m) => m.id === props.panel.id) ?? null : null));
 const medicationPanelOpen = computed(() => props.panel?.kind === 'new-medication' || (props.panel?.kind === 'medication' && activeMedication.value !== null));
+const activeVaccination = computed(() => (props.panel?.kind === 'vaccination' ? props.vaccinations.find((v) => v.id === props.panel.id) ?? null : null));
+const vaccinationPanelOpen = computed(() => props.panel?.kind === 'new-vaccination' || (props.panel?.kind === 'vaccination' && activeVaccination.value !== null));
 const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.includes(v.id));
 </script>
 
@@ -80,10 +89,15 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
             <template v-if="person">
                 <PersonSwitcher :people="people" :current-id="person.id" :can-create="canCreate" @add="openNew" />
                 <PersonHeader :person="person" @add-visit="openNewVisit" />
+                <UiAlert v-if="vaccinationAttention > 0" variant="warning" data-testid="vaccination-alert">
+                    <strong>{{ t('health.vaccination.attention_title') }}</strong>
+                    {{ t('health.vacc.attention', { n: vaccinationAttention }, vaccinationAttention) }}
+                </UiAlert>
                 <div class="health-person__area">
                     <div class="health-person__side" data-testid="person-side">
                         <AllergyList :allergies="allergies" :can-edit="canAddVisit" @add="openNewAllergy" @open="openAllergy" />
                         <MedicationList :medications="medications" :can-edit="canAddVisit" @add="openNewMedication" @open="openMedication" />
+                        <VaccinationList :vaccinations="vaccinations" :can-edit="canAddVisit" @add="openNewVaccination" @open="openVaccination" />
                     </div>
                     <section class="health-person__main" data-testid="person-main">
                         <UiEmptyState v-if="visits.length === 0" :title="t('health.visits.empty_title')" :body="t('health.visits.empty_body')" :icon="HeartPulse">
@@ -103,7 +117,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                                     @open="openVisit"
                                 />
                             </div>
-                            <TimelineList v-else :entries="timeline" :visits="visits" :filters="timelineFilters" :filter="filter" :busy="busy" @open="openVisit" @filter="setFilter" />
+                            <TimelineList v-else :entries="timeline" :visits="visits" :vaccinations="vaccinations" :filters="timelineFilters" :filter="filter" :busy="busy" @open="openVisit" @open-vaccination="openVaccination" @filter="setFilter" />
                         </template>
                     </section>
                 </div>
@@ -118,6 +132,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
         <VisitPanel v-if="person" :open="visitPanelOpen" :person-id="person.id" :visit="activeVisit" :can-edit="canAddVisit" :specialties="specialties" @close="closePanel" />
         <AllergyPanel v-if="person" :open="allergyPanelOpen" :person-id="person.id" :allergy="activeAllergy" :can-edit="canAddVisit" @close="closePanel" />
         <MedicationPanel v-if="person" :open="medicationPanelOpen" :person-id="person.id" :medication="activeMedication" :can-edit="canAddVisit" @close="closePanel" />
+        <VaccinationPanel v-if="person" :open="vaccinationPanelOpen" :person-id="person.id" :vaccination="activeVaccination" :can-edit="canAddVisit" @close="closePanel" />
         <ShellAdd :enabled="canAddVisit" :label="t('health.fab.add_visit')" @add="openNewVisit" />
     </AppShell>
 </template>

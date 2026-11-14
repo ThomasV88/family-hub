@@ -255,3 +255,86 @@ describe('identical 403', function () {
         }
     });
 });
+
+describe('person page', function () {
+    it('never exposes the bigint id in the page props', function () {
+        [$user, $person] = vaccinationEditor();
+        MedicalVaccination::factory()->forSubject($person)->count(3)->create();
+        $row = MedicalVaccination::factory()->forSubject($person)->due('2099-01-01')->create(['vaccine' => 'Marker']);
+        $internal = DB::table('medical_vaccinations')->where('vaccine', 'Marker')->value('id');
+        expect($internal)->toBeGreaterThan(3);
+
+        $response = $this->actingAs($user)->get("/health/people/{$person->id}");
+        $props = $response->viewData('page')['props'];
+        $found = collect($props['vaccinations'])->firstWhere('vaccine', 'Marker');
+        expect($found['id'])->toBe($row->public_id)->and(array_keys($found))->not->toContain('internalId');
+        expect($found)->not->toContain($internal);
+    });
+
+    it('lists vaccinations, counts attention for this person only and merges them into the timeline', function () {
+        [$user, $person] = vaccinationEditor();
+        $today = now(config('family.timezone'))->toDateString();
+        MedicalVaccination::factory()->forSubject($person)->given('2010-01-01')->due('2010-06-01')->create(['vaccine' => 'Overdue one']);
+        MedicalVaccination::factory()->forSubject($person)->given('2012-01-01')->create(['vaccine' => 'Past']);
+        MedicalVaccination::factory()->forSubject($person)->given('2013-01-01')->due('2099-01-01')->create(['vaccine' => 'Far']);
+        $hidden = MedicalFixtures::subject([], [[User::factory()->create(), AccessLevel::Edit]]);
+        MedicalVaccination::factory()->forSubject($hidden)->given('2010-01-01')->due('2010-06-01')->count(4)->create(['vaccine' => 'ZxCanaryMed']);
+
+        $response = $this->actingAs($user)->get("/health/people/{$person->id}");
+        $response->assertInertia(fn ($page) => $page->has('vaccinations', 3)->where('vaccinationAttention', 1)
+            ->where('vaccinations.0.vaccine', 'Overdue one')->where('vaccinations.0.status', 'overdue')
+            ->where('vaccinations.1.vaccine', 'Far')->where('vaccinations.1.status', 'later')
+            ->where('vaccinations.2.status', 'none')->where('timelineFilters', ['vaccinations'])
+            ->has('timeline', 3)->where('timeline.0.type', 'vaccination')->where('timeline.0.date', '2013-01-01'));
+        expect(json_encode($response->viewData('page')))->not->toContain('ZxCanaryMed');
+        expect($today)->not->toBe('');
+
+        $this->actingAs($user)->get("/health/people/{$person->id}?view=timeline&filter=vaccinations")
+            ->assertInertia(fn ($page) => $page->where('filter', 'vaccinations')->has('timeline', 3));
+        $this->actingAs($user)->get("/health/people/{$person->id}?filter=nonsense")
+            ->assertInertia(fn ($page) => $page->where('filter', 'all'));
+    });
+
+    it('filters visits out of the vaccinations filter and vaccinations out of a specialty filter', function () {
+        [$user, $person] = vaccinationEditor();
+        MedicalVaccination::factory()->forSubject($person)->create();
+        DB::table('medical_visits')->insert(['id' => (string) Str::uuid(), 'subject_id' => $person->id, 'visited_on' => '2024-01-01', 'specialty_key' => 'dentist', 'source' => 'manual', 'created_at' => now(), 'updated_at' => now()]);
+
+        $this->actingAs($user)->get("/health/people/{$person->id}?filter=vaccinations")
+            ->assertInertia(fn ($page) => $page->has('timeline', 1)->where('timeline.0.type', 'vaccination'));
+        $this->actingAs($user)->get("/health/people/{$person->id}?filter=dentist")
+            ->assertInertia(fn ($page) => $page->has('timeline', 1)->where('timeline.0.type', 'visit'));
+        $this->actingAs($user)->get("/health/people/{$person->id}")
+            ->assertInertia(fn ($page) => $page->has('timeline', 2));
+    });
+
+    it('resolves vaccination and new-vaccination panels inside the person and aborts 403 otherwise', function () {
+        [$user, $person] = vaccinationEditor();
+        $mine = MedicalVaccination::factory()->forSubject($person)->create();
+        $hidden = MedicalFixtures::subject([], [[User::factory()->create(), AccessLevel::Edit]]);
+        $theirs = MedicalVaccination::factory()->forSubject($hidden)->create();
+        $random = (string) Str::uuid();
+
+        $this->actingAs($user)->get("/health/people/{$person->id}?panel=vaccination&id={$mine->public_id}")
+            ->assertInertia(fn ($page) => $page->where('panel', ['kind' => 'vaccination', 'id' => $mine->public_id]));
+        $this->actingAs($user)->get("/health/people/{$person->id}?panel=new-vaccination")
+            ->assertInertia(fn ($page) => $page->where('panel', ['kind' => 'new-vaccination', 'id' => null]));
+
+        $reference = $this->actingAs($user)->get("/health/people/{$hidden->id}")->assertForbidden()->viewData('page');
+        foreach (["panel=vaccination&id={$theirs->public_id}", "panel=vaccination&id={$random}", 'panel=vaccination&id=abc', 'panel=vaccination', "panel=new-vaccination&id={$mine->public_id}"] as $query) {
+            $page = $this->actingAs($user)->get("/health/people/{$person->id}?{$query}")->assertForbidden()->viewData('page');
+            expect($page['props'])->toEqual($reference['props'], $query);
+        }
+    });
+
+    it('shows a view-only member vaccinations read-only and refuses new-vaccination', function () {
+        $user = User::factory()->create();
+        MedicalFixtures::grantHealth($user, AccessLevel::View);
+        $person = MedicalFixtures::subject([], [[$user, AccessLevel::View]]);
+        $row = MedicalVaccination::factory()->forSubject($person)->create();
+
+        $this->actingAs($user)->get("/health/people/{$person->id}?panel=vaccination&id={$row->public_id}")
+            ->assertInertia(fn ($page) => $page->where('person.canEdit', false)->has('vaccinations', 1)->where('panel.kind', 'vaccination'));
+        $this->actingAs($user)->get("/health/people/{$person->id}?panel=new-vaccination")->assertForbidden();
+    });
+});

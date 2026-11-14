@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Paperclip, Stethoscope } from '@lucide/vue';
+import { Paperclip, Stethoscope, Syringe } from '@lucide/vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiChip from '../Components/ui/UiChip.vue';
 
@@ -10,15 +10,19 @@ import UiChip from '../Components/ui/UiChip.vue';
 const props = defineProps({
     entries: { type: Array, default: () => [] },
     visits: { type: Array, default: () => [] },
+    vaccinations: { type: Array, default: () => [] },
     filters: { type: Array, default: null },
     filter: { type: String, default: 'all' },
     busy: { type: Boolean, default: false },
 });
-const emit = defineEmits(['open', 'filter']);
+const emit = defineEmits(['open', 'open-vaccination', 'filter']);
 const { t, locale, te } = useI18n();
 
 const byId = computed(() => new Map(props.visits.map((v) => [v.id, v])));
-const rows = computed(() => props.entries.map((e) => ({ ...e, visit: e.type === 'visit' ? byId.value.get(e.id) : null })).filter((r) => r.visit));
+const vaccById = computed(() => new Map(props.vaccinations.map((v) => [v.id, v])));
+const rows = computed(() => props.entries
+    .map((e) => ({ ...e, visit: e.type === 'visit' ? byId.value.get(e.id) : null, vaccination: e.type === 'vaccination' ? vaccById.value.get(e.id) : null }))
+    .filter((r) => r.visit || r.vaccination));
 
 const specialtyName = (visit) => (visit.specialtyKey === 'other' && visit.specialtyOther ? visit.specialtyOther : t(`health.specialty.${visit.specialtyKey}`));
 const chipLabel = (key) => (te(`health.specialty.${key}`) ? t(`health.specialty.${key}`) : t(`health.timeline.filter_${key}`));
@@ -43,7 +47,14 @@ const dateText = (iso) => {
         <ol v-else class="timeline__list">
             <li v-for="row in rows" :key="`${row.type}-${row.id}`" class="timeline__item">
                 <span class="timeline__rail" aria-hidden="true"><span class="timeline__dot" /></span>
-                <button type="button" class="timeline__row" data-testid="timeline-entry" @click="emit('open', row.visit.id)">
+                <button v-if="row.vaccination" type="button" class="timeline__row" data-testid="timeline-entry" @click="emit('open-vaccination', row.vaccination.id)">
+                    <time class="timeline__date" :datetime="row.date">{{ dateText(row.date) }}</time>
+                    <span class="timeline__title">
+                        <Syringe :size="20" :stroke-width="1.75" aria-hidden="true" />
+                        <span>{{ row.vaccination.vaccine }}</span>
+                    </span>
+                </button>
+                <button v-else type="button" class="timeline__row" data-testid="timeline-entry" @click="emit('open', row.visit.id)">
                     <time class="timeline__date" :datetime="row.date">{{ dateText(row.date) }}</time>
                     <span class="timeline__title">
                         <Stethoscope :size="20" :stroke-width="1.75" aria-hidden="true" />
