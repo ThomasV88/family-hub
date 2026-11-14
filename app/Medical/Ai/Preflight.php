@@ -84,6 +84,8 @@ final class Preflight
             $out[] = 'model_invalid';
         }
 
+        $this->copilotProblems($out);
+
         if (! is_executable('/usr/bin/setsid')) {
             $out[] = 'setsid_missing';
         }
@@ -101,6 +103,63 @@ final class Preflight
         }
 
         return $out;
+    }
+
+    /** @param  list<string>  $out */
+    private function copilotProblems(array &$out): void
+    {
+        $binary = (string) config('ai.copilot.binary');
+        if (! is_file($binary) || ! is_executable($binary)) {
+            $out[] = 'copilot_binary_missing';
+        } elseif (! $this->copilotVersionMatches($binary)) {
+            $out[] = 'copilot_version_mismatch';
+        }
+
+        $cache = rtrim((string) config('ai.copilot.cache'), '/');
+        if ($cache === '' || glob($cache.'/pkg/*/*/.extraction-complete') === [] || glob($cache.'/pkg/*/*/.extraction-complete') === false) {
+            $out[] = 'copilot_cache_missing';
+        }
+
+        $home = rtrim((string) config('ai.copilot.home'), '/');
+        if ($home === '' || ! is_dir($home) || ! is_writable($home)) {
+            $out[] = 'copilot_home_unwritable';
+        }
+        $work = rtrim((string) config('ai.work_dir'), '/');
+        if ($this->under($home, sys_get_temp_dir()) || $this->under($home, '/tmp') || $this->under($home, $work)) {
+            $out[] = 'copilot_home_in_tmp';
+        }
+
+        $model = config('ai.copilot.model');
+        if (is_string($model) && trim($model) !== '' && ! ModelId::isValid(trim($model))) {
+            $out[] = 'copilot_model_invalid';
+        }
+    }
+
+    /** Runs `<binary> --version` (never `version`) with an empty environment and a throwaway home; no network involved. */
+    private function copilotVersionMatches(string $binary): bool
+    {
+        if (! is_executable('/usr/bin/env')) {
+            return false;
+        }
+        try {
+            $tmp = WorkDir::makeTempDir();
+        } catch (\Throwable) {
+            return false;
+        }
+        try {
+            $p = new Process(['/usr/bin/env', '-i', 'PATH='.dirname($binary).':/usr/bin:/bin', 'HOME='.$tmp, 'COPILOT_HOME='.$tmp,
+                'COPILOT_CACHE_HOME='.(string) config('ai.copilot.cache'), $binary, '--version']);
+            $p->setTimeout(15);
+            $p->run();
+        } catch (\Throwable) {
+            return false;
+        } finally {
+            WorkDir::removeTree($tmp);
+        }
+
+        return $p->getExitCode() === 0
+            && preg_match('/(\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?)/', $p->getOutput(), $m) === 1
+            && $m[1] === (string) config('ai.copilot.version');
     }
 
     private function versionMatches(string $binary): bool

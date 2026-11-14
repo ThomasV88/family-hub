@@ -73,7 +73,7 @@ final class WorkDir
 
     /**
      * The configured work dir, or null when it is not safe to create into or delete from: it must be an absolute path
-     * without dot segments, not the filesystem root, and not a parent of the Codex home (which holds the login).
+     * without dot segments, not the filesystem root, and not a parent of, equal to or inside the Codex or Copilot home (which hold the logins).
      */
     public static function root(): ?string
     {
@@ -89,9 +89,15 @@ final class WorkDir
         if ($codex !== '' && str_starts_with($codex.'/', $root.'/') && $codex !== $root) {
             return null;
         }
-        // The fixed production login location is protected even when the config points elsewhere.
-        if (str_starts_with('/codex/', $root.'/')) {
+        $copilot = rtrim(trim((string) config('ai.copilot.home')), '/');
+        if ($copilot !== '' && (str_starts_with($copilot.'/', $root.'/') || str_starts_with($root.'/', $copilot.'/'))) {
             return null;
+        }
+        // The fixed production login locations are protected even when the config points elsewhere.
+        foreach (['/codex', '/copilot'] as $fixed) {
+            if (str_starts_with($fixed.'/', $root.'/') || str_starts_with($root.'/', $fixed.'/')) {
+                return null;
+            }
         }
 
         return $root;

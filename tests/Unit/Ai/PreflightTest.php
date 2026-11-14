@@ -12,14 +12,27 @@ beforeEach(function () {
     $this->base = sys_get_temp_dir().'/pf-test-'.strtolower((string) Str::ulid());
     mkdir($this->base, 0700, true);
     $this->scripts = [];
+    $this->copVersion = null;
     // A "good" home/work dir outside the system temp dir cannot be assumed writable, so use the project storage dir.
     $this->home = storage_path('framework/testing/pf-'.strtolower((string) Str::ulid()));
     mkdir($this->home.'/home', 0700, true);
     mkdir($this->home.'/work', 0700, true);
+    mkdir($this->home.'/cphome', 0700, true);
+    mkdir($this->home.'/cache/pkg/universal/1.0.112', 0700, true);
+    touch($this->home.'/cache/pkg/universal/1.0.112/.extraction-complete');
     $this->good = function (string $version = 'codex-cli 0.169.0') {
         $bin = FakeCodex::loginStatus(0, $version);
         $this->scripts[] = $bin;
+        $cop = tempnam(sys_get_temp_dir(), 'fakecop');
+        file_put_contents($cop, "#!/bin/sh\necho 'GitHub Copilot CLI ".($this->copVersion ?? '1.0.112.')."'\n");
+        chmod($cop, 0700);
+        $this->scripts[] = $cop;
         config([
+            'ai.copilot.binary' => $cop,
+            'ai.copilot.home' => $this->home.'/cphome',
+            'ai.copilot.cache' => $this->home.'/cache',
+            'ai.copilot.version' => '1.0.112',
+            'ai.copilot.model' => null,
             'ai.codex.binary' => $bin,
             'ai.codex.home' => $this->home.'/home',
             'ai.codex.version' => '0.169.0',
@@ -61,7 +74,8 @@ afterEach(function () {
     foreach ($this->scripts as $s) {
         @unlink($s);
     }
-    foreach ([$this->home.'/home', $this->home.'/work', $this->home] as $d) {
+    @unlink($this->home.'/cache/pkg/universal/1.0.112/.extraction-complete');
+    foreach ([$this->home.'/cache/pkg/universal/1.0.112', $this->home.'/cache/pkg/universal', $this->home.'/cache/pkg', $this->home.'/cache', $this->home.'/cphome', $this->home.'/home', $this->home.'/work', $this->home] as $d) {
         @rmdir($d);
     }
     @rmdir($this->base);
@@ -172,3 +186,62 @@ it('flags a configured model that is not a plain identifier', function (string $
 
     expect((new Preflight)->problems())->toBe($bad ? ['model_invalid'] : []);
 })->with([['gpt-5.1-codex', false], ['', false], ['--config', true], ['a=b', true], ['-x', true]]);
+
+it('refuses every GitHub and Copilot token or BYOK variable, but not an empty value or GH_HOST', function (string $name) {
+    ($this->good)();
+    foreach ([fn () => putenv("$name=canary"), function () use ($name) {
+        $_ENV[$name] = 'canary';
+    }, function () use ($name) {
+        $_SERVER[$name] = 'canary';
+    }] as $set) {
+        $set();
+        expect((new Preflight)->envKeysClean())->toBeFalse()->and((new Preflight)->problems())->toContain('forbidden_env');
+        putenv($name);
+        unset($_ENV[$name], $_SERVER[$name]);
+    }
+    putenv("$name=");
+    expect((new Preflight)->envKeysClean())->toBeTrue();
+    putenv($name);
+})->with(['GH_TOKEN', 'GITHUB_TOKEN', 'COPILOT_GITHUB_TOKEN', 'COPILOT_ALLOW_ALL', 'COPILOT_PROVIDER_BASE_URL', 'COPILOT_PROVIDER_API_KEY',
+    'COPILOT_PROVIDER_API_KEY_COMMAND', 'COPILOT_PROVIDER_BEARER_TOKEN', 'COPILOT_OFFLINE']);
+
+it('does not treat GH_HOST as forbidden', function () {
+    ($this->good)();
+    putenv('GH_HOST=github.example');
+    expect((new Preflight)->envKeysClean())->toBeTrue();
+    putenv('GH_HOST');
+});
+
+it('checks the Copilot binary and pinned version, tolerating a trailing dot', function () {
+    ($this->good)();
+    expect((new Preflight)->problems())->toBe([]);
+
+    $this->copVersion = '1.0.111';
+    ($this->good)();
+    expect((new Preflight)->problems())->toBe(['copilot_version_mismatch']);
+
+    config(['ai.copilot.binary' => $this->base.'/nope']);
+    expect((new Preflight)->problems())->toBe(['copilot_binary_missing']);
+});
+
+it('requires the baked Copilot cache marker', function () {
+    ($this->good)();
+    unlink($this->home.'/cache/pkg/universal/1.0.112/.extraction-complete');
+    expect((new Preflight)->problems())->toBe(['copilot_cache_missing']);
+    touch($this->home.'/cache/pkg/universal/1.0.112/.extraction-complete');
+});
+
+it('rejects a Copilot home that is unwritable or in tmp', function () {
+    ($this->good)();
+    config(['ai.copilot.home' => $this->home.'/missing']);
+    expect((new Preflight)->problems())->toBe(['copilot_home_unwritable']);
+
+    config(['ai.copilot.home' => $this->base]);
+    expect((new Preflight)->problems())->toBe(['copilot_home_in_tmp']);
+});
+
+it('flags an invalid Copilot fallback model only', function (string $model, bool $bad) {
+    ($this->good)();
+    config(['ai.copilot.model' => $model]);
+    expect((new Preflight)->problems())->toBe($bad ? ['copilot_model_invalid'] : []);
+})->with([['-x', true], ['a=b', true], ['gpt-5', false], ['', false]]);

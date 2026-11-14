@@ -62,7 +62,7 @@ it('refuses to sweep or create under an empty, relative, root, dotted or Codex-p
         ->and(WorkDir::sweepStale(30))->toBe(0)
         ->and(fn () => WorkDir::create())->toThrow(RuntimeException::class)
         ->and(is_dir($victim))->toBeTrue();
-})->with(['', '   ', '/', '//', 'relative/dir', './x', '/tmp/../etc', '/tmp/x/..', '/codex']);
+})->with(['', '   ', '/', '//', 'relative/dir', './x', '/tmp/../etc', '/tmp/x/..', '/codex', '/copilot', '/copilot/x']);
 
 it('refuses a work dir that is a parent of the Codex home', function () {
     config(['ai.work_dir' => $this->root, 'ai.codex.home' => $this->root.'/login']);
@@ -110,4 +110,21 @@ it('also sweeps stale rasterizer scratch dirs under the system temp dir, and onl
         ->and(file_exists($foreign))->toBeTrue();
     WorkDir::removeTree($fresh);
     WorkDir::removeTree($foreign);
+});
+
+it('refuses a work root equal to, inside or above the configured Copilot home', function () {
+    $home = $this->root.'/cop';
+    config(['ai.copilot.home' => $home]);
+
+    foreach ([$home, $home.'/x', $this->root, dirname($this->root)] as $bad) {
+        config(['ai.work_dir' => $bad]);
+        expect(WorkDir::root())->toBeNull();
+    }
+    config(['ai.work_dir' => $this->root.'/work']);
+    expect(WorkDir::root())->toBe($this->root.'/work');
+});
+
+it('accepts an ordinary work root', function () {
+    config(['ai.work_dir' => '/ai-work', 'ai.copilot.home' => '/copilot', 'ai.codex.home' => '/codex']);
+    expect(WorkDir::root())->toBe('/ai-work');
 });
