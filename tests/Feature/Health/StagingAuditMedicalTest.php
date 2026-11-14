@@ -81,9 +81,11 @@ it('fails on an AI extraction or AI call started by a real user', function () {
         ->assertExitCode(1);
 });
 
-it('fails on an AI call whose starter no longer exists', function () {
+// A reseed deletes only @example.test users and ai_calls is append-only, so a missing starter id is a deleted
+// synthetic user (see StagingSeedTest). A real starter still fails (test above).
+it('accepts an AI call whose starter no longer exists', function () {
     User::factory()->create(['email' => 'a.1@example.test']);
     AiCall::factory()->create(['started_by' => 999999]);
 
-    $this->artisan('staging:audit')->expectsOutputToContain('non-synthetic ai_calls')->assertExitCode(1);
+    $this->artisan('staging:audit')->assertExitCode(0);
 });

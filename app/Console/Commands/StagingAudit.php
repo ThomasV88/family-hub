@@ -21,15 +21,24 @@ class StagingAudit extends Command
     {
         $synthetic = "(select id from users where email like '%@example.test')";
         // Phase 5: staging must never hold real finance data. Rows created by a deleted (null) or non-synthetic user fail.
+        // Null stays flagged: StagingSeeder deletes the rows of the synthetic users before it deletes them, so a null
+        // creator can only be a real user who was deleted (real data) and never a reseeded synthetic one.
+        $real = "(select id from users where email not like '%@example.test')";
+        $anyUser = '(select id from users)';
         $createdByReal = "(created_by is null or created_by not in {$synthetic})";
 
         return [
             ['users', "email not like '%@example.test'"],
             // Phase 2: invitations hold the invited address; audit rows keep names (labels) and invite emails.
             ['invitations', "email not like '%@example.test'"],
+            // A reseed deletes the synthetic users, and audit_logs and ai_calls are append-only, so their rows keep ids that no
+            // longer exist. Only a deleted synthetic user can leave such an id, so a dangling id is accepted: the rules look
+            // for a REAL thing instead (an existing non-synthetic user, a real email, or a stored label that is not a demo label).
             ['audit_logs', "(meta->>'email' is not null and meta->>'email' not like '%@example.test')"
-                ." or (actor_id is not null and actor_id not in (select id from users where email like '%@example.test'))"
-                ." or (target_user_id is not null and target_user_id not in (select id from users where email like '%@example.test'))"],
+                ." or actor_id in {$real}"
+                ." or target_user_id in {$real}"
+                ." or (actor_id is not null and actor_id not in {$anyUser} and actor_label is not null and actor_label not like '%(demo)')"
+                ." or (target_user_id is not null and target_user_id not in {$anyUser} and target_label is not null and target_label not like '%(demo)')"],
             ['finance_accounts', $createdByReal],
             ['finance_transactions', $createdByReal],
             ['finance_recurring', $createdByReal],
@@ -43,10 +52,10 @@ class StagingAudit extends Command
             ['medical_subjects', "{$createdByReal} or (user_id is not null and user_id not in {$synthetic})"],
             ['medical_subject_members', "(user_id not in {$synthetic})"],
             // Phase 8: a run started by a real user means a real document may have gone to the AI provider and a proposal
-            // (health content) may sit in the database. started_by is not nullable and has no foreign key, so an id of a
-            // deleted user fails too (it is not in the synthetic set).
-            ['medical_ai_extractions', "(started_by not in {$synthetic})"],
-            ['ai_calls', "(started_by not in {$synthetic})"],
+            // (health content) may sit in the database. started_by has no foreign key and ai_calls is append-only, so a
+            // dangling id is a deleted synthetic user and is accepted; an existing non-synthetic user fails.
+            ['medical_ai_extractions', "(started_by in {$real})"],
+            ['ai_calls', "(started_by in {$real})"],
         ];
     }
 
