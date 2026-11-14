@@ -38,6 +38,12 @@ enum AuditEvent: string
     case ReauthConfirmed = 'reauth_confirmed';
     case SecondFactorReset = 'second_factor_reset';
     case SecurityPolicyChanged = 'security_policy_changed';
+    case MedicalSubjectCreated = 'medical_subject_created';
+    case MedicalSubjectDeleted = 'medical_subject_deleted';
+    case MedicalAccessChanged = 'medical_access_changed';
+    case MedicalAdminSelfAdded = 'medical_admin_self_added';
+    case MedicalExported = 'medical_exported';
+    case MedicalConsentChanged = 'medical_consent_changed';
 
     /** UI filter groups, in display order. */
     public const GROUPS = ['login', 'login_failed', 'invite', 'permission', 'session_revoked', 'health', 'finance', 'account', 'security'];
@@ -66,6 +72,10 @@ enum AuditEvent: string
             self::SecondFactorFailed => ['method', 'context'],
             self::ReauthConfirmed => ['method'],
             self::SecurityPolicyChanged => ['setting', 'value'],
+            self::MedicalSubjectCreated, self::MedicalSubjectDeleted, self::MedicalAdminSelfAdded => ['subject'],
+            self::MedicalAccessChanged => ['subject', 'change'],
+            self::MedicalExported => ['subject', 'scope', 'format'],
+            self::MedicalConsentChanged => ['subject', 'value'],
             default => [],
         };
     }
@@ -79,7 +89,9 @@ enum AuditEvent: string
             self::InviteCreated, self::InviteResent, self::InviteRevoked, self::InviteAccepted => 'invite',
             self::PermissionChanged => 'permission',
             self::SessionRevoked, self::SessionRevokedAll => 'session_revoked',
-            self::HealthRead, self::HealthWrite => 'health',
+            self::HealthRead, self::HealthWrite,
+            self::MedicalSubjectCreated, self::MedicalSubjectDeleted, self::MedicalAccessChanged,
+            self::MedicalAdminSelfAdded, self::MedicalExported, self::MedicalConsentChanged => 'health',
             self::FinanceRead, self::FinanceWrite, self::FinanceVisibilityChanged, self::FinanceAdminSelfAdded, self::FinanceCategoryChanged => 'finance',
             self::AccessDenied => $module === 'finance' ? 'finance' : 'health',
             self::PasswordReset, self::AdminCreated, self::GoogleLinked => 'account',
