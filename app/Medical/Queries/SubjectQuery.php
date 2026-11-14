@@ -89,4 +89,47 @@ class SubjectQuery
             return $subject;
         });
     }
+
+    /**
+     * Sets the person's AI-consent flag. One transaction: the Edit-scoped UPDATE and the audit row stand or fall together.
+     * Returns false when the subject is outside the viewer's Edit scope (the controller answers 403). Setting the stored
+     * value again changes nothing and writes no audit row.
+     */
+    public function setConsent(Viewer $viewer, MedicalSubject $subject, bool $value): bool
+    {
+        if (! $viewer->canEdit()) {
+            return false;
+        }
+
+        return DB::transaction(function () use ($viewer, $subject, $value) {
+            $id = (string) $subject->getKey();
+            $current = DB::table('medical_subjects')
+                ->where('id', $id)
+                ->whereIn('id', Visibility::subjectIds($viewer, AccessLevel::Edit))
+                ->lockForUpdate()
+                ->first(['ai_consent']);
+            if ($current === null) {
+                return false;
+            }
+            if ((bool) $current->ai_consent === $value) {
+                return true;
+            }
+
+            $changed = DB::table('medical_subjects')
+                ->where('id', $id)
+                ->whereIn('id', Visibility::subjectIds($viewer, AccessLevel::Edit))
+                ->update([
+                    'ai_consent' => $value,
+                    'ai_consent_changed_at' => now(),
+                    'ai_consent_changed_by' => $viewer->userId(),
+                ]);
+            if ($changed === 0) {
+                return false;
+            }
+
+            $this->audit->record(AuditEvent::MedicalConsentChanged, $viewer->user, ['subject' => $id, 'value' => $value ? 'on' : 'off'], null, Module::Health);
+
+            return true;
+        });
+    }
 }
