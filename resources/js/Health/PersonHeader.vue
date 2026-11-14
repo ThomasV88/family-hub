@@ -5,6 +5,7 @@ import { Plus, UserX } from '@lucide/vue';
 import UiAvatar from '../Components/ui/UiAvatar.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiTag from '../Components/ui/UiTag.vue';
+import AiConsentControl from './AiConsentControl.vue';
 
 // Name, age line, blood type and the "No account" marker. Free text is interpolated, never rendered as HTML.
 const props = defineProps({
@@ -43,6 +44,7 @@ const bloodLabel = computed(() => {
             <UiButton variant="primary" :icon="Plus" data-testid="header-add-visit" @click="emit('add-visit')">{{ t('health.visit.add') }}</UiButton>
         </div>
         <p v-if="!person.canEdit" class="person-header__view-only">{{ t('health.view_only') }}</p>
+        <AiConsentControl :person-id="person.id" :value="!!person.aiConsent" :can-edit="!!person.canEdit" />
     </header>
 </template>
 
