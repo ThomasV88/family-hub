@@ -41,6 +41,18 @@ it('allows one queued or running run per document', function () {
     expect(aiRefused(fn () => MedicalAiExtraction::factory()->forDocument($doc)->running()->create()))->toBeTrue();
 });
 
+it('counts a waiting run as the one active run and keeps it consistent with available_at', function () {
+    $doc = aiDoc();
+    MedicalAiExtraction::factory()->forDocument($doc)->waiting()->create();
+
+    expect(aiRefused(fn () => aiInsert($doc, ['status' => 'queued'])))->toBeTrue()
+        ->and(aiRefused(fn () => aiInsert(aiDoc(), ['status' => 'waiting'])))->toBeTrue()
+        ->and(aiRefused(fn () => aiInsert(aiDoc(), ['status' => 'queued', 'available_at' => now()])))->toBeTrue();
+
+    MedicalAiExtraction::factory()->forDocument($doc)->ready()->create();
+    expect(MedicalAiExtraction::where('document_id', $doc->id)->count())->toBe(2);
+});
+
 it('allows one ready run per document and any number of terminal others', function () {
     $doc = aiDoc();
     MedicalAiExtraction::factory()->forDocument($doc)->ready()->create();

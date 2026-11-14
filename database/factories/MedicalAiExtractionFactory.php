@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\MedicalAiExtraction;
 use App\Models\MedicalDocument;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -34,6 +35,17 @@ class MedicalAiExtractionFactory extends Factory
     public function running(): static
     {
         return $this->state(fn () => ['status' => 'running', 'started_at' => now()]);
+    }
+
+    public function waiting(?CarbonInterface $availableAt = null): static
+    {
+        return $this->state(fn () => ['status' => 'waiting', 'available_at' => $availableAt ?? now()->addMinutes(30),
+            'waiting_since' => now(), 'started_at' => null]);
+    }
+
+    public function bulk(string $runId): static
+    {
+        return $this->state(fn () => ['bulk_run_id' => $runId]);
     }
 
     /** @param  array<string, mixed>  $payload */

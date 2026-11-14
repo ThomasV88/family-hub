@@ -77,7 +77,8 @@ it('refuses identity changes, going back, and any change to a terminal row', fun
     expect(aiCallError(fn () => $row()->update(['subject_id' => (string) Str::uuid()])))->toContain('identity')
         ->and(aiCallError(fn () => $row()->update(['started_by' => 2])))->toContain('identity')
         ->and(aiCallError(fn () => $row()->update(['queued_at' => now()->subDay()])))->toContain('identity')
-        ->and(aiCallError(fn () => $row()->update(['attempt' => 2])))->toContain('identity');
+        ->and(aiCallError(fn () => $row()->update(['attempt' => 2])))->toContain('identity')
+        ->and(aiCallError(fn () => $row()->update(['bulk_run_id' => (string) Str::uuid()])))->toContain('identity');
 
     $row()->update(['status' => 'running']);
     expect(aiCallError(fn () => $row()->update(['status' => 'queued'])))->toContain('forward');
@@ -161,7 +162,7 @@ it('has no column that could hold content', function () {
 
     expect($cols)->toBe(collect([
         'id', 'extraction_id', 'subject_id', 'document_id', 'started_by', 'agent', 'model', 'attempt', 'status',
-        'failure_code', 'queued_at', 'started_at', 'finished_at', 'duration_ms',
+        'failure_code', 'queued_at', 'started_at', 'finished_at', 'duration_ms', 'bulk_run_id',
     ])->sort()->values()->all());
 });
 
@@ -190,4 +191,19 @@ it('builds call rows with the factory', function () {
     $call = AiCall::factory()->running()->create();
 
     expect($call->fresh()->status)->toBe('running');
+});
+
+it('keeps bulk_run_id immutable and attempts unique per extraction', function () {
+    $db = aiConn('app');
+    $run = (string) Str::uuid();
+    $extraction = (string) Str::uuid();
+    $id = callRow(['extraction_id' => $extraction, 'bulk_run_id' => $run]);
+
+    expect(aiCallError(fn () => $db->table('ai_calls')->where('id', $id)->update(['bulk_run_id' => null])))->toContain('identity')
+        ->and(aiCallError(fn () => callRow(['extraction_id' => $extraction, 'bulk_run_id' => $run])))->toContain('ai_calls_extraction_attempt_unique');
+
+    callRow(['extraction_id' => $extraction, 'attempt' => 2]);
+    $db->table('ai_calls')->where('id', $id)->update(['status' => 'running', 'started_at' => now()]);
+
+    expect($db->table('ai_calls')->where('id', $id)->value('status'))->toBe('running');
 });
