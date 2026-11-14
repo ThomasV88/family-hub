@@ -10,6 +10,33 @@ return [
         'home' => env('CODEX_HOME', '/codex'),
     ],
 
+    // Registry order of KNOWN agents (not the run order; that is the admin setting).
+    'agents' => ['codex', 'copilot'],
+
+    // Zone of the bulk start hour and the Copilot daily ceiling (the CLIs themselves run with TZ=UTC).
+    'local_timezone' => 'Europe/Bratislava',
+
+    'copilot' => [
+        'binary' => env('AI_COPILOT_BINARY', '/opt/copilot/bin/copilot'),
+        'version' => '1.0.112',
+        // null = fallback only; the admin model setting wins.
+        'model' => env('AI_COPILOT_MODEL'),
+        'home' => env('COPILOT_HOME', '/copilot'),
+        'cache' => env('COPILOT_CACHE_HOME', '/opt/copilot/cache'),
+        // [PROVISIONAL] cost guard per session, owner confirms in 09-20.
+        'max_ai_credits' => 60,
+        // [PROVISIONAL] AUP guard: runs per local day, 0 = unlimited.
+        'daily_runs' => 30,
+        'repair_min_seconds' => 45,
+        // First entry VERIFIED, the rest ASSUMED until the live check L4.
+        'auth_failure_patterns' => [
+            'no authentication information found', 'not authenticated', 'authentication failed',
+            'bad credentials', 'unauthorized', 'login again',
+        ],
+        // [ASSUMED] marker keys of the signed-in account in config.json (research A2); correct live (L1).
+        'login_keys' => ['logged_in_users', 'last_logged_in_user', 'loggedInUsers', 'lastLoggedInUser'],
+    ],
+
     'work_dir' => env('AI_WORK_DIR', '/ai-work'),
 
     // [ASSUMED] tune after the first real run (research A8)
@@ -17,6 +44,8 @@ return [
         'process' => 300,
         'idle' => 120,
         'job' => 330,
+        // Shortest per-call timeout the attempt loop will start (seconds); 09-10 raises 'job' with the loop.
+        'min_call' => 30,
         'login' => 10,
         'abort_check_seconds' => 2,
         'queued_stale_hours' => 6,
@@ -48,6 +77,9 @@ return [
     'forbidden_env' => [
         'OPENAI_API_KEY', 'CODEX_API_KEY', 'ANTHROPIC_API_KEY', 'OPENAI_BASE_URL', 'OPENAI_ORG_ID',
         'CODEX_ACCESS_TOKEN', 'CODEX_AGENT_IDENTITY',
+        'GH_TOKEN', 'GITHUB_TOKEN', 'COPILOT_GITHUB_TOKEN', 'COPILOT_ALLOW_ALL', 'COPILOT_PROVIDER_BASE_URL',
+        'COPILOT_PROVIDER_API_KEY', 'COPILOT_PROVIDER_API_KEY_COMMAND', 'COPILOT_PROVIDER_BEARER_TOKEN',
+        'COPILOT_OFFLINE',
     ],
 
     // Name patterns of foreign secrets the ai-worker must never receive (ai:preflight reports forbidden_secret).
@@ -65,6 +97,43 @@ return [
         'max_active_per_user' => 3,
         'max_active_global' => 20,
         'document_cooldown_minutes' => 10,
+    ],
+
+    // [PROVISIONAL] owner confirms in 09-20. Needles are lowercase with a straight apostrophe; every
+    // signature is ASSUMED until real transcripts are captured live (L4, L6).
+    'quota' => [
+        'signatures' => [
+            'codex' => [
+                ['needle' => 'hit your usage limit', 'minutes' => 60],
+                ['needle' => 'limits reset every 5h', 'minutes' => 60],
+            ],
+            'copilot' => [
+                ['needle' => "you've hit your session rate limit", 'minutes' => 60],
+                ['needle' => "you've reached your weekly rate limit", 'minutes' => 1440],
+                ['needle' => "you've hit your rate limit", 'minutes' => 60],
+                ['needle' => "you've hit the rate limit for this model", 'minutes' => 10],
+                ['needle' => 'plan: 100% used', 'minutes' => 1440],
+            ],
+        ],
+        'ladder' => [60, 180, 720, 1440],
+        'ladder_reset_hours' => 48,
+        'max_reset_days' => 8,
+        'reset_buffer_seconds' => 60,
+        'wait_cap_hours' => 24,
+    ],
+
+    // [PROVISIONAL] bulk re-reading; owner confirms in 09-20.
+    'bulk' => [
+        'default_cap' => 20,
+        'max_cap' => 30,
+        'start_hour' => 1,
+        'spacing_minutes' => 10,
+        'max_global_active' => 10,
+        'queue' => 'ai-bulk',
+        'fallback_agents' => false,
+        'dry_run_ttl_minutes' => 15,
+        'history' => 10,
+        'stopped_after_hours' => 24,
     ],
 
     'login_stale_minutes' => 15,

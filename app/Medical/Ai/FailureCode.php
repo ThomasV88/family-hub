@@ -4,7 +4,7 @@ namespace App\Medical\Ai;
 
 /**
  * Content-free by design; the only failure detail ever stored or shown.
- * Phase 9 adds quota.
+ * Phase 9 adds quota and agent selection codes.
  */
 enum FailureCode: string
 {
@@ -19,4 +19,8 @@ enum FailureCode: string
     case UnreadableDocument = 'unreadable_document';
     case UnsupportedDocument = 'unsupported_document';
     case Preflight = 'preflight';
+    case QuotaExhausted = 'quota_exhausted';
+    case QuotaTimeout = 'quota_timeout';
+    case NoAgent = 'no_agent';
+    case NoticeRequired = 'notice_required';
 }

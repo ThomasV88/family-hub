@@ -11,5 +11,7 @@ final readonly class AgentInput
     public function __construct(
         public WorkDir $workDir,
         public array $images,
+        /** Unix seconds; agents derive per-call timeouts from it. */
+        public ?int $deadline = null,
     ) {}
 }

@@ -2,6 +2,8 @@
 
 namespace App\Medical\Ai;
 
+use Carbon\CarbonImmutable;
+
 /**
  * Outcome of a supervised codex run: counters and flags only.
  * Never add output text here; reportedModel is a validated identifier, not output.
@@ -17,5 +19,8 @@ final readonly class ProcessResult
         public bool $authSignature,
         public int $durationMs,
         public ?string $reportedModel = null,
+        public bool $quotaSignature = false,
+        public ?int $quotaMinutes = null,
+        public ?CarbonImmutable $quotaResetAt = null,
     ) {}
 }
