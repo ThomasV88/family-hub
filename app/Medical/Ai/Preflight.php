@@ -2,6 +2,7 @@
 
 namespace App\Medical\Ai;
 
+use App\Medical\Ai\Work\WorkDir;
 use Symfony\Component\Process\Process;
 
 /** Startup / pre-spawn checks for the subscription-only rule. Returns codes only, never a value. */
@@ -20,6 +21,34 @@ final class Preflight
         return true;
     }
 
+    /**
+     * True when no variable that names a foreign secret (mail, Google, VAPID, cloud keys, any *_API_KEY or *_SECRET)
+     * is present in the process environment. Only names are matched and nothing is returned but the verdict.
+     */
+    public function secretsClean(): bool
+    {
+        $names = array_merge(
+            array_keys(getenv()),
+            array_keys($_ENV),
+            array_keys($_SERVER),
+        );
+        foreach ($names as $name) {
+            $name = (string) $name;
+            foreach ((array) config('ai.forbidden_env_patterns') as $pattern) {
+                if (preg_match($pattern, $name) !== 1) {
+                    continue;
+                }
+                foreach ([getenv($name), $_ENV[$name] ?? null, $_SERVER[$name] ?? null] as $v) {
+                    if (is_string($v) && $v !== '') {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     /** @return list<string> */
     public function problems(): array
     {
@@ -27,6 +56,9 @@ final class Preflight
 
         if (! $this->envKeysClean()) {
             $out[] = 'forbidden_env';
+        }
+        if (! $this->secretsClean()) {
+            $out[] = 'forbidden_secret';
         }
         if ((string) config('app.key') !== '') {
             $out[] = 'app_key_present';
@@ -58,8 +90,8 @@ final class Preflight
             $out[] = 'retry_after_too_small';
         }
 
-        $work = rtrim((string) config('ai.work_dir'), '/');
-        if ($work === '' || ! is_dir($work) || ! is_writable($work)) {
+        $work = WorkDir::root();
+        if ($work === null || ! is_dir($work) || ! is_writable($work)) {
             $out[] = 'work_dir_unwritable';
         }
 

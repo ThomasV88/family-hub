@@ -161,10 +161,10 @@ PY
 
 # compose.yaml (dev): the same rule with the dev volume names
 DEV="$TMP/dev.json"
-docker compose -f compose.yaml --project-directory "$PWD" config --format json > "$DEV" 2>/dev/null || \
-  docker compose -f compose.yaml config --format json > "$DEV"
+docker compose -f compose.yaml --project-directory "$PWD" --profile ai config --format json > "$DEV" 2>/dev/null || \
+  docker compose -f compose.yaml --profile ai config --format json > "$DEV"
 python3 -I - "$DEV" <<'PY'
-import json, sys
+import json, re, sys
 
 svcs = json.load(open(sys.argv[1]))["services"]
 MED = "/var/www/html/storage/app/medical"
@@ -182,6 +182,18 @@ for s in ("nginx", "postgres"):
     if any(src == "medical-dev" or tgt == MED for src, tgt in mounts(svcs[s])):
         print("FAIL: dev %s mounts the medical volume" % s, file=sys.stderr)
         sys.exit(1)
+# The dev ai-worker gets its own env file and a masked .env, so dev exercises the isolation production relies on
+dev_ai = svcs.get("ai-worker", {})
+for key in dev_ai.get("environment") or {}:
+    if re.match(r"MAIL_|GOOGLE_|VAPID_|AWS_|STRIPE_|.*_API_KEY$|.*_SECRET$|REDIS", key):
+        print("FAIL: dev ai-worker gets forbidden variable %s" % key, file=sys.stderr)
+        sys.exit(1)
+if (dev_ai.get("environment") or {}).get("APP_KEY") not in (None, ""):
+    print("FAIL: dev ai-worker has an APP_KEY", file=sys.stderr)
+    sys.exit(1)
+if not any(v.get("target") == "/var/www/html/.env" and v.get("source") == "/dev/null" for v in dev_ai.get("volumes", [])):
+    print("FAIL: dev ai-worker does not mask the repo .env", file=sys.stderr)
+    sys.exit(1)
 PY
 
 echo "CHECK-COMPOSE OK"

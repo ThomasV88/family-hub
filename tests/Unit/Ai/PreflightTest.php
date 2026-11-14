@@ -30,6 +30,17 @@ beforeEach(function () {
 
         return $bin;
     };
+    // The dev and test containers carry mail and cloud variables; the ai-worker never does. Clear them for the test.
+    $this->secrets = [];
+    foreach (array_unique(array_merge(array_keys(getenv()), array_keys($_ENV), array_keys($_SERVER))) as $n) {
+        foreach (config('ai.forbidden_env_patterns') as $pattern) {
+            if (preg_match($pattern, (string) $n) === 1) {
+                $this->secrets[$n] = [getenv($n), $_ENV[$n] ?? null, $_SERVER[$n] ?? null];
+                putenv((string) $n);
+                unset($_ENV[$n], $_SERVER[$n]);
+            }
+        }
+    }
     $this->saved = [];
     foreach (config('ai.forbidden_env') as $n) {
         $this->saved[$n] = getenv($n);
@@ -39,6 +50,11 @@ beforeEach(function () {
 });
 
 afterEach(function () {
+    foreach ($this->secrets as $n => [$env, $e, $srv]) {
+        $env === false ? putenv((string) $n) : putenv("$n=$env");
+        $e === null ? null : $_ENV[$n] = $e;
+        $srv === null ? null : $_SERVER[$n] = $srv;
+    }
     foreach ($this->saved as $n => $v) {
         $v === false ? putenv($n) : putenv("$n=$v");
     }
@@ -66,6 +82,27 @@ it('flags every forbidden variable', function () {
         putenv($n);
         expect((new Preflight)->envKeysClean())->toBeTrue();
     }
+});
+
+it('flags mail, Google, VAPID, cloud and key or secret variables as forbidden_secret, by name and without a value', function (string $name) {
+    ($this->good)();
+    putenv("$name=CANARY-value-123");
+
+    expect((new Preflight)->secretsClean())->toBeFalse()
+        ->and((new Preflight)->problems())->toBe(['forbidden_secret']);
+    Artisan::call('ai:preflight');
+    expect(Artisan::output())->toContain('forbidden_secret')->not->toContain('CANARY')->not->toContain($name);
+
+    putenv($name);
+    expect((new Preflight)->secretsClean())->toBeTrue()->and((new Preflight)->problems())->toBe([]);
+})->with(['MAIL_PASSWORD', 'MAIL_HOST', 'GOOGLE_CLIENT_SECRET', 'VAPID_PRIVATE_KEY', 'AWS_ACCESS_KEY_ID', 'SOME_VENDOR_API_KEY', 'WEBHOOK_SECRET']);
+
+it('ignores an empty forbidden-looking variable', function () {
+    ($this->good)();
+    putenv('MAIL_PASSWORD=');
+
+    expect((new Preflight)->secretsClean())->toBeTrue();
+    putenv('MAIL_PASSWORD');
 });
 
 it('flags a present app key only', function () {
@@ -104,6 +141,13 @@ it('flags an unwritable work dir', function () {
     config(['ai.work_dir' => $this->home.'/nowhere']);
     expect((new Preflight)->problems())->toBe(['work_dir_unwritable']);
 });
+
+it('flags an empty or unsafe work dir', function (string $dir) {
+    ($this->good)();
+    config(['ai.work_dir' => $dir]);
+
+    expect((new Preflight)->problems())->toBe(['work_dir_unwritable']);
+})->with(['', '/', 'relative']);
 
 it('prints codes only and never a variable value', function () {
     ($this->good)();

@@ -48,6 +48,12 @@ return [
         'CODEX_ACCESS_TOKEN', 'CODEX_AGENT_IDENTITY',
     ],
 
+    // Name patterns of foreign secrets the ai-worker must never receive (ai:preflight reports forbidden_secret).
+    // APP_KEY is covered separately through config('app.key').
+    'forbidden_env_patterns' => [
+        '/^(MAIL|GOOGLE|VAPID|AWS|STRIPE)_/', '/_API_KEY$/', '/_SECRET$/', '/^APP_PREVIOUS_KEYS$/',
+    ],
+
     // Records one proposal may create when its entries are accepted (a proposal holds at most 100 entries).
     'max_accepts_per_proposal' => 100,
 

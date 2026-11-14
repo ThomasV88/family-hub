@@ -97,8 +97,9 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
 - Service `ai-worker` (compose.server.yaml; locally only with `docker compose --profile ai up`). Image `$IMAGE_PREFIX-ai:$IMAGE_TAG`
   (Dockerfile target `ai-worker`, the only image with the pinned Codex CLI). Runs as www-data, one process
   (`queue:work --queue=ai --tries=1 --timeout=360`), `init: true`, no ports, `mem_limit` `MEM_AI` (default 384m, measure live in 08-22).
-- Env file `ai-worker.env` (template `ops/env/ai-worker.env.example`), never `app.env`: no `APP_KEY`, `MAIL_*`, `GOOGLE_*`, `VAPID_*`, `*_API_KEY`.
-  `ai:preflight` refuses to start if one is set. `deploy.sh` refuses to run without `ai-worker.env`. It uses the runtime role `fh_app`
+- Env file `ai-worker.env` (template `ops/env/ai-worker.env.example`), never `app.env`: no `APP_KEY`, `MAIL_*`, `GOOGLE_*`, `VAPID_*`, `AWS_*`, `STRIPE_*`, `*_API_KEY`, `*_SECRET`.
+  `ai:preflight` refuses to start if one is set (codes `app_key_present`, `forbidden_env`, `forbidden_secret`; names are matched by
+  `ai.forbidden_env_patterns`, values are never printed). The dev `ai-worker` reads `ops/env/ai-worker.dev.env` and has the repo `.env` masked. `deploy.sh` refuses to run without `ai-worker.env`. It uses the runtime role `fh_app`
   (provisional: no dedicated database role for now). `DB_QUEUE_RETRY_AFTER=900` must stay above the job timeout.
 - Mounts: volume `codex-home` at `/codex` (writable, holds `auth.json`, refreshed in place) and `medical` read-only. Work dir `/ai-work` is a
   tmpfs (mode 0700), discarded on stop. No other service mounts `codex-home`; `scripts/check-compose.sh` fails on any drift.

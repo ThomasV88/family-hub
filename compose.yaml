@@ -73,7 +73,8 @@ services:
     profiles: ["ai"]
     restart: unless-stopped
     init: true
-    env_file: .env
+    # Not the shared .env: the ai-worker gets no APP_KEY, mail, Google or VAPID secrets (ai:preflight enforces it).
+    env_file: ops/env/ai-worker.dev.env
     environment:
       APP_KEY: ""
       HOME: /codex
@@ -84,6 +85,8 @@ services:
       AI_CODEX_MODEL: ""
     volumes:
       - .:/var/www/html
+      # The bind mount above would let Laravel read the repo .env (APP_KEY, MAIL_*, ...): mask it with an empty file.
+      - /dev/null:/var/www/html/.env:ro
       - medical-dev:/var/www/html/storage/app/medical:ro
       - codex-home-dev:/codex
     tmpfs:
