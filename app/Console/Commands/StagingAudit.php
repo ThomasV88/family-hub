@@ -42,6 +42,11 @@ class StagingAudit extends Command
             // linked to a real user, fails; so does any membership of a real user.
             ['medical_subjects', "{$createdByReal} or (user_id is not null and user_id not in {$synthetic})"],
             ['medical_subject_members', "(user_id not in {$synthetic})"],
+            // Phase 8: a run started by a real user means a real document may have gone to the AI provider and a proposal
+            // (health content) may sit in the database. started_by is not nullable and has no foreign key, so an id of a
+            // deleted user fails too (it is not in the synthetic set).
+            ['medical_ai_extractions', "(started_by not in {$synthetic})"],
+            ['ai_calls', "(started_by not in {$synthetic})"],
         ];
     }
 

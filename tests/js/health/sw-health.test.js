@@ -32,4 +32,26 @@ describe('service worker and health', () => {
         }
         expect(checkPrecache({ swSource: `${clean}\nregisterRoute(/health/, h)`, swBuilt: 'var x=[{url:"offline.html"}]' }).ok).toBe(false);
     });
+
+    it('the precache check rejects the Phase 8 AI urls: status poll, review page and page images', () => {
+        const clean = `import { precacheAndRoute } from 'workbox-precaching';\nprecacheAndRoute(self.__WB_MANIFEST);`;
+        for (const url of [
+            'health/people/3f2a/ai-status',
+            '/health/people/3f2a/documents/9b1c/review',
+            'health/people/3f2a/documents/9b1c/pages/1',
+            '/health/people/3f2a/ai/77aa/entries/visit-0/accept',
+        ]) {
+            const r = checkPrecache({ swSource: clean, swBuilt: `var x=[{url:"offline.html",revision:null},{url:"${url}",revision:null}]` });
+            expect(r.ok, url).toBe(false);
+            expect(r.violations.join('\n')).toMatch(/health or finance url/);
+        }
+    });
+
+    it('registers no runtime route that could match an AI url', () => {
+        expect(source).not.toMatch(/ai-status|\/review|\/pages\/|ai-calls/);
+        if (built !== null) {
+            const r = checkPrecache({ swSource: source, swBuilt: built });
+            expect(r.urls.filter((u) => /ai-status|review|pages\/|ai-calls/.test(u))).toEqual([]);
+        }
+    });
 });

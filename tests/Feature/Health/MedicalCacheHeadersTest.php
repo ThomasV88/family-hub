@@ -5,6 +5,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\Support\ImageFixtures;
+use Tests\Support\MedicalFileFixtures;
 use Tests\Support\MedicalPrivacy;
 
 beforeEach(function () {
@@ -123,4 +124,75 @@ it('marks stale-session refusals (redirect to confirm and 423) no-store on every
         );
         expect($response->getStatusCode())->toBe(423)->and((string) $response->headers->get('Cache-Control'))->toContain('no-store');
     }
+});
+
+it('marks the AI status poll, the review page, the page images and every AI JSON write no-store and private, with no validator on page images', function () {
+    Storage::fake('medical');
+    $ctx = MedicalPrivacy::scenario();
+    MedicalPrivacy::seedVisible($ctx);
+    MedicalPrivacy::seedHidden($ctx);
+    $person = $ctx['person']->getKey();
+
+    $pdf = MedicalDocument::factory()->pdf()->create(['subject_id' => $person, 'title' => 'Pages']);
+    Storage::disk('medical')->put($pdf->path, MedicalFileFixtures::pdfPages(2));
+
+    $gets = [
+        'status' => route('health.people.ai.status', ['person' => $person], false),
+        'review' => route('health.documents.ai.review', ['person' => $person, 'document' => $ctx['document']], false),
+        'page 1' => route('health.documents.page', ['person' => $person, 'document' => $pdf->getKey(), 'page' => 1], false),
+        'page 2' => route('health.documents.page', ['person' => $person, 'document' => $pdf->getKey(), 'page' => 2], false),
+        'page out of range' => route('health.documents.page', ['person' => $person, 'document' => $pdf->getKey(), 'page' => 99], false),
+    ];
+    foreach ($gets as $label => $url) {
+        app('auth')->forgetGuards();
+        $this->flushSession();
+        $response = $this->actingAs($ctx['viewer'])->get($url);
+        $header = (string) $response->headers->get('Cache-Control');
+        expect(str_contains($header, 'no-store') && str_contains($header, 'private'))->toBeTrue("$label answered ".$response->getStatusCode()." with '$header'");
+        expect($response->headers->get('ETag'))->toBeNull("$label carries a validator");
+    }
+    // The two real pages really are images (not a refusal that happens to be no-store).
+    foreach (['page 1', 'page 2'] as $label) {
+        app('auth')->forgetGuards();
+        $this->flushSession();
+        expect($this->actingAs($ctx['viewer'])->get($gets[$label])->getStatusCode())->toBe(200);
+    }
+
+    $aiWrites = ['health.documents.ai.run', 'health.ai.cancel', 'health.ai.entries.accept', 'health.ai.entries.reject', 'health.ai.entries.undo'];
+    $checked = 0;
+    foreach (MedicalPrivacy::writes() as $route) {
+        if (! in_array($route->getName(), $aiWrites, true)) {
+            continue;
+        }
+        foreach (['visible' => MedicalPrivacy::params($route, $ctx), 'hidden' => MedicalPrivacy::hiddenParams($route, $ctx)] as $label => $params) {
+            app('auth')->forgetGuards();
+            $this->flushSession();
+            $response = $this->actingAs($ctx['viewer'])->call(
+                MedicalPrivacy::method($route), route($route->getName(), $params, false),
+                MedicalPrivacy::payload($route->getName(), $ctx), [], [], ['HTTP_ACCEPT' => 'application/json'],
+            );
+            expect(str_contains((string) $response->headers->get('Cache-Control'), 'no-store'))->toBeTrue($route->getName()." $label answered ".$response->getStatusCode());
+            $checked++;
+        }
+    }
+    expect($checked)->toBe(count($aiWrites) * 2);
+});
+
+it('serves the review page with encrypted browser history and lands a stale session on the confirm-access page that clears it', function () {
+    $ctx = MedicalPrivacy::scenario();
+    MedicalPrivacy::seedVisible($ctx);
+    $url = route('health.documents.ai.review', ['person' => $ctx['person']->getKey(), 'document' => $ctx['document']], false);
+
+    $html = $this->actingAs($ctx['viewer'])->get($url)->assertOk()->getContent();
+    preg_match('#<script[^>]*data-page="app"[^>]*>(.*?)</script>#s', $html, $m);
+    $page = json_decode($m[1] ?? 'null', true);
+    expect($page['component'] ?? null)->toBe('Health/AiReview')
+        ->and($page['encryptHistory'] ?? false)->toBeTrue();
+
+    // The idle gate sends a stale session to confirm-access, which clears history (HealthHistoryTest asserts the clear itself).
+    $this->useRealSensitiveSession();
+    app('auth')->forgetGuards();
+    $this->flushSession();
+    $stale = $this->actingAs($ctx['viewer'])->withSession(mchStale())->get($url);
+    expect($stale->getStatusCode())->toBe(302)->and((string) $stale->headers->get('Location'))->toContain('confirm-access');
 });
