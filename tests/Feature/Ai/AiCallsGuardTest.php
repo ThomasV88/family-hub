@@ -121,6 +121,24 @@ it('prunes only rows older than 12 months through the definer function', functio
         ->and($app->table('ai_calls')->pluck('id')->all())->toBe([$keep]);
 });
 
+it('refuses a retention below the floor and deletes nothing', function (string $months) {
+    $app = aiConn('app');
+    $recent = callRow(['queued_at' => now()->subDay()]);
+    $old = callRow(['queued_at' => now()->subMonths(14)]);
+
+    foreach ([$months, 'null'] as $value) {
+        expect(aiCallError(fn () => aiConn('app')->selectOne("select ai_calls_prune({$value}::int) as n")))->toContain('retention floor');
+    }
+
+    expect($app->table('ai_calls')->pluck('id')->sort()->values()->all())->toBe(collect([$recent, $old])->sort()->values()->all());
+})->with(['0', '-5', '11']);
+
+it('pins the search path of the prune function', function () {
+    $config = DB::selectOne("select proconfig from pg_proc where proname = 'ai_calls_prune'")->proconfig;
+
+    expect($config)->toContain('search_path=public, pg_temp');
+});
+
 it('prints only the count from ai:prune-calls', function () {
     callRow(['queued_at' => now()->subMonths(14)]);
     callRow(['queued_at' => now()->subMonths(13)]);
