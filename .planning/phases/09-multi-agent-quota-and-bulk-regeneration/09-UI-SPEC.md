@@ -453,11 +453,19 @@ Long-string behaviour (SK and PL run about 20-40% longer than EN): no label, tag
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
 **Approval:** pending checker pass (author set `status: approved` 2026-11-14 per orchestrator instruction)
+
+## Checker follow-ups (2026-11-14, approved with flags)
+- Bulk buttons are named "Pause bulk run" and "Resume bulk run" (visible text may stay "Pause"/"Resume" only if the accessible name carries the noun).
+- EN waiting detail reads "We will try again automatically."; SK and PL drafts follow the same meaning.
+- The 12 token stays limited to label rows and `<dl>` rows.
+- Bulk history empty state uses `ListChecks` (not `Layers`, which stays reserved for "Replaced").
+- Enabling an agent while its health is Login expired or AI service not responding (not just Not checked yet) is a defaults-level extension of CONTEXT's wording, kept PROVISIONAL and listed for the live session.
+- The v2 provider notice REQUIRES a server-side per-member notice-version field (Phase 8 stores a boolean acknowledgment); the plan must include the migration and migrate existing acknowledgments to version 1.
