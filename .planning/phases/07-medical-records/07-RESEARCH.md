@@ -627,7 +627,9 @@ Route::middleware(['web', 'access:module,health,view'])->get('/health/zz-mutant-
 | A13 | Delete subject allowed for edit members (not admin-only), hard delete | Access Model | Owner may want admin-only or a soft-delete grace period |
 | A14 | One person can have at most one linked user and one user at most one profile (unique `user_id`) | Schema | Shared-profile cases not supported |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+RESOLVED by orchestrator decisions (PROVISIONAL, owner confirms at the end of the run): (1) the health module grant stays a prerequisite even for a linked member own record; (2) export needs Edit, emergency card needs View; (3) PDFs and HEIC and downloads get no-store, only image derivatives get private no-cache + ETag; (4) admin sees person names and member lists on the settings screen only, no records or counts; (5) deleting a person needs Edit and is a hard delete; (6) no app-level file encryption in v1 (restic backups encrypted, volume permissions 0700); (7) original files are not bundled in the all-records export.
 
 1. **Does a linked member reach their own record without a `health` module grant?**
    - Known: the route middleware requires module `health >= view`; presets give `health = none` to everyone.
