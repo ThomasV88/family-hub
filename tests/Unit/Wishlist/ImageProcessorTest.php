@@ -160,12 +160,12 @@ it('serializes decodes: a held decode slot makes another process() give up with 
     flock($held, LOCK_EX);
 
     try {
-        expect(fn () => (new \App\Wishlist\Catalog\ImageProcessor)->process(\Tests\Support\ImageFixtures::jpeg(), 5 * 1024 * 1024))
-            ->toThrow(\App\Wishlist\Catalog\ImageRejected::class, 'busy');
+        expect(fn () => (new ImageProcessor)->process(ImageFixtures::jpeg(), 5 * 1024 * 1024))
+            ->toThrow(ImageRejected::class, 'busy');
     } finally {
         flock($held, LOCK_UN);
         fclose($held);
     }
 
-    expect((new \App\Wishlist\Catalog\ImageProcessor)->process(\Tests\Support\ImageFixtures::jpeg(), 5 * 1024 * 1024)->width)->toBeGreaterThan(0);
+    expect((new ImageProcessor)->process(ImageFixtures::jpeg(), 5 * 1024 * 1024)->width)->toBeGreaterThan(0);
 });

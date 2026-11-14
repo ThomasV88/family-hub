@@ -1,9 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Cache;
 use App\Models\User;
 use App\Security\PasswordSetBackfill;
+use App\Security\UserScopedTwoFactorProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider;
@@ -115,7 +117,7 @@ it('consumes a recovery code once even from a stale in-memory copy (the lock re-
     $second = User::find($user->id); // loaded before the first use, still lists the code: a parallel request
     $first->replaceRecoveryCode($code);
 
-    expect(fn () => $second->replaceRecoveryCode($code))->toThrow(\Illuminate\Http\Exceptions\HttpResponseException::class);
+    expect(fn () => $second->replaceRecoveryCode($code))->toThrow(HttpResponseException::class);
     expect(Totp::recoveryCodes($user->refresh()))->toHaveCount(7)->not->toContain($code);
 });
 
@@ -138,15 +140,15 @@ it('keys the TOTP replay marker per member secret, not by the bare code', functi
     $a = User::factory()->create();
     $secret = Totp::enable($a);
     $code = Totp::code($secret, -1);
-    $provider = app(\Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider::class);
+    $provider = app(TwoFactorAuthenticationProvider::class);
 
-    expect($provider)->toBeInstanceOf(\App\Security\UserScopedTwoFactorProvider::class);
+    expect($provider)->toBeInstanceOf(UserScopedTwoFactorProvider::class);
     expect($provider->verify($secret, $code))->toBeTrue();
     // Fortify's global key is untouched, so another member entering the same digits is not rejected by this use.
     expect(Cache::has('fortify.2fa_codes.'.md5($code)))->toBeFalse();
-    expect(Cache::has(\App\Security\UserScopedTwoFactorProvider::replayKey($secret, $code)))->toBeTrue();
+    expect(Cache::has(UserScopedTwoFactorProvider::replayKey($secret, $code)))->toBeTrue();
     // The same member cannot replay it.
     expect($provider->verify($secret, $code))->toBeFalse();
     // A different secret has its own marker.
-    expect(\App\Security\UserScopedTwoFactorProvider::replayKey('OTHERSECRET', $code))->not->toBe(\App\Security\UserScopedTwoFactorProvider::replayKey($secret, $code));
+    expect(UserScopedTwoFactorProvider::replayKey('OTHERSECRET', $code))->not->toBe(UserScopedTwoFactorProvider::replayKey($secret, $code));
 });

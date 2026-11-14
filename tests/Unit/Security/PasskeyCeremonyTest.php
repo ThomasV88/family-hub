@@ -5,6 +5,7 @@ use App\Security\Passkeys\PasskeyCeremony;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Laravel\Passkeys\Actions\GenerateRegistrationOptions;
 use Laravel\Passkeys\Actions\GenerateVerificationOptions;
 use Laravel\Passkeys\Exceptions\InvalidPasskeyException;
 use Laravel\Passkeys\Http\Requests\PasskeyRegistrationRequest;
@@ -92,7 +93,7 @@ it('returns null and logs only the exception class when registration throws', fu
     $request = ceremonyRequest(
         PasskeyRegistrationRequest::class,
         ['name' => 'Phone', 'credential' => FakePasskeys::attestation()],
-        ['passkey.registration_options' => WebAuthn::toJson(app(\Laravel\Passkeys\Actions\GenerateRegistrationOptions::class)($user))],
+        ['passkey.registration_options' => WebAuthn::toJson(app(GenerateRegistrationOptions::class)($user))],
     );
 
     expect(app(PasskeyCeremony::class)->register($user, $request, 'Phone'))->toBeNull();

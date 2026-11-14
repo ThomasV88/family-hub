@@ -2,6 +2,8 @@
 
 namespace App\Security;
 
+use Illuminate\Contracts\Session\Session;
+
 /**
  * Server-session timestamps for the sensitive idle gate and the security confirm window.
  * The only place that reads or writes `sensitive.active_at` and `auth.password_confirmed_at`.
@@ -66,7 +68,7 @@ class SensitiveSession
         return $age >= 0 && $age <= $seconds;
     }
 
-    private function session(): \Illuminate\Contracts\Session\Session
+    private function session(): Session
     {
         return app('request')->session();
     }

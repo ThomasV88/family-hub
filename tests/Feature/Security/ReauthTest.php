@@ -1,6 +1,7 @@
 <?php
 
 use App\Access\Preset;
+use App\Audit\AuditLogger;
 use App\Models\AuditEntry;
 use App\Models\User;
 use App\Security\ReauthMethods;
@@ -8,6 +9,9 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
+use ParagonIE\ConstantTime\Base64UrlSafe;
+use Tests\Support\FailingAuditLogger;
+use Tests\Support\FakePasskeys;
 use Tests\Support\Totp;
 
 uses(RefreshDatabase::class);
@@ -202,7 +206,7 @@ it('still accepts the password for a member with no second factor', function () 
 // 06-REVIEW WR-04: audit first, so a failing audit write never leaves the member confirmed.
 it('opens no window when the audit write fails on confirm', function () {
     $user = reauthUser();
-    $this->app->instance(\App\Audit\AuditLogger::class, new \Tests\Support\FailingAuditLogger);
+    $this->app->instance(AuditLogger::class, new FailingAuditLogger);
     $this->withoutExceptionHandling();
 
     expect(fn () => $this->actingAs($user)->postJson('/confirm-access', ['password' => 'password']))
@@ -226,16 +230,16 @@ it('rotates the session id on confirm and keeps the intended URL', function () {
 
 it('rotates the session id on a passkey confirm too', function () {
     $user = reauthUser();
-    $id = \ParagonIE\ConstantTime\Base64UrlSafe::encodeUnpadded('key-'.$user->id);
+    $id = Base64UrlSafe::encodeUnpadded('key-'.$user->id);
     DB::table('passkeys')->insert([
         'user_id' => $user->id, 'name' => 'Laptop', 'credential_id' => $id,
         'credential' => json_encode(['x' => 1]), 'created_at' => now(), 'updated_at' => now(),
     ]);
-    \Tests\Support\FakePasskeys::verifies();
+    FakePasskeys::verifies();
     $this->actingAs($user)->getJson('/confirm-access/passkey/options')->assertOk();
     $before = session()->getId();
 
-    $this->postJson('/confirm-access/passkey', ['credential' => \Tests\Support\FakePasskeys::assertion($id), 'mode' => 'dialog'])->assertOk();
+    $this->postJson('/confirm-access/passkey', ['credential' => FakePasskeys::assertion($id), 'mode' => 'dialog'])->assertOk();
 
     expect(session()->getId())->not->toBe($before)->and(session('auth.password_confirmed_at'))->toBeInt();
 });

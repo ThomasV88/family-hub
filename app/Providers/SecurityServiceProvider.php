@@ -5,12 +5,18 @@ namespace App\Providers;
 use App\Audit\AuditEvent;
 use App\Audit\AuditLogger;
 use App\Models\User;
+use App\Security\AppSettings;
+use App\Security\SecondFactorPolicy;
 use App\Security\SensitiveSession;
+use App\Security\UserScopedTwoFactorProvider;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider;
+use PragmaRX\Google2FA\Google2FA;
 
 class SecurityServiceProvider extends ServiceProvider
 {
@@ -18,14 +24,14 @@ class SecurityServiceProvider extends ServiceProvider
     {
         $this->app->scoped(SensitiveSession::class);
         // Created by plan 06-01; referenced by class constant only.
-        $this->app->scoped(\App\Security\AppSettings::class);
-        $this->app->scoped(\App\Security\SecondFactorPolicy::class);
+        $this->app->scoped(AppSettings::class);
+        $this->app->scoped(SecondFactorPolicy::class);
         // Replay marker per member secret instead of Fortify's global per-code key (06-REVIEW WR-06).
         $this->app->singleton(
-            \Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider::class,
-            fn ($app) => new \App\Security\UserScopedTwoFactorProvider(
-                $app->make(\PragmaRX\Google2FA\Google2FA::class),
-                $app->make(\Illuminate\Contracts\Cache\Repository::class),
+            TwoFactorAuthenticationProvider::class,
+            fn ($app) => new UserScopedTwoFactorProvider(
+                $app->make(Google2FA::class),
+                $app->make(Repository::class),
             ),
         );
     }

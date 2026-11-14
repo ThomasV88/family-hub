@@ -2,10 +2,10 @@
 
 namespace App\Listeners;
 
-use App\Support\RequestInput;
 use App\Audit\AuditEvent;
 use App\Audit\AuditLogger;
 use App\Models\User;
+use App\Support\RequestInput;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;

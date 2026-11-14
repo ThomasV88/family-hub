@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Push\PushEndpointRule;
 use App\Push\PushSender;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\DB;
 use Minishlink\WebPush\VAPID;
 use Tests\Support\FakePushSender;
@@ -158,7 +159,7 @@ it('does not let a logout delete another user\'s subscription', function () {
 });
 
 it('test endpoint only tries the newest few devices', function () {
-    $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
+    $this->withoutMiddleware(ThrottleRequests::class);
     $keys = VAPID::createVapidKeys();
     config(['push.subject' => 'mailto:test@example.test', 'push.public_key' => $keys['publicKey'], 'push.private_key' => $keys['privateKey']]);
     $fake = new FakePushSender;

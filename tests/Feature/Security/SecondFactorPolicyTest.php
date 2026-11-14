@@ -1,5 +1,6 @@
 <?php
 
+use App\Access\AccessGate;
 use App\Access\AccessLevel;
 use App\Access\Module;
 use App\Models\User;
@@ -13,7 +14,7 @@ uses(RefreshDatabase::class);
 
 function secondFactorPolicy(): SecondFactorPolicy
 {
-    return new SecondFactorPolicy(new AppSettings, new App\Access\AccessGate);
+    return new SecondFactorPolicy(new AppSettings, new AccessGate);
 }
 
 it('returns defaults, round-trips values and caches per instance', function () {

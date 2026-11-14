@@ -113,6 +113,7 @@ class FakePasskeys
     public static function attestation(): array
     {
         $credentialId = Base64UrlSafe::encodeUnpadded('new-credential-id');
+
         return [
             'id' => $credentialId,
             'rawId' => $credentialId,

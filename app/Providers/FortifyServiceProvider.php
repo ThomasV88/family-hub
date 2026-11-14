@@ -19,14 +19,14 @@ use Inertia\Inertia;
 use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Contracts\FailedTwoFactorLoginResponse;
 use Laravel\Fortify\Contracts\LoginResponse;
+use Laravel\Fortify\Contracts\LogoutResponse;
+use Laravel\Fortify\Contracts\PasswordResetResponse;
 use Laravel\Fortify\Contracts\RecoveryCodesGeneratedResponse;
+use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Contracts\TwoFactorConfirmedResponse;
 use Laravel\Fortify\Contracts\TwoFactorDisabledResponse;
 use Laravel\Fortify\Contracts\TwoFactorEnabledResponse;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse;
-use Laravel\Fortify\Contracts\LogoutResponse;
-use Laravel\Fortify\Contracts\PasswordResetResponse;
-use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Fortify;
 use Symfony\Component\HttpFoundation\Response;
 

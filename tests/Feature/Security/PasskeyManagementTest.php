@@ -5,7 +5,9 @@ use App\Models\AuditEntry;
 use App\Models\User;
 use App\Providers\FortifyServiceProvider;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Laravel\Fortify\Features;
 use ParagonIE\ConstantTime\Base64UrlSafe;
 use Tests\Support\FakePasskeys;
 
@@ -45,7 +47,7 @@ function pkStale(): array
 /** Runs the options step, then posts a registration for the same session. */
 function pkRegister(object $test, User $user, array $session, string $name = 'iPhone')
 {
-    Illuminate\Support\Facades\Cache::flush(); // the throttle is not under test here
+    Cache::flush(); // the throttle is not under test here
     FakePasskeys::registers();
     $test->actingAs($user)->withSession($session)->getJson('/settings/security/passkeys/options');
 
@@ -175,7 +177,7 @@ it('keeps the user handle secret falling back to the app key and derives rp id a
 
     config(['app.url' => 'https://stage.example.test', 'fortify.passkeys' => [], 'app.key' => 'base64:abc']);
     app()->getProvider(FortifyServiceProvider::class); // sanity: the app provider is loaded
-    app()->getProvider(\Laravel\Fortify\FortifyServiceProvider::class)->register();
+    app()->getProvider(Laravel\Fortify\FortifyServiceProvider::class)->register();
 
     expect(config('passkeys.relying_party_id'))->toBe('stage.example.test')
         ->and(config('passkeys.allowed_origins'))->toBe(['https://stage.example.test'])
@@ -199,7 +201,7 @@ it('keeps the user handle secret falling back to the app key and derives rp id a
 });
 
 it('never enables Fortify\'s passkey feature or a passwordless login route', function () {
-    expect(\Laravel\Fortify\Features::enabled(\Laravel\Fortify\Features::passkeys()))->toBeFalse();
+    expect(Features::enabled(Features::passkeys()))->toBeFalse();
     foreach (['passkeys/login', 'passkey/login', 'passkeys/login/options'] as $uri) {
         $this->postJson('/'.$uri)->assertNotFound();
     }

@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Laravel\Fortify\Fortify;
-use ParagonIE\ConstantTime\Base64UrlSafe;
 use Tests\Support\FakeGoogle;
 use Tests\Support\FakePasskeys;
 use Tests\Support\Totp;

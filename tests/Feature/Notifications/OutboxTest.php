@@ -9,10 +9,12 @@ use App\Models\Task;
 use App\Models\User;
 use App\Notifications\NotificationPreferences;
 use App\Notifications\Outbox\OutboxHandlers;
+use App\Notifications\Outbox\OutboxStatus;
 use App\Notifications\Outbox\OutboxWriter;
 use App\Notifications\Outbox\TaskReminderHandler;
 use App\Notifications\TaskReminderNotification;
 use App\Tasks\ReminderRecipients;
+use App\Tasks\ReminderTimeCalculator;
 use App\Tasks\TaskStatus;
 use Carbon\Carbon;
 use Illuminate\Console\Scheduling\Schedule;
@@ -32,7 +34,7 @@ function outboxRow(?User $user = null, ?Task $task = null, string $channel = 'ma
 {
     $user ??= User::factory()->withPreset(Preset::Parent)->create();
     $task ??= Task::factory()->dueOn('2027-05-10')->create(['assignee_id' => $user->id, 'creator_id' => $user->id]);
-    $at = $task->due_date === null ? 1 : app(\App\Tasks\ReminderTimeCalculator::class)
+    $at = $task->due_date === null ? 1 : app(ReminderTimeCalculator::class)
         ->remindAt($task->due_date->format('Y-m-d'), $task->due_time === null ? null : substr((string) $task->due_time, 0, 5), $task->timezone, $task->remind_before_minutes ?? 0)->timestamp;
     app(OutboxWriter::class)->enqueue('task_reminder', $user, $channel, 'task', $task->id, "k:{$task->id}:{$user->id}:{$channel}", ['task_id' => $task->id, 'remind_at' => $at]);
 
@@ -233,7 +235,7 @@ it('does not resend when marking a delivered mail as sent fails once', function 
     $row = queued(outboxRow());
     $GLOBALS['fh_fail_mark'] = 1;
     OutboxItem::saving(function (OutboxItem $m) {
-        if (($GLOBALS['fh_fail_mark'] ?? 0) > 0 && $m->status === \App\Notifications\Outbox\OutboxStatus::Sent) {
+        if (($GLOBALS['fh_fail_mark'] ?? 0) > 0 && $m->status === OutboxStatus::Sent) {
             $GLOBALS['fh_fail_mark']--;
             throw new RuntimeException('db blip');
         }

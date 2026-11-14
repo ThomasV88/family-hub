@@ -1,5 +1,6 @@
 <?php
 
+use App\Audit\AuditLogger;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
@@ -90,7 +91,7 @@ it('rolls the revoke back when the audit row cannot be written', function () {
     $member = User::factory()->create(['remember_token' => 'old-token']);
     $id = str_repeat('a', 40);
     revRow($member, $id);
-    $this->mock(\App\Audit\AuditLogger::class)->shouldReceive('record')->andThrow(new RuntimeException('audit down'));
+    $this->mock(AuditLogger::class)->shouldReceive('record')->andThrow(new RuntimeException('audit down'));
     $this->withoutExceptionHandling();
 
     expect(fn () => $this->actingAs($admin)->delete("/settings/members/{$member->id}/sessions/{$id}"))->toThrow(RuntimeException::class);

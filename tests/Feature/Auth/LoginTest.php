@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AuditEntry;
 use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -106,7 +107,7 @@ it('applies a high cross-IP per-email ceiling that fires an audited Lockout', fu
     $this->from('/login')->withServerVariables(['REMOTE_ADDR' => '10.3.0.1'])
         ->post('/login', ['email' => 'anna@example.test', 'password' => 'password'])
         ->assertSessionHasErrors('throttle');
-    expect(\App\Models\AuditEntry::where('event', 'lockout')->count())->toBe(1);
+    expect(AuditEntry::where('event', 'lockout')->count())->toBe(1);
 });
 
 it('redirects a guest from home to /login and a signed-in user away from /login', function () {

@@ -1,9 +1,10 @@
 <?php
 
-use App\Models\User;
 use App\Access\AccessLevel;
 use App\Access\Module;
+use App\Models\User;
 use App\Security\SecondFactorPolicy;
+use App\Support\SettingsSections;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -93,7 +94,7 @@ it('guides a finance member without a factor under the requirement and continues
 
     $this->actingAs($user)->withSession(['status' => 'second_factor_required', 'url.intended' => '/finance'])
         ->get('/settings/security')->assertInertia(fn (Assert $p) => $p
-            ->where('guidance', true)->where('required', true)->where('continueTo', '/finance'));
+        ->where('guidance', true)->where('required', true)->where('continueTo', '/finance'));
 
     $this->actingAs($user)->withSession(['url.intended' => '/finance'])->post('/settings/security/continue')
         ->assertStatus(303)->assertRedirect('/finance')->assertSessionHas('toast', ['key' => 'security.guidance.done']);
@@ -121,7 +122,7 @@ it('shows no guidance or intended address to a member outside the requirement', 
 });
 
 it('lists the security section for members and admins before appearance', function () {
-    expect(App\Support\SettingsSections::for(User::factory()->create()))->toHaveCount(3);
-    $admin = collect(App\Support\SettingsSections::for(User::factory()->admin()->create()))->pluck('key')->all();
+    expect(SettingsSections::for(User::factory()->create()))->toHaveCount(3);
+    $admin = collect(SettingsSections::for(User::factory()->admin()->create()))->pluck('key')->all();
     expect(array_slice($admin, -3))->toBe(['notifications', 'security', 'appearance']);
 });

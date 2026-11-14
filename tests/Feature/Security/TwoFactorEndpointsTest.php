@@ -1,5 +1,6 @@
 <?php
 
+use App\Audit\AuditLogger;
 use App\Models\AuditEntry;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -7,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Fortify;
+use Tests\Support\FailingAuditLogger;
 use Tests\Support\Totp;
 
 uses(RefreshDatabase::class);
@@ -184,7 +186,7 @@ it('turns a confirmed app off only on a fresh window, with one audit row', funct
 it('rolls the factor change back when the audit write fails on disable', function () {
     $user = User::factory()->create();
     Totp::enable($user);
-    $this->app->instance(\App\Audit\AuditLogger::class, new \Tests\Support\FailingAuditLogger);
+    $this->app->instance(AuditLogger::class, new FailingAuditLogger);
     $this->withoutExceptionHandling();
 
     expect(fn () => $this->actingAs($user)->withSession(freshWindow())->deleteJson('/user/two-factor-authentication'))

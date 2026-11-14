@@ -2,6 +2,7 @@
 
 use App\Models\AuditEntry;
 use App\Models\User;
+use App\Security\ReauthMethods;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -189,7 +190,7 @@ it('keeps the passkey sign-in and the confirm-access passkey working for an exis
     FakePasskeys::verifies();
 
     expect($anna->refresh()->hasSecondFactor())->toBeTrue();
-    expect(\App\Security\ReauthMethods::for($anna)['passkey'])->toBeTrue();
+    expect(ReauthMethods::for($anna)['passkey'])->toBeTrue();
 
     $this->withSession(pcPending($anna))->getJson('/two-factor-challenge/passkey/options')->assertOk();
     $this->postJson('/two-factor-challenge/passkey', ['credential' => FakePasskeys::assertion($id)])->assertOk();

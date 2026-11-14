@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AuditEntry;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -21,10 +22,10 @@ it('refuses DELETE and TRUNCATE outside the audit:prune opt-in, even for the tab
 });
 
 it('refuses bulk model deletes and updates', function () {
-    \App\Models\AuditEntry::create(['event' => 'login_success']);
+    AuditEntry::create(['event' => 'login_success']);
 
-    expect(fn () => DB::transaction(fn () => \App\Models\AuditEntry::query()->delete()))->toThrow(QueryException::class, 'append-only');
-    expect(fn () => DB::transaction(fn () => \App\Models\AuditEntry::query()->update(['event' => 'x'])))->toThrow(QueryException::class, 'append-only');
+    expect(fn () => DB::transaction(fn () => AuditEntry::query()->delete()))->toThrow(QueryException::class, 'append-only');
+    expect(fn () => DB::transaction(fn () => AuditEntry::query()->update(['event' => 'x'])))->toThrow(QueryException::class, 'append-only');
 });
 
 function auditMigration(): object

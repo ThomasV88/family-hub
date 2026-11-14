@@ -3,8 +3,9 @@
 use App\Http\Middleware\EnsureRouteDeclaresAccess;
 use App\Models\User;
 use Illuminate\Support\Facades\File;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 // Phase 6 static guarantees (T-06-65, T-06-67): hidden factor columns, session-key ownership, no test seam or
 // passkey feature in production code, recency rules that cannot silently regress.

@@ -5,8 +5,8 @@ use App\Models\Invitation;
 use App\Models\User;
 use App\Notifications\GoogleLinkedNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Tests\Support\FakeGoogle;
 
 function googleInvite(string $email = 'eva@example.test', string $token = 'gtoken1234'): Invitation

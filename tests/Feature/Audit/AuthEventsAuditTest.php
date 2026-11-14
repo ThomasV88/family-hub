@@ -3,9 +3,9 @@
 use App\Models\AuditEntry;
 use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\RateLimiter;
 
 uses(RefreshDatabase::class);
