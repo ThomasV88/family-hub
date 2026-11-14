@@ -9,41 +9,49 @@ use Tests\Support\MedicalPrivacy;
 $payload = fn (): array => [
     'schema_version' => 1,
     'document_date' => null,
-    'specialty' => null,
-    'entries' => [
-        ['type' => 'visit', 'fields' => ['visited_on' => '2026-01-05', 'doctor' => MedicalPrivacy::CANARY.' ai doctor', 'diagnosis' => MedicalPrivacy::CANARY.' ai diagnosis']],
-        ['type' => 'medication', 'fields' => ['name' => MedicalPrivacy::CANARY.' ai medication', 'dose' => '5 mg']],
-    ],
+    'specialty_key' => null,
+    'visits' => [['visited_on' => '2026-01-05', 'doctor' => MedicalPrivacy::CANARY.' ai doctor', 'specialty_key' => 'general_practice', 'specialty_other' => null, 'diagnosis' => MedicalPrivacy::CANARY.' ai diagnosis', 'notes' => null]],
+    'medications' => [['name' => MedicalPrivacy::CANARY.' ai medication', 'dose' => '5 mg', 'schedule' => null, 'started_on' => null, 'ended_on' => null, 'notes' => null]],
+    'allergies' => [],
+    'vaccinations' => [],
 ];
 
-$seed = function (string $subject) use ($payload): array {
+$seed = function (string $subject, string $document) use ($payload): array {
+    // The documents area's file also gets a ready proposal, so the review route (which takes {document}) renders a page.
+    MedicalAiExtraction::factory()->forDocument(MedicalDocument::query()->findOrFail($document))->ready($payload(), 2)->create();
+
     $ready = MedicalDocument::factory()->pdf()->create(['subject_id' => $subject, 'title' => 'Ai ready']);
     $queued = MedicalDocument::factory()->pdf()->create(['subject_id' => $subject, 'title' => 'Ai queued']);
     $extraction = MedicalAiExtraction::factory()->forDocument($ready)->ready($payload(), 2)->create();
     MedicalAiExtraction::factory()->forDocument($queued)->queued()->create();
 
-    return [(string) $extraction->getKey(), (string) $queued->getKey()];
+    return [(string) $extraction->getKey(), (string) $queued->getKey(), (string) $ready->getKey()];
 };
 
 return [
     'visible' => function (array &$ctx) use ($seed): void {
-        [$ctx['extraction'], $ctx['ai_queued_document']] = $seed((string) $ctx['person']->getKey());
+        [$ctx['extraction'], $ctx['ai_queued_document'], $ctx['ai_ready_document']] = $seed((string) $ctx['person']->getKey(), (string) $ctx['document']);
     },
 
     'hidden' => function (array &$ctx) use ($seed): void {
-        [$ctx['hidden']['extraction'], $ctx['hidden']['ai_queued_document']] = $seed($ctx['hidden']['person']);
+        [$ctx['hidden']['extraction'], $ctx['hidden']['ai_queued_document'], $ctx['hidden']['ai_ready_document']] = $seed($ctx['hidden']['person'], (string) $ctx['hidden']['document']);
     },
 
     'params' => [
         'extraction' => fn (array $ctx): string => $ctx['extraction'],
+        'entry' => fn (array $ctx): string => 'visit-0',
     ],
 
     'hiddenParams' => [
         'extraction' => fn (array $ctx): string => $ctx['hidden']['extraction'],
+        'entry' => fn (array $ctx): string => 'visit-0',
     ],
 
     'payloads' => [
         'health.documents.ai.run' => fn (array $ctx): array => ['acknowledged' => true],
         'health.ai.cancel' => fn (array $ctx): array => [],
+        'health.ai.entries.accept' => fn (array $ctx): array => [],
+        'health.ai.entries.reject' => fn (array $ctx): array => [],
+        'health.ai.entries.undo' => fn (array $ctx): array => [],
     ],
 ];
