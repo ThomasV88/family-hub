@@ -45,13 +45,13 @@ Per-person AI-consent flag (off by default) that only members who can change the
 
 - AiConsentTest, SensitiveGateMatrixTest, Unit/Health scans, MedicalPrivacyArchTest: pass.
 - Vitest full: 110 files, 2576 tests pass. `npm run build`: OK. Pint on own PHP files: clean.
-- Full Pest: see deviations (MedicalPrivacyTest is not mine and does not complete).
+- Full Pest (final re-run, tests/Feature and tests/Unit): 1804 passed. An earlier run crashed in MedicalPrivacyTest (see deviations).
 
 ## Deviations from Plan
 
 **1. [Rule 3] SystemQuery is not `final`.** The plan asked for a mocked SystemQuery to prove the DB-error path, and Mockery cannot mock a final class. Left non-final.
 
-**2. Full Pest could not be completed cleanly (out of scope, sibling files).** `Tests\Feature\Health\MedicalPrivacyTest` and `MedicalWriteParityTest` fail before and independent of this plan: `tests/Support/MedicalPrivacy/allergies.php` (07-08) reads `$ctx['hidden']['person']` in its `hidden` seed, but areas run in sorted file order so `allergies` seeds before `subjects` creates that id ("Undefined array key person"). The privacy test also exhausts the 512M phpunit memory limit. Neither involves consent.php (it declares no seeds). Reported to the caller; 07-08 owner should fix the ordering (for example by seeding people in an earlier-sorted area or guarding the id).
+**2. Transient full-Pest failure in sibling files (out of scope, resolved on re-run).** `Tests\Feature\Health\MedicalPrivacyTest` and `MedicalWriteParityTest` fail before and independent of this plan: `tests/Support/MedicalPrivacy/allergies.php` (07-08) reads `$ctx['hidden']['person']` in its `hidden` seed, but areas run in sorted file order so `allergies` seeds before `subjects` creates that id ("Undefined array key person"). The privacy test also exhausts the 512M phpunit memory limit. Neither involves consent.php (it declares no seeds). Reported to the caller; 07-08 owner should fix the ordering (for example by seeding people in an earlier-sorted area or guarding the id).
 
 ## Known Stubs
 
