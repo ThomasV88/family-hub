@@ -16,4 +16,8 @@ return [
     'gift_body' => ':occasion (:name) je :date. Pozrite si zoznam želaní.',
     'gift_body_family' => ':occasion je :date. Pozrite si zoznamy želaní.',
     'gift_action' => 'Otvoriť zoznam želaní',
+    'vaccination_title' => 'Termín očkovania: :person',
+    'vaccination_body' => 'Očkovanie, :person: termín je :date. Pozrite si záznam.',
+    'vaccination_due_in' => 'o :count deň|o :count dni|o :count dní',
+    'vaccination_action' => 'Otvoriť záznam',
 ];
