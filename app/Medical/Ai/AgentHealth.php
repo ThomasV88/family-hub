@@ -2,10 +2,10 @@
 
 namespace App\Medical\Ai;
 
+use App\Medical\Queries\AiSpawnCounter;
 use App\Models\AiAgentStatus;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Login health of the AI agents: written by the worker (check job, real run outcomes), read by the app.
@@ -74,15 +74,7 @@ final class AgentHealth
      */
     public function recordSpawn(string $agent): void
     {
-        $today = LocalDay::date();
-        $now = now();
-        DB::statement(
-            'insert into ai_agent_status (agent, spawn_day, spawn_count, updated_at) values (?, ?, 1, ?) '
-            .'on conflict (agent) do update set '
-            .'spawn_count = case when ai_agent_status.spawn_day = excluded.spawn_day then ai_agent_status.spawn_count + 1 else 1 end, '
-            .'spawn_day = excluded.spawn_day, updated_at = excluded.updated_at',
-            [$agent, $today, $now],
-        );
+        (new AiSpawnCounter)->record($agent);
     }
 
     /** CLI spawns of the agent on the current local day. */
