@@ -6,33 +6,37 @@ import TimelineList from './TimelineList.vue';
 
 // Disclosure folder of one specialty. Expansion is client state per page load.
 const props = defineProps({
-    folder: { type: Object, required: true },
+    // folder is null for the "Documents without a visit" variant, which lists `documents` instead of visits.
+    folder: { type: Object, default: null },
     visits: { type: Array, default: () => [] },
+    documents: { type: Array, default: () => [] },
     defaultOpen: { type: Boolean, default: false },
 });
-const emit = defineEmits(['open']);
+const emit = defineEmits(['open', 'open-document']);
 const { t } = useI18n();
 const open = ref(props.defaultOpen);
 const uid = useId();
 const headerId = `folder-h-${uid}`;
 const bodyId = `folder-b-${uid}`;
 
-const title = () => (props.folder.key === 'other' && props.folder.otherLabel ? props.folder.otherLabel : t(`health.specialty.${props.folder.key}`));
-const entries = () => props.folder.visitIds.map((id) => ({ type: 'visit', id, date: props.visits.find((v) => v.id === id)?.visitedOn }));
+const unattached = () => props.folder === null;
+const title = () => (unattached() ? t('health.folder.no_visit_docs') : props.folder.key === 'other' && props.folder.otherLabel ? props.folder.otherLabel : t(`health.specialty.${props.folder.key}`));
+const entries = () => (unattached() ? props.documents.map((d) => ({ type: 'document', id: d.id, date: d.uploadedOn })) : props.folder.visitIds.map((id) => ({ type: 'visit', id, date: props.visits.find((v) => v.id === id)?.visitedOn })));
 </script>
 
 <template>
-    <section class="folder" data-testid="specialty-folder">
+    <section class="folder" data-testid="specialty-folder" :data-folder="unattached() ? 'documents' : folder.key">
         <h3 class="folder__heading">
             <button :id="headerId" type="button" class="folder__header" :aria-expanded="open ? 'true' : 'false'" :aria-controls="bodyId" @click="open = !open">
                 <component :is="open ? FolderOpen : Folder" :size="20" :stroke-width="1.75" aria-hidden="true" />
                 <span class="folder__name">{{ title() }}</span>
-                <span class="folder__count">{{ t('health.folder.visits', { n: folder.count }, folder.count) }}</span>
+                <span v-if="unattached()" class="folder__count">{{ t('health.docs.attached', { n: documents.length }, documents.length) }}</span>
+                <span v-else class="folder__count">{{ t('health.folder.visits', { n: folder.count }, folder.count) }}</span>
                 <ChevronDown :size="20" :stroke-width="1.75" aria-hidden="true" class="folder__chevron" :class="{ 'folder__chevron--open': open }" />
             </button>
         </h3>
         <div v-show="open" :id="bodyId" role="region" :aria-labelledby="headerId" class="folder__body">
-            <TimelineList :entries="entries()" :visits="visits" @open="(id) => emit('open', id)" />
+            <TimelineList :entries="entries()" :visits="visits" :documents="documents" @open="(id) => emit('open', id)" @open-document="(id) => emit('open-document', id)" />
         </div>
     </section>
 </template>

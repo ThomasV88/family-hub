@@ -85,6 +85,7 @@ const activeVaccination = computed(() => (props.panel?.kind === 'vaccination' ? 
 const vaccinationPanelOpen = computed(() => props.panel?.kind === 'new-vaccination' || (props.panel?.kind === 'vaccination' && activeVaccination.value !== null));
 const activeDocument = computed(() => (props.panel?.kind === 'document' ? props.documents.find((d) => d.id === props.panel.id) ?? null : null));
 const documentPanelOpen = computed(() => props.panel?.kind === 'new-document' || (props.panel?.kind === 'document' && activeDocument.value !== null));
+const unattachedDocuments = computed(() => props.documents.filter((d) => props.unattachedDocumentIds.includes(d.id)));
 const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.includes(v.id));
 </script>
 
@@ -108,7 +109,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                         <VaccinationList :vaccinations="vaccinations" :can-edit="canAddVisit" @add="openNewVaccination" @open="openVaccination" />
                     </div>
                     <section class="health-person__main" data-testid="person-main">
-                        <UiEmptyState v-if="visits.length === 0" :title="t('health.visits.empty_title')" :body="t('health.visits.empty_body')" :icon="HeartPulse">
+                        <UiEmptyState v-if="visits.length === 0 && documents.length === 0" :title="t('health.visits.empty_title')" :body="t('health.visits.empty_body')" :icon="HeartPulse">
                             <template v-if="canAddVisit" #action>
                                 <UiButton variant="primary" :icon="Plus" data-testid="empty-add-visit" @click="openNewVisit">{{ t('health.visit.add') }}</UiButton>
                             </template>
@@ -124,8 +125,9 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                                     :default-open="index === 0"
                                     @open="openVisit"
                                 />
+                                <SpecialtyFolder v-if="unattachedDocuments.length > 0" :documents="unattachedDocuments" :default-open="folders.length === 0" @open-document="openDocument" />
                             </div>
-                            <TimelineList v-else :entries="timeline" :visits="visits" :vaccinations="vaccinations" :filters="timelineFilters" :filter="filter" :busy="busy" @open="openVisit" @open-vaccination="openVaccination" @filter="setFilter" />
+                            <TimelineList v-else :entries="timeline" :visits="visits" :vaccinations="vaccinations" :documents="documents" :filters="timelineFilters" :filter="filter" :busy="busy" @open="openVisit" @open-vaccination="openVaccination" @open-document="openDocument" @filter="setFilter" />
                         </template>
                     </section>
                 </div>
@@ -137,7 +139,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
             </UiEmptyState>
         </div>
         <PersonPanel :open="panel?.kind === 'new-person'" @close="closePanel" />
-        <VisitPanel v-if="person" :open="visitPanelOpen" :person-id="person.id" :visit="activeVisit" :can-edit="canAddVisit" :specialties="specialties" @close="closePanel" />
+        <VisitPanel v-if="person" :open="visitPanelOpen" :person-id="person.id" :visit="activeVisit" :can-edit="canAddVisit" :specialties="specialties" :documents="documents" @close="closePanel" @open-document="openDocument" @upload-document="openNewDocument" />
         <AllergyPanel v-if="person" :open="allergyPanelOpen" :person-id="person.id" :allergy="activeAllergy" :can-edit="canAddVisit" @close="closePanel" />
         <MedicationPanel v-if="person" :open="medicationPanelOpen" :person-id="person.id" :medication="activeMedication" :can-edit="canAddVisit" @close="closePanel" />
         <VaccinationPanel v-if="person" :open="vaccinationPanelOpen" :person-id="person.id" :vaccination="activeVaccination" :can-edit="canAddVisit" @close="closePanel" />

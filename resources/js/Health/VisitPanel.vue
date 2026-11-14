@@ -9,7 +9,9 @@ import UiDetailPanel from '../Components/ui/UiDetailPanel.vue';
 import UiField from '../Components/ui/UiField.vue';
 import UiInput from '../Components/ui/UiInput.vue';
 import UiSelect from '../Components/ui/UiSelect.vue';
+import UiListRow from '../Components/ui/UiListRow.vue';
 import UiTextarea from '../Components/ui/UiTextarea.vue';
+import AttachDocumentDialog from './AttachDocumentDialog.vue';
 
 // Create, edit and read-only presentation of one visit. The draft lives in component memory only: no Inertia
 // form-state persistence and no browser storage. Free text is interpolated, never rendered as HTML.
@@ -19,8 +21,9 @@ const props = defineProps({
     visit: { type: Object, default: null },
     canEdit: { type: Boolean, default: false },
     specialties: { type: Array, default: () => [] },
+    documents: { type: Array, default: () => [] },
 });
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'open-document', 'upload-document']);
 const { t, te, locale } = useI18n();
 
 const blank = () => ({ visited_on: '', doctor: '', specialty_key: '', specialty_other: '', diagnosis: '', notes: '' });
@@ -122,6 +125,29 @@ function save() {
 function remove() {
     router.delete(`${base.value}/${props.visit.id}`, callbacks);
 }
+
+// Documents of this visit. Attach and detach are PATCHes that always carry visit_id (null detaches); detaching never
+// deletes the document.
+const attachOpen = ref(false);
+const attachBusy = ref(false);
+const attached = computed(() => (props.visit ? props.documents.filter((d) => d.visitId === props.visit.id) : []));
+const unattached = computed(() => props.documents.filter((d) => d.visitId === null));
+const docCallbacks = {
+    preserveScroll: true,
+    onStart: () => { attachBusy.value = true; },
+    onSuccess: () => { attachOpen.value = false; },
+    onError: () => { serverError.value = true; },
+    onHttpException: () => { serverError.value = true; },
+    onNetworkError: () => { serverError.value = true; },
+    onFinish: () => { attachBusy.value = false; },
+};
+function setDocumentVisit(doc, visitId) {
+    router.patch(`/health/people/${props.personId}/documents/${doc.id}`, { title: doc.title, visit_id: visitId }, docCallbacks);
+}
+const attachDocument = (id) => {
+    const doc = props.documents.find((d) => d.id === id);
+    if (doc) setDocumentVisit(doc, props.visit.id);
+};
 const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preventDefault(); };
 </script>
 
@@ -156,6 +182,18 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
                 <UiTextarea v-model="form.notes" :rows="4" />
             </UiField>
         </form>
+        <section v-if="editing && (attached.length > 0 || !readOnly)" class="visit-docs" data-testid="visit-documents" aria-labelledby="visit-docs-title">
+            <h3 id="visit-docs-title" class="visit-docs__title">{{ t('health.visit.documents') }}</h3>
+            <ul v-if="attached.length > 0" class="visit-docs__list">
+                <UiListRow v-for="doc in attached" :key="doc.id" as="button" @select="emit('open-document', doc.id)">
+                    {{ doc.title }}
+                    <template v-if="!readOnly" #trailing>
+                        <UiButton variant="ghost" size="sm" data-testid="doc-detach" @click.stop="setDocumentVisit(doc, null)">{{ t('health.visit.remove_from_visit') }}</UiButton>
+                    </template>
+                </UiListRow>
+            </ul>
+            <UiButton v-if="!readOnly" variant="secondary" data-testid="visit-attach" @click="attachOpen = true">{{ t('health.visit.attach') }}</UiButton>
+        </section>
         <template #footer>
             <UiButton v-if="editing && !readOnly" variant="ghost" class="visit-delete" data-testid="visit-delete" @click="deleteOpen = true">{{ t('health.visit.delete') }}</UiButton>
             <UiButton variant="secondary" @click="requestClose">{{ t('ui.close') }}</UiButton>
@@ -163,6 +201,13 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
         </template>
     </UiDetailPanel>
 
+    <AttachDocumentDialog
+        v-model:open="attachOpen"
+        :documents="unattached"
+        :busy="attachBusy"
+        @attach="attachDocument"
+        @upload="() => { attachOpen = false; emit('upload-document', visit.id); }"
+    />
     <UiConfirmDialog
         v-model:open="deleteOpen"
         :title="t('health.visit.delete_title')"
@@ -187,5 +232,8 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
 .visit-read dt { font-size: var(--text-sm); color: var(--color-text-muted); }
 .visit-read dd { margin: 0; overflow-wrap: anywhere; }
 .visit-read__notes { white-space: pre-wrap; }
+.visit-docs { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); margin-block-start: var(--space-4); padding-block-start: var(--space-4); border-block-start: 1px solid var(--color-border); }
+.visit-docs__title { margin: 0; font-size: var(--text-base); font-weight: 600; }
+.visit-docs__list { list-style: none; margin: 0; padding: 0; width: 100%; }
 .visit-delete { margin-inline-end: auto; color: var(--color-danger); }
 </style>
