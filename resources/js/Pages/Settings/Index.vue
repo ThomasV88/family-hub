@@ -2,7 +2,7 @@
 import { onMounted } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { Bell, ChevronRight, Palette, ScrollText, Users, Wallet } from '@lucide/vue';
+import { Bell, Bot, ChevronRight, Palette, ScrollText, Users, Wallet } from '@lucide/vue';
 import AppShell from '../../Layouts/AppShell.vue';
 import UiList from '../../Components/ui/UiList.vue';
 import UiListRow from '../../Components/ui/UiListRow.vue';
@@ -10,7 +10,7 @@ import UiListRow from '../../Components/ui/UiListRow.vue';
 const props = defineProps({ sections: { type: Array, default: () => [] } });
 
 const { t } = useI18n();
-const ICONS = { users: Users, 'scroll-text': ScrollText, palette: Palette, bell: Bell, wallet: Wallet };
+const ICONS = { users: Users, 'scroll-text': ScrollText, palette: Palette, bell: Bell, wallet: Wallet, bot: Bot };
 
 // Wide screens show the section list beside the content, so the index goes straight to the first section.
 onMounted(() => {

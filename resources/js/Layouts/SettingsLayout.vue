@@ -1,7 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { Bell, ChevronLeft, Palette, ScrollText, ShieldCheck, Users, Wallet } from '@lucide/vue';
+import { Bell, Bot, ChevronLeft, Palette, ScrollText, ShieldCheck, Users, Wallet } from '@lucide/vue';
 import AppShell from './AppShell.vue';
 
 defineProps({
@@ -13,7 +13,7 @@ defineProps({
 });
 
 const { t } = useI18n();
-const ICONS = { users: Users, 'scroll-text': ScrollText, palette: Palette, bell: Bell, wallet: Wallet, 'shield-check': ShieldCheck };
+const ICONS = { users: Users, 'scroll-text': ScrollText, palette: Palette, bell: Bell, wallet: Wallet, 'shield-check': ShieldCheck, bot: Bot };
 </script>
 
 <template>
