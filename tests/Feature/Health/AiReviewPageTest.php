@@ -59,7 +59,7 @@ it('renders the proposal with fixed section order, entry keys and pending states
 
     $response = $this->actingAs($user)->get(reviewUrl($person, $document->id))->assertOk();
 
-    $response->assertInertia(fn (Assert $page) => $page->component('Health/AiReview', false)
+    $response->assertInertia(fn (Assert $page) => $page->component('Health/AiReview')
         ->where('person.id', $person->id)
         ->where('document.id', $document->id)->where('document.kind', 'pdf')
         ->where('extraction.id', $extraction->id)->where('extraction.status', 'ready')

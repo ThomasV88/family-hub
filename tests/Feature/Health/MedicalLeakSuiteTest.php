@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\AssertionFailedError;
+use Tests\Support\EndpointMatrix;
 use Tests\Support\MedicalPrivacy;
 
 /*
@@ -231,4 +232,75 @@ it('does not name a medical subject the viewer cannot see in the hidden fixtures
 
     expect(MedicalSubject::query()->whereKey($ctx['hidden']['person'])->exists())->toBeTrue()
         ->and(MedicalDocument::query()->count())->toBeGreaterThanOrEqual(3);
+});
+
+/** Route names of the Phase 8 surfaces: every AI route, the page image route and the four verify routes. */
+const MED_LS_AI_PATTERN = '/^health\.(documents\.ai\.|ai\.|people\.ai\.|people\.ai_consent|documents\.page$|[a-z]+\.verify$)/';
+
+/**
+ * Completeness of one Phase 8 route: a matrix row with the same method and uri, every parameter resolved by an area file,
+ * and (for a write) a hidden-record provider so the parity check really exercises it. Returns the problems found.
+ *
+ * @return list<string>
+ */
+function medLsAiProblems(Illuminate\Routing\Route $route, array $ctx, array $parityNames): array
+{
+    $name = (string) $route->getName();
+    $problems = [];
+    $row = EndpointMatrix::all()[$name] ?? null;
+    if ($row === null) {
+        $problems[] = "$name has no EndpointMatrix row";
+    } elseif ($row['method'] !== MedicalPrivacy::method($route) || ltrim($row['uri'], '/') !== $route->uri()) {
+        $problems[] = "$name matrix row does not match the route ({$row['method']} {$row['uri']})";
+    }
+    try {
+        MedicalPrivacy::params($route, $ctx);
+    } catch (RuntimeException $e) {
+        $problems[] = "$name: ".$e->getMessage();
+    }
+    $isWrite = ! in_array('GET', $route->methods(), true);
+    if ($isWrite && ! in_array($name, $parityNames, true) && $name !== 'health.people.store') {
+        $problems[] = "$name is a write without a hidden-record provider";
+    }
+    if (! $isWrite && ! in_array($name, array_map(fn ($r) => $r->getName(), MedicalPrivacy::surfaces()), true)) {
+        $problems[] = "$name is a GET that is not a leak surface";
+    }
+
+    return $problems;
+}
+
+it('covers every Phase 8 route with a matrix row, area parameters and the leak net, and fails for a new uncovered AI route', function () {
+    $ctx = medLsScenario();
+    $parity = [];
+    foreach (MedicalPrivacy::writes() as $route) {
+        if (MedicalPrivacy::hiddenParams($route, $ctx) !== null) {
+            $parity[] = $route->getName();
+        }
+    }
+    $inventory = fn () => collect(Route::getRoutes())->filter(fn ($r) => $r->getName() !== null && preg_match(MED_LS_AI_PATTERN, $r->getName()) === 1);
+
+    $names = $inventory()->map->getName()->values()->all();
+    expect($names)->toContain(
+        'health.documents.ai.run', 'health.ai.cancel', 'health.people.ai.status', 'health.documents.ai.review',
+        'health.ai.entries.accept', 'health.ai.entries.reject', 'health.ai.entries.undo', 'health.documents.page',
+        'health.visits.verify', 'health.medications.verify', 'health.allergies.verify', 'health.vaccinations.verify',
+    );
+    $problems = [];
+    foreach ($inventory() as $route) {
+        $problems = [...$problems, ...medLsAiProblems($route, $ctx, $parity)];
+    }
+    expect($problems)->toBe([]);
+
+    // Sanity: a new AI route that nobody registered anywhere is reported, for a read and a write.
+    Route::middleware(['web', 'access:module,health,view'])->get('/health/people/{person}/ai/zz-new/{zzparam}', fn () => 'x')->name('health.ai.zz_new_read');
+    Route::middleware(['web', 'access:module,health,edit'])->post('/health/people/{person}/ai/zz-new', fn () => 'x')->name('health.ai.zz_new_write');
+    medLsRefreshRoutes();
+    $new = $inventory()->filter(fn ($r) => str_contains($r->getName(), 'zz_new'));
+    expect($new)->toHaveCount(2);
+    $found = [];
+    foreach ($new as $route) {
+        $found[$route->getName()] = medLsAiProblems($route, $ctx, $parity);
+    }
+    expect(implode("\n", $found['health.ai.zz_new_read']))->toContain('no EndpointMatrix row')->toContain('zzparam')
+        ->and(implode("\n", $found['health.ai.zz_new_write']))->toContain('no EndpointMatrix row')->toContain('hidden-record provider');
 });
