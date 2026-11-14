@@ -64,7 +64,7 @@ final class AgentRegistry
             fn (Agent $a) => ! in_array($a->key(), $excludeKeys, true)
                 && $this->health->runnable($a->key())
                 && ! $this->health->coolingDown($a->key())
-                && ! $this->health->dailyCeilingReached($a->key()),
+                && ! $this->health->dailyCeilingReached($a->key(), $bulk),
         ));
     }
 
@@ -86,7 +86,7 @@ final class AgentRegistry
             if (! $this->health->runnable($key)) {
                 continue;
             }
-            foreach ([$this->health->cooldownUntil($key), $this->health->ceilingResetAt($key)] as $at) {
+            foreach ([$this->health->cooldownUntil($key), $this->health->ceilingResetAt($key, $bulk)] as $at) {
                 if ($at !== null && ($earliest === null || $at->lt($earliest))) {
                     $earliest = $at;
                 }
@@ -139,7 +139,7 @@ final class AgentRegistry
 
         return match ($key) {
             'codex' => new CodexAgent(null, $model),
-            'copilot' => new CopilotAgent(null, $model),
+            'copilot' => new CopilotAgent(null, $model, fn () => $this->health->recordSpawn('copilot')),
             default => null,
         };
     }

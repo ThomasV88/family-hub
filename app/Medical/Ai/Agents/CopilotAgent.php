@@ -25,7 +25,8 @@ final class CopilotAgent implements Agent
 
     private readonly ?string $model;
 
-    public function __construct(?CopilotRunner $runner = null, ?string $model = null)
+    /** @param  Closure|null  $onSpawn  called right before every CLI spawn (the repair call included); counts the daily ceiling */
+    public function __construct(?CopilotRunner $runner = null, ?string $model = null, private readonly ?Closure $onSpawn = null)
     {
         $this->runner = $runner ?? new CopilotRunner;
         $model = $model !== null ? trim($model) : '';
@@ -89,6 +90,9 @@ final class CopilotAgent implements Agent
             $timeout = min($timeout, $left);
         }
 
+        if ($this->onSpawn !== null) {
+            ($this->onSpawn)();
+        }
         $result = $this->runner->exec(
             new CopilotRequest($in->workDir->path(), $prompt, $images, $this->model, $timeout, $usage),
             $shouldAbort,

@@ -54,22 +54,56 @@ it('clears the cooldown on success and ignores a past cooldown', function () {
     expect($h->cooldownUntil('codex'))->toBeNull();
 });
 
-it('stops Copilot at the daily ceiling counted from local midnight', function () {
+it('stops Copilot at the daily ceiling counted in CLI spawns from local midnight', function () {
     $h = new AgentHealth;
     Carbon::setTestNow('2026-11-14 12:00:00');
     config(['ai.local_timezone' => 'Europe/Bratislava', 'ai.copilot.daily_runs' => 30]);
-    AiCall::factory()->count(29)->state(['agent' => 'copilot'])->succeeded()->create();
-    AiCall::factory()->count(3)->state(['agent' => 'copilot', 'status' => 'cancelled'])->create();
-    AiCall::factory()->state(['agent' => 'copilot', 'status' => 'failed', 'queued_at' => now()->subDay()])->create();
-    expect($h->dailyCeilingReached('copilot'))->toBeFalse()->and($h->ceilingResetAt('copilot'))->toBeNull();
+    // Call-log rows no longer count: only spawns do.
+    AiCall::factory()->count(35)->state(['agent' => 'copilot'])->succeeded()->create();
+    foreach (range(1, 29) as $i) {
+        $h->recordSpawn('copilot');
+    }
+    expect($h->spawnsToday('copilot'))->toBe(29)
+        ->and($h->dailyCeilingReached('copilot'))->toBeFalse()->and($h->ceilingResetAt('copilot'))->toBeNull();
 
-    AiCall::factory()->state(['agent' => 'copilot'])->failed()->create();
+    $h->recordSpawn('copilot');
     expect($h->dailyCeilingReached('copilot'))->toBeTrue();
     $reset = $h->ceilingResetAt('copilot');
     expect($reset->setTimezone('Europe/Bratislava')->format('Y-m-d H:i:s'))->toBe('2026-11-15 00:00:00');
 
+    // The counter starts again on the next local day (23:30 UTC is already the 15th in Bratislava).
+    Carbon::setTestNow('2026-11-14 23:30:00');
+    CarbonImmutable::setTestNow('2026-11-14 23:30:00');
+    expect($h->spawnsToday('copilot'))->toBe(0)->and($h->dailyCeilingReached('copilot'))->toBeFalse();
+    $h->recordSpawn('copilot');
+    expect($h->spawnsToday('copilot'))->toBe(1);
+    CarbonImmutable::setTestNow();
+
     config(['ai.copilot.daily_runs' => 0]);
     expect($h->dailyCeilingReached('copilot'))->toBeFalse();
+});
+
+it('keeps spawns for interactive runs: bulk stops at the daily ceiling minus the reserve', function () {
+    $h = new AgentHealth;
+    config(['ai.copilot.daily_runs' => 30, 'ai.copilot.bulk_reserve' => 10]);
+    foreach (range(1, 19) as $i) {
+        $h->recordSpawn('copilot');
+    }
+    expect($h->dailyCeilingReached('copilot', true))->toBeFalse();
+
+    $h->recordSpawn('copilot');
+    expect($h->dailyCeilingReached('copilot', true))->toBeTrue()
+        ->and($h->ceilingResetAt('copilot', true))->not->toBeNull()
+        ->and($h->dailyCeilingReached('copilot', false))->toBeFalse()
+        ->and($h->ceilingResetAt('copilot', false))->toBeNull();
+
+    foreach (range(1, 10) as $i) {
+        $h->recordSpawn('copilot');
+    }
+    expect($h->dailyCeilingReached('copilot', false))->toBeTrue();
+
+    config(['ai.copilot.bulk_reserve' => 100]);
+    expect($h->dailyCeilingReached('copilot', true))->toBeTrue();
 });
 
 it('never gives codex a ceiling', function () {

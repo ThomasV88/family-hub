@@ -3,9 +3,9 @@
 namespace App\Medical\Ai;
 
 use App\Models\AiAgentStatus;
-use App\Models\AiCall;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Login health of the AI agents: written by the worker (check job, real run outcomes), read by the app.
@@ -68,26 +68,51 @@ final class AgentHealth
         return $this->cooldownUntil($agent) !== null;
     }
 
-    /** Copilot only: runs started today (local day) have used up the AUP guard. */
-    public function dailyCeilingReached(string $agent): bool
+    /**
+     * Counts one CLI spawn of the agent on the local day, atomically. The repair call is a second spawn of the same attempt.
+     * Called by the agent right before it starts the process.
+     */
+    public function recordSpawn(string $agent): void
+    {
+        $today = LocalDay::date();
+        $now = now();
+        DB::statement(
+            'insert into ai_agent_status (agent, spawn_day, spawn_count, updated_at) values (?, ?, 1, ?) '
+            .'on conflict (agent) do update set '
+            .'spawn_count = case when ai_agent_status.spawn_day = excluded.spawn_day then ai_agent_status.spawn_count + 1 else 1 end, '
+            .'spawn_day = excluded.spawn_day, updated_at = excluded.updated_at',
+            [$agent, $today, $now],
+        );
+    }
+
+    /** CLI spawns of the agent on the current local day. */
+    public function spawnsToday(string $agent): int
+    {
+        $row = AiAgentStatus::query()->toBase()->where('agent', $agent)->first(['spawn_day', 'spawn_count']);
+
+        return ($row !== null && $row->spawn_day === LocalDay::date()) ? (int) $row->spawn_count : 0;
+    }
+
+    /**
+     * Copilot only: spawns today (local day) have used up the AUP guard. Bulk may use only part of it
+     * (ai.copilot.bulk_reserve spawns stay free for interactive runs).
+     */
+    public function dailyCeilingReached(string $agent, bool $bulk = false): bool
     {
         $limit = (int) config('ai.copilot.daily_runs', 0);
         if ($agent !== 'copilot' || $limit <= 0) {
             return false;
         }
-        $start = LocalDay::startBinding();
-        $count = AiCall::query()->toBase()
-            ->where('agent', 'copilot')
-            ->whereIn('status', ['succeeded', 'failed'])
-            ->whereRaw('COALESCE(started_at, queued_at) >= ?', [$start])
-            ->count();
+        if ($bulk) {
+            $limit = max(0, $limit - max(0, (int) config('ai.copilot.bulk_reserve', 0)));
+        }
 
-        return $count >= $limit;
+        return $this->spawnsToday($agent) >= $limit;
     }
 
-    public function ceilingResetAt(string $agent): ?CarbonImmutable
+    public function ceilingResetAt(string $agent, bool $bulk = false): ?CarbonImmutable
     {
-        if (! $this->dailyCeilingReached($agent)) {
+        if (! $this->dailyCeilingReached($agent, $bulk)) {
             return null;
         }
 

@@ -6,7 +6,6 @@ use App\Medical\Ai\Agents\CopilotAgent;
 use App\Medical\Ai\LoginState;
 use App\Medical\Queries\AiAgentSettingsQuery;
 use App\Models\AiAgentSetting;
-use App\Models\AiCall;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
@@ -47,9 +46,21 @@ it('excludes disabled, expired, cooling and ceiling agents but keeps unknown log
     expect(($this->keys)(($this->reg)()->candidates()))->toBe(['copilot']);
 
     config(['ai.copilot.daily_runs' => 1]);
-    AiCall::factory()->state(['agent' => 'copilot'])->succeeded()->create();
+    $this->health->recordSpawn('copilot');
     expect(($this->reg)()->candidates())->toBe([])
         ->and(($this->reg)()->nextCandidate([]))->toBeNull();
+});
+
+it('keeps the Copilot bulk reserve free for interactive runs', function () {
+    ($this->enableCopilot)();
+    config(['ai.bulk.fallback_agents' => true, 'ai.copilot.daily_runs' => 4, 'ai.copilot.bulk_reserve' => 2]);
+    $this->health->recordQuotaHit('codex', null, null);
+    expect(($this->reg)()->find('copilot'))->toBeInstanceOf(CopilotAgent::class);
+
+    $this->health->recordSpawn('copilot');
+    $this->health->recordSpawn('copilot');
+    expect(($this->keys)(($this->reg)()->candidates([], true)))->toBe([])
+        ->and(($this->keys)(($this->reg)()->candidates([], false)))->toBe(['copilot']);
 });
 
 it('limits bulk to the first enabled agent unless fallback is configured', function () {

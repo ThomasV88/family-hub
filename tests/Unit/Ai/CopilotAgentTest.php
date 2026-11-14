@@ -173,3 +173,21 @@ it('delegates the login status and has its own key', function () {
     expect($agent->key())->toBe('copilot')->and($agent->loginStatus())->toBe(LoginState::LoggedIn);
     WorkDir::removeTree($this->root.'-home');
 });
+
+it('reports every CLI spawn, the repair call included, and none when the deadline leaves no time', function () {
+    $spawns = 0;
+    $script = FakeCopilot::sequence(['Sure, here you go', json_encode(copilotPayload())], $this->counter);
+    $this->scripts[] = $script;
+    config(['ai.copilot.binary' => $script]);
+
+    $out = (new CopilotAgent(null, null, function () use (&$spawns) {
+        $spawns++;
+    }))->extract(new AgentInput($this->dir, ['page-1.jpg'], null));
+    expect($out->ok)->toBeTrue()->and(($this->calls)())->toBe(2)->and($spawns)->toBe(2);
+
+    $none = 0;
+    $out = (new CopilotAgent(null, null, function () use (&$none) {
+        $none++;
+    }))->extract(new AgentInput($this->dir, ['page-1.jpg'], time() + 5));
+    expect($out->ok)->toBeFalse()->and($none)->toBe(0);
+});

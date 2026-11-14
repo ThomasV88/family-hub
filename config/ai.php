@@ -25,8 +25,11 @@ return [
         'cache' => env('COPILOT_CACHE_HOME', '/opt/copilot/cache'),
         // [PROVISIONAL] cost guard per session, owner confirms in 09-20.
         'max_ai_credits' => 60,
-        // [PROVISIONAL] AUP guard: runs per local day, 0 = unlimited.
+        // [PROVISIONAL] AUP guard: CLI spawns per local day, 0 = unlimited.
         'daily_runs' => 30,
+        // [PROVISIONAL] CLI spawns per local day kept free for interactive runs: bulk stops at daily_runs minus this.
+        // The daily count is of spawns (a repair call is a second one), not of call-log rows.
+        'bulk_reserve' => 10,
         'repair_min_seconds' => 45,
         // Seconds without output before a Copilot run is killed as idle; null = none, the total time bound alone applies.
         // The CLI runs with --stream off and --log-level none, so it prints nothing until its single final answer; an idle
