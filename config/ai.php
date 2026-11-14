@@ -18,6 +18,8 @@ return [
 
     'copilot' => [
         'binary' => env('AI_COPILOT_BINARY', '/opt/copilot/bin/copilot'),
+        // Also pinned in docker/app/Dockerfile and docs/ops/server.md. UNVERIFIED live: `--available-tools` is passed with no
+        // value to mean "no tools"; the --deny-tool flags are the layer that is tested. Re-check on every version bump.
         'version' => '1.0.112',
         // null = fallback only; the admin model setting wins.
         'model' => env('AI_COPILOT_MODEL'),
@@ -72,7 +74,7 @@ return [
         'scale' => 1800,
         'timeout' => 20,
         'info_timeout' => 5,
-        // ulimit -v (virtual) of pdfinfo/pdftoppm. Below the container limits: app 192m, ai-worker 384m (compose.server.yaml).
+        // ulimit -v (virtual) of pdfinfo/pdftoppm. Below the container limits: app 192m, ai-worker 768m (MEM_AI in compose.server.yaml, which also holds the 192m /ai-work tmpfs).
         'ulimit_kb' => 131072,
         'ulimit_kb_worker' => 262144,
     ],
@@ -86,7 +88,7 @@ return [
         'CODEX_ACCESS_TOKEN', 'CODEX_AGENT_IDENTITY',
         'GH_TOKEN', 'GITHUB_TOKEN', 'COPILOT_GITHUB_TOKEN', 'COPILOT_ALLOW_ALL', 'COPILOT_PROVIDER_BASE_URL',
         'COPILOT_PROVIDER_API_KEY', 'COPILOT_PROVIDER_API_KEY_COMMAND', 'COPILOT_PROVIDER_BEARER_TOKEN',
-        'COPILOT_OFFLINE',
+        'COPILOT_OFFLINE', 'GH_ENTERPRISE_TOKEN', 'GITHUB_ENTERPRISE_TOKEN',
     ],
 
     // Name patterns of foreign secrets the ai-worker must never receive (ai:preflight reports forbidden_secret).

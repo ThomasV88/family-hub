@@ -104,7 +104,7 @@ for name, svc in svcs.items():
         fail("%s mounts copilot-home" % name)
 aenv = ai.get("environment") or {}
 for key in aenv:
-    if re.match(r"APP_KEY$|MAIL_|GOOGLE_|VAPID_|.*_API_KEY$|REDIS|GH_TOKEN$|GITHUB_TOKEN$|COPILOT_GITHUB_TOKEN$|COPILOT_PROVIDER_|COPILOT_ALLOW_ALL|COPILOT_OFFLINE", key):
+    if re.match(r"APP_KEY$|MAIL_|GOOGLE_|VAPID_|.*_API_KEY$|REDIS|GH_TOKEN$|GITHUB_TOKEN$|GH_ENTERPRISE_TOKEN$|GITHUB_ENTERPRISE_TOKEN$|COPILOT_GITHUB_TOKEN$|COPILOT_PROVIDER_|COPILOT_ALLOW_ALL|COPILOT_OFFLINE", key):
         fail("ai-worker gets forbidden variable %s" % key)
 if aenv.get("DB_USERNAME") != "fh_app":
     fail("ai-worker does not use the runtime role fh_app")
@@ -142,7 +142,7 @@ if "app.env" in block.replace("never app.env", ""):
 for line in open("ops/env/ai-worker.env.example"):
     if line.lstrip().startswith("#"):
         continue
-    if re.match(r"\s*(\w*_API_KEY|APP_KEY|MAIL_\w*|GOOGLE_\w*|VAPID_\w*|GH_TOKEN|GITHUB_TOKEN|COPILOT_GITHUB_TOKEN|COPILOT_PROVIDER_\w*|COPILOT_ALLOW_ALL\w*|COPILOT_OFFLINE)\s*=", line):
+    if re.match(r"\s*(\w*_API_KEY|APP_KEY|MAIL_\w*|GOOGLE_\w*|VAPID_\w*|GH_TOKEN|GITHUB_TOKEN|GH_ENTERPRISE_TOKEN|GITHUB_ENTERPRISE_TOKEN|COPILOT_GITHUB_TOKEN|COPILOT_PROVIDER_\w*|COPILOT_ALLOW_ALL\w*|COPILOT_OFFLINE)\s*=", line):
         fail("ai-worker.env.example sets a forbidden variable: " + line.strip())
 for f in ("scripts/backup.sh", "scripts/restore-drill.sh", "scripts/backup-freshness.sh"):
     if "codex-home" in open(f).read() or "copilot-home" in open(f).read():

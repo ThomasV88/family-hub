@@ -37,7 +37,7 @@ const SCOPES = ['no_proposal', 'last_failed', 'all'];
 const config = computed(() => ({
     defaultCap: Number(props.bulkConfig?.defaultCap) || 20,
     maxCap: Number(props.bulkConfig?.maxCap) || 30,
-    startHour: Number.isFinite(Number(props.bulkConfig?.startHour)) ? Number(props.bulkConfig.startHour) : 2,
+    startHour: Number.isFinite(Number(props.bulkConfig?.startHour)) ? Number(props.bulkConfig.startHour) : 1,
     timezone: props.bulkConfig?.timezone || 'Europe/Bratislava',
     validMinutes: Number(props.bulkConfig?.validMinutes) || 15,
 }));

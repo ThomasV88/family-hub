@@ -131,6 +131,12 @@ reports "login expired" once the health check exists). Never set `OPENAI_API_KEY
 - Queues are served in strict order `ai-control,ai,ai-bulk`: login checks and interactive runs always go before a bulk re-read.
 - Timeout invariants: `DB_QUEUE_RETRY_AFTER` 900 > worker `--timeout` 720 >= job budget 660 (config raised in 09-10); the reaper threshold is job + 120 = 780.
 - PROVISIONAL (confirmed in 09-20): `MEM_AI` 768m and tmpfs `/ai-work` 192m.
+- Operations notes from the Phase 9 review:
+  - **Rollback (IN-01).** Rolling back to a Phase 8 image keeps the migrated schema. Before the old image starts, resolve `waiting` rows (`update medical_ai_extractions set ...` through the owner role, or cancel them in the app); the old code never resumes or reaps them, and the `one_active` index (which includes `waiting`) blocks any new run on those documents. The `waiting` migration's `down()` refuses while `waiting` or `decided` rows exist.
+  - **Pause (IN-03).** Pausing a bulk run only stops new enqueues. Items already queued, and waiting bulk rows that the resume command puts back in the queue, still run. Cancel the run to stop them.
+  - **Interactive latency (IN-07).** One worker with no preemption: an interactive run can wait behind one running bulk job for up to the job budget (11 minutes). Queue order `ai-control,ai,ai-bulk` only decides what starts next.
+  - **Retention (IN-06).** `ai_bulk_run_items` (document ids) and `ai_bulk_runs` are not pruned by `ai:prune-calls`; they are kept until a retention rule is decided (see DEFERRED.md).
+  - **Copilot `--available-tools` (IN-02).** It is passed without a value to mean "no tools"; the fake CLI cannot prove that. Verify it live on every Copilot version bump (the version is pinned in `config/ai.php` and the Dockerfile).
 - Deferred WR-06: both CLIs run under the www-data uid (same uid as the app files). Still open; now covers two CLIs.
 
 ## Deploy
