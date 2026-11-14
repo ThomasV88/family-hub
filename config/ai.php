@@ -48,6 +48,9 @@ return [
         'CODEX_ACCESS_TOKEN', 'CODEX_AGENT_IDENTITY',
     ],
 
+    // Records one proposal may create when its entries are accepted (a proposal holds at most 100 entries).
+    'max_accepts_per_proposal' => 100,
+
     'login_stale_minutes' => 15,
     'call_retention_months' => 12,
     'queue' => 'ai',

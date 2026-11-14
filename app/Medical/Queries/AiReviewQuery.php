@@ -177,12 +177,22 @@ class AiReviewQuery
                 }
                 $valid = $validator->validated();
 
-                $recordId = match ($type) {
-                    'visit' => (string) $this->visits->create($viewer, $subject, $valid, 'ai')->getKey(),
-                    'medication' => (string) $this->medications->create($viewer, $subject, $valid, 'ai')->getKey(),
-                    'allergy' => (string) $this->allergies->create($viewer, $subject, $valid, 'ai')->getKey(),
-                    default => (string) $this->vaccinations->create($viewer, $subject, $valid, 'ai')->public_id,
-                };
+                // One lock per person for the whole accept: de-duplication and the caps below are checked under it, so two
+                // concurrent accepts of the same content cannot both insert.
+                DB::table('medical_subjects')->where('id', $subjectId)->lockForUpdate()->value('id');
+
+                // A re-run proposes the same content again. An entry that matches a record the person already has is
+                // linked to it, never inserted twice (and a duplicate vaccination never schedules a second reminder).
+                $recordId = $this->existingRecordId($type, $subjectId, $valid);
+                if ($recordId === null) {
+                    $this->assertWithinLimits($subjectId, (string) $row->id);
+                    $recordId = match ($type) {
+                        'visit' => (string) $this->visits->create($viewer, $subject, $valid, 'ai')->getKey(),
+                        'medication' => (string) $this->medications->create($viewer, $subject, $valid, 'ai')->getKey(),
+                        'allergy' => (string) $this->allergies->create($viewer, $subject, $valid, 'ai')->getKey(),
+                        default => (string) $this->vaccinations->create($viewer, $subject, $valid, 'ai')->public_id,
+                    };
+                }
 
                 if ($type === 'visit') {
                     $this->linkDocument($viewer, $subject, (string) $row->document_id, $recordId);
@@ -359,6 +369,47 @@ class AiReviewQuery
         $this->audit->record(AuditEvent::MedicalAiEntryDecided, $user, [
             'subject' => $subjectId, 'document' => $documentId, 'decision' => $decision,
         ], null, Module::Health);
+    }
+
+    /**
+     * The id of a record of this person that already holds the same content (case-insensitive text, null-safe dates),
+     * or null. Vaccinations answer with their public uuid like create does.
+     *
+     * @param  array<string, mixed>  $valid
+     */
+    private function existingRecordId(string $type, string $subjectId, array $valid): ?string
+    {
+        [$table, $idColumn, $columns] = match ($type) {
+            'visit' => ['medical_visits', 'id', ['visited_on' => 'date', 'doctor' => 'text', 'specialty_key' => 'text', 'diagnosis' => 'text']],
+            'medication' => ['medical_medications', 'id', ['name' => 'text', 'dose' => 'text', 'started_on' => 'date']],
+            'allergy' => ['medical_allergies', 'id', ['substance' => 'text', 'reaction' => 'text']],
+            default => ['medical_vaccinations', 'public_id', ['vaccine' => 'text', 'given_on' => 'date', 'next_due_on' => 'date']],
+        };
+        $query = DB::table($table)->where('subject_id', $subjectId);
+        foreach ($columns as $column => $kind) {
+            $value = $valid[$column] ?? null;
+            if ($kind === 'date') {
+                $query->whereRaw("{$column} is not distinct from ?::date", [$value === null ? null : (string) $value]);
+            } else {
+                $query->whereRaw("lower(btrim({$column})) is not distinct from lower(btrim(?::text))", [$value === null ? null : (string) $value]);
+            }
+        }
+        $id = $query->orderBy('created_at')->value($idColumn);
+
+        return $id === null ? null : (string) $id;
+    }
+
+    /** Caps the records one proposal and one person can gain through AI accepts. Called under the subject lock. */
+    private function assertWithinLimits(string $subjectId, string $extractionId): void
+    {
+        $created = DB::table('medical_ai_decisions')->where('extraction_id', $extractionId)->where('decision', 'accepted')->count();
+        $total = DB::table('medical_visits')->where('subject_id', $subjectId)->count()
+            + DB::table('medical_medications')->where('subject_id', $subjectId)->count()
+            + DB::table('medical_allergies')->where('subject_id', $subjectId)->count()
+            + DB::table('medical_vaccinations')->where('subject_id', $subjectId)->count();
+        if ($created >= (int) config('ai.max_accepts_per_proposal') || $total >= (int) config('medical.max_records_per_subject')) {
+            throw ValidationException::withMessages(['record_limit' => ['limit']]);
+        }
     }
 
     /** Attaches the document to the new visit, only when it has no visit yet. */

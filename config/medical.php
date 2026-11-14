@@ -7,6 +7,8 @@ return [
     'max_documents_per_subject' => 200,
     'upload_batch_max' => 10,
     'max_contacts' => 3,
+    // Visits, medications, allergies and vaccinations together, enforced on the AI accept path under the person lock.
+    'max_records_per_subject' => 1000,
     'vaccination_lead_days' => [14, 0],
     'reminder_hour' => 8,
     'due_soon_days' => 30,

@@ -269,3 +269,69 @@ describe('guards', function () {
         expect(DB::table('medical_ai_decisions')->count())->toBe(0);
     });
 });
+
+describe('re-runs and limits', function () {
+    /** A second ready proposal for the same document, as after a re-run (the old one superseded). */
+    function acceptRerun(MedicalDocument $document, User $user): MedicalAiExtraction
+    {
+        DB::table('medical_ai_extractions')->where('document_id', $document->id)->where('status', 'ready')
+            ->update(['status' => 'superseded']);
+
+        return MedicalAiExtraction::factory()->forDocument($document)->ready(acceptPayload(), 7)->create(['started_by' => $user->id]);
+    }
+
+    it('links an entry of a re-run to the record the first run created instead of inserting it again', function () {
+        [$user, $person, $document, $first] = acceptSetup();
+        $one = $this->actingAs($user)->postJson(acceptUrl($person, $first->id, 'medication-0'), [])->assertOk()->json();
+        $this->actingAs($user)->postJson(acceptUrl($person, $first->id, 'allergy-1'), ['values' => ['severity' => 'mild']])->assertOk();
+        $this->actingAs($user)->postJson(acceptUrl($person, $first->id, 'visit-0'), [])->assertOk();
+        $this->actingAs($user)->postJson(acceptUrl($person, $first->id, 'vaccination-0'), ['values' => ['given_on' => '2025-01-10', 'next_due_on' => '2035-01-10']])->assertOk();
+        $before = [
+            DB::table('medical_medications')->count(), DB::table('medical_allergies')->count(), DB::table('medical_visits')->count(),
+            DB::table('medical_vaccinations')->count(), DB::table('notification_outbox')->count(),
+        ];
+
+        $second = acceptRerun($document, $user);
+        $two = $this->actingAs($user)->postJson(acceptUrl($person, $second->id, 'medication-0'), [])->assertOk()->json();
+        $this->actingAs($user)->postJson(acceptUrl($person, $second->id, 'allergy-1'), ['values' => ['severity' => 'mild']])->assertOk();
+        $this->actingAs($user)->postJson(acceptUrl($person, $second->id, 'visit-0'), [])->assertOk();
+        $this->actingAs($user)->postJson(acceptUrl($person, $second->id, 'vaccination-0'), ['values' => ['given_on' => '2025-01-10', 'next_due_on' => '2035-01-10']])->assertOk();
+
+        expect($two['state'])->toBe('accepted')->and($two['recordId'])->toBe($one['recordId'])
+            ->and([
+                DB::table('medical_medications')->count(), DB::table('medical_allergies')->count(), DB::table('medical_visits')->count(),
+                DB::table('medical_vaccinations')->count(), DB::table('notification_outbox')->count(),
+            ])->toBe($before)
+            ->and(DB::table('medical_ai_decisions')->where('extraction_id', $second->id)->count())->toBe(4);
+    });
+
+    it('also treats a manually entered record with the same content as already present, but not a different one', function () {
+        [$user, $person, $document, $extraction] = acceptSetup();
+        $manual = (string) Str::uuid();
+        DB::table('medical_medications')->insert([
+            'id' => $manual, 'subject_id' => $person->id, 'name' => ' IBUPROFEN ', 'dose' => '200 mg', 'source' => 'manual',
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $same = $this->actingAs($user)->postJson(acceptUrl($person, $extraction->id, 'medication-0'), [])->assertOk()->json();
+        expect($same['recordId'])->toBe($manual)->and(DB::table('medical_medications')->count())->toBe(1);
+
+        $other = acceptRerun($document, $user);
+        $edited = $this->actingAs($user)->postJson(acceptUrl($person, $other->id, 'medication-0'), ['values' => ['dose' => '400 mg']])->assertOk()->json();
+        expect($edited['recordId'])->not->toBe($manual)->and(DB::table('medical_medications')->count())->toBe(2);
+    });
+
+    it('refuses to create more records than the proposal cap or the person cap allows, and still links duplicates', function () {
+        [$user, $person, , $extraction] = acceptSetup();
+        config(['ai.max_accepts_per_proposal' => 1]);
+        $this->actingAs($user)->postJson(acceptUrl($person, $extraction->id, 'medication-0'), [])->assertOk();
+        $this->actingAs($user)->postJson(acceptUrl($person, $extraction->id, 'allergy-1'), ['values' => ['severity' => 'mild']])
+            ->assertStatus(422)->assertJsonValidationErrors(['record_limit']);
+        expect(DB::table('medical_allergies')->count())->toBe(0)->and(DB::table('medical_ai_decisions')->count())->toBe(1);
+
+        config(['ai.max_accepts_per_proposal' => 100, 'medical.max_records_per_subject' => 1]);
+        $this->actingAs($user)->postJson(acceptUrl($person, $extraction->id, 'allergy-1'), ['values' => ['severity' => 'mild']])
+            ->assertStatus(422)->assertJsonValidationErrors(['record_limit']);
+        expect(DB::table('medical_allergies')->count())->toBe(0);
+    });
+});
