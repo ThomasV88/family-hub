@@ -4,15 +4,21 @@ use App\Access\AccessLevel;
 use App\Access\Module;
 use App\Medical\Ai\RunExtractionJob;
 use App\Medical\Ai\Work\WorkDir;
+use App\Models\AiAgentSetting;
 use App\Models\AiCall;
 use App\Models\MedicalAiExtraction;
 use App\Models\MedicalDocument;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\FakeCodex;
 use Tests\Support\MedicalFileFixtures;
 use Tests\Support\MedicalFixtures;
@@ -34,6 +40,8 @@ beforeEach(function () {
 });
 
 afterEach(function () {
+    Carbon::setTestNow();
+    DB::purge('btlock');
     foreach ($this->scripts as $f) {
         @unlink($f);
     }
@@ -84,6 +92,9 @@ it('answers every AI route for a hidden person exactly like a person who never e
     MedicalPrivacy::seedVisible($ctx);
     MedicalPrivacy::seedHidden($ctx);
     $viewer = $ctx['viewer'];
+    // The hidden person carries Phase 9 state too (zz_ai_agents.php): a Copilot-produced proposal and waiting runs.
+    expect(DB::table('medical_ai_extractions')->where('subject_id', $ctx['hidden']['person'])->where('agent', 'copilot')->where('status', 'ready')->count())->toBe(1)
+        ->and(DB::table('medical_ai_extractions')->where('subject_id', $ctx['hidden']['person'])->where('status', 'waiting')->count())->toBe(2);
     // The PDF the hidden proposal sits on is a real two-page PDF, so the page route would render for a member.
     $hiddenDocument = MedicalDocument::query()->findOrFail($ctx['hidden']['ai_ready_document']);
     Storage::disk('medical')->put($hiddenDocument->path, MedicalFileFixtures::pdfPages(2));
@@ -239,4 +250,78 @@ it('keeps proposal and document-title canaries out of other members, every admin
         $logText .= (string) substr((string) file_get_contents($f), $logs[$f] ?? 0);
     }
     $assertClean($logText, 'a log file');
+});
+
+it('keeps document and proposal canaries and person and member names out of every Phase 9 admin payload and table', function () {
+    Queue::fake();
+    $this->travelTo(CarbonImmutable::parse('2026-03-10 00:30', 'Europe/Bratislava')->utc());
+    $admin = User::factory()->admin()->withGrant(Module::Health, AccessLevel::Edit)->create(['name' => 'Ada Admin']);
+    $member = User::factory()->create(['name' => 'Mona Member']);
+    MedicalFixtures::grantHealth($member, AccessLevel::Edit);
+    AiAgentSetting::query()->toBase()->where('agent', 'copilot')->update(['enabled' => true]);
+    $this->scripts[] = $script = FakeCodex::succeeding(json_encode(aipdPayload('Dr '.MedicalPrivacy::CANARY)));
+    config(['ai.codex.binary' => $script, 'ai.limits.document_cooldown_minutes' => 0]);
+
+    $logs = [];
+    foreach (glob(storage_path('logs/*')) ?: [] as $f) {
+        $logs[$f] = (int) filesize($f);
+    }
+    $names = [];
+    foreach ([1, 2] as $i) {
+        $subject = MedicalFixtures::subject(['name' => 'Clean Person '.$i, 'ai_consent' => true], [[$member, AccessLevel::Edit]]);
+        $names[] = 'Clean Person '.$i;
+        $document = MedicalDocument::factory()->image()->forSubject($subject)->create(['title' => 'Scan '.MedicalPrivacy::CANARY]);
+        Storage::disk('medical')->put($document->path, 'jpeg-bytes');
+    }
+
+    $this->actingAs($admin);
+    $captured = [];
+    $captured['dry'] = (string) $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 5])->assertOk()->getContent();
+    $token = json_decode($captured['dry'], true)['token'];
+    $captured['start'] = (string) $this->postJson('/settings/ai-agents/bulk', ['token' => $token, 'acknowledged' => true])->assertCreated()->getContent();
+    foreach (['01:05', '01:20', '01:35'] as $at) {
+        $this->travelTo(CarbonImmutable::parse("2026-03-10 $at", 'Europe/Bratislava')->utc());
+        Artisan::call('ai:bulk-tick');
+        $id = DB::table('medical_ai_extractions')->whereNotNull('bulk_run_id')->where('status', 'queued')->value('id');
+        if ($id !== null) {
+            (new RunExtractionJob((string) $id))->handle();
+        }
+    }
+    expect(DB::table('medical_ai_extractions')->whereNotNull('bulk_run_id')->where('status', 'ready')->count())->toBe(2);
+
+    $captured['agents page'] = (string) $this->get('/settings/ai-agents')->assertOk()->getContent();
+    $captured['bulk poll'] = (string) $this->getJson('/settings/ai-agents/bulk')->assertOk()->getContent();
+    $captured['ai calls'] = (string) $this->get('/settings/ai-calls')->assertOk()->getContent();
+    $captured['audit page'] = (string) $this->get('/settings/audit')->assertOk()->getContent();
+    $captured['audit meta'] = (string) json_encode(DB::table('audit_logs')->whereIn('event', ['ai_agent_setting_changed', 'ai_bulk_run_changed', 'medical_ai_run_requested', 'medical_ai_run_finished'])->pluck('meta'));
+    $captured['tables'] = (string) json_encode([
+        'bulk runs' => DB::table('ai_bulk_runs')->get(), 'bulk items' => DB::table('ai_bulk_run_items')->get(), 'bulk dry runs' => DB::table('ai_bulk_dry_runs')->get(),
+        'settings' => DB::table('ai_agent_settings')->get(), 'status' => DB::table('ai_agent_status')->get(),
+        'calls' => DB::table('ai_calls')->get(), 'failed' => DB::table('failed_jobs')->get(), 'jobs' => DB::table('jobs')->get(),
+    ]);
+    expect(DB::table('audit_logs')->where('event', 'ai_bulk_run_changed')->count())->toBeGreaterThanOrEqual(3);
+
+    foreach ($captured as $where => $text) {
+        $scan = MedicalPrivacy::scannable($text);
+        foreach ([...MedicalPrivacy::CANARY_NEEDLES, 'jpeg-bytes'] as $needle) {
+            expect(str_contains($scan, $needle))->toBeFalse("'$needle' found in $where");
+        }
+    }
+    // Counts only: no person or member name in the bulk payloads, the agents page or the bulk tables and call rows.
+    foreach (['dry', 'start', 'bulk poll', 'agents page', 'tables'] as $where) {
+        foreach ([...$names, 'Mona Member'] as $name) {
+            expect(str_contains($captured[$where], $name))->toBeFalse("'$name' found in $where");
+        }
+    }
+    // The call rows name no person; only the filter dropdown lists every person, as Settings > Members does (Phase 8 admin exception).
+    $this->get('/settings/ai-calls')->assertInertia(fn (Assert $page) => expect(json_encode($page->toArray()['props']['calls']))->not->toContain('Clean Person'));
+
+    clearstatcache();
+    $logText = '';
+    foreach (glob(storage_path('logs/*')) ?: [] as $f) {
+        $logText .= (string) substr((string) file_get_contents($f), $logs[$f] ?? 0);
+    }
+    foreach ([...MedicalPrivacy::CANARY_NEEDLES, 'jpeg-bytes', ...$names] as $needle) {
+        expect(str_contains(MedicalPrivacy::scannable($logText), $needle))->toBeFalse("'$needle' found in a log file");
+    }
 });

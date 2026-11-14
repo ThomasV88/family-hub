@@ -127,3 +127,29 @@ it('refuses every health write to a view-only member and sends no edit rights to
     expect($body)->not->toContain('"canEdit":true')->not->toContain('"canCreate":true')->toContain('"canCreate":false');
     expect($this->actingAs($viewOnly)->get("/health/people/{$person}", ['X-Inertia' => 'true', 'X-Inertia-Version' => $version])->getContent())->toContain('"canEdit":false');
 });
+
+it('shows no person, document or proposal content on the AI agents page, the bulk poll or the dry run to an admin who is a member of nobody', function () {
+    $ctx = medApScenario();
+    $admin = $ctx['viewer'];
+    DB::table('medical_subjects')->update(['ai_consent' => true]);
+
+    $this->actingAs($admin);
+    $bodies = [
+        'agents page' => (string) $this->get('/settings/ai-agents')->assertOk()->getContent(),
+        'bulk poll' => (string) $this->getJson('/settings/ai-agents/bulk')->assertOk()->getContent(),
+        'dry run' => (string) $this->postJson('/settings/ai-agents/bulk/dry-run', ['scope' => 'all', 'cap' => 5])->assertOk()->getContent(),
+    ];
+    $ids = [(string) $ctx['hidden']['person'], (string) $ctx['person']->getKey(), (string) $ctx['hidden']['ai_agents_copilot_document'], (string) $ctx['hidden']['ai_agents_waiting_document']];
+    foreach ($bodies as $where => $body) {
+        $scan = MedicalPrivacy::scannable($body);
+        foreach (MedicalPrivacy::CANARY_NEEDLES as $needle) {
+            expect(str_contains($scan, $needle))->toBeFalse("'$needle' in $where");
+        }
+        expect(str_contains($scan, 'Visible Person'))->toBeFalse("subject name in $where");
+        foreach ($ids as $id) {
+            expect(str_contains($scan, $id))->toBeFalse("id $id in $where");
+        }
+    }
+    // The dry run counted real documents (not an empty pass) and handed back counts only.
+    expect(json_decode($bodies['dry run'], true)['counts']['eligible'])->toBeGreaterThan(0);
+});
