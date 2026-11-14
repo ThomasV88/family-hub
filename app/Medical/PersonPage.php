@@ -112,6 +112,7 @@ class PersonPage
             'diagnosis' => $v->diagnosis,
             'notes' => $v->notes,
             'documentCount' => (int) ($perVisit[(string) $v->getKey()] ?? 0),
+            'provenance' => $this->provenance($v),
         ])->values();
 
         $folders = $visits->groupBy('specialtyKey')->map(fn ($group, $key) => [
@@ -190,6 +191,7 @@ class PersonPage
             'substance' => $a->substance,
             'reaction' => $a->reaction,
             'severity' => $a->severity,
+            'provenance' => $this->provenance($a),
         ])->values()->all();
     }
 
@@ -214,6 +216,7 @@ class PersonPage
             'endedOn' => $m->ended_on?->format('Y-m-d'),
             'notes' => $m->notes,
             'ongoing' => $m->ended_on === null || $m->ended_on->format('Y-m-d') >= $today,
+            'provenance' => $this->provenance($m),
         ])->values()->all();
     }
 
@@ -236,6 +239,7 @@ class PersonPage
             'notes' => $v->notes,
             'status' => (string) $v->getAttribute('status'),
             'dueInDays' => $v->getAttribute('dueInDays'),
+            'provenance' => $this->provenance($v),
         ])->values()->all();
     }
 
@@ -243,6 +247,18 @@ class PersonPage
     private function vaccinationAttention(Viewer $viewer, ?MedicalSubject $subject): int
     {
         return $subject === null ? 0 : $this->vaccinations->attentionCount($viewer, $subject, $this->today());
+    }
+
+    /**
+     * The label the UI shows: manual (no label), unverified or verified. Source and verification only, never who or when.
+     *
+     * @return array{source: string, verification: string}
+     */
+    private function provenance(object $row): array
+    {
+        $p = Provenance::present($row);
+
+        return ['source' => $p['source'], 'verification' => $p['source'] === 'manual' ? 'manual' : $p['verification']];
     }
 
     private function today(): string
