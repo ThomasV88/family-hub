@@ -1,9 +1,7 @@
 <?php
 
 use App\Access\Preset;
-use App\Medical\Ai\AgentHealth;
 use App\Medical\Ai\CheckLoginJob;
-use App\Medical\Ai\LoginState;
 use App\Models\AiCall;
 use App\Models\MedicalAiExtraction;
 use App\Models\MedicalDocument;
@@ -12,6 +10,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\MedicalPrivacy;
 
@@ -45,10 +44,10 @@ it('lists calls newest first with names only and the page shape', function () {
         ->where('calls.rows.0.startedBy', 'Alice Admin')
         ->where('calls.rows.1.status', 'queued')
         ->where('calls.rows.1.model', null)
-        ->has('calls.rows.0', fn (Assert $r) => $r->hasAll(['time', 'startedBy', 'person', 'agent', 'model', 'status', 'durationMs']))
+        ->has('calls.rows.0', fn (Assert $r) => $r->hasAll(['time', 'startedBy', 'person', 'agent', 'model', 'status', 'durationMs', 'quota', 'bulk']))
         ->where('filters', ['person' => null, 'member' => null, 'status' => null])
         ->has('options.people', 1)
-        ->where('login.agent', 'codex'));
+        ->missing('login'));
 });
 
 it('paginates 25 per page', function () {
@@ -137,19 +136,40 @@ it('refuses the check without a recent confirmation', function () {
     Queue::assertNothingPushed();
 });
 
-it('reflects the login health states', function () {
+it('shows every fallback attempt as its own row and flags the quota one', function () {
     $admin = User::factory()->admin()->create();
-    $login = fn () => $this->actingAs($admin)->get('/settings/ai-calls');
+    $s = acSubject('Anna');
+    $run = (string) Str::uuid();
+    acCall($s, $admin, ['extraction_id' => $run, 'agent' => 'codex', 'model' => 'gpt-5', 'attempt' => 1, 'status' => 'failed', 'failure_code' => 'quota_exhausted', 'queued_at' => now()->subMinutes(2)]);
+    acCall($s, $admin, ['extraction_id' => $run, 'agent' => 'copilot', 'model' => 'default', 'attempt' => 2, 'status' => 'succeeded', 'queued_at' => now()->subMinute()]);
+    acCall($s, $admin, ['status' => 'failed', 'failure_code' => 'unknown', 'queued_at' => now()->subHour()]);
 
-    $login()->assertInertia(fn (Assert $p) => $p->where('login.state', 'unknown')->where('login.checkedAt', null));
+    $this->actingAs($admin)->get('/settings/ai-calls')->assertInertia(fn (Assert $p) => $p
+        ->has('calls.rows', 3)
+        ->where('calls.rows.0.agent', 'copilot')->where('calls.rows.0.quota', false)
+        ->where('calls.rows.1.agent', 'codex')->where('calls.rows.1.model', 'gpt-5')->where('calls.rows.1.quota', true)
+        ->where('calls.rows.2.quota', false));
 
-    $health = app(AgentHealth::class);
-    $health->recordCheck('codex', LoginState::LoggedIn);
-    $login()->assertInertia(fn (Assert $p) => $p->where('login.state', 'logged_in')->whereType('login.checkedAt', 'string'));
+    $this->actingAs($admin)->get('/settings/ai-calls?status=quota')->assertInertia(fn (Assert $p) => $p
+        ->where('calls.total', 1)->where('filters.status', 'quota')->where('calls.rows.0.agent', 'codex'));
+    $this->actingAs($admin)->get('/settings/ai-calls?status=bogus')->assertInertia(fn (Assert $p) => $p
+        ->where('calls.total', 3)->where('filters.status', null));
+});
 
-    $health->recordCheck('codex', LoginState::LoggedOut);
-    $login()->assertInertia(fn (Assert $p) => $p->where('login.state', 'expired'));
+it('masks the person of bulk rows and keeps them out of the person filter', function () {
+    $admin = User::factory()->admin()->create();
+    $s = acSubject('Anna '.MedicalPrivacy::CANARY);
+    $bulkId = (string) Str::uuid();
+    acCall($s, $admin, ['bulk_run_id' => $bulkId, 'status' => 'succeeded', 'queued_at' => now()->subMinute()]);
+    acCall($s, $admin, ['status' => 'succeeded', 'queued_at' => now()->subHour()]);
 
-    $health->recordCheck('codex', LoginState::Unknown);
-    $login()->assertInertia(fn (Assert $p) => $p->where('login.state', 'not_responding'));
+    $res = $this->actingAs($admin)->get('/settings/ai-calls');
+    $res->assertInertia(fn (Assert $p) => $p
+        ->where('calls.rows.0.bulk', true)->where('calls.rows.0.person', null)
+        ->where('calls.rows.1.bulk', false)->where('calls.rows.1.person', 'Anna '.MedicalPrivacy::CANARY)
+        ->where('calls.rows.0.startedBy', $admin->name));
+    expect(json_encode($res->viewData('page')['props']['calls']))->not->toContain($bulkId)->not->toContain('bulk_run_id')->not->toContain('bulkRunId');
+
+    $this->actingAs($admin)->get('/settings/ai-calls?person='.$s->id)->assertInertia(fn (Assert $p) => $p
+        ->where('calls.total', 1)->where('calls.rows.0.bulk', false));
 });

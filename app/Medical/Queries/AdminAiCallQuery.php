@@ -14,7 +14,7 @@ final class AdminAiCallQuery
 {
     public const PER_PAGE = 25;
 
-    public const STATUSES = ['queued', 'running', 'succeeded', 'failed', 'cancelled'];
+    public const STATUSES = ['queued', 'running', 'succeeded', 'failed', 'cancelled', 'quota'];
 
     /**
      * Invalid filter values are ignored.
@@ -47,9 +47,12 @@ final class AdminAiCallQuery
         $base = DB::table('ai_calls as c')
             ->leftJoin('medical_subjects as s', 's.id', '=', 'c.subject_id')
             ->leftJoin('users as u', 'u.id', '=', 'c.started_by')
-            ->when($f['person'], fn ($q, $v) => $q->where('c.subject_id', $v))
+            // A person filter never matches bulk rows, so bulk-processed people cannot be found by filtering.
+            ->when($f['person'], fn ($q, $v) => $q->where('c.subject_id', $v)->whereNull('c.bulk_run_id'))
             ->when($f['member'], fn ($q, $v) => $q->where('c.started_by', $v))
-            ->when($f['status'], fn ($q, $v) => $q->where('c.status', $v));
+            ->when($f['status'], fn ($q, $v) => $v === 'quota'
+                ? $q->where('c.status', 'failed')->where('c.failure_code', 'quota_exhausted')
+                : $q->where('c.status', $v));
 
         $total = (clone $base)->count();
         $pages = max(1, (int) ceil($total / self::PER_PAGE));
@@ -57,7 +60,11 @@ final class AdminAiCallQuery
 
         $rows = $base->orderByDesc('c.queued_at')->orderByDesc('c.id')
             ->forPage($page, self::PER_PAGE)
-            ->get(['c.queued_at', 'c.agent', 'c.model', 'c.status', 'c.duration_ms', 's.name as person_name', 'u.name as member_name'])
+            ->select(['c.queued_at', 'c.agent', 'c.model', 'c.status', 'c.duration_ms', 'u.name as member_name'])
+            ->selectRaw('CASE WHEN c.bulk_run_id IS NULL THEN s.name END as person_name')
+            ->selectRaw('(c.bulk_run_id IS NOT NULL) as is_bulk')
+            ->selectRaw("(c.status = 'failed' AND c.failure_code = 'quota_exhausted') as is_quota")
+            ->get()
             ->map(fn ($r) => [
                 'time' => Carbon::parse($r->queued_at)->toIso8601String(),
                 'startedBy' => $r->member_name,
@@ -66,6 +73,8 @@ final class AdminAiCallQuery
                 'model' => $r->model,
                 'status' => $r->status,
                 'durationMs' => $r->duration_ms === null ? null : (int) $r->duration_ms,
+                'quota' => (bool) $r->is_quota,
+                'bulk' => (bool) $r->is_bulk,
             ])->all();
 
         return ['rows' => $rows, 'page' => $page, 'pages' => $pages, 'total' => $total];
