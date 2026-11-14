@@ -17,6 +17,11 @@ Plans 08-01..08-21 are built and tested against the fake CLI (`tests/Support/Fak
 - Explicit questions added by the plan checker: convert HEIC to JPEG server-side (would need a decoder and a new package approval) or keep refusing it; keep the 10-page PDF cap or raise it.
 - ai_calls.model and medical_ai_extractions.model are NULL while queued/running and set once at finish (CLI-reported model, else 'default').
 
+## Native-review copy tasks (recorded by 08-21)
+Both belong with the native SK/PL review of the AI copy in 08-22 (and need new lang keys in EN, SK and PL, so a native reader should write them).
+- **Discard-edit dialog body (08-19).** `UiConfirmDialog` in the review edit discard flow shows the entry name as its body, because no lang key exists for a body sentence. Add a real body sentence key (for example "Your changes to this suggestion will be lost.") in en, sk and pl and use it as the body, with the entry name moved to the title or an `aria-describedby` line.
+- **Entry accessible names (08-18).** Entry accessible names ("Accept Medications: Ibuprofen") use the plural section heading as the type word, because the lang files have no singular type nouns. Add singular nouns (visit, medication, allergy, vaccination) in en, sk and pl so the names read "Accept medication: Ibuprofen". Polish and Slovak need the noun in the right case for each action, which is why this is a native task.
+
 ## Requirements after the live session
 AI-01..AI-03 get ticked in 08-22. AI-04 is NOT ticked: it is annotated "Codex part complete in Phase 8; Copilot part in Phase 9". The requirement wording is left unchanged.
 
