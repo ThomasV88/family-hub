@@ -54,6 +54,10 @@ afterEach(function () {
         $owner->statement("select set_config('ai.prune', 'on', true)");
         $owner->table('ai_calls')->delete();
     });
+    // Each test boots its own app and so opens its own extra connections; close them now instead of waiting for the
+    // garbage collector, or a long run exhausts the dev Postgres (max_connections=20).
+    DB::purge('ai_owner');
+    DB::purge('ai_app');
 });
 
 it('lets fh_app insert and advance the status forward', function () {

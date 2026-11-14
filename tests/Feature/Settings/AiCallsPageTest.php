@@ -115,7 +115,7 @@ it('forbids everyone but the admin and redirects guests', function () {
     $this->get('/settings/ai-calls')->assertRedirect('/login');
 });
 
-it('queues one login check on the ai queue for an admin with a recent confirmation', function () {
+it('queues one login check on the ai-control queue for an admin with a recent confirmation', function () {
     $this->useRealSensitiveSession();
     Queue::fake();
     $admin = User::factory()->admin()->create();
@@ -124,7 +124,7 @@ it('queues one login check on the ai queue for an admin with a recent confirmati
         ->post('/settings/ai-calls/check')->assertRedirect();
 
     Queue::assertPushed(CheckLoginJob::class, 1);
-    Queue::assertPushedOn('ai', CheckLoginJob::class);
+    Queue::assertPushedOn('ai-control', CheckLoginJob::class);
 });
 
 it('refuses the check without a recent confirmation', function () {
