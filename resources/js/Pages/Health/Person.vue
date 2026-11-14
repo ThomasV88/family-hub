@@ -8,6 +8,7 @@ import UiButton from '../../Components/ui/UiButton.vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
 import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
 import AllergyList from '../../Health/AllergyList.vue';
+import EmergencySummaryCard from '../../Health/EmergencySummaryCard.vue';
 import DocumentPanel from '../../Health/DocumentPanel.vue';
 import AllergyPanel from '../../Health/AllergyPanel.vue';
 import MedicationList from '../../Health/MedicationList.vue';
@@ -105,6 +106,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                 </UiAlert>
                 <div class="health-person__area">
                     <div class="health-person__side" data-testid="person-side">
+                        <EmergencySummaryCard :person="person" :allergy-count="allergies.length" />
                         <AllergyList :allergies="allergies" :can-edit="canAddVisit" @add="openNewAllergy" @open="openAllergy" />
                         <MedicationList :medications="medications" :can-edit="canAddVisit" @add="openNewMedication" @open="openMedication" />
                         <VaccinationList :vaccinations="vaccinations" :can-edit="canAddVisit" @add="openNewVaccination" @open="openVaccination" />

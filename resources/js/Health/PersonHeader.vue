@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
-import { FileDown, Pencil, Plus, Trash2, Upload, UserX } from '@lucide/vue';
+import { FileDown, IdCard, Pencil, Plus, Trash2, Upload, UserX } from '@lucide/vue';
 import UiAvatar from '../Components/ui/UiAvatar.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiConfirmDialog from '../Components/ui/UiConfirmDialog.vue';
@@ -54,10 +54,13 @@ const remove = () => router.delete(`/health/people/${props.person.id}`);
             <UiTag v-if="bloodLabel">{{ t('health.blood.label') }} {{ bloodLabel }}</UiTag>
             <UiTag v-if="!person.hasAccount" :icon="UserX">{{ t('health.person.no_account') }}</UiTag>
         </div>
-        <div v-if="person.canEdit" class="person-header__actions">
-            <UiButton variant="primary" :icon="Plus" data-testid="header-add-visit" @click="emit('add-visit')">{{ t('health.visit.add') }}</UiButton>
-            <UiButton variant="secondary" :icon="Upload" data-testid="header-add-document" @click="emit('add-document')">{{ t('health.doc.add') }}</UiButton>
-            <UiButton variant="secondary" :icon="FileDown" :href="`/health/people/${person.id}/export`" data-testid="header-export">{{ t('health.export.title') }}</UiButton>
+        <div class="person-header__actions">
+            <template v-if="person.canEdit">
+                <UiButton variant="primary" :icon="Plus" class="person-header__edit-action" data-testid="header-add-visit" @click="emit('add-visit')">{{ t('health.visit.add') }}</UiButton>
+                <UiButton variant="secondary" :icon="Upload" class="person-header__edit-action" data-testid="header-add-document" @click="emit('add-document')">{{ t('health.doc.add') }}</UiButton>
+                <UiButton variant="secondary" :icon="FileDown" class="person-header__edit-action" :href="`/health/people/${person.id}/export`" data-testid="header-export">{{ t('health.export.title') }}</UiButton>
+            </template>
+            <UiButton variant="secondary" :icon="IdCard" :href="`/health/people/${person.id}/emergency-card`" data-testid="header-emergency">{{ t('health.emergency.title') }}</UiButton>
         </div>
         <div v-if="person.canEdit" class="person-header__menu" data-testid="header-menu">
             <UiMenu :label="t('health.person.more_actions')" :items="menuItems" @select="onMenu" />
@@ -84,6 +87,6 @@ const remove = () => router.delete(`/health/people/${props.person.id}`);
 .person-header__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-inline-start: auto; }
 .person-header__menu { flex: none; }
 .person-header__actions + .person-header__menu { margin-inline-start: 0; }
-@container (max-width: 640px) { .person-header__actions { display: none; } }
+@container (max-width: 640px) { .person-header__edit-action { display: none; } }
 .person-header__view-only { flex-basis: 100%; margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 </style>
