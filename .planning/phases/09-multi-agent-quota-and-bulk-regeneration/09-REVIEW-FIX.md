@@ -38,7 +38,16 @@ Each fix is one commit, listed by hash. Every fix has tests. The logic fixes (CR
 
 **Files modified:** `app/Medical/Queries/AiBulkJobQuery.php`, `tests/Feature/Ai/BulkTickTest.php`
 **Commit:** a11e9c5
-**Applied fix:** The tick ends a run whose starting admin is gone or no longer an admin (status `cancelled`, queued work cancelled, audit row). It picks agents only from the starter's acknowledged set; with no usable agent it sets `blocked_since`, which the panel shows as Stopped after the configured hours, and it resumes by itself once the acknowledgment is fixed. Not done: freezing the provider set on `ai_bulk_runs` at Start. The tick and the job still read the admin's live `ai_notice_acks` row, so a later interactive acknowledgment by the same admin can still widen what an old run may use (that would need a migration).
+**Applied fix:** The tick ends a run whose starting admin is gone or no longer an admin (status `cancelled`, queued work cancelled, audit row). It picks agents only from the starter's acknowledged set; with no usable agent it sets `blocked_since`, which the panel shows as Stopped after the configured hours, and it resumes by itself once the acknowledgment is fixed. The provider set is now frozen on the run, see the follow-up below.
+
+### WR-01 follow-up: provider set frozen on the bulk run (fixed: requires human verification)
+
+**Files modified:** `database/migrations/2026_11_23_100000_add_providers_to_ai_bulk_runs.php` (new), `app/Medical/Queries/AdminAiBulkQuery.php`, `app/Medical/Queries/AiBulkJobQuery.php`, `app/Medical/Queries/AiJobQuery.php`, `app/Medical/Ai/RunExtractionJob.php`, tests
+**Applied fix:**
+- `ai_bulk_runs.providers` (non-null, comma separated keys like `ai_notice_acks.providers`, default `codex` for existing rows). The rollback drops the column. A new migration must be run on deploy.
+- Bulk Start stores exactly the set verified under the CR-01 lock (the one the admin saw and confirmed).
+- The tick (agent choice, `blocked_since`) and the job (`AiJobQuery::allowedProviders`, read before every attempt, which also feeds the no-candidate and resume logic) use the run's frozen set for bulk rows. A missing run row fails closed (empty set). Interactive rows still read the live acknowledgment. The panel and status payloads are unchanged.
+- Tests: Start stores the set (both Start tests), existing runs migrate to `codex` and the rollback is clean, a provider enabled after Start is never used by the tick (even with fallback on and the first agent cooling down), a later interactive acknowledgment does not widen the old run (tick and job), the held-run test now frees itself by order, not by acknowledgment.
 
 ### WR-03: Bulk audit rows carried person and document ids
 
