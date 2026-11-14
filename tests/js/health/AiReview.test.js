@@ -557,6 +557,73 @@ describe('accessibility', () => {
     });
 });
 
+describe('waiting for AI quota and provenance', () => {
+    const soon = () => new Date(Date.now() + 2 * 3600 * 1000).toISOString();
+    const waitingExtraction = () => extraction({ status: 'waiting', availableAt: soon(), readOnly: true, pending: 0, sections: { visits: [], medications: [], allergies: [], vaccinations: [] } });
+
+    it('shows "Read by <agent> <model>" under the status tag row', () => {
+        mountPage({ provenance: { agent: 'codex', model: 'gpt-x' } });
+        const meta = $('.ai-review__meta');
+        expect(meta.nextElementSibling.getAttribute('data-testid')).toBe('ai-provenance');
+        expect($('[data-testid="ai-provenance"]').textContent).toBe('Read by OpenAI Codex gpt-x');
+    });
+
+    it('shows only the agent when the model is empty and nothing when there is no provenance', () => {
+        mountPage({ provenance: { agent: 'copilot', model: null } });
+        expect($('[data-testid="ai-provenance"]').textContent).toBe('Read by GitHub Copilot');
+        wrapper.unmount();
+        mountPage({});
+        expect($('[data-testid="ai-provenance"]')).toBeNull();
+    });
+
+    it('shows the newer waiting run as a neutral tag with a time and Cancel run, while the old proposal stays reviewable', async () => {
+        mountPage({ newerWaiting: { id: 'nnnnnnnn-nnnn-4nnn-8nnn-nnnnnnnnnnn1', availableAt: soon() } });
+        const block = $('[data-testid="newer-waiting"]');
+        expect(block.textContent).toMatch(/A newer run is waiting for AI quota, retrying after (\w{3},? )?\d{2}:\d{2}/);
+        expect(block.querySelector('time').getAttribute('datetime')).toBeTruthy();
+        fetchMock.mockResolvedValue(accepted('visit', 'rec1'));
+        action('visit-0', 'accept').click();
+        await flush();
+        expect(entryEl('visit-0').textContent).toContain('Added');
+        fetchMock.mockReset();
+        fetchMock.mockResolvedValue({ ok: true, status: 200, data: {} });
+        $('[data-testid="cancel-newer"]').click();
+        await flush();
+        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/nnnnnnnn-nnnn-4nnn-8nnn-nnnnnnnnnnn1/cancel`, { method: 'POST', body: {} });
+        expect($('[data-testid="newer-waiting"]')).toBeNull();
+    });
+
+    it('shows a waiting extraction opened directly as a status block with Cancel run and no panes', async () => {
+        mountPage({ extraction: waitingExtraction() });
+        expect($('[data-testid="review-waiting"]').getAttribute('aria-busy')).toBe('true');
+        expect($('[data-testid="ai-status-tag"]').textContent).toContain('Waiting for AI quota, retrying after');
+        expect($('[data-testid="waiting-detail"]').textContent).toContain('usage limit');
+        expect($('[data-testid="pane-document"]')).toBeNull();
+        expect($('[data-testid="review-empty"]')).toBeNull();
+        fetchMock.mockResolvedValue({ ok: true, status: 200, data: {} });
+        $('[data-testid="cancel-waiting"]').click();
+        await flush();
+        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/${EX}/cancel`, { method: 'POST', body: {} });
+        expect(router.visit).toHaveBeenCalledWith(`/health/people/${PID}?panel=document&id=${DOC_ID}`);
+    });
+
+    for (const locale of ['en', 'sk', 'pl']) {
+        for (const dark of [false, true]) {
+            for (const width of [1280, 320]) {
+                it(`has no axe violations with provenance, a newer waiting run and the waiting block in ${locale} ${dark ? 'dark' : 'light'} at ${width}`, async () => {
+                    document.documentElement.classList.toggle('dark', dark);
+                    mountPage({ provenance: { agent: 'copilot', model: 'gpt-5' }, newerWaiting: { id: 'n1', availableAt: soon() } }, { locale, width });
+                    await expectNoAxeViolations(document.body);
+                    wrapper.unmount();
+                    document.body.innerHTML = '';
+                    mountPage({ extraction: waitingExtraction() }, { locale, width });
+                    await expectNoAxeViolations(document.body);
+                });
+            }
+        }
+    }
+});
+
 describe('copy', () => {
     it('has every key the page reads in en, sk and pl', () => {
         const keys = [

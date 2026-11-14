@@ -2,7 +2,7 @@
 import { computed, nextTick, provide, reactive, ref, watch } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { ArrowLeft, ListChecks } from '@lucide/vue';
+import { ArrowLeft, Ban, Hourglass, ListChecks } from '@lucide/vue';
 import AppShell from '../../Layouts/AppShell.vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
 import UiConfirmDialog from '../../Components/ui/UiConfirmDialog.vue';
@@ -10,8 +10,14 @@ import UiButton from '../../Components/ui/UiButton.vue';
 import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
 import UiErrorState from '../../Components/ui/UiErrorState.vue';
 import UiSkeleton from '../../Components/ui/UiSkeleton.vue';
+import UiTag from '../../Components/ui/UiTag.vue';
+import { useToast } from '../../Components/ui/useToast.js';
+import { securityFetch } from '../../Security/securityFetch.js';
+import { handleHealthRefusal } from '../../Health/healthRefusal.js';
 import { useFrameWidth } from '../../Shell/shellState.js';
+import AiProvenanceLine from '../../Health/Ai/AiProvenanceLine.vue';
 import AiStatusTag from '../../Health/Ai/AiStatusTag.vue';
+import { formatWhen, isPast } from '../../Health/Ai/aiWhen.js';
 import DocumentPane from '../../Health/Ai/DocumentPane.vue';
 import ReviewPaneToggle from '../../Health/Ai/ReviewPaneToggle.vue';
 import SuggestionList from '../../Health/Ai/SuggestionList.vue';
@@ -26,10 +32,14 @@ const props = defineProps({
     newestExtractionId: { type: String, default: null },
     consentOn: { type: Boolean, default: false },
     specialties: { type: Array, default: () => [] },
+    // {agent, model|null} of the proposal shown; newerWaiting {id, availableAt} when a newer run waits for AI quota.
+    provenance: { type: Object, default: null },
+    newerWaiting: { type: Object, default: null },
     pane: { type: String, default: null },
     loading: { type: Boolean, default: false },
 });
 const { t, locale } = useI18n();
+const toast = useToast();
 
 const WIDE = 800;
 const root = ref(null);
@@ -193,6 +203,34 @@ const switchLabel = computed(() => {
 watch(superseded, (value) => { if (value) closeEdit(editingKey.value); });
 
 const retry = () => router.reload();
+
+// Waiting for AI quota: a run opened directly shows the status block instead of panes, and a newer waiting run is
+// one tag and a Cancel run beside an older proposal that stays fully reviewable.
+const appLocale = computed(() => ({ 'sk-SK': 'sk', 'pl-PL': 'pl', 'en-GB': 'en' }[locale.value] ?? locale.value));
+const isWaitingRun = computed(() => props.extraction?.status === 'waiting');
+const newerCancelled = ref(false);
+const newerWhen = computed(() => {
+    const at = props.newerWaiting?.availableAt;
+    return at && !isPast(at) ? formatWhen(at, appLocale.value) : '';
+});
+const newerParts = computed(() => t('health.ai.status.newer_waiting', { when: '\u0000' }).split('\u0000'));
+const cancelling = ref(false);
+async function cancelRun(id, done) {
+    if (cancelling.value || !id) return;
+    cancelling.value = true;
+    const result = await securityFetch(`/health/people/${props.person?.id}/ai/${id}/cancel`, { method: 'POST', body: {} });
+    cancelling.value = false;
+    if (result.ok) {
+        toast.show(t('health.ai.run.cancelled_toast'));
+        announce(t('health.ai.status.announce_cancelled'));
+        done();
+        return;
+    }
+    if (result.status === 423 && handleHealthRefusal(result.error)) return;
+    announce(t('health.ai.run.queue_failed'));
+}
+const cancelNewer = () => cancelRun(props.newerWaiting?.id, () => { newerCancelled.value = true; });
+const cancelWaitingRun = () => cancelRun(props.extraction?.id, () => router.visit(documentUrl.value));
 </script>
 
 <template>
@@ -202,11 +240,24 @@ const retry = () => router.reload();
             <header v-if="person && document" class="ai-review__header">
                 <div><UiButton variant="ghost" :icon="ArrowLeft" :href="documentUrl" data-testid="back-document">{{ t('health.ai.review.back_document') }}</UiButton></div>
                 <h1 class="ai-review__title">{{ t('health.ai.review.title') }}</h1>
-                <template v-if="extraction">
+                <template v-if="extraction && isWaitingRun">
+                    <p class="ai-review__meta">
+                        <AiStatusTag status="waiting" :available-at="extraction.availableAt ?? null" />
+                    </p>
+                </template>
+                <template v-else-if="extraction">
                     <p class="ai-review__meta">
                         <AiStatusTag :status="superseded ? 'superseded' : 'ready'" />
                         <time v-if="runDate" :datetime="extraction.runAt" data-testid="run-date">{{ t('health.ai.review.run_at', { date: runDate }) }}</time>
                     </p>
+                    <AiProvenanceLine v-if="provenance" :agent="provenance.agent" :model="provenance.model ?? null" />
+                    <div v-if="newerWaiting && !newerCancelled" class="ai-review__newer" data-testid="newer-waiting">
+                        <UiTag variant="neutral" :icon="Hourglass" class="ai-review__newer-tag">
+                            <span v-if="newerWhen">{{ newerParts[0] }}<time :datetime="newerWaiting.availableAt">{{ newerWhen }}</time>{{ newerParts[1] }}</span>
+                            <span v-else>{{ t('health.ai.status.waiting_soon') }}</span>
+                        </UiTag>
+                        <UiButton variant="ghost" size="sm" :icon="Ban" :loading="cancelling" data-testid="cancel-newer" @click="cancelNewer">{{ t('health.ai.run.cancel') }}</UiButton>
+                    </div>
                     <p class="ai-review__progress" data-testid="progress">{{ leftText }}</p>
                     <UiAlert variant="info" data-testid="warning">{{ t('health.ai.review.warning') }}</UiAlert>
                     <p v-if="pagesLine" class="ai-review__muted" data-testid="pages-read">{{ pagesLine }}</p>
@@ -228,6 +279,10 @@ const retry = () => router.reload();
                     <div class="ai-review__skeleton-list"><UiSkeleton height="120px" /><UiSkeleton height="120px" /><UiSkeleton height="120px" /></div>
                 </div>
             </div>
+            <section v-else-if="person && document && isWaitingRun" class="ai-review__waiting" aria-busy="true" data-testid="review-waiting">
+                <p class="ai-review__muted" data-testid="waiting-detail">{{ t('health.ai.status.waiting_detail') }}</p>
+                <UiButton variant="secondary" :icon="Ban" :loading="cancelling" data-testid="cancel-waiting" @click="cancelWaitingRun">{{ t('health.ai.run.cancel') }}</UiButton>
+            </section>
             <UiErrorState v-else-if="!person || !document || !extraction" :heading-level="2" data-testid="review-error" @retry="retry" />
             <UiEmptyState v-else-if="total === 0" :title="t('health.ai.review.empty_title')" :body="t('health.ai.review.empty_body')" :icon="ListChecks" :heading-level="2" data-testid="review-empty">
                 <template #action>
@@ -292,6 +347,9 @@ const retry = () => router.reload();
 .ai-review__header > :deep(.ui-alert) { align-self: stretch; }
 .ai-review__title { margin: 0; font-size: var(--text-2xl); font-weight: 600; line-height: 1.2; }
 .ai-review__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
+.ai-review__newer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.ai-review__newer-tag { white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
+.ai-review__waiting { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); }
 .ai-review__progress { margin: 0; font-weight: 600; }
 .ai-review__muted { margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
 .ai-review__panes { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
