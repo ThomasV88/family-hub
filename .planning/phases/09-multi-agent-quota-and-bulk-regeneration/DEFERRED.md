@@ -1,0 +1,55 @@
+# Phase 9 deferred live-ops work (owner decision 2026-11-14: no live work during the phase)
+
+Plan 09-20 holds all live work: owner decisions, the Copilot data-use check, staging release, the real Copilot device login per stack, the tool-denial gate (L3), one real run per agent, the live checklist L1-L8, a real bulk dry run and a tiny bulk run on staging, native SK/PL review and the production release.
+Plans 09-01..09-19 are built and tested against fake CLIs (`tests/Support/FakeCodex.php`, `tests/Support/FakeCopilot.php`). No plan before 09-20 pushes, logs in to any CLI or touches a server. AI-04..AI-07 stay unticked in REQUIREMENTS.md until 09-20. Do not push `develop` or `main` before that session (a push deploys, and CI builds the ai image, now about 490 MB heavier with the Copilot binary and its baked cache).
+
+Prerequisite: the Phase 8 live plan 08-22 has run (Codex login per stack, ai-worker live). If it has not, run it first.
+
+## Live work (09-20)
+- Server: ai-worker healthy on the new image, `ai:preflight` OK (no GH_TOKEN, GITHUB_TOKEN, COPILOT_GITHUB_TOKEN, COPILOT_PROVIDER_* in the env), copilot-home mounted only in ai-worker and never in backups, `copilot --version` 1.0.112, `staging:audit` passes.
+- Login: `docker compose exec ai-worker copilot login --device-code` per stack as the app user; the owner signs in to GitHub and answers yes to plaintext storage; list `config.json` keys only (never values) and compare with `ai.copilot.login_keys`; record the OAuth scopes; never copy credentials between stacks.
+- L3 tool-denial gate on a synthetic injection document BEFORE Copilot is enabled for real use; if any tool ran, Copilot stays off.
+- Real runs: one per agent (image and 10-page PDF), fallback with one agent made unusable, attempt rows in AI calls, "Read by" provenance.
+- Measurements: per-run home size and ai-worker memory peak (MEM_AI 768m, tmpfs 192m), `config.json` hash before/after (token rotation, A5), `usage.json` model field (A6), `max_ai_credits` 60 sufficiency (A14).
+- Real usage-limit and expired-login transcripts per agent if observed (L4): freeze `ai.quota.signatures` and `ai.copilot.auth_failure_patterns` in a quick task; otherwise keep the ASSUMED values.
+- Bulk on staging: dry run counts only, accepted-proposal and consent-off documents skipped, start with cap 1, pause, resume, cancel, history counts only.
+
+## Owner decisions (ask A10, G, A9 first)
+- **A10: bulk without membership (prominent).** Bulk may process documents of persons the admin is not a member of; each person's AI consent is the only gate (research C6). Alternative: restrict bulk eligibility and counts to persons the admin edits (quick task).
+- **G: documents to GitHub.** Copilot plan data-use and training settings, the Copilot terms and the GitHub AUP ("excessive automated bulk activity") for a private family server; Additional usage budget $0.
+- **A9: bulk policy and ceilings.** Bulk uses only the first enabled agent (`ai.bulk.fallback_agents` false); Copilot daily ceiling 30 runs; bulk default cap 20, max cap 30; spacing 10 minutes; start hour 01:00 Europe/Bratislava; global headroom 10.
+
+## PROVISIONAL defaults built in this phase (confirm or change in 09-20)
+- Per-run `COPILOT_HOME` on the tmpfs, no copy-back of `config.json` (research Pattern 1, A5).
+- Quota ladder 60/180/720/1440 minutes, 48 h ladder reset window, 24 h wait cap, reset buffer 60 s, reset clamp 8 days.
+- Dry-run validity 15 minutes; one active bulk run at a time; history of 10 counts-only runs.
+- Enabling an agent while not logged in is allowed with a warning, for every non-logged-in state (UI-SPEC PROVISIONAL 3, UI checker follow-up).
+- The last enabled agent cannot be switched off (UI-SPEC PROVISIONAL 2); cooldown is read-only (PROVISIONAL 4).
+- Model id rule `^[A-Za-z0-9][A-Za-z0-9._:-]{0,59}$` (no slashes, 60 characters), tightened from the UI-SPEC PROVISIONAL slash/64 pattern to equal the existing server rule; error copy changed accordingly (09-01).
+- A Copilot-only notice text (`health.ai.notice.github_*`) added by the planner, since the UI-SPEC had no wording for "only Copilot enabled".
+- "Stopped" bulk display derived from `ai_bulk_runs.blocked_since` after 24 h without a usable agent; the run stays active and resumes on its own (UI-SPEC "Stopped" tag vs PROVISIONAL 12).
+- Copilot health from the local credential marker plus run outcomes (no status command exists, research C1).
+- MEM_AI 768m, tmpfs /ai-work 192m (A4); `ai.copilot.max_ai_credits` 60 (A14); job budget 660 s, worker timeout 720 s, retry_after 900 s.
+- Admin sections 7 -> 8, `AiAgentsController` arch allowlist with a pinned reference set, `zz_ai_agents.php` area name, `AiBulkJobQuery` added to the mutation-scan allowlist.
+- Agent update/move as JSON endpoints through `securityFetch`; login check keeps `settings.ai_calls.check`.
+- UI-SPEC PROVISIONAL 1-14 (the login card moves into the agent cards and the AI calls page keeps a pointer line, which changes the 08-17 output; waiting poll 60 s with a 60-minute stop; bulk poll 15 s; bulk calls not labelled in AI calls; newer waiting run beside an older reviewable proposal).
+
+## Research corrections that override CONTEXT (recorded in the plans)
+- C1: no Copilot login/status command; health = local credential marker + run outcomes (09-07, 09-09).
+- C2: no queue `release()` with delay; a DB `waiting` status plus the scheduled `ai:resume-waiting` (09-03, 09-10).
+- C3: failure codes `quota_timeout` (24 h cap), `quota_exhausted`, `no_agent` (09-04, 09-10).
+- C4: fall through to the next agent on `auth` as well as quota; everything else terminal (09-10).
+- C5: stored single-use dry-run row with 15-minute validity and 409/410 semantics (09-03, 09-13).
+- C6: bulk-specific run-time recheck (admin still admin, run not cancelled, consent on) instead of the member-editor check (09-10), owner decision A10.
+- C7: per-member provider notice version (`ai_notice_acks.providers`, existing acknowledgments become the Codex-only first version), provider-aware disclosure lines, `availableAt`/`failureCode` in the status payload, "Usage limit reached" call filter (09-03, 09-11, 09-15, 09-17).
+
+## Native-review copy
+All new SK and PL strings from 09-01 (agents section, waiting and quota-timeout status, provenance, provider lines, provider-aware and Copilot-only notices, bulk panel, AI calls additions, audit details) are drafts flagged for a native reader in 09-20.
+
+## Carried hardening items (from Phase 8 DEFERRED.md, now covering two CLIs)
+- WR-06: run the CLIs under their own uid. With Copilot the www-data uid can read both `/codex/auth.json` and `/copilot/config.json`; the same `setpriv` approach applies to both runners and both credential volumes.
+- IN-06: ai-worker container hardening (cap_drop ALL, no-new-privileges, read_only, pids_limit), together with WR-06.
+- No compose-level egress allowlist is available; the Copilot CLI must reach GitHub (research Q8).
+
+## Requirements after the live session
+AI-04 is ticked in 09-20 only when both the Codex part (08-22) and the Copilot part are live; AI-05, AI-06 and AI-07 are ticked in 09-20 (under Decision G2, AI-06 and AI-04 are annotated that Copilot is installed but disabled by owner decision).

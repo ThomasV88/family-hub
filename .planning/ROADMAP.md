@@ -302,8 +302,30 @@ Plans:
   1. Admin can set the agent order (Codex, then GitHub Copilot) and the model per agent in settings, and sees each agent's login health
   2. When an agent's usage limit is exhausted, the job falls back to the next agent or waits until the limit resets, and the user sees the job's status
   3. Admin can start bulk re-generation for past documents with a dry run first and a daily cap, and it never overwrites data a human already accepted
-**Plans**: TBD
+**Plans:** 20 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 09-01-PLAN.md — All Phase 9 copy (EN/SK/PL, plurals, checker wording) and two content-free audit events
+- [ ] 09-02-PLAN.md — @github/copilot 1.0.112 pin with legitimacy evidence, ai-image-only stage, copilot-home, queue order, check-compose rules
+- [ ] 09-03-PLAN.md — ai_agent_settings, waiting status, per-attempt call rows, bulk tables, notice provider set (three migrations)
+- [ ] 09-04-PLAN.md — Phase 9 config with PROVISIONAL defaults, model-id rule, failure codes, quota signature matcher
+- [ ] 09-05-PLAN.md — Strict JSON reply parsing, content-free validator issue codes, inline-schema prompt with repair block
+- [ ] 09-06-PLAN.md — Codex quota detection with reset time, admin model override, deadline-bound calls
+- [ ] 09-07-PLAN.md — CopilotRunner (per-run home, layered tool denial), CopilotAgent with one repair, FakeCopilot, arch rules
+- [ ] 09-08-PLAN.md — Preflight refuses GitHub/Copilot tokens and checks the Copilot install; work-dir root guard
+- [ ] 09-09-PLAN.md — Agent settings query, ordered registry with candidates, cooldown ladder, Copilot ceiling, login checks
+- [ ] 09-10-PLAN.md — Fallback loop, waiting state and resumer, 24 h cap, bulk run-time rule and accepted-data guard
+- [ ] 09-11-PLAN.md — Waiting, quota timeout, provenance and provider-aware notice in start, cancel, status and review
+- [ ] 09-12-PLAN.md — Admin AI agents backend (enable, order, model), eighth admin section, allowlists
+- [ ] 09-13-PLAN.md — Bulk dry run with single-use token, start, pause, resume, cancel, counts-only panel
+- [ ] 09-14-PLAN.md — Bulk scheduler tick: off-peak, daily cap, spacing, single flight, ai-bulk queue
+- [ ] 09-15-PLAN.md — AI calls: attempt rows with "Usage limit reached" tag and filter
+- [ ] 09-16-PLAN.md — Settings > AI agents screen with agent cards and per-agent login health
+- [ ] 09-17-PLAN.md — Waiting for AI quota, quota timeout, "Read by" provenance, provider line and notice in the UI
+- [ ] 09-18-PLAN.md — Bulk re-generation panel: dry run, guarded Start, progress, pause/cancel, history
+- [ ] 09-19-PLAN.md — End-to-end and privacy proofs, cache/SW/a11y checks, full gate alone, validation sign-off
+- [ ] 09-20-PLAN.md — Live: owner decisions, Copilot login per stack, L1-L8 incl. tool-denial gate, tiny bulk run, release (deferred, with owner)
 
 ## Progress
 
