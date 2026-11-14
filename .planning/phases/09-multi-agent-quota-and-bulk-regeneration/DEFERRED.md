@@ -16,7 +16,7 @@ Prerequisite: the Phase 8 live plan 08-22 has run (Codex login per stack, ai-wor
 
 ## Owner decisions (ask A10, G, A9 first)
 - **A10: bulk without membership (prominent).** Bulk may process documents of persons the admin is not a member of; each person's AI consent is the only gate (research C6). Alternative: restrict bulk eligibility and counts to persons the admin edits (quick task).
-- **G: documents to GitHub.** Copilot plan data-use and training settings, the Copilot terms and the GitHub AUP ("excessive automated bulk activity") for a private family server; Additional usage budget $0.
+- **G: documents to GitHub.** Copilot plan data-use and training settings, the Copilot terms and the GitHub AUP ("excessive automated bulk activity") for a private family server; Additional usage budget $0. The owner confirms that Copilot's one repair retry re-sends the same page images to GitHub a second time (issue codes only, never the earlier reply).
 - **A9: bulk policy and ceilings.** Bulk uses only the first enabled agent (`ai.bulk.fallback_agents` false); Copilot daily ceiling 30 runs; bulk default cap 20, max cap 30; spacing 10 minutes; start hour 01:00 Europe/Bratislava; global headroom 10.
 
 ## PROVISIONAL defaults built in this phase (confirm or change in 09-20)
@@ -27,12 +27,20 @@ Prerequisite: the Phase 8 live plan 08-22 has run (Codex login per stack, ai-wor
 - The last enabled agent cannot be switched off (UI-SPEC PROVISIONAL 2); cooldown is read-only (PROVISIONAL 4).
 - Model id rule `^[A-Za-z0-9][A-Za-z0-9._:-]{0,59}$` (no slashes, 60 characters), tightened from the UI-SPEC PROVISIONAL slash/64 pattern to equal the existing server rule; error copy changed accordingly (09-01).
 - A Copilot-only notice text (`health.ai.notice.github_*`) added by the planner, since the UI-SPEC had no wording for "only Copilot enabled".
+- Bulk-row person masking in AI calls and the copy "Not shown (bulk run)" (plan checker revision, see above).
 - "Stopped" bulk display derived from `ai_bulk_runs.blocked_since` after 24 h without a usable agent; the run stays active and resumes on its own (UI-SPEC "Stopped" tag vs PROVISIONAL 12).
 - Copilot health from the local credential marker plus run outcomes (no status command exists, research C1).
 - MEM_AI 768m, tmpfs /ai-work 192m (A4); `ai.copilot.max_ai_credits` 60 (A14); job budget 660 s, worker timeout 720 s, retry_after 900 s.
 - Admin sections 7 -> 8, `AiAgentsController` arch allowlist with a pinned reference set, `zz_ai_agents.php` area name, `AiBulkJobQuery` added to the mutation-scan allowlist.
 - Agent update/move as JSON endpoints through `securityFetch`; login check keeps `settings.ai_calls.check`.
 - UI-SPEC PROVISIONAL 1-14 (the login card moves into the agent cards and the AI calls page keeps a pointer line, which changes the 08-17 output; waiting poll 60 s with a 60-minute stop; bulk poll 15 s; bulk calls not labelled in AI calls; newer waiting run beside an older reviewable proposal).
+
+## Plan checker revisions (2026-11-14)
+- **Call log masking for bulk rows (deliberate tightening of the UI-SPEC).** The UI-SPEC let Settings > AI calls keep person names for every row under the Phase 8 admin exception. Rows with a `bulk_run_id` now show "Not shown (bulk run)" in the person cell and a person filter never returns them (09-15), so the admin learns nothing about which people bulk processed (CONTEXT "counts and status only", A10). This supersedes UI-SPEC PROVISIONAL 10 ("bulk calls not labelled"). Confirm under A10.
+- **Provider acknowledgment at run time.** Every attempt, including runs resumed from `waiting`, is restricted to the providers the starter acknowledged (`ai_notice_acks.providers`); with none enabled the run fails `notice_required` and nothing is sent (09-10). Bulk runs use the starting admin's acknowledgment, recorded at Start from the providers named in the confirm dialog (09-13).
+- **Leaving `waiting`.** Resume, reaper, user cancel and bulk cancel all set `available_at` to NULL in the same UPDATE; `waiting_since` is written only by the first park and kept as history.
+- **Bulk completion.** Counts come from item rows only (each skip once); a run completes when no eligible document is left and no item is open; documents that became ineligible after the dry run drop out and are added to `skipped_count` once at completion; `eligible_total` is display only (09-13, 09-14).
+- **Terminal-code detail lines** for `quota_exhausted`, `no_agent` and `notice_required` added (09-01 copy, 09-17), native review pending.
 
 ## Research corrections that override CONTEXT (recorded in the plans)
 - C1: no Copilot login/status command; health = local credential marker + run outcomes (09-07, 09-09).
