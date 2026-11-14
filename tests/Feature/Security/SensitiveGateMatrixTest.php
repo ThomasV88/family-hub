@@ -3,14 +3,18 @@
 use App\Access\AccessLevel;
 use App\Access\Module;
 use App\Access\Preset;
+use App\Http\Controllers\Finance\OverviewController;
 use App\Models\AuditEntry;
 use App\Models\FinanceAccount;
 use App\Models\FinanceRecurring;
 use App\Models\ModulePermission;
 use App\Models\User;
+use App\Security\SensitiveSession;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\EndpointMatrix;
 use Tests\Support\Roles;
@@ -159,19 +163,18 @@ it('keeps the Home still-to-pay card visible for a stale finance member (allowli
         ->component('Home')->has('financeCard.paymentsCount'));
 });
 
-
 // CR-01: routes that grant or widen access to sensitive data need the recent-confirmation window.
 function grantSnapshot(): array
 {
     return json_decode(json_encode([
         'audit' => AuditEntry::count(),
         'permissions' => ModulePermission::query()->orderBy('id')->get()->toArray(),
-        'invitations' => \Illuminate\Support\Facades\DB::table('invitations')->orderBy('id')->get()->toArray(),
+        'invitations' => DB::table('invitations')->orderBy('id')->get()->toArray(),
         'accounts' => FinanceAccount::query()->orderBy('id')->get()->toArray(),
-        'members' => \Illuminate\Support\Facades\DB::table('finance_account_members')->get()->toArray(),
-        'medical_members' => \Illuminate\Support\Facades\DB::table('medical_subject_members')->orderBy('subject_id')->orderBy('user_id')->get()->toArray(),
-        'wishlist_managers' => \Illuminate\Support\Facades\DB::table('wishlist_managers')->orderBy('id')->get()->toArray(),
-        'medical_links' => \Illuminate\Support\Facades\DB::table('medical_subjects')->orderBy('id')->get(['id', 'user_id', 'self_access_enabled'])->toArray(),
+        'members' => DB::table('finance_account_members')->get()->toArray(),
+        'medical_members' => DB::table('medical_subject_members')->orderBy('subject_id')->orderBy('user_id')->get()->toArray(),
+        'wishlist_managers' => DB::table('wishlist_managers')->orderBy('id')->get()->toArray(),
+        'medical_links' => DB::table('medical_subjects')->orderBy('id')->get(['id', 'user_id', 'self_access_enabled'])->toArray(),
     ]), true);
 }
 
@@ -215,11 +218,11 @@ it('refuses a stale admin on the wishlist manager route and leaves the managers 
     $stale = $this->actingAs($users['admin'])->putJson($url, $payload);
     expect($stale->getStatusCode())->toBe(423);
     expect($stale->json('error'))->toBe('confirm_required');
-    expect(\Illuminate\Support\Facades\DB::table('wishlist_managers')->count())->toBe(0);
+    expect(DB::table('wishlist_managers')->count())->toBe(0);
 
     $this->app['auth']->forgetGuards();
-    $this->actingAs($users['admin'])->withSession([\App\Security\SensitiveSession::CONFIRMED_KEY => now()->getTimestamp()])->putJson($url, $payload)->assertRedirect();
-    expect(\Illuminate\Support\Facades\DB::table('wishlist_managers')->count())->toBe(1);
+    $this->actingAs($users['admin'])->withSession([SensitiveSession::CONFIRMED_KEY => now()->getTimestamp()])->putJson($url, $payload)->assertRedirect();
+    expect(DB::table('wishlist_managers')->count())->toBe(1);
 });
 
 it('classifies the second-factor reset and wishlist manager routes as access-granting and leaves session revokes outside', function () {
@@ -259,7 +262,7 @@ it('reports a throwaway grant route that was never classified (mutation check)',
 
 function inertiaHeaders(): array
 {
-    return ['HTTP_X_INERTIA' => 'true', 'HTTP_X_INERTIA_VERSION' => (string) \Inertia\Inertia::getVersion()];
+    return ['HTTP_X_INERTIA' => 'true', 'HTTP_X_INERTIA_VERSION' => (string) Inertia::getVersion()];
 }
 
 /**
@@ -376,7 +379,7 @@ it('lets a fresh session through on every sensitive route, GET and write alike, 
 });
 
 it('finds a finance, health or medical controller route behind an innocent name and URI (namespace net, mutation check)', function () {
-    Route::middleware('web')->get('/reports/zz-probe', [\App\Http\Controllers\Finance\OverviewController::class, 'index'])
+    Route::middleware('web')->get('/reports/zz-probe', [OverviewController::class, 'index'])
         ->middleware('access:authenticated')->name('zz.report_probe');
 
     expect(SensitiveRoutes::offenders())->toContain('zz.report_probe');
