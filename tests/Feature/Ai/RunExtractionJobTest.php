@@ -3,6 +3,7 @@
 use App\Access\AccessLevel;
 use App\Medical\Ai\RunExtractionJob;
 use App\Medical\Ai\Work\WorkDir;
+use App\Medical\Queries\AiJobQuery;
 use App\Medical\Queries\SystemQuery;
 use App\Models\AiAgentStatus;
 use App\Models\AiCall;
@@ -372,4 +373,27 @@ it('closes a still-running row through failed() as worker_lost and ignores finis
     ejUse(FakeCodex::succeeding(json_encode(ejPayload())));
     (new RunExtractionJob($s['run']->id))->failed(new RuntimeException('again'));
     expect(ejRow($s['run'])->status)->toBe('failed');
+});
+
+it('finishes as cancelled and keeps the old proposal when a cancel lands between the last recheck and the write', function () {
+    $s = ejSetup();
+    $old = MedicalAiExtraction::factory()->forDocument($s['doc'])->ready(ejPayload(), 5)->create(['started_by' => $s['user']->id]);
+    ejUse(FakeCodex::succeeding(json_encode(ejPayload())));
+    app()->instance(AiJobQuery::class, new class extends AiJobQuery
+    {
+        public function finishReady(string $id, array $payload, int $entryCount, ?int $pagesRead, ?int $pagesTotal, string $model, int $durationMs): bool
+        {
+            DB::table('medical_ai_extractions')->where('id', $id)->update(['cancel_requested_at' => now()]);
+
+            return parent::finishReady($id, $payload, $entryCount, $pagesRead, $pagesTotal, $model, $durationMs);
+        }
+    });
+
+    ejRun($s['run']);
+
+    $row = ejRow($s['run']);
+    expect($row->status)->toBe('cancelled')->and($row->cancel_reason)->toBe('user')->and($row->payload)->toBeNull()
+        ->and(DB::table('medical_ai_extractions')->where('id', $old->id)->value('status'))->toBe('ready')
+        ->and(ejCall($s['run'])->status)->toBe('cancelled');
+    expect(AuditEntry::query()->where('event', 'medical_ai_run_finished')->first()->meta['status'])->toBe('cancelled');
 });

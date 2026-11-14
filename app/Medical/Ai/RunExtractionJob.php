@@ -163,9 +163,15 @@ class RunExtractionJob implements ShouldQueue
             $done = $query->finishReady($id, $outcome->payload, (int) $outcome->entryCount, $pagesRead, $pagesTotal, $outcome->model, $outcome->durationMs);
             if ($done) {
                 $this->safely(fn () => $health->recordSuccess($agent->key()));
+
+                return 'succeeded';
             }
 
-            return $done ? 'succeeded' : null;
+            // A cancel or a consent withdrawal landed after the last recheck: finish as cancelled, supersede nothing.
+            // finishCancelled is a no-op (null) when the row was closed elsewhere.
+            $why = $query->abortReason($id) ?? 'user';
+
+            return $query->finishCancelled($id, $why, $outcome->model, $outcome->durationMs) ? 'cancelled' : null;
         }
 
         $code = $outcome->failure ?? FailureCode::NoOutput;

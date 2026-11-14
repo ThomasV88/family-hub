@@ -5,6 +5,7 @@ namespace App\Medical\Queries;
 use App\Medical\Ai\ExtractionSchema;
 use App\Medical\Ai\FailureCode;
 use App\Medical\AiConsent;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -15,7 +16,7 @@ use LogicException;
  * never returns names. Every finish call acts only on a row that is still running, so a reaper, a cancel or a
  * redelivery can never be overwritten by a late result.
  */
-final class AiJobQuery
+class AiJobQuery
 {
     private const MODEL_MAX = 60;
 
@@ -87,25 +88,36 @@ final class AiJobQuery
     }
 
     /**
-     * The previous ready run of the same document becomes superseded in the same transaction. False when the row was
-     * no longer running (nothing is written then).
+     * The previous ready run of the same document becomes superseded in the same transaction, but only once this row is
+     * confirmed (under a row lock) to be still running, not cancel-requested and for a person who still consents.
+     * False when any of that no longer holds: nothing is written then and the old proposal stays as it is. The caller
+     * maps false to a cancelled finish.
      *
      * @param  array<string, mixed>  $payload
      */
     public function finishReady(string $id, array $payload, int $entryCount, ?int $pagesRead, ?int $pagesTotal, string $model, int $durationMs): bool
     {
+        if (! Str::isUuid($id)) {
+            return false;
+        }
         $model = $this->model($model);
         $now = Carbon::now();
 
         try {
             DB::transaction(function () use ($id, $payload, $entryCount, $pagesRead, $pagesTotal, $model, $durationMs, $now) {
-                $documentId = DB::table('medical_ai_extractions')->where('id', $id)->where('status', 'running')->value('document_id');
-                if ($documentId === null) {
+                $row = DB::table('medical_ai_extractions')->where('id', $id)->where('status', 'running')
+                    ->whereNull('cancel_requested_at')->lockForUpdate()->first(['document_id', 'subject_id']);
+                if ($row === null) {
                     throw new LogicException('not running');
                 }
-                DB::table('medical_ai_extractions')->where('document_id', $documentId)->where('status', 'ready')
+                // FOR SHARE serializes with a consent change, which takes FOR UPDATE on the subject row.
+                $consent = DB::table('medical_subjects')->where('id', $row->subject_id)->sharedLock()->value('ai_consent');
+                if (! $consent) {
+                    throw new LogicException('consent withdrawn');
+                }
+                DB::table('medical_ai_extractions')->where('document_id', $row->document_id)->where('status', 'ready')
                     ->update(['status' => 'superseded', 'updated_at' => $now]);
-                DB::table('medical_ai_extractions')->where('id', $id)->where('status', 'running')->update([
+                $written = DB::table('medical_ai_extractions')->where('id', $id)->where('status', 'running')->update([
                     'status' => 'ready',
                     'payload' => json_encode($payload, JSON_THROW_ON_ERROR),
                     'entry_count' => $entryCount,
@@ -117,6 +129,9 @@ final class AiJobQuery
                     'finished_at' => $now,
                     'updated_at' => $now,
                 ]);
+                if ($written !== 1) {
+                    throw new LogicException('not running');
+                }
                 $this->closeCall($id, 'succeeded', null, $model, $durationMs, $now);
             });
         } catch (LogicException) {
@@ -186,15 +201,22 @@ final class AiJobQuery
         });
     }
 
+    /**
+     * The call log is a side record: a failure here (for example a trigger refusing a row that is already closed) must
+     * never undo the extraction outcome. The savepoint keeps the surrounding transaction usable.
+     */
     private function closeCall(string $extractionId, string $status, ?string $failureCode, string $model, ?int $durationMs, Carbon $now): void
     {
-        DB::table('ai_calls')->where('extraction_id', $extractionId)->whereIn('status', ['queued', 'running'])->update([
-            'status' => $status,
-            'failure_code' => $failureCode,
-            'model' => $model,
-            'duration_ms' => $durationMs,
-            'finished_at' => $now,
-        ]);
+        try {
+            DB::transaction(fn () => DB::table('ai_calls')->where('extraction_id', $extractionId)->whereIn('status', ['queued', 'running'])->update([
+                'status' => $status,
+                'failure_code' => $failureCode,
+                'model' => $model,
+                'duration_ms' => $durationMs,
+                'finished_at' => $now,
+            ]));
+        } catch (QueryException) {
+        }
     }
 
     private function model(string $model): string
