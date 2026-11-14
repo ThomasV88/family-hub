@@ -8,9 +8,11 @@ use App\Medical\Visibility;
 use App\Models\AuditEntry;
 use App\Models\MedicalSubject;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Support\FailingAuditLogger;
 use Tests\Support\MedicalFixtures;
 
@@ -30,17 +32,17 @@ describe('schema', function () {
             ['id' => (string) Str::uuid(), 'name' => 'A', 'created_at' => now(), 'updated_at' => now()],
             $row,
         )));
-        expect($bad(['sex' => 'x']))->toThrow(Illuminate\Database\QueryException::class);
-        expect($bad(['blood_type' => 'C+']))->toThrow(Illuminate\Database\QueryException::class);
+        expect($bad(['sex' => 'x']))->toThrow(QueryException::class);
+        expect($bad(['blood_type' => 'C+']))->toThrow(QueryException::class);
 
         $user = User::factory()->create();
         MedicalSubject::factory()->linkedTo($user)->create();
-        expect(fn () => DB::transaction(fn () => MedicalSubject::factory()->linkedTo($user)->create()))->toThrow(Illuminate\Database\QueryException::class);
+        expect(fn () => DB::transaction(fn () => MedicalSubject::factory()->linkedTo($user)->create()))->toThrow(QueryException::class);
 
         $subject = MedicalSubject::factory()->create();
         expect(fn () => DB::transaction(fn () => DB::table('medical_subject_members')->insert([
             'subject_id' => $subject->id, 'user_id' => $user->id, 'level' => 3,
-        ])))->toThrow(Illuminate\Database\QueryException::class);
+        ])))->toThrow(QueryException::class);
     });
 
     it('uses random version 4 uuids', function () {
@@ -108,10 +110,10 @@ describe('visibility scope', function () {
 
     it('refuses a viewer without the Health module', function () {
         $admin = User::factory()->admin()->create();
-        expect(fn () => Viewer::for($admin))->toThrow(Symfony\Component\HttpKernel\Exception\HttpException::class);
+        expect(fn () => Viewer::for($admin))->toThrow(HttpException::class);
         $linked = User::factory()->create();
         MedicalSubject::factory()->linkedTo($linked)->create();
-        expect(fn () => Viewer::for($linked))->toThrow(Symfony\Component\HttpKernel\Exception\HttpException::class);
+        expect(fn () => Viewer::for($linked))->toThrow(HttpException::class);
     });
 
     it('does not touch the database for a malformed id or an Edit lookup by a view-only module viewer', function () {
@@ -170,7 +172,7 @@ describe('create', function () {
     it('refuses a view-only module viewer', function () {
         $user = User::factory()->create();
         expect(fn () => app(SubjectQuery::class)->create(viewerFor($user, AccessLevel::View), ['name' => 'X']))
-            ->toThrow(Symfony\Component\HttpKernel\Exception\HttpException::class);
+            ->toThrow(HttpException::class);
     });
 });
 
