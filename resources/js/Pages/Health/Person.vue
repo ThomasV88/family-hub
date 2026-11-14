@@ -8,6 +8,7 @@ import UiButton from '../../Components/ui/UiButton.vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
 import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
 import AllergyList from '../../Health/AllergyList.vue';
+import DocumentPanel from '../../Health/DocumentPanel.vue';
 import AllergyPanel from '../../Health/AllergyPanel.vue';
 import MedicationList from '../../Health/MedicationList.vue';
 import MedicationPanel from '../../Health/MedicationPanel.vue';
@@ -40,6 +41,9 @@ const props = defineProps({
     medications: { type: Array, default: () => [] },
     vaccinations: { type: Array, default: () => [] },
     vaccinationAttention: { type: Number, default: 0 },
+    documents: { type: Array, default: () => [] },
+    unattachedDocumentIds: { type: Array, default: () => [] },
+    limits: { type: Object, default: () => ({ maxMb: 10, filesAtOnce: 10 }) },
 });
 const { t } = useI18n();
 
@@ -64,6 +68,8 @@ const openNewMedication = () => go({ panel: 'new-medication' }, ['panel']);
 const openMedication = (id) => go({ panel: 'medication', id }, ['panel']);
 const openNewVaccination = () => go({ panel: 'new-vaccination' }, ['panel']);
 const openVaccination = (id) => go({ panel: 'vaccination', id }, ['panel']);
+const openNewDocument = (visit) => go({ panel: 'new-document', ...(typeof visit === 'string' ? { visit } : {}) }, ['panel']);
+const openDocument = (id) => go({ panel: 'document', id }, ['panel']);
 const closePanel = () => go({}, ['panel']);
 const setView = (view) => go({ view: view === 'folders' ? undefined : view, filter: undefined }, ['view', 'filter', 'timeline']);
 const setFilter = (filter) => go({ filter: filter === 'all' ? undefined : filter }, ['timeline', 'filter']);
@@ -77,6 +83,8 @@ const activeMedication = computed(() => (props.panel?.kind === 'medication' ? pr
 const medicationPanelOpen = computed(() => props.panel?.kind === 'new-medication' || (props.panel?.kind === 'medication' && activeMedication.value !== null));
 const activeVaccination = computed(() => (props.panel?.kind === 'vaccination' ? props.vaccinations.find((v) => v.id === props.panel.id) ?? null : null));
 const vaccinationPanelOpen = computed(() => props.panel?.kind === 'new-vaccination' || (props.panel?.kind === 'vaccination' && activeVaccination.value !== null));
+const activeDocument = computed(() => (props.panel?.kind === 'document' ? props.documents.find((d) => d.id === props.panel.id) ?? null : null));
+const documentPanelOpen = computed(() => props.panel?.kind === 'new-document' || (props.panel?.kind === 'document' && activeDocument.value !== null));
 const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.includes(v.id));
 </script>
 
@@ -88,7 +96,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
 
             <template v-if="person">
                 <PersonSwitcher :people="people" :current-id="person.id" :can-create="canCreate" @add="openNew" />
-                <PersonHeader :person="person" @add-visit="openNewVisit" />
+                <PersonHeader :person="person" @add-visit="openNewVisit" @add-document="openNewDocument" />
                 <UiAlert v-if="vaccinationAttention > 0" variant="warning" data-testid="vaccination-alert">
                     <strong>{{ t('health.vaccination.attention_title') }}</strong>
                     {{ t('health.vacc.attention', { n: vaccinationAttention }, vaccinationAttention) }}
@@ -133,6 +141,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
         <AllergyPanel v-if="person" :open="allergyPanelOpen" :person-id="person.id" :allergy="activeAllergy" :can-edit="canAddVisit" @close="closePanel" />
         <MedicationPanel v-if="person" :open="medicationPanelOpen" :person-id="person.id" :medication="activeMedication" :can-edit="canAddVisit" @close="closePanel" />
         <VaccinationPanel v-if="person" :open="vaccinationPanelOpen" :person-id="person.id" :vaccination="activeVaccination" :can-edit="canAddVisit" @close="closePanel" />
+        <DocumentPanel v-if="person" :open="documentPanelOpen" :person-id="person.id" :document="activeDocument" :visits="visits" :limits="limits" :can-edit="canAddVisit" :initial-visit="panel?.visit ?? null" @close="closePanel" />
         <ShellAdd :enabled="canAddVisit" :label="t('health.fab.add_visit')" @add="openNewVisit" />
     </AppShell>
 </template>

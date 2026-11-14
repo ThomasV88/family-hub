@@ -4,11 +4,13 @@ namespace App\Medical;
 
 use App\Access\AccessLevel;
 use App\Medical\Queries\AllergyQuery;
+use App\Medical\Queries\DocumentQuery;
 use App\Medical\Queries\MedicationQuery;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Queries\VaccinationQuery;
 use App\Medical\Queries\VisitQuery;
 use App\Models\MedicalAllergy;
+use App\Models\MedicalDocument;
 use App\Models\MedicalMedication;
 use App\Models\MedicalSubject;
 use App\Models\MedicalVaccination;
@@ -26,11 +28,11 @@ use Inertia\Response;
 class PersonPage
 {
     /** Panel kinds that exist so far; those listed in WITH_ID resolve a record id inside the visible person. */
-    private const PANELS = ['new-person', 'new-visit', 'visit', 'new-allergy', 'allergy', 'new-medication', 'medication', 'new-vaccination', 'vaccination'];
+    private const PANELS = ['new-person', 'new-visit', 'visit', 'new-allergy', 'allergy', 'new-medication', 'medication', 'new-vaccination', 'vaccination', 'new-document', 'document'];
 
-    private const WITH_ID = ['visit', 'allergy', 'medication', 'vaccination'];
+    private const WITH_ID = ['visit', 'allergy', 'medication', 'vaccination', 'document'];
 
-    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations) {}
+    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations, private readonly DocumentQuery $documents) {}
 
     public function render(Viewer $viewer, ?MedicalSubject $subject, Request $request): Response
     {
@@ -42,7 +44,12 @@ class PersonPage
     {
         $people = $this->subjects->visible($viewer);
 
-        return $this->visitProps($viewer, $subject, $request) + [
+        $documents = $this->documentProps($viewer, $subject);
+
+        return $this->visitProps($viewer, $subject, $request, $documents) + [
+            'documents' => $documents,
+            'unattachedDocumentIds' => array_values(array_column(array_filter($documents, fn (array $d) => $d['visitId'] === null), 'id')),
+            'limits' => ['maxMb' => intdiv((int) config('medical.document_max_bytes'), 1048576), 'filesAtOnce' => (int) config('medical.upload_batch_max')],
             'allergies' => $this->allergyProps($viewer, $subject),
             'medications' => $this->medicationProps($viewer, $subject),
             'vaccinations' => $this->vaccinationProps($viewer, $subject),
@@ -81,11 +88,14 @@ class PersonPage
      * visits, folders, timeline, timelineFilters, view, filter, specialties. Everything comes from the visible
      * person's scoped list, so a count can never include a record the viewer may not see.
      *
+     * @param  list<array<string, mixed>>  $documentList  the person's scoped documents
      * @return array<string, mixed>
      */
-    private function visitProps(Viewer $viewer, ?MedicalSubject $subject, Request $request): array
+    private function visitProps(Viewer $viewer, ?MedicalSubject $subject, Request $request, array $documentList): array
     {
         $list = $subject === null ? collect() : $this->visits->forSubject($viewer, $subject);
+        $documents = collect($documentList);
+        $perVisit = $documents->whereNotNull('visitId')->countBy('visitId');
         $visits = $list->map(fn (MedicalVisit $v) => [
             'id' => (string) $v->getKey(),
             'visitedOn' => $v->visited_on->format('Y-m-d'),
@@ -94,7 +104,7 @@ class PersonPage
             'specialtyOther' => $v->specialty_other,
             'diagnosis' => $v->diagnosis,
             'notes' => $v->notes,
-            'documentCount' => 0,
+            'documentCount' => (int) ($perVisit[(string) $v->getKey()] ?? 0),
         ])->values();
 
         $folders = $visits->groupBy('specialtyKey')->map(fn ($group, $key) => [
@@ -110,16 +120,23 @@ class PersonPage
         if (count($vaccinations) > 0) {
             $filterKeys[] = 'vaccinations';
         }
+        $unattached = $documents->whereNull('visitId');
+        if ($unattached->isNotEmpty()) {
+            $filterKeys[] = 'documents';
+        }
         $requested = $request->query('filter');
         $filter = is_string($requested) && in_array($requested, $filterKeys, true) ? $requested : 'all';
 
-        $visitEntries = $filter === 'vaccinations' ? collect() : $visits
+        $visitEntries = in_array($filter, ['vaccinations', 'documents'], true) ? collect() : $visits
             ->when($filter !== 'all', fn ($c) => $c->where('specialtyKey', $filter))
             ->map(fn (array $v) => ['type' => 'visit', 'id' => $v['id'], 'date' => $v['visitedOn']]);
+        $documentEntries = in_array($filter, ['all', 'documents'], true)
+            ? $unattached->map(fn (array $d) => ['type' => 'document', 'id' => $d['id'], 'date' => $d['uploadedOn']])
+            : collect();
         $vaccinationEntries = in_array($filter, ['all', 'vaccinations'], true)
             ? collect($vaccinations)->map(fn (array $v) => ['type' => 'vaccination', 'id' => $v['id'], 'date' => $v['givenOn']])
             : collect();
-        $timeline = $visitEntries->concat($vaccinationEntries)->sortByDesc('date')->values();
+        $timeline = $visitEntries->concat($vaccinationEntries)->concat($documentEntries)->sortByDesc('date')->values();
 
         return [
             'visits' => $visits->all(),
@@ -130,6 +147,28 @@ class PersonPage
             'filter' => $filter,
             'specialties' => array_map(fn (Specialty $s) => $s->value, Specialty::cases()),
         ];
+    }
+
+    /**
+     * Never the path, the thumb path or the hash; only what the screen shows. 
+     *
+     * @return list<array{id: string, kind: string, title: string, visitId: ?string, uploadedOn: string, sizeBytes: int}>
+     */
+    private function documentProps(Viewer $viewer, ?MedicalSubject $subject): array
+    {
+        if ($subject === null) {
+            return [];
+        }
+        $timezone = (string) config('family.timezone');
+
+        return $this->documents->forSubject($viewer, $subject)->map(fn (MedicalDocument $d) => [
+            'id' => (string) $d->getKey(),
+            'kind' => (string) $d->kind,
+            'title' => (string) $d->title,
+            'visitId' => $d->visit_id === null ? null : (string) $d->visit_id,
+            'uploadedOn' => $d->created_at->copy()->setTimezone($timezone)->format('Y-m-d'),
+            'sizeBytes' => (int) $d->size_bytes,
+        ])->values()->all();
     }
 
     /** @return list<array{id: string, substance: string, reaction: ?string, severity: string}> severe first */
@@ -220,6 +259,7 @@ class PersonPage
                 'visit' => $this->visits->find($viewer, $subject, $id) !== null,
                 'medication' => $this->medications->find($viewer, $subject, $id) !== null,
                 'vaccination' => $this->vaccinations->find($viewer, $subject, $id) !== null,
+                'document' => $this->documents->find($viewer, $subject, $id) !== null,
                 default => $this->allergies->find($viewer, $subject, $id) !== null,
             };
             abort_unless($found, 403);
@@ -233,8 +273,15 @@ class PersonPage
         if ($kind === 'new-person' && ! $viewer->canEdit()) {
             return null;
         }
-        if (in_array($kind, ['new-visit', 'new-allergy', 'new-medication', 'new-vaccination'], true)) {
+        if (in_array($kind, ['new-visit', 'new-allergy', 'new-medication', 'new-vaccination', 'new-document'], true)) {
             abort_if($subject === null || $this->subjects->levelFor($viewer, $subject) !== AccessLevel::Edit, 403);
+        }
+        if ($kind === 'new-document') {
+            // The optional visit must be one of this person's visits; anything else is the same 403.
+            $visit = $request->query('visit');
+            abort_if($request->query->has('visit') && (! is_string($visit) || $this->visits->find($viewer, $subject, $visit) === null), 403);
+
+            return ['kind' => $kind, 'id' => null, 'visit' => $visit];
         }
 
         return ['kind' => $kind, 'id' => null];

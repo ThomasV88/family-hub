@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Plus, UserX } from '@lucide/vue';
+import { Plus, Upload, UserX } from '@lucide/vue';
 import UiAvatar from '../Components/ui/UiAvatar.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiTag from '../Components/ui/UiTag.vue';
@@ -11,7 +11,7 @@ import AiConsentControl from './AiConsentControl.vue';
 const props = defineProps({
     person: { type: Object, required: true },
 });
-const emit = defineEmits(['add-visit']);
+const emit = defineEmits(['add-visit', 'add-document']);
 const { t } = useI18n();
 
 const ageLine = computed(() => {
@@ -42,6 +42,7 @@ const bloodLabel = computed(() => {
         </div>
         <div v-if="person.canEdit" class="person-header__actions">
             <UiButton variant="primary" :icon="Plus" data-testid="header-add-visit" @click="emit('add-visit')">{{ t('health.visit.add') }}</UiButton>
+            <UiButton variant="secondary" :icon="Upload" data-testid="header-add-document" @click="emit('add-document')">{{ t('health.doc.add') }}</UiButton>
         </div>
         <p v-if="!person.canEdit" class="person-header__view-only">{{ t('health.view_only') }}</p>
         <AiConsentControl :person-id="person.id" :value="!!person.aiConsent" :can-edit="!!person.canEdit" />

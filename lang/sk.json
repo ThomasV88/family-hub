@@ -1865,7 +1865,10 @@
             "err_failed": "Tento súbor sa nepodarilo nahrať. Nič sa neuložilo. Skúste to znova.",
             "err_visit": "Vyberte jednu z návštev tejto osoby alebo možnosť Bez návštevy.",
             "err_limit": "Naraz môžete pridať najviac {count} súborov. Odstráňte niektoré súbory a skúste to znova.",
+            "err_cap": "Záznam tejto osoby pojme najviac {count} dokumentov a je plný. Odstráňte niektoré dokumenty a skúste to znova.",
             "leave_title": "Odísť počas nahrávania?",
+            "leave_body": "Prebiehajúce nahrávanie sa zastaví. Súbory, ktoré už boli pridané, v zázname zostanú.",
+            "remove": "Odstrániť súbor",
             "leave": "Opustiť stránku",
             "keep": "Pokračovať v nahrávaní",
             "add_n": "Pridať dokument | Pridať {n} dokumenty | Pridať {n} dokumentu | Pridať {n} dokumentov"

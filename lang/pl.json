@@ -1865,7 +1865,10 @@
             "err_failed": "Nie udało się przesłać tego pliku. Nic nie zostało zapisane. Spróbuj ponownie.",
             "err_visit": "Wybierz jedną z wizyt tej osoby lub opcję Bez wizyty.",
             "err_limit": "Naraz możesz dodać najwyżej {count} plików. Usuń część plików i spróbuj ponownie.",
+            "err_cap": "Dokumentacja tej osoby mieści najwyżej {count} dokumentów i jest pełna. Usuń część dokumentów i spróbuj ponownie.",
             "leave_title": "Wyjść w trakcie przesyłania?",
+            "leave_body": "Trwające przesyłanie zostanie zatrzymane. Pliki, które już dodano, pozostaną w dokumentacji.",
+            "remove": "Usuń plik",
             "leave": "Opuść stronę",
             "keep": "Kontynuuj przesyłanie",
             "add_n": "Dodaj dokument | Dodaj {n} dokumenty | Dodaj {n} dokumentów | Dodaj {n} dokumentu"

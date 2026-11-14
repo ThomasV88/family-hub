@@ -1865,7 +1865,10 @@
             "err_failed": "We could not upload this file. Nothing was saved. Try again.",
             "err_visit": "Choose one of this person's visits, or choose No visit.",
             "err_limit": "You can add up to {count} files at a time. Remove some files and try again.",
+            "err_cap": "This person's record holds up to {count} documents and is full. Delete some documents and try again.",
             "leave_title": "Leave while uploading?",
+            "leave_body": "Uploads in progress will stop. Files that were already added stay in the record.",
+            "remove": "Remove file",
             "leave": "Leave page",
             "keep": "Keep uploading",
             "add_n": "Add document | Add {n} documents"
