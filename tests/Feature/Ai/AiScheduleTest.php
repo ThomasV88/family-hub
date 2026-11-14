@@ -31,6 +31,14 @@ it('schedules the waiting-run resumer every minute without overlapping', functio
         ->and($e->withoutOverlapping)->toBeTrue();
 });
 
+it('schedules the bulk tick every five minutes without overlapping, beside the resumer', function () {
+    $e = aiScheduled('ai-bulk-tick');
+    expect($e->expression)->toBe('*/5 * * * *')
+        ->and($e->command)->toContain('ai:bulk-tick')
+        ->and($e->withoutOverlapping)->toBeTrue()
+        ->and(aiScheduled('ai-resume-waiting')->withoutOverlapping)->toBeTrue();
+});
+
 it('gives the job a 660 second budget below the worker timeout', function () {
     expect(config('ai.timeouts.job'))->toBe(660);
 });

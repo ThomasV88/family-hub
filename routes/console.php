@@ -24,4 +24,5 @@ Schedule::command('medical:enqueue-reminders')->hourly()->withoutOverlapping()->
 Schedule::job(new CheckLoginJob)->everyFiveMinutes()->name('ai-check-login');
 Schedule::command('ai:reap-stuck')->everyFiveMinutes()->withoutOverlapping()->name('ai-reap-stuck');
 Schedule::command('ai:resume-waiting')->everyMinute()->withoutOverlapping()->name('ai-resume-waiting');
+Schedule::command('ai:bulk-tick')->everyFiveMinutes()->withoutOverlapping()->name('ai-bulk-tick');
 Schedule::command('ai:prune-calls')->daily()->name('ai-prune-calls');
