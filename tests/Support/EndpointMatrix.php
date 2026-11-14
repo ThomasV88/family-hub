@@ -13,6 +13,13 @@ class EndpointMatrix
     /** @return array<string, array<string, mixed>> */
     public static function all(): array
     {
+        // Built once per process: the files only return literals and closures, and rebuilding them on every call
+        // (hundreds of calls in the gate proofs) used to bloat memory.
+        static $cache = null;
+        if ($cache !== null) {
+            return $cache;
+        }
+
         $all = [];
         $files = glob(__DIR__.'/EndpointMatrix/*.php') ?: [];
         sort($files);
@@ -20,7 +27,7 @@ class EndpointMatrix
             $all = array_merge($all, require $file);
         }
 
-        return $all;
+        return $cache = $all;
     }
 
     /**

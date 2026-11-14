@@ -18,7 +18,7 @@ return [
     // The matrix replays with the always-fresh session seam, so the `recent` rule on enable/confirm passes here.
     // The stale refusal (423 confirm_required, or the redirect to /confirm-access) is proven in TwoFactorEndpointsTest.
     'two-factor.enable' => ['method' => 'POST', 'uri' => '/user/two-factor-authentication', 'expect' => $everyone(302)],
-    'two-factor.confirm' => ['method' => 'POST', 'uri' => '/user/confirmed-two-factor-authentication', 'data' => ['code' => '000000'], 'expect' => $everyone(302)],
+    'two-factor.confirm' => ['method' => 'POST', 'uri' => '/user/confirmed-two-factor-authentication', 'data' => ['code' => '000000'], 'expect' => $signedIn(404)], // no pending secret (06-REVIEW WR-02: expired or absent seeds are not confirmable)
     // An unconfirmed (here: absent) secret is cancelled without any confirmation.
     'two-factor.disable' => ['method' => 'DELETE', 'uri' => '/user/two-factor-authentication', 'expect' => $everyone(302)],
     // Secret and QR exist only while a setup is pending; the fixture has none.
