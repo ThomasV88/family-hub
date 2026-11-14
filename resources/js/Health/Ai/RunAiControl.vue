@@ -9,27 +9,41 @@ import { useToast } from '../../Components/ui/useToast.js';
 import { securityFetch } from '../../Security/securityFetch.js';
 import { handleHealthRefusal } from '../healthRefusal.js';
 import AiNoticeDialog from './AiNoticeDialog.vue';
+import AiProvenanceLine from './AiProvenanceLine.vue';
 import AiStatusTag from './AiStatusTag.vue';
+import { formatWhen, isPast } from './aiWhen.js';
 
 // Start, follow and cancel the AI reading of one document. Model-free: only run state is rendered, never anything
 // the AI produced. Nothing is stored in the browser; the server answer always wins over the props it was given.
 const props = defineProps({
     personId: { type: String, required: true },
     document: { type: Object, required: true },
-    // PersonPage `ai` prop: {canRun, available, noticeAcknowledged}
-    ai: { type: Object, default: () => ({ canRun: false, available: false, noticeAcknowledged: false }) },
-    // useAiStatus() result shared by the whole page: {statuses, failedPolls, stoppedLongWait, refresh, markQueued}
+    // PersonPage `ai` prop: {canRun, available, providers, noticeAcknowledged}
+    ai: { type: Object, default: () => ({ canRun: false, available: false, providers: ['codex'], noticeAcknowledged: false }) },
+    // useAiStatus() result shared by the whole page: {statuses, failedPolls, stoppedLongWait, stalled, refresh, markQueued}
     poller: { type: Object, required: true },
     consentOn: { type: Boolean, default: false },
 });
 const emit = defineEmits(['go-header']);
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const toast = useToast();
 const ids = { sends: useId(), reason: useId() };
 
 const entry = computed(() => props.poller.statuses.value?.[props.document.id] ?? null);
 const status = computed(() => entry.value?.status ?? null);
-const waiting = computed(() => status.value === 'queued' || status.value === 'running');
+const waitingQuota = computed(() => status.value === 'waiting');
+// A run in flight (queued, running or waiting for quota): the tag, the detail and Cancel run replace Run AI.
+const waiting = computed(() => status.value === 'queued' || status.value === 'running' || waitingQuota.value);
+const appLocale = computed(() => ({ 'sk-SK': 'sk', 'pl-PL': 'pl', 'en-GB': 'en' }[locale.value] ?? locale.value));
+const availableAt = computed(() => (waitingQuota.value ? entry.value?.availableAt ?? null : null));
+const providers = computed(() => (Array.isArray(props.ai?.providers) && props.ai.providers.length > 0 ? props.ai.providers : ['codex']));
+const providerLine = computed(() => {
+    const hasCodex = providers.value.includes('codex');
+    const hasCopilot = providers.value.includes('copilot');
+    if (hasCodex && hasCopilot) return 'provider_both';
+    return hasCopilot ? 'provider_copilot' : 'provider_codex';
+});
+const noticeVariant = computed(() => ({ provider_both: 'multi', provider_copilot: 'github', provider_codex: 'codex' }[providerLine.value]));
 const canRun = computed(() => Boolean(props.ai?.canRun));
 
 // Local corrections from a 409 answer; the matching prop wins again when it changes.
@@ -60,6 +74,7 @@ const busy = ref(false);
 const cancelling = ref(false);
 const announcement = ref('');
 const cancelButton = ref(null);
+const runButton = ref(null);
 const keepCurrent = ref(null);
 
 const pending = computed(() => Number(entry.value?.pending ?? 0));
@@ -75,7 +90,11 @@ const detail = computed(() => {
         case 'queued':
         case 'running': return t('health.ai.status.wait_detail');
         case 'ready': return readyCount.value ? t('health.ai.status.ready_detail', { n: readyCount.value }, readyCount.value) : '';
-        case 'failed': return t('health.ai.status.failed_detail');
+        case 'waiting': return t('health.ai.status.waiting_detail');
+        case 'failed': {
+            const code = { quota_timeout: 'quota_timeout_detail', quota_exhausted: 'quota_exhausted_detail', no_agent: 'no_agent_detail', notice_required: 'notice_required_detail' }[entry.value?.failureCode];
+            return t(`health.ai.status.${code ?? 'failed_detail'}`);
+        }
         case 'cancelled': return entry.value.cancelReason === 'consent' ? t('health.ai.status.consent_detail') : t('health.ai.status.cancelled_detail');
         default: return '';
     }
@@ -89,6 +108,11 @@ function announce(text) {
 // Only transitions are announced; the first value seen on mount and unchanged polls say nothing.
 watch(status, (next, previous) => {
     if (previous === undefined || previous === null || next === previous) return;
+    if (next === 'waiting') {
+        const at = entry.value?.availableAt;
+        announce(at && !isPast(at) ? t('health.ai.status.waiting_announce', { when: formatWhen(at, appLocale.value) }) : t('health.ai.status.waiting_soon'));
+        return;
+    }
     const key = { running: 'announce_running', ready: 'announce_ready', failed: 'announce_failed', cancelled: 'announce_cancelled' }[next];
     if (key) announce(t(`health.ai.status.${key}`));
 });
@@ -156,7 +180,10 @@ async function cancel() {
     cancelling.value = false;
     if (result.ok) {
         toast.show(t('health.ai.run.cancelled_toast'));
-        props.poller.refresh();
+        await props.poller.refresh();
+        await nextTick();
+        // The Cancel run button is gone now; keyboard focus goes back to Run AI.
+        runButton.value?.$el?.focus?.();
         return;
     }
     if (result.status === 423 && handleHealthRefusal(result.error)) return;
@@ -171,15 +198,17 @@ const pollFailed = computed(() => props.poller.failedPolls.value >= 3);
         <p class="visually-hidden" role="status" data-testid="ai-announce">{{ announcement }}</p>
 
         <div v-if="entry" class="run-ai__state">
-            <AiStatusTag :status="entry.status" :cancel-reason="entry.cancelReason" :entry-count="canRun ? readyCount : null" />
+            <AiStatusTag :status="entry.status" :cancel-reason="entry.cancelReason" :entry-count="canRun ? readyCount : null" :available-at="availableAt" :failure-code="entry.failureCode ?? null" />
             <template v-if="canRun">
                 <p v-if="detail" class="run-ai__detail" data-testid="ai-detail">{{ detail }}</p>
+                <AiProvenanceLine v-if="status === 'ready' && entry.agent" :agent="entry.agent" :model="entry.model ?? null" />
                 <p v-if="partialPages" class="run-ai__detail" data-testid="ai-pages">{{ t('health.ai.status.pages_read', { n: entry.pagesRead }, entry.pagesRead) }}</p>
             </template>
         </div>
 
         <template v-if="canRun">
             <UiAlert v-if="waiting && poller.stoppedLongWait.value" variant="info" data-testid="ai-long-wait">{{ t('health.ai.run.still_waiting') }}</UiAlert>
+            <UiAlert v-if="waitingQuota && poller.stalled?.value" variant="info" data-testid="ai-stalled">{{ t('health.ai.status.still_waiting') }}</UiAlert>
             <div v-if="waiting && pollFailed" class="run-ai__poll" data-testid="ai-poll-failed">
                 <span>{{ t('health.ai.run.poll_failed') }}</span>
                 <UiButton variant="ghost" size="sm" @click="poller.refresh()">{{ t('health.ai.run.try_again') }}</UiButton>
@@ -191,6 +220,7 @@ const pollFailed = computed(() => props.poller.failedPolls.value >= 3);
                 <template v-else>
                     <UiButton v-if="status === 'ready' || entry?.readyExtractionId" :variant="status === 'ready' ? 'primary' : 'secondary'" :href="reviewUrl" data-testid="ai-review">{{ t('health.ai.run.review') }}</UiButton>
                     <UiButton
+                        ref="runButton"
                         :variant="runVariant"
                         :icon="Sparkles"
                         :loading="busy"
@@ -206,11 +236,11 @@ const pollFailed = computed(() => props.poller.failedPolls.value >= 3);
                     {{ t(`health.ai.run.${blocked.key}`) }}
                     <button v-if="blocked.link" type="button" class="run-ai__link" data-testid="ai-go-header" @click="emit('go-header')">{{ t('health.ai.run.consent_off_link') }}</button>
                 </p>
-                <p v-else :id="ids.sends" class="run-ai__line" data-testid="ai-sends">{{ t('health.ai.run.sends_line') }}</p>
+                <p v-else :id="ids.sends" class="run-ai__line" data-testid="ai-sends">{{ t(`health.ai.run.${providerLine}`) }}</p>
             </template>
         </template>
 
-        <AiNoticeDialog :open="noticeOpen" @confirm="confirmNotice" @cancel="noticeOpen = false" />
+        <AiNoticeDialog :open="noticeOpen" :variant="noticeVariant" @confirm="confirmNotice" @cancel="noticeOpen = false" />
         <UiDialog :open="rerunOpen" :title="t('health.ai.run.rerun_title')" :initial-focus="() => keepCurrent" @update:open="(v) => { if (!v) rerunOpen = false; }">
             <p class="run-ai__body">{{ t('health.ai.run.rerun_body') }}</p>
             <template #footer>

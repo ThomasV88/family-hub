@@ -38,6 +38,7 @@ function makePoller(initial = {}) {
         available: ref(null),
         failedPolls: ref(0),
         stoppedLongWait: ref(false),
+        stalled: ref(false),
         refresh: vi.fn(async () => {}),
         markQueued: vi.fn((id, extractionId) => { statuses.value = { ...statuses.value, [id]: { status: 'queued', extractionId, readyExtractionId: null, cancelReason: null, pagesRead: null, pagesTotal: null } }; }),
     };
@@ -375,4 +376,167 @@ describe('DocumentPanel integration', () => {
         mountPanel({ ai: null, aiStatus: null });
         expect($('[data-testid="run-ai"]')).toBeNull();
     });
+});
+
+describe('waiting for AI quota, provenance and providers', () => {
+    const soon = () => new Date(Date.now() + 2 * 3600 * 1000).toISOString();
+    const waitingEntry = (over = {}) => entry({ status: 'waiting', readyExtractionId: null, availableAt: soon(), extractionId: 'ex7', entryCount: undefined, ...over });
+    const ACK = { ...AI, noticeAcknowledged: true };
+
+    it('shows the waiting tag with a <time>, the detail and Cancel run in place of Run AI, aria-busy on the block', () => {
+        mountControl({ ai: ACK, statuses: { [DOC.id]: waitingEntry() } });
+        expect($('[data-testid="ai-status-tag"]').textContent).toMatch(/^Waiting for AI quota, retrying after (\w{3},? )?\d{2}:\d{2}$/);
+        expect($('[data-testid="ai-status-tag"] time').getAttribute('datetime')).toBeTruthy();
+        expect($('[data-testid="ai-detail"]').textContent).toBe('The AI services have reached their usage limit. We will try again automatically. You can leave this page.');
+        expect($('[data-testid="ai-cancel"]').textContent).toContain('Cancel run');
+        expect($('[data-testid="ai-run"]')).toBeNull();
+        expect($('[data-testid="run-ai"]').getAttribute('aria-busy')).toBe('true');
+    });
+
+    it('cancels immediately, toasts and refreshes the status', async () => {
+        fetchMock.mockResolvedValue({ ok: true, status: 200, data: {} });
+        mountControl({ ai: ACK, statuses: { [DOC.id]: waitingEntry() } });
+        $('[data-testid="ai-cancel"]').click();
+        await flush();
+        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/ex7/cancel`, { method: 'POST', body: {} });
+        expect(useToast().toasts.map((x) => x.message)).toContain('AI run cancelled');
+        expect(poller.refresh).toHaveBeenCalled();
+    });
+
+    it('moves focus back to Run AI after cancelling a waiting run', async () => {
+        fetchMock.mockResolvedValue({ ok: true, status: 200, data: {} });
+        mountControl({ ai: ACK, statuses: { [DOC.id]: waitingEntry() } });
+        poller.refresh.mockImplementation(async () => { poller.statuses.value = { [DOC.id]: entry({ status: 'cancelled', readyExtractionId: null, cancelReason: null }) }; });
+        $('[data-testid="ai-cancel"]').click();
+        await flush();
+        expect(document.activeElement).toBe($('[data-testid="ai-run"]'));
+    });
+
+    it('announces entering waiting once, with the time', async () => {
+        mountControl({ ai: ACK, statuses: { [DOC.id]: entry({ status: 'running', readyExtractionId: null }) } });
+        poller.statuses.value = { [DOC.id]: waitingEntry() };
+        await flush();
+        expect($('[data-testid="ai-announce"]').textContent).toMatch(/^Waiting for AI quota\. Retrying after /);
+        poller.statuses.value = { [DOC.id]: waitingEntry({ cancelReason: null }) };
+        await flush();
+        expect($('[data-testid="ai-announce"]').textContent).toMatch(/^Waiting for AI quota/);
+    });
+
+    it('shows "retrying soon" once the time passed', () => {
+        mountControl({ ai: ACK, statuses: { [DOC.id]: waitingEntry({ availableAt: new Date(Date.now() - 1000).toISOString() }) } });
+        expect($('[data-testid="ai-status-tag"]').textContent).toBe('Waiting for AI quota, retrying soon');
+    });
+
+    it('renders the stalled hint when the poller gave up on waiting', () => {
+        mountControl({ ai: ACK, statuses: { [DOC.id]: waitingEntry() } });
+        poller.stalled.value = true;
+        return nextTick().then(() => {
+            expect($('[data-testid="ai-stalled"]').textContent).toBe('Still waiting. Reload the page to check again.');
+        });
+    });
+
+    it.each([
+        ['quota_timeout', 'The AI usage limit did not come back in time. Nothing was saved. Try again later, or add the details by hand.'],
+        ['quota_exhausted', 'The AI services have reached their usage limit and will not be back soon enough. Nothing was saved. Try again later, or add the details by hand.'],
+        ['no_agent', 'No AI tool is signed in right now. Nothing was sent. Try again later, or add the details by hand.'],
+        ['notice_required', 'The AI tools changed since you agreed to send documents. Nothing was sent. Run AI again to see the updated notice.'],
+    ])('shows the %s failure detail with Run AI again', (failureCode, text) => {
+        mountControl({ ai: ACK, statuses: { [DOC.id]: entry({ status: 'failed', readyExtractionId: null, failureCode }) } });
+        expect($('[data-testid="ai-status-tag"]').textContent).toBe('AI could not read this');
+        expect($('[data-testid="ai-detail"]').textContent).toBe(text);
+        expect($('[data-testid="ai-run"]').textContent).toContain('Run AI again');
+    });
+
+    it('keeps the Phase 8 detail for other failures', () => {
+        mountControl({ ai: ACK, statuses: { [DOC.id]: entry({ status: 'failed', readyExtractionId: null, failureCode: 'timeout' }) } });
+        expect($('[data-testid="ai-detail"]').textContent).toContain('AI could not read this document.');
+    });
+
+    it('opens the provider-aware notice when Run AI again follows notice_required', async () => {
+        mountControl({ ai: { ...AI, providers: ['codex', 'copilot'] }, statuses: { [DOC.id]: entry({ status: 'failed', readyExtractionId: null, failureCode: 'notice_required' }) } });
+        $('[data-testid="ai-run"]').click();
+        await flush();
+        expect($('[role="dialog"]').textContent).toContain('Send this document to OpenAI or GitHub?');
+    });
+
+    it('shows the provenance line under the ready detail, never in the live region or toasts', async () => {
+        mountControl({ ai: ACK, statuses: { [DOC.id]: entry({ agent: 'copilot', model: 'gpt-5' }) } });
+        expect($('[data-testid="ai-provenance"]').textContent).toBe('Read by GitHub Copilot gpt-5');
+        expect($('[data-testid="ai-detail"]').nextElementSibling.getAttribute('data-testid')).toBe('ai-provenance');
+        expect($('[data-testid="ai-announce"]').textContent).toBe('');
+    });
+
+    it('renders a model with markup literally', () => {
+        mountControl({ ai: ACK, statuses: { [DOC.id]: entry({ agent: 'codex', model: '<b>x</b>' }) } });
+        expect($('[data-testid="ai-provenance"] b')).toBeNull();
+        expect($('[data-testid="ai-provenance"]').textContent).toBe('Read by OpenAI Codex <b>x</b>');
+    });
+
+    it.each([
+        [['codex'], 'Sends this document to OpenAI.'],
+        [['codex', 'copilot'], 'Sends this document to OpenAI, or to GitHub if OpenAI is not available.'],
+        [['copilot', 'codex'], 'Sends this document to OpenAI, or to GitHub if OpenAI is not available.'],
+        [['copilot'], 'Sends this document to GitHub.'],
+    ])('names the providers %j in the permanent line', (providers, text) => {
+        mountControl({ ai: { ...ACK, providers } });
+        const line = $('[data-testid="ai-sends"]');
+        expect(line.textContent).toBe(text);
+        expect($('[data-testid="ai-run"]').getAttribute('aria-describedby')).toBe(line.id);
+    });
+
+    it.each([
+        [['codex', 'copilot'], 'Send this document to OpenAI or GitHub?'],
+        [['copilot'], 'Send this document to GitHub?'],
+        [['codex'], 'Send this document to OpenAI?'],
+    ])('uses the right notice for %j with the safe default focus', async (providers, title) => {
+        fetchMock.mockResolvedValue({ ok: true, status: 202, data: { extractionId: 'ex9' } });
+        mountControl({ ai: { ...AI, providers } });
+        $('[data-testid="ai-run"]').click();
+        await flush();
+        expect($('[role="dialog"]').textContent).toContain(title);
+        expect(document.activeElement).toBe($('[data-testid="ai-notice-cancel"]'));
+        $('[data-testid="ai-notice-confirm"]').click();
+        await flush();
+        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: { acknowledged: true } });
+    });
+
+    it('treats Esc in the notice like "Keep document private"', async () => {
+        mountControl({ ai: { ...AI, providers: ['codex', 'copilot'] } });
+        $('[data-testid="ai-run"]').click();
+        await flush();
+        $('[role="dialog"]').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        await flush();
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('keeps Run AI enabled while the server says available (agents cooling down) and shows the unavailable line when it is not', () => {
+        mountControl({ ai: ACK });
+        expect($('[data-testid="ai-run"]').getAttribute('aria-disabled')).toBeNull();
+        wrapper.unmount();
+        mountControl({ ai: { ...ACK, available: false } });
+        expect($('[data-testid="ai-blocked"]').textContent).toContain('AI is not available right now');
+    });
+
+    for (const locale of ['en', 'sk', 'pl']) {
+        for (const dark of [false, true]) {
+            it(`has no axe violations for waiting, timeout, provenance and provider states in ${locale} ${dark ? 'dark' : 'light'}`, async () => {
+                document.documentElement.classList.toggle('dark', dark);
+                const states = [
+                    { ai: { ...ACK, providers: ['codex', 'copilot'] }, statuses: { [DOC.id]: waitingEntry() } },
+                    { ai: { ...ACK, providers: ['copilot'] }, statuses: { [DOC.id]: entry({ status: 'failed', readyExtractionId: null, failureCode: 'quota_timeout' }) } },
+                    { ai: ACK, statuses: { [DOC.id]: entry({ agent: 'copilot', model: 'gpt-5' }) } },
+                ];
+                for (const state of states) {
+                    mountControl({ ...state, locale });
+                    await expectNoAxeViolations(document.body);
+                    wrapper.unmount();
+                    document.body.innerHTML = '';
+                }
+                mountControl({ ai: { ...AI, providers: ['codex', 'copilot'] }, locale });
+                $('[data-testid="ai-run"]').click();
+                await flush();
+                await expectNoAxeViolations(document.body);
+            });
+        }
+    }
 });
