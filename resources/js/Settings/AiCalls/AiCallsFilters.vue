@@ -32,6 +32,7 @@ const memberOptions = computed(() => [
 const statusOptions = computed(() => [
     { value: '', label: t('settings.ai_calls.all_statuses') },
     ...STATUSES.map((s) => ({ value: s, label: t(`settings.ai_calls.status_${s}`) })),
+    { value: 'quota', label: t('settings.ai_calls.filter_quota') },
 ]);
 const anySet = computed(() => Boolean(form.person || form.member || form.status));
 

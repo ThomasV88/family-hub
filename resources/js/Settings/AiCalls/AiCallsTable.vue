@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Ban, Check, CircleX, Clock, Loader } from '@lucide/vue';
+import { Ban, Check, CircleX, Clock, Hourglass, Loader } from '@lucide/vue';
 import UiTable from '../../Components/ui/UiTable.vue';
 import UiTag from '../../Components/ui/UiTag.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
@@ -50,8 +50,9 @@ function duration(row) {
 }
 const model = (row) => (!row.model ? '-' : row.model === 'default' ? t('settings.ai_calls.default_model') : row.model);
 const agent = (row) => (row.agent === 'codex' ? t('settings.ai_calls.agent_codex') : row.agent ?? '-');
-const statusOf = (row) => STATUS[row.status] ?? STATUS.queued;
-const statusLabel = (row) => (STATUS[row.status] ? t(`settings.ai_calls.status_${row.status}`) : String(row.status ?? ''));
+const QUOTA = { variant: 'warn', icon: Hourglass };
+const statusOf = (row) => (row.quota ? QUOTA : STATUS[row.status] ?? STATUS.queued);
+const statusLabel = (row) => (row.quota ? t('settings.ai_calls.status_quota') : STATUS[row.status] ? t(`settings.ai_calls.status_${row.status}`) : String(row.status ?? ''));
 </script>
 
 <template>
@@ -59,7 +60,10 @@ const statusLabel = (row) => (STATUS[row.status] ? t(`settings.ai_calls.status_$
         <UiTable :caption="t('settings.ai_calls.title')" caption-hidden :columns="columns" :rows="rows">
             <template #cell-time="{ row }"><time :datetime="row.time">{{ dateFormat.format(new Date(row.time)) }}</time></template>
             <template #cell-startedBy="{ row }">{{ row.startedBy ?? '-' }}</template>
-            <template #cell-person="{ row }">{{ row.person ?? t('settings.ai_calls.removed_person') }}</template>
+            <template #cell-person="{ row }">
+                <span v-if="row.bulk" class="ai-table__muted">{{ t('settings.ai_calls.person_bulk') }}</span>
+                <template v-else>{{ row.person ?? t('settings.ai_calls.removed_person') }}</template>
+            </template>
             <template #cell-agent="{ row }">{{ agent(row) }}</template>
             <template #cell-model="{ row }">{{ model(row) }}</template>
             <template #cell-status="{ row }"><UiTag :variant="statusOf(row).variant" :icon="statusOf(row).icon" class="ai-table__tag">{{ statusLabel(row) }}</UiTag></template>
@@ -76,6 +80,7 @@ const statusLabel = (row) => (STATUS[row.status] ? t(`settings.ai_calls.status_$
 
 <style scoped>
 .is-busy :deep(.ui-table) { opacity: 0.6; }
+.ai-table__muted { color: var(--color-text-muted); }
 .ai-table__tag { white-space: normal; max-width: 100%; }
 .ai-table__pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-4); }
 .ai-table__page { color: var(--color-text-muted); font-size: var(--text-sm); }
