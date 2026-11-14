@@ -74,6 +74,20 @@ describe('write', function () {
         expect(DB::table('medical_visits')->count())->toBe(0);
     });
 
+    it('keeps stored optional fields when a PATCH leaves them out, and clears one sent as null', function () {
+        [$user, $person] = visitEditor();
+        $this->actingAs($user)->post("/health/people/{$person->id}/visits", VISIT_BODY);
+        $id = DB::table('medical_visits')->value('id');
+
+        $this->actingAs($user)->patch("/health/people/{$person->id}/visits/$id", ['visited_on' => '2026-01-11', 'specialty_key' => 'cardiology'])->assertRedirect();
+        $row = DB::table('medical_visits')->first();
+        expect($row->visited_on)->toStartWith('2026-01-11')->and($row->doctor)->toBe('Dr. Ada')->and($row->diagnosis)->toBe('Fine')->and($row->notes)->toBe('Rest');
+
+        $this->actingAs($user)->patch("/health/people/{$person->id}/visits/$id", ['visited_on' => '2026-01-11', 'specialty_key' => 'cardiology', 'notes' => null])->assertRedirect();
+        $row = DB::table('medical_visits')->first();
+        expect($row->notes)->toBeNull()->and($row->diagnosis)->toBe('Fine');
+    });
+
     it('refuses invalid bodies for a visible person', function (array $override, string $field) {
         [$user, $person] = visitEditor();
         $this->actingAs($user)->post("/health/people/{$person->id}/visits", $override + VISIT_BODY)->assertSessionHasErrors($field);

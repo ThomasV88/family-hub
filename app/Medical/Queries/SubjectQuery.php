@@ -157,14 +157,7 @@ class SubjectQuery
                 $viewer,
                 'id',
                 AccessLevel::Edit,
-            )->update([
-                'name' => $data['name'],
-                'birth_date' => $data['birth_date'] ?? null,
-                'sex' => $data['sex'] ?? 'unspecified',
-                'blood_type' => $data['blood_type'] ?? null,
-                'notes' => $data['notes'] ?? null,
-                'updated_at' => now(),
-            ]);
+            )->update(['name' => $data['name'], 'updated_at' => now()] + $this->optionalProfileFields($data));
             if ($changed === 0) {
                 return false;
             }
@@ -174,6 +167,25 @@ class SubjectQuery
 
             return true;
         });
+    }
+
+    /**
+     * Profile columns the client actually sent. A key that is absent keeps the stored value (a partial PATCH must not
+     * erase blood type or notes); a key sent as null clears it, except sex which falls back to 'unspecified'.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function optionalProfileFields(array $data): array
+    {
+        $out = [];
+        foreach (['birth_date', 'sex', 'blood_type', 'notes'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $out[$field] = $data[$field] ?? ($field === 'sex' ? 'unspecified' : null);
+            }
+        }
+
+        return $out;
     }
 
     /**

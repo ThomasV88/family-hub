@@ -74,7 +74,7 @@ class VisitQuery
         }
 
         return $this->scoped($viewer, $subject, $visitId)
-            ->update($this->attributes($data) + ['updated_at' => now()]) > 0;
+            ->update($this->attributes($data, true) + ['updated_at' => now()]) > 0;
     }
 
     public function delete(Viewer $viewer, MedicalSubject $subject, string $visitId): bool
@@ -97,16 +97,22 @@ class VisitQuery
     }
 
     /**
+     * With $partial, a field the client did not send is left out of the result (so the UPDATE keeps the stored value);
+     * a field sent as null still clears it.
+     *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
-    private function attributes(array $data): array
+    private function attributes(array $data, bool $partial = false): array
     {
         $out = [];
         foreach (self::FIELDS as $field) {
+            if ($partial && ! array_key_exists($field, $data)) {
+                continue;
+            }
             $out[$field] = $data[$field] ?? null;
         }
-        if ($out['specialty_key'] !== 'other') {
+        if (array_key_exists('specialty_key', $out) && $out['specialty_key'] !== 'other') {
             $out['specialty_other'] = null;
         }
 

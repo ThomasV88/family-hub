@@ -85,6 +85,19 @@ describe('contacts and update', function () {
         expect(MedicalContact::count())->toBe(0)->and(MedicalSubject::find($person->id)->name)->toBe('Old Name');
     });
 
+    it('keeps stored fields when a PATCH sends only the name', function () {
+        [$user, $person] = personEditor();
+        $this->actingAs($user)->patch("/health/people/{$person->id}", PERSON_BODY)->assertRedirect();
+
+        $this->actingAs($user)->patch("/health/people/{$person->id}", ['name' => 'Renamed'])->assertRedirect();
+        $row = MedicalSubject::find($person->id);
+        expect($row->name)->toBe('Renamed')->and($row->blood_type)->toBe('A+')->and($row->sex)->toBe('female')
+            ->and($row->notes)->toBe('n')->and($row->birth_date->toDateString())->toBe('2015-04-02');
+
+        $this->actingAs($user)->patch("/health/people/{$person->id}", ['name' => 'Renamed', 'blood_type' => null])->assertRedirect();
+        expect(MedicalSubject::find($person->id)->blood_type)->toBeNull()->and(MedicalSubject::find($person->id)->notes)->toBe('n');
+    });
+
     it('lets a linked member edit their own record', function () {
         $user = User::factory()->create();
         MedicalFixtures::grantHealth($user);
