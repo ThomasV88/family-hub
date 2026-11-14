@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { Bot } from '@lucide/vue';
 import SettingsLayout from '../../Layouts/SettingsLayout.vue';
@@ -9,7 +9,6 @@ import UiCard from '../../Components/ui/UiCard.vue';
 import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
 import UiErrorState from '../../Components/ui/UiErrorState.vue';
 import UiSkeleton from '../../Components/ui/UiSkeleton.vue';
-import AiLoginHealthCard from '../../Settings/AiCalls/AiLoginHealthCard.vue';
 import AiCallsFilters from '../../Settings/AiCalls/AiCallsFilters.vue';
 import AiCallsTable from '../../Settings/AiCalls/AiCallsTable.vue';
 
@@ -17,7 +16,6 @@ const URL = '/settings/ai-calls';
 
 const props = defineProps({
     sections: { type: Array, default: () => [] },
-    login: { type: Object, default: () => ({ agent: 'codex', state: 'unknown', checkedAt: null }) },
     // null while the call list has not arrived yet (loading skeleton).
     calls: { type: Object, default: null },
     filters: { type: Object, default: () => ({ person: null, member: null, status: null }) },
@@ -62,7 +60,7 @@ const retry = () => load(query(props.filters, props.calls?.page));
     <SettingsLayout :sections="sections" current="ai_calls" title="settings.ai_calls.title">
         <p class="ai-calls__intro">{{ t('settings.ai_calls.intro') }}</p>
 
-        <AiLoginHealthCard :login="login" />
+        <p class="ai-calls__pointer"><Link href="/settings/ai-agents">{{ t('settings.ai_calls.agents_pointer') }}</Link></p>
 
         <section class="ai-calls__list">
             <AiCallsFilters :filters="filters" :options="options" @change="onFilter" @clear="clear" />
@@ -93,6 +91,8 @@ const retry = () => load(query(props.filters, props.calls?.page));
 
 <style scoped>
 .ai-calls__intro { margin: 0 0 var(--space-4); font-size: var(--text-sm); color: var(--color-text-muted); }
+.ai-calls__pointer { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
+.ai-calls__pointer a { color: var(--color-primary); }
 .ai-calls__list { margin-top: var(--space-6); }
 .ai-calls__skeleton-row { margin-top: var(--space-4); }
 </style>

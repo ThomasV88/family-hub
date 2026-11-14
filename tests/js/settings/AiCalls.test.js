@@ -39,7 +39,6 @@ const ROWS = [
 const NO_FILTERS = { person: null, member: null, status: null };
 const OPTIONS = { people: [{ id: PERSON, name: 'Eva' }], members: [{ id: 1, name: 'Anna' }, { id: 2, name: 'Bob' }] };
 const unit = (n, u) => new Intl.NumberFormat('en-GB', { style: 'unit', unit: u, unitDisplay: 'short', maximumFractionDigits: 0 }).format(n);
-const LOGIN = (state, checkedAt = '2026-11-14T10:30:00+00:00') => ({ agent: 'codex', state, checkedAt });
 
 let current;
 function mountPage({ locale = 'en', messages, ...props } = {}) {
@@ -51,7 +50,7 @@ function mountPage({ locale = 'en', messages, ...props } = {}) {
     window.matchMedia = (query) => ({ matches: false, media: query, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
     current = mount(AiCalls, {
         props: {
-            sections: SECTIONS, login: LOGIN('logged_in'),
+            sections: SECTIONS,
             calls: { rows: ROWS, page: 1, pages: 1, total: 5 },
             filters: NO_FILTERS, options: OPTIONS, ...props,
         },
@@ -66,68 +65,15 @@ afterEach(() => {
     get.mockReset(); post.mockReset(); reload.mockReset(); vi.useRealTimers();
 });
 
-describe('AI calls page: login card', () => {
-    const CASES = [
-        ['logged_in', 'Logged in', null],
-        ['expired', 'Login expired', 'cannot be done from this page'],
-        ['not_responding', 'AI service not responding', 'did not answer'],
-        ['unknown', 'Not checked yet', 'has not been checked yet'],
-    ];
-    for (const [state, tag, help] of CASES) {
-        it(`renders the ${state} state`, () => {
-            mountPage({ login: LOGIN(state, state === 'unknown' ? null : undefined) });
-            expect(current.find('h1').text()).toBe('AI calls');
-            expect(current.find('h2').text()).toBe('Codex login');
-            expect(current.text()).toContain(tag);
-            if (help) expect(current.text()).toContain(help);
-            expect(current.text()).toContain('AI documents are read by OpenAI Codex.');
-            if (state === 'unknown') expect(current.text()).not.toContain('Last checked');
-            else expect(current.find('time').exists()).toBe(true);
-        });
-    }
-
-    it('the expired alert is not role=alert on load and no credential input exists', () => {
-        mountPage({ login: LOGIN('expired') });
-        expect(current.find('[role="alert"]').exists()).toBe(false);
-        expect(current.find('input[type="password"]').exists()).toBe(false);
-        expect(current.find('textarea').exists()).toBe(false);
-        expect(current.findAll('form')).toHaveLength(0);
-        expect(current.findAll('input[type="text"], input:not([type])')).toHaveLength(0);
-    });
-
-    it('Check again posts once, goes busy, reloads only login every 3 s and gives up after 30 s', async () => {
-        vi.useFakeTimers();
-        mountPage({ login: LOGIN('unknown', null) });
-        const button = () => current.findAll('button').find((b) => b.text() === 'Check again');
-        await button().trigger('click');
-        await button().trigger('click');
-        expect(post).toHaveBeenCalledTimes(1);
-        expect(post.mock.calls[0][0]).toBe('/settings/ai-calls/check');
-        expect(button().attributes('aria-busy')).toBe('true');
-        expect(button().attributes('disabled')).toBeDefined();
-
-        vi.advanceTimersByTime(3000);
-        expect(reload).toHaveBeenCalledTimes(1);
-        expect(reload.mock.calls[0][0]).toMatchObject({ only: ['login'] });
-        vi.advanceTimersByTime(27000);
-        expect(reload).toHaveBeenCalledTimes(10);
-        await flushPromises();
-        expect(current.text()).toContain('No answer yet');
-        expect(button().attributes('disabled')).toBeUndefined();
-        expect(button().attributes('aria-busy')).toBeUndefined();
-    });
-
-    it('stops polling as soon as a newer check result arrives', async () => {
-        vi.useFakeTimers();
-        mountPage({ login: LOGIN('unknown', null) });
-        const button = () => current.findAll('button').find((b) => b.text() === 'Check again');
-        await button().trigger('click');
-        vi.advanceTimersByTime(3000);
-        await current.setProps({ login: LOGIN('logged_in') });
-        vi.advanceTimersByTime(9000);
-        expect(reload).toHaveBeenCalledTimes(1);
-        expect(button().attributes('disabled')).toBeUndefined();
-        expect(current.text()).not.toContain('No answer yet');
+describe('AI calls page: agents pointer', () => {
+    it('renders no login card and points to AI agents', () => {
+        mountPage();
+        expect(current.find('h1').text()).toBe('AI calls');
+        expect(current.text()).not.toContain('Codex login');
+        expect(current.text()).not.toContain('Check again');
+        expect(current.find('.login-card').exists()).toBe(false);
+        const link = current.findAll('a').find((x) => x.attributes('href') === '/settings/ai-agents');
+        expect(link.text()).toBe('Agent order and login status are in AI agents.');
     });
 });
 
@@ -306,10 +252,7 @@ describe('settings nav', () => {
 
 describe('accessibility and layout', () => {
     const STATES = {
-        logged_in: {},
-        expired: { login: LOGIN('expired') },
-        not_responding: { login: LOGIN('not_responding') },
-        unknown: { login: LOGIN('unknown', null) },
+        default: {},
         'multi-page': { calls: { rows: ROWS, page: 2, pages: 3, total: 60 } },
         empty: { calls: { rows: [], page: 1, pages: 1, total: 0 } },
         'filtered-empty': { calls: { rows: [], page: 1, pages: 1, total: 0 }, filters: { person: null, member: null, status: 'failed' } },
@@ -332,10 +275,9 @@ describe('accessibility and layout', () => {
 
     it('pseudo-long text renders in full at a 320 px stacked layout without truncation hooks', () => {
         document.body.style.width = '320px';
-        mountPage({ messages: pseudoLong(load('sk')), locale: 'sk', login: LOGIN('expired'), calls: { rows: ROWS, page: 1, pages: 2, total: 30 } });
+        mountPage({ messages: pseudoLong(load('sk')), locale: 'sk', calls: { rows: ROWS, page: 1, pages: 2, total: 30 } });
         const long = pseudoLong(load('sk')).settings.ai_calls.col_started_by;
         expect(current.html()).toContain(long);
-        expect(current.html()).toContain(pseudoLong(load('sk')).settings.ai_login.expired_help);
         const css = ['AiCallsTable', 'AiLoginHealthCard', 'AiCallsFilters'].map((n) => src(`resources/js/Settings/AiCalls/${n}.vue`)).join('\n');
         expect(css).not.toMatch(/text-overflow|line-clamp|ellipsis/);
         expect(src('resources/js/Settings/AiCalls/AiCallsTable.vue')).toMatch(/white-space: normal/);

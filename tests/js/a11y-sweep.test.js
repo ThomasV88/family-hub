@@ -27,6 +27,7 @@ import StyleGuide from '../../resources/js/Pages/StyleGuide.vue';
 import Home from '../../resources/js/Pages/Home.vue';
 import TodoIndex from '../../resources/js/Pages/Todo/Index.vue';
 import AiCalls from '../../resources/js/Pages/Settings/AiCalls.vue';
+import AiAgents from '../../resources/js/Pages/Settings/AiAgents.vue';
 import AppShell from '../../resources/js/Layouts/AppShell.vue';
 
 let wrapper;
@@ -38,7 +39,7 @@ afterEach(() => {
     window.innerWidth = originalWidth;
 });
 
-const pages = { StyleGuide, Home, 'Todo/Index': TodoIndex, 'Settings/AiCalls': AiCalls };
+const pages = { StyleGuide, Home, 'Todo/Index': TodoIndex, 'Settings/AiCalls': AiCalls, 'Settings/AiAgents': AiAgents };
 const ME = 1;
 const todoTask = (id, extra = {}) => ({
     id, title: `Task ${id}`, notes: null, status: 'todo', visibility: 'family', creatorId: ME, assigneeId: ME,
@@ -62,7 +63,6 @@ pageProps['Settings/AiCalls'] = {
         { key: 'ai_calls', href: '/settings/ai-calls', labelKey: 'settings.section.ai_calls', icon: 'bot' },
         { key: 'appearance', href: '/settings/appearance', labelKey: 'settings.section.appearance', icon: 'palette' },
     ],
-    login: { agent: 'codex', state: 'expired', checkedAt: '2026-11-14T10:30:00+00:00' },
     calls: {
         page: 1, pages: 2, total: 30,
         rows: [
@@ -73,6 +73,18 @@ pageProps['Settings/AiCalls'] = {
     },
     filters: { person: null, member: null, status: null },
     options: { people: [{ id: '11111111-1111-4111-8111-111111111111', name: 'Eva' }], members: [{ id: 1, name: 'Mira' }, { id: 2, name: 'Adam' }] },
+};
+pageProps['Settings/AiAgents'] = {
+    sections: [
+        { key: 'ai_calls', href: '/settings/ai-calls', labelKey: 'settings.section.ai_calls', icon: 'bot' },
+        { key: 'ai_agents', href: '/settings/ai-agents', labelKey: 'settings.section.ai_agents', icon: 'bot' },
+    ],
+    agents: [
+        { key: 'codex', enabled: true, position: 1, model: null, health: { state: 'logged_in', checkedAt: '2026-11-14T10:30:00+00:00' }, cooldownUntil: new Date(Date.now() + 3 * 3600 * 1000).toISOString() },
+        { key: 'copilot', enabled: true, position: 2, model: 'gpt-5', health: { state: 'unknown', checkedAt: null }, cooldownUntil: null },
+    ],
+    providers: ['codex', 'copilot'],
+    checkRoute: 'settings.ai_calls.check',
 };
 const cases = [];
 for (const locale of ['en', 'sk', 'pl'])
