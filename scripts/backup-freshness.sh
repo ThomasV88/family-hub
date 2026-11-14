@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Exits 1 when the newest nightly database snapshot (tag nightly, path /<DB_NAME>.dump) or the newest
-# uploads-nightly snapshot (path /uploads.tar) is missing or older than max_hours (default 26).
+# uploads-nightly snapshot (path /uploads.tar) or medical-nightly snapshot (path /medical.tar) is missing or older than max_hours (default 26).
 # Pre-migrate and manual snapshots do not count. Every failure prints a BACKUP STALE line to stderr (cron.log) and, when
 # BACKUP_ALERT_COMMAND is set (env or .env), runs that command with the message as its only argument.
 # Usage: backup-freshness.sh [max_hours=26]
@@ -63,4 +63,8 @@ UAGE="$(age_hours uploads-nightly /uploads.tar)"
 [ "$UAGE" != "none" ] || stale "no nightly uploads snapshot"
 within "$UAGE" || stale "newest nightly uploads snapshot is ${UAGE}h old (max ${MAX}h)"
 
-echo "BACKUP FRESH: ${AGE}h uploads=${UAGE}h"
+MAGE="$(age_hours medical-nightly /medical.tar)"
+[ "$MAGE" != "none" ] || stale "no nightly medical snapshot"
+within "$MAGE" || stale "newest nightly medical snapshot is ${MAGE}h old (max ${MAX}h)"
+
+echo "BACKUP FRESH: ${AGE}h uploads=${UAGE}h medical=${MAGE}h"

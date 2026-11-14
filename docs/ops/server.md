@@ -74,6 +74,24 @@ is older than 26 h it prints `BACKUP STALE` to `logs/cron.log`, appends to `logs
 if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script with the message as its argument
 (hook point for mail or push notification; none is configured in Phase 1).
 
+### Phase 7: medical files volume
+
+- Volume `medical` (compose.server.yaml, one per stack because each stack has its own project name; `medical-dev` locally), mounted at
+  `/var/www/html/storage/app/medical` in `app`, `worker` and `scheduler` only, never in nginx or postgres. Mode 0700, files 0600.
+- Each nightly and manual `backup.sh` run writes a third restic snapshot `/medical.tar` with tags `<env>`, `medical`, `medical-<kind>`
+  (never the bare `nightly`/`manual` tag, which stays "database"). pre-migrate runs skip it. `.env` key `MEDICAL_PATH` overrides the
+  in-container path (default as above). Retention matches the database (`medical-nightly`), the off-site copy receives the snapshot id.
+- A failing medical tar does not stop the database and uploads snapshots; the run then exits non-zero with `FAILED: medical ...`.
+- `backup-freshness.sh` also requires a fresh `medical-nightly` snapshot (`no nightly medical snapshot`). The first deploy of this
+  phase needs one manual `backup.sh manual` or the first freshness run reports stale. `restore-drill.sh` prints
+  `RESTORE-DRILL MEDICAL OK files=N`.
+- Restore one person's files: `restic -r <repo> dump latest /medical.tar --tag medical-nightly | tar -xf - ./<subject-uuid>` into a
+  scratch directory, then copy back into the volume as the app user. Files are stored under one directory per subject uuid.
+- Erasure: deleted medical data stays in snapshots for the retention window (production: daily 14, weekly 8, monthly 6).
+- Decision (provisional, owner to confirm in plan 07-20): no app-level file encryption in v1. `APP_KEY` lives on the same host, so it
+  would add little; restic encrypts the backups and the volume is 0700/0600.
+- nginx: only `POST /health/people/<uuid>/documents` accepts a body up to 12m; PHP `upload_max_filesize=11M`, `post_max_size=13M`.
+
 ## Deploy
 
 (Filled by plan 01-12.)

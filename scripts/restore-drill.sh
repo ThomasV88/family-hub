@@ -109,6 +109,26 @@ else
   echo "RESTORE-DRILL UPLOADS NONE"
 fi
 
+# Medical: same proof for /medical.tar (tag medical-<DRILL_TAG>).
+M_ID="$("${R[@]}" snapshots --json --latest 1 --tag "medical-$DRILL_TAG" --path /medical.tar 2>/dev/null \
+  | python3 -c 'import json,sys; s=json.load(sys.stdin); print(max(s, key=lambda x: x["time"])["short_id"] if s else "")')" || true
+if [ -n "$M_ID" ]; then
+  ML="$(mktemp)"
+  set +e
+  "${R[@]}" dump "$M_ID" /medical.tar | tar -tf - > "$ML"
+  MRC=("${PIPESTATUS[@]}")
+  set -e
+  if [ "${MRC[0]}" -ne 0 ] || [ "${MRC[1]}" -ne 0 ]; then rm -f "$ML"; die "medical restore failed"; fi
+  M_FILES="$(grep -vc '/$' "$ML" || true)"
+  rm -f "$ML"
+  MMSG="RESTORE-DRILL MEDICAL OK files=$M_FILES snapshot=$M_ID"
+  log "$MMSG"
+  echo "$MMSG"
+else
+  log "no medical snapshot for tag medical-$DRILL_TAG"
+  echo "RESTORE-DRILL MEDICAL NONE"
+fi
+
 MSG="RESTORE-DRILL OK tables=$DRILL_TABLES rows_checked=$ROWS snapshot=$SNAP_ID"
 log "$MSG"
 echo "$MSG"

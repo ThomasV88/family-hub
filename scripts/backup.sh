@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# Encrypted backup: pg_dump and a tar of the wish-images uploads volume stream straight into a restic
+# Encrypted backup: pg_dump and tars of the wish-images and medical volumes stream straight into a restic
 # repository (no plaintext file). Two snapshots per nightly/manual run:
 #   database: tags <STACK_ENV> + <kind>                              path /<DB_NAME>.dump
 #   uploads:  tags <STACK_ENV> + uploads + uploads-<kind>            path /uploads.tar
-# The uploads snapshot never carries the bare kind tag, so `--tag nightly|manual` still means "database".
-# pre-migrate runs skip uploads. The off-site copy receives the explicit snapshot ids of this run.
+#   medical:  tags <STACK_ENV> + medical + medical-<kind>            path /medical.tar
+# Volume snapshots never carry the bare kind tag, so `--tag nightly|manual` still means "database".
+# pre-migrate runs skip uploads and medical. The off-site copy receives the explicit snapshot ids of this run.
 # Usage: backup.sh [nightly|pre-migrate|manual]   (run from the stack directory)
 # Env (from .env or the environment): COMPOSE_FILE, STACK_ENV, BACKUP_RESTIC_REPOSITORY,
 #   BACKUP_COPY_REPOSITORY, RESTIC_PASSWORD_FILE, BACKUP_COPY_PASSWORD_FILE, DB_NAME, DB_DUMP_USER,
-#   BACKUP_LOG_FILE (default ./logs/backup.log), UPLOADS_PATH (directory inside the app container, default /var/www/html/storage/app/private/wish-images)
+#   BACKUP_LOG_FILE (default ./logs/backup.log), UPLOADS_PATH (directory inside the app container, default /var/www/html/storage/app/private/wish-images),
+#   MEDICAL_PATH (default /var/www/html/storage/app/medical)
 set -euo pipefail
 
 KIND="${1:-nightly}"
@@ -19,7 +21,7 @@ load_env() {
   [ -f .env ] || return 0
   local key line val
   for key in COMPOSE_FILE STACK_ENV BACKUP_RESTIC_REPOSITORY BACKUP_COPY_REPOSITORY RESTIC_PASSWORD_FILE \
-             BACKUP_COPY_PASSWORD_FILE DB_NAME DB_DUMP_USER UPLOADS_PATH BACKUP_LOG_FILE; do
+             BACKUP_COPY_PASSWORD_FILE DB_NAME DB_DUMP_USER UPLOADS_PATH MEDICAL_PATH BACKUP_LOG_FILE; do
     [ -n "${!key:-}" ] && continue
     line="$(grep -E "^${key}=" .env | tail -n 1 || true)"
     [ -z "$line" ] && continue
@@ -36,6 +38,7 @@ DB_NAME="${DB_NAME:-family_hub}"
 DB_DUMP_USER="${DB_DUMP_USER:-fh_owner}"
 DB_PATH="/${DB_NAME}.dump"
 UPLOADS_PATH="${UPLOADS_PATH:-/var/www/html/storage/app/private/wish-images}"
+MEDICAL_PATH="${MEDICAL_PATH:-/var/www/html/storage/app/medical}"
 LOG_FILE="${BACKUP_LOG_FILE:-./logs/backup.log}"
 mkdir -p "$(dirname "$LOG_FILE")"
 log() { printf '%s backup[%s/%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$STACK_ENV" "$KIND" "$*" >> "$LOG_FILE"; }
@@ -68,25 +71,36 @@ if [ "${RC[0]}" -ne 0 ] || [ "${RC[1]}" -ne 0 ]; then
 fi
 [ -n "$SNAP" ] || die "restic reported no snapshot id"
 
-# Uploads: tar from a one-off app container (works when app is not running) straight into restic.
-USNAP=""
-UFAIL=""
-if [ "$KIND" = "pre-migrate" ]; then
-  log "uploads skipped (pre-migrate)"
-else
-  UOUT="$(mktemp)"
-  trap 'rm -f "$OUT" "$UOUT"' EXIT
+# Volume snapshots (uploads, medical): tar from a one-off app container (works when app is not running) straight
+# into restic, never a plaintext tar on disk. A failure sets the volume's own flag and never aborts the other
+# snapshots; the run fails at the end. Sets VSNAP (snapshot id, empty on failure) and VERR (message, empty on success).
+snapshot_volume() {
+  local path="$1" file="$2" tag="$3" vout vrc
+  VSNAP=""; VERR=""
+  vout="$(mktemp)"
   set +e
-  docker compose -f "$COMPOSE_FILE" run --rm --no-deps -T --entrypoint tar app -C "$UPLOADS_PATH" -cf - . \
-    | "${R[@]}" backup --stdin --stdin-filename uploads.tar --tag "$STACK_ENV" --tag uploads --tag "uploads-$KIND" --json > "$UOUT"
-  URC=("${PIPESTATUS[@]}")
+  docker compose -f "$COMPOSE_FILE" run --rm --no-deps -T --entrypoint tar app -C "$path" -cf - . \
+    | "${R[@]}" backup --stdin --stdin-filename "$file" --tag "$STACK_ENV" --tag "$tag" --tag "$tag-$KIND" --json > "$vout"
+  vrc=("${PIPESTATUS[@]}")
   set -e
-  USNAP="$(grep -o '"snapshot_id":"[0-9a-f]*"' "$UOUT" | tail -n 1 | cut -d'"' -f4 || true)"
-  if [ "${URC[0]}" -ne 0 ] || [ "${URC[1]}" -ne 0 ] || [ -z "$USNAP" ]; then
-    [ -n "$USNAP" ] && "${R[@]}" forget --prune --quiet "$USNAP" >/dev/null 2>&1 || true
-    UFAIL="uploads tar or snapshot failed (tar=${URC[0]} restic=${URC[1]})"
-    USNAP=""
+  VSNAP="$(grep -o '"snapshot_id":"[0-9a-f]*"' "$vout" | tail -n 1 | cut -d'"' -f4 || true)"
+  rm -f "$vout"
+  if [ "${vrc[0]}" -ne 0 ] || [ "${vrc[1]}" -ne 0 ] || [ -z "$VSNAP" ]; then
+    [ -n "$VSNAP" ] && "${R[@]}" forget --prune --quiet "$VSNAP" >/dev/null 2>&1 || true
+    VERR="$tag tar or snapshot failed (tar=${vrc[0]} restic=${vrc[1]})"
+    VSNAP=""
   fi
+}
+
+USNAP=""; UFAIL=""
+MSNAP=""; MFAIL=""
+if [ "$KIND" = "pre-migrate" ]; then
+  log "uploads and medical skipped (pre-migrate)"
+else
+  snapshot_volume "$UPLOADS_PATH" uploads.tar uploads
+  USNAP="$VSNAP"; UFAIL="$VERR"
+  snapshot_volume "$MEDICAL_PATH" medical.tar medical
+  MSNAP="$VSNAP"; MFAIL="$VERR"
 fi
 
 if [ "$KIND" = "nightly" ]; then
@@ -96,6 +110,7 @@ if [ "$KIND" = "nightly" ]; then
   esac
   "${R[@]}" forget --tag nightly --path "$DB_PATH" "${KEEP[@]}" --prune --quiet || die "retention (nightly) failed"
   "${R[@]}" forget --tag uploads-nightly --path /uploads.tar "${KEEP[@]}" --prune --quiet || die "retention (uploads-nightly) failed"
+  "${R[@]}" forget --tag medical-nightly --path /medical.tar "${KEEP[@]}" --prune --quiet || die "retention (medical-nightly) failed"
 fi
 if [ "$KIND" = "pre-migrate" ]; then
   "${R[@]}" forget --tag pre-migrate --path "$DB_PATH" --keep-last 10 --prune --quiet || die "retention (pre-migrate) failed"
@@ -104,13 +119,17 @@ fi
 if [ -n "${BACKUP_COPY_REPOSITORY:-}" ]; then
   COPY_IDS=("$SNAP")
   [ -n "$USNAP" ] && COPY_IDS+=("$USNAP")
+  [ -n "$MSNAP" ] && COPY_IDS+=("$MSNAP")
   restic -r "$BACKUP_COPY_REPOSITORY" --password-file "$BACKUP_COPY_PASSWORD_FILE" \
     copy --from-repo "$BACKUP_RESTIC_REPOSITORY" --from-password-file "$RESTIC_PASSWORD_FILE" --quiet "${COPY_IDS[@]}" \
     || die "copy to off-site repository failed"
   U_SHORT="none"; [ -z "$USNAP" ] || U_SHORT="${USNAP:0:8}"
-  log "copied db=${SNAP:0:8} uploads=$U_SHORT"
+  M_SHORT="none"; [ -z "$MSNAP" ] || M_SHORT="${MSNAP:0:8}"
+  log "copied db=${SNAP:0:8} uploads=$U_SHORT medical=$M_SHORT"
 fi
 
+[ -z "$UFAIL" ] || [ -z "$MFAIL" ] || die "$UFAIL; $MFAIL"
 [ -z "$UFAIL" ] || die "$UFAIL"
+[ -z "$MFAIL" ] || die "$MFAIL"
 log "OK"
 echo "backup OK ($KIND)"
