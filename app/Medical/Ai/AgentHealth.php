@@ -4,7 +4,6 @@ namespace App\Medical\Ai;
 
 use App\Models\AiAgentStatus;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Login health of the AI agents: written by the worker (check job, real run outcomes), read by the app.
@@ -73,6 +72,6 @@ final class AgentHealth
     private function write(string $agent, array $columns): void
     {
         $columns['updated_at'] = now();
-        DB::table('ai_agent_status')->upsert([['agent' => $agent, ...$columns]], ['agent'], array_keys($columns));
+        AiAgentStatus::query()->toBase()->upsert([['agent' => $agent, ...$columns]], ['agent'], array_keys($columns));
     }
 }
