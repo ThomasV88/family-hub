@@ -150,7 +150,7 @@ class PersonPage
     }
 
     /**
-     * Never the path, the thumb path or the hash; only what the screen shows. 
+     * Never the path, the thumb path or the hash; only what the screen shows.
      *
      * @return list<array{id: string, kind: string, title: string, visitId: ?string, uploadedOn: string, sizeBytes: int}>
      */

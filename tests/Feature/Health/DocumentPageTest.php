@@ -2,6 +2,7 @@
 
 use App\Access\AccessLevel;
 use App\Models\MedicalDocument;
+use App\Models\MedicalSubject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -10,7 +11,7 @@ use Tests\Support\MedicalFixtures;
 
 uses(RefreshDatabase::class);
 
-/** @return array{0: User, 1: App\Models\MedicalSubject} */
+/** @return array{0: User, 1: MedicalSubject} */
 function documentPageEditor(): array
 {
     $user = User::factory()->create();
