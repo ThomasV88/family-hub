@@ -1702,7 +1702,8 @@
             "contact_add": "Dodaj kontakt",
             "contact_remove": "Usuń kontakt",
             "err_name": "Brak imienia i nazwiska. Wpisz imię i nazwisko.",
-            "err_contacts_max": "Możesz dodać najwyżej 3 kontakty. Usuń jeden, aby dodać inny."
+            "err_contacts_max": "Możesz dodać najwyżej 3 kontakty. Usuń jeden, aby dodać inny.",
+            "err_phone": "Numer telefonu wygląda niepoprawnie. Użyj cyfr, spacji i znaków + ( ) . / -"
         },
         "visit": {
             "add": "Dodaj wizytę",

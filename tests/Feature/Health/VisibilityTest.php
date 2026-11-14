@@ -2,7 +2,6 @@
 
 use App\Access\AccessLevel;
 use App\Access\Preset;
-use App\Audit\AuditLogger;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Viewer;
 use App\Medical\Visibility;
@@ -31,7 +30,7 @@ it('returns member subjects and the own linked profile while self access is on, 
     $c = MedicalFixtures::subject(['name' => 'C', 'user_id' => $w->id, 'self_access_enabled' => false]);
 
     $ids = fn (AccessLevel $min = AccessLevel::View) => Visibility::subjectIds(Viewer::for($v), $min)->pluck('subject_id')->all();
-    $query = new SubjectQuery(app(AuditLogger::class));
+    $query = app(SubjectQuery::class);
     $visible = $query->visible(Viewer::for($v))->pluck('id')->all();
 
     expect($visible)->toContain($a->id, $s->id)->not->toContain($b->id)->not->toContain($c->id)
@@ -50,7 +49,7 @@ it('caps a member Edit at the module level and gives an admin with a grant no by
     $edit = mdUser();
     $admin = mdUser(AccessLevel::Edit, admin: true);
     $subject = MedicalFixtures::subject([], [[$viewOnly, AccessLevel::Edit], [$edit, AccessLevel::Edit]]);
-    $query = new SubjectQuery(app(AuditLogger::class));
+    $query = app(SubjectQuery::class);
 
     expect($query->levelFor(Viewer::for($viewOnly), $subject))->toBe(AccessLevel::View)
         ->and($query->levelFor(Viewer::for($edit), $subject))->toBe(AccessLevel::Edit)

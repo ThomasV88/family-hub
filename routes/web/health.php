@@ -12,3 +12,7 @@ Route::get('/health/people/{person}', [PersonController::class, 'show'])
     ->middleware('access:module,health,view')->name('health.people.show');
 Route::post('/health/people', [PersonController::class, 'store'])
     ->middleware(['access:module,health,edit', 'throttle:30,1,health.people.store'])->name('health.people.store');
+Route::patch('/health/people/{person}', [PersonController::class, 'update'])
+    ->middleware(['access:module,health,edit', 'throttle:60,1,health.people.update'])->name('health.people.update');
+Route::delete('/health/people/{person}', [PersonController::class, 'destroy'])
+    ->middleware(['access:module,health,edit', 'throttle:10,1,health.people.destroy'])->name('health.people.destroy');

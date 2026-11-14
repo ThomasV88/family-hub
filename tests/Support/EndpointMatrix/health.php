@@ -34,4 +34,23 @@ return [
             'grandparent' => 403, 'guestPreset' => 403, 'noGrants' => 403,
         ],
     ],
+    'health.people.update' => [
+        'method' => 'PATCH',
+        'uri' => '/health/people/{person}',
+        'params' => $parent,
+        'data' => ['name' => 'Matrix person'],
+        'expect' => [
+            'guest' => 302, 'admin' => 403, 'parent' => 302, 'child' => 403,
+            'grandparent' => 403, 'guestPreset' => 403, 'noGrants' => 403,
+        ],
+    ],
+    'health.people.destroy' => [
+        'method' => 'DELETE',
+        'uri' => '/health/people/{person}',
+        'params' => $parent,
+        'expect' => [
+            'guest' => 302, 'admin' => 403, 'parent' => 302, 'child' => 403,
+            'grandparent' => 403, 'guestPreset' => 403, 'noGrants' => 403,
+        ],
+    ],
 ];

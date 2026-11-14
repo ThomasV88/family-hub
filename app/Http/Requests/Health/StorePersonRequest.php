@@ -27,6 +27,11 @@ class StorePersonRequest extends FormRequest
             'sex' => ['nullable', Rule::in(['female', 'male', 'unspecified'])],
             'blood_type' => ['nullable', Rule::in(self::BLOOD_TYPES)],
             'notes' => ['nullable', 'string', 'max:2000', new ValidUtf8('health.person.err_name')],
+            'contacts' => ['nullable', 'array', 'max:'.(int) config('medical.max_contacts')],
+            'contacts.*' => ['array'],
+            'contacts.*.name' => ['required', 'string', 'max:120', new ValidUtf8('health.person.err_name')],
+            'contacts.*.relation' => ['nullable', 'string', 'max:60', new ValidUtf8('health.error.load')],
+            'contacts.*.phone' => ['required', 'string', 'max:40', 'regex:/^[0-9+()\.\/\s-]{3,40}$/'],
         ];
     }
 
@@ -37,6 +42,12 @@ class StorePersonRequest extends FormRequest
             'name.required' => 'health.person.err_name',
             'name.string' => 'health.person.err_name',
             'name.max' => 'health.person.err_name',
+            'contacts.max' => 'health.person.err_contacts_max',
+            'contacts.*.name.required' => 'health.person.err_name',
+            'contacts.*.name.max' => 'health.person.err_name',
+            'contacts.*.phone.required' => 'health.person.err_phone',
+            'contacts.*.phone.max' => 'health.person.err_phone',
+            'contacts.*.phone.regex' => 'health.person.err_phone',
         ];
     }
 }

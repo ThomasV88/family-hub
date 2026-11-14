@@ -1702,7 +1702,8 @@
             "contact_add": "Add contact",
             "contact_remove": "Remove contact",
             "err_name": "Name is missing. Enter a name.",
-            "err_contacts_max": "You can add up to 3 contacts. Remove one to add another."
+            "err_contacts_max": "You can add up to 3 contacts. Remove one to add another.",
+            "err_phone": "Phone number looks wrong. Use digits, spaces, + ( ) . / -"
         },
         "visit": {
             "add": "Add visit",

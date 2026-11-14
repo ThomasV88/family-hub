@@ -4,12 +4,14 @@ namespace App\Medical;
 
 use App\Access\AccessLevel;
 use App\Medical\Queries\AllergyQuery;
+use App\Medical\Queries\ContactQuery;
 use App\Medical\Queries\DocumentQuery;
 use App\Medical\Queries\MedicationQuery;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Queries\VaccinationQuery;
 use App\Medical\Queries\VisitQuery;
 use App\Models\MedicalAllergy;
+use App\Models\MedicalContact;
 use App\Models\MedicalDocument;
 use App\Models\MedicalMedication;
 use App\Models\MedicalSubject;
@@ -28,11 +30,11 @@ use Inertia\Response;
 class PersonPage
 {
     /** Panel kinds that exist so far; those listed in WITH_ID resolve a record id inside the visible person. */
-    private const PANELS = ['new-person', 'new-visit', 'visit', 'new-allergy', 'allergy', 'new-medication', 'medication', 'new-vaccination', 'vaccination', 'new-document', 'document'];
+    private const PANELS = ['new-person', 'new-visit', 'visit', 'new-allergy', 'allergy', 'new-medication', 'medication', 'new-vaccination', 'vaccination', 'new-document', 'document', 'edit-person'];
 
     private const WITH_ID = ['visit', 'allergy', 'medication', 'vaccination', 'document'];
 
-    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations, private readonly DocumentQuery $documents) {}
+    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations, private readonly DocumentQuery $documents, private readonly ContactQuery $contacts) {}
 
     public function render(Viewer $viewer, ?MedicalSubject $subject, Request $request): Response
     {
@@ -81,6 +83,11 @@ class PersonPage
             'aiConsent' => (bool) $subject->ai_consent,
             'canEdit' => $this->subjects->levelFor($viewer, $subject) === AccessLevel::Edit,
             'notes' => $subject->notes,
+            'contacts' => $this->contacts->forSubject($viewer, $subject)->map(fn (MedicalContact $c) => [
+                'name' => $c->name,
+                'relation' => $c->relation,
+                'phone' => $c->phone,
+            ])->values()->all(),
         ];
     }
 
@@ -272,6 +279,9 @@ class PersonPage
 
         if ($kind === 'new-person' && ! $viewer->canEdit()) {
             return null;
+        }
+        if ($kind === 'edit-person') {
+            abort_if($subject === null || $this->subjects->levelFor($viewer, $subject) !== AccessLevel::Edit, 403);
         }
         if (in_array($kind, ['new-visit', 'new-allergy', 'new-medication', 'new-vaccination', 'new-document'], true)) {
             abort_if($subject === null || $this->subjects->levelFor($viewer, $subject) !== AccessLevel::Edit, 403);

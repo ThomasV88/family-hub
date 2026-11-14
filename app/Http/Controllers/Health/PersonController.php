@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Health;
 
+use App\Access\AccessLevel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Health\StorePersonRequest;
+use App\Http\Requests\Health\UpdatePersonRequest;
 use App\Medical\PersonPage;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Viewer;
@@ -39,5 +41,24 @@ class PersonController extends Controller
 
         return redirect()->route('health.people.show', ['person' => $subject->getKey()])
             ->with('toast', ['key' => 'health.person.saved']);
+    }
+
+    public function update(UpdatePersonRequest $request, string $person, SubjectQuery $subjects): RedirectResponse
+    {
+        $subject = $request->subject();
+        abort_unless($subjects->update(Viewer::for($request->user()), $subject, $request->validated()), 403);
+
+        return redirect()->route('health.people.show', ['person' => $subject->getKey()])
+            ->with('toast', ['key' => 'health.person.saved']);
+    }
+
+    public function destroy(Request $request, string $person, SubjectQuery $subjects): RedirectResponse
+    {
+        $viewer = Viewer::for($request->user());
+        $subject = $subjects->findVisible($viewer, $person, AccessLevel::Edit);
+        abort_if($subject === null, 403);
+        abort_unless($subjects->delete($viewer, $subject), 403);
+
+        return redirect()->route('health.index')->with('toast', ['key' => 'health.person.deleted']);
     }
 }

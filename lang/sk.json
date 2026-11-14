@@ -1702,7 +1702,8 @@
             "contact_add": "Pridať kontakt",
             "contact_remove": "Odstrániť kontakt",
             "err_name": "Chýba meno. Zadajte meno.",
-            "err_contacts_max": "Môžete pridať najviac 3 kontakty. Odstráňte jeden a pridajte iný."
+            "err_contacts_max": "Môžete pridať najviac 3 kontakty. Odstráňte jeden a pridajte iný.",
+            "err_phone": "Telefónne číslo vyzerá nesprávne. Použite číslice, medzery a znaky + ( ) . / -"
         },
         "visit": {
             "add": "Pridať návštevu",

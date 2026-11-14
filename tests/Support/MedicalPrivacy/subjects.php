@@ -1,6 +1,7 @@
 <?php
 
 use App\Access\AccessLevel;
+use App\Models\MedicalContact;
 use Tests\Support\MedicalFixtures;
 use Tests\Support\MedicalPrivacy;
 
@@ -15,6 +16,14 @@ return [
         $ctx['hidden']['own_off'] = MedicalFixtures::subject(
             ['name' => MedicalPrivacy::CANARY.' Own off', 'user_id' => $ctx['viewer']->id, 'self_access_enabled' => false],
         )->getKey();
+        foreach (['person', 'own_off'] as $key) {
+            MedicalContact::factory()->create([
+                'subject_id' => $ctx['hidden'][$key],
+                'name' => MedicalPrivacy::CANARY." Contact {$key}",
+                'relation' => MedicalPrivacy::CANARY.' Relation',
+                'phone' => '+421 777 777',
+            ]);
+        }
     },
 
     'params' => [
@@ -31,5 +40,6 @@ return [
 
     'payloads' => [
         'health.people.store' => fn (array $ctx): array => ['name' => 'Parity Person'],
+        'health.people.update' => fn (array $ctx): array => ['name' => 'Parity Person', 'contacts' => [['name' => 'Parity Contact', 'phone' => '123 456']]],
     ],
 ];
