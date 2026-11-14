@@ -1,10 +1,11 @@
 <script setup>
-import { computed, nextTick, reactive, ref } from 'vue';
+import { computed, nextTick, provide, reactive, ref, watch } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { ArrowLeft, ListChecks } from '@lucide/vue';
 import AppShell from '../../Layouts/AppShell.vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
+import UiConfirmDialog from '../../Components/ui/UiConfirmDialog.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
 import UiErrorState from '../../Components/ui/UiErrorState.vue';
@@ -132,9 +133,64 @@ function onDecided({ key, action, state, recordId, edited }) {
     }
 }
 
-// Editing in place arrives in 08-19, which replaces this hook; until then an Edit press changes nothing and a 422
-// shows its errors inline in the entry.
-function onEditRequested() {}
+// Edit in place: one entry at a time. The page holds which entry is open, the server errors that opened it and
+// whether its form is dirty; the entries reach this through provide/inject. The drafts themselves live in the form
+// components (memory only) and nowhere else. Opening another entry while the open one is clean switches silently;
+// while it is dirty a discard confirm runs first, and "Keep editing" returns focus into the open form.
+const editingKey = ref(null);
+const editErrors = ref(null);
+const editDirty = ref(false);
+const switchTo = ref(null); // {key, errors} waiting on the discard confirm
+const switchOpen = ref(false);
+const specialtyList = computed(() => props.specialties);
+
+function openEdit(key, errors) {
+    editingKey.value = key;
+    editErrors.value = errors && Object.keys(errors).length > 0 ? errors : null;
+    editDirty.value = false;
+}
+function closeEdit(key) {
+    if (editingKey.value !== key) return;
+    editingKey.value = null;
+    editErrors.value = null;
+    editDirty.value = false;
+}
+function setDirty(key, value) {
+    if (editingKey.value === key) editDirty.value = value;
+}
+provide('reviewEdit', { editingKey, errors: editErrors, specialties: specialtyList, close: closeEdit, setDirty });
+
+function onEditRequested({ key, errors }) {
+    if (editingKey.value === key) return;
+    if (editingKey.value !== null && editDirty.value) {
+        switchTo.value = { key, errors };
+        switchOpen.value = true;
+        return;
+    }
+    openEdit(key, errors);
+}
+function confirmSwitch() {
+    const next = switchTo.value;
+    switchTo.value = null;
+    if (next) openEdit(next.key, next.errors);
+}
+function keepCurrent() {
+    switchTo.value = null;
+    const key = editingKey.value;
+    // The dialog gives focus back to the button that opened it; take it into the open form right after.
+    setTimeout(() => {
+        const el = document.querySelector(`[data-entry-key="${key}"] form [aria-invalid="true"], [data-entry-key="${key}"] form input, [data-entry-key="${key}"] form select, [data-entry-key="${key}"] form textarea`);
+        el?.focus();
+    }, 0);
+}
+const switchLabel = computed(() => {
+    const entry = sections.value.flatMap((s) => s.entries).find((e) => e.key === editingKey.value);
+    const f = entry?.fields ?? {};
+    const first = [f.doctor, f.name, f.substance, f.vaccine].find((v) => typeof v === 'string' && v.trim() !== '');
+    return first?.trim() ?? t('health.ai.review.pane_suggestions');
+});
+// A superseded run is read-only: nothing stays open for editing.
+watch(superseded, (value) => { if (value) closeEdit(editingKey.value); });
 
 const retry = () => router.reload();
 </script>
@@ -214,6 +270,16 @@ const retry = () => router.reload();
                     </section>
                 </div>
             </template>
+
+            <UiConfirmDialog
+                v-model:open="switchOpen"
+                :title="t('health.ai.review.discard_title')"
+                :body="switchLabel"
+                :confirm-label="t('health.ai.review.discard_confirm')"
+                :cancel-label="t('health.ai.review.keep_editing')"
+                @confirm="confirmSwitch"
+                @cancel="keepCurrent"
+            />
 
             <div class="visually-hidden" role="status" data-testid="ai-live">{{ live }}</div>
         </div>

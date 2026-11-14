@@ -405,15 +405,14 @@ describe('accept', () => {
         expect($('[data-testid="entry-reject"]')).toBeNull();
     });
 
-    it('lists the server errors inline on 422 and keeps the entry pending', async () => {
+    it('opens the edit form with the field flagged on a 422 and keeps the entry pending', async () => {
         mountPage();
         fetchMock.mockResolvedValue({ ok: false, status: 422, error: 'invalid', errors: { severity: ['health.allergy.err_severity'] }, data: {} });
         action('allergy-0', 'accept').click();
         await flush();
-        const errors = entryEl('allergy-0').querySelector('[data-testid="entry-errors"]');
-        expect(errors.textContent).toContain('Choose a severity to add this allergy.');
+        const form = entryEl('allergy-0').querySelector('[data-testid="edit-form-allergy"]');
+        expect(form.textContent).toContain('Choose a severity to add this allergy.');
         expect(entryEl('allergy-0').querySelector('[data-testid="entry-tag"]').textContent).toBe('Not reviewed yet');
-        expect(action('allergy-0', 'accept').disabled).toBe(false);
         expect($('[role="alert"]')).toBeNull();
     });
 
@@ -441,11 +440,12 @@ describe('accept', () => {
         expect(entryEl('visit-0').querySelector('[data-testid="entry-tag"]').textContent).toBe('Not reviewed yet');
     });
 
-    it('emits the edit request when Edit is pressed and changes nothing yet', async () => {
+    it('opens the edit form when Edit is pressed without any request', async () => {
         mountPage();
         action('visit-0', 'edit').click();
         await flush();
         expect(fetchMock).not.toHaveBeenCalled();
+        expect(entryEl('visit-0').querySelector('[data-testid="edit-form-visit"]')).not.toBeNull();
         expect(entryEl('visit-0').querySelector('[data-testid="entry-tag"]').textContent).toBe('Not reviewed yet');
     });
 });
