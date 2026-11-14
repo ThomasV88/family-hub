@@ -96,7 +96,7 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
 
 - Service `ai-worker` (compose.server.yaml; locally only with `docker compose --profile ai up`). Image `$IMAGE_PREFIX-ai:$IMAGE_TAG`
   (Dockerfile target `ai-worker`, the only image with the pinned Codex CLI). Runs as www-data, one process
-  (`queue:work --queue=ai-control,ai --tries=1 --timeout=360`: the login check runs on the priority queue `ai-control`, so an extraction backlog never makes the agent look "not responding"), `init: true`, no ports, `mem_limit` `MEM_AI` (default 384m, measure live in 08-22).
+  (`queue:work --queue=ai-control,ai,ai-bulk --tries=1 --timeout=720`: the login check runs on the priority queue `ai-control`, so an extraction backlog never makes the agent look "not responding"), `init: true`, no ports, `mem_limit` `MEM_AI` (default 768m, PROVISIONAL, confirmed in 09-20).
 - Env file `ai-worker.env` (template `ops/env/ai-worker.env.example`), never `app.env`: no `APP_KEY`, `MAIL_*`, `GOOGLE_*`, `VAPID_*`, `AWS_*`, `STRIPE_*`, `*_API_KEY`, `*_SECRET`.
   `ai:preflight` refuses to start if one is set (codes `app_key_present`, `forbidden_env`, `forbidden_secret`; names are matched by
   `ai.forbidden_env_patterns`, values are never printed). The dev `ai-worker` reads `ops/env/ai-worker.dev.env` and has the repo `.env` masked. `deploy.sh` refuses to run without `ai-worker.env`. It uses the runtime role `fh_app`
@@ -121,6 +121,17 @@ Before the first login check the data-controls and training settings of the Chat
 
 The login survives restarts because it lives in the `codex-home` volume. When a refresh fails, run the login again (the admin settings page
 reports "login expired" once the health check exists). Never set `OPENAI_API_KEY`/`CODEX_API_KEY`: per-token billing is out of scope.
+
+### Copilot CLI (Phase 9)
+
+- The GitHub Copilot CLI is pinned to 1.0.112 (`docker/ai/copilot/package-lock.json`) and baked into the ai image only (build stage `copilot`, one `COPY --from=copilot` into `ai-runtime`). Its runtime cache is extracted at build time into `/opt/copilot/cache` and read-only, so it starts in about a second and never self-updates (`COPILOT_AUTO_UPDATE=false`, `COPILOT_TELEMETRY_DISABLED=true`). The binary is not stripped or repacked (licence). The app, worker and web images contain no Copilot and no Node.
+- Volume `copilot-home` (dev `copilot-home-dev`) at `/copilot`, mounted only into the `ai-worker`. It holds the login only (the per-run homes live on the `/ai-work` tmpfs). It is never backed up and never copied between stacks; after a restore the login is repeated. `check-compose.sh` fails on any other mount or any backup script mentioning it.
+- Login (done in 09-20, not before): `docker compose exec ai-worker copilot login --device-code`. On a server without a keyring Copilot stores the token in plaintext under `/copilot`; the owner answers yes. Set the Copilot "Additional usage" budget to $0. Never set `GH_TOKEN`, `GITHUB_TOKEN`, `COPILOT_GITHUB_TOKEN`, `COPILOT_PROVIDER_*`, `COPILOT_ALLOW_ALL*` or `COPILOT_OFFLINE` (static check, env example rule, preflight).
+- Check the version with `copilot --version`, never `copilot version` (it calls the network).
+- Queues are served in strict order `ai-control,ai,ai-bulk`: login checks and interactive runs always go before a bulk re-read.
+- Timeout invariants: `DB_QUEUE_RETRY_AFTER` 900 > worker `--timeout` 720 >= job budget 660 (config raised in 09-10); the reaper threshold is job + 120 = 780.
+- PROVISIONAL (confirmed in 09-20): `MEM_AI` 768m and tmpfs `/ai-work` 192m.
+- Deferred WR-06: both CLIs run under the www-data uid (same uid as the app files). Still open; now covers two CLIs.
 
 ## Deploy
 

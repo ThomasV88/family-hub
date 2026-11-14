@@ -79,6 +79,10 @@ services:
       APP_KEY: ""
       HOME: /codex
       CODEX_HOME: /codex
+      COPILOT_HOME: /copilot
+      COPILOT_CACHE_HOME: /opt/copilot/cache
+      COPILOT_TELEMETRY_DISABLED: "true"
+      COPILOT_AUTO_UPDATE: "false"
       QUEUE_CONNECTION: database
       DB_QUEUE_RETRY_AFTER: "900"
       AI_WORK_DIR: /ai-work
@@ -89,12 +93,13 @@ services:
       - /dev/null:/var/www/html/.env:ro
       - medical-dev:/var/www/html/storage/app/medical:ro
       - codex-home-dev:/codex
+      - copilot-home-dev:/copilot
     tmpfs:
-      - /ai-work:size=96m,mode=0700,uid=1000,gid=1000
+      - /ai-work:size=192m,mode=0700,uid=1000,gid=1000
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["sh", "-c", "until php artisan migrate:status >/dev/null 2>&1; do sleep 3; done; php artisan ai:preflight && exec php artisan queue:work database --queue=ai-control,ai --sleep=3 --tries=1 --timeout=360 --max-jobs=100 --max-time=3600"]
+    command: ["sh", "-c", "until php artisan migrate:status >/dev/null 2>&1; do sleep 3; done; php artisan ai:preflight && exec php artisan queue:work database --queue=ai-control,ai,ai-bulk --sleep=3 --tries=1 --timeout=720 --max-jobs=100 --max-time=3600"]
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f '[q]ueue:work'"]
       interval: 15s
@@ -131,3 +136,4 @@ volumes:
   uploads-dev:
   medical-dev:
   codex-home-dev:
+  copilot-home-dev:

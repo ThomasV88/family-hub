@@ -89,25 +89,31 @@ if (ai.get("deploy") or {}).get("replicas") not in (None, 1):
 am = [(v.get("source"), v.get("target"), bool(v.get("read_only"))) for v in ai.get("volumes", [])]
 if ("codex-home", "/codex", False) not in am:
     fail("ai-worker does not mount codex-home at /codex")
+if ("copilot-home", "/copilot", False) not in am:
+    fail("ai-worker does not mount copilot-home at /copilot")
 if ("medical", MED, True) not in am:
     fail("ai-worker does not mount medical read-only")
 if any(src == "uploads" or tgt == WISH for src, tgt, _ in am):
     fail("ai-worker mounts the uploads volume")
-if len(am) != 2:
-    fail("ai-worker has volumes besides codex-home and medical")
+if len(am) != 3:
+    fail("ai-worker has volumes besides codex-home, copilot-home and medical")
 for name, svc in svcs.items():
     if name != "ai-worker" and any(src == "codex-home" or tgt == "/codex" for src, tgt in mounts(svc)):
         fail("%s mounts codex-home" % name)
+    if name != "ai-worker" and any(src == "copilot-home" or tgt == "/copilot" for src, tgt in mounts(svc)):
+        fail("%s mounts copilot-home" % name)
 aenv = ai.get("environment") or {}
 for key in aenv:
-    if re.match(r"APP_KEY$|MAIL_|GOOGLE_|VAPID_|.*_API_KEY$|REDIS", key):
+    if re.match(r"APP_KEY$|MAIL_|GOOGLE_|VAPID_|.*_API_KEY$|REDIS|GH_TOKEN$|GITHUB_TOKEN$|COPILOT_GITHUB_TOKEN$|COPILOT_PROVIDER_|COPILOT_ALLOW_ALL|COPILOT_OFFLINE", key):
         fail("ai-worker gets forbidden variable %s" % key)
 if aenv.get("DB_USERNAME") != "fh_app":
     fail("ai-worker does not use the runtime role fh_app")
 if aenv.get("DB_QUEUE_RETRY_AFTER") != "900":
     fail("ai-worker DB_QUEUE_RETRY_AFTER is not 900")
-if "queue=ai-control,ai " not in " ".join(ai.get("command", [])):
-    fail("ai-worker does not work ai-control before ai")
+if "queue=ai-control,ai,ai-bulk " not in " ".join(ai.get("command", [])):
+    fail("ai-worker does not work ai-control,ai,ai-bulk in that order")
+if "--timeout=720 " not in " ".join(ai.get("command", [])):
+    fail("ai-worker worker timeout is not 720")
 if not any("/ai-work" in t for t in (ai.get("tmpfs") or [])):
     fail("ai-worker has no tmpfs work dir")
 for name, svc in svcs.items():
@@ -136,16 +142,22 @@ if "app.env" in block.replace("never app.env", ""):
 for line in open("ops/env/ai-worker.env.example"):
     if line.lstrip().startswith("#"):
         continue
-    if re.match(r"\s*(\w*_API_KEY|APP_KEY|MAIL_\w*|GOOGLE_\w*|VAPID_\w*)\s*=", line):
+    if re.match(r"\s*(\w*_API_KEY|APP_KEY|MAIL_\w*|GOOGLE_\w*|VAPID_\w*|GH_TOKEN|GITHUB_TOKEN|COPILOT_GITHUB_TOKEN|COPILOT_PROVIDER_\w*|COPILOT_ALLOW_ALL\w*|COPILOT_OFFLINE)\s*=", line):
         fail("ai-worker.env.example sets a forbidden variable: " + line.strip())
 for f in ("scripts/backup.sh", "scripts/restore-drill.sh", "scripts/backup-freshness.sh"):
-    if "codex-home" in open(f).read():
-        fail("%s mentions codex-home (credentials must never be backed up)" % f)
+    if "codex-home" in open(f).read() or "copilot-home" in open(f).read():
+        fail("%s mentions codex-home or copilot-home (credentials must never be backed up)" % f)
 df = open("docker/app/Dockerfile").read()
 if df.count("COPY --from=codex") != 1:
     fail("COPY --from=codex must appear exactly once")
 if df.index("COPY --from=codex") < df.index("AS ai-runtime"):
     fail("COPY --from=codex appears before the ai-runtime stage")
+if df.count("COPY --from=copilot") != 1:
+    fail("COPY --from=copilot must appear exactly once")
+if df.index("COPY --from=copilot") < df.index("AS ai-runtime"):
+    fail("COPY --from=copilot appears before the ai-runtime stage")
+if "copilot" in df[:df.index("# ---- copilot:")].lower():
+    fail("copilot appears in a stage before its build stage")
 deploy = open("scripts/deploy.sh").read()
 up_lists = re.findall(r"up -d --wait[^\n]*", deploy)
 services = re.findall(r"^  ([a-z][a-z-]*):\n", raw.split("\nservices:\n", 1)[1].split("\nnetworks:\n", 1)[0], re.M)
@@ -206,6 +218,14 @@ for key in dev_ai.get("environment") or {}:
 if (dev_ai.get("environment") or {}).get("APP_KEY") not in (None, ""):
     print("FAIL: dev ai-worker has an APP_KEY", file=sys.stderr)
     sys.exit(1)
+dv = [(v.get("source"), v.get("target")) for v in dev_ai.get("volumes", [])]
+if ("copilot-home-dev", "/copilot") not in dv:
+    print("FAIL: dev ai-worker does not mount copilot-home-dev", file=sys.stderr)
+    sys.exit(1)
+for name, svc in svcs.items():
+    if name != "ai-worker" and any(src == "copilot-home-dev" or tgt == "/copilot" for src, tgt in mounts(svc)):
+        print("FAIL: dev %s mounts copilot-home-dev" % name, file=sys.stderr)
+        sys.exit(1)
 if not any(v.get("target") == "/var/www/html/.env" and v.get("source") == "/dev/null" for v in dev_ai.get("volumes", [])):
     print("FAIL: dev ai-worker does not mask the repo .env", file=sys.stderr)
     sys.exit(1)
