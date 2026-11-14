@@ -199,10 +199,11 @@ describe('send time', function () {
         expect($email->getSubject())->toBe($subject)
             ->and($text)->toContain("Mary-Ann O'Brien")->not->toContain('\\')->toContain(url('/health/people/'.MedicalSubject::query()->sole()->id))
             ->and($html)->toContain('Mary');
+        // The link carries a random uuid, so digits are checked on the text without URLs.
         foreach ([$text, $html, $email->getSubject()] as $part) {
-            expect($part)->not->toContain('ZxCanary')->not->toContain('2027')->not->toContain('15');
+            $bare = preg_replace('#https?://\S+#', '', $part);
+            expect($bare)->not->toContain('ZxCanary')->not->toContain('2027')->not->toMatch('/\b15\b/')->not->toMatch('/March|marca|marec/u');
         }
-        expect($html)->not->toMatch('/March|marca|marec/u');
     })->with([
         ['en', "Vaccination due: Mary-Ann O'Brien"],
         ['sk', "Termín očkovania: Mary-Ann O'Brien"],

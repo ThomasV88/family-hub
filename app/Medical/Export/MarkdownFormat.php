@@ -34,7 +34,6 @@ final class MarkdownFormat
         $out[] = self::PREFACE;
         $out[] = self::FREE_TEXT_LIMIT;
         $out[] = '';
-        $out[] = '- generated_at: '.self::line($model['generated_at'] ?? '');
         $out[] = '- scope: '.self::line($model['scope'] ?? 'all');
 
         $subject = $model['subject'] ?? [];
