@@ -24,4 +24,16 @@ final class AiConsent
             return false;
         }
     }
+
+    /** Consent of the person a document belongs to; false for an unknown or malformed document id and on any error. */
+    public static function allowsDocument(string $documentId): bool
+    {
+        try {
+            $subjectId = app(SystemQuery::class)->documentSubjectId($documentId);
+
+            return $subjectId !== null && self::allows($subjectId);
+        } catch (Throwable) {
+            return false;
+        }
+    }
 }
