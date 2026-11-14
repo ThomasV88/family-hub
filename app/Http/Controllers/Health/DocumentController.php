@@ -88,7 +88,7 @@ class DocumentController extends Controller
 
         $response = $this->fileResponse($store, $relative, 'image/jpeg', HeaderUtils::makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE, 'preview.jpg'));
         $response->headers->set('Cache-Control', 'private, no-cache');
-        $response->headers->set('ETag', '"'.substr((string) $row->sha256, 0, 32).$variant.'"');
+        $response->headers->set('ETag', '"'.substr(hash_hmac('sha256', $row->sha256.$variant, (string) config('app.key')), 0, 32).$variant.'"');
         $response->isNotModified($request);
 
         return $response;
