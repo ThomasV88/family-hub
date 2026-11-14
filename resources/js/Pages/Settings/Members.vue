@@ -16,6 +16,8 @@ import InviteDialog from '../../Components/Settings/InviteDialog.vue';
 import MemberRow from '../../Components/Settings/MemberRow.vue';
 import MemberPanel from '../../Components/Settings/MemberPanel.vue';
 import SecurityRequirementCard from '../../Components/Settings/SecurityRequirementCard.vue';
+import HealthAccessCard from '../../Components/Settings/HealthAccessCard.vue';
+import PersonAccessPanel from '../../Components/Settings/PersonAccessPanel.vue';
 import PermissionMatrix from '../../Components/Settings/PermissionMatrix.vue';
 
 const props = defineProps({
@@ -24,6 +26,7 @@ const props = defineProps({
     presets: { type: Object, default: () => ({}) },
     openMember: { type: Number, default: null },
     invitations: { type: Array, default: () => [] },
+    healthPeople: { type: Array, default: () => [] },
     securityPolicy: { type: Object, default: () => ({ required: false, pending: 0 }) },
     confirmFresh: { type: Boolean, default: false },
     methods: { type: Object, default: () => ({}) },
@@ -33,6 +36,8 @@ const { t } = useI18n();
 const view = ref('members');
 const openId = ref(props.openMember);
 const openTab = ref('permissions');
+const openPersonId = ref(null);
+const openPerson = computed(() => props.healthPeople.find((p) => p.id === openPersonId.value) ?? null);
 const toast = useToast();
 
 // The invite link arrives only as one-shot flash data and is dropped from local state when the dialog closes.
@@ -79,6 +84,7 @@ const viewTabs = computed(() => [
 ]);
 
 function open(id, tab = 'permissions') {
+    openPersonId.value = null;
     openTab.value = tab;
     openId.value = id;
 }
@@ -98,6 +104,7 @@ function open(id, tab = 'permissions') {
                         <MemberRow v-for="member in members" :key="member.id" :member="member" :selected="member.id === openId" @manage="open(member.id)" />
                     </UiList>
                 </UiCard>
+                <HealthAccessCard class="members__card" :people="healthPeople" :selected-id="openPersonId" @manage="openId = null; openPersonId = $event" />
                 <UiCard :title="t('settings.invites.title')" class="members__card">
                     <UiEmptyState v-if="!invitations.length" :title="t('settings.invites.empty_title')" :body="t('settings.invites.empty_body')">
                         <template #action>
@@ -138,7 +145,8 @@ function open(id, tab = 'permissions') {
             @confirm="confirmRevoke"
         />
         <template #panel>
-            <MemberPanel v-if="opened" :key="`${opened.id}-${openTab}`" :member="opened" :presets="presets" :members="members" :security-policy="securityPolicy" :confirm-fresh="confirmFresh" :methods="methods" :initial-tab="openTab" @close="openId = null" />
+            <PersonAccessPanel v-if="openPerson" :key="openPerson.id" :person="openPerson" :members="members" @close="openPersonId = null" />
+            <MemberPanel v-else-if="opened" :key="`${opened.id}-${openTab}`" :member="opened" :presets="presets" :members="members" :security-policy="securityPolicy" :confirm-fresh="confirmFresh" :methods="methods" :initial-tab="openTab" @close="openId = null" />
         </template>
     </SettingsLayout>
 </template>

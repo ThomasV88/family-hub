@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Access\AccessGate;
 use App\Access\Preset;
 use App\Http\Controllers\Controller;
+use App\Medical\Queries\AdminSubjectQuery;
 use App\Models\Invitation;
 use App\Models\User;
 use App\Models\WishlistManager;
@@ -19,7 +20,7 @@ use Inertia\Response;
 
 class MembersController extends Controller
 {
-    public function index(Request $request, AccessGate $gate, SecondFactorPolicy $policy, SensitiveSession $sensitive): Response
+    public function index(Request $request, AccessGate $gate, SecondFactorPolicy $policy, SensitiveSession $sensitive, AdminSubjectQuery $people): Response
     {
         $viewer = $request->user();
 
@@ -76,6 +77,8 @@ class MembersController extends Controller
             'securityPolicy' => ['required' => $policy->required(), 'pending' => $policy->pendingCount()],
             'confirmFresh' => $sensitive->recentlyConfirmed(),
             'methods' => ReauthMethods::for($viewer),
+            // Admin-only page: person names and member levels, never record data or counts (PROVISIONAL, owner confirms in 07-20).
+            'healthPeople' => $people->listForAdmin(),
             'openMember' => $open > 0 && $members->contains('id', $open) ? $open : null,
         ]);
     }

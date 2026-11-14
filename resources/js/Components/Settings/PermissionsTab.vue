@@ -43,6 +43,12 @@ function apply() {
     Object.assign(form, levels);
     applied.value = true;
 }
+function chooseHealthPeople() {
+    const card = document.getElementById('health-access-card');
+    if (!card) return;
+    card.scrollIntoView?.({ block: 'start' });
+    card.focus();
+}
 function cancel() {
     Object.assign(form, current());
     applied.value = false;
@@ -86,6 +92,10 @@ function submit() {
                     v-model="form[key]"
                     :aria-label="t('permissions.select_aria', { member: member.name, module: t(`permissions.module.${key}`) })"
                 />
+                <p v-if="key === 'health' && form.health !== 'none'" class="perm-tab__people">
+                    {{ t('health.access.choose_people_hint') }}
+                    <a href="#health-access-card" @click.prevent="chooseHealthPeople">{{ t('health.access.choose_people_link') }}</a>
+                </p>
             </li>
             <li class="perm-tab__row perm-tab__row--static">
                 <div class="perm-tab__module">
@@ -114,6 +124,7 @@ function submit() {
 .perm-tab__module { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; overflow-wrap: anywhere; }
 .perm-tab__name { font-weight: 600; }
 .perm-tab__hint { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
+.perm-tab__people { flex-basis: 100%; margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 .perm-tab__note { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 .perm-tab__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-3); }
 </style>
