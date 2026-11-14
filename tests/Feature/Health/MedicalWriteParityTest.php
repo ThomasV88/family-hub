@@ -67,8 +67,8 @@ it('answers a write on a hidden record exactly like a write on a record that doe
         $checked++;
     }
 
-    // Vacuous until a slice adds record-id write routes; the loop is the net for every route that does.
-    expect($checked)->toBeGreaterThanOrEqual(0);
+    // Every id-carrying write route of the phase (people, visits, allergies, medications, vaccinations, documents).
+    expect($checked)->toBeGreaterThanOrEqual(19);
 });
 
 it('issues only subject-scoped UPDATE, DELETE and INSERT statements from every health write request', function () {
@@ -91,7 +91,8 @@ it('issues only subject-scoped UPDATE, DELETE and INSERT statements from every h
         $checked++;
     }
 
-    expect($checked)->toBeGreaterThanOrEqual(1);
+    // Those 19 plus the id-free health.people.store.
+    expect($checked)->toBeGreaterThanOrEqual(20);
 });
 
 it('fails the scoped-mutation helper for an unscoped statement (helper self-test)', function () {
