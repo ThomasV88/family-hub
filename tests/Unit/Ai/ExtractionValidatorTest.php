@@ -5,6 +5,7 @@ use App\Medical\Ai\ExtractionSchema;
 use App\Medical\Ai\ExtractionValidator;
 use App\Medical\Ai\FailureCode;
 use App\Medical\Ai\ProposalEntries;
+use Tests\Support\MedicalPrivacy;
 use Tests\TestCase;
 
 uses(TestCase::class);
@@ -170,4 +171,57 @@ it('keeps the schema file and the validator rule table in step', function () {
 
     $raw = file_get_contents(ExtractionSchema::path());
     expect($raw)->not->toContain('allOf')->not->toContain('maxLength')->not->toContain('minLength');
+});
+
+function inspectIssues(array|string $payload): array
+{
+    return (new ExtractionValidator)->inspect(is_string($payload) ? $payload : json_encode($payload));
+}
+
+it('inspects the golden payload without issues and describes failures by rule-table codes', function () {
+    $golden = inspectIssues(goldenPayload());
+    expect($golden['outcome']->ok)->toBeTrue()->and($golden['issues'])->toBe([])
+        ->and(inspectIssues('{oops')['issues'])->toBe(['json_syntax'])
+        ->and(inspectIssues('[1]')['issues'])->toBe(['root:not_object']);
+
+    $p = goldenPayload();
+    $p['visits'][] = $p['visits'][0];
+    $p['visits'][2]['visited_on'] = '31.12.2026';
+    $p['allergies'][] = ['substance' => 'x', 'reaction' => null, 'severity' => 'deadly'];
+    unset($p['visits'][0]['notes']);
+    $p['schema_version'] = 2;
+    $p['medications'][0]['name'] = null;
+    $p['vaccinations'][0]['notes'] = str_repeat('a', 4001);
+    $p['document_date'] = 5;
+    $issues = inspectIssues($p)['issues'];
+
+    expect($issues)->toContain('visits[2].visited_on:date_format', 'allergies[1].severity:enum', 'visits[0]:keys_missing:notes',
+        'root:schema_version', 'medications[0].name:required_empty', 'vaccinations[0].notes:too_long', 'root.document_date:type');
+});
+
+it('never echoes a key name or value in issue codes and caps them at 20', function () {
+    $c = MedicalPrivacy::CANARY;
+    $p = goldenPayload();
+    $p[$c] = $c;
+    foreach (['document_date', 'specialty_key'] as $f) {
+        $p[$f] = $c;
+    }
+    foreach (['visits' => 'visit', 'medications' => 'medication', 'allergies' => 'allergy', 'vaccinations' => 'vaccination'] as $list => $_) {
+        foreach ($p[$list][0] as $field => $v) {
+            $p[$list][0][$field] = [$c];
+        }
+        $p[$list][0][$c] = $c;
+    }
+    $issues = inspectIssues($p)['issues'];
+
+    expect($issues)->not->toBeEmpty()->and(implode('|', $issues))->not->toContain($c)->not->toContain('Zx');
+    foreach ($issues as $issue) {
+        expect($issue)->toMatch('/^[a-z_]+(\[\d+\])?(\.[a-z_]+)?:[a-z_]+(:[a-z_]+)?$/');
+    }
+
+    $many = goldenPayload();
+    $many['visits'] = array_fill(0, 3, array_fill_keys(array_keys($many['visits'][0]), 5));
+    $many['allergies'] = array_fill(0, 10, ['substance' => null, 'reaction' => 1, 'severity' => 'x']);
+
+    expect(count(inspectIssues($many)['issues']))->toBe(20);
 });
