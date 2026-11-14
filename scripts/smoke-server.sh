@@ -22,7 +22,8 @@ done
 [ "$code" = 200 ] || fail "GET /login returned HTTP $code"
 grep -qi '^strict-transport-security:' "$TMP/h" || fail "no Strict-Transport-Security header"
 grep -q 'data-page' "$TMP/b" || fail "no data-page in body (Inertia not rendering)"
-grep -q 'Auth/Login' "$TMP/b" || fail "Auth/Login component not in body"
+# Inertia embeds the page as JSON, where the slash is escaped ("Auth\/Login"); accept both spellings.
+grep -Eq 'Auth\\?/Login' "$TMP/b" || fail "Auth/Login component not in body"
 
 # 1b. A static asset referenced by the HTML must be served (catches app/nginx images built from different assets)
 asset=$(grep -oE '/build/assets/[A-Za-z0-9._-]+\.(js|css)' "$TMP/b" | head -n1 || true)
@@ -59,8 +60,10 @@ case "$code" in
 esac
 
 # 6. The medical volume is writable by the app user (a fresh named volume must not be root-owned). Needs a docker
-#    compose context (run from the stack directory on the server); skipped when none is available.
-if [ -f compose.server.yaml ] && command -v docker >/dev/null; then
+#    compose context (run from the stack directory on the server: .env with COMPOSE_PROJECT_NAME next to
+#    compose.server.yaml). Skipped everywhere else, e.g. the CI runner, which has the compose file from the checkout
+#    but no stack .env, and where `docker compose` would stop on the missing project name.
+if [ -f compose.server.yaml ] && [ -f .env ] && grep -q '^COMPOSE_PROJECT_NAME=' .env && command -v docker >/dev/null; then
   docker compose -f compose.server.yaml exec -T app sh -c 'f=storage/app/medical/.smoke-$$; touch "$f" && rm "$f"' \
     || fail "medical volume is not writable by the app user"
 fi

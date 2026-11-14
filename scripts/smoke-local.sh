@@ -10,7 +10,7 @@ if [ "$code" != "200" ]; then
   exit 1
 fi
 grep -q 'data-page' /tmp/fh-smoke-body || { echo "FAIL: no data-page in body" >&2; exit 1; }
-grep -q 'Auth/Login' /tmp/fh-smoke-body || { echo "FAIL: Auth/Login component not in body" >&2; exit 1; }
+grep -Eq 'Auth\\?/Login' /tmp/fh-smoke-body || { echo "FAIL: Auth/Login component not in body" >&2; exit 1; }
 rm -f /tmp/fh-smoke-body
 
 running=$(docker compose ps --status running --services | sort | tr '\n' ' ')
