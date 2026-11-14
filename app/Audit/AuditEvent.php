@@ -47,6 +47,8 @@ enum AuditEvent: string
     case MedicalAiRunRequested = 'medical_ai_run_requested';
     case MedicalAiRunFinished = 'medical_ai_run_finished';
     case MedicalAiEntryDecided = 'medical_ai_entry_decided';
+    case AiAgentSettingChanged = 'ai_agent_setting_changed';
+    case AiBulkRunChanged = 'ai_bulk_run_changed';
 
     /** UI filter groups, in display order. */
     public const GROUPS = ['login', 'login_failed', 'invite', 'permission', 'session_revoked', 'health', 'finance', 'account', 'security'];
@@ -83,6 +85,8 @@ enum AuditEvent: string
             self::MedicalAiRunRequested => ['subject', 'document'],
             self::MedicalAiRunFinished => ['subject', 'document', 'status'],
             self::MedicalAiEntryDecided => ['subject', 'document', 'decision'],
+            self::AiAgentSettingChanged => ['agent', 'field', 'value'],
+            self::AiBulkRunChanged => ['action', 'scope', 'count'],
             default => [],
         };
     }
@@ -99,7 +103,8 @@ enum AuditEvent: string
             self::HealthRead, self::HealthWrite,
             self::MedicalSubjectCreated, self::MedicalSubjectDeleted, self::MedicalAccessChanged,
             self::MedicalAdminSelfAdded, self::MedicalExported, self::MedicalConsentChanged,
-            self::MedicalAiRunRequested, self::MedicalAiRunFinished, self::MedicalAiEntryDecided => 'health',
+            self::MedicalAiRunRequested, self::MedicalAiRunFinished, self::MedicalAiEntryDecided,
+            self::AiAgentSettingChanged, self::AiBulkRunChanged => 'health',
             self::FinanceRead, self::FinanceWrite, self::FinanceVisibilityChanged, self::FinanceAdminSelfAdded, self::FinanceCategoryChanged => 'finance',
             self::AccessDenied => $module === 'finance' ? 'finance' : 'health',
             self::PasswordReset, self::AdminCreated, self::GoogleLinked => 'account',

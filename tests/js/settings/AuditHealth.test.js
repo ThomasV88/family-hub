@@ -80,3 +80,52 @@ describe('Audit table medical rows', () => {
         await expectNoAxeViolations(current.element);
     });
 });
+
+describe('Audit table AI agent and bulk rows', () => {
+    const ai = [
+        { id: 20, event: 'ai_agent_setting_changed', meta: { agent: 'codex', field: 'enabled', value: 'off' } },
+        { id: 21, event: 'ai_agent_setting_changed', meta: { agent: 'copilot', field: 'position', value: 1 } },
+        { id: 22, event: 'ai_agent_setting_changed', meta: { agent: 'codex', field: 'model', value: '<b>gpt-5</b>' } },
+        { id: 23, event: 'ai_bulk_run_changed', meta: { action: 'dry_run', scope: 'no_proposal', count: 12 } },
+        { id: 24, event: 'ai_bulk_run_changed', meta: { action: 'started', scope: 'last_failed', count: 7 } },
+        { id: 25, event: 'ai_bulk_run_changed', meta: { action: 'paused', scope: 'all', count: 7 } },
+        { id: 26, event: 'ai_bulk_run_changed', meta: { action: 'resumed', scope: 'all', count: 7 } },
+        { id: 27, event: 'ai_bulk_run_changed', meta: { action: 'cancelled', scope: 'all', count: 3 } },
+        { id: 28, event: 'ai_bulk_run_changed', meta: { action: 'completed', scope: 'all', count: 7 } },
+    ].map((e) => ({ ...base, ...e, targetLabel: null }));
+
+    it('renders agent display names, field labels and values without a person', () => {
+        mountTable(ai);
+        const text = current.text();
+        for (const expected of [
+            'Changed an AI agent setting: OpenAI Codex, Use: Off',
+            'Changed an AI agent setting: GitHub Copilot, Position: 1',
+            'Checked a bulk AI re-generation: Documents without any suggestions yet. Documents: 12',
+            'Started a bulk AI re-generation: Documents whose latest AI run failed. Documents: 7',
+            'Paused a bulk AI re-generation: All documents. Documents: 7',
+            'Resumed a bulk AI re-generation: All documents. Documents: 7',
+            'Cancelled a bulk AI re-generation: All documents. Documents: 3',
+            'A bulk AI re-generation finished: All documents. Documents: 7',
+        ]) expect(text).toContain(expected);
+    });
+
+    it('renders a model string as literal text, never as markup', () => {
+        mountTable(ai);
+        expect(current.text()).toContain('Model: <b>gpt-5</b>');
+        expect(current.find('tbody b').exists()).toBe(false);
+    });
+
+    it('ignores meta outside the allowlists', () => {
+        mountTable([{ ...base, id: 30, event: 'ai_bulk_run_changed', meta: { action: 'started', scope: 'LEAK-SCOPE', count: 'LEAK', title: 'LEAK-TITLE' } }]);
+        expect(current.text()).not.toContain('LEAK');
+    });
+
+    it('translates in SK and PL and passes axe', async () => {
+        for (const locale of ['sk', 'pl']) {
+            current?.unmount();
+            mountTable(ai, locale);
+            expect(current.text()).toContain(load(locale).audit.detail.ai_bulk_run_changed_started.split('{')[0].trim());
+            await expectNoAxeViolations(current.element);
+        }
+    });
+});
