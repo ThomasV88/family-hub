@@ -82,12 +82,31 @@ RUN set -eux; \
     cp -a "$d"/. /opt/codex/; \
     rm -rf /opt/codex/codex-resources/voice
 
-# ---- ai-runtime: base + native Codex (large layer sits below the per-commit code layer) ----
+# ---- copilot: build stage only. Pinned GitHub Copilot CLI, musl native binary, cache extracted once and baked read-only ----
+# The binary is neither stripped nor repacked (licence). The --version run extracts its runtime cache into /opt/copilot/cache.
+FROM node:22-alpine AS copilot
+WORKDIR /opt/copilot-build
+COPY docker/ai/copilot/package.json docker/ai/copilot/package-lock.json ./
+RUN set -eux; \
+    npm ci --ignore-scripts --omit=dev; \
+    case "$(uname -m)" in x86_64) a=x64 ;; aarch64) a=arm64 ;; *) echo "unsupported arch" >&2; exit 1 ;; esac; \
+    d="node_modules/@github/copilot-linuxmusl-${a}"; \
+    test -x "$d/copilot"; \
+    mkdir -p /opt/copilot/bin /opt/copilot/cache /tmp/ch; \
+    cp "$d/copilot" /opt/copilot/bin/copilot; \
+    cp node_modules/@github/copilot/LICENSE.md /opt/copilot/LICENSE.md; \
+    env -i PATH=/usr/bin:/bin HOME=/tmp COPILOT_HOME=/tmp/ch COPILOT_CACHE_HOME=/opt/copilot/cache /opt/copilot/bin/copilot --version | grep -q "1.0.112"; \
+    ls /opt/copilot/cache/pkg/*/*/.extraction-complete; \
+    chmod -R a-w /opt/copilot/cache
+
+# ---- ai-runtime: base + native Codex and Copilot (large layers sit below the per-commit code layer) ----
 FROM base AS ai-runtime
 COPY --from=codex /opt/codex /opt/codex
+COPY --from=copilot /opt/copilot /opt/copilot
 RUN set -eux; \
     ln -s /opt/codex/bin/codex /usr/local/bin/codex; \
-    mkdir -p /codex /ai-work
+    ln -s /opt/copilot/bin/copilot /usr/local/bin/copilot; \
+    mkdir -p /codex /copilot /ai-work
 
 # ---- ai-worker-dev: bind-mounted code, non-root `app` user ----
 FROM ai-runtime AS ai-worker-dev
@@ -98,7 +117,7 @@ RUN set -eux; \
     adduser -D -u "${UID}" -G app app; \
     mkdir -p /var/www/html/storage/app/private/wish-images /var/www/html/storage/app/medical; \
     chmod 0700 /var/www/html/storage/app/medical; \
-    chown -R app:app /var/www/html/storage /codex /ai-work
+    chown -R app:app /var/www/html/storage /codex /copilot /ai-work
 USER app
 
 # ---- ai-worker: prod flavour without the Vite assets, runs as www-data (same uid as app: medical files are 0600) ----
@@ -112,5 +131,5 @@ RUN set -eux; \
     composer dump-autoload --no-dev --optimize --no-interaction; \
     mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs storage/app/private/wish-images storage/app/medical bootstrap/cache; \
     chmod 0700 storage/app/medical; \
-    chown -R www-data:www-data storage bootstrap/cache /codex /ai-work
+    chown -R www-data:www-data storage bootstrap/cache /codex /copilot /ai-work
 USER www-data
