@@ -209,6 +209,9 @@ fi
 # --- restic repository ---
 if [ -d "$RESTIC_REPO" ]; then KEPT+=("$RESTIC_REPO_REL"); else CREATED+=("$RESTIC_REPO_REL"); fi
 mkdir -p "$RESTIC_REPO"; chmod 700 "$RESTIC_REPO"; own "$RESTIC_REPO"
+# The parent (/var/backups/restic) may be root:root 0700 from an older stack; `deploy` runs restic and must be able to
+# traverse (not list) it. 0711 keeps other repositories (root, 0700) unreadable.
+chmod o+x "$(dirname "$RESTIC_REPO")"
 if [ "$DRY" = 0 ]; then
   if [ ! -f "$RESTIC_REPO/config" ]; then
     command -v restic >/dev/null || { echo "restic not installed (apt-get install restic)" >&2; exit 1; }
