@@ -1,5 +1,6 @@
 <?php
 
+use App\Access\AccessLevel;
 use App\Access\Preset;
 use App\Models\AuditEntry;
 use App\Models\FinanceAccount;
@@ -9,6 +10,7 @@ use App\Security\SecondFactorPolicy;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\Support\MedicalFixtures;
 
 uses(RefreshDatabase::class);
 
@@ -59,8 +61,8 @@ it('refuses prefetch and passive requests when stale and never slides when fresh
 
 it('counts a write with a passive header as activity (reads stay passive)', function () {
     $user = User::factory()->create();
-    Tests\Support\MedicalFixtures::grantHealth($user);
-    $person = Tests\Support\MedicalFixtures::subject([], [[$user, App\Access\AccessLevel::Edit]]);
+    MedicalFixtures::grantHealth($user);
+    $person = MedicalFixtures::subject([], [[$user, AccessLevel::Edit]]);
     $old = now()->subSeconds(60)->getTimestamp();
 
     $this->actingAs($user)->withSession(['sensitive.active_at' => $old])->withHeaders(['X-Fh-Passive' => '1'])

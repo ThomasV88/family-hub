@@ -1,6 +1,10 @@
 <?php
 
 use App\Access\AccessLevel;
+use App\Medical\Documents\DocumentRejected;
+use App\Medical\Documents\MedicalDocumentStore;
+use App\Medical\Queries\DocumentQuery;
+use App\Medical\Viewer;
 use App\Models\AuditEntry;
 use App\Models\MedicalDocument;
 use App\Models\MedicalSubject;
@@ -187,11 +191,11 @@ it('re-checks the per-person cap inside the insert transaction and keeps the row
     [$user, $person] = docEditor();
     config(['medical.max_documents_per_subject' => 2]);
     MedicalDocument::factory()->count(2)->forSubject($person)->create();
-    $stored = app(App\Medical\Documents\MedicalDocumentStore::class)->put($person->id, MedicalFileFixtures::pdf());
-    $viewer = App\Medical\Viewer::for($user);
+    $stored = app(MedicalDocumentStore::class)->put($person->id, MedicalFileFixtures::pdf());
+    $viewer = Viewer::for($user);
 
-    expect(fn () => app(App\Medical\Queries\DocumentQuery::class)->create($viewer, $person, $stored, 'Late', null))
-        ->toThrow(App\Medical\Documents\DocumentRejected::class);
+    expect(fn () => app(DocumentQuery::class)->create($viewer, $person, $stored, 'Late', null))
+        ->toThrow(DocumentRejected::class);
     expect(MedicalDocument::where('subject_id', $person->id)->count())->toBe(2);
 });
 

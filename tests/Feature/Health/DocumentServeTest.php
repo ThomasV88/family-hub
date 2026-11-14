@@ -1,6 +1,7 @@
 <?php
 
 use App\Access\AccessLevel;
+use App\Models\AuditEntry;
 use App\Models\MedicalDocument;
 use App\Models\MedicalSubject;
 use App\Models\User;
@@ -204,7 +205,7 @@ it('audits reads with the subject and document id, never the thumbnails, and thr
     $this->actingAs($user)->get(previewUrl($person->id, $document->id))->assertOk();
     $this->actingAs($user)->get(fileUrl($person->id, $document->id))->assertOk();
 
-    $rows = App\Models\AuditEntry::where('event', 'health_read')->orderBy('id')->get();
+    $rows = AuditEntry::where('event', 'health_read')->orderBy('id')->get();
     expect($rows->map->meta->all())->toBe([
         ['subject' => $person->id],
         ['subject' => $person->id, 'document' => $document->id],
