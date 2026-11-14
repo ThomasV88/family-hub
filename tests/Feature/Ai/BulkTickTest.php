@@ -8,6 +8,7 @@ use App\Medical\Queries\AdminAiBulkQuery;
 use App\Medical\Queries\AiBulkJobQuery;
 use App\Models\AiAgentSetting;
 use App\Models\AiBulkRun;
+use App\Models\AuditEntry;
 use App\Models\MedicalAiExtraction;
 use App\Models\MedicalDocument;
 use App\Models\MedicalSubject;
@@ -50,6 +51,9 @@ function btDoc(bool $consent = true, string $when = '2026-01-01 10:00:00'): arra
 
 function btRun(array $attrs = []): AiBulkRun
 {
+    // The starter has acknowledged both providers, so the tick may use whichever is enabled (see the viability tests).
+    DB::table('ai_notice_acks')->upsert([['user_id' => $attrs['started_by'] ?? test()->admin->id, 'providers' => 'codex,copilot', 'acknowledged_at' => now()]], ['user_id'], ['providers']);
+
     return AiBulkRun::factory()->create($attrs + ['started_by' => test()->admin->id, 'scope' => 'all', 'eligible_total' => 3]);
 }
 
@@ -170,6 +174,49 @@ it('sets blocked_since while the only agent is cooling and clears it when the ag
     DB::table('ai_agent_status')->where('agent', 'codex')->update(['cooldown_until' => null]);
     expect(btTick(btAt('2026-03-10 08:00'))['enqueued'])->not->toBeNull()
         ->and(DB::table('ai_bulk_runs')->where('id', $run->id)->value('blocked_since'))->toBeNull();
+});
+
+it('holds the run visibly, instead of failing items, when the first agent is outside the starter\'s acknowledged set', function () {
+    btDoc();
+    AiAgentSetting::query()->toBase()->where('agent', 'copilot')->update(['enabled' => true, 'position' => 1]);
+    AiAgentSetting::query()->toBase()->where('agent', 'codex')->update(['position' => 2]);
+    $run = btRun();
+    // The admin acknowledged OpenAI only, then reordered so that GitHub is first.
+    DB::table('ai_notice_acks')->where('user_id', $this->admin->id)->update(['providers' => 'codex']);
+    config(['ai.bulk.fallback_agents' => false]);
+
+    $r = btTick(btAt('2026-03-10 02:00'));
+
+    expect($r['enqueued'])->toBeNull()
+        ->and(DB::table('medical_ai_extractions')->count())->toBe(0)
+        ->and(DB::table('ai_bulk_runs')->where('id', $run->id)->value('status'))->toBe('active')
+        ->and(DB::table('ai_bulk_runs')->where('id', $run->id)->value('blocked_since'))->not->toBeNull();
+
+    // With no acknowledgment at all the run is held as well; after the stop window the panel says Stopped.
+    DB::table('ai_notice_acks')->where('user_id', $this->admin->id)->delete();
+    btTick(btAt('2026-03-10 02:05'));
+    Carbon::setTestNow(btAt('2026-03-10 02:05')->addHours((int) config('ai.bulk.stopped_after_hours') + 1));
+    expect(app(AdminAiBulkQuery::class)->panel()['active']['state'])->toBe('stopped');
+
+    // Fixing the acknowledgment lets the same run go on.
+    DB::table('ai_notice_acks')->insert(['user_id' => $this->admin->id, 'providers' => 'codex,copilot', 'acknowledged_at' => now()]);
+    expect(btTick(btAt('2026-03-10 20:00'))['enqueued'])->not->toBeNull()
+        ->and(DB::table('ai_bulk_runs')->where('id', $run->id)->value('blocked_since'))->toBeNull();
+});
+
+it('ends the run and its queued work when the starting admin is no longer an admin', function () {
+    btDoc();
+    $run = btRun();
+    expect(btTick(btAt('2026-03-10 02:00'))['enqueued'])->not->toBeNull();
+    DB::table('users')->where('id', $this->admin->id)->update(['is_admin' => false]);
+
+    $r = btTick(btAt('2026-03-10 03:00'));
+
+    expect($r['enqueued'])->toBeNull()
+        ->and(DB::table('ai_bulk_runs')->where('id', $run->id)->value('status'))->toBe('cancelled')
+        ->and(DB::table('ai_bulk_runs')->where('id', $run->id)->value('finished_at'))->not->toBeNull()
+        ->and(DB::table('medical_ai_extractions')->value('status'))->toBe('cancelled')
+        ->and(AuditEntry::where('event', 'ai_bulk_run_changed')->get()->pluck('meta.action')->all())->toContain('cancelled');
 });
 
 it('does nothing for a paused or cancelled run and never completes a paused one', function () {

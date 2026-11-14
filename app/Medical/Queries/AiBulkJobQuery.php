@@ -50,6 +50,14 @@ final class AiBulkJobQuery
                 return ['enqueued' => null, 'reconciled' => $reconciled, 'completed' => 0];
             }
             $runId = (string) $run->id;
+            // Run viability: a run whose starter lost the admin role is ended, and its queued work stopped. (A run with no usable
+            // acknowledged provider is held further down, visibly, via blocked_since.)
+            if (! $this->starterIsAdmin($run)) {
+                $this->cancelUnviable($run, $now);
+
+                return ['enqueued' => null, 'reconciled' => $reconciled, 'completed' => 0];
+            }
+
             $open = DB::table('ai_bulk_run_items')->where('bulk_run_id', $runId)->whereNull('outcome')->exists();
             $candidate = $this->eligibility->nextCandidate((string) $run->scope, $runId);
 
@@ -77,7 +85,8 @@ final class AiBulkJobQuery
                 return ['enqueued' => null, 'reconciled' => $reconciled, 'completed' => 0];
             }
 
-            $agent = $this->agents->candidates([], true)[0] ?? null;
+            // The same acknowledged set the job re-applies before each attempt, so the tick never picks an agent the job would refuse.
+            $agent = $this->agents->candidates([], true, $this->ackedProviders((int) $run->started_by))[0] ?? null;
             if ($agent === null) {
                 if ($run->blocked_since === null) {
                     DB::table('ai_bulk_runs')->where('id', $runId)->update(['blocked_since' => $now, 'updated_at' => $now]);
@@ -90,6 +99,30 @@ final class AiBulkJobQuery
 
             return ['enqueued' => $id, 'reconciled' => $reconciled, 'completed' => 0];
         });
+    }
+
+    private function starterIsAdmin(object $run): bool
+    {
+        return (bool) User::query()->whereKey((int) $run->started_by)->value('is_admin');
+    }
+
+    /** @return list<string> */
+    private function ackedProviders(int $userId): array
+    {
+        $providers = DB::table('ai_notice_acks')->where('user_id', $userId)->value('providers');
+
+        return $providers === null ? [] : array_values(array_filter(array_map('trim', explode(',', (string) $providers)), fn ($p) => $p !== ''));
+    }
+
+    /** The starting admin is gone or no longer an admin: end the run, stop its queued work and say so in the audit trail. */
+    private function cancelUnviable(object $run, CarbonImmutable $now): void
+    {
+        $runId = (string) $run->id;
+        DB::table('ai_bulk_runs')->where('id', $runId)->update(['status' => 'cancelled', 'finished_at' => $now, 'updated_at' => $now]);
+        $stopped = $this->cancelRunExtractions($runId, null);
+        $this->audit->record(AuditEvent::AiBulkRunChanged, User::query()->find((int) $run->started_by), [
+            'action' => 'cancelled', 'scope' => (string) $run->scope, 'count' => $stopped,
+        ]);
     }
 
     /** Items whose extraction ended get their outcome. Idempotent; never touches an item that already has one. */
