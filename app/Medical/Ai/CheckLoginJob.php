@@ -24,7 +24,7 @@ class CheckLoginJob implements ShouldBeUnique, ShouldQueue
 
     public function handle(AgentRegistry $registry, AgentHealth $health): void
     {
-        foreach ($registry->agents() as $agent) {
+        foreach ($registry->all() as $agent) {
             $health->recordCheck($agent->key(), $agent->loginStatus());
         }
     }

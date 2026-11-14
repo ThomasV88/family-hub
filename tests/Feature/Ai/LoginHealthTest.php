@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\Support\FakeCodex;
+use Tests\Support\FakeCopilot;
 
 beforeEach(function () {
     $this->scripts = [];
@@ -126,6 +127,26 @@ it('queues the login check apart from extractions, so a backlog cannot starve it
 
     // The worker command lists the control queue first (checked statically by scripts/check-compose.sh).
     foreach (['compose.yaml', 'compose.server.yaml'] as $file) {
-        expect(file_get_contents(base_path($file)))->toContain('--queue=ai-control,ai ');
+        expect(file_get_contents(base_path($file)))->toContain('--queue=ai-control,ai,');
     }
+});
+
+it('records the health of copilot from the local credential marker', function () {
+    $dir = sys_get_temp_dir().'/fh-copilot-home-'.bin2hex(random_bytes(4));
+    config(['ai.copilot.home' => FakeCopilot::loginHome($dir, true)]);
+    ($this->check)(0, 'Logged in using ChatGPT.');
+    $h = new AgentHealth;
+
+    expect($h->display('copilot'))->toBe('logged_in')->and($h->display('codex'))->toBe('logged_in');
+
+    FakeCopilot::loginHome($dir, false);
+    ($this->check)(0, 'Logged in using ChatGPT.');
+    expect($h->display('copilot'))->toBe('expired')->and($h->runnable('copilot'))->toBeFalse();
+
+    file_put_contents($dir.'/config.json', '{ not json');
+    ($this->check)(0, 'Logged in using ChatGPT.');
+    expect(AiAgentStatus::find('copilot')->login_state)->toBe('unknown');
+
+    @unlink($dir.'/config.json');
+    @rmdir($dir);
 });

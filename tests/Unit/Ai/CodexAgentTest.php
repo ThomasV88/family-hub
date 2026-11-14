@@ -8,11 +8,12 @@ use App\Medical\Ai\FailureCode;
 use App\Medical\Ai\PromptBuilder;
 use App\Medical\Ai\Work\WorkDir;
 use Carbon\CarbonImmutable;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\Support\FakeCodex;
 use Tests\TestCase;
 
-uses(TestCase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 function agentPayload(): array
 {
@@ -124,15 +125,15 @@ it('reports the model the CLI reported, else the label', function () {
     expect((new CodexAgent)->modelLabel())->toBe('gpt-conf');
 });
 
-it('registers exactly the codex agent', function () {
+it('registers codex and copilot in config order and enables only codex by default', function () {
     $registry = app(AgentRegistry::class);
 
-    expect($registry->agents())->toHaveCount(1)
-        ->and($registry->primary()->key())->toBe('codex')
+    expect(array_map(fn ($a) => $a->key(), $registry->all()))->toBe(['codex', 'copilot'])
         ->and($registry->find('codex'))->toBeInstanceOf(CodexAgent::class)
         ->and($registry->find('nope'))->toBeNull()
-        ->and($registry->primary()->modelLabel())->toBe('default')
-        ->and(app(AgentRegistry::class))->toBe($registry);
+        ->and(array_map(fn ($a) => $a->key(), $registry->enabled()))->toBe(['codex'])
+        ->and($registry->primary()->key())->toBe('codex')
+        ->and($registry->primary()->modelLabel())->toBe('default');
 });
 
 it('records the configured model, never text the CLI echoed, and drops an invalid configured value', function () {
