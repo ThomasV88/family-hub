@@ -92,9 +92,36 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
   would add little; restic encrypts the backups and the volume is 0700/0600.
 - nginx: only `POST /health/people/<uuid>/documents` accepts a body up to 12m; PHP `upload_max_filesize=11M`, `post_max_size=13M`.
 
+## AI worker (Phase 8)
+
+- Service `ai-worker` (compose.server.yaml; locally only with `docker compose --profile ai up`). Image `$IMAGE_PREFIX-ai:$IMAGE_TAG`
+  (Dockerfile target `ai-worker`, the only image with the pinned Codex CLI). Runs as www-data, one process
+  (`queue:work --queue=ai --tries=1 --timeout=360`), `init: true`, no ports, `mem_limit` `MEM_AI` (default 384m, measure live in 08-22).
+- Env file `ai-worker.env` (template `ops/env/ai-worker.env.example`), never `app.env`: no `APP_KEY`, `MAIL_*`, `GOOGLE_*`, `VAPID_*`, `*_API_KEY`.
+  `ai:preflight` refuses to start if one is set. `deploy.sh` refuses to run without `ai-worker.env`. It uses the runtime role `fh_app`
+  (provisional: no dedicated database role for now). `DB_QUEUE_RETRY_AFTER=900` must stay above the job timeout.
+- Mounts: volume `codex-home` at `/codex` (writable, holds `auth.json`, refreshed in place) and `medical` read-only. Work dir `/ai-work` is a
+  tmpfs (mode 0700), discarded on stop. No other service mounts `codex-home`; `scripts/check-compose.sh` fails on any drift.
+- `codex-home` is never backed up: it holds a subscription login. `backup.sh`, `restore-drill.sh` and `backup-freshness.sh` never mention it
+  (checked by `check-compose.sh`). After a restore the login is repeated, not restored.
+- Each stack (production, staging) has its own `codex-home` volume and its own login (separate project names). Never copy `auth.json` between stacks.
+- Single concurrency: one `auth.json` per serialized stream. Never scale the service (no `deploy.replicas`).
+
+### One-time login (do in 08-22, not before)
+
+Before the first login check the data-controls and training settings of the ChatGPT plan. Then, on the stack's server directory:
+
+    docker compose exec ai-worker codex login --device-auth
+    docker compose exec ai-worker codex login status
+
+The login survives restarts because it lives in the `codex-home` volume. When a refresh fails, run the login again (the admin settings page
+reports "login expired" once the health check exists). Never set `OPENAI_API_KEY`/`CODEX_API_KEY`: per-token billing is out of scope.
+
 ## Deploy
 
 (Filled by plan 01-12.)
+
+The server directory needs `ai-worker.env` (mode 600) next to `app.env` before the first deploy of Phase 8; create it from `ops/env/ai-worker.env.example`.
 
 ## Two-step verification and re-authentication
 

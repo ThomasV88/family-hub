@@ -24,11 +24,12 @@ STAGING_RESEED=$4
 ENV
   printf 'APP_ENV=%s\nDB_USERNAME=fh_app\n' "$5" > "$d/app.env"
   echo 'DB_USERNAME=fh_owner' > "$d/migrate.env"
+  echo 'DB_USERNAME=fh_app' > "$d/ai-worker.env"
   for f in compose.server.yaml backup.sh smoke-server.sh postgres-init/01-roles.sh; do echo '#' > "$d/$f"; done
   for s in db_root_password db_owner_password db_app_password restic_password cloudflare.ini; do
     echo x > "$d/secrets/$s"; chmod 600 "$d/secrets/$s"
   done
-  chmod 600 "$d/.env" "$d/app.env" "$d/migrate.env"
+  chmod 600 "$d/.env" "$d/app.env" "$d/migrate.env" "$d/ai-worker.env"
   echo "$d"
 }
 
@@ -93,6 +94,21 @@ d=$(make_fixture miss family-hub-staging staging 0 staging)
 rm "$d/backup.sh"
 expect fail "missing backup.sh" "$d" "$TAG" guard_inputs
 
+d=$(make_fixture noai family-hub-staging staging 0 staging)
+rm "$d/ai-worker.env"
+expect fail "missing ai-worker.env" "$d" "$TAG" guard_inputs
+d=$(make_fixture aimode family-hub-staging staging 0 staging)
+chmod 644 "$d/ai-worker.env"
+expect fail "ai-worker.env readable by others" "$d" "$TAG" guard_secrets
+
+# the new service is in every up list and the image lists of deploy.sh
+if [ "$(grep -c 'app worker scheduler ai-worker nginx' "$DEPLOY")" -ge 2 ] && grep -q 'dc pull app nginx ai-worker' "$DEPLOY" \
+  && grep -q '\$prefix-ai:\$IMAGE_TAG' "$DEPLOY"; then
+  PASS=$((PASS + 1)); echo "ok   deploy.sh knows ai-worker in pull, inspect and both up lists"
+else
+  FAILS=$((FAILS + 1)); echo "FAIL deploy.sh lacks ai-worker in pull, inspect or up lists" >&2
+fi
+
 d=$(make_fixture mode family-hub-staging staging 0 staging)
 chmod 644 "$d/secrets/db_app_password"
 expect fail "secret with mode 0644" "$d" "$TAG" guard_secrets
@@ -111,11 +127,12 @@ imgs=$(
   docker() {
     printf '%s\n' ghcr.io/example/family-hub-app:sha-aaaaaaa ghcr.io/example/family-hub-app:sha-bbbbbbb \
       ghcr.io/example/family-hub-app:sha-ccccccc ghcr.io/example/family-hub-nginx:sha-ccccccc \
+      ghcr.io/example/family-hub-ai:sha-ccccccc ghcr.io/example/family-hub-ai:sha-aaaaaaa \
       ghcr.io/example/family-hub-app:develop ghcr.io/other/family-hub-app:sha-ddddddd postgres:18-alpine
   }
   stale_images
 )
-if [ "$imgs" = "$(printf 'ghcr.io/example/family-hub-app:sha-ccccccc\nghcr.io/example/family-hub-nginx:sha-ccccccc')" ]; then
+if [ "$imgs" = "$(printf 'ghcr.io/example/family-hub-app:sha-ccccccc\nghcr.io/example/family-hub-nginx:sha-ccccccc\nghcr.io/example/family-hub-ai:sha-ccccccc')" ]; then
   PASS=$((PASS + 1)); echo "ok   stale_images keeps current and last-good, drops old sha-* only"
 else
   FAILS=$((FAILS + 1)); echo "FAIL stale_images output: $imgs"

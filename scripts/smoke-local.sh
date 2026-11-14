@@ -14,6 +14,7 @@ grep -q 'Auth/Login' /tmp/fh-smoke-body || { echo "FAIL: Auth/Login component no
 rm -f /tmp/fh-smoke-body
 
 running=$(docker compose ps --status running --services | sort | tr '\n' ' ')
+# ai-worker is profile-only (`--profile ai`), so it is not part of the default stack and not expected here
 expected="app nginx postgres scheduler worker "
 if [ "$running" != "$expected" ]; then
   echo "FAIL: running services '$running' != '$expected'" >&2

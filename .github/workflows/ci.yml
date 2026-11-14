@@ -146,6 +146,20 @@ jobs:
           cache-from: type=gha,scope=app
           cache-to: type=gha,scope=app,mode=max
 
+      - name: Build and push ai-worker image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: docker/app/Dockerfile
+          target: ai-worker
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.PREFIX }}-ai:sha-${{ github.sha }}
+            ${{ env.PREFIX }}-ai:${{ env.BRANCH_TAG }}
+          cache-from: type=gha,scope=ai
+          cache-to: type=gha,scope=ai,mode=max
+
       - name: Build and push nginx image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:

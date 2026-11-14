@@ -8,7 +8,7 @@
 #        -> .last-good-tag. Migrations never run without a fresh backup. If `up` fails, the previous
 #        good tag is started again. Migrations are additive in this project; a destructive migration
 #        needs a manual restore from the `pre-migrate` restic snapshot (restore-drill.sh documents it).
-# Never prints the content of .env, app.env, migrate.env or secrets/*.
+# Never prints the content of .env, app.env, migrate.env, ai-worker.env or secrets/*.
 # With DEPLOY_SH_SOURCE_ONLY=1 only the guard functions are defined (used by test-deploy-guards.sh).
 set -euo pipefail
 
@@ -19,7 +19,7 @@ err() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
 env_get() { sed -n "s/^$1=//p" .env 2>/dev/null | head -n1 | tr -d "'\"\r"; }
 appenv_get() { sed -n "s/^$1=//p" app.env 2>/dev/null | head -n1 | tr -d "'\"\r "; }
 
-REQUIRED_FILES=(.env app.env migrate.env compose.server.yaml backup.sh smoke-server.sh postgres-init/01-roles.sh)
+REQUIRED_FILES=(.env app.env migrate.env ai-worker.env compose.server.yaml backup.sh smoke-server.sh postgres-init/01-roles.sh)
 REQUIRED_SECRETS=(secrets/db_root_password secrets/db_owner_password secrets/db_app_password secrets/restic_password secrets/cloudflare.ini)
 
 guard_inputs() {
@@ -58,7 +58,7 @@ guard_env_has_no_passwords() {
   fi
 }
 
-# Prints the sha-* tagged app/nginx images of this stack that are neither the deployed tag nor the last good
+# Prints the sha-* tagged app/nginx/ai images of this stack that are neither the deployed tag nor the last good
 # tag (the rollback target). `docker image prune` alone only removes dangling images, never tagged ones.
 stale_images() {
   local prefix keep_a keep_b ref
@@ -67,7 +67,7 @@ stale_images() {
   keep_b=$(cat .last-good-tag 2>/dev/null || true)
   docker image ls --format '{{.Repository}}:{{.Tag}}' | while IFS= read -r ref; do
     case "$ref" in
-      "$prefix-app:sha-"*|"$prefix-nginx:sha-"*) ;;
+      "$prefix-app:sha-"*|"$prefix-nginx:sha-"*|"$prefix-ai:sha-"*) ;;
       *) continue ;;
     esac
     [ "${ref#*:}" = "$keep_a" ] && continue
@@ -87,7 +87,7 @@ guard_secrets() {
       bad=1
     fi
   done
-  for f in .env app.env migrate.env; do
+  for f in .env app.env migrate.env ai-worker.env; do
     [ -e "$f" ] || continue
     mode=$(stat -c %a "$f")
     if [ $((8#$mode & 8#007)) != 0 ]; then
@@ -170,10 +170,10 @@ main() {
     log "Skipping pull (SKIP_PULL=1), checking local images"
     local prefix
     prefix=$(env_get IMAGE_PREFIX)
-    docker image inspect "$prefix-app:$IMAGE_TAG" "$prefix-nginx:$IMAGE_TAG" >/dev/null
+    docker image inspect "$prefix-app:$IMAGE_TAG" "$prefix-nginx:$IMAGE_TAG" "$prefix-ai:$IMAGE_TAG" >/dev/null
   else
     log "Pulling images"
-    dc pull app nginx
+    dc pull app nginx ai-worker
   fi
 
   log "Starting postgres"
@@ -212,7 +212,7 @@ main() {
 
   log "Starting services"
   # The tag is recorded as good only after the containers are healthy AND the live smoke test passes.
-  if dc up -d --wait --remove-orphans app worker scheduler nginx \
+  if dc up -d --wait --remove-orphans app worker scheduler ai-worker nginx \
      && { [ "${SKIP_SMOKE:-}" = 1 ] || bash ./smoke-server.sh "$app_domain" "$(env_get STACK_ENV)"; }; then
     printf '%s\n' "$IMAGE_TAG" > .last-good-tag
     log "Healthy and smoke test passed. Recorded $IMAGE_TAG as last good tag."
@@ -222,7 +222,7 @@ main() {
       local good
       good=$(cat .last-good-tag)
       err "Rolling back to $good"
-      IMAGE_TAG=$good dc up -d --wait --remove-orphans app worker scheduler nginx || err "Rollback to $good also failed."
+      IMAGE_TAG=$good dc up -d --wait --remove-orphans app worker scheduler ai-worker nginx || err "Rollback to $good also failed."
     else
       err "No .last-good-tag to roll back to."
     fi
