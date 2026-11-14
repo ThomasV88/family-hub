@@ -3,8 +3,10 @@
 use App\Models\MedicalAllergy;
 use Tests\Support\MedicalPrivacy;
 
-// Allergies area. One allergy on the visible subject A; canary allergies (every free-text column) on the hidden subject B
-// and on the self-access-off subject C. The subjects area runs first and leaves their ids in $ctx['hidden'].
+// Allergies area (file name sorts after subjects.php, which seeds the hidden subjects this area attaches rows to). One
+// allergy on the visible subject A; canary allergies (every free-text column) on the hidden subject B and on the
+// self-access-off subject C. The subjects area leaves their ids in $ctx['hidden'].
+
 $canary = fn (string $where): array => [
     'substance' => MedicalPrivacy::CANARY." {$where} substance",
     'reaction' => MedicalPrivacy::CANARY." {$where} reaction",
