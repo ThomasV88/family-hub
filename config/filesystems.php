@@ -39,6 +39,21 @@ return [
             'report' => false,
         ],
 
+        // Private medical documents: own Docker volume, root outside public/ and outside app/private (so the
+        // `local` disk can never list it), no framework serve route, files 0600 and directories 0700.
+        'medical' => [
+            'driver' => 'local',
+            'root' => storage_path('app/medical'),
+            'serve' => false,
+            'throw' => false,
+            'report' => false,
+            'visibility' => 'private',
+            'permissions' => [
+                'file' => ['public' => 0600, 'private' => 0600],
+                'dir' => ['public' => 0700, 'private' => 0700],
+            ],
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

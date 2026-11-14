@@ -27,7 +27,8 @@ ARG GID=1000
 RUN set -eux; \
     addgroup -g "${GID}" app; \
     adduser -D -u "${UID}" -G app app; \
-    mkdir -p /var/www/html/storage/app/private/wish-images; \
+    mkdir -p /var/www/html/storage/app/private/wish-images /var/www/html/storage/app/medical; \
+    chmod 0700 /var/www/html/storage/app/medical; \
     chown -R app:app /var/www/html/storage
 USER app
 
@@ -61,6 +62,7 @@ COPY . .
 COPY --from=assets /build/public ./public
 RUN set -eux; \
     composer dump-autoload --no-dev --optimize --no-interaction; \
-    mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs storage/app/private/wish-images bootstrap/cache; \
+    mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs storage/app/private/wish-images storage/app/medical bootstrap/cache; \
+    chmod 0700 storage/app/medical; \
     chown -R www-data:www-data storage bootstrap/cache
 USER www-data

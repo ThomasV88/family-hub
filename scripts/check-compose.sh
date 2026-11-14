@@ -67,6 +67,41 @@ for s in ("app", "worker", "scheduler"):
 for s in ("nginx", "postgres"):
     if any(src == "uploads" or tgt == WISH for src, tgt in mounts(svcs[s])):
         fail("%s mounts the uploads volume" % s)
+MED = "/var/www/html/storage/app/medical"
+for s in ("app", "worker", "scheduler"):
+    if ("medical", MED) not in mounts(svcs[s]):
+        fail("%s does not mount volume medical at %s" % (s, MED))
+    if ("uploads", WISH) not in mounts(svcs[s]):
+        fail("%s lost the uploads mount" % s)
+for s in ("nginx", "postgres"):
+    if any(src == "medical" or tgt == MED for src, tgt in mounts(svcs[s])):
+        fail("%s mounts the medical volume" % s)
+PY
+
+
+# compose.yaml (dev): the same rule with the dev volume names
+DEV="$TMP/dev.json"
+docker compose -f compose.yaml --project-directory "$PWD" config --format json > "$DEV" 2>/dev/null || \
+  docker compose -f compose.yaml config --format json > "$DEV"
+python3 -I - "$DEV" <<'PY'
+import json, sys
+
+svcs = json.load(open(sys.argv[1]))["services"]
+MED = "/var/www/html/storage/app/medical"
+
+
+def mounts(svc):
+    return [(v.get("source"), v.get("target")) for v in svc.get("volumes", [])]
+
+
+for s in ("app", "worker", "scheduler"):
+    if ("medical-dev", MED) not in mounts(svcs[s]):
+        print("FAIL: dev %s does not mount medical-dev at %s" % (s, MED), file=sys.stderr)
+        sys.exit(1)
+for s in ("nginx", "postgres"):
+    if any(src == "medical-dev" or tgt == MED for src, tgt in mounts(svcs[s])):
+        print("FAIL: dev %s mounts the medical volume" % s, file=sys.stderr)
+        sys.exit(1)
 PY
 
 echo "CHECK-COMPOSE OK"

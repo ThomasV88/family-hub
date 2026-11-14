@@ -23,4 +23,14 @@ docker run --rm --add-host app:127.0.0.1 \
   -v "$TMP/live:/etc/letsencrypt/live:ro" \
   fh-nginx-check nginx -t
 
+# Body limits: the medical upload URL is the only one at 12m, and no location raises the limit beyond that.
+SNIP=docker/nginx/snippets/laravel-locations.conf
+[ "$(grep -c 'client_max_body_size 12m' "$SNIP")" = 1 ] || { echo "FAIL: expected exactly one 12m limit" >&2; exit 1; }
+grep -B1 'client_max_body_size 12m' "$SNIP" | grep -q '/health/people/\[0-9a-f-\]{36}/documents\$' \
+  || { echo "FAIL: the 12m limit is not on the medical upload location" >&2; exit 1; }
+while read -r v; do
+  n="${v%m}"
+  [ "$n" -le 12 ] || { echo "FAIL: body limit $v exceeds 12m" >&2; exit 1; }
+done < <(grep -rhoE 'client_max_body_size [0-9]+m' docker/nginx | awk '{print $2}')
+
 echo "CHECK-NGINX OK"

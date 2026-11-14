@@ -8,6 +8,8 @@
 x-uploads: &uploads
   - .:/var/www/html
   - uploads-dev:/var/www/html/storage/app/private/wish-images
+  # Private medical documents (storage/app/medical): app, worker and scheduler only (all use this anchor), never nginx or postgres.
+  - medical-dev:/var/www/html/storage/app/medical
 
 x-app: &app
   build:
@@ -84,3 +86,4 @@ services:
 volumes:
   pgdata-dev:
   uploads-dev:
+  medical-dev:

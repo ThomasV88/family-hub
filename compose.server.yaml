@@ -22,6 +22,12 @@ x-logging: &logging
 x-uploads: &uploads
   - uploads:/var/www/html/storage/app/private/wish-images
 
+# Private medical documents (storage/app/medical): written and read by the app, kept by the worker (Phase 8) and swept by the
+# scheduler (orphans); never mounted into nginx or postgres. Backed up as its own restic snapshot (medical.tar).
+x-medical: &medical
+  - uploads:/var/www/html/storage/app/private/wish-images
+  - medical:/var/www/html/storage/app/medical
+
 x-app: &app
   image: ${IMAGE_PREFIX:?}-app:${IMAGE_TAG:?}
   restart: unless-stopped
@@ -61,7 +67,7 @@ services:
   app:
     <<: *app
     mem_limit: ${MEM_APP:-192m}
-    volumes: *uploads
+    volumes: *medical
     healthcheck:
       # php-fpm has no TCP client tools in the alpine image: a successful connect to the pool port is the check
       test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 9000) ? 0 : 1);"]
@@ -74,7 +80,7 @@ services:
     <<: *app
     command: ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--max-time=3600"]
     mem_limit: ${MEM_WORKER:-160m}
-    volumes: *uploads
+    volumes: *medical
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f '[q]ueue:work'"]
       interval: 15s
@@ -86,7 +92,7 @@ services:
     <<: *app
     command: ["php", "artisan", "schedule:work"]
     mem_limit: ${MEM_SCHEDULER:-128m}
-    volumes: *uploads
+    volumes: *medical
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f '[s]chedule:work'"]
       interval: 15s
@@ -149,6 +155,7 @@ networks:
 volumes:
   pgdata:
   uploads:
+  medical:
 
 secrets:
   db_root_password:

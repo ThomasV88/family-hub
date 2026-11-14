@@ -58,4 +58,11 @@ case "$code" in
   *) fail "/sw.js returned HTTP $code" ;;
 esac
 
+# 6. The medical volume is writable by the app user (a fresh named volume must not be root-owned). Needs a docker
+#    compose context (run from the stack directory on the server); skipped when none is available.
+if [ -f compose.server.yaml ] && command -v docker >/dev/null; then
+  docker compose -f compose.server.yaml exec -T app sh -c 'f=storage/app/medical/.smoke-$$; touch "$f" && rm "$f"' \
+    || fail "medical volume is not writable by the app user"
+fi
+
 echo "SMOKE-SERVER OK"
