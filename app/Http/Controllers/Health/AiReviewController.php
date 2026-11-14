@@ -57,7 +57,8 @@ class AiReviewController extends Controller
     /** @param  array<string, mixed>|null  $result */
     private function respond(?array $result): JsonResponse
     {
-        abort_if($result === null, 403);
+        // The same message as a failed authorize(), so every denial looks alike.
+        abort_if($result === null, 403, 'This action is unauthorized.');
 
         return response()->json($result, $result['state'] === 'superseded' ? 409 : 200);
     }
