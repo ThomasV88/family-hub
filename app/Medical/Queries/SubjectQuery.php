@@ -213,7 +213,14 @@ class SubjectQuery
             }
 
             $this->audit->record(AuditEvent::MedicalSubjectDeleted, $viewer->user, ['subject' => $id], null, Module::Health);
-            DB::afterCommit(fn () => $this->store->deleteSubjectDirectory($id));
+            DB::afterCommit(function () use ($id): void {
+                // The rows are already gone; a failing file removal must not turn the request into a 500 (the sweep cleans up).
+                try {
+                    $this->store->deleteSubjectDirectory($id);
+                } catch (\Throwable $e) {
+                    report(new \RuntimeException('Medical directory removal failed after delete ('.$e::class.')'));
+                }
+            });
 
             return true;
         });
