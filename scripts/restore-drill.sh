@@ -21,6 +21,11 @@ load_env() {
 }
 load_env
 
+# compose.server.yaml requires IMAGE_TAG, which is not stored in .env: deploy.sh exports it but cron does not. Fall back to
+# the last good tag, as cert-renew.sh does, so nightly runs work without a deploy.
+if [ -z "${IMAGE_TAG:-}" ] && [ -s .last-good-tag ]; then IMAGE_TAG="$(cat .last-good-tag)"; fi
+[ -z "${IMAGE_TAG:-}" ] || export IMAGE_TAG
+
 COMPOSE_FILE="${COMPOSE_FILE:-compose.server.yaml}"
 STACK_ENV="${STACK_ENV:-production}"
 RESTIC_PASSWORD_FILE="${RESTIC_PASSWORD_FILE:-./secrets/restic_password}"
