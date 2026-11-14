@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { h, nextTick, reactive } from 'vue';
+import { h, nextTick, reactive, ref } from 'vue';
 import { readFileSync, readdirSync } from 'node:fs';
 import { expectNoAxeViolations } from '../helpers/axe.js';
 import { pseudoLong } from '../helpers/pseudoLong.js';
@@ -18,7 +18,8 @@ import { loadMessages } from '../helpers/mount.js';
  * and nowrap/ellipsis, which would be the only ways a screen could overflow.
  */
 let mockProps = {};
-const { router, download, refusal } = vi.hoisted(() => ({
+const { router, download, refusal, fetchMock } = vi.hoisted(() => ({
+    fetchMock: vi.fn(),
     router: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), delete: vi.fn(), visit: vi.fn(), reload: vi.fn(), on: vi.fn(() => vi.fn()) },
     download: vi.fn(),
     refusal: vi.fn(),
@@ -31,6 +32,7 @@ vi.mock('@inertiajs/vue3', () => ({
 }));
 vi.mock('../../../resources/js/Security/securityTransfer.js', () => ({ securityDownload: download, securityUpload: vi.fn() }));
 vi.mock('../../../resources/js/Health/healthRefusal.js', () => ({ handleHealthRefusal: refusal }));
+vi.mock('../../../resources/js/Security/securityFetch.js', () => ({ securityFetch: fetchMock }));
 
 import Person from '../../../resources/js/Pages/Health/Person.vue';
 import EmergencyCard from '../../../resources/js/Pages/Health/EmergencyCard.vue';
@@ -40,6 +42,13 @@ import AiConsentControl from '../../../resources/js/Health/AiConsentControl.vue'
 import HomeHealthCard from '../../../resources/js/Dashboard/HomeHealthCard.vue';
 import HealthAccessCard from '../../../resources/js/Components/Settings/HealthAccessCard.vue';
 import PersonAccessPanel from '../../../resources/js/Components/Settings/PersonAccessPanel.vue';
+import RunAiControl from '../../../resources/js/Health/Ai/RunAiControl.vue';
+import AiNoticeDialog from '../../../resources/js/Health/Ai/AiNoticeDialog.vue';
+import ProvenanceTags from '../../../resources/js/Health/ProvenanceTags.vue';
+import AiReview from '../../../resources/js/Pages/Health/AiReview.vue';
+import AiCalls from '../../../resources/js/Pages/Settings/AiCalls.vue';
+import TimelineList from '../../../resources/js/Health/TimelineList.vue';
+import SpecialtyFolder from '../../../resources/js/Health/SpecialtyFolder.vue';
 
 const ID = '11111111-1111-4111-8111-111111111111';
 const PERSON = { id: ID, name: 'Ada Novak', birthDate: '2015-03-04', ageYears: 11, sex: 'female', bloodType: 'A+', hasAccount: false, aiConsent: false, canEdit: true, notes: 'Notes', contacts: [] };
@@ -97,6 +106,61 @@ const EXPORT = {
 };
 const MEMBERS = [{ id: 1, name: 'Anna', access: { health: 'edit' } }, { id: 2, name: 'Bob', access: { health: 'view' } }, { id: 3, name: 'Cyril', access: { health: 'none' } }];
 const ACCESS_PERSON = { id: 'p1', name: 'Eva', hasAccount: false, linkedUserId: null, selfAccessEnabled: true, members: { 1: 'edit', 2: 'view' } };
+
+// Phase 8 data: the AI run control, the review page, provenance tags, the admin call log and document rows with status tags.
+const AI_ID = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1';
+const AI_NEWEST = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2';
+const AI_RUN = { canRun: true, available: true, noticeAcknowledged: false };
+const aiStatus = (status, extra = {}) => ({ status, extractionId: 'x1', readyExtractionId: null, cancelReason: null, pagesRead: null, pagesTotal: null, entryCount: null, pending: 0, ...extra });
+const makePoller = (statuses = {}, over = {}) => ({
+    statuses: ref(statuses), available: ref(null), failedPolls: ref(0), stoppedLongWait: ref(false),
+    refresh: vi.fn(async () => {}), markQueued: vi.fn(), ...over,
+});
+const runState = (statuses, { ai = AI_RUN, consentOn = true, document: doc = D1, target, after, poller } = {}) => ({
+    component: RunAiControl,
+    props: () => ({ personId: ID, document: doc, ai, consentOn, poller: poller ?? makePoller(statuses) }),
+    target, after, ai: true,
+});
+const reviewVisit = { visited_on: '2025-05-02', doctor: 'Dr Kova', specialty_key: 'cardiology', diagnosis: 'Mild murmur', notes: null };
+const reviewMed = { name: 'Ibuprofen', dose: '200 mg', schedule: null, started_on: null, ended_on: null, notes: null };
+const reviewAllergy = { substance: 'Penicillin', reaction: 'Rash', severity: 'unknown' };
+const reviewVaccine = { vaccine: 'MMR', given_on: '2024-01-10', next_due_on: null, notes: null };
+const reviewItem = (key, fields, over = {}) => ({ key, fields, state: 'pending', recordId: null, edited: false, ...over });
+const reviewExtraction = (over = {}) => ({
+    id: AI_ID, status: 'ready', runAt: '2026-11-14T09:30:00+00:00', pagesRead: null, pagesTotal: null, documentDate: '2025-05-02', specialtyKey: 'cardiology',
+    readOnly: false, pending: 4,
+    sections: {
+        visits: [reviewItem('visit-0', reviewVisit)], medications: [reviewItem('medication-0', reviewMed)],
+        allergies: [reviewItem('allergy-0', reviewAllergy)], vaccinations: [reviewItem('vaccination-0', reviewVaccine)],
+    },
+    ...over,
+});
+const reviewProps = (over = {}) => ({
+    person: { id: ID }, document: { id: D2.id, kind: 'image', title: 'Discharge letter', pageCount: null },
+    extraction: reviewExtraction(), newestExtractionId: null, consentOn: true, specialties: ['cardiology'], pane: null, ...over,
+});
+const reviewState = (over, target, { after, width } = {}) => ({ component: AiReview, props: () => reviewProps(typeof over === 'function' ? over() : over), target, after, width, ai: true });
+const showDocumentPane = async () => { await click('[data-testid="pane-toggle"] [data-value="document"]'); };
+const CALL_ROWS = [
+    { time: '2026-11-14T10:00:00+00:00', startedBy: 'Anna', person: 'Eva', agent: 'codex', model: 'gpt-5-codex', status: 'succeeded', durationMs: 12000 },
+    { time: '2026-11-14T09:00:00+00:00', startedBy: 'Bob', person: null, agent: 'codex', model: 'default', status: 'failed', durationMs: 65000 },
+    { time: '2026-11-14T08:00:00+00:00', startedBy: 'Bob', person: 'Eva', agent: 'codex', model: null, status: 'running', durationMs: null },
+    { time: '2026-11-14T07:00:00+00:00', startedBy: 'Anna', person: 'Eva', agent: 'codex', model: null, status: 'queued', durationMs: null },
+    { time: '2026-11-14T06:00:00+00:00', startedBy: 'Anna', person: 'Eva', agent: 'codex', model: 'default', status: 'cancelled', durationMs: 3000 },
+];
+const callsProps = (over = {}) => ({
+    sections: [{ key: 'ai_calls', href: '/settings/ai-calls', labelKey: 'settings.section.ai_calls', icon: 'bot' }, { key: 'appearance', href: '/settings/appearance', labelKey: 'settings.section.appearance', icon: 'palette' }],
+    login: { agent: 'codex', state: 'logged_in', checkedAt: '2026-11-14T10:30:00+00:00' },
+    calls: { rows: CALL_ROWS, page: 1, pages: 1, total: 5 }, filters: { person: null, member: null, status: null },
+    options: { people: [{ id: ID, name: 'Eva' }], members: [{ id: 1, name: 'Anna' }, { id: 2, name: 'Bob' }] }, ...over,
+});
+const callsState = (over, target = '.ai-table, table, [role="status"]') => ({ component: AiCalls, props: () => callsProps(over), target, ai: true });
+const aiDocs = ['Waiting', 'Running', 'Ready', 'Empty', 'Failed', 'Cancelled'].map((title, i) => ({ id: `aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa${i + 1}`, kind: 'pdf', title: `${title} document with a rather long title`, visitId: null, uploadedOn: `2025-06-0${i + 1}`, sizeBytes: 100 }));
+const aiDocStatuses = Object.fromEntries([
+    aiStatus('queued'), aiStatus('running'), aiStatus('ready', { entryCount: 3 }), aiStatus('ready', { entryCount: 0 }), aiStatus('failed'), aiStatus('cancelled'),
+].map((st, i) => [aiDocs[i].id, st]));
+const AI_UNV = { source: 'ai', verification: 'unverified' };
+const AI_VER = { source: 'ai', verification: 'verified' };
 
 const $ = (sel) => document.querySelector(sel);
 const click = async (sel) => { const el = typeof sel === 'string' ? $(sel) : sel; el.click(); await nextTick(); await nextTick(); };
@@ -167,6 +231,77 @@ const states = {
     'Settings access panel': { component: PersonAccessPanel, props: () => ({ person: ACCESS_PERSON, members: MEMBERS }), target: 'input[name="level-1"]' },
     'Settings access panel linked': { component: PersonAccessPanel, props: () => ({ person: { ...ACCESS_PERSON, hasAccount: true, linkedUserId: 1 }, members: MEMBERS }), target: '[role="switch"]' },
     'Home card': { component: HomeHealthCard, props: () => ({}), target: '[data-testid="home-health"]' },
+
+    // Phase 8: Run AI control, notice dialog, review page, provenance tags, AI calls page, document rows with status tags.
+    'AI run idle': runState({}, { target: '[data-testid="ai-run"]' }),
+    'AI run notice dialog': runState({}, { target: '[role="dialog"]', after: async () => { await click('[data-testid="ai-run"]'); } }),
+    'AI run waiting': runState({ [D1.id]: aiStatus('queued') }, { target: '[data-testid="ai-cancel"]' }),
+    'AI run running': runState({ [D1.id]: aiStatus('running') }, { target: '[data-testid="ai-cancel"]' }),
+    'AI run poll failed': runState({ [D1.id]: aiStatus('running') }, { target: '[data-testid="ai-poll-failed"]', poller: makePoller({ [D1.id]: aiStatus('running') }, { failedPolls: ref(3) }) }),
+    'AI run long wait': runState({ [D1.id]: aiStatus('queued') }, { target: '[data-testid="ai-long-wait"]', poller: makePoller({ [D1.id]: aiStatus('queued') }, { stoppedLongWait: ref(true) }) }),
+    'AI run ready': runState({ [D1.id]: aiStatus('ready', { entryCount: 3, pending: 3, readyExtractionId: 'x1' }) }, { target: '[data-testid="ai-review"]' }),
+    'AI run ready partial pages': runState({ [D1.id]: aiStatus('ready', { entryCount: 3, pending: 3, pagesRead: 10, pagesTotal: 12, readyExtractionId: 'x1' }) }, { target: '[data-testid="ai-pages"]' }),
+    'AI run ready empty': runState({ [D1.id]: aiStatus('ready', { entryCount: 0 }) }, { target: '[data-testid="ai-status-tag"]' }),
+    'AI run rerun confirm': runState({ [D1.id]: aiStatus('ready', { entryCount: 3, pending: 2, readyExtractionId: 'x1' }) }, { target: '[role="dialog"]', after: async () => { await click('[data-testid="ai-run"]'); } }),
+    'AI run failed': runState({ [D1.id]: aiStatus('failed') }, { target: '[data-testid="ai-status-tag"]' }),
+    'AI run cancelled': runState({ [D1.id]: aiStatus('cancelled') }, { target: '[data-testid="ai-status-tag"]' }),
+    'AI run cancelled by consent': runState({ [D1.id]: aiStatus('cancelled', { cancelReason: 'consent' }) }, { target: '[data-testid="ai-status-tag"]' }),
+    'AI run consent off': runState({}, { consentOn: false, target: '[data-testid="ai-run"][aria-disabled="true"]' }),
+    'AI run unavailable': runState({}, { ai: { ...AI_RUN, available: false }, target: '[data-testid="ai-run"][aria-disabled="true"]' }),
+    'AI run heic': runState({}, { document: D3, target: '[data-testid="ai-run"][aria-disabled="true"]' }),
+    'AI run queue failed alert': runState({}, {
+        ai: { ...AI_RUN, noticeAcknowledged: true }, target: '[data-testid="ai-run-failed"]',
+        after: async () => { fetchMock.mockResolvedValue({ ok: false, status: 0, error: 'network', data: {} }); await click('[data-testid="ai-run"]'); await vi.waitFor(() => expect($('[data-testid="ai-run-failed"]')).not.toBeNull()); },
+    }),
+    'AI notice dialog': { component: AiNoticeDialog, props: () => ({ open: true }), target: '[data-testid="ai-notice-confirm"]', ai: true },
+    'AI review wide pending': reviewState({}, '[data-testid="pane-entries"]:not([hidden])'),
+    'AI review pdf document': reviewState({ document: { id: D1.id, kind: 'pdf', title: 'Lab result', pageCount: 3 }, extraction: reviewExtraction({ pagesRead: 3, pagesTotal: 3 }) }, '[data-testid="ai-review"]'),
+    'AI review partial pages and consent off': reviewState({ consentOn: false, extraction: reviewExtraction({ pagesRead: 10, pagesTotal: 12 }) }, '[data-testid="pages-read"]'),
+    'AI review stacked suggestions': reviewState({}, '[data-testid="pane-entries"]:not([hidden])', { width: 600 }),
+    'AI review stacked document': reviewState({}, '[data-testid="pane-document"]:not([hidden])', { width: 600, after: showDocumentPane }),
+    'AI review accepted and rejected': reviewState({
+        extraction: reviewExtraction({ pending: 2, sections: {
+            visits: [reviewItem('visit-0', reviewVisit, { state: 'accepted', recordId: 'rec-1' })], medications: [reviewItem('medication-0', reviewMed, { state: 'rejected' })],
+            allergies: [reviewItem('allergy-0', reviewAllergy)], vaccinations: [reviewItem('vaccination-0', reviewVaccine, { state: 'accepted', recordId: 'rec-2', edited: true })],
+        } }),
+    }, '[data-entry-key="visit-0"]'),
+    'AI review all handled': reviewState({ extraction: reviewExtraction({ pending: 0, sections: { visits: [reviewItem('visit-0', reviewVisit, { state: 'accepted', recordId: 'rec-1' })], medications: [], allergies: [], vaccinations: [] } }) }, '[data-testid="completion"]'),
+    'AI review edit open': reviewState({}, '[data-testid="edit-form-visit"]', { after: async () => { await click('[data-entry-key="visit-0"] [data-action="edit"]'); } }),
+    'AI review edit allergy flagged by server': reviewState({}, '[data-testid="edit-form-allergy"]', {
+        after: async () => {
+            fetchMock.mockResolvedValue({ ok: false, status: 422, error: 'invalid', errors: { severity: ['health.allergy.err_severity'] }, data: {} });
+            await click('[data-entry-key="allergy-0"] [data-action="accept"]');
+            await vi.waitFor(() => expect($('[data-testid="edit-form-allergy"]')).not.toBeNull());
+        },
+    }),
+    'AI review action failed alert': reviewState({}, '[role="alert"]', {
+        after: async () => { fetchMock.mockResolvedValue({ ok: false, status: 0, error: 'network', data: {} }); await click('[data-entry-key="visit-0"] [data-action="accept"]'); await vi.waitFor(() => expect($('[role="alert"]')).not.toBeNull()); },
+    }),
+    'AI review superseded': reviewState({ newestExtractionId: AI_NEWEST, extraction: reviewExtraction({ readOnly: true, sections: { visits: [reviewItem('visit-0', reviewVisit), reviewItem('visit-1', reviewVisit, { state: 'accepted', recordId: 'rec-1' })], medications: [], allergies: [], vaccinations: [] } }) }, '[data-testid="superseded-banner"]'),
+    'AI review empty': reviewState({ extraction: reviewExtraction({ sections: { visits: [], medications: [], allergies: [], vaccinations: [] } }) }, '[data-testid="review-empty"]'),
+    'AI review loading': reviewState({ loading: true }, '[data-testid="review-loading"]'),
+    'AI review error': reviewState({ extraction: null }, '[data-testid="review-error"]'),
+    'Provenance AI unverified': { component: ProvenanceTags, props: () => ({ provenance: AI_UNV }), target: '[data-testid="provenance-tags"]', ai: true },
+    'Provenance AI verified': { component: ProvenanceTags, props: () => ({ provenance: AI_VER }), target: '[data-testid="provenance-tags"]', ai: true },
+    'Provenance panel with verify': { component: ProvenanceTags, props: () => ({ provenance: AI_UNV, canVerify: true }), target: '[data-testid="provenance-verify"]', ai: true },
+    'Provenance panel verifying': { component: ProvenanceTags, props: () => ({ provenance: AI_UNV, canVerify: true, verifying: true }), target: '[data-testid="provenance-verify"]', ai: true },
+    'Timeline document rows with AI status tags': {
+        component: TimelineList, props: () => ({ entries: aiDocs.map((d) => ({ type: 'document', id: d.id, date: d.uploadedOn })), documents: aiDocs, aiStatuses: aiDocStatuses }),
+        target: '[data-testid="ai-status-tag"]', ai: true,
+    },
+    'Folder document rows with AI status tags': {
+        component: SpecialtyFolder, props: () => ({ documents: aiDocs, aiStatuses: aiDocStatuses, defaultOpen: true }),
+        target: '[data-testid="ai-status-tag"]', ai: true,
+    },
+    'Person page with AI status tags': { ai: true, ...personState({ documents: aiDocs, unattachedDocumentIds: aiDocs.map((d) => d.id), ai: { ...AI_RUN, statuses: aiDocStatuses }, timeline: aiDocs.map((d) => ({ type: 'document', id: d.id, date: d.uploadedOn })), view: 'timeline' }, '[data-testid="ai-status-tag"]') },
+    'AI calls logged in': callsState({}),
+    'AI calls login expired': callsState({ login: { agent: 'codex', state: 'expired', checkedAt: '2026-11-14T10:30:00+00:00' } }),
+    'AI calls not responding': callsState({ login: { agent: 'codex', state: 'not_responding', checkedAt: '2026-11-14T10:30:00+00:00' } }),
+    'AI calls not checked yet': callsState({ login: { agent: 'codex', state: 'unknown', checkedAt: null } }),
+    'AI calls multi page': callsState({ calls: { rows: CALL_ROWS, page: 2, pages: 3, total: 60 } }),
+    'AI calls empty': callsState({ calls: { rows: [], page: 1, pages: 1, total: 0 } }, '.ui-empty, [data-testid="empty"], h2'),
+    'AI calls filtered empty': callsState({ calls: { rows: [], page: 1, pages: 1, total: 0 }, filters: { person: null, member: null, status: 'failed' } }, '.ui-empty, [data-testid="empty"], h2'),
+    'AI calls loading': callsState({ calls: null }, '[aria-busy="true"], .ui-skeleton, h1'),
 };
 
 let current;
@@ -180,7 +315,9 @@ afterEach(() => {
 
 async function reach(state, { locale, dark = false, width = 1280, pseudo = false }) {
     document.documentElement.classList.toggle('dark', dark && !state.light);
-    window.innerWidth = width;
+    // A state can ask for a stacked width of its own when the pass runs at the default desktop width.
+    window.innerWidth = state.width && width === 1280 ? state.width : width;
+    fetchMock.mockReset();
     window.matchMedia = (query) => ({ matches: false, media: query, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
     mockProps = reactive({
         locale, flash: { status: null, toast: null, data: null }, availableLocales: ['sk', 'pl', 'en'],
@@ -236,6 +373,39 @@ describe('health with +40% text', () => {
             });
         }
     }
+});
+
+// Carry-over from 08-23: the +40% check above runs at 360px; document rows with status tags and every Phase 8 surface also
+// get it at the narrowest supported width (320px), where a long Slovak or Polish status word could overflow a row.
+describe('Phase 8 surfaces at 320px with +40% text', () => {
+    const aiStates = Object.entries(states).filter(([, state]) => state.ai);
+
+    it('covers the document rows with status tags and the other Phase 8 surfaces', () => {
+        expect(aiStates.length).toBeGreaterThanOrEqual(40);
+        expect(aiStates.map(([name]) => name)).toEqual(expect.arrayContaining([
+            'Timeline document rows with AI status tags', 'Folder document rows with AI status tags', 'AI review stacked suggestions', 'AI calls logged in',
+        ]));
+    });
+
+    for (const locale of ['sk', 'pl']) {
+        for (const [name, state] of aiStates) {
+            it(`${name} passes axe and does not overflow at 320px (${locale})`, async () => {
+                await sweep(name, state, { locale, width: 320, pseudo: true });
+                expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(320);
+                for (const el of document.body.querySelectorAll('[style]')) {
+                    expect(el.getAttribute('style') ?? '', `${name}: inline fixed width`).not.toMatch(/(^|;)\s*(min-)?width:\s*(32[1-9]|3[3-9]\d|[4-9]\d\d|\d{4,})px/);
+                    expect(el.getAttribute('style') ?? '').not.toMatch(/text-overflow|overflow:\s*hidden/);
+                }
+            });
+        }
+    }
+
+    it('keeps the status tag text wrappable in every document row', async () => {
+        await reach(states['Timeline document rows with AI status tags'], { locale: 'pl', width: 320, pseudo: true });
+        const tags = [...document.querySelectorAll('[data-testid="ai-status-tag"]')];
+        expect(tags).toHaveLength(6);
+        for (const tag of tags) expect(tag.textContent.trim().length).toBeGreaterThan(8);
+    });
 });
 
 describe('health styles cannot force horizontal overflow', () => {

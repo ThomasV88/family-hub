@@ -17,7 +17,8 @@ vi.mock('@inertiajs/vue3', async () => {
                 heartbeat: { last_recorded_at: '2026-11-13T10:00:00+00:00', last_source: 'schedule', count_24h: 3, expected_24h: 1440 },
             },
         }),
-        router: { post: vi.fn(), get: vi.fn(), visit: vi.fn(), on: vi.fn() },
+        router: { post: vi.fn(), get: vi.fn(), visit: vi.fn(), on: vi.fn(), reload: vi.fn() },
+        Head: { render: () => null },
         Link: { props: ['href'], render() { return h('a', { href: this.href }, this.$slots.default?.()); } },
     };
 });
@@ -25,6 +26,7 @@ vi.mock('@inertiajs/vue3', async () => {
 import StyleGuide from '../../resources/js/Pages/StyleGuide.vue';
 import Home from '../../resources/js/Pages/Home.vue';
 import TodoIndex from '../../resources/js/Pages/Todo/Index.vue';
+import AiCalls from '../../resources/js/Pages/Settings/AiCalls.vue';
 import AppShell from '../../resources/js/Layouts/AppShell.vue';
 
 let wrapper;
@@ -36,7 +38,7 @@ afterEach(() => {
     window.innerWidth = originalWidth;
 });
 
-const pages = { StyleGuide, Home, 'Todo/Index': TodoIndex };
+const pages = { StyleGuide, Home, 'Todo/Index': TodoIndex, 'Settings/AiCalls': AiCalls };
 const ME = 1;
 const todoTask = (id, extra = {}) => ({
     id, title: `Task ${id}`, notes: null, status: 'todo', visibility: 'family', creatorId: ME, assigneeId: ME,
@@ -54,6 +56,23 @@ const pageProps = {
             todoTask(5, { assigneeId: null }),
         ],
     },
+};
+pageProps['Settings/AiCalls'] = {
+    sections: [
+        { key: 'ai_calls', href: '/settings/ai-calls', labelKey: 'settings.section.ai_calls', icon: 'bot' },
+        { key: 'appearance', href: '/settings/appearance', labelKey: 'settings.section.appearance', icon: 'palette' },
+    ],
+    login: { agent: 'codex', state: 'expired', checkedAt: '2026-11-14T10:30:00+00:00' },
+    calls: {
+        page: 1, pages: 2, total: 30,
+        rows: [
+            { time: '2026-11-14T10:00:00+00:00', startedBy: 'Mira', person: 'Eva', agent: 'codex', model: 'default', status: 'succeeded', durationMs: 12000 },
+            { time: '2026-11-14T09:00:00+00:00', startedBy: 'Adam', person: null, agent: 'codex', model: null, status: 'failed', durationMs: 65000 },
+            { time: '2026-11-14T08:00:00+00:00', startedBy: 'Adam', person: 'Eva', agent: 'codex', model: null, status: 'running', durationMs: null },
+        ],
+    },
+    filters: { person: null, member: null, status: null },
+    options: { people: [{ id: '11111111-1111-4111-8111-111111111111', name: 'Eva' }], members: [{ id: 1, name: 'Mira' }, { id: 2, name: 'Adam' }] },
 };
 const cases = [];
 for (const locale of ['en', 'sk', 'pl'])
