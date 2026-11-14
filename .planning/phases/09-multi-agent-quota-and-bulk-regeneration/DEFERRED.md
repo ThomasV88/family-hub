@@ -54,6 +54,10 @@ Prerequisite: the Phase 8 live plan 08-22 has run (Codex login per stack, ai-wor
 ## Native-review copy
 All new SK and PL strings from 09-01 (agents section, waiting and quota-timeout status, provenance, provider lines, provider-aware and Copilot-only notices, bulk panel, AI calls additions, audit details) are drafts flagged for a native reader in 09-20.
 
+Two native-review copy tasks for 09-20 (recorded by 09-19, from the 09-01 summary):
+1. **Riskiest SK/PL strings (no UI-SPEC draft, written by the executor):** `settings.ai_agents.model_error` (tightened rule), `settings.ai_agents.open_calls`, `settings.ai_bulk.already_active`, `settings.ai_bulk.try_again`, `settings.ai_bulk.pause_name`, `settings.ai_bulk.resume_name`, `settings.ai_bulk.valid_minutes`, `settings.ai_bulk.row_*`, `health.ai.status.quota_exhausted_detail`, `health.ai.status.no_agent_detail`, `health.ai.status.notice_required_detail`, `health.ai.notice.github_title`, `health.ai.notice.github_body`, `settings.ai_calls.person_bulk`, and every `audit.detail.ai_*` line.
+2. **Polish plural agreement:** `settings.ai_bulk.confirm_body`, `settings.ai_bulk.progress` and `settings.ai_bulk.valid_minutes` use four pipe segments in SK and PL; a native Polish reader must check noun and numeral agreement for every count class (1, 2-4, 5-21, 22-24 and 25+), which the parity test only proves structurally.
+
 ## Carried hardening items (from Phase 8 DEFERRED.md, now covering two CLIs)
 - WR-06: run the CLIs under their own uid. With Copilot the www-data uid can read both `/codex/auth.json` and `/copilot/config.json`; the same `setpriv` approach applies to both runners and both credential volumes.
 - IN-06: ai-worker container hardening (cap_drop ALL, no-new-privileges, read_only, pids_limit), together with WR-06.
