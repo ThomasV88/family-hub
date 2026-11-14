@@ -124,7 +124,10 @@ return [
         ],
         'ladder' => [60, 180, 720, 1440],
         'ladder_reset_hours' => 48,
+        // A printed reset further out than this is treated as garbage (the ladder applies instead).
         'max_reset_days' => 8,
+        // A cooldown from a printed reset is never longer than this: one stderr line must not park an agent for days.
+        'max_cooldown_hours' => 24,
         'reset_buffer_seconds' => 60,
         'wait_cap_hours' => 24,
     ],
