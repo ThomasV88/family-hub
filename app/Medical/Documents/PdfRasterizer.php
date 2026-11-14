@@ -12,9 +12,10 @@ use Symfony\Component\Process\Process;
  */
 final class PdfRasterizer
 {
-    public function pageCount(string $absPdf): int
+    /** @param  string  $profile  'web' (the app container) or 'worker' (the ai-worker): picks the memory limit. */
+    public function pageCount(string $absPdf, string $profile = 'web'): int
     {
-        $p = $this->process(['pdfinfo', $absPdf], (float) config('ai.pdf.info_timeout'), sys_get_temp_dir());
+        $p = $this->process(['pdfinfo', $absPdf], (float) config('ai.pdf.info_timeout'), sys_get_temp_dir(), $profile);
         if (! $this->run($p) || $p->getExitCode() !== 0) {
             return 0;
         }
@@ -22,10 +23,13 @@ final class PdfRasterizer
         return preg_match('/^Pages:\s+(\d+)\s*$/m', $p->getOutput(), $m) === 1 ? (int) $m[1] : 0;
     }
 
-    /** One page (1-based) as JPEG bytes, or null. */
+    /**
+     * One page (1-based) as JPEG bytes, or null. A single pdftoppm spawn and no pdfinfo: a page past the end makes
+     * pdftoppm exit non-zero without writing a file, which is the same null.
+     */
     public function page(string $absPdf, int $page): ?string
     {
-        if ($page < 1 || $page > $this->pageCount($absPdf)) {
+        if ($page < 1) {
             return null;
         }
 
@@ -56,7 +60,7 @@ final class PdfRasterizer
      */
     public function pages(string $absPdf, string $dir, int $max): array
     {
-        $total = $this->pageCount($absPdf);
+        $total = $this->pageCount($absPdf, 'worker');
         $k = min($total, $max);
         $written = [];
         if ($k < 1) {
@@ -70,6 +74,7 @@ final class PdfRasterizer
                     '-scale-to', (string) (int) config('ai.pdf.scale'), $absPdf, $tmp.'/p'],
                 (float) config('ai.pdf.timeout'),
                 $tmp,
+                'worker',
             );
             if (! $this->run($p) || $p->getExitCode() !== 0) {
                 return ['written' => [], 'total' => $total];
@@ -99,9 +104,10 @@ final class PdfRasterizer
     /**
      * @param  list<string>  $command
      */
-    private function process(array $command, float $timeout, string $cwd): Process
+    private function process(array $command, float $timeout, string $cwd, string $profile = 'web'): Process
     {
-        $kb = (int) config('ai.pdf.ulimit_kb');
+        // Virtual address space, kept below the container's memory limit so a hostile PDF dies in the tool, not in the cgroup.
+        $kb = (int) config($profile === 'worker' ? 'ai.pdf.ulimit_kb_worker' : 'ai.pdf.ulimit_kb');
         $p = new Process(['sh', '-c', 'ulimit -v '.$kb.'; exec "$@"', 'sh', ...$command], $cwd);
         $p->setTimeout($timeout);
 

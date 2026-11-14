@@ -36,7 +36,9 @@ return [
         'scale' => 1800,
         'timeout' => 20,
         'info_timeout' => 5,
-        'ulimit_kb' => 786432,
+        // ulimit -v (virtual) of pdfinfo/pdftoppm. Below the container limits: app 192m, ai-worker 384m (compose.server.yaml).
+        'ulimit_kb' => 131072,
+        'ulimit_kb_worker' => 262144,
     ],
 
     // [ASSUMED] case-insensitive substrings of an auth failure; frozen in 08-22 from a real transcript.

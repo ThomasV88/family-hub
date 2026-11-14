@@ -93,3 +93,29 @@ it('never writes under the medical disk root', function () {
 
     expect(is_dir($root) ? scandir($root) : null)->toBe($before);
 });
+
+it('keeps the memory limits below the container limits and gives the worker its own', function () {
+    // compose.server.yaml: app 192m, ai-worker 384m.
+    expect((int) config('ai.pdf.ulimit_kb'))->toBeLessThan(192 * 1024)
+        ->and((int) config('ai.pdf.ulimit_kb_worker'))->toBeLessThan(384 * 1024)
+        ->and((int) config('ai.pdf.ulimit_kb_worker'))->toBeGreaterThan((int) config('ai.pdf.ulimit_kb'));
+});
+
+it('renders a page with the web limit and the worker pages with the worker limit', function () {
+    $r = new PdfRasterizer;
+    $pdf = ($this->pdf)(2);
+    $out = $this->dir.'/out2';
+    mkdir($out, 0700);
+
+    expect($r->page($pdf, 1))->not->toBeNull()
+        ->and($r->pages($pdf, $out, 10)['written'])->toHaveCount(2);
+});
+
+it('answers a page past the end with null from a single pdftoppm spawn, without pdfinfo', function () {
+    $r = new PdfRasterizer;
+    $pdf = ($this->pdf)(2);
+    // A pdfinfo that would time out cannot slow the page route down: it is never run.
+    config(['ai.pdf.info_timeout' => 0.000001]);
+
+    expect($r->page($pdf, 3))->toBeNull()->and($r->page($pdf, 2))->not->toBeNull();
+});
