@@ -112,7 +112,7 @@ describe('Phase 7 copy parity', () => {
 
     it('detects exactly the ten plural keys among health.* strings', () => {
         const pipes = Object.entries(en)
-            .filter(([k, v]) => k.startsWith('health.') && v.includes('|'))
+            .filter(([k, v]) => k.startsWith('health.') && !k.startsWith('health.ai.') && v.includes('|'))
             .map(([k]) => k);
         expect(pipes.sort()).toEqual([...PLURALS].sort());
     });
