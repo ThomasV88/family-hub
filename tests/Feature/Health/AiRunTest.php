@@ -315,3 +315,67 @@ describe('person page props', function () {
         $this->actingAs($user)->get("/health/people/{$person->id}")->assertInertia(fn (Assert $page) => $page->where('ai.available', false));
     });
 });
+
+describe('quota guard', function () {
+    function aiExtra(User $user, MedicalSubject $person, string $state = 'queued'): MedicalAiExtraction
+    {
+        $doc = MedicalDocument::factory()->image()->create(['subject_id' => $person->id]);
+        $factory = MedicalAiExtraction::factory()->forDocument($doc);
+        $factory = match ($state) {
+            'running' => $factory->running(),
+            'ready' => $factory->ready(['entries' => []], 0),
+            'failed' => $factory->failed(),
+            'cancelled' => $factory->cancelled(),
+            default => $factory,
+        };
+
+        return $factory->create(['started_by' => $user->id]);
+    }
+
+    it('refuses a start beyond the per-user active cap and writes nothing', function () {
+        [$user, $person, $document] = aiSetup();
+        config(['ai.limits.max_active_per_user' => 2]);
+        aiExtra($user, $person);
+        aiExtra($user, $person, 'running');
+        $before = aiTables();
+
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])
+            ->assertStatus(409)->assertExactJson(['reason' => 'busy']);
+        expect(aiTables())->toBe($before);
+
+        // Another member is not held back by this user's runs.
+        $other = User::factory()->create();
+        MedicalFixtures::grantHealth($other);
+        $otherPerson = MedicalFixtures::subject(['ai_consent' => true], [[$other, AccessLevel::Edit]]);
+        $otherDoc = MedicalDocument::factory()->image()->create(['subject_id' => $otherPerson->id]);
+        $this->actingAs($other)->postJson(aiRunUrl($otherPerson, $otherDoc->id), ['acknowledged' => true])->assertStatus(202);
+    });
+
+    it('refuses a start beyond the global cap', function () {
+        [$user, $person, $document] = aiSetup();
+        config(['ai.limits.max_active_global' => 2]);
+        $other = User::factory()->create();
+        $otherPerson = MedicalFixtures::subject(['ai_consent' => true], [[$other, AccessLevel::Edit]]);
+        aiExtra($other, $otherPerson);
+        aiExtra($other, $otherPerson, 'running');
+
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])
+            ->assertStatus(409)->assertExactJson(['reason' => 'busy']);
+    });
+
+    it('holds a document back for the cool-down after a finished run, but not after a cancel or once it has passed', function (string $state, bool $blocked) {
+        [$user, $person, $document] = aiSetup();
+        MedicalAiExtraction::factory()->forDocument($document)->{$state}(...($state === 'ready' ? [['entries' => []], 0] : []))->create(['started_by' => $user->id]);
+
+        $response = $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true]);
+
+        $blocked ? $response->assertStatus(409)->assertExactJson(['reason' => 'busy']) : $response->assertStatus(202);
+    })->with([['ready', true], ['failed', true], ['cancelled', false]]);
+
+    it('allows a re-run once the cool-down has passed', function () {
+        [$user, $person, $document] = aiSetup();
+        MedicalAiExtraction::factory()->forDocument($document)->ready(['entries' => []], 0)->create(['started_by' => $user->id, 'finished_at' => now()->subMinutes(11)]);
+
+        $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true])->assertStatus(202);
+    });
+});

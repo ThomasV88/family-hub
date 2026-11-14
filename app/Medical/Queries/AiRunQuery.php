@@ -90,6 +90,10 @@ class AiRunQuery
                     return new StartResult('active', $active);
                 }
 
+                if ($this->busy($viewer, $documentId)) {
+                    return new StartResult('busy');
+                }
+
                 $this->audit->record(AuditEvent::MedicalAiRunRequested, $user, ['subject' => $subjectId, 'document' => $documentId], null, Module::Health);
 
                 $id = (string) Str::uuid();
@@ -248,6 +252,31 @@ class AiRunQuery
         }
 
         return $map;
+    }
+
+    /**
+     * The quota guard: a cap on active runs per starter, a global cap, and a cool-down after the document's last
+     * finished run. A transaction-scoped advisory lock serializes the counting across people, so the bounds hold under
+     * concurrent starts. Cancelled runs do not start a cool-down.
+     */
+    private function busy(Viewer $viewer, string $documentId): bool
+    {
+        DB::select("select pg_advisory_xact_lock(hashtext('ai-run-start'))");
+
+        $active = fn () => DB::table('medical_ai_extractions')->whereIn('status', self::ACTIVE);
+        if ($active()->count() >= (int) config('ai.limits.max_active_global')) {
+            return true;
+        }
+        if ($active()->where('started_by', $viewer->userId())->count() >= (int) config('ai.limits.max_active_per_user')) {
+            return true;
+        }
+        $cooldown = (int) config('ai.limits.document_cooldown_minutes');
+
+        return $cooldown > 0 && DB::table('medical_ai_extractions')
+            ->where('document_id', $documentId)
+            ->whereIn('status', ['ready', 'superseded', 'failed'])
+            ->where('finished_at', '>', Carbon::now()->subMinutes($cooldown))
+            ->exists();
     }
 
     /** The queued or running extraction of the document, inside the viewer's scope. */

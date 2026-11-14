@@ -57,6 +57,14 @@ return [
     // Records one proposal may create when its entries are accepted (a proposal holds at most 100 entries).
     'max_accepts_per_proposal' => 100,
 
+    // [ASSUMED] Quota guard of a start request: the subscription is flat, so queue depth and re-runs are bounded.
+    // A refused start answers 409 reason 'busy' (the UI shows its generic "could not start" message).
+    'limits' => [
+        'max_active_per_user' => 3,
+        'max_active_global' => 20,
+        'document_cooldown_minutes' => 10,
+    ],
+
     'login_stale_minutes' => 15,
     'call_retention_months' => 12,
     'queue' => 'ai',
