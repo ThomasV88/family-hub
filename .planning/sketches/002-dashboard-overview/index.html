@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="sk" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch 002: Dashboard</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font-sans); background: #d9d9d6; color: var(--color-text); padding-top: 52px; }
+:root[data-theme="dark"] body { background: #0e0e0d; }
+#variant-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9998; background: #fff; border-bottom: 1px solid #ddd; padding: 8px 16px; display: flex; gap: 8px; font-family: system-ui; flex-wrap: wrap; }
+.variant-tab { border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 13px; transition: all .15s ease; color: #222; }
+.variant-tab:hover { background: #f0f0f0; }
+.variant-tab.active { background: #222; color: #fff; border-color: #222; }
+.stage { display: flex; justify-content: center; padding: 16px; }
+.frame { container-type: inline-size; container-name: frame; width: 100%; max-width: 1280px; height: calc(100vh - 92px); min-height: 560px; background: var(--color-bg); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-lg); position: relative; transition: width .2s ease; }
+
+/* Shell (winner of sketch 001: bottom bar on phone, toggleable sidebar on iPad/desktop) */
+.app { display: flex; height: 100%; color: var(--color-text); position: relative; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); border-bottom: 1px solid var(--color-border); }
+.topbar h1 { font-size: var(--text-lg); font-weight: 600; margin: 0; flex: 1; letter-spacing: -.01em; }
+.content { flex: 1; overflow: auto; padding: var(--space-6); padding-bottom: 100px; }
+.icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); padding: 7px 12px; border-radius: var(--radius-md); font: inherit; font-size: var(--text-sm); cursor: pointer; transition: all .15s ease; }
+.btn:hover { background: var(--color-surface-2); }
+.btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+.btn.primary:hover { background: var(--color-primary-hover); }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--color-primary-soft); color: var(--color-primary); display: grid; place-items: center; font-size: 12px; font-weight: 600; border: 0; }
+.side { display: none; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3); border-right: 1px solid var(--color-border); width: 64px; align-items: center; overflow: hidden; transition: width .2s ease; }
+.side .brand { display: flex; align-items: center; gap: 8px; font-weight: 650; padding: 4px 12px 16px; }
+.side .brand .logo { width: 22px; height: 22px; border-radius: 6px; background: var(--color-primary); flex: none; }
+.side .spacer { flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--radius-md); color: var(--color-text-muted); cursor: pointer; border: 0; background: none; font: inherit; font-size: var(--text-sm); width: 44px; justify-content: center; transition: all .15s ease; }
+.nav-item:hover { background: var(--color-surface-2); color: var(--color-text); }
+.nav-item.active { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
+.label, .brand span { display: none; }
+.app.open .side { width: 232px; align-items: stretch; }
+.app.open .label, .app.open .brand span { display: inline; }
+.app.open .nav-item { width: 100%; justify-content: flex-start; padding: 8px 12px; }
+.bottom { display: flex; position: absolute; left: 0; right: 0; bottom: 0; background: var(--color-surface); border-top: 1px solid var(--color-border); padding: 6px 4px 14px; justify-content: space-around; z-index: 10; }
+.bottom .nav-item { flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 11px; width: auto; flex: 1; }
+.bottom .label { display: inline; }
+.fab { position: absolute; right: 16px; bottom: 76px; z-index: 11; width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--color-primary); color: #fff; box-shadow: var(--shadow-md); cursor: pointer; display: grid; place-items: center; }
+.collapse-btn, .add-top { display: none; }
+@container frame (min-width: 640px) {
+  .side { display: flex; }
+  .bottom, .fab { display: none; }
+  .content { padding-bottom: var(--space-6); }
+  .collapse-btn, .add-top { display: inline-flex; }
+}
+
+/* Dashboard pieces */
+.hello { margin: 0 0 4px; font-size: var(--text-2xl); letter-spacing: -.02em; }
+.muted { color: var(--color-text-muted); font-size: var(--text-sm); }
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); }
+.card h3 { margin: 0 0 var(--space-3); font-size: var(--text-sm); font-weight: 600; color: var(--color-text-muted); display: flex; align-items: center; gap: 8px; }
+.card h3 .more { margin-left: auto; font-weight: 400; font-size: var(--text-xs); cursor: pointer; color: var(--color-primary); }
+.quick { display: flex; gap: 8px; margin: var(--space-4) 0; }
+.quick input { flex: 1; padding: 9px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: var(--text-sm); }
+.quick input:focus { outline: 2px solid var(--color-primary-soft); border-color: var(--color-primary); }
+.task { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--color-border); font-size: var(--text-sm); }
+.task:first-of-type { border-top: 0; }
+.task input { accent-color: var(--color-primary); width: 18px; height: 18px; }
+.task.done .t { text-decoration: line-through; color: var(--color-text-muted); }
+.task .who { margin-left: auto; font-size: var(--text-xs); color: var(--color-text-muted); }
+.tag { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--color-surface-2); color: var(--color-text-muted); }
+.tag.warn { background: #f8e9e6; color: var(--color-danger); }
+:root[data-theme="dark"] .tag.warn { background: #3a2622; }
+.row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-top: 1px solid var(--color-border); font-size: var(--text-sm); }
+.row:first-of-type { border-top: 0; }
+.row .ic { width: 28px; height: 28px; border-radius: 8px; background: var(--color-primary-soft); color: var(--color-primary); display: grid; place-items: center; flex: none; }
+.row .ic .icon { width: 16px; height: 16px; }
+.row .when { margin-left: auto; color: var(--color-text-muted); font-size: var(--text-xs); white-space: nowrap; }
+.bars { display: flex; align-items: flex-end; gap: 8px; height: 90px; }
+.bars i { flex: 1; background: var(--color-primary-soft); border-radius: 4px 4px 0 0; }
+.bars i.cur { background: var(--color-primary); }
+.bar-labels { display: flex; gap: 8px; font-size: 11px; color: var(--color-text-muted); margin-top: 4px; }
+.bar-labels span { flex: 1; text-align: center; }
+.progress { height: 6px; border-radius: 99px; background: var(--color-surface-2); overflow: hidden; margin: 6px 0; }
+.progress > b { display: block; height: 100%; background: var(--color-primary); border-radius: 99px; }
+.big { font-size: var(--text-3xl); font-weight: 650; letter-spacing: -.02em; line-height: 1.1; }
+.empty { text-align: center; padding: 20px 8px; color: var(--color-text-muted); font-size: var(--text-sm); }
+.stack { display: grid; gap: var(--space-4); align-content: start; }
+.grid-b { display: grid; gap: var(--space-4); grid-template-columns: 1fr; }
+@container frame (min-width: 700px) { .grid-b { grid-template-columns: 1fr 1fr; } }
+.grid-c { display: grid; gap: var(--space-4); grid-template-columns: 1fr; }
+@container frame (min-width: 860px) { .grid-c { grid-template-columns: 1.5fr 1fr; } }
+.col-a { max-width: 680px; margin: 0 auto; }
+
+#sketch-tools { position: fixed; bottom: 12px; right: 12px; z-index: 9999; font-family: system-ui; font-size: 12px; background: rgba(0,0,0,.75); color: #fff; padding: 8px 12px; border-radius: 8px; opacity: .45; transition: opacity .2s; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 92vw; }
+#sketch-tools:hover { opacity: 1; }
+#sketch-tools button { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 3px 8px; font-size: 12px; cursor: pointer; }
+#sketch-tools button.on { background: #fff; color: #000; }
+</style>
+</head>
+<body>
+<div id="variant-nav">
+  <button class="variant-tab active" onclick="setDash('a', this)">A: „Dnes" — jeden stĺpec, všetko zmiešané podľa času</button>
+  <button class="variant-tab" onclick="setDash('b', this)">B: Dlaždice modulov — jedna karta na modul ★ Selected</button>
+  <button class="variant-tab" onclick="setDash('c', this)">C: Úlohy hore, bočný panel so súhrnmi</button>
+</div>
+
+<div class="stage">
+  <div class="frame" id="frame">
+    <div class="app rail" id="app">
+      <aside class="side" id="side"></aside>
+      <div class="main">
+        <div class="topbar">
+          <button class="btn collapse-btn" onclick="document.getElementById('app').classList.toggle('open')" aria-label="Prepnúť panel"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9 5v14"/></svg></button>
+          <h1>Prehľad</h1><button class="btn primary add-top">+ Pridať</button><button class="avatar">JK</button>
+        </div>
+        <div class="content" id="content"></div>
+      </div>
+      <nav class="bottom" id="bottom"></nav>
+      <button class="fab" title="Pridať"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<div id="sketch-tools">
+  <span>Rámec:</span>
+  <button onclick="setW('390px', this)">Mobil 390</button>
+  <button onclick="setW('820px', this)">iPad 820</button>
+  <button class="on" onclick="setW('100%', this)">Desktop</button>
+  <button id="empty-btn" onclick="toggleEmpty(this)">Prázdny stav</button>
+  <button onclick="toggleDark(this)">Tmavý režim</button>
+</div>
+
+<script>
+const ICONS = {
+  home: '<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  tasks: '<path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>',
+  gift: '<path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7a3 3 0 1 0-3-3c0 2 3 3 3 3zm0 0a3 3 0 1 1 3-3c0 2-3 3-3 3z"/>',
+  money: '<path d="M3 7h18v12H3zM3 11h18M7 15h3"/>',
+  health: '<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>'
+};
+const ico = n => `<svg class="icon" viewBox="0 0 24 24">${ICONS[n]}</svg>`;
+const NAV = [['home','Prehľad'],['tasks','Úlohy'],['gift','Wishlist'],['money','Financie'],['health','Zdravie']];
+let dash = 'a', empty = false;
+const tasks = [
+  { t:'Zaplatiť školku', who:'Jana', due:'dnes', done:false, late:true },
+  { t:'Objednať Tomáša k zubárovi', who:'Peter', due:'dnes', done:false },
+  { t:'Vymeniť žiarovku v chodbe', who:'Peter', due:'zajtra', done:false },
+  { t:'Nákup na víkend', who:'Jana', due:'dnes', done:true }
+];
+const upcoming = [
+  { ic:'money', t:'Nájom 650 €', when:'1. 12.' },
+  { ic:'health', t:'Očkovanie Tomáš (preočkovanie)', when:'9. 12.' },
+  { ic:'gift', t:'Babkine narodeniny (kúpiš: parfum)', when:'14. 12.' },
+  { ic:'money', t:'Energie 112 €', when:'15. 12.' }
+];
+const months = [['Júl',55],['Aug',70],['Sep',48],['Okt',82],['Nov',62]];
+
+function taskList(list) {
+  if (!list.length) return `<div class="empty">Dnes nič nezostáva. Pridajte úlohu hore.</div>`;
+  return list.map(x => { const i = tasks.indexOf(x); return `<label class="task ${x.done?'done':''}"><input type="checkbox" data-task="${i}" ${x.done?'checked':''}><span class="t">${x.t}</span>${x.late?'<span class="tag warn">po termíne</span>':''}<span class="who">${x.who}</span></label>`; }).join('');
+}
+const quick = `<div class="quick"><input id="qi" placeholder="Rýchlo pridať úlohu…"><button class="btn primary" onclick="addTask()">Pridať</button></div>`;
+const upcomingRows = () => empty ? `<div class="empty">Nič sa neblíži.</div>` : upcoming.map(u => `<div class="row"><span class="ic">${ico(u.ic)}</span><span>${u.t}</span><span class="when">${u.when}</span></div>`).join('');
+const spendChart = () => empty ? `<div class="empty">Zatiaľ žiadne výdavky.</div>` : `<div class="bars">${months.map((m,i)=>`<i class="${i===4?'cur':''}" style="height:${m[1]}%"></i>`).join('')}</div><div class="bar-labels">${months.map(m=>`<span>${m[0]}</span>`).join('')}</div>`;
+const budget = () => empty ? '' : `<div class="muted" style="margin-top:12px">Rozpočet novembra: 1 240 € z 2 000 €</div><div class="progress"><b style="width:62%"></b></div>`;
+
+function view() {
+  const today = empty ? [] : tasks.filter(x => x.due === 'dnes');
+  const hello = `<h2 class="hello">Dobrý deň, Jana</h2><div class="muted">Štvrtok 12. novembra</div>`;
+  if (dash === 'a') return `<div class="col-a">${hello}${quick}
+    <div class="card"><h3>Dnes ${ico('tasks')}<span class="more">všetky úlohy</span></h3>${taskList(today)}</div>
+    <div class="card" style="margin-top:16px"><h3>Čoskoro, zo všetkých modulov</h3>${upcomingRows()}</div>
+    <div class="card" style="margin-top:16px"><h3>Výdavky podľa mesiacov</h3>${spendChart()}</div></div>`;
+  if (dash === 'b') return `${hello}${quick}<div class="grid-b">
+    <div class="card"><h3>${ico('tasks')} Úlohy <span class="more">otvoriť</span></h3>${empty?'<div class="empty">Žiadne úlohy.</div>':`<div class="big">3</div><div class="muted">dnes, 1 po termíne</div>${taskList(today.slice(0,2))}`}</div>
+    <div class="card"><h3>${ico('gift')} Wishlist <span class="more">otvoriť</span></h3>${empty?'<div class="empty">Zatiaľ žiadne priania.</div>':`<div class="big">2 nové</div><div class="muted">od Emy a Tomáša, 1 si rezervovala ty</div><div class="row" style="margin-top:8px"><span class="ic">${ico('gift')}</span><span>Babkine narodeniny</span><span class="when">o 32 dní</span></div>`}</div>
+    <div class="card"><h3>${ico('money')} Financie <span class="more">otvoriť</span></h3>${empty?'<div class="empty">Zatiaľ žiadne výdavky.</div>':`<div class="big">1 240 €</div><div class="muted">minuté v novembri</div>`}${budget()}${spendChart()}</div>
+    <div class="card"><h3>${ico('health')} Zdravie <span class="more">otvoriť</span></h3>${empty?'<div class="empty">Nič sa neblíži.</div>':`<div class="big">9. 12.</div><div class="muted">ďalšie očkovanie: Tomáš</div><div class="row" style="margin-top:8px"><span class="ic">${ico('health')}</span><span>Kontrola u zubára, Ema</span><span class="when">20. 12.</span></div>`}</div></div>`;
+  return `${hello}${quick}<div class="grid-c">
+    <div class="card"><h3>${ico('tasks')} Úlohy <span class="more">všetky</span></h3>${taskList(empty?[]:tasks)}</div>
+    <div class="stack">
+      <div class="card"><h3>Čoskoro</h3>${upcomingRows()}</div>
+      <div class="card"><h3>Výdavky podľa mesiacov</h3>${spendChart()}${budget()}</div>
+    </div></div>`;
+}
+function render() {
+  document.getElementById('content').innerHTML = view();
+  const nav = NAV.map(([id,l]) => `<button class="nav-item ${id==='home'?'active':''}" title="${l}">${ico(id)}<span class="label">${l}</span></button>`).join('');
+  document.getElementById('side').innerHTML = `<div class="brand"><div class="logo"></div><span>Family Hub</span></div>${nav}<div class="spacer"></div><button class="nav-item" title="Nastavenia">${ico('settings')}<span class="label">Nastavenia</span></button>`;
+  document.getElementById('bottom').innerHTML = nav;
+}
+function addTask() { const i = document.getElementById('qi'); if (i.value.trim()) { tasks.unshift({ t:i.value, who:'Jana', due:'dnes', done:false }); empty = false; document.getElementById('empty-btn').classList.remove('on'); render(); } }
+document.addEventListener('change', e => { if (e.target.dataset.task !== undefined) { tasks[e.target.dataset.task].done = e.target.checked; render(); } });
+function setDash(d, btn) { dash = d; document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); render(); }
+function toggleEmpty(btn) { empty = !empty; btn.classList.toggle('on', empty); render(); }
+let sideUser = null;
+function applySide() { const w = document.getElementById('frame').getBoundingClientRect().width; document.getElementById('app').classList.toggle('open', w >= 1024); }
+new ResizeObserver(applySide).observe(document.getElementById('frame'));
+function setW(w, btn) { document.getElementById('frame').style.width = w; document.querySelectorAll('#sketch-tools button').forEach(b => { if (/Mobil|iPad|Desktop/.test(b.textContent)) b.classList.remove('on'); }); btn.classList.add('on'); }
+function toggleDark(btn) { const r = document.documentElement; const d = r.dataset.theme === 'dark'; r.dataset.theme = d ? 'light' : 'dark'; btn.classList.toggle('on', !d); }
+render();
+</script>
+</body>
+</html>

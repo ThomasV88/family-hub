@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="sk" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch 001: App shell a navigácia</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font-sans); background: #d9d9d6; color: var(--color-text); padding-top: 52px; }
+:root[data-theme="dark"] body { background: #0e0e0d; }
+
+/* Variant tabs (sketch chrome) */
+#variant-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9998; background: #fff; border-bottom: 1px solid #ddd; padding: 8px 16px; display: flex; gap: 8px; font-family: system-ui; }
+.variant-tab { border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 13px; transition: all .15s ease; color: #222; }
+.variant-tab:hover { background: #f0f0f0; }
+.variant-tab.active { background: #222; color: #fff; border-color: #222; }
+.stage { display: flex; justify-content: center; padding: 16px; }
+.frame { container-type: inline-size; container-name: frame; width: 100%; max-width: 1280px; height: calc(100vh - 92px); min-height: 560px; background: var(--color-bg); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-lg); position: relative; transition: width .2s ease; }
+.variant { display: none; }
+.variant.active { display: block; }
+
+/* Shared app pieces */
+.app { display: flex; height: 100%; background: var(--color-bg); color: var(--color-text); position: relative; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); border-bottom: 1px solid var(--color-border); background: var(--color-bg); }
+.topbar h1 { font-size: var(--text-lg); font-weight: 600; margin: 0; flex: 1; letter-spacing: -.01em; }
+.content { flex: 1; overflow: auto; padding: var(--space-6); }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); padding: 7px 12px; border-radius: var(--radius-md); font: inherit; font-size: var(--text-sm); cursor: pointer; transition: all .15s ease; }
+.btn:hover { background: var(--color-surface-2); }
+.btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+.btn.primary:hover { background: var(--color-primary-hover); }
+.icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--color-primary-soft); color: var(--color-primary); display: grid; place-items: center; font-size: 12px; font-weight: 600; border: 0; cursor: pointer; transition: all .15s ease; }
+.avatar:hover { box-shadow: 0 0 0 3px var(--color-primary-soft); }
+.brand { font-weight: 650; letter-spacing: -.01em; display: flex; align-items: center; gap: 8px; }
+.brand .logo { width: 22px; height: 22px; border-radius: 6px; background: var(--color-primary); }
+
+/* Nav item */
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: var(--radius-md); color: var(--color-text-muted); cursor: pointer; border: 0; background: none; font: inherit; font-size: var(--text-sm); width: 100%; text-align: left; transition: all .15s ease; }
+.nav-item:hover { background: var(--color-surface-2); color: var(--color-text); }
+.nav-item.active { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
+.nav-item .label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Content demo */
+.page-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: var(--space-4); }
+.page-head h2 { margin: 0; font-size: var(--text-2xl); letter-spacing: -.02em; }
+.muted { color: var(--color-text-muted); font-size: var(--text-sm); }
+.grid { display: grid; gap: var(--space-4); grid-template-columns: 1fr; }
+@container frame (min-width: 760px) { .grid { grid-template-columns: 1.4fr 1fr; } }
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); }
+.card h3 { margin: 0 0 var(--space-3); font-size: var(--text-sm); font-weight: 600; color: var(--color-text-muted); text-transform: none; }
+.task { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--color-border); font-size: var(--text-sm); }
+.task:first-of-type { border-top: 0; }
+.task input { accent-color: var(--color-primary); width: 18px; height: 18px; }
+.task.done span.t { text-decoration: line-through; color: var(--color-text-muted); }
+.task .who { margin-left: auto; font-size: var(--text-xs); color: var(--color-text-muted); }
+.quick { display: flex; gap: 8px; margin-bottom: var(--space-3); }
+.quick input { flex: 1; padding: 9px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg); color: var(--color-text); font: inherit; font-size: var(--text-sm); }
+.quick input:focus { outline: 2px solid var(--color-primary-soft); border-color: var(--color-primary); }
+.bars { display: flex; align-items: flex-end; gap: 8px; height: 80px; }
+.bars i { flex: 1; background: var(--color-primary-soft); border-radius: 4px 4px 0 0; position: relative; }
+.bars i.cur { background: var(--color-primary); }
+.row { display: flex; justify-content: space-between; font-size: var(--text-sm); padding: 8px 0; border-top: 1px solid var(--color-border); }
+.row:first-of-type { border-top: 0; }
+
+/* Popover */
+.pop { position: absolute; z-index: 50; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: 6px; min-width: 200px; display: none; }
+.pop.open { display: block; }
+.pop .nav-item { padding: 8px 10px; }
+.pop hr { border: 0; border-top: 1px solid var(--color-border); margin: 6px 0; }
+.langs { display: flex; gap: 4px; padding: 4px 6px; }
+.langs button { flex: 1; border: 1px solid var(--color-border); background: none; color: var(--color-text); border-radius: 6px; padding: 4px; cursor: pointer; font-size: 12px; }
+.langs button.on { background: var(--color-primary-soft); color: var(--color-primary); border-color: var(--color-primary); }
+
+/* ===== Variant A: adaptive (bottom bar -> rail -> sidebar) ===== */
+.a .side { display: none; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3); border-right: 1px solid var(--color-border); background: var(--color-bg); }
+.a .side .brand { padding: 4px 12px 16px; }
+.a .side .spacer { flex: 1; }
+.a .bottom { display: flex; position: absolute; left: 0; right: 0; bottom: 0; background: var(--color-surface); border-top: 1px solid var(--color-border); padding: 6px 4px calc(6px + 8px); justify-content: space-around; z-index: 10; }
+.a .bottom .nav-item { flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 11px; width: auto; flex: 1; text-align: center; min-width: 0; }
+.a .bottom .nav-item .label { max-width: 100%; }
+.a .fab { position: absolute; right: 16px; bottom: 76px; z-index: 11; width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--color-primary); color: #fff; box-shadow: var(--shadow-md); cursor: pointer; display: grid; place-items: center; transition: all .15s ease; }
+.a .fab:hover { background: var(--color-primary-hover); }
+.a .content { padding-bottom: 100px; }
+.a .topbar .btn.add { display: none; }
+@container frame (min-width: 640px) {
+  .a .side { display: flex; width: 64px; align-items: center; }
+  .a .side .label, .a .side .brand span { display: none; }
+  .a .side .nav-item { justify-content: center; padding: 10px; width: 44px; }
+  .a .bottom, .a .fab { display: none; }
+  .a .content { padding-bottom: var(--space-6); }
+  .a .topbar .btn.add { display: inline-flex; }
+}
+@container frame (min-width: 1024px) {
+  .a .side { width: 232px; align-items: stretch; }
+  .a .side .label, .a .side .brand span { display: inline; }
+  .a .side .nav-item { justify-content: flex-start; padding: 8px 12px; width: 100%; }
+}
+
+/* ===== Variant B: always sidebar (collapsible); phone = drawer ===== */
+.b .side { display: flex; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3); border-right: 1px solid var(--color-border); background: var(--color-surface-2); width: 232px; transition: all .2s ease; }
+.b .side.collapsed { width: 64px; align-items: center; }
+.b .side.collapsed .label, .b .side.collapsed .brand span { display: none; }
+.b .side.collapsed .nav-item { justify-content: center; padding: 10px; width: 44px; }
+.b .side .brand { padding: 4px 12px 16px; }
+.b .side .spacer { flex: 1; }
+.b .burger { display: none; }
+@container frame (max-width: 639px) {
+  .b .side { position: absolute; z-index: 40; top: 0; bottom: 0; left: 0; transform: translateX(-100%); box-shadow: var(--shadow-lg); width: 260px !important; align-items: stretch !important; }
+  .b .side.open { transform: none; }
+  .b .side .label, .b .side .brand span { display: inline !important; }
+  .b .side .nav-item { justify-content: flex-start !important; width: 100% !important; padding: 8px 12px !important; }
+  .b .burger { display: inline-flex; }
+  .b .collapse-btn { display: none; }
+  .b .scrim { position: absolute; inset: 0; background: rgba(0,0,0,.3); z-index: 30; display: none; }
+  .b .scrim.open { display: block; }
+}
+.b .scrim { display: none; }
+
+/* ===== Variant C: top navigation tabs ===== */
+.c { flex-direction: column; }
+.c .bar { display: flex; align-items: center; gap: var(--space-4); padding: 0 var(--space-4); border-bottom: 1px solid var(--color-border); background: var(--color-bg); height: 52px; }
+.c .tabs { display: flex; gap: 2px; overflow-x: auto; flex: 1; scrollbar-width: none; }
+.c .tabs::-webkit-scrollbar { display: none; }
+.c .tabs .nav-item { width: auto; padding: 8px 12px; border-radius: var(--radius-md); }
+.c .tabs .nav-item .icon { display: none; }
+@container frame (min-width: 900px) { .c .tabs .nav-item .icon { display: block; } }
+.c .brand span { display: none; }
+@container frame (min-width: 640px) { .c .brand span { display: inline; } }
+.c .content { flex: 1; }
+.c .inner { max-width: 880px; margin: 0 auto; width: 100%; }
+
+/* ===== Variant D: A + B (phone bottom bar; iPad/desktop toggleable sidebar) ===== */
+.d .side { display: none; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3); border-right: 1px solid var(--color-border); background: var(--color-bg); width: 232px; overflow: hidden; transition: width .2s ease; }
+.d .side .brand { padding: 4px 12px 16px; }
+.d .side .spacer { flex: 1; }
+.d.rail .side { width: 64px; align-items: center; }
+.d.rail .side .label, .d.rail .side .brand span { display: none; }
+.d.rail .side .nav-item { justify-content: center; padding: 10px; width: 44px; }
+.d .bottom { display: flex; position: absolute; left: 0; right: 0; bottom: 0; background: var(--color-surface); border-top: 1px solid var(--color-border); padding: 6px 4px 14px; justify-content: space-around; z-index: 10; }
+.d .bottom .nav-item { flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 11px; width: auto; flex: 1; text-align: center; min-width: 0; }
+.d .fab { position: absolute; right: 16px; bottom: 76px; z-index: 11; width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--color-primary); color: #fff; box-shadow: var(--shadow-md); cursor: pointer; display: grid; place-items: center; transition: all .15s ease; }
+.d .fab:hover { background: var(--color-primary-hover); }
+.d .content { padding-bottom: 100px; }
+.d .topbar .btn.add, .d .collapse-btn { display: none; }
+@container frame (min-width: 640px) {
+  .d .side { display: flex; }
+  .d .bottom, .d .fab { display: none; }
+  .d .content { padding-bottom: var(--space-6); }
+  .d .topbar .btn.add, .d .collapse-btn { display: inline-flex; }
+}
+
+/* Sketch toolbar */
+#sketch-tools { position: fixed; bottom: 12px; right: 12px; z-index: 9999; font-family: system-ui; font-size: 12px; background: rgba(0,0,0,.75); color: #fff; padding: 8px 12px; border-radius: 8px; opacity: .45; transition: opacity .2s; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 92vw; }
+#sketch-tools:hover { opacity: 1; }
+#sketch-tools button, #sketch-tools select { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 3px 8px; font-size: 12px; cursor: pointer; }
+#sketch-tools button.on { background: #fff; color: #000; }
+</style>
+</head>
+<body>
+
+<div id="variant-nav">
+  <button class="variant-tab active" onclick="showVariant('a', this)">A: Adaptívna (spodná lišta → rail → sidebar)</button>
+  <button class="variant-tab" onclick="showVariant('b', this)">B: Vždy sidebar (zbaliteľný, na mobile šuplík)</button>
+  <button class="variant-tab" onclick="showVariant('c', this)">C: Horná navigácia</button>
+  <button class="variant-tab" onclick="showVariant('d', this)">D: A + B (spodná lišta na mobile, prepínací panel na iPade/desktope) ★ Selected</button>
+</div>
+
+<div class="stage">
+  <div class="frame" id="frame">
+    <div class="variant active" id="variant-a" style="height:100%">
+      <div class="app a" id="app-a">
+        <aside class="side" id="side-a"></aside>
+        <div class="main">
+          <div class="topbar"><h1 data-title></h1><button class="btn primary add" data-add></button><button class="avatar" data-avatar>JK</button></div>
+          <div class="content" data-content></div>
+        </div>
+        <nav class="bottom" id="bottom-a"></nav>
+        <button class="fab" data-add title="Pridať"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+    </div>
+
+    <div class="variant" id="variant-b" style="height:100%">
+      <div class="app b" id="app-b">
+        <div class="scrim" id="scrim-b" onclick="toggleDrawer(false)"></div>
+        <aside class="side" id="side-b"></aside>
+        <div class="main">
+          <div class="topbar">
+            <button class="btn burger" onclick="toggleDrawer(true)" aria-label="Menu"><svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+            <button class="btn collapse-btn" onclick="toggleCollapse()" aria-label="Zbaliť"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9 5v14"/></svg></button>
+            <h1 data-title></h1><button class="btn primary add" data-add></button><button class="avatar" data-avatar>JK</button>
+          </div>
+          <div class="content" data-content></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="variant" id="variant-c" style="height:100%">
+      <div class="app c" id="app-c">
+        <div class="bar">
+          <div class="brand"><div class="logo"></div><span>Family Hub</span></div>
+          <nav class="tabs" id="tabs-c"></nav>
+          <button class="btn primary add" data-add></button>
+          <button class="avatar" data-avatar>JK</button>
+        </div>
+        <div class="content"><div class="inner" data-content></div><h1 data-title style="display:none"></h1></div>
+      </div>
+    </div>
+
+    <div class="variant" id="variant-d" style="height:100%">
+      <div class="app d rail" id="app-d">
+        <aside class="side" id="side-d"></aside>
+        <div class="main">
+          <div class="topbar">
+            <button class="btn collapse-btn" onclick="toggleSide()" aria-label="Prepnúť panel"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9 5v14"/></svg></button>
+            <h1 data-title></h1><button class="btn primary add" data-add></button><button class="avatar" data-avatar>JK</button>
+          </div>
+          <div class="content" data-content></div>
+        </div>
+        <nav class="bottom" id="bottom-d"></nav>
+        <button class="fab" data-add title="Pridať"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+    </div>
+
+    <div class="pop" id="pop"></div>
+  </div>
+</div>
+
+<div id="sketch-tools">
+  <span>Rámec:</span>
+  <button onclick="setW('390px', this)">Mobil 390</button>
+  <button onclick="setW('820px', this)">iPad 820</button>
+  <button class="on" onclick="setW('100%', this)">Desktop</button>
+  <span>Jazyk:</span>
+  <select onchange="setLang(this.value)"><option value="sk">SK</option><option value="pl">PL</option><option value="en">EN</option></select>
+  <button onclick="toggleDark(this)">Tmavý režim</button>
+</div>
+
+<script>
+const ICONS = {
+  home: '<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  tasks: '<path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>',
+  gift: '<path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7a3 3 0 1 0-3-3c0 2 3 3 3 3zm0 0a3 3 0 1 1 3-3c0 2-3 3-3 3z"/>',
+  money: '<path d="M3 7h18v12H3zM3 11h18M7 15h3"/>',
+  health: '<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.3l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2.2-1.3L14 3h-4l-.4 2.4a7 7 0 0 0-2.2 1.3l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .9.1 1.3l-2 1.5 2 3.4 2.3-.9c.7.6 1.4 1 2.2 1.3L10 21h4l.4-2.4c.8-.3 1.5-.7 2.2-1.3l2.3.9 2-3.4-2-1.5c.1-.4.1-.9.1-1.3z"/>'
+};
+const I18N = {
+  sk: { home:'Prehľad', tasks:'Úlohy', gift:'Wishlist darčekov', money:'Rodinné financie', health:'Zdravotné záznamy', settings:'Nastavenia', add:'Pridať', logout:'Odhlásiť sa', today:'Dnes', upcoming:'Blížiace sa', spend:'Výdavky podľa mesiacov', quick:'Rýchlo pridať úlohu…', soon:'Obsah tohto modulu ukážu ďalšie sketche.' },
+  pl: { home:'Przegląd', tasks:'Zadania', gift:'Lista życzeń prezentów', money:'Finanse rodzinne', health:'Dokumentacja medyczna', settings:'Ustawienia', add:'Dodaj', logout:'Wyloguj się', today:'Dzisiaj', upcoming:'Nadchodzące', spend:'Wydatki według miesięcy', quick:'Szybko dodaj zadanie…', soon:'Zawartość tego modułu pokażą kolejne szkice.' },
+  en: { home:'Overview', tasks:'Tasks', gift:'Gift wishlist', money:'Family finances', health:'Medical records', settings:'Settings', add:'Add', logout:'Log out', today:'Today', upcoming:'Upcoming', spend:'Spending by month', quick:'Quickly add a task…', soon:'This module is shown in later sketches.' }
+};
+// Short nav labels (long names stay in page titles and tooltips)
+Object.assign(I18N.sk, { gift_s:'Wishlist', money_s:'Financie', health_s:'Zdravie' });
+Object.assign(I18N.pl, { gift_s:'Życzenia', money_s:'Finanse', health_s:'Zdrowie' });
+Object.assign(I18N.en, { gift_s:'Wishlist', money_s:'Finances', health_s:'Health' });
+const PAGES = ['home','tasks','gift','money','health'];
+let lang = 'sk', page = 'home';
+const tasks = [
+  { t: { sk:'Zaplatiť školku', pl:'Zapłacić za przedszkole', en:'Pay kindergarten' }, who:'Jana', done:false },
+  { t: { sk:'Objednať Tomáša k zubárovi', pl:'Umówić Tomka do dentysty', en:'Book Tom at the dentist' }, who:'Peter', done:false },
+  { t: { sk:'Nákup na víkend', pl:'Zakupy na weekend', en:'Weekend groceries' }, who:'Jana', done:true }
+];
+const T = k => I18N[lang][k];
+const ico = n => `<svg class="icon" viewBox="0 0 24 24">${ICONS[n]}</svg>`;
+
+function navHtml(ids, withSettings) {
+  return ids.map(id => `<button class="nav-item ${id===page?'active':''}" data-nav="${id}" title="${T(id)}">${ico(id)}<span class="label">${I18N[lang][id+'_s'] || T(id)}</span></button>`).join('');
+}
+function content() {
+  if (page !== 'home') return `<div class="page-head"><h2>${T(page)}</h2></div><div class="card"><span class="muted">${T('soon')}</span></div>`;
+  return `<div class="page-head"><h2>${T('home')}</h2><span class="muted">${T('today')}</span></div>
+  <div class="quick"><input placeholder="${T('quick')}"><button class="btn primary" data-addtask>${T('add')}</button></div>
+  <div class="grid">
+    <div class="card"><h3>${T('tasks')}</h3>${tasks.map((x,i)=>`<label class="task ${x.done?'done':''}"><input type="checkbox" data-task="${i}" ${x.done?'checked':''}><span class="t">${x.t[lang]}</span><span class="who">${x.who}</span></label>`).join('')}</div>
+    <div style="display:grid;gap:16px;align-content:start">
+      <div class="card"><h3>${T('upcoming')}</h3>
+        <div class="row"><span>${lang==='en'?'Rent':lang==='pl'?'Czynsz':'Nájom'}</span><span class="muted">1. 12.</span></div>
+        <div class="row"><span>${lang==='en'?'Gran’s birthday':lang==='pl'?'Urodziny babci':'Babkine narodeniny'}</span><span class="muted">14. 12.</span></div>
+      </div>
+      <div class="card"><h3>${T('spend')}</h3><div class="bars"><i style="height:55%"></i><i style="height:70%"></i><i style="height:48%"></i><i style="height:82%"></i><i class="cur" style="height:62%"></i></div></div>
+    </div>
+  </div>`;
+}
+function render() {
+  document.documentElement.lang = lang;
+  const sideHtml = (cls) => `<div class="brand"><div class="logo"></div><span>Family Hub</span></div>${navHtml(PAGES)}<div class="spacer"></div><button class="nav-item" data-nav="settings">${ico('settings')}<span class="label">${T('settings')}</span></button>`;
+  document.getElementById('side-a').innerHTML = sideHtml();
+  document.getElementById('side-b').innerHTML = sideHtml();
+  document.getElementById('side-d').innerHTML = sideHtml();
+  document.getElementById('bottom-d').innerHTML = navHtml(PAGES);
+  document.getElementById('bottom-a').innerHTML = navHtml(PAGES);
+  document.getElementById('tabs-c').innerHTML = navHtml(PAGES);
+  document.querySelectorAll('[data-title]').forEach(e => e.textContent = T(page));
+  document.querySelectorAll('[data-add]').forEach(e => { if (e.classList.contains('btn')) e.innerHTML = '+ ' + T('add'); });
+  document.querySelectorAll('[data-content]').forEach(e => e.innerHTML = content());
+  document.querySelectorAll('.nav-item[data-nav]').forEach(b => b.classList.toggle('active', b.dataset.nav === page));
+}
+document.addEventListener('click', e => {
+  const nav = e.target.closest('[data-nav]');
+  if (nav) { page = nav.dataset.nav; render(); toggleDrawer(false); closePop(); return; }
+  if (e.target.closest('[data-avatar]')) { openPop(e.target.closest('[data-avatar]')); return; }
+  if (!e.target.closest('#pop')) closePop();
+  const add = e.target.closest('[data-addtask]');
+  if (add) { const inp = add.parentElement.querySelector('input'); if (inp.value.trim()) { tasks.unshift({ t:{sk:inp.value,pl:inp.value,en:inp.value}, who:'Ja', done:false }); render(); } }
+});
+document.addEventListener('change', e => { if (e.target.dataset.task !== undefined) { tasks[e.target.dataset.task].done = e.target.checked; render(); } });
+
+function openPop(btn) {
+  const pop = document.getElementById('pop'), frame = document.getElementById('frame');
+  const r = btn.getBoundingClientRect(), f = frame.getBoundingClientRect();
+  pop.innerHTML = `<button class="nav-item" data-nav="settings">${ico('settings')}<span class="label">${T('settings')}</span></button><hr>
+    <div class="langs">${['sk','pl','en'].map(l=>`<button class="${l===lang?'on':''}" onclick="setLang('${l}')">${l.toUpperCase()}</button>`).join('')}</div><hr>
+    <button class="nav-item"><span class="label">${T('logout')}</span></button>`;
+  pop.style.top = (r.bottom - f.top + 6) + 'px';
+  pop.style.right = (f.right - r.right) + 'px';
+  pop.classList.add('open');
+}
+function closePop() { document.getElementById('pop').classList.remove('open'); }
+function showVariant(id, btn) {
+  document.querySelectorAll('.variant').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('variant-' + id).classList.add('active');
+  btn.classList.add('active'); closePop(); toggleDrawer(false);
+}
+let sideUser = null; // user's manual choice for variant D ('open' | 'rail'), null = automatic by width
+function applySide() {
+  const w = document.getElementById('frame').getBoundingClientRect().width;
+  const state = sideUser || (w >= 1024 ? 'open' : 'rail');
+  const app = document.getElementById('app-d');
+  app.classList.toggle('open', state === 'open');
+  app.classList.toggle('rail', state === 'rail');
+}
+function toggleSide() { const open = document.getElementById('app-d').classList.contains('open'); sideUser = open ? 'rail' : 'open'; applySide(); }
+new ResizeObserver(applySide).observe(document.getElementById('frame'));
+function setW(w, btn) { sideUser = null; document.getElementById('frame').style.width = w; document.querySelectorAll('#sketch-tools button').forEach(b => { if (/Mobil|iPad|Desktop/.test(b.textContent)) b.classList.remove('on'); }); btn.classList.add('on'); }
+function setLang(l) { lang = l; render(); closePop(); const s = document.querySelector('#sketch-tools select'); if (s) s.value = l; }
+function toggleDark(btn) { const r = document.documentElement; const d = r.dataset.theme === 'dark'; r.dataset.theme = d ? 'light' : 'dark'; btn.classList.toggle('on', !d); }
+function toggleDrawer(open) { document.getElementById('side-b').classList.toggle('open', open); document.getElementById('scrim-b').classList.toggle('open', open); }
+function toggleCollapse() { document.getElementById('side-b').classList.toggle('collapsed'); }
+render();
+</script>
+</body>
+</html>

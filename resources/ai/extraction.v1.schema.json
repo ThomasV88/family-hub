@@ -1,0 +1,285 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "document_date",
+    "specialty_key",
+    "visits",
+    "medications",
+    "allergies",
+    "vaccinations"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "enum": [
+        1
+      ]
+    },
+    "document_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "specialty_key": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "general_practice",
+        "pediatrics",
+        "internal_medicine",
+        "gastroenterology",
+        "cardiology",
+        "pulmonology",
+        "endocrinology",
+        "diabetology",
+        "nephrology",
+        "urology",
+        "gynecology",
+        "dermatology",
+        "ophthalmology",
+        "ent",
+        "orthopedics",
+        "neurology",
+        "psychiatry",
+        "psychology",
+        "rheumatology",
+        "oncology",
+        "hematology",
+        "allergology",
+        "infectious_diseases",
+        "surgery",
+        "rehabilitation",
+        "dentistry",
+        "radiology",
+        "laboratory",
+        "geriatrics",
+        "other",
+        null
+      ]
+    },
+    "visits": {
+      "type": "array",
+      "maxItems": 25,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "visited_on",
+          "doctor",
+          "specialty_key",
+          "specialty_other",
+          "diagnosis",
+          "notes"
+        ],
+        "properties": {
+          "visited_on": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "doctor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "specialty_key": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "general_practice",
+              "pediatrics",
+              "internal_medicine",
+              "gastroenterology",
+              "cardiology",
+              "pulmonology",
+              "endocrinology",
+              "diabetology",
+              "nephrology",
+              "urology",
+              "gynecology",
+              "dermatology",
+              "ophthalmology",
+              "ent",
+              "orthopedics",
+              "neurology",
+              "psychiatry",
+              "psychology",
+              "rheumatology",
+              "oncology",
+              "hematology",
+              "allergology",
+              "infectious_diseases",
+              "surgery",
+              "rehabilitation",
+              "dentistry",
+              "radiology",
+              "laboratory",
+              "geriatrics",
+              "other",
+              null
+            ]
+          },
+          "specialty_other": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "diagnosis": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "medications": {
+      "type": "array",
+      "maxItems": 25,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "dose",
+          "schedule",
+          "started_on",
+          "ended_on",
+          "notes"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "dose": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "schedule": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "started_on": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "ended_on": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "allergies": {
+      "type": "array",
+      "maxItems": 25,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "substance",
+          "reaction",
+          "severity"
+        ],
+        "properties": {
+          "substance": {
+            "type": "string"
+          },
+          "reaction": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "severity": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "mild",
+              "moderate",
+              "severe",
+              "unknown",
+              null
+            ]
+          }
+        }
+      }
+    },
+    "vaccinations": {
+      "type": "array",
+      "maxItems": 25,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "vaccine",
+          "given_on",
+          "next_due_on",
+          "notes"
+        ],
+        "properties": {
+          "vaccine": {
+            "type": "string"
+          },
+          "given_on": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "next_due_on": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "title": "family_hub_extraction_v1"
+}

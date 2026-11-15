@@ -1,0 +1,207 @@
+# Server stack (production and staging): one definition, two deployments.
+#   production: /opt/family-hub          (COMPOSE_PROJECT_NAME=family-hub,         EDGE_ALIAS=fh-prod-nginx)
+#   staging:    /opt/family-hub-staging  (COMPOSE_PROJECT_NAME=family-hub-staging, EDGE_ALIAS=fh-stage-nginx)
+# Started by deploy.sh. No published ports: the separately managed edge stack owns 80/443 and reaches
+# nginx through the external network `edge` under the alias EDGE_ALIAS.
+#
+# Secrets are split by who needs them:
+#   .env         compose interpolation and deploy.sh only (project, alias, domain, image, memory), no passwords
+#   app.env      Laravel runtime for app, worker, scheduler: runtime role fh_app only
+#   migrate.env  owner credentials, loaded only by the one-shot `migrate` service
+#   secrets/     database role passwords for first initialisation (Docker secrets, *_FILE)
+name: ${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME missing in .env}
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# Private wish images (storage/app/private/wish-images): written by the worker, read by the web app, never mounted into nginx or postgres.
+# Backed up by scripts/backup.sh as its own restic snapshot (uploads.tar, wish-images volume). Staging has its own volume (own project name).
+x-uploads: &uploads
+  - uploads:/var/www/html/storage/app/private/wish-images
+
+# Private medical documents (storage/app/medical): written and read by the app, kept by the worker (Phase 8) and swept by the
+# scheduler (orphans); never mounted into nginx or postgres. Backed up as its own restic snapshot (medical.tar).
+x-medical: &medical
+  - uploads:/var/www/html/storage/app/private/wish-images
+  - medical:/var/www/html/storage/app/medical
+
+x-app: &app
+  image: ${IMAGE_PREFIX:?}-app:${IMAGE_TAG:?}
+  restart: unless-stopped
+  env_file: app.env
+  environment:
+    TZ: Europe/Bratislava
+  logging: *logging
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_root_password
+      # No POSTGRES_DB: 01-roles.sh creates family_hub owned by fh_owner; setting it here would make the
+      # entrypoint create the database first and the init script would abort on first start.
+      TZ: Europe/Bratislava
+    command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=20"]
+    mem_limit: ${MEM_POSTGRES:-192m}
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    secrets:
+      - db_root_password
+      - db_owner_password
+      - db_app_password
+    logging: *logging
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    <<: *app
+    mem_limit: ${MEM_APP:-256m}
+    volumes: *medical
+    healthcheck:
+      # php-fpm has no TCP client tools in the alpine image: a successful connect to the pool port is the check
+      test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 9000) ? 0 : 1);"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  worker:
+    <<: *app
+    command: ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--max-time=3600"]
+    mem_limit: ${MEM_WORKER:-160m}
+    volumes: *medical
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f '[q]ueue:work'"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+
+  # AI extraction worker (Phase 8): the only holder of the Codex CLI login (codex-home) and the only service with the ai image.
+  # Own env file (ai-worker.env, never app.env): no APP_KEY, mail, Google or VAPID secrets. Reads medical documents read-only.
+  # Single concurrency: one auth.json per serialized stream, never scale (no deploy.replicas, one queue:work process).
+  # Optional hardening for the live session (08-22): cap_drop ALL, security_opt no-new-privileges, read_only with the tmpfs below.
+  ai-worker:
+    image: ${IMAGE_PREFIX:?}-ai:${IMAGE_TAG:?}
+    restart: unless-stopped
+    env_file: ai-worker.env
+    environment:
+      TZ: Europe/Bratislava
+      HOME: /codex
+      CODEX_HOME: /codex
+      COPILOT_HOME: /copilot
+      COPILOT_CACHE_HOME: /opt/copilot/cache
+      COPILOT_TELEMETRY_DISABLED: "true"
+      COPILOT_AUTO_UPDATE: "false"
+    logging: *logging
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["sh", "-c", "php artisan ai:preflight && exec php artisan queue:work database --queue=ai-control,ai,ai-bulk --sleep=3 --tries=1 --timeout=720 --max-jobs=100 --max-time=3600"]
+    init: true
+    mem_limit: ${MEM_AI:-768m}
+    volumes:
+      - medical:/var/www/html/storage/app/medical:ro
+      - codex-home:/codex
+      - copilot-home:/copilot
+    # www-data in the prod image is uid 82; the work dir is discarded on stop
+    tmpfs:
+      - /ai-work:size=192m,mode=0700,uid=82,gid=82
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f '[q]ueue:work'"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+
+  scheduler:
+    <<: *app
+    command: ["php", "artisan", "schedule:work"]
+    mem_limit: ${MEM_SCHEDULER:-128m}
+    volumes: *medical
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f '[s]chedule:work'"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+
+  nginx:
+    image: ${IMAGE_PREFIX:?}-nginx:${IMAGE_TAG:?}
+    restart: unless-stopped
+    environment:
+      # PROXY protocol from the edge; robots header and domain are rendered into the template at start
+      NGINX_PROXY_PROTOCOL: proxy_protocol
+      APP_DOMAIN: ${APP_DOMAIN:?}
+      STACK_ENV: ${STACK_ENV:?}
+    mem_limit: ${MEM_NGINX:-48m}
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt:ro
+    networks:
+      default: {}
+      edge:
+        aliases: ["${EDGE_ALIAS:?EDGE_ALIAS missing in .env}"]
+    logging: *logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8081/nginx-health >/dev/null"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      app:
+        condition: service_healthy
+        restart: true
+
+  # One-shot, on demand from deploy.sh: migrations with the owner role. migrate.env overrides the
+  # runtime credentials from app.env, so only this container ever sees DDL credentials.
+  migrate:
+    <<: *app
+    profiles: ["migrate"]
+    restart: "no"
+    env_file:
+      - app.env
+      - migrate.env
+    command: ["php", "artisan", "migrate", "--force"]
+
+  # On demand: certificate issue and renewal (DNS-01 through Cloudflare).
+  certbot:
+    image: certbot/dns-cloudflare:v5.8.0
+    profiles: ["certbot"]
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+      - ./secrets/cloudflare.ini:/cloudflare.ini:ro
+
+networks:
+  default: {}
+  edge:
+    external: true
+    name: edge
+
+volumes:
+  pgdata:
+  uploads:
+  medical:
+  # Codex CLI login (auth.json, refreshed in place). Mounted only into ai-worker, never backed up, never shared between stacks.
+  codex-home:
+  # Copilot CLI login (plaintext token in config, device flow). Mounted only into ai-worker, never backed up, never shared between stacks.
+  copilot-home:
+
+secrets:
+  db_root_password:
+    file: ./secrets/db_root_password
+  db_owner_password:
+    file: ./secrets/db_owner_password
+  db_app_password:
+    file: ./secrets/db_app_password

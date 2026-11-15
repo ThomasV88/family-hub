@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="sk" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch 006: Financie</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font-sans); background: #d9d9d6; color: var(--color-text); padding-top: 52px; }
+:root[data-theme="dark"] body { background: #0e0e0d; }
+#variant-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9998; background: #fff; border-bottom: 1px solid #ddd; padding: 8px 16px; display: flex; gap: 8px; font-family: system-ui; flex-wrap: wrap; }
+.variant-tab { border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 13px; transition: all .15s ease; color: #222; }
+.variant-tab:hover { background: #f0f0f0; }
+.variant-tab.active { background: #222; color: #fff; border-color: #222; }
+.stage { display: flex; justify-content: center; padding: 16px; }
+.frame { container-type: inline-size; container-name: frame; width: 100%; max-width: 1280px; height: calc(100vh - 92px); min-height: 560px; background: var(--color-bg); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-lg); position: relative; transition: width .2s ease; }
+
+/* Shell */
+.app { display: flex; height: 100%; color: var(--color-text); position: relative; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); border-bottom: 1px solid var(--color-border); }
+.topbar h1 { font-size: var(--text-lg); font-weight: 600; margin: 0; flex: 1; letter-spacing: -.01em; }
+.body { flex: 1; display: flex; min-height: 0; position: relative; }
+.content { flex: 1; overflow: auto; padding: var(--space-6); padding-bottom: 100px; min-width: 0; container-type: inline-size; container-name: content; }
+.icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.icon.s { width: 14px; height: 14px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); padding: 7px 12px; border-radius: var(--radius-md); font: inherit; font-size: var(--text-sm); cursor: pointer; transition: all .15s ease; min-height: 36px; }
+.btn:hover { background: var(--color-surface-2); }
+.btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
+.btn.primary:hover { background: var(--color-primary-hover); }
+.btn.danger { color: var(--color-danger); border-color: var(--color-danger); background: transparent; }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--color-text-muted); }
+.btn.sm { min-height: 30px; padding: 4px 10px; font-size: var(--text-xs); }
+.avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--color-primary-soft); color: var(--color-primary); display: inline-grid; place-items: center; font-size: 11px; font-weight: 700; flex: none; }
+.side { display: none; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3); border-right: 1px solid var(--color-border); width: 64px; align-items: center; overflow: hidden; transition: width .2s ease; }
+.side .brand { display: flex; align-items: center; gap: 8px; font-weight: 650; padding: 4px 12px 16px; }
+.side .brand .logo { width: 22px; height: 22px; border-radius: 6px; background: var(--color-primary); flex: none; }
+.side .spacer { flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--radius-md); color: var(--color-text-muted); cursor: pointer; border: 0; background: none; font: inherit; font-size: var(--text-sm); width: 44px; justify-content: center; transition: all .15s ease; }
+.nav-item:hover { background: var(--color-surface-2); color: var(--color-text); }
+.nav-item.active { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
+.label, .brand span { display: none; }
+.app.open .side { width: 232px; align-items: stretch; }
+.app.open .label, .app.open .brand span { display: inline; }
+.app.open .nav-item { width: 100%; justify-content: flex-start; padding: 8px 12px; }
+.bottom { display: flex; position: absolute; left: 0; right: 0; bottom: 0; background: var(--color-surface); border-top: 1px solid var(--color-border); padding: 6px 4px 14px; justify-content: space-around; z-index: 10; }
+.bottom .nav-item { flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 11px; width: auto; flex: 1; }
+.bottom .label { display: inline; }
+.fab { position: absolute; right: 16px; bottom: 76px; z-index: 11; width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--color-primary); color: var(--color-on-primary); box-shadow: var(--shadow-md); cursor: pointer; display: grid; place-items: center; }
+.collapse-btn, .add-top { display: none; }
+@container frame (min-width: 640px) { .side { display: flex; } .bottom, .fab { display: none; } .content { padding-bottom: var(--space-6); } .collapse-btn, .add-top { display: inline-flex; } }
+
+/* Finance */
+.muted { color: var(--color-text-muted); font-size: var(--text-sm); }
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); }
+.card h3 { margin: 0 0 var(--space-3); font-size: var(--text-sm); font-weight: 600; color: var(--color-text-muted); display: flex; align-items: center; gap: 8px; }
+.card h3 .more { margin-left: auto; font-weight: 400; font-size: var(--text-xs); }
+.bar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: var(--space-4); }
+.monthnav { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; font-size: var(--text-sm); }
+.chip { border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-muted); padding: 5px 12px; border-radius: 99px; font-size: var(--text-sm); cursor: pointer; transition: all .15s ease; display: inline-flex; gap: 6px; align-items: center; }
+.chip:hover { background: var(--color-surface-2); }
+.chip.on { background: var(--color-primary-soft); color: var(--color-primary); border-color: var(--color-primary); font-weight: 600; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-4); }
+.tabs button { border: 0; background: none; padding: 9px 14px; font: inherit; font-size: var(--text-sm); color: var(--color-text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs button.on { color: var(--color-primary); border-color: var(--color-primary); font-weight: 600; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
+.stat .k { font-size: var(--text-xs); color: var(--color-text-muted); }
+.stat .v { font-size: var(--text-xl); font-weight: 650; letter-spacing: -.01em; margin-top: 2px; }
+@container content (max-width: 480px) { .stat .v { font-size: var(--text-lg); } }
+.pos { color: var(--color-success); }
+.neg { color: var(--color-text); }
+.grid2 { display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1fr); margin-bottom: var(--space-4); }
+@container content (min-width: 720px) { .grid2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.bars { display: flex; align-items: flex-end; gap: 8px; height: 100px; }
+.bars i { flex: 1; background: var(--color-primary-soft); border-radius: 4px 4px 0 0; }
+.bars i.cur { background: var(--color-primary); }
+.bl { display: flex; gap: 8px; font-size: 11px; color: var(--color-text-muted); margin-top: 4px; }
+.bl span { flex: 1; text-align: center; }
+.bud { margin-bottom: 12px; font-size: var(--text-sm); }
+.bud .h { display: flex; justify-content: space-between; }
+.progress { height: 6px; border-radius: 99px; background: var(--color-surface-2); overflow: hidden; margin-top: 5px; }
+.progress > b { display: block; height: 100%; background: var(--color-primary); }
+.progress.over > b { background: var(--color-danger); }
+.row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--color-border); font-size: var(--text-sm); }
+.row:first-of-type { border-top: 0; }
+.row .grow { flex: 1; min-width: 0; }
+.row .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .s { font-size: var(--text-xs); color: var(--color-text-muted); }
+.row .amt { font-weight: 600; white-space: nowrap; }
+.ic { width: 30px; height: 30px; border-radius: 8px; background: var(--color-primary-soft); color: var(--color-primary); display: grid; place-items: center; flex: none; }
+.tag { font-size: 11px; padding: 2px 9px; border-radius: 99px; background: var(--color-surface-2); color: var(--color-text-muted); white-space: nowrap; }
+.tag.ok { background: var(--color-primary-soft); color: var(--color-primary); }
+.tag.late { background: #f8e9e6; color: var(--color-danger); }
+.tag.wait { background: #f6ecd9; color: #9a6a1c; }
+:root[data-theme="dark"] .tag.late { background: #3a2622; }
+:root[data-theme="dark"] .tag.wait { background: #3a3120; color: var(--color-accent); }
+.sec { margin: 0 0 var(--space-3); font-size: var(--text-sm); font-weight: 600; }
+/* calendar */
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal .dow { font-size: 11px; color: var(--color-text-muted); text-align: center; padding: 4px 0; }
+.cal .d { min-height: 64px; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 4px 6px; font-size: 11px; cursor: pointer; background: var(--color-surface); transition: background .15s ease; position: relative; }
+.cal .d:hover { background: var(--color-surface-2); }
+.cal .d.today { border-color: var(--color-primary); }
+.cal .d.sel { background: var(--color-primary-soft); }
+.cal .d.off { visibility: hidden; }
+.cal .d .n { font-weight: 600; }
+.cal .d .p { display: block; margin-top: 3px; padding: 1px 5px; border-radius: 4px; background: var(--color-primary-soft); color: var(--color-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal .d .p.late { background: #f8e9e6; color: var(--color-danger); }
+:root[data-theme="dark"] .cal .d .p.late { background: #3a2622; }
+@container content (max-width: 560px) { .cal .d { min-height: 46px; } .cal .d .p { font-size: 0; padding: 0; height: 6px; width: 6px; border-radius: 50%; display: inline-block; margin-right: 2px; } }
+
+/* Panel (add / import) */
+.detail { position: absolute; z-index: 30; background: var(--color-surface); border-left: 1px solid var(--color-border); top: 0; bottom: 0; right: 0; width: 380px; padding: var(--space-4); overflow: auto; transform: translateX(100%); transition: transform .2s ease; box-shadow: var(--shadow-lg); }
+.detail.open { transform: none; }
+@container frame (min-width: 900px) { .detail { position: static; flex: none; width: 380px; transform: none; box-shadow: none; display: none; } .detail.open { display: block; } }
+@container frame (max-width: 639px) { .detail { top: auto; left: 0; width: auto; max-height: 88%; border-left: 0; border-top: 1px solid var(--color-border); border-radius: 16px 16px 0 0; transform: translateY(100%); } .detail.open { transform: none; } }
+.detail h2 { margin: 0 0 var(--space-3); font-size: var(--text-lg); display: flex; align-items: center; gap: 8px; }
+.detail h2 button { margin-left: auto; }
+label.f { display: grid; gap: 5px; font-size: var(--text-sm); margin-bottom: var(--space-3); }
+label.f > span { font-weight: 600; font-size: var(--text-xs); color: var(--color-text-muted); }
+.in { width: 100%; padding: 8px 10px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: var(--text-sm); min-height: 38px; }
+.in:focus { outline: 2px solid var(--color-primary-soft); border-color: var(--color-primary); }
+table.imp { width: 100%; border-collapse: collapse; font-size: var(--text-xs); margin: 8px 0 12px; }
+table.imp th { text-align: left; color: var(--color-text-muted); font-weight: 600; padding: 4px 6px; border-bottom: 1px solid var(--color-border); }
+table.imp td { padding: 5px 6px; border-bottom: 1px solid var(--color-border); }
+table.imp tr.dup td { color: var(--color-text-muted); text-decoration: line-through; }
+.seg { display: flex; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: var(--space-3); }
+.seg button { flex: 1; border: 0; background: var(--color-surface); color: var(--color-text-muted); padding: 8px; font: inherit; font-size: var(--text-sm); cursor: pointer; }
+.seg button.on { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
+.note { padding: 10px 12px; border-radius: var(--radius-md); background: var(--color-surface-2); font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: 12px; }
+
+#sketch-tools { position: fixed; bottom: 12px; right: 12px; z-index: 9999; font-family: system-ui; font-size: 12px; background: rgba(0,0,0,.75); color: #fff; padding: 8px 12px; border-radius: 8px; opacity: .45; transition: opacity .2s; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 92vw; }
+#sketch-tools:hover { opacity: 1; }
+#sketch-tools button { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 3px 8px; font-size: 12px; cursor: pointer; }
+#sketch-tools button.on { background: #fff; color: #000; }
+</style>
+</head>
+<body>
+<div id="variant-nav">
+  <button class="variant-tab active" onclick="setView('a', this)">A: Záložky (Prehľad, Transakcie, Pravidelné)</button>
+  <button class="variant-tab" onclick="setView('b', this)">B: Jedna stránka mesiaca</button>
+  <button class="variant-tab" onclick="setView('c', this)">C: Kalendár platieb</button>
+  <button class="variant-tab" onclick="setView('d', this)">D: A + kalendár na záložke Pravidelné ★ Selected</button>
+</div>
+<div class="stage">
+  <div class="frame" id="frame">
+    <div class="app rail" id="app">
+      <aside class="side" id="side"></aside>
+      <div class="main">
+        <div class="topbar">
+          <button class="btn collapse-btn" onclick="document.getElementById('app').classList.toggle('open')" aria-label="Prepnúť panel"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9 5v14"/></svg></button>
+          <h1>Financie</h1><button class="btn add-top" onclick="openPanel('import')">Import CSV</button><button class="btn primary add-top" onclick="openPanel('add')">+ Záznam</button><button class="avatar">JK</button>
+        </div>
+        <div class="body"><div class="content" id="content"></div><aside class="detail" id="detail"></aside></div>
+      </div>
+      <nav class="bottom" id="bottom"></nav>
+      <button class="fab" title="Pridať záznam" onclick="openPanel('add')"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+  </div>
+</div>
+<div id="sketch-tools">
+  <span>Rámec:</span>
+  <button onclick="setW('390px', this)">Mobil 390</button>
+  <button onclick="setW('820px', this)">iPad 820</button>
+  <button class="on" onclick="setW('100%', this)">Desktop</button>
+  <button onclick="toggleDark(this)">Tmavý režim</button>
+</div>
+
+<script>
+const ICONS = {
+  home: '<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  tasks: '<path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>',
+  gift: '<path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7a3 3 0 1 0-3-3c0 2 3 3 3 3zm0 0a3 3 0 1 1 3-3c0 2-3 3-3 3z"/>',
+  money: '<path d="M3 7h18v12H3zM3 11h18M7 15h3"/>',
+  health: '<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  repeat: '<path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/>',
+  left: '<path d="M15 6l-6 6 6 6"/>', right: '<path d="M9 6l6 6-6 6"/>'
+};
+const ico = (n, c='') => `<svg class="icon ${c}" viewBox="0 0 24 24">${ICONS[n]}</svg>`;
+const NAV = [['home','Prehľad'],['tasks','Úlohy'],['gift','Wishlist'],['money','Financie'],['health','Zdravie']];
+const TODAY = 12;
+const eur = n => (n < 0 ? '−' : '') + Math.abs(n).toLocaleString('sk-SK', { maximumFractionDigits: 0 }) + ' €';
+const ACCOUNTS = [{ id:'all', name:'Všetky účty' }, { id:'joint', name:'Spoločný účet' }, { id:'jana', name:'Jana, osobný', locked:true }, { id:'save', name:'Sporenie' }];
+let acct = 'all', view = 'a', tab = 'overview', selDay = TODAY, panel = null, impStep = 0, addType = 'exp';
+let tx = [
+  { id:1, d:1, t:'Nájom', cat:'Bývanie', amt:-650, acc:'joint', rec:1 },
+  { id:2, d:3, t:'Lidl', cat:'Potraviny', amt:-64, acc:'joint' },
+  { id:3, d:5, t:'Škôlka Slniečko', cat:'Deti', amt:-120, acc:'joint', rec:2 },
+  { id:4, d:6, t:'Mzda Peter', cat:'Príjem', amt:1850, acc:'joint' },
+  { id:5, d:8, t:'Tesco', cat:'Potraviny', amt:-96, acc:'joint' },
+  { id:6, d:9, t:'Kino', cat:'Zábava', amt:-31, acc:'joint' },
+  { id:7, d:10, t:'Mzda Jana', cat:'Príjem', amt:1420, acc:'jana' },
+  { id:8, d:11, t:'Lidl', cat:'Potraviny', amt:-72, acc:'joint' },
+  { id:9, d:12, t:'Bolt', cat:'Doprava', amt:-18, acc:'joint' }
+];
+let recurring = [
+  { id:1, t:'Nájom', amt:650, day:1, cat:'Bývanie', acc:'joint' },
+  { id:2, t:'Škôlka', amt:120, day:5, cat:'Deti', acc:'joint' },
+  { id:3, t:'Internet', amt:24, day:10, cat:'Služby', acc:'joint' },
+  { id:4, t:'Energie', amt:112, day:15, cat:'Bývanie', acc:'joint' },
+  { id:5, t:'Sporenie, trvalý príkaz', amt:200, day:25, cat:'Sporenie', acc:'save' },
+  { id:6, t:'Poistenie auta', amt:45, day:28, cat:'Doprava', acc:'jana' }
+];
+const BUD = [['Potraviny', 400, 232], ['Doprava', 100, 64], ['Zábava', 80, 91], ['Deti', 150, 120]];
+const MONTHS = [['Júl', 62], ['Aug', 78], ['Sep', 55], ['Okt', 88], ['Nov', 70]];
+const rvis = () => recurring.filter(r => acct === 'all' || r.acc === acct);
+const tvis = () => tx.filter(x => acct === 'all' || x.acc === acct).sort((a, b) => b.d - a.d);
+function rstate(r) { const paid = tx.some(x => x.rec === r.id); if (paid) return 'paid'; return r.day <= TODAY ? 'late' : 'wait'; }
+const TAG = { paid: '<span class="tag ok">zaplatené</span>', late: '<span class="tag late">po splatnosti</span>', wait: '<span class="tag wait">čaká</span>' };
+const sums = () => { const l = tvis(); const inc = l.filter(x => x.amt > 0).reduce((s, x) => s + x.amt, 0); const exp = l.filter(x => x.amt < 0).reduce((s, x) => s + x.amt, 0); return { inc, exp, bal: inc + exp }; };
+
+function statCards() { const s = sums(); return `<div class="stats"><div class="card stat"><div class="k">Príjmy</div><div class="v pos">${eur(s.inc)}</div></div><div class="card stat"><div class="k">Výdavky</div><div class="v">${eur(s.exp)}</div></div><div class="card stat"><div class="k">Bilancia</div><div class="v">${eur(s.bal)}</div></div></div>`; }
+function chart() { return `<div class="card"><h3>Výdavky podľa mesiacov</h3><div class="bars">${MONTHS.map((m,i)=>`<i class="${i===4?'cur':''}" style="height:${m[1]}%"></i>`).join('')}</div><div class="bl">${MONTHS.map(m=>`<span>${m[0]}</span>`).join('')}</div></div>`; }
+function budgets() { return `<div class="card"><h3>Rozpočty na november</h3>${BUD.map(([n,b,s]) => `<div class="bud"><div class="h"><span>${n}</span><span class="muted">${eur(s)} z ${eur(b)}</span></div><div class="progress ${s>b?'over':''}"><b style="width:${Math.min(100,s/b*100)}%"></b></div></div>`).join('')}</div>`; }
+function recList(limit) { const l = rvis().sort((a, b) => a.day - b.day).slice(0, limit || 99); return l.map(r => { const st = rstate(r); return `<div class="row"><span class="ic">${ico('repeat','s')}</span><div class="grow"><div class="t">${r.t}</div><div class="s">každý ${r.day}. v mesiaci${ACCOUNTS.find(a=>a.id===r.acc).locked?' · osobný účet':''}</div></div>${TAG[st]}<span class="amt">${eur(-r.amt)}</span>${st!=='paid'?`<button class="btn sm" onclick="payRec(${r.id})">Zaplatené</button>`:''}</div>`; }).join('') || '<div class="muted">Žiadne pravidelné platby.</div>'; }
+function txList(limit) { return tvis().slice(0, limit || 99).map(x => `<div class="row"><span class="ic">${ico(x.rec?'repeat':'money','s')}</span><div class="grow"><div class="t">${x.t}</div><div class="s">${x.d}. 11. · ${x.cat}</div></div><span class="amt ${x.amt>0?'pos':''}">${eur(x.amt)}</span></div>`).join(''); }
+function acctChips() { return `<div class="bar">${ACCOUNTS.map(a => `<button class="chip ${acct===a.id?'on':''}" data-acct="${a.id}">${a.locked?ico('lock','s'):''}${a.name}</button>`).join('')}<span class="monthnav" style="margin-left:auto"><button class="btn ghost sm" aria-label="Predošlý mesiac">${ico('left','s')}</button>November 2026<button class="btn ghost sm" aria-label="Ďalší mesiac">${ico('right','s')}</button></span></div>`; }
+function upcomingNote() { const n = rvis().filter(r => rstate(r) !== 'paid'); const late = n.filter(r => rstate(r) === 'late'); const sum = n.reduce((s, r) => s + r.amt, 0); return `<div class="card" style="margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center"><div><div class="muted">Ešte treba zaplatiť tento mesiac</div><div style="font-size:var(--text-xl);font-weight:650">${eur(sum)}</div></div><div class="muted">${n.length} z ${rvis().length} pravidelných platieb${late.length?`, <b style="color:var(--color-danger)">${late.length} po splatnosti</b>`:''}</div></div>`; }
+
+function viewA() {
+  const tabs = [['overview','Prehľad'],['tx','Transakcie'],['rec','Pravidelné']].map(([k,l]) => `<button class="${tab===k?'on':''}" data-tab="${k}">${l}</button>`).join('');
+  let body = '';
+  if (tab === 'overview') body = statCards() + upcomingNote() + `<div class="grid2">${budgets()}${chart()}</div>`;
+  else if (tab === 'tx') body = `<div class="card">${txList()}</div>`;
+  else body = view === 'd' ? recTab() : upcomingNote() + `<div class="card">${recList()}</div>`;
+  return `<div class="tabs">${tabs}</div>${body}`;
+}
+function viewB() { return statCards() + upcomingNote() + `<div class="grid2"><div class="card"><h3>Pravidelné platby <span class="more muted">tento mesiac</span></h3>${recList(6)}</div>${budgets()}</div><div class="grid2">${chart()}<div class="card"><h3>Posledné transakcie</h3>${txList(5)}</div></div>`; }
+function calendar() {
+  const start = 6; // 1 Nov 2026 is a Sunday, Monday-first grid
+  const cells = []; for (let i = 0; i < start; i++) cells.push('<div class="d off"></div>');
+  for (let d = 1; d <= 30; d++) { const rs = rvis().filter(r => r.day === d); cells.push(`<div class="d ${d===TODAY?'today':''} ${d===selDay?'sel':''}" data-day="${d}"><span class="n">${d}</span>${rs.map(r => `<span class="p ${rstate(r)==='late'?'late':''}">${r.t}</span>`).join('')}</div>`); }
+  const dayRec = rvis().filter(r => r.day === selDay), dayTx = tvis().filter(x => x.d === selDay);
+  const side = `<div class="card" style="margin-top:16px"><h3>${selDay}. 11.</h3>${dayRec.map(r => `<div class="row"><span class="ic">${ico('repeat','s')}</span><div class="grow"><div class="t">${r.t}</div></div>${TAG[rstate(r)]}<span class="amt">${eur(-r.amt)}</span>${rstate(r)!=='paid'?`<button class="btn sm" onclick="payRec(${r.id})">Zaplatené</button>`:''}</div>`).join('')}${dayTx.map(x => `<div class="row"><span class="ic">${ico('money','s')}</span><div class="grow"><div class="t">${x.t}</div><div class="s">${x.cat}</div></div><span class="amt ${x.amt>0?'pos':''}">${eur(x.amt)}</span></div>`).join('')}${!dayRec.length && !dayTx.length ? '<div class="muted">V tento deň nič nie je.</div>' : ''}</div>`;
+  return `<div class="cal">${['Po','Ut','St','Št','Pi','So','Ne'].map(d=>`<div class="dow">${d}</div>`).join('')}${cells.join('')}</div>` + side;
+}
+function viewC() { return statCards() + calendar(); }
+// Recurring-payments tab (variant D): still-to-pay summary, calendar (default) or list
+let recMode = 'cal';
+function recTab() {
+  const seg = `<div class="seg" style="max-width:260px"><button class="${recMode==='cal'?'on':''}" data-recmode="cal">Kalendár</button><button class="${recMode==='list'?'on':''}" data-recmode="list">Zoznam</button></div>`;
+  return upcomingNote() + seg + (recMode === 'cal' ? calendar() : `<div class="card">${recList()}</div>`);
+}
+function render() {
+  const c = document.getElementById('content'), y = c.scrollTop;
+  c.innerHTML = acctChips() + (view === 'b' ? viewB() : view === 'c' ? viewC() : viewA());
+  c.scrollTop = y;
+  const nav = NAV.map(([id,l]) => `<button class="nav-item ${id==='money'?'active':''}" title="${l}">${ico(id)}<span class="label">${l}</span></button>`).join('');
+  document.getElementById('side').innerHTML = `<div class="brand"><div class="logo"></div><span>Family Hub</span></div>${nav}<div class="spacer"></div><button class="nav-item" title="Nastavenia">${ico('settings')}<span class="label">Nastavenia</span></button>`;
+  document.getElementById('bottom').innerHTML = nav;
+  renderPanel();
+}
+function renderPanel() {
+  const d = document.getElementById('detail'); d.classList.toggle('open', !!panel);
+  if (!panel) { d.innerHTML = ''; return; }
+  const head = t => `<h2>${t} <button class="btn ghost" onclick="closePanel()" aria-label="Zavrieť">${ico('close')}</button></h2>`;
+  if (panel === 'add') {
+    d.innerHTML = head('Nový záznam') + `<div class="seg"><button class="${addType==='exp'?'on':''}" onclick="addType='exp';renderPanel()">Výdavok</button><button class="${addType==='inc'?'on':''}" onclick="addType='inc';renderPanel()">Príjem</button></div>
+    <label class="f"><span>Suma (€)</span><input class="in" id="a-amt" type="number" placeholder="0"></label>
+    <label class="f"><span>Popis</span><input class="in" id="a-t" placeholder="Napr. Lidl"></label>
+    <label class="f"><span>Kategória</span><select class="in" id="a-cat"><option>Potraviny</option><option>Doprava</option><option>Bývanie</option><option>Deti</option><option>Zábava</option><option>Služby</option></select></label>
+    <label class="f"><span>Účet</span><select class="in" id="a-acc"><option value="joint">Spoločný účet</option><option value="jana">Jana, osobný</option><option value="save">Sporenie</option></select></label>
+    <label class="f"><span style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="a-rep"> Opakovať každý mesiac (pravidelná platba)</span></label>
+    <div style="display:flex;gap:8px"><button class="btn" onclick="closePanel()">Zrušiť</button><button class="btn primary" style="margin-left:auto" onclick="saveTx()">Uložiť</button></div>`;
+  } else {
+    const rows = [['9. 11.','Tesco Bratislava','−45,20'],['10. 11.','Internet O2','−24,00'],['11. 11.','Lidl','−72,00'],['11. 11.','Bolt','−18,00','dup'],['12. 11.','Mzda Peter','1 850,00']];
+    d.innerHTML = head('Import z banky (CSV)') + (impStep === 0 ? `<div class="note">Podporované sú výpisy slovenských a poľských bánk (kódovanie Windows-1250, bodkočiarka, desatinná čiarka). Po výbere súboru uvidíte náhľad, nič sa neuloží bez potvrdenia.</div><button class="btn primary" onclick="impStep=1;renderPanel()">Vybrať súbor… (vzorový výpis)</button>` : `<div class="note">Rozpoznaný profil: <b>Tatra banka, CSV</b>. 5 riadkov, 1 duplicita (už zaznamenané) sa preskočí.</div>
+    <label class="f"><span>Účet</span><select class="in"><option>Spoločný účet</option><option>Jana, osobný</option></select></label>
+    <table class="imp"><thead><tr><th>Dátum</th><th>Popis</th><th>Suma</th></tr></thead><tbody>${rows.map(r=>`<tr class="${r[3]||''}"><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody></table>
+    <div style="display:flex;gap:8px"><button class="btn" onclick="impStep=0;renderPanel()">Späť</button><button class="btn primary" style="margin-left:auto" onclick="doImport()">Importovať 4 záznamy</button></div>`);
+  }
+}
+function openPanel(p) { panel = p; impStep = 0; render(); }
+function closePanel() { panel = null; render(); }
+function saveTx() { const amt = +document.getElementById('a-amt').value; if (!amt) return; const t = document.getElementById('a-t').value || 'Záznam'; tx.push({ id: Date.now(), d: TODAY, t, cat: document.getElementById('a-cat').value, amt: addType === 'exp' ? -Math.abs(amt) : Math.abs(amt), acc: document.getElementById('a-acc').value }); if (document.getElementById('a-rep').checked && addType === 'exp') recurring.push({ id: Date.now() + 1, t, amt: Math.abs(amt), day: TODAY, cat: document.getElementById('a-cat').value, acc: document.getElementById('a-acc').value }); closePanel(); }
+function doImport() { [['Tesco Bratislava',9,-45,'Potraviny'],['Internet O2',10,-24,'Služby'],['Mzda Peter (import)',12,1850,'Príjem']].forEach((r,i) => tx.push({ id: Date.now()+i, d:r[1], t:r[0], cat:r[3], amt:r[2], acc:'joint', rec: r[0].startsWith('Internet') ? 3 : undefined })); closePanel(); }
+function payRec(id) { const r = recurring.find(x => x.id === id); tx.push({ id: Date.now(), d: TODAY, t: r.t, cat: r.cat, amt: -r.amt, acc: r.acc, rec: r.id }); render(); }
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-acct]'); if (a) { acct = a.dataset.acct; render(); return; }
+  const t = e.target.closest('[data-tab]'); if (t) { tab = t.dataset.tab; render(); return; }
+  const rm = e.target.closest('[data-recmode]'); if (rm) { recMode = rm.dataset.recmode; render(); return; }
+  const dy = e.target.closest('[data-day]'); if (dy) { selDay = +dy.dataset.day; render(); }
+});
+function setView(v, btn) { view = v; document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); render(); }
+function applySide() { const w = document.getElementById('frame').getBoundingClientRect().width; document.getElementById('app').classList.toggle('open', w >= 1024); }
+new ResizeObserver(applySide).observe(document.getElementById('frame'));
+function setW(w, btn) { document.getElementById('frame').style.width = w; document.querySelectorAll('#sketch-tools button').forEach(b => { if (/Mobil|iPad|Desktop/.test(b.textContent)) b.classList.remove('on'); }); btn.classList.add('on'); }
+function toggleDark(btn) { const r = document.documentElement; const d = r.dataset.theme === 'dark'; r.dataset.theme = d ? 'light' : 'dark'; btn.classList.toggle('on', !d); }
+render();
+</script>
+</body>
+</html>

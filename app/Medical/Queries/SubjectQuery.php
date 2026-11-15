@@ -1,0 +1,278 @@
+<?php
+
+namespace App\Medical\Queries;
+
+use App\Access\AccessLevel;
+use App\Access\Module;
+use App\Audit\AuditEvent;
+use App\Audit\AuditLogger;
+use App\Medical\ArchiveState;
+use App\Medical\Documents\MedicalDocumentStore;
+use App\Medical\Retention;
+use App\Medical\Viewer;
+use App\Medical\Visibility;
+use App\Models\MedicalSubject;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
+class SubjectQuery
+{
+    public function __construct(private readonly AuditLogger $audit, private readonly ContactQuery $contacts, private readonly MedicalDocumentStore $store) {}
+
+    /** @return Collection<int, MedicalSubject> */
+    public function visible(Viewer $viewer): Collection
+    {
+        return Visibility::apply(MedicalSubject::query(), $viewer, 'id')
+            ->orderByRaw('lower(name)')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
+     * A non-uuid id, an id outside the scope and an unknown id all give null; a malformed id and an Edit lookup by a
+     * module-view viewer never reach the database.
+     */
+    public function findVisible(Viewer $viewer, string $id, AccessLevel $min = AccessLevel::View): ?MedicalSubject
+    {
+        if (! Str::isUuid($id)) {
+            return null;
+        }
+        if ($min === AccessLevel::Edit && ! $viewer->canEdit()) {
+            return null;
+        }
+
+        return Visibility::apply(MedicalSubject::query()->where('id', $id), $viewer, 'id', $min)->first();
+    }
+
+    /** min(module level, the viewer's level on this subject); None when the subject is outside the scope. */
+    public function levelFor(Viewer $viewer, MedicalSubject $subject): AccessLevel
+    {
+        $level = (int) DB::table('medical_subject_members')
+            ->where('subject_id', $subject->getKey())
+            ->where('user_id', $viewer->userId())
+            ->value('level');
+        if ($subject->user_id !== null && (int) $subject->user_id === $viewer->userId() && $subject->self_access_enabled) {
+            $level = max($level, AccessLevel::Edit->value);
+        }
+
+        return AccessLevel::from(min($level, $viewer->level->value));
+    }
+
+    /**
+     * Creates the person and makes the creator its "Can change" member, with the audit row, in one transaction.
+     *
+     * @param  array{name: string, birth_date?: ?string, sex?: ?string, blood_type?: ?string, notes?: ?string, contacts?: ?array}  $data
+     */
+    public function create(Viewer $viewer, array $data): MedicalSubject
+    {
+        abort_unless($viewer->canEdit(), 403);
+
+        return DB::transaction(function () use ($viewer, $data) {
+            $subject = new MedicalSubject;
+            $subject->forceFill([
+                'name' => $data['name'],
+                'birth_date' => $data['birth_date'] ?? null,
+                'sex' => $data['sex'] ?? 'unspecified',
+                'blood_type' => $data['blood_type'] ?? null,
+                'notes' => $data['notes'] ?? null,
+                'created_by' => $viewer->userId(),
+            ])->save();
+
+            DB::table('medical_subject_members')->insert([
+                'subject_id' => $subject->getKey(),
+                'user_id' => $viewer->userId(),
+                'level' => AccessLevel::Edit->value,
+                'granted_by' => $viewer->userId(),
+                'created_at' => now(),
+            ]);
+
+            if (! empty($data['contacts'])) {
+                $this->contacts->replaceAll($viewer, $subject, $data['contacts']);
+            }
+
+            $this->audit->record(AuditEvent::MedicalSubjectCreated, $viewer->user, ['subject' => (string) $subject->getKey()], null, Module::Health);
+
+            return $subject;
+        });
+    }
+
+    /**
+     * Sets the person's AI-consent flag. One transaction: the Edit-scoped UPDATE and the audit row stand or fall together.
+     * Returns false when the subject is outside the viewer's Edit scope (the controller answers 403). Setting the stored
+     * value again changes nothing and writes no audit row.
+     */
+    public function setConsent(Viewer $viewer, MedicalSubject $subject, bool $value): bool
+    {
+        if (! $viewer->canEdit()) {
+            return false;
+        }
+
+        return DB::transaction(function () use ($viewer, $subject, $value) {
+            $id = (string) $subject->getKey();
+            $current = DB::table('medical_subjects')
+                ->where('id', $id)
+                ->whereIn('id', Visibility::subjectIds($viewer, AccessLevel::Edit))
+                ->lockForUpdate()
+                ->first(['ai_consent']);
+            if ($current === null) {
+                return false;
+            }
+            if ((bool) $current->ai_consent === $value) {
+                return true;
+            }
+
+            $changed = DB::table('medical_subjects')
+                ->where('id', $id)
+                ->whereIn('id', Visibility::subjectIds($viewer, AccessLevel::Edit))
+                ->update([
+                    'ai_consent' => $value,
+                    'ai_consent_changed_at' => now(),
+                    'ai_consent_changed_by' => $viewer->userId(),
+                ]);
+            if ($changed === 0) {
+                return false;
+            }
+
+            $this->audit->record(AuditEvent::MedicalConsentChanged, $viewer->user, ['subject' => $id, 'value' => $value ? 'on' : 'off'], null, Module::Health);
+
+            return true;
+        });
+    }
+
+    /**
+     * Updates the profile with one Edit-scoped statement; when `contacts` is present they are replaced in the same
+     * transaction (null or [] clears them, a missing key leaves them). False when the subject is outside the viewer's
+     * Edit scope (the controller answers 403).
+     *
+     * @param  array{name: string, birth_date?: ?string, sex?: ?string, blood_type?: ?string, notes?: ?string, contacts?: ?array}  $data
+     */
+    public function update(Viewer $viewer, MedicalSubject $subject, array $data): bool
+    {
+        if (! $viewer->canEdit()) {
+            return false;
+        }
+
+        return DB::transaction(function () use ($viewer, $subject, $data) {
+            $changed = Visibility::apply(
+                DB::table('medical_subjects')->where('id', $subject->getKey()),
+                $viewer,
+                'id',
+                AccessLevel::Edit,
+            )->update(['name' => $data['name'], 'updated_at' => now()] + $this->optionalProfileFields($data));
+            if ($changed === 0) {
+                return false;
+            }
+            if (array_key_exists('contacts', $data) && ! $this->contacts->replaceAll($viewer, $subject, $data['contacts'] ?? [])) {
+                throw new \RuntimeException('contacts not replaced');
+            }
+
+            return true;
+        });
+    }
+
+    /**
+     * Profile columns the client actually sent. A key that is absent keeps the stored value (a partial PATCH must not
+     * erase blood type or notes); a key sent as null clears it, except sex which falls back to 'unspecified'.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function optionalProfileFields(array $data): array
+    {
+        $out = [];
+        foreach (['birth_date', 'sex', 'blood_type', 'notes'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $out[$field] = $data[$field] ?? ($field === 'sex' ? 'unspecified' : null);
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Removes the person the way the delete window allows (owner decision B), decided here by the server. Inside
+     * medical.delete_window_hours of created_at: a permanent delete in one transaction (the Edit-scoped DELETE of the
+     * subject, foreign keys cascading to members, visits, medications, allergies, vaccinations, contacts and documents,
+     * and the content-free audit row; the files go only after commit, so a failing audit rolls everything back and
+     * keeps them). Older: the person is archived with everything below it, nothing is deleted and no file is touched.
+     *
+     * @return 'deleted'|'archived'|null null when the subject is outside the viewer's Edit scope (the controller answers 403)
+     */
+    public function remove(Viewer $viewer, MedicalSubject $subject): ?string
+    {
+        if (! $viewer->canEdit()) {
+            return null;
+        }
+        $id = (string) $subject->getKey();
+
+        return DB::transaction(function () use ($viewer, $id): ?string {
+            $scoped = fn () => Visibility::apply(DB::table('medical_subjects')->where('id', $id), $viewer, 'id', AccessLevel::Edit);
+            $row = $scoped()->lockForUpdate()->first(['created_at']);
+            if ($row === null) {
+                return null;
+            }
+
+            if (! Retention::canDeletePermanently($row->created_at)) {
+                $changed = $scoped()->update(['archived_at' => now(), 'archived_by' => $viewer->userId(), 'updated_at' => now()]);
+                if ($changed === 0) {
+                    return null;
+                }
+                $this->audit->record(AuditEvent::MedicalArchived, $viewer->user, ['subject' => $id, 'type' => 'person'], null, Module::Health);
+
+                return 'archived';
+            }
+
+            if ($scoped()->delete() === 0) {
+                return null;
+            }
+            $this->audit->record(AuditEvent::MedicalSubjectDeleted, $viewer->user, ['subject' => $id], null, Module::Health);
+            DB::afterCommit(function () use ($id): void {
+                // The rows are already gone; a failing file removal must not turn the request into a 500 (the sweep cleans up).
+                try {
+                    $this->store->deleteSubjectDirectory($id);
+                } catch (\Throwable $e) {
+                    report(new \RuntimeException('Medical directory removal failed after delete ('.$e::class.')'));
+                }
+            });
+
+            return 'deleted';
+        });
+    }
+
+    /**
+     * Archived people the viewer may restore: Edit scope, archived only. Empty for a view-only viewer.
+     *
+     * @return Collection<int, MedicalSubject>
+     */
+    public function archived(Viewer $viewer): Collection
+    {
+        if (! $viewer->canEdit()) {
+            return new Collection;
+        }
+
+        return Visibility::apply(MedicalSubject::query(), $viewer, 'id', AccessLevel::Edit, ArchiveState::Only)
+            ->orderByRaw('lower(name)')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /** Restores an archived person through the Edit-scoped query. False for hidden, unknown, malformed, view-only or not archived. */
+    public function restore(Viewer $viewer, string $id): bool
+    {
+        if (! Str::isUuid($id) || ! $viewer->canEdit()) {
+            return false;
+        }
+
+        return DB::transaction(function () use ($viewer, $id): bool {
+            $changed = Visibility::apply(DB::table('medical_subjects')->where('id', $id), $viewer, 'id', AccessLevel::Edit, ArchiveState::Only)
+                ->update(['archived_at' => null, 'archived_by' => null, 'updated_at' => now()]);
+            if ($changed === 0) {
+                return false;
+            }
+            $this->audit->record(AuditEvent::MedicalRestored, $viewer->user, ['subject' => $id, 'type' => 'person'], null, Module::Health);
+
+            return true;
+        });
+    }
+}

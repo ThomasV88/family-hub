@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="sk" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch 007: Zdravotné záznamy</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font-sans); background: #d9d9d6; color: var(--color-text); padding-top: 52px; }
+:root[data-theme="dark"] body { background: #0e0e0d; }
+#variant-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9998; background: #fff; border-bottom: 1px solid #ddd; padding: 8px 16px; display: flex; gap: 8px; font-family: system-ui; flex-wrap: wrap; }
+.variant-tab { border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 13px; transition: all .15s ease; color: #222; }
+.variant-tab:hover { background: #f0f0f0; }
+.variant-tab.active { background: #222; color: #fff; border-color: #222; }
+.stage { display: flex; justify-content: center; padding: 16px; }
+.frame { container-type: inline-size; container-name: frame; width: 100%; max-width: 1280px; height: calc(100vh - 92px); min-height: 560px; background: var(--color-bg); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-lg); position: relative; transition: width .2s ease; }
+
+/* Shell */
+.app { display: flex; height: 100%; color: var(--color-text); position: relative; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); border-bottom: 1px solid var(--color-border); }
+.topbar h1 { font-size: var(--text-lg); font-weight: 600; margin: 0; flex: 1; letter-spacing: -.01em; }
+.body { flex: 1; display: flex; min-height: 0; position: relative; }
+.content { flex: 1; overflow: auto; padding: var(--space-6); padding-bottom: 100px; min-width: 0; container-type: inline-size; container-name: content; }
+.icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.icon.s { width: 14px; height: 14px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); padding: 7px 12px; border-radius: var(--radius-md); font: inherit; font-size: var(--text-sm); cursor: pointer; transition: all .15s ease; min-height: 36px; }
+.btn:hover { background: var(--color-surface-2); }
+.btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
+.btn.primary:hover { background: var(--color-primary-hover); }
+.btn.danger { color: var(--color-danger); border-color: var(--color-danger); background: transparent; }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--color-text-muted); }
+.btn.sm { min-height: 30px; padding: 4px 10px; font-size: var(--text-xs); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--color-primary-soft); color: var(--color-primary); display: inline-grid; place-items: center; font-size: 11px; font-weight: 700; flex: none; }
+.side { display: none; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3); border-right: 1px solid var(--color-border); width: 64px; align-items: center; overflow: hidden; transition: width .2s ease; }
+.side .brand { display: flex; align-items: center; gap: 8px; font-weight: 650; padding: 4px 12px 16px; }
+.side .brand .logo { width: 22px; height: 22px; border-radius: 6px; background: var(--color-primary); flex: none; }
+.side .spacer { flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--radius-md); color: var(--color-text-muted); cursor: pointer; border: 0; background: none; font: inherit; font-size: var(--text-sm); width: 44px; justify-content: center; transition: all .15s ease; }
+.nav-item:hover { background: var(--color-surface-2); color: var(--color-text); }
+.nav-item.active { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
+.label, .brand span { display: none; }
+.app.open .side { width: 232px; align-items: stretch; }
+.app.open .label, .app.open .brand span { display: inline; }
+.app.open .nav-item { width: 100%; justify-content: flex-start; padding: 8px 12px; }
+.bottom { display: flex; position: absolute; left: 0; right: 0; bottom: 0; background: var(--color-surface); border-top: 1px solid var(--color-border); padding: 6px 4px 14px; justify-content: space-around; z-index: 10; }
+.bottom .nav-item { flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 11px; width: auto; flex: 1; }
+.bottom .label { display: inline; }
+.fab { position: absolute; right: 16px; bottom: 76px; z-index: 11; width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--color-primary); color: var(--color-on-primary); box-shadow: var(--shadow-md); cursor: pointer; display: grid; place-items: center; }
+.collapse-btn, .add-top { display: none; }
+@container frame (min-width: 640px) { .side { display: flex; } .bottom, .fab { display: none; } .content { padding-bottom: var(--space-6); } .collapse-btn, .add-top { display: inline-flex; } }
+
+/* Medical */
+.muted { color: var(--color-text-muted); font-size: var(--text-sm); }
+.people { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--space-3); }
+.chip { display: inline-flex; gap: 8px; align-items: center; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-muted); padding: 5px 12px 5px 6px; border-radius: 99px; font-size: var(--text-sm); cursor: pointer; transition: all .15s ease; }
+.chip.plain { padding: 5px 12px; }
+.chip:hover { background: var(--color-surface-2); }
+.chip.on { background: var(--color-primary-soft); color: var(--color-primary); border-color: var(--color-primary); font-weight: 600; }
+.pbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); margin-bottom: var(--space-4); font-size: var(--text-sm); }
+.pbar .nm { font-weight: 650; font-size: var(--text-base); }
+.pbar .meta { color: var(--color-text-muted); }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-4); overflow-x: auto; scrollbar-width: none; }
+.tabs button { border: 0; background: none; padding: 9px 14px; font: inherit; font-size: var(--text-sm); color: var(--color-text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tabs button.on { color: var(--color-primary); border-color: var(--color-primary); font-weight: 600; }
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); }
+.card h3 { margin: 0 0 var(--space-3); font-size: var(--text-sm); font-weight: 600; color: var(--color-text-muted); display: flex; align-items: center; gap: 8px; }
+.grid2 { display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1fr); margin-bottom: var(--space-4); }
+@container content (min-width: 700px) { .grid2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--color-border); font-size: var(--text-sm); }
+.row:first-of-type { border-top: 0; }
+.row.click { cursor: pointer; transition: background .15s ease; }
+.row .grow { flex: 1; min-width: 0; }
+.row .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.row .s { font-size: var(--text-xs); color: var(--color-text-muted); }
+.ic { width: 30px; height: 30px; border-radius: 8px; background: var(--color-primary-soft); color: var(--color-primary); display: grid; place-items: center; flex: none; }
+.tag { font-size: 11px; padding: 2px 9px; border-radius: 99px; background: var(--color-surface-2); color: var(--color-text-muted); white-space: nowrap; }
+.tag.ok { background: var(--color-primary-soft); color: var(--color-primary); }
+.tag.warn { background: #f6ecd9; color: #9a6a1c; }
+.tag.bad { background: #f8e9e6; color: var(--color-danger); }
+:root[data-theme="dark"] .tag.warn { background: #3a3120; color: var(--color-accent); }
+:root[data-theme="dark"] .tag.bad { background: #3a2622; }
+.emerg { border-color: var(--color-danger); }
+.emerg h3 { color: var(--color-danger); }
+.kv { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; font-size: var(--text-sm); }
+.kv dt { color: var(--color-text-muted); }
+.kv dd { margin: 0; }
+.tl { position: relative; padding-left: 22px; }
+.tl::before { content: ""; position: absolute; left: 6px; top: 6px; bottom: 6px; width: 1px; background: var(--color-border); }
+.tl .it { position: relative; padding: 0 0 14px; }
+.tl .it::before { content: ""; position: absolute; left: -20px; top: 6px; width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary); border: 2px solid var(--color-bg); }
+.tl .it .d { font-size: var(--text-xs); color: var(--color-text-muted); }
+.acc { border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); margin-bottom: 10px; overflow: hidden; }
+.acc > .h { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; font-weight: 600; font-size: var(--text-sm); }
+.acc > .h:hover { background: var(--color-surface-2); }
+.acc > .b { padding: 0 14px 6px; border-top: 1px solid var(--color-border); }
+.empty { text-align: center; padding: 26px 8px; color: var(--color-text-muted); font-size: var(--text-sm); }
+.banner { display: flex; gap: 10px; padding: 10px 14px; border-radius: var(--radius-lg); background: #f6ecd9; color: #7d5410; font-size: var(--text-sm); margin-bottom: var(--space-4); align-items: flex-start; }
+:root[data-theme="dark"] .banner { background: #3a3120; color: var(--color-accent); }
+.banner.info { background: var(--color-primary-soft); color: var(--color-primary); }
+
+/* Panel */
+.detail { position: absolute; z-index: 30; background: var(--color-surface); border-left: 1px solid var(--color-border); top: 0; bottom: 0; right: 0; width: 440px; padding: var(--space-4); overflow: auto; transform: translateX(100%); transition: transform .2s ease; box-shadow: var(--shadow-lg); }
+.detail.open { transform: none; }
+@container frame (min-width: 1000px) { .detail { position: static; flex: none; width: 440px; transform: none; box-shadow: none; display: none; } .detail.open { display: block; } }
+@container frame (max-width: 639px) { .detail { top: auto; left: 0; width: auto; max-height: 90%; border-left: 0; border-top: 1px solid var(--color-border); border-radius: 16px 16px 0 0; transform: translateY(100%); } .detail.open { transform: none; } }
+.detail h2 { margin: 0 0 var(--space-3); font-size: var(--text-lg); display: flex; align-items: center; gap: 8px; }
+.detail h2 button { margin-left: auto; }
+label.f { display: grid; gap: 5px; font-size: var(--text-sm); margin-bottom: var(--space-3); }
+label.f > span { font-weight: 600; font-size: var(--text-xs); color: var(--color-text-muted); display: flex; gap: 8px; align-items: center; }
+.in { width: 100%; padding: 8px 10px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: var(--text-sm); min-height: 38px; }
+.in:focus { outline: 2px solid var(--color-primary-soft); border-color: var(--color-primary); }
+.in.chk { border-color: var(--color-accent); }
+.docprev { border: 1px solid var(--color-border); border-radius: var(--radius-md); background: #f8f8f6; padding: 14px; margin-bottom: 12px; min-height: 130px; }
+:root[data-theme="dark"] .docprev { background: #2a2a27; }
+.docprev i { display: block; height: 7px; border-radius: 3px; background: var(--color-border); margin-bottom: 8px; }
+.docprev i:nth-child(3n) { width: 70%; } .docprev i:nth-child(4n) { width: 45%; }
+.split { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+.steps { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.note { padding: 10px 12px; border-radius: var(--radius-md); background: var(--color-surface-2); font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: 12px; }
+.seg { display: flex; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: var(--space-3); }
+.seg button { flex: 1; border: 0; background: var(--color-surface); color: var(--color-text-muted); padding: 8px; font: inherit; font-size: var(--text-sm); cursor: pointer; }
+.seg button.on { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
+.toast { position: fixed; left: 50%; bottom: 70px; transform: translate(-50%, 20px); background: var(--color-text); color: var(--color-bg); padding: 10px 16px; border-radius: var(--radius-md); font-size: var(--text-sm); opacity: 0; pointer-events: none; transition: all .2s ease; z-index: 9500; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: sp .8s linear infinite; vertical-align: -2px; }
+@keyframes sp { to { transform: rotate(360deg); } }
+
+#sketch-tools { position: fixed; bottom: 12px; right: 12px; z-index: 9999; font-family: system-ui; font-size: 12px; background: rgba(0,0,0,.75); color: #fff; padding: 8px 12px; border-radius: 8px; opacity: .45; transition: opacity .2s; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 92vw; }
+#sketch-tools:hover { opacity: 1; }
+#sketch-tools button { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 3px 8px; font-size: 12px; cursor: pointer; }
+#sketch-tools button.on { background: #fff; color: #000; }
+</style>
+</head>
+<body>
+<div id="variant-nav">
+  <button class="variant-tab active" onclick="setView('a', this)">A: Karta osoby so záložkami</button>
+  <button class="variant-tab" onclick="setView('b', this)">B: Časová os s filtrom špecializácií</button>
+  <button class="variant-tab" onclick="setView('c', this)">C: Podľa špecializácií (zložky)</button>
+  <button class="variant-tab" onclick="setView('d', this)">D: C + časová os z B</button>
+</div>
+<div class="stage">
+  <div class="frame" id="frame">
+    <div class="app rail" id="app">
+      <aside class="side" id="side"></aside>
+      <div class="main">
+        <div class="topbar">
+          <button class="btn collapse-btn" onclick="document.getElementById('app').classList.toggle('open')" aria-label="Prepnúť panel"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9 5v14"/></svg></button>
+          <h1>Zdravotné záznamy</h1><button class="btn add-top" onclick="openPanel({t:'export'})">Export</button><button class="btn primary add-top" onclick="openPanel({t:'add'})">+ Záznam</button><button class="avatar">JK</button>
+        </div>
+        <div class="body"><div class="content" id="content"></div><aside class="detail" id="detail"></aside></div>
+      </div>
+      <nav class="bottom" id="bottom"></nav>
+      <button class="fab" title="Pridať záznam" onclick="openPanel({t:'add'})"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div id="sketch-tools">
+  <span>Rámec:</span>
+  <button onclick="setW('390px', this)">Mobil 390</button>
+  <button onclick="setW('820px', this)">iPad 820</button>
+  <button class="on" onclick="setW('100%', this)">Desktop</button>
+  <button id="quota-btn" onclick="toggleQuota(this)">Simulovať vyčerpaný limit AI</button>
+  <button onclick="toggleDark(this)">Tmavý režim</button>
+</div>
+
+<script>
+const ICONS = {
+  home: '<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  tasks: '<path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>',
+  gift: '<path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7a3 3 0 1 0-3-3c0 2 3 3 3 3zm0 0a3 3 0 1 1 3-3c0 2-3 3-3 3z"/>',
+  money: '<path d="M3 7h18v12H3zM3 11h18M7 15h3"/>',
+  health: '<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  doc: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/>',
+  visit: '<path d="M8 2v4M16 2v4M3 9h18M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>',
+  shot: '<path d="M18 2l4 4M17 7l3-3M3 21l7-7M14 6l4 4-8 8H6v-4zM2 22l2-2"/>',
+  pill: '<path d="M10.5 20.5a5 5 0 0 1-7-7l10-10a5 5 0 0 1 7 7zM8.5 8.5l7 7"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  chev: '<path d="M6 9l6 6 6-6"/>',
+  sparkle: '<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>'
+};
+const ico = (n, c='') => `<svg class="icon ${c}" viewBox="0 0 24 24">${ICONS[n]}</svg>`;
+const NAV = [['home','Prehľad'],['tasks','Úlohy'],['gift','Wishlist'],['money','Financie'],['health','Zdravie']];
+const SPECS = ['Pediatria','Gastroenterológia','Stomatológia','Interné','Gynekológia'];
+const fd = iso => iso ? iso.split('-').reverse().map((x, i) => i < 2 ? +x : x).join('. ') : '';
+let PEOPLE = [
+  { id:'Jana', born:'1988', user:true, ai:true, blood:'0+', ins:'Dôvera' },
+  { id:'Peter', born:'1986', user:true, ai:false, blood:'B+', ins:'Union' },
+  { id:'Ema', born:'2017', user:true, ai:true, blood:'A+', ins:'Dôvera' },
+  { id:'Tomáš', born:'2022', user:false, ai:true, blood:'A+', ins:'Dôvera' },
+  { id:'Babka Mária', born:'1955', user:false, ai:false, blood:'?', ins:'Všeobecná' }
+];
+let visits = [
+  { id:1, p:'Ema', d:'2026-10-14', spec:'Pediatria', doc:'MUDr. Nováková', dx:'Preventívna prehliadka', note:'Bez nálezu, rast v norme.' },
+  { id:2, p:'Ema', d:'2026-09-02', spec:'Stomatológia', doc:'MUDr. Kováč', dx:'Kontrola chrupu', note:'Bez kazu.' },
+  { id:3, p:'Ema', d:'2026-06-20', spec:'Gastroenterológia', doc:'MUDr. Horváth', dx:'Bolesti brucha', note:'Odporúčaná diéta bez laktózy, kontrola o 3 mesiace.' },
+  { id:4, p:'Jana', d:'2026-08-11', spec:'Gynekológia', doc:'MUDr. Štefanová', dx:'Preventívna prehliadka', note:'' },
+  { id:5, p:'Jana', d:'2026-03-03', spec:'Interné', doc:'MUDr. Baláž', dx:'Kontrola tlaku', note:'Tlak 120/78.' },
+  { id:6, p:'Tomáš', d:'2026-10-30', spec:'Pediatria', doc:'MUDr. Nováková', dx:'Nádcha', note:'' }
+];
+let meds = [
+  { p:'Ema', kind:'alergia', t:'Arašidy', n:'Závažná reakcia', sev:'bad' },
+  { p:'Ema', kind:'liek', t:'Zyrtec 5 mg', n:'Pri potrebe, 1 tableta' },
+  { p:'Jana', kind:'alergia', t:'Penicilín', n:'Vyrážka', sev:'warn' }
+];
+let vacc = [
+  { p:'Ema', t:'Kliešťová encefalitída, 3. dávka', d:'2025-03-10', next:'2028-03-10' },
+  { p:'Ema', t:'Tetanus, preočkovanie', d:'2021-05-02', next:'2026-12-09', soon:true },
+  { p:'Tomáš', t:'MMR, 2. dávka', d:'2026-10-20', next:null }
+];
+let docs = [
+  { id:1, p:'Ema', t:'Správa gastroenterológ.pdf', d:'2026-06-20', spec:'Gastroenterológia', state:'none' },
+  { id:2, p:'Ema', t:'Krvný obraz 10/2026.jpg', d:'2026-10-14', spec:'Pediatria', state:'verified' },
+  { id:3, p:'Ema', t:'Očkovací preukaz.jpg', d:'2026-05-02', spec:'Pediatria', state:'none' },
+  { id:4, p:'Jana', t:'Výsledky krvi 03/2026.pdf', d:'2026-03-03', spec:'Interné', state:'verified' },
+  { id:5, p:'Peter', t:'Ultrazvuk brucha.pdf', d:'2026-05-12', spec:'Gastroenterológia', state:'none' }
+];
+const PROPOSAL = { d:'2026-06-20', doc:'MUDr. Horváth', spec:'Gastroenterológia', dx:'Funkčné bolesti brucha', note:'Diéta bez laktózy, kontrola o 3 mesiace' };
+const CONF = { d:'ok', doc:'ok', spec:'ok', dx:'chk', note:'chk' };
+let person = 'Ema', view = 'a', tab = 'overview', filter = 'all', panel = null, quota = false, open = { Gastroenterológia:true };
+let exp = { scope:'all', fmt:'doctor', unverified:false };
+const P = () => PEOPLE.find(x => x.id === person);
+const pv = () => visits.filter(v => v.p === person).sort((a, b) => b.d.localeCompare(a.d));
+const pd = () => docs.filter(d => d.p === person);
+const toast = t => { const e = document.getElementById('toast'); e.textContent = t; e.classList.add('show'); setTimeout(() => e.classList.remove('show'), 1800); };
+const DS = { none: '<span class="tag">bez AI</span>', running: '<span class="tag warn"><span class="spin"></span> AI číta…</span>', waiting: '<span class="tag warn">čaká na limit AI</span>', proposed: '<span class="tag warn">návrh na kontrolu</span>', verified: '<span class="tag ok">overené</span>', failed: '<span class="tag bad">AI zlyhala</span>' };
+
+function pbar() { const p = P(); const age = 2026 - +p.born; return `<div class="pbar"><span class="avatar">${p.id[0]}</span><div><div class="nm">${p.id}</div><div class="meta">${age} r.${p.user ? '' : ' · bez konta v appke'}</div></div><span class="tag ${p.ai?'ok':''}" title="Súhlas s odosielaním dokumentov do AI">${ico('sparkle','s')} AI ${p.ai?'povolená':'vypnutá'}</span><span class="tag">${ico('lock','s')} Prístup: Jana, Peter</span><button class="btn sm" style="margin-left:auto" onclick="openPanel({t:'export'})">Export…</button></div>`; }
+function people() { return `<div class="people">${PEOPLE.map(p => `<button class="chip ${person===p.id?'on':''}" data-person="${p.id}"><span class="avatar">${p.id[0]}</span>${p.id}</button>`).join('')}</div>`; }
+function visitRow(v) { return `<div class="row click" data-visit="${v.id}"><span class="ic">${ico('visit','s')}</span><div class="grow"><div class="t">${v.dx}</div><div class="s">${fd(v.d)} · ${v.spec} · ${v.doc}</div></div></div>`; }
+function docRow(d) { return `<div class="row click" data-doc="${d.id}"><span class="ic">${ico('doc','s')}</span><div class="grow"><div class="t">${d.t}</div><div class="s">${fd(d.d)} · ${d.spec}</div></div>${DS[d.state]}</div>`; }
+function medRows() { const l = meds.filter(m => m.p === person); return l.length ? l.map(m => `<div class="row"><span class="ic">${ico(m.kind==='liek'?'pill':'health','s')}</span><div class="grow"><div class="t">${m.t}</div><div class="s">${m.kind==='liek'?'Liek':'Alergia'} · ${m.n}</div></div>${m.sev?`<span class="tag ${m.sev}">${m.sev==='bad'?'závažná':'mierna'}</span>`:''}</div>`).join('') : '<div class="empty">Žiadne lieky ani alergie.</div>'; }
+function vaccRows() { const l = vacc.filter(v => v.p === person); return l.length ? l.map(v => `<div class="row"><span class="ic">${ico('shot','s')}</span><div class="grow"><div class="t">${v.t}</div><div class="s">podané ${fd(v.d)}${v.next?` · ďalšie ${fd(v.next)}`:''}</div></div>${v.soon?'<span class="tag warn">čoskoro, 27 dní</span>':''}</div>`).join('') : '<div class="empty">Zatiaľ žiadne očkovania.</div>'; }
+function emerg() { const p = P(); const al = meds.filter(m => m.p === person && m.kind === 'alergia').map(m => m.t).join(', ') || '—'; const md = meds.filter(m => m.p === person && m.kind === 'liek').map(m => m.t).join(', ') || '—'; return `<div class="card emerg"><h3>${ico('health','s')} Karta pre núdzu</h3><dl class="kv"><dt>Krvná skupina</dt><dd>${p.blood}</dd><dt>Alergie</dt><dd><b>${al}</b></dd><dt>Lieky</dt><dd>${md}</dd><dt>Poisťovňa</dt><dd>${p.ins}</dd><dt>Kontakt</dt><dd>Jana, 0900 000 000</dd></dl></div>`; }
+
+function viewA() {
+  const tabs = [['overview','Prehľad'],['visits','Návštevy'],['meds','Lieky a alergie'],['vacc','Očkovania'],['docs','Dokumenty']].map(([k,l]) => `<button class="${tab===k?'on':''}" data-tab="${k}">${l}</button>`).join('');
+  let b = '';
+  if (tab === 'overview') b = `<div class="grid2">${emerg()}<div class="card"><h3>Čoskoro</h3>${vacc.filter(v => v.p===person && v.next && v.next < '2027').map(v => `<div class="row"><span class="ic">${ico('shot','s')}</span><div class="grow"><div class="t">${v.t}</div><div class="s">${fd(v.next)}</div></div><span class="tag warn">čoskoro</span></div>`).join('') || '<div class="muted">Nič sa neblíži.</div>'}<h3 style="margin-top:14px">Posledná návšteva</h3>${pv()[0] ? visitRow(pv()[0]) : '<div class="muted">Zatiaľ žiadna.</div>'}</div></div>`;
+  else if (tab === 'visits') b = `<div class="card">${pv().map(visitRow).join('') || '<div class="empty">Zatiaľ žiadne návštevy.</div>'}</div>`;
+  else if (tab === 'meds') b = `<div class="card">${medRows()}</div>`;
+  else if (tab === 'vacc') b = `<div class="card">${vaccRows()}</div>`;
+  else b = `<div class="card">${pd().map(docRow).join('') || '<div class="empty">Zatiaľ žiadne dokumenty. Nahrajte fotku alebo PDF.</div>'}</div>`;
+  return `<div class="tabs">${tabs}</div>${b}`;
+}
+function tlItems() {
+  return [...pv().map(v => ({ k:'visit', d:v.d, spec:v.spec, html:`<div class="d">${fd(v.d)} · ${v.spec}</div><div class="row click" style="border:0;padding:2px 0" data-visit="${v.id}"><div class="grow"><div class="t">${v.dx}</div><div class="s">${v.doc}</div></div></div>` })),
+    ...pd().map(d => ({ k:'doc', d:d.d, spec:d.spec, html:`<div class="d">${fd(d.d)} · ${d.spec}</div><div class="row click" style="border:0;padding:2px 0" data-doc="${d.id}"><span class="ic">${ico('doc','s')}</span><div class="grow"><div class="t">${d.t}</div></div>${DS[d.state]}</div>` })),
+    ...vacc.filter(v => v.p === person).map(v => ({ k:'vacc', d:v.d, spec:'Očkovanie', html:`<div class="d">${fd(v.d)} · Očkovanie</div><div class="t" style="font-size:var(--text-sm);font-weight:500">${v.t}</div>` }))].filter(x => filter === 'all' || x.spec === filter).sort((a, b) => b.d.localeCompare(a.d));
+}
+function viewB() {
+  const items = tlItems();
+  const chips = ['all', ...SPECS, 'Očkovanie'].map(s => `<button class="chip plain ${filter===s?'on':''}" data-filter="${s}">${s==='all'?'Všetko':s}</button>`).join('');
+  return `<div class="people">${chips}</div><div class="grid2"><div class="card"><div class="tl">${items.map(i => `<div class="it">${i.html}</div>`).join('') || '<div class="empty">Nič v tomto filtri.</div>'}</div></div><div>${emerg()}<div class="card" style="margin-top:16px"><h3>Lieky a alergie</h3>${medRows()}</div></div></div>`;
+}
+function viewC() {
+  const used = SPECS.filter(s => pv().some(v => v.spec === s) || pd().some(d => d.spec === s));
+  const groups = used.map(s => { const vs = pv().filter(v => v.spec === s), ds = pd().filter(d => d.spec === s); const o = open[s]; return `<div class="acc"><div class="h" data-acc="${s}">${ico('chev','s')} ${s}<span class="tag" style="margin-left:auto">${vs.length} návšt. · ${ds.length} dok.</span></div>${o?`<div class="b">${vs.map(visitRow).join('')}${ds.map(docRow).join('')}</div>`:''}</div>`; }).join('');
+  return `<div class="grid2"><div>${groups || '<div class="empty">Zatiaľ žiadne záznamy.</div>'}</div><div>${emerg()}<div class="card" style="margin-top:16px"><h3>Lieky a alergie</h3>${medRows()}</div></div></div>`;
+}
+let dmode = 'folders';
+function viewD() {
+  const sw = `<div class="tabs" style="max-width:340px"><button class="${dmode==='folders'?'on':''}" data-dmode="folders">Podľa špecializácií</button><button class="${dmode==='time'?'on':''}" data-dmode="time">Časová os</button></div>`;
+  let main;
+  if (dmode === 'time') {
+    const chips = ['all', ...SPECS, 'Očkovanie'].map(s => `<button class="chip plain ${filter===s?'on':''}" data-filter="${s}">${s==='all'?'Všetko':s}</button>`).join('');
+    const items = tlItems();
+    main = `<div class="people">${chips}</div><div class="card"><div class="tl">${items.map(i => `<div class="it">${i.html}</div>`).join('') || '<div class="empty">Nič v tomto filtri.</div>'}</div></div>`;
+  } else {
+    const all = tlItems().filter(i => i.k !== 'vacc');
+    const used = SPECS.filter(s => all.some(i => i.spec === s));
+    main = used.map(s => { const its = all.filter(i => i.spec === s); const o = open[s]; return `<div class="acc"><div class="h" data-acc="${s}">${ico('chev','s')} ${s}<span class="tag" style="margin-left:auto">${its.length} záznamov · posledný ${fd(its[0].d)}</span></div>${o?`<div class="b"><div class="tl">${its.map(i => `<div class="it">${i.html}</div>`).join('')}</div></div>`:''}</div>`; }).join('') || '<div class="empty">Zatiaľ žiadne záznamy.</div>';
+  }
+  return `${sw}<div class="grid2"><div>${main}</div><div>${emerg()}<div class="card" style="margin-top:16px"><h3>Lieky a alergie</h3>${medRows()}</div></div></div>`;
+}
+function render() {
+  const c = document.getElementById('content'), y = c.scrollTop;
+  c.innerHTML = people() + pbar() + (view === 'a' ? viewA() : view === 'b' ? viewB() : view === 'd' ? viewD() : viewC());
+  c.scrollTop = y;
+  const nav = NAV.map(([id,l]) => `<button class="nav-item ${id==='health'?'active':''}" title="${l}">${ico(id)}<span class="label">${l}</span></button>`).join('');
+  document.getElementById('side').innerHTML = `<div class="brand"><div class="logo"></div><span>Family Hub</span></div>${nav}<div class="spacer"></div><button class="nav-item" title="Nastavenia">${ico('settings')}<span class="label">Nastavenia</span></button>`;
+  document.getElementById('bottom').innerHTML = nav;
+  renderPanel();
+}
+function renderPanel() {
+  const d = document.getElementById('detail'); d.classList.toggle('open', !!panel);
+  if (!panel) { d.innerHTML = ''; return; }
+  const head = t => `<h2>${t} <button class="btn ghost" onclick="closePanel()" aria-label="Zavrieť">${ico('close')}</button></h2>`;
+  if (panel.t === 'visit') { const v = visits.find(x => x.id === panel.id); d.innerHTML = head('Návšteva') + `<dl class="kv"><dt>Dátum</dt><dd>${fd(v.d)}</dd><dt>Osoba</dt><dd>${v.p}</dd><dt>Špecializácia</dt><dd>${v.spec}</dd><dt>Lekár</dt><dd>${v.doc}</dd><dt>Diagnóza</dt><dd>${v.dx}</dd><dt>Poznámka</dt><dd>${v.note || '—'}</dd></dl>`; }
+  else if (panel.t === 'doc') d.innerHTML = head('Dokument') + docPanel(docs.find(x => x.id === panel.id));
+  else if (panel.t === 'export') d.innerHTML = head('Export záznamov') + exportPanel();
+  else d.innerHTML = head('Nový záznam') + `<div class="seg"><button class="on">Návšteva</button><button>Liek / alergia</button><button>Očkovanie</button><button>Dokument</button></div><label class="f"><span>Osoba</span><select class="in">${PEOPLE.map(p=>`<option ${p.id===person?'selected':''}>${p.id}</option>`).join('')}</select></label><label class="f"><span>Dátum</span><input class="in" type="date" value="2026-11-12"></label><label class="f"><span>Špecializácia</span><select class="in">${SPECS.map(s=>`<option>${s}</option>`).join('')}</select></label><label class="f"><span>Lekár</span><input class="in"></label><label class="f"><span>Diagnóza</span><input class="in"></label><label class="f"><span>Poznámka</span><textarea class="in" rows="3"></textarea></label><div style="display:flex;gap:8px"><button class="btn" onclick="closePanel()">Zrušiť</button><button class="btn primary" style="margin-left:auto" onclick="closePanel();toast('Uložené (simulácia)')">Uložiť</button></div>`;
+}
+function docPanel(dc) {
+  const p = PEOPLE.find(x => x.id === dc.p);
+  const prev = `<div class="docprev">${'<i></i>'.repeat(9)}</div>`;
+  const steps = `<div class="steps">${DS[dc.state]}<span class="tag">${fd(dc.d)} · ${dc.spec}</span></div>`;
+  const manual = `<div class="note">Dokument môžete vyplniť aj ručne. AI je voliteľná pomoc, nie podmienka.</div>`;
+  if (dc.state === 'none' || dc.state === 'failed') {
+    if (!p.ai) return prev + steps + `<div class="banner">${ico('lock','s')}<div><b>AI je pri tomto profile vypnutá.</b> Dokumenty tejto osoby sa neodosielajú do žiadnej AI. Súhlas môže zapnúť správca v nastaveniach osoby.</div></div>` + manual + `<button class="btn primary" disabled>Spustiť AI</button>`;
+    return prev + steps + manual + `<div class="banner info">${ico('sparkle','s')}<div>AI prečíta dokument a navrhne polia. Obsah dokumentu sa pošle externej službe (Codex, záložne Copilot). Nič sa neuloží, kým návrh neskontrolujete.</div></div><button class="btn primary" onclick="runAI(${dc.id})">${ico('sparkle','s')} Spustiť AI</button>`;
+  }
+  if (dc.state === 'running') return prev + steps + `<div class="note"><span class="spin"></span> Agent <b>Codex</b> číta dokument… Môžete zatvoriť panel, výsledok sa objaví v zozname.</div>`;
+  if (dc.state === 'waiting') return prev + steps + `<div class="banner">${ico('sparkle','s')}<div><b>Limit agenta Codex je vyčerpaný.</b> Skúsim <b>Copilot</b>. Ak ani ten nie je dostupný, úloha počká do 14:30 a spustí sa sama.</div></div><div style="display:flex;gap:8px"><button class="btn" onclick="setDoc(${dc.id},'none')">Zrušiť</button><button class="btn primary" onclick="quota=false;document.getElementById('quota-btn').classList.remove('on');runAI(${dc.id})">Skúsiť teraz znova</button></div>`;
+  if (dc.state === 'proposed') {
+    const f = (k, l) => `<label class="f"><span>${l} ${CONF[k]==='chk'?'<span class="tag warn">skontrolovať</span>':'<span class="tag ok">isté</span>'}</span><input class="in ${CONF[k]==='chk'?'chk':''}" value="${PROPOSAL[k]}" id="pf-${k}"></label>`;
+    return steps + `<div class="banner info">${ico('sparkle','s')}<div>Návrh od AI (agent Codex). Porovnajte s dokumentom a opravte. Nič nie je uložené, kým ho neprijmete.</div></div><div class="split">${prev}<div>${f('d','Dátum')}${f('doc','Lekár')}${f('spec','Špecializácia')}${f('dx','Diagnóza')}${f('note','Odporúčanie')}</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn danger" onclick="setDoc(${dc.id},'none')">Zamietnuť</button><button class="btn" onclick="runAI(${dc.id})">Spustiť znova</button><button class="btn primary" style="margin-left:auto" onclick="acceptDoc(${dc.id})">Prijať a uložiť</button></div>`;
+  }
+  return prev + steps + `<div class="note">Údaje z tohto dokumentu sú overené a uložené v záznamoch osoby.</div><button class="btn" onclick="setDoc(${dc.id},'none')">Spustiť AI znova (história sa zachová)</button>`;
+}
+function exportPanel() {
+  const vs = pv().filter(v => exp.scope === 'all' || v.spec === exp.scope), ds = pd().filter(d => (exp.scope === 'all' || d.spec === exp.scope));
+  const unver = ds.filter(d => d.state === 'proposed').length;
+  const specOpts = ['all', ...SPECS].map(s => `<option value="${s}" ${exp.scope===s?'selected':''}>${s==='all'?'Všetky špecializácie':s}</option>`).join('');
+  const pl = (n, one, few, many) => `${n} ${n === 1 ? one : (n >= 2 && n <= 4) ? few : many}`;  // Slovak plural forms
+  return `<div class="note">Exportuje sa len to, k čomu máte prístup. Export sa zapíše do audit logu.</div>
+  <label class="f"><span>Osoba</span><input class="in" value="${person}" disabled></label>
+  <label class="f"><span>Rozsah</span><select class="in" onchange="exp.scope=this.value;renderPanel()">${specOpts}</select></label>
+  <div class="seg"><button class="${exp.fmt==='doctor'?'on':''}" onclick="exp.fmt='doctor';renderPanel()">Pre lekára (PDF)</button><button class="${exp.fmt==='ai'?'on':''}" onclick="exp.fmt='ai';renderPanel()">Pre AI (Markdown)</button></div>
+  <label class="f"><span style="gap:8px"><input type="checkbox" ${exp.unverified?'checked':''} onchange="exp.unverified=this.checked;renderPanel()"> Zahrnúť neoverené údaje z AI</span></label>
+  <div class="note">Bude exportované: <b>${pl(vs.length,'návšteva','návštevy','návštev')}</b>, <b>${pl(ds.length,'dokument','dokumenty','dokumentov')}</b>${unver?`, z toho <b>${pl(unver,'neoverený','neoverené','neoverených')}</b> ${exp.unverified?'(budú označené ako neoverené)':'(vynechajú sa)'}`:''}.${exp.fmt==='ai'?' Formát pre AI neobsahuje meno osoby, len vek a pohlavie.':''}</div>
+  <button class="btn primary" onclick="toast('Export pripravený (simulácia)')">Exportovať</button>`;
+}
+function openPanel(p) { panel = p; render(); }
+function closePanel() { panel = null; render(); }
+function setDoc(id, s) { docs.find(x => x.id === id).state = s; render(); }
+function runAI(id) { setDoc(id, 'running'); setTimeout(() => { setDoc(id, quota ? 'waiting' : 'proposed'); }, 1200); }
+function acceptDoc(id) { const dc = docs.find(x => x.id === id); const g = k => document.getElementById('pf-' + k).value; if (!visits.some(v => v.p === dc.p && v.d === g('d') && v.spec === g('spec'))) visits.push({ id: Date.now(), p: dc.p, d: g('d'), spec: g('spec'), doc: g('doc'), dx: g('dx'), note: g('note') + ' (z dokumentu, AI)' }); dc.state = 'verified'; toast('Uložené ako overené'); render(); }
+document.addEventListener('click', e => {
+  const pe = e.target.closest('[data-person]'); if (pe) { person = pe.dataset.person; panel = null; render(); return; }
+  const tb = e.target.closest('[data-tab]'); if (tb) { tab = tb.dataset.tab; render(); return; }
+  const dm = e.target.closest('[data-dmode]'); if (dm) { dmode = dm.dataset.dmode; render(); return; }
+  const fl = e.target.closest('[data-filter]'); if (fl) { filter = fl.dataset.filter; render(); return; }
+  const ac = e.target.closest('[data-acc]'); if (ac) { open[ac.dataset.acc] = !open[ac.dataset.acc]; render(); return; }
+  const dc = e.target.closest('[data-doc]'); if (dc) { openPanel({ t:'doc', id:+dc.dataset.doc }); return; }
+  const vs = e.target.closest('[data-visit]'); if (vs) { openPanel({ t:'visit', id:+vs.dataset.visit }); }
+});
+function setView(v, btn) { view = v; document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); render(); }
+function toggleQuota(btn) { quota = !quota; btn.classList.toggle('on', quota); }
+function applySide() { const w = document.getElementById('frame').getBoundingClientRect().width; document.getElementById('app').classList.toggle('open', w >= 1024); }
+new ResizeObserver(applySide).observe(document.getElementById('frame'));
+function setW(w, btn) { document.getElementById('frame').style.width = w; document.querySelectorAll('#sketch-tools button').forEach(b => { if (/Mobil|iPad|Desktop/.test(b.textContent)) b.classList.remove('on'); }); btn.classList.add('on'); }
+function toggleDark(btn) { const r = document.documentElement; const d = r.dataset.theme === 'dark'; r.dataset.theme = d ? 'light' : 'dark'; btn.classList.toggle('on', !d); }
+render();
+</script>
+</body>
+</html>

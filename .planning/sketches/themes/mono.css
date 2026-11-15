@@ -1,0 +1,60 @@
+/* Monochrome theme (Notion-like): white and grey, near-black accent, sharper shapes. */
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-2: #f6f6f4;
+  --color-border: #e6e6e3;
+  --color-text: #191919;
+  --color-text-muted: #75756f;
+  --color-primary: #191919;
+  --color-primary-hover: #000000;
+  --color-primary-soft: #efefed;
+  --color-on-primary: #ffffff;
+  --color-accent: #2f6fdb;
+  --color-danger: #c4443a;
+  --color-success: #2f8f5b;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  --shadow-sm: none;
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10);
+}
+:root[data-theme="dark"] {
+  --color-bg: #191919;
+  --color-surface: #202020;
+  --color-surface-2: #282828;
+  --color-border: #343434;
+  --color-text: #ededeb;
+  --color-text-muted: #9b9b95;
+  --color-primary: #ededeb;
+  --color-primary-hover: #ffffff;
+  --color-primary-soft: #2c2c2c;
+  --color-on-primary: #151515;
+  --color-accent: #6a9bf0;
+  --color-danger: #e2685d;
+  --color-success: #5cb98a;
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.55);
+}

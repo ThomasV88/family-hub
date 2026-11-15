@@ -1,0 +1,68 @@
+/* Family Hub sketch theme: calm, neutral, minimalist. Variables only. */
+:root {
+  /* Colors (light) */
+  --color-bg: #fbfbfa;
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f4f2;
+  --color-border: #e8e8e5;
+  --color-text: #1f1f1d;
+  --color-text-muted: #737370;
+  --color-primary: #3b6ea8;
+  --color-primary-hover: #2f5c8f;
+  --color-primary-soft: #e8f0f8;
+  --color-on-primary: #ffffff;
+  --color-accent: #c7893a;
+  --color-danger: #c4503f;
+  --color-success: #4a8f64;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* Shapes */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,0.10);
+}
+
+/* Dark theme: toggled with data-theme="dark" on <html> */
+:root[data-theme="dark"] {
+  --color-bg: #191918;
+  --color-surface: #222220;
+  --color-surface-2: #2a2a28;
+  --color-border: #343431;
+  --color-text: #ececea;
+  --color-text-muted: #9a9a95;
+  --color-primary: #7aa6d6;
+  --color-primary-hover: #93b6de;
+  --color-primary-soft: #26323f;
+  --color-on-primary: #0f1b27;
+  --color-accent: #d9a05a;
+  --color-danger: #e0735f;
+  --color-success: #6fb088;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,0.5);
+}

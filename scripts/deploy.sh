@@ -1,0 +1,302 @@
+#!/usr/bin/env bash
+# Server deploy for the production and staging stacks. Run from the stack directory:
+#   IMAGE_TAG=sha-<commit> bash ./deploy.sh
+# Exit 0 only when the core stack (app, worker, scheduler, nginx) is healthy and the smoke test passed. The optional ai-worker is
+# started afterwards and never gates the deploy or the rollback.
+#
+# Order: guards -> pull -> postgres -> encrypted pre-migrate backup (restic, backup.sh) -> migrate
+#        (one-shot owner-role container) -> [staging reseed + audit] -> certificate -> up (healthchecks)
+#        -> .last-good-tag -> ai-worker (non-gating). Migrations never run without a fresh backup. If `up` fails, the previous
+#        good tag is started again. Migrations are additive in this project; a destructive migration
+#        needs a manual restore from the `pre-migrate` restic snapshot (restore-drill.sh documents it).
+# Never prints the content of .env, app.env, migrate.env, ai-worker.env or secrets/*.
+# With DEPLOY_SH_SOURCE_ONLY=1 only the guard functions are defined (used by test-deploy-guards.sh).
+set -euo pipefail
+
+log() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"; }
+err() { printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&2; }
+
+# Reads KEY=value from .env without sourcing it.
+env_get() { sed -n "s/^$1=//p" .env 2>/dev/null | head -n1 | tr -d "'\"\r"; }
+appenv_get() { sed -n "s/^$1=//p" app.env 2>/dev/null | head -n1 | tr -d "'\"\r "; }
+
+# ai-worker.env is deliberately not required: the ai-worker never gates the app deploy (see ai_env_present).
+REQUIRED_FILES=(.env app.env migrate.env compose.server.yaml backup.sh smoke-server.sh postgres-init/01-roles.sh)
+REQUIRED_SECRETS=(secrets/db_root_password secrets/db_owner_password secrets/db_app_password secrets/restic_password secrets/cloudflare.ini)
+
+# The ai-worker is optional. Without a non-empty ai-worker.env its steps are skipped with a warning and the core app deploys.
+ai_env_present() { [ -s ai-worker.env ]; }
+
+# Production only: MAIL_NETWORK in .env joins app, worker and scheduler to the mail stack's docker network through the overlay
+# compose.server.mail.yaml (staging leaves it unset and keeps MAIL_MAILER=log). The overlay file must exist when it is set.
+guard_mail_overlay() {
+  [ -z "$(env_get MAIL_NETWORK)" ] && return 0
+  if [ ! -f compose.server.mail.yaml ]; then
+    err "MAIL_NETWORK=$(env_get MAIL_NETWORK) needs compose.server.mail.yaml in $(pwd). Nothing deployed."
+    return 1
+  fi
+}
+
+guard_inputs() {
+  if [ -z "${IMAGE_TAG:-}" ]; then
+    err "IMAGE_TAG is missing (expected sha-<commit>). Nothing deployed."
+    return 1
+  fi
+  if ! [[ "$IMAGE_TAG" =~ ^sha-[0-9a-f]{7,40}$ ]]; then
+    err "IMAGE_TAG does not match ^sha-[0-9a-f]{7,40}\$. Nothing deployed."
+    return 1
+  fi
+  local f bad=0
+  for f in "${REQUIRED_FILES[@]}" "${REQUIRED_SECRETS[@]}"; do
+    if [ ! -s "$f" ]; then
+      err "Missing or empty required file: $f"
+      bad=1
+    fi
+  done
+  local key
+  for key in COMPOSE_PROJECT_NAME EDGE_ALIAS APP_DOMAIN IMAGE_PREFIX STACK_ENV; do
+    if [ -z "$(env_get "$key")" ]; then
+      err "$key is missing in .env"
+      bad=1
+    fi
+  done
+  [ "$bad" = 0 ] || { err "Nothing deployed."; return 1; }
+  if ! ai_env_present; then
+    err "WARNING: ai-worker.env is missing or empty; the ai-worker is skipped (AI extraction unavailable). The app deploy continues."
+  fi
+}
+
+# .env is read by compose and this script only; credentials belong in app.env, migrate.env or secrets/.
+guard_env_has_no_passwords() {
+  # Keys ending in _FILE (RESTIC_PASSWORD_FILE, BACKUP_COPY_PASSWORD_FILE) hold paths, not secrets.
+  if grep -v '^[[:space:]]*#' .env 2>/dev/null | grep -Ei '^[^=]*(PASSWORD|APP_KEY)[^=]*=' \
+    | grep -Eivq '^[[:space:]]*[A-Za-z0-9_]*_FILE[[:space:]]*='; then
+    err ".env contains PASSWORD or APP_KEY lines; they belong in app.env, migrate.env or secrets/. Nothing deployed."
+    return 1
+  fi
+}
+
+# Prints the sha-* tagged app/nginx/ai images of this stack that are neither the deployed tag nor the last good
+# tag (the rollback target). `docker image prune` alone only removes dangling images, never tagged ones.
+stale_images() {
+  local prefix keep_a keep_b ref
+  prefix=$(env_get IMAGE_PREFIX)
+  keep_a="${IMAGE_TAG:-}"
+  keep_b=$(cat .last-good-tag 2>/dev/null || true)
+  docker image ls --format '{{.Repository}}:{{.Tag}}' | while IFS= read -r ref; do
+    case "$ref" in
+      "$prefix-app:sha-"*|"$prefix-nginx:sha-"*|"$prefix-ai:sha-"*) ;;
+      *) continue ;;
+    esac
+    [ "${ref#*:}" = "$keep_a" ] && continue
+    [ "${ref#*:}" = "$keep_b" ] && continue
+    printf '%s\n' "$ref"
+  done
+}
+
+# secrets/* must be exactly 0600, except the three database passwords, which the postgres image user (gid 70) reads
+# through Docker secrets and which are 0600 or 0640 (server-provision.sh sets 0640 with group 70). The env files
+# must not be accessible to others.
+guard_secrets() {
+  local f mode want bad=0
+  for f in "${REQUIRED_SECRETS[@]}"; do
+    [ -e "$f" ] || continue
+    mode=$(stat -c %a "$f")
+    want="600"
+    case "$f" in secrets/db_root_password|secrets/db_owner_password|secrets/db_app_password) want="600 640" ;; esac
+    case " $want " in
+      *" $mode "*) ;;
+      *) err "$f has mode $mode (expected ${want// / or })"; bad=1 ;;
+    esac
+  done
+  for f in .env app.env migrate.env ai-worker.env; do
+    [ -e "$f" ] || continue
+    mode=$(stat -c %a "$f")
+    if [ $((8#$mode & 8#007)) != 0 ]; then
+      err "$f is accessible to others (mode $mode)"
+      bad=1
+    fi
+  done
+  [ "$bad" = 0 ] || { err "Nothing deployed."; return 1; }
+}
+
+# A staging reseed wipes the database. It needs staging in four independent places and never runs from
+# the production directory.
+guard_reseed() {
+  local reseed project here app_env
+  reseed=$(env_get STAGING_RESEED)
+  project=$(env_get COMPOSE_PROJECT_NAME)
+  app_env=$(appenv_get APP_ENV)
+  here=$(pwd -P)
+  case "$reseed" in
+    ''|0) return 0 ;;
+    1) ;;
+    *)
+      err "STAGING_RESEED must be 0, 1 or empty (got '$reseed'). Nothing deployed."
+      return 1
+      ;;
+  esac
+  if [ "$(env_get STACK_ENV)" != staging ] \
+    || [ "$project" != family-hub-staging ] \
+    || [ "$app_env" != staging ] \
+    || [ "$here" = /opt/family-hub ]; then
+    err "STAGING_RESEED=1 is only allowed on the staging stack (STACK_ENV=staging, project family-hub-staging, APP_ENV=staging, not /opt/family-hub). Nothing deployed."
+    return 1
+  fi
+}
+
+# True when the ai image of a tag exists locally. The first Phase 8 rollout has no -ai image for the last good tag, and a
+# rollback must not name a service whose image is missing (compose would abort and leave the broken tag running).
+ai_image_available() {
+  local prefix
+  prefix=$(env_get IMAGE_PREFIX)
+  docker image inspect "$prefix-ai:$1" >/dev/null 2>&1
+}
+
+guard_host() {
+  if ! docker network inspect edge >/dev/null 2>&1; then
+    err "Docker network 'edge' is missing. Nothing deployed."
+    return 1
+  fi
+}
+
+if [ "${DEPLOY_SH_SOURCE_ONLY:-}" = 1 ]; then
+  # shellcheck disable=SC2317
+  return 0 2>/dev/null || exit 0
+fi
+
+main() {
+  cd "$(dirname "$0")"
+  local here
+  here=$(pwd -P)
+
+  guard_inputs
+  guard_env_has_no_passwords
+  guard_secrets
+  guard_reseed
+  guard_host
+  guard_mail_overlay
+
+  export IMAGE_TAG
+  COMPOSE_PROJECT_NAME=$(env_get COMPOSE_PROJECT_NAME)
+  export COMPOSE_PROJECT_NAME
+  local app_domain reseed
+  app_domain=$(env_get APP_DOMAIN)
+  reseed=$(env_get STAGING_RESEED)
+
+  # Each stack keeps its own docker config so a registry login/logout of one deploy never touches another.
+  DOCKER_CONFIG=${DOCKER_CONFIG:-$here/.docker}
+  export DOCKER_CONFIG
+  # The CI registry token must not stay on the server disk.
+  trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
+
+  # compose resolves env_file of every service when it loads the project, so an absent ai-worker.env would break even
+  # `up app ...`. An empty mode-600 placeholder lets the core load; the ai-worker steps stay skipped while it is empty.
+  [ -e ai-worker.env ] || (umask 077; : > ai-worker.env)
+
+  local mail_network overlay=()
+  mail_network=$(env_get MAIL_NETWORK)
+  if [ -n "$mail_network" ]; then
+    docker network inspect "$mail_network" >/dev/null 2>&1 || { err "Docker network $mail_network is missing (is the mail stack running?). Nothing deployed."; return 1; }
+    export MAIL_NETWORK="$mail_network"
+    overlay=(-f compose.server.mail.yaml)
+  fi
+  dc() { docker compose -f compose.server.yaml ${overlay[@]+"${overlay[@]}"} "$@"; }
+
+  log "Deploying $IMAGE_TAG to $COMPOSE_PROJECT_NAME ($here)"
+  if [ "$(env_get STACK_ENV)" = production ] && [ -z "$(env_get BACKUP_COPY_REPOSITORY)" ]; then
+    err "WARNING: BACKUP_COPY_REPOSITORY is empty. Backups live on this VPS only (owner decision for Phase 1: no off-site copy); they do not survive loss of the server."
+  fi
+
+  if [ "${SKIP_PULL:-}" = 1 ]; then
+    log "Skipping pull (SKIP_PULL=1), checking local images"
+    local prefix
+    prefix=$(env_get IMAGE_PREFIX)
+    docker image inspect "$prefix-app:$IMAGE_TAG" "$prefix-nginx:$IMAGE_TAG" >/dev/null
+    if ai_env_present; then ai_image_available "$IMAGE_TAG" || err "WARNING: image $prefix-ai:$IMAGE_TAG is missing; the ai-worker will not start (AI extraction unavailable)."; fi
+  else
+    log "Pulling images"
+    dc pull app nginx
+    # The ai-worker is optional for the app: a missing or broken ai image never blocks the deploy.
+    if ai_env_present; then
+      dc pull ai-worker || err "WARNING: could not pull the ai image; the ai-worker will not start (AI extraction unavailable)."
+    fi
+  fi
+
+  log "Starting postgres"
+  dc up -d --wait postgres
+
+  # Encrypted restic snapshot tagged pre-migrate (plan 01-06). No plaintext dump files are written here.
+  log "Pre-migration backup"
+  if ! bash ./backup.sh pre-migrate; then
+    err "Pre-migration backup failed, migration not run. The previous version keeps running."
+    exit 1
+  fi
+
+  log "Migrating (owner role, one-shot container)"
+  if ! dc --profile migrate run --rm --no-deps -T migrate; then
+    err "Migration failed. The previous version keeps running; recover from the pre-migrate snapshot if needed."
+    exit 1
+  fi
+
+  if [ "$reseed" = 1 ]; then
+    log "Staging reseed"
+    if ! dc run --rm --no-deps -T app php artisan staging:seed --force; then
+      err "staging:seed failed. Staging data may be partial; the next deploy reseeds."
+      exit 1
+    fi
+    if ! dc run --rm --no-deps -T app php artisan staging:audit; then
+      err "Staging audit failed (staging data is not clean). Nothing started."
+      exit 1
+    fi
+  fi
+
+  # letsencrypt/live is root-owned; the check runs inside the certbot container (cert-renew.sh exists)
+  if ! bash ./cert-renew.sh exists; then
+    log "Issuing certificate for $app_domain"
+    bash ./cert-renew.sh issue
+  fi
+
+  log "Starting services"
+  # The tag is recorded as good only after the core containers are healthy AND the live smoke test passes. The
+  # ai-worker is deliberately not part of this gate (it is optional, and a first rollout may have no ai image yet).
+  if dc up -d --wait --remove-orphans app worker scheduler nginx \
+     && { [ "${SKIP_SMOKE:-}" = 1 ] || bash ./smoke-server.sh "$app_domain" "$(env_get STACK_ENV)"; }; then
+    printf '%s\n' "$IMAGE_TAG" > .last-good-tag
+    log "Healthy and smoke test passed. Recorded $IMAGE_TAG as last good tag."
+  else
+    err "Services did not become healthy or the smoke test failed."
+    if [ -s .last-good-tag ]; then
+      local good
+      good=$(cat .last-good-tag)
+      err "Rolling back to $good"
+      IMAGE_TAG=$good dc up -d --wait --remove-orphans app worker scheduler nginx || err "Rollback to $good also failed."
+      if ! ai_env_present; then
+        err "ai-worker.env is missing or empty; leaving the ai-worker alone."
+      elif ai_image_available "$good"; then
+        IMAGE_TAG=$good dc up -d --wait ai-worker || err "ai-worker of $good did not start (AI extraction unavailable)."
+      else
+        err "No ai image for $good; stopping the ai-worker of the failed deploy (AI extraction unavailable)."
+        dc stop ai-worker >/dev/null 2>&1 || true
+      fi
+    else
+      err "No .last-good-tag to roll back to."
+    fi
+    exit 1
+  fi
+
+  # Second, non-gating step: an ai-worker problem (preflight, missing env value, missing image) disables AI only.
+  log "Starting the ai-worker (non-gating)"
+  if ! ai_env_present; then
+    err "WARNING: skipping the ai-worker: ai-worker.env is missing or empty (create it from ops/env/ai-worker.env.example, mode 600). The app deploy stands."
+  elif ! dc up -d --wait ai-worker; then
+    err "WARNING: the ai-worker did not become healthy. The app deploy stands; AI extraction is unavailable until it is fixed (docker compose logs ai-worker)."
+  fi
+
+  docker image prune -f >/dev/null || true
+  # Containers still using an image make `rmi` fail, which is the desired safety net.
+  stale_images | while IFS= read -r ref; do docker rmi "$ref" >/dev/null 2>&1 || true; done
+  log "Deploy finished"
+}
+
+main "$@"

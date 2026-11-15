@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="sk" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch 008: Nastavenia</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font-sans); background: #d9d9d6; color: var(--color-text); padding-top: 52px; }
+:root[data-theme="dark"] body { background: #0e0e0d; }
+#variant-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9998; background: #fff; border-bottom: 1px solid #ddd; padding: 8px 16px; display: flex; gap: 8px; font-family: system-ui; flex-wrap: wrap; }
+.variant-tab { border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 13px; transition: all .15s ease; color: #222; }
+.variant-tab:hover { background: #f0f0f0; }
+.variant-tab.active { background: #222; color: #fff; border-color: #222; }
+.stage { display: flex; justify-content: center; padding: 16px; }
+.frame { container-type: inline-size; container-name: frame; width: 100%; max-width: 1280px; height: calc(100vh - 92px); min-height: 560px; background: var(--color-bg); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-lg); position: relative; transition: width .2s ease; }
+
+/* Shell */
+.app { display: flex; height: 100%; color: var(--color-text); position: relative; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); border-bottom: 1px solid var(--color-border); }
+.topbar h1 { font-size: var(--text-lg); font-weight: 600; margin: 0; flex: 1; letter-spacing: -.01em; }
+.body { flex: 1; display: flex; min-height: 0; position: relative; }
+.content { flex: 1; overflow: auto; padding: var(--space-6); padding-bottom: 100px; min-width: 0; container-type: inline-size; container-name: content; }
+.icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.icon.s { width: 14px; height: 14px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); padding: 7px 12px; border-radius: var(--radius-md); font: inherit; font-size: var(--text-sm); cursor: pointer; transition: all .15s ease; min-height: 36px; }
+.btn:hover { background: var(--color-surface-2); }
+.btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
+.btn.primary:hover { background: var(--color-primary-hover); }
+.btn.danger { color: var(--color-danger); border-color: var(--color-danger); background: transparent; }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--color-text-muted); }
+.btn.sm { min-height: 30px; padding: 4px 10px; font-size: var(--text-xs); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--color-primary-soft); color: var(--color-primary); display: inline-grid; place-items: center; font-size: 11px; font-weight: 700; flex: none; }
+.side { display: none; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3); border-right: 1px solid var(--color-border); width: 64px; align-items: center; overflow: hidden; transition: width .2s ease; }
+.side .brand { display: flex; align-items: center; gap: 8px; font-weight: 650; padding: 4px 12px 16px; }
+.side .brand .logo { width: 22px; height: 22px; border-radius: 6px; background: var(--color-primary); flex: none; }
+.side .spacer { flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--radius-md); color: var(--color-text-muted); cursor: pointer; border: 0; background: none; font: inherit; font-size: var(--text-sm); width: 44px; justify-content: center; transition: all .15s ease; }
+.nav-item:hover { background: var(--color-surface-2); color: var(--color-text); }
+.nav-item.active { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
+.label, .brand span { display: none; }
+.app.open .side { width: 232px; align-items: stretch; }
+.app.open .label, .app.open .brand span { display: inline; }
+.app.open .nav-item { width: 100%; justify-content: flex-start; padding: 8px 12px; }
+.bottom { display: flex; position: absolute; left: 0; right: 0; bottom: 0; background: var(--color-surface); border-top: 1px solid var(--color-border); padding: 6px 4px 14px; justify-content: space-around; z-index: 10; }
+.bottom .nav-item { flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 11px; width: auto; flex: 1; }
+.bottom .label { display: inline; }
+.fab { position: absolute; right: 16px; bottom: 76px; z-index: 11; width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--color-primary); color: var(--color-on-primary); box-shadow: var(--shadow-md); cursor: pointer; display: grid; place-items: center; }
+.collapse-btn, .add-top { display: none; }
+@container frame (min-width: 640px) { .side { display: flex; } .bottom, .fab { display: none; } .content { padding-bottom: var(--space-6); } .collapse-btn, .add-top { display: inline-flex; } }
+
+/* Medical */
+.muted { color: var(--color-text-muted); font-size: var(--text-sm); }
+.people { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--space-3); }
+.chip { display: inline-flex; gap: 8px; align-items: center; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-muted); padding: 5px 12px 5px 6px; border-radius: 99px; font-size: var(--text-sm); cursor: pointer; transition: all .15s ease; }
+.chip.plain { padding: 5px 12px; }
+.chip:hover { background: var(--color-surface-2); }
+.chip.on { background: var(--color-primary-soft); color: var(--color-primary); border-color: var(--color-primary); font-weight: 600; }
+.pbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); margin-bottom: var(--space-4); font-size: var(--text-sm); }
+.pbar .nm { font-weight: 650; font-size: var(--text-base); }
+.pbar .meta { color: var(--color-text-muted); }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-4); overflow-x: auto; scrollbar-width: none; }
+.tabs button { border: 0; background: none; padding: 9px 14px; font: inherit; font-size: var(--text-sm); color: var(--color-text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tabs button.on { color: var(--color-primary); border-color: var(--color-primary); font-weight: 600; }
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); }
+.card h3 { margin: 0 0 var(--space-3); font-size: var(--text-sm); font-weight: 600; color: var(--color-text-muted); display: flex; align-items: center; gap: 8px; }
+.grid2 { display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1fr); margin-bottom: var(--space-4); }
+@container content (min-width: 700px) { .grid2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--color-border); font-size: var(--text-sm); }
+.row:first-of-type { border-top: 0; }
+.row.click { cursor: pointer; transition: background .15s ease; }
+.row .grow { flex: 1; min-width: 0; }
+.row .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.row .s { font-size: var(--text-xs); color: var(--color-text-muted); }
+.ic { width: 30px; height: 30px; border-radius: 8px; background: var(--color-primary-soft); color: var(--color-primary); display: grid; place-items: center; flex: none; }
+.tag { font-size: 11px; padding: 2px 9px; border-radius: 99px; background: var(--color-surface-2); color: var(--color-text-muted); white-space: nowrap; }
+.tag.ok { background: var(--color-primary-soft); color: var(--color-primary); }
+.tag.warn { background: #f6ecd9; color: #9a6a1c; }
+.tag.bad { background: #f8e9e6; color: var(--color-danger); }
+:root[data-theme="dark"] .tag.warn { background: #3a3120; color: var(--color-accent); }
+:root[data-theme="dark"] .tag.bad { background: #3a2622; }
+.emerg { border-color: var(--color-danger); }
+.emerg h3 { color: var(--color-danger); }
+.kv { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; font-size: var(--text-sm); }
+.kv dt { color: var(--color-text-muted); }
+.kv dd { margin: 0; }
+.tl { position: relative; padding-left: 22px; }
+.tl::before { content: ""; position: absolute; left: 6px; top: 6px; bottom: 6px; width: 1px; background: var(--color-border); }
+.tl .it { position: relative; padding: 0 0 14px; }
+.tl .it::before { content: ""; position: absolute; left: -20px; top: 6px; width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary); border: 2px solid var(--color-bg); }
+.tl .it .d { font-size: var(--text-xs); color: var(--color-text-muted); }
+.acc { border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); margin-bottom: 10px; overflow: hidden; }
+.acc > .h { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; font-weight: 600; font-size: var(--text-sm); }
+.acc > .h:hover { background: var(--color-surface-2); }
+.acc > .b { padding: 0 14px 6px; border-top: 1px solid var(--color-border); }
+.empty { text-align: center; padding: 26px 8px; color: var(--color-text-muted); font-size: var(--text-sm); }
+.banner { display: flex; gap: 10px; padding: 10px 14px; border-radius: var(--radius-lg); background: #f6ecd9; color: #7d5410; font-size: var(--text-sm); margin-bottom: var(--space-4); align-items: flex-start; }
+:root[data-theme="dark"] .banner { background: #3a3120; color: var(--color-accent); }
+.banner.info { background: var(--color-primary-soft); color: var(--color-primary); }
+
+/* Panel */
+.detail { position: absolute; z-index: 30; background: var(--color-surface); border-left: 1px solid var(--color-border); top: 0; bottom: 0; right: 0; width: 440px; padding: var(--space-4); overflow: auto; transform: translateX(100%); transition: transform .2s ease; box-shadow: var(--shadow-lg); }
+.detail.open { transform: none; }
+@container frame (min-width: 1000px) { .detail { position: static; flex: none; width: 440px; transform: none; box-shadow: none; display: none; } .detail.open { display: block; } }
+@container frame (max-width: 639px) { .detail { top: auto; left: 0; width: auto; max-height: 90%; border-left: 0; border-top: 1px solid var(--color-border); border-radius: 16px 16px 0 0; transform: translateY(100%); } .detail.open { transform: none; } }
+.detail h2 { margin: 0 0 var(--space-3); font-size: var(--text-lg); display: flex; align-items: center; gap: 8px; }
+.detail h2 button { margin-left: auto; }
+label.f { display: grid; gap: 5px; font-size: var(--text-sm); margin-bottom: var(--space-3); }
+label.f > span { font-weight: 600; font-size: var(--text-xs); color: var(--color-text-muted); display: flex; gap: 8px; align-items: center; }
+.in { width: 100%; padding: 8px 10px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: var(--text-sm); min-height: 38px; }
+.in:focus { outline: 2px solid var(--color-primary-soft); border-color: var(--color-primary); }
+.in.chk { border-color: var(--color-accent); }
+.docprev { border: 1px solid var(--color-border); border-radius: var(--radius-md); background: #f8f8f6; padding: 14px; margin-bottom: 12px; min-height: 130px; }
+:root[data-theme="dark"] .docprev { background: #2a2a27; }
+.docprev i { display: block; height: 7px; border-radius: 3px; background: var(--color-border); margin-bottom: 8px; }
+.docprev i:nth-child(3n) { width: 70%; } .docprev i:nth-child(4n) { width: 45%; }
+.split { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+.steps { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.note { padding: 10px 12px; border-radius: var(--radius-md); background: var(--color-surface-2); font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: 12px; }
+.seg { display: flex; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: var(--space-3); }
+.seg button { flex: 1; border: 0; background: var(--color-surface); color: var(--color-text-muted); padding: 8px; font: inherit; font-size: var(--text-sm); cursor: pointer; }
+.seg button.on { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
+.toast { position: fixed; left: 50%; bottom: 70px; transform: translate(-50%, 20px); background: var(--color-text); color: var(--color-bg); padding: 10px 16px; border-radius: var(--radius-md); font-size: var(--text-sm); opacity: 0; pointer-events: none; transition: all .2s ease; z-index: 9500; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: sp .8s linear infinite; vertical-align: -2px; }
+@keyframes sp { to { transform: rotate(360deg); } }
+
+#sketch-tools { position: fixed; bottom: 12px; right: 12px; z-index: 9999; font-family: system-ui; font-size: 12px; background: rgba(0,0,0,.75); color: #fff; padding: 8px 12px; border-radius: 8px; opacity: .45; transition: opacity .2s; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; max-width: 92vw; }
+#sketch-tools:hover { opacity: 1; }
+#sketch-tools button { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 3px 8px; font-size: 12px; cursor: pointer; }
+#sketch-tools button.on { background: #fff; color: #000; }
+
+/* Settings */
+.snav { display: flex; flex-direction: column; gap: 2px; }
+.snav button { display: flex; align-items: center; gap: 10px; border: 0; background: none; font: inherit; font-size: var(--text-sm); color: var(--color-text-muted); padding: 9px 12px; border-radius: var(--radius-md); cursor: pointer; text-align: left; }
+.snav button:hover { background: var(--color-surface-2); }
+.snav button.on { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
+.slayout { display: grid; gap: var(--space-4); grid-template-columns: minmax(0,1fr); }
+@container content (min-width: 760px) { .slayout.split2 { grid-template-columns: 210px minmax(0,1fr); } }
+.sec { margin-bottom: var(--space-6); }
+.sec > h2 { font-size: var(--text-base); margin: 0 0 4px; }
+.sec > p { margin: 0 0 var(--space-3); color: var(--color-text-muted); font-size: var(--text-sm); }
+.mx { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.mx th { text-align: left; font-weight: 600; font-size: var(--text-xs); color: var(--color-text-muted); padding: 8px 8px; border-bottom: 1px solid var(--color-border); white-space: nowrap; }
+.mx td { padding: 10px 8px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.mx tr:last-child td { border-bottom: 0; }
+.mxwrap { overflow-x: auto; }
+.who { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.who .nm { font-weight: 550; } .who .sub { font-size: var(--text-xs); color: var(--color-text-muted); }
+select.lv { border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: var(--text-xs); padding: 5px 8px; min-height: 32px; }
+select.lv.none { color: var(--color-text-muted); }
+select.lv.edit, select.lv.manage { border-color: var(--color-primary); color: var(--color-primary); }
+select.lv[disabled] { opacity: .6; }
+.mlist { display: none; }
+@container content (max-width: 640px) { .mxwrap { display: none; } .mlist { display: block; } }
+.mem { border-top: 1px solid var(--color-border); padding: 12px 0; } .mem:first-child { border-top: 0; }
+.mem .mod { display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: var(--text-sm); } .mem .mod span:first-child { flex: 1; }
+.sw { position: relative; width: 38px; height: 22px; border-radius: 99px; background: var(--color-border); border: 0; cursor: pointer; flex: none; transition: background .15s ease; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s ease; }
+.sw.on { background: var(--color-primary); } .sw.on::after { transform: translateX(16px); }
+.agent { display: grid; gap: 10px; }
+.agent .top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.agent .top .nm { font-weight: 650; }
+.rank { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--color-border); display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--color-text-muted); flex: none; }
+.cmd { font-family: ui-monospace, monospace; font-size: 12px; background: var(--color-surface-2); padding: 8px 10px; border-radius: var(--radius-md); overflow-x: auto; white-space: nowrap; }
+.seg.inl { display: inline-flex; margin: 0; max-width: 100%; } .seg.inl button { padding: 6px 14px; flex: none; }
+.pill { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-text-muted); display: inline-block; }
+.dot.ok { background: #3a8a5a; } .dot.warn { background: #c8892b; } .dot.bad { background: var(--color-danger); }
+</style>
+</head>
+<body>
+<div id="variant-nav">
+  <button class="variant-tab active" onclick="setView('a', this)">A: Sekcie vľavo</button>
+  <button class="variant-tab" onclick="setView('b', this)">B: Jedna stránka</button>
+  <button class="variant-tab" onclick="setView('c', this)">C: Matica práv ako domov</button>
+</div>
+<div class="stage">
+  <div class="frame" id="frame">
+    <div class="app rail" id="app">
+      <aside class="side" id="side"></aside>
+      <div class="main">
+        <div class="topbar">
+          <button class="btn collapse-btn" onclick="document.getElementById('app').classList.toggle('open')" aria-label="Prepnúť panel"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9 5v14"/></svg></button>
+          <h1>Nastavenia</h1><button class="avatar">TV</button>
+        </div>
+        <div class="body"><div class="content" id="content"></div><aside class="detail" id="detail"></aside></div>
+      </div>
+      <nav class="bottom" id="bottom"></nav>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div id="sketch-tools">
+  <span>Rámec:</span>
+  <button onclick="setW('390px', this)">Mobil 390</button>
+  <button onclick="setW('820px', this)">iPad 820</button>
+  <button class="on" onclick="setW('100%', this)">Desktop</button>
+  <button onclick="toggleDark(this)">Tmavý režim</button>
+</div>
+<script>
+const ICONS = {
+  home: '<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  tasks: '<path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>',
+  gift: '<path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7a3 3 0 1 0-3-3c0 2 3 3 3 3zm0 0a3 3 0 1 1 3-3c0 2-3 3-3 3z"/>',
+  money: '<path d="M3 7h18v12H3zM3 11h18M7 15h3"/>',
+  health: '<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  doc: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/>',
+  visit: '<path d="M8 2v4M16 2v4M3 9h18M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>',
+  shot: '<path d="M18 2l4 4M17 7l3-3M3 21l7-7M14 6l4 4-8 8H6v-4zM2 22l2-2"/>',
+  pill: '<path d="M10.5 20.5a5 5 0 0 1-7-7l10-10a5 5 0 0 1 7 7zM8.5 8.5l7 7"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  chev: '<path d="M6 9l6 6 6-6"/>',
+  sparkle: '<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>'
+};
+const ico = (n, c='') => `<svg class="icon ${c}" viewBox="0 0 24 24">${ICONS[n]}</svg>`;
+const NAV = [['home','Prehľad'],['tasks','Úlohy'],['gift','Wishlist'],['money','Financie'],['health','Zdravie']];
+const MODS = [['tasks','Úlohy'],['gift','Wishlist'],['money','Financie'],['health','Zdravie']];
+const LV = { none:'Žiadny', read:'Čítanie', edit:'Úpravy', manage:'Správa' };
+const PEOPLE = ['Jana','Peter','Ema','Tomáš','Babka Mária'];
+let members = [
+  { id:'Tomáš V.', role:'Správca', admin:true, p:{ tasks:'manage', gift:'manage', money:'manage', health:'manage' } },
+  { id:'Jana', role:'Dospelý', p:{ tasks:'edit', gift:'edit', money:'edit', health:'edit' } },
+  { id:'Peter', role:'Dospelý', p:{ tasks:'edit', gift:'edit', money:'read', health:'none' } },
+  { id:'Ema', role:'Dieťa', p:{ tasks:'edit', gift:'edit', money:'none', health:'none' } },
+  { id:'Dedo Ján', role:'Širšia rodina', p:{ tasks:'read', gift:'read', money:'none', health:'none' } }
+];
+// per-person medical grants: member -> person -> level
+let grants = {
+  'Jana': { Jana:'edit', Peter:'none', Ema:'edit', 'Tomáš':'edit', 'Babka Mária':'read' },
+  'Peter': { Jana:'none', Peter:'edit', Ema:'read', 'Tomáš':'read', 'Babka Mária':'none' },
+  'Ema': {}, 'Dedo Ján': {}
+};
+const AGENTS = [
+  { id:'codex', nm:'Codex (ChatGPT predplatné)', on:true, login:'ok', loginTxt:'Prihlásený, overené pred 2 min', model:'Predvolený', limit:null, used:'18 úloh dnes' },
+  { id:'copilot', nm:'GitHub Copilot', on:true, login:'bad', loginTxt:'Prihlásenie vypršalo', model:'Predvolený', limit:null, used:'0 úloh dnes' }
+];
+let order = ['codex','copilot'];
+let lang = 'sk', theme = 'system', sec = 'perm', view = 'a', panel = null, quotaSim = false, bulk = { scope:'failed', pace:'slow' };
+const toast = t => { const e = document.getElementById('toast'); e.textContent = t; e.classList.add('show'); setTimeout(() => e.classList.remove('show'), 1800); };
+const lvSel = (m, mod) => { const mm = members.find(x => x.id === m); const v = mm.p[mod]; return `<select class="lv ${v}" data-m="${m}" data-mod="${mod}" ${mm.admin ? 'disabled title="Správca vidí všetko"' : ''}>${Object.entries(LV).map(([k,l]) => `<option value="${k}" ${v===k?'selected':''}>${l}</option>`).join('')}</select>`; };
+const grantCount = m => { const g = grants[m] || {}; return PEOPLE.filter(p => (g[p] || 'none') !== 'none').length; };
+const healthCell = m => { const mm = members.find(x => x.id === m); if (mm.admin) return '<span class="tag">všetky osoby</span>'; if (mm.p.health === 'none') return lvSel(m,'health'); return `${lvSel(m,'health')} <button class="btn sm" data-grant="${m}">Osoby: ${grantCount(m)} z 5</button>`; };
+function perm() {
+  const rows = members.map(m => `<tr><td><div class="who"><span class="avatar">${m.id[0]}</span><div><div class="nm">${m.id}</div><div class="sub">${m.role}</div></div></div></td>${MODS.map(([k]) => `<td>${k==='health' ? healthCell(m.id) : lvSel(m.id,k)}</td>`).join('')}</tr>`).join('');
+  const cards = members.map(m => `<div class="mem"><div class="who" style="margin-bottom:6px"><span class="avatar">${m.id[0]}</span><div><div class="nm">${m.id}</div><div class="sub">${m.role}</div></div></div>${MODS.map(([k,l]) => `<div class="mod"><span>${l}</span>${k==='health'?healthCell(m.id):lvSel(m.id,k)}</div>`).join('')}</div>`).join('');
+  return `<div class="sec"><h2>Členovia a práva</h2><p>Práva sa nastavujú pre každý modul zvlášť. Financie a Zdravie sú pre nových členov predvolene vypnuté. Skryté údaje server nikdy neodošle.</p>
+  <div class="card"><div class="mxwrap"><table class="mx"><thead><tr><th>Člen</th>${MODS.map(([,l]) => `<th>${l}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div><div class="mlist">${cards}</div>
+  <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn primary" onclick="openPanel({t:'invite'})">+ Pozvať člena</button><span class="muted" style="align-self:center">Pozvánka platí 7 dní.</span></div></div>
+  <div class="note" style="margin-top:12px"><b>Čítanie</b> vidí, <b>Úpravy</b> pridáva a mení vlastné aj spoločné, <b>Správa</b> mení aj cudzie záznamy a nastavenia modulu. Pri Zdraví určujete aj to, ku ktorým osobám má člen prístup. Pri Financiách sa viditeľnosť účtov nastavuje v module.</div></div>`;
+}
+function agents() {
+  const ord = order.map(id => AGENTS.find(a => a.id === id));
+  const cards = ord.map((a, i) => { const lim = a.id === 'codex' && quotaSim;
+    const st = a.login === 'bad' ? '<span class="pill"><span class="dot bad"></span> Prihlásenie vypršalo</span>' : lim ? '<span class="pill"><span class="dot warn"></span> Limit vyčerpaný do 14:30</span>' : `<span class="pill"><span class="dot ok"></span> ${a.loginTxt}</span>`;
+    return `<div class="card agent"><div class="top"><span class="rank">${i+1}</span><span class="nm">${a.nm}</span><span class="tag ${i===0?'ok':''}">${i===0?'primárny':'záloha'}</span><span style="margin-left:auto;display:flex;gap:6px;align-items:center"><button class="btn sm ghost" data-up="${a.id}" ${i===0?'disabled':''} aria-label="Vyššie">↑</button><button class="btn sm ghost" data-down="${a.id}" ${i===ord.length-1?'disabled':''} aria-label="Nižšie">↓</button><button class="sw ${a.on?'on':''}" data-agent="${a.id}" aria-label="Zapnúť"></button></span></div>
+    <div class="muted">${st} · ${a.used}</div>
+    ${a.login==='bad' ? `<div class="banner"><span>Agent sa nemôže používať, kým sa znova neprihlásite. Tokeny appka neukladá, prihlásenie sa robí raz na serveri:</span></div><div class="cmd">docker compose exec worker ${a.id==='codex'?'codex login --device-auth':'copilot login'}</div>` : ''}
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label class="muted" for="m-${a.id}">Model</label><select class="lv" id="m-${a.id}" style="min-width:200px"><option>Predvolený (odporúčané)</option><option>Vyššia kvalita, pomalší</option><option>Rýchly, lacnejší na limit</option></select><button class="btn sm" data-check="${a.id}">Skontrolovať prihlásenie</button></div></div>`; }).join('');
+  return `<div class="sec"><h2>AI agenti</h2><p>Dokumenty sa čítajú oficiálnymi nástrojmi z vašich predplatných, nie platenými API. Skúša sa podľa poradia: keď agent dosiahne limit alebo nie je prihlásený, použije sa ďalší.</p><div style="display:grid;gap:10px">${cards}</div>
+  <div class="note" style="margin-top:12px">Claude a Antigravity v tejto verzii nie sú ponúknuté, pretože ich podmienky nepovoľujú takéto použitie predplatného na serveri. Appka nikdy nepoužije kľúč s platbou za token.</div>
+  <div class="card" style="margin-top:12px"><h3>Hromadné prepočítanie</h3><p class="muted" style="margin:0 0 10px">Znova spracuje dokumenty novšou verziou agenta alebo po oprave. Jeden dokument naraz, zvyšok počká na limit. Nič sa neuloží bez vašej kontroly.</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div class="seg inl"><button class="${bulk.scope==='failed'?'on':''}" data-bscope="failed">Len zlyhané</button><button class="${bulk.scope==='unverified'?'on':''}" data-bscope="unverified">Neoverené</button><button class="${bulk.scope==='all'?'on':''}" data-bscope="all">Všetky s AI</button></div>
+  <div class="seg inl"><button class="${bulk.pace==='slow'?'on':''}" data-bpace="slow">Pomaly, v noci</button><button class="${bulk.pace==='now'?'on':''}" data-bpace="now">Hneď</button></div><button class="btn primary" onclick="openPanel({t:'bulk'})">Spustiť…</button></div>
+  <div class="muted" style="margin-top:10px">Súhlas s AI sa vždy kontroluje podľa osoby. Osoby s vypnutým súhlasom sa nikdy nespracujú. <a href="#" onclick="toast('Otvorí sa zoznam súhlasov v Zdraví');return false">Zoznam súhlasov</a></div>
+  <div style="margin-top:10px"><button class="btn sm" onclick="quotaSim=!quotaSim;render();toast(quotaSim?'Simulácia: Codex narazil na limit':'Limit zrušený')">Simulovať limit Codexu</button></div></div></div>`;
+}
+function look() {
+  return `<div class="sec"><h2>Vzhľad a jazyk</h2><p>Platí len pre vás.</p><div class="card">
+  <div class="mod" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:6px 0"><span style="flex:1;font-size:var(--text-sm)">Jazyk</span><div class="seg inl">${[['sk','Slovenčina'],['pl','Polski'],['en','English']].map(([k,l]) => `<button class="${lang===k?'on':''}" data-lang="${k}">${l}</button>`).join('')}</div></div>
+  <div class="mod" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0 6px;border-top:1px solid var(--color-border);margin-top:8px"><span style="flex:1;font-size:var(--text-sm)">Téma</span><div class="seg inl">${[['system','Podľa zariadenia'],['light','Svetlá'],['dark','Tmavá']].map(([k,l]) => `<button class="${theme===k?'on':''}" data-th="${k}">${l}</button>`).join('')}</div></div></div></div>`;
+}
+function account() {
+  return `<div class="sec"><h2>Môj účet</h2><p>Prihlásenie a bezpečnosť.</p><div class="card">
+  <div class="row"><div class="grow"><div class="t">Heslo</div><div class="s">Zmenené pred 3 mesiacmi</div></div><button class="btn sm">Zmeniť</button></div>
+  <div class="row"><div class="grow"><div class="t">Prihlásenie cez Google</div><div class="s">Prepojené</div></div><button class="btn sm">Odpojiť</button></div>
+  <div class="row"><div class="grow"><div class="t">Dvojfaktorové overenie</div><div class="s">Aplikácia na kódy je zapnutá. Povinné pre Zdravie a Financie.</div></div><span class="tag ok">zapnuté</span></div></div></div>`;
+}
+const SECS = [['perm','Členovia a práva','lock'],['ai','AI agenti','sparkle'],['look','Vzhľad a jazyk','settings'],['acc','Môj účet','home']];
+const secHtml = k => k==='perm'?perm():k==='ai'?agents():k==='look'?look():account();
+function viewA() { const nav = SECS.map(([k,l,i]) => `<button class="${sec===k?'on':''}" data-sec="${k}">${ico(i,'s')} ${l}</button>`).join(''); return `<div class="slayout split2"><nav class="snav">${nav}</nav><div>${secHtml(sec)}</div></div>`; }
+function viewB() { return SECS.map(([k]) => secHtml(k)).join(''); }
+function viewC() { const tabs = [['perm','Práva'],['ai','AI agenti'],['look','Vzhľad a jazyk'],['acc','Môj účet']].map(([k,l]) => `<button class="${sec===k?'on':''}" data-sec="${k}">${l}</button>`).join(''); return `<div class="tabs">${tabs}</div>${secHtml(sec)}`; }
+function render() {
+  const c = document.getElementById('content'), y = c.scrollTop;
+  c.innerHTML = view==='a'?viewA():view==='b'?viewB():viewC();
+  c.scrollTop = y;
+  const nav = NAV.map(([id,l]) => `<button class="nav-item" title="${l}">${ico(id)}<span class="label">${l}</span></button>`).join('');
+  document.getElementById('side').innerHTML = `<div class="brand"><div class="logo"></div><span>Family Hub</span></div>${nav}<div class="spacer"></div><button class="nav-item active" title="Nastavenia">${ico('settings')}<span class="label">Nastavenia</span></button>`;
+  document.getElementById('bottom').innerHTML = nav;
+  renderPanel();
+}
+function openPanel(p) { panel = p; renderPanel(); } function closePanel() { panel = null; renderPanel(); }
+function renderPanel() {
+  const d = document.getElementById('detail'); d.classList.toggle('open', !!panel);
+  if (!panel) { d.innerHTML = ''; return; }
+  const head = t => `<h2>${t} <button class="btn ghost" onclick="closePanel()" aria-label="Zavrieť">${ico('close')}</button></h2>`;
+  if (panel.t === 'grant') {
+    const m = panel.m, g = grants[m] = grants[m] || {};
+    d.innerHTML = head(`Zdravie: ${m}`) + `<p class="muted">Vyberte, ktorých osobných záznamov sa člen môže dotknúť. Osoby bez konta (Tomáš, Babka Mária) patria rodine, prístup im určujete tu.</p><div class="card">${PEOPLE.map(p => `<div class="mod" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--color-border)"><span class="avatar">${p[0]}</span><span style="flex:1;font-size:var(--text-sm)">${p}</span><select class="lv ${g[p]||'none'}" data-gm="${m}" data-gp="${p}">${[['none','Žiadny'],['read','Čítanie'],['edit','Úpravy']].map(([k,l]) => `<option value="${k}" ${(g[p]||'none')===k?'selected':''}>${l}</option>`).join('')}</select></div>`).join('')}</div><div class="note" style="margin-top:12px">Export zdravotných údajov a spúšťanie AI vyžadujú Úpravy. Súhlas s AI sa nastavuje na profile osoby, nie tu.</div><button class="btn primary" onclick="closePanel();toast('Prístup uložený')">Hotovo</button>`;
+  } else if (panel.t === 'invite') {
+    d.innerHTML = head('Pozvať člena') + `<label class="f"><span>E-mail</span><input class="in" placeholder="meno@example.com"></label><label class="f"><span>Šablóna práv</span><select class="in"><option>Dospelý</option><option>Dieťa</option><option selected>Širšia rodina</option></select></label><div class="note">Šablóna vyplní Úlohy a Wishlist. Financie a Zdravie ostanú na Žiadny, kým ich nenastavíte v matici.</div><label class="f"><span>Jazyk pozvánky</span><select class="in"><option>Slovenčina</option><option>Polski</option><option>English</option></select></label><button class="btn primary" onclick="closePanel();toast('Pozvánka odoslaná')">Odoslať pozvánku</button>`;
+  } else {
+    const n = { failed:'3 dokumenty', unverified:'7 dokumentov', all:'12 dokumentov' }[bulk.scope];
+    d.innerHTML = head('Spustiť hromadné prepočítanie') + `<div class="card"><dl class="kv"><dt>Rozsah</dt><dd>${{failed:'Len zlyhané',unverified:'Neoverené návrhy',all:'Všetky s AI'}[bulk.scope]}</dd><dt>Dokumentov</dt><dd>${n}</dd><dt>Tempo</dt><dd>${bulk.pace==='slow'?'Pomaly, v noci (22:00 až 06:00)':'Hneď, jeden po druhom'}</dd><dt>Vynechané</dt><dd>2 dokumenty osôb bez súhlasu s AI</dd><dt>Agent</dt><dd>${quotaSim?'Copilot (Codex je na limite)':'Codex'}</dd></dl></div><div class="note" style="margin-top:12px">Pri limite agenta sa zvyšok počká a pokračuje sa sám. Výsledky sú len návrhy na kontrolu.</div><button class="btn primary" onclick="closePanel();toast('Prepočítanie naplánované')">Naplánovať</button>`;
+  }
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-sec]'); if (t) { sec = t.dataset.sec; render(); return; }
+  const g = e.target.closest('[data-grant]'); if (g) { openPanel({ t:'grant', m:g.dataset.grant }); return; }
+  const l = e.target.closest('[data-lang]'); if (l) { lang = l.dataset.lang; render(); toast('Jazyk sa zmení v celej appke'); return; }
+  const th = e.target.closest("[data-th]"); if (th) { theme = th.dataset.th; render(); return; }
+  const sw = e.target.closest('[data-agent]'); if (sw) { const a = AGENTS.find(x => x.id === sw.dataset.agent); a.on = !a.on; render(); return; }
+  const up = e.target.closest('[data-up]'); if (up) { const i = order.indexOf(up.dataset.up); [order[i-1], order[i]] = [order[i], order[i-1]]; render(); return; }
+  const dn = e.target.closest('[data-down]'); if (dn) { const i = order.indexOf(dn.dataset.down); [order[i+1], order[i]] = [order[i], order[i+1]]; render(); return; }
+  const ck = e.target.closest('[data-check]'); if (ck) { toast('Prihlásenie sa overuje…'); return; }
+  const bs = e.target.closest('[data-bscope]'); if (bs) { bulk.scope = bs.dataset.bscope; render(); return; }
+  const bp = e.target.closest('[data-bpace]'); if (bp) { bulk.pace = bp.dataset.bpace; render(); }
+});
+document.addEventListener('change', e => {
+  const s = e.target;
+  if (s.dataset.mod) { const m = members.find(x => x.id === s.dataset.m); m.p[s.dataset.mod] = s.value; if (s.dataset.mod==='health' && s.value!=='none' && !Object.values(grants[m.id]||{}).some(v=>v!=='none')) toast('Vyberte osoby, ku ktorým má mať prístup'); render(); if (s.dataset.mod==='health' && s.value!=='none') openPanel({ t:'grant', m:m.id }); }
+  if (s.dataset.gm) { grants[s.dataset.gm][s.dataset.gp] = s.value; s.className = 'lv ' + s.value; render(); panel = { t:'grant', m:s.dataset.gm }; renderPanel(); }
+});
+function setView(v, btn) { view = v; document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); render(); }
+function applySide() { const w = document.getElementById('frame').getBoundingClientRect().width; document.getElementById('app').classList.toggle('open', w >= 1024); }
+new ResizeObserver(applySide).observe(document.getElementById('frame'));
+function setW(w, btn) { document.getElementById('frame').style.width = w; document.querySelectorAll('#sketch-tools button').forEach(b => { if (/Mobil|iPad|Desktop/.test(b.textContent)) b.classList.remove('on'); }); btn.classList.add('on'); }
+function toggleDark(btn) { const r = document.documentElement; const d = r.dataset.theme === 'dark'; r.dataset.theme = d ? 'light' : 'dark'; btn.classList.toggle('on', !d); }
+render();
+</script>
+</body>
+</html>

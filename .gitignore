@@ -25,3 +25,27 @@ __pycache__/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Playwright MCP screenshots and snapshots
+.playwright-mcp/
+
+# Laravel
+/vendor/
+/public/build
+/public/hot
+/public/storage
+/public/sw.js
+/public/manifest.webmanifest
+/public/workbox-*.js
+/storage/*.key
+/storage/pail
+.phpunit.cache
+.phpunit.result.cache
+auth.json
+
+# Secrets (never commit)
+app.env
+migrate.env
+/secrets/
+cloudflare.ini
+*.dump

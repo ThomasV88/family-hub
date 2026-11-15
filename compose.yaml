@@ -1,0 +1,139 @@
+# Local development stack: app (php-fpm), nginx, worker, scheduler, postgres.
+# Open http://localhost:8080/ after `docker compose up -d --build --wait`.
+# Migrations are never run on container start; run them as the owner role:
+#   docker compose run --rm -e DB_USERNAME=fh_owner -e DB_PASSWORD=fh_owner_dev app php artisan migrate
+
+# Private wish images (written by the worker, read by app). Backed up by scripts/backup.sh on the server;
+# the dev volume is disposable.
+x-uploads: &uploads
+  - .:/var/www/html
+  - uploads-dev:/var/www/html/storage/app/private/wish-images
+  # Private medical documents (storage/app/medical): app, worker and scheduler only (all use this anchor), never nginx or postgres.
+  - medical-dev:/var/www/html/storage/app/medical
+
+x-app: &app
+  build:
+    context: .
+    dockerfile: docker/app/Dockerfile
+    target: dev
+    args:
+      UID: ${UID:-1000}
+      GID: ${GID:-1000}
+  image: family-hub-app:dev
+  env_file: .env
+  volumes: *uploads
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=20"]
+    environment:
+      POSTGRES_PASSWORD: postgres_dev
+      FH_OWNER_PASSWORD: fh_owner_dev
+      FH_APP_PASSWORD: fh_app_dev
+      FH_CREATE_TEST_DB: "1"
+    volumes:
+      - pgdata-dev:/var/lib/postgresql
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    <<: *app
+
+  worker:
+    <<: *app
+    # Waits until migrations have been run (they never run on container start), then starts the worker.
+    command: ["sh", "-c", "until php artisan migrate:status >/dev/null 2>&1; do sleep 3; done; exec php artisan queue:work --sleep=3 --tries=3 --max-time=3600"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f '[q]ueue:work'"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # AI worker (Phase 8), only with `--profile ai`. Holds the Codex login volume; no APP_KEY (ai:preflight refuses secrets).
+  # Single concurrency, never scale. Medical documents are read-only.
+  ai-worker:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+      target: ai-worker-dev
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    image: family-hub-ai:dev
+    profiles: ["ai"]
+    restart: unless-stopped
+    init: true
+    # Not the shared .env: the ai-worker gets no APP_KEY, mail, Google or VAPID secrets (ai:preflight enforces it).
+    env_file: ops/env/ai-worker.dev.env
+    environment:
+      APP_KEY: ""
+      HOME: /codex
+      CODEX_HOME: /codex
+      COPILOT_HOME: /copilot
+      COPILOT_CACHE_HOME: /opt/copilot/cache
+      COPILOT_TELEMETRY_DISABLED: "true"
+      COPILOT_AUTO_UPDATE: "false"
+      QUEUE_CONNECTION: database
+      DB_QUEUE_RETRY_AFTER: "900"
+      AI_WORK_DIR: /ai-work
+      AI_CODEX_MODEL: ""
+    volumes:
+      - .:/var/www/html
+      # The bind mount above would let Laravel read the repo .env (APP_KEY, MAIL_*, ...): mask it with an empty file.
+      - /dev/null:/var/www/html/.env:ro
+      - medical-dev:/var/www/html/storage/app/medical:ro
+      - codex-home-dev:/codex
+      - copilot-home-dev:/copilot
+    tmpfs:
+      - /ai-work:size=192m,mode=0700,uid=1000,gid=1000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["sh", "-c", "until php artisan migrate:status >/dev/null 2>&1; do sleep 3; done; php artisan ai:preflight && exec php artisan queue:work database --queue=ai-control,ai,ai-bulk --sleep=3 --tries=1 --timeout=720 --max-jobs=100 --max-time=3600"]
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f '[q]ueue:work'"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  scheduler:
+    <<: *app
+    command: ["sh", "-c", "until php artisan migrate:status >/dev/null 2>&1; do sleep 3; done; exec php artisan schedule:work"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f '[s]chedule:work'"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  nginx:
+    image: nginx:1.29-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/nginx/dev.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx/snippets:/etc/nginx/snippets:ro
+      - ./public:/var/www/html/public:ro
+    depends_on:
+      app:
+        condition: service_started
+        restart: true  # nginx resolves `app` once at start; restart it when app is recreated
+
+volumes:
+  pgdata-dev:
+  uploads-dev:
+  medical-dev:
+  codex-home-dev:
+  copilot-home-dev:
