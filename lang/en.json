@@ -537,6 +537,23 @@
             "col_status": "Status",
             "history_empty_heading": "No bulk runs yet",
             "history_empty_body": "When you start a bulk run, its counts are listed here."
+        },
+        "security": {
+            "title": "Re-confirmation",
+            "intro": "How long members stay signed in to Health and Finances and to sensitive actions before they are asked to confirm it's them again.",
+            "idle_label": "Re-confirm after inactivity in Health and Finance",
+            "idle_help": "Between 1 minute and 24 hours. Only activity in Health and Finances keeps the time running.",
+            "confirm_label": "Re-confirm sensitive actions after",
+            "confirm_help": "Between 1 minute and 1 hour. Applies to settings such as permissions, invitations and security.",
+            "unit_minutes": "minutes",
+            "unit_hours": "hours",
+            "unit_label": "Unit",
+            "save": "Save times",
+            "saved": "Times saved",
+            "error_range": "Enter a time between {min} and {max}.",
+            "duration_minutes": "{n} minute | {n} minutes",
+            "duration_hours": "{n} hour | {n} hours",
+            "timings_toast": "Times saved"
         }
     },
     "permissions": {
@@ -716,7 +733,9 @@
             "medical_type_medication": "Medication",
             "medical_type_allergy": "Allergy",
             "medical_type_vaccination": "Vaccination",
-            "medical_type_document": "Document"
+            "medical_type_document": "Document",
+            "timings_idle": "Re-confirmation after inactivity set to {duration}",
+            "timings_confirm": "Re-confirmation of sensitive actions set to {duration}"
         },
         "page": "Page {n} of {total}",
         "prev": "Previous",

@@ -64,6 +64,6 @@ class SecurityPolicyController extends Controller
             return response()->json(['idle_seconds' => $timings->idle(), 'confirm_window_seconds' => $timings->confirmWindow()]);
         }
 
-        return back(303)->with('toast', ['key' => 'settings.security_timings.toast']);
+        return back(303)->with('toast', ['key' => 'settings.security.timings_toast']);
     }
 }

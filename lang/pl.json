@@ -537,6 +537,23 @@
             "col_status": "Status",
             "history_empty_heading": "Brak masowych przetwarzań",
             "history_empty_body": "Gdy rozpoczniesz masowe przetwarzanie, jego liczby pojawią się tutaj."
+        },
+        "security": {
+            "title": "Ponowne potwierdzenie",
+            "intro": "Jak długo członkowie pozostają zalogowani w Zdrowiu i Finansach oraz przy wrażliwych czynnościach, zanim aplikacja ponownie zapyta, czy to oni.",
+            "idle_label": "Potwierdzaj ponownie po bezczynności w Zdrowiu i Finansach",
+            "idle_help": "Od 1 minuty do 24 godzin. Czas liczy się tylko według aktywności w Zdrowiu i Finansach.",
+            "confirm_label": "Wrażliwe czynności potwierdzaj ponownie po",
+            "confirm_help": "Od 1 minuty do 1 godziny. Dotyczy ustawień takich jak uprawnienia, zaproszenia i zabezpieczenia.",
+            "unit_minutes": "minut",
+            "unit_hours": "godzin",
+            "unit_label": "Jednostka",
+            "save": "Zapisz czasy",
+            "saved": "Czasy zapisane",
+            "error_range": "Podaj czas od {min} do {max}.",
+            "duration_minutes": "{n} minuta | {n} minuty | {n} minut | {n} minuty",
+            "duration_hours": "{n} godzina | {n} godziny | {n} godzin | {n} godziny",
+            "timings_toast": "Czasy zapisane"
         }
     },
     "permissions": {
@@ -716,7 +733,9 @@
             "medical_type_medication": "Lek",
             "medical_type_allergy": "Alergia",
             "medical_type_vaccination": "Szczepienie",
-            "medical_type_document": "Dokument"
+            "medical_type_document": "Dokument",
+            "timings_idle": "Ponowne potwierdzenie po bezczynności ustawione na {duration}",
+            "timings_confirm": "Ponowne potwierdzenie wrażliwych czynności ustawione na {duration}"
         },
         "page": "Strona {n} z {total}",
         "prev": "Poprzednia",

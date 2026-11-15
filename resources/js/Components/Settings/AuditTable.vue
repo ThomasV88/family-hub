@@ -47,6 +47,12 @@ const AGENT_NAMES = { codex: 'OpenAI Codex', copilot: 'GitHub Copilot' };
 const AGENT_FIELDS = ['enabled', 'position', 'model'];
 const BULK_ACTIONS = ['dry_run', 'started', 'paused', 'resumed', 'cancelled', 'completed'];
 const BULK_SCOPES = ['no_proposal', 'last_failed', 'all'];
+// A stored window in seconds as "1 hour" / "90 minutes"; a value that is not a plain positive number shows nothing.
+function durationPhrase(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n <= 0) return '';
+    return n % 3600 === 0 ? t('settings.security.duration_hours', { n: n / 3600 }, n / 3600) : t('settings.security.duration_minutes', { n: Math.round(n / 60) }, Math.round(n / 60));
+}
 const isOn = (v) => v === true || v === 1 || v === '1' || v === 'on' || v === 'true';
 function agentSettingDetail(meta) {
     const field = AGENT_FIELDS.includes(meta.field) ? meta.field : null;
@@ -119,6 +125,9 @@ function details(row) {
         case 'second_factor_reset':
             return t('audit.detail.admin_reset', { name });
         case 'security_policy_changed':
+            if (meta.setting === 'security.idle_seconds' || meta.setting === 'security.confirm_window_seconds') {
+                return t(meta.setting === 'security.idle_seconds' ? 'audit.detail.timings_idle' : 'audit.detail.timings_confirm', { duration: durationPhrase(meta.value) });
+            }
             return t(`audit.detail.requirement_${meta.value === true || meta.value === 1 || meta.value === '1' ? 'on' : 'off'}`);
         case 'reauth_confirmed':
             return t('audit.detail.reauth_confirmed');

@@ -16,6 +16,7 @@ import InviteDialog from '../../Components/Settings/InviteDialog.vue';
 import MemberRow from '../../Components/Settings/MemberRow.vue';
 import MemberPanel from '../../Components/Settings/MemberPanel.vue';
 import SecurityRequirementCard from '../../Components/Settings/SecurityRequirementCard.vue';
+import SecurityTimingsCard from '../../Components/Settings/SecurityTimingsCard.vue';
 import HealthAccessCard from '../../Components/Settings/HealthAccessCard.vue';
 import PersonAccessPanel from '../../Components/Settings/PersonAccessPanel.vue';
 import PermissionMatrix from '../../Components/Settings/PermissionMatrix.vue';
@@ -28,6 +29,7 @@ const props = defineProps({
     invitations: { type: Array, default: () => [] },
     healthPeople: { type: Array, default: () => [] },
     securityPolicy: { type: Object, default: () => ({ required: false, pending: 0 }) },
+    securityTimings: { type: Object, default: () => ({ idleSeconds: 3600, confirmSeconds: 3600, idle: { min: 60, max: 86400 }, confirm: { min: 60, max: 3600 } }) },
     confirmFresh: { type: Boolean, default: false },
     methods: { type: Object, default: () => ({}) },
 });
@@ -99,6 +101,7 @@ function open(id, tab = 'permissions') {
         <UiTabs v-model="view" :tabs="viewTabs" :label="t('settings.section.members')">
             <template #panel-members>
                 <SecurityRequirementCard class="members__card" :security-policy="securityPolicy" :confirm-fresh="confirmFresh" :methods="methods" />
+                <SecurityTimingsCard class="members__card" :timings="securityTimings" />
                 <UiCard :title="t('settings.members.title')" class="members__card">
                     <UiList>
                         <MemberRow v-for="member in members" :key="member.id" :member="member" :selected="member.id === openId" @manage="open(member.id)" />

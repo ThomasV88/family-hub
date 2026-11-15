@@ -537,6 +537,23 @@
             "col_status": "Stav",
             "history_empty_heading": "Zatiaľ žiadne hromadné spracovania",
             "history_empty_body": "Keď spustíte hromadné spracovanie, jeho počty sa zobrazia tu."
+        },
+        "security": {
+            "title": "Opätovné potvrdenie",
+            "intro": "Ako dlho zostávajú členovia prihlásení v Zdraví a Financiách a pri citlivých akciách, kým sa ich app znova opýta, či sú to oni.",
+            "idle_label": "Znova potvrdiť po nečinnosti v Zdraví a Financiách",
+            "idle_help": "Od 1 minúty do 24 hodín. Čas beží len podľa aktivity v Zdraví a Financiách.",
+            "confirm_label": "Citlivé akcie znova potvrdiť po",
+            "confirm_help": "Od 1 minúty do 1 hodiny. Platí pre nastavenia ako oprávnenia, pozvánky a zabezpečenie.",
+            "unit_minutes": "minút",
+            "unit_hours": "hodín",
+            "unit_label": "Jednotka",
+            "save": "Uložiť časy",
+            "saved": "Časy uložené",
+            "error_range": "Zadajte čas od {min} do {max}.",
+            "duration_minutes": "{n} minúta | {n} minúty | {n} minúty | {n} minút",
+            "duration_hours": "{n} hodina | {n} hodiny | {n} hodiny | {n} hodín",
+            "timings_toast": "Časy uložené"
         }
     },
     "permissions": {
@@ -716,7 +733,9 @@
             "medical_type_medication": "Liek",
             "medical_type_allergy": "Alergia",
             "medical_type_vaccination": "Očkovanie",
-            "medical_type_document": "Dokument"
+            "medical_type_document": "Dokument",
+            "timings_idle": "Opätovné potvrdenie po nečinnosti nastavené na {duration}",
+            "timings_confirm": "Opätovné potvrdenie citlivých akcií nastavené na {duration}"
         },
         "page": "Strana {n} z {total}",
         "prev": "Predchádzajúca",
