@@ -1,0 +1,26 @@
+# Overlay: joins the services that send mail to the external docker network of the mail stack (/opt/mail runs on its own).
+# Production only: scripts/deploy.sh adds this file when .env has MAIL_NETWORK=mail. Staging holds synthetic data only and
+# keeps MAIL_MAILER=log without this overlay.
+#   app        password reset and invitation mails (sent while the request runs)
+#   worker     queued mail
+#   scheduler  outbox:dispatch (reminder mail and push)
+# Never the database, nginx or the ai-worker: scripts/check-compose.sh fails if any of those joins the mail network.
+# The app reaches Stalwart as mail.vostack.dev (alias inside the mail network), so the certificate verifies without hairpin NAT.
+services:
+  app:
+    networks:
+      default: {}
+      mail: {}
+  worker:
+    networks:
+      default: {}
+      mail: {}
+  scheduler:
+    networks:
+      default: {}
+      mail: {}
+
+networks:
+  mail:
+    external: true
+    name: ${MAIL_NETWORK:?}

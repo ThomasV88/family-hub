@@ -27,6 +27,16 @@ REQUIRED_SECRETS=(secrets/db_root_password secrets/db_owner_password secrets/db_
 # The ai-worker is optional. Without a non-empty ai-worker.env its steps are skipped with a warning and the core app deploys.
 ai_env_present() { [ -s ai-worker.env ]; }
 
+# Production only: MAIL_NETWORK in .env joins app, worker and scheduler to the mail stack's docker network through the overlay
+# compose.server.mail.yaml (staging leaves it unset and keeps MAIL_MAILER=log). The overlay file must exist when it is set.
+guard_mail_overlay() {
+  [ -z "$(env_get MAIL_NETWORK)" ] && return 0
+  if [ ! -f compose.server.mail.yaml ]; then
+    err "MAIL_NETWORK=$(env_get MAIL_NETWORK) needs compose.server.mail.yaml in $(pwd). Nothing deployed."
+    return 1
+  fi
+}
+
 guard_inputs() {
   if [ -z "${IMAGE_TAG:-}" ]; then
     err "IMAGE_TAG is missing (expected sha-<commit>). Nothing deployed."
@@ -165,6 +175,7 @@ main() {
   guard_secrets
   guard_reseed
   guard_host
+  guard_mail_overlay
 
   export IMAGE_TAG
   COMPOSE_PROJECT_NAME=$(env_get COMPOSE_PROJECT_NAME)
@@ -183,7 +194,14 @@ main() {
   # `up app ...`. An empty mode-600 placeholder lets the core load; the ai-worker steps stay skipped while it is empty.
   [ -e ai-worker.env ] || (umask 077; : > ai-worker.env)
 
-  dc() { docker compose -f compose.server.yaml "$@"; }
+  local mail_network overlay=()
+  mail_network=$(env_get MAIL_NETWORK)
+  if [ -n "$mail_network" ]; then
+    docker network inspect "$mail_network" >/dev/null 2>&1 || { err "Docker network $mail_network is missing (is the mail stack running?). Nothing deployed."; return 1; }
+    export MAIL_NETWORK="$mail_network"
+    overlay=(-f compose.server.mail.yaml)
+  fi
+  dc() { docker compose -f compose.server.yaml ${overlay[@]+"${overlay[@]}"} "$@"; }
 
   log "Deploying $IMAGE_TAG to $COMPOSE_PROJECT_NAME ($here)"
   if [ "$(env_get STACK_ENV)" = production ] && [ -z "$(env_get BACKUP_COPY_REPOSITORY)" ]; then

@@ -197,7 +197,7 @@ jobs:
           SSH_OPTS="-i $HOME/.ssh/deploy_key -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
           T="$DEPLOY_USER@$DEPLOY_HOST"
           # shellcheck disable=SC2086
-          scp $SSH_OPTS compose.server.yaml \
+          scp $SSH_OPTS compose.server.yaml compose.server.mail.yaml \
             scripts/deploy.sh scripts/cert-renew.sh scripts/smoke-server.sh \
             scripts/backup.sh scripts/restore-drill.sh scripts/backup-freshness.sh \
             "$T:$TARGET_DIR/"

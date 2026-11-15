@@ -146,6 +146,16 @@ expect fail "secret with mode 0644" "$d" "$TAG" guard_secrets
 d=$(make_fixture mode2 family-hub-staging staging 0 staging)
 chmod 640 "$d/secrets/restic_password"
 expect fail "secret with mode 0640" "$d" "$TAG" guard_secrets
+# guard_mail_overlay: MAIL_NETWORK needs the overlay file (production only); unset is fine
+d=$(make_fixture mailoff family-hub staging 0 staging)
+expect pass "no MAIL_NETWORK, no overlay needed" "$d" "$TAG" guard_mail_overlay
+d=$(make_fixture mailnofile family-hub production 0 production)
+echo "MAIL_NETWORK=mail" >> "$d/.env"
+expect fail "MAIL_NETWORK set but overlay file missing" "$d" "$TAG" guard_mail_overlay
+d=$(make_fixture mailfile family-hub production 0 production)
+echo "MAIL_NETWORK=mail" >> "$d/.env"; echo "# overlay" > "$d/compose.server.mail.yaml"
+expect pass "MAIL_NETWORK set and overlay present" "$d" "$TAG" guard_mail_overlay
+
 d=$(make_fixture dbmode family-hub-staging staging 0 staging)
 chmod 640 "$d/secrets/db_app_password" "$d/secrets/db_owner_password" "$d/secrets/db_root_password"
 expect pass "database passwords at 0640 (postgres group)" "$d" "$TAG" guard_secrets

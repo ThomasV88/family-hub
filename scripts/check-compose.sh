@@ -231,4 +231,37 @@ if not any(v.get("target") == "/var/www/html/.env" and v.get("source") == "/dev/
     sys.exit(1)
 PY
 
+# Production mail overlay (compose.server.mail.yaml): only the services that send mail join the mail network.
+MAILCFG="$TMP/config-mail.json"
+MAIL_NETWORK=mail docker compose -f compose.server.yaml -f compose.server.mail.yaml --project-directory "$TMP" --env-file "$TMP/.env" \
+  --profile migrate --profile certbot config --format json > "$MAILCFG"
+python3 -I - "$MAILCFG" <<'PY'
+import json, sys
+
+cfg = json.load(open(sys.argv[1]))
+svcs = cfg["services"]
+nets = cfg.get("networks", {})
+if nets.get("mail", {}).get("name") != "mail" or nets["mail"].get("external") is not True:
+    print("FAIL: the mail network must be external and named from MAIL_NETWORK", file=sys.stderr)
+    sys.exit(1)
+joined = sorted(n for n, s in svcs.items() if "mail" in (s.get("networks") or {}))
+if joined != ["app", "scheduler", "worker"]:
+    print("FAIL: only app, worker and scheduler may join the mail network, got %s" % joined, file=sys.stderr)
+    sys.exit(1)
+for n in joined:
+    if "default" not in svcs[n]["networks"]:
+        print("FAIL: %s must stay on the default network" % n, file=sys.stderr)
+        sys.exit(1)
+PY
+# Without the overlay nothing is on the mail network (staging and the base file).
+if python3 -I - "$OUT" <<'PY'
+import json, sys
+cfg = json.load(open(sys.argv[1]))
+sys.exit(0 if any("mail" in (s.get("networks") or {}) for s in cfg["services"].values()) else 1)
+PY
+then
+  echo "FAIL: compose.server.yaml alone must not join any service to the mail network" >&2
+  exit 1
+fi
+
 echo "CHECK-COMPOSE OK"
