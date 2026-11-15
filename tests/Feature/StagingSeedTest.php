@@ -9,9 +9,12 @@ use App\Models\ModulePermission;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Wish;
+use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
     $this->originalEnv = app()->environment();
+    // The demo seed stores a few synthetic documents; keep them off the real medical volume.
+    Storage::fake('medical');
 });
 
 afterEach(function () {
@@ -52,7 +55,7 @@ it('seeds six synthetic members and one synthetic admin on staging', function ()
         ->and(User::where('is_admin', true)->first()->email)->toBe('admin@example.test');
 });
 
-it('gives members preset grants and the admin none', function () {
+it('gives members preset grants (plus the demo health and finance grants) and the admin none', function () {
     setEnv('staging');
 
     $this->artisan('staging:seed --force')->assertExitCode(0);
@@ -62,7 +65,18 @@ it('gives members preset grants and the admin none', function () {
     foreach (User::where('is_admin', false)->get() as $member) {
         expect($member->modulePermissions()->count())->toBe(4);
     }
-    expect(ModulePermission::where('module', 'health')->where('level', '>', 0)->count())->toBe(0);
+    // Health is restricted by default; the demo family grants it to exactly four members (the admin and Guest never).
+    $health = fn (string $email) => DB::table('module_permissions')->where('module', 'health')->where('user_id', User::where('email', $email)->value('id'))->value('level');
+    expect(ModulePermission::where('module', 'health')->where('level', '>', 0)->count())->toBe(4)
+        ->and((int) $health('sk_sk.1@example.test'))->toBe(2)
+        ->and((int) $health('en_gb.5@example.test'))->toBe(2)
+        ->and((int) $health('sk_sk.2@example.test'))->toBe(1)
+        ->and((int) $health('pl_pl.3@example.test'))->toBe(1)
+        ->and((int) $health('admin@example.test'))->toBe(0);
+    // The admin owns and sees no finance or health data.
+    expect(DB::table('finance_account_members')->where('user_id', $admin->id)->count())->toBe(0)
+        ->and(DB::table('medical_subject_members')->where('user_id', $admin->id)->count())->toBe(0)
+        ->and(DB::table('medical_subjects')->where('user_id', $admin->id)->count())->toBe(0);
 });
 
 it('is idempotent', function () {
@@ -199,29 +213,42 @@ it('reseeds and audits cleanly after the synthetic admin produced audit rows (li
     expect(DB::table('audit_logs')->count())->toBe(4);
 });
 
+/** Row counts of every table the seed or the purge touches (ai_calls and audit_logs are append-only and excluded). */
+function seededCounts(): array
+{
+    $tables = ['tasks', 'task_members', 'wishes', 'wish_urls', 'wish_reservations', 'wish_contributions', 'wish_occasions', 'wishlist_managers',
+        'finance_accounts', 'finance_account_members', 'finance_transactions', 'finance_recurring', 'finance_recurring_matches', 'finance_budgets',
+        'finance_import_profiles', 'finance_import_batches', 'finance_import_rows', 'medical_subjects', 'medical_subject_members', 'medical_visits',
+        'medical_medications', 'medical_allergies', 'medical_vaccinations', 'medical_contacts', 'medical_documents', 'medical_ai_extractions',
+        'medical_ai_decisions', 'module_permissions', 'users'];
+
+    return collect($tables)->mapWithKeys(fn (string $t) => [$t => DB::table($t)->count()])->all();
+}
+
 it('reseeds and audits cleanly after synthetic users created finance, medical, AI, task and wish data', function () {
     setEnv('staging');
     $this->artisan('staging:seed --force')->assertExitCode(0);
+    $baseline = seededCounts();
+    $demoCalls = DB::table('ai_calls')->count();
     foreach (User::all() as $user) {
         synthRows($user);
     }
     $calls = DB::table('ai_calls')->count();
-    expect($calls)->toBe(7);
+    expect($calls)->toBe($demoCalls + 7);
 
     $this->artisan('staging:seed --force')->assertExitCode(0);
 
-    foreach (['finance_accounts', 'finance_transactions', 'finance_account_members', 'medical_subjects', 'medical_documents',
-        'medical_ai_extractions', 'tasks', 'wishes'] as $table) {
-        expect(DB::table($table)->count())->toBe(0, $table);
-    }
-    // append-only history stays, and the audit accepts its dangling synthetic ids
-    expect(DB::table('ai_calls')->count())->toBe($calls);
+    // everything the testers added is gone and the demo data is back exactly once
+    expect(seededCounts())->toBe($baseline);
+    // append-only history stays (the testers' rows plus three more demo calls), and the audit accepts its dangling synthetic ids
+    expect(DB::table('ai_calls')->count())->toBe($calls + 3);
     $this->artisan('staging:audit')->assertExitCode(0);
 });
 
 it('still fails the audit for real data and a reseed keeps the real user rows', function () {
     setEnv('staging');
     $this->artisan('staging:seed --force')->assertExitCode(0);
+    $baseline = seededCounts();
     $synth = User::where('email', 'admin@example.test')->first();
     synthRows($synth);
 
@@ -255,9 +282,9 @@ it('still fails the audit for real data and a reseed keeps the real user rows', 
         ->and(DB::table('medical_ai_extractions')->where('started_by', $real->id)->count())->toBe(1)
         ->and(DB::table('ai_calls')->where('started_by', $real->id)->count())->toBe(1)
         ->and(DB::table('audit_logs')->where('actor_id', $real->id)->count())->toBe(1)
-        // the synthetic admin's rows are gone, the real user's are not
-        ->and(DB::table('finance_accounts')->count())->toBe(1)
-        ->and(DB::table('medical_subjects')->count())->toBe(1);
+        // the synthetic admin's rows are gone and the demo data is back once, the real user's rows are untouched
+        ->and(DB::table('finance_accounts')->count())->toBe($baseline['finance_accounts'] + 1)
+        ->and(DB::table('medical_subjects')->count())->toBe($baseline['medical_subjects'] + 1);
     $audit()->assertExitCode(1);
 });
 

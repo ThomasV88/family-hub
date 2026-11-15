@@ -26,9 +26,13 @@ class StagingSeed extends Command
             return 1;
         }
 
-        $count = DB::transaction(fn () => (new StagingSeeder)->run());
+        $seeder = new StagingSeeder;
+        $count = DB::transaction(fn () => $seeder->run());
 
         $this->info("staging:seed created {$count} synthetic users");
+        foreach ($seeder->summary as $module => $counts) {
+            $this->line('  '.$module.': '.(is_array($counts) ? json_encode($counts) : $counts));
+        }
 
         return 0;
     }
