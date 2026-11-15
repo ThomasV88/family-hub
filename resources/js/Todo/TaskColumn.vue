@@ -67,8 +67,10 @@ const doneShown = computed(() => props.done.slice(0, 20));
 
 <style scoped>
 .column { min-width: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
-.column__header { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3); background: var(--color-surface-2); border-start-start-radius: var(--radius-lg); border-start-end-radius: var(--radius-lg); }
-.column__name { margin: 0; flex: 1; min-width: 0; font-size: var(--text-base); font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.column__header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); padding: var(--space-3); background: var(--color-surface-2); border-start-start-radius: var(--radius-lg); border-start-end-radius: var(--radius-lg); }
+/* flex-basis 9rem: with a basis of 0 the name collapsed to one character per line next to the tag and the count in a narrow
+   column (e.g. with the detail panel open); now the count wraps below it instead. */
+.column__name { margin: 0; flex: 1 1 9rem; min-width: 0; font-size: var(--text-base); font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
 .column__count { flex: none; color: var(--color-text-muted); font-size: var(--text-sm); font-weight: 400; }
 .column__toggle { display: flex; align-items: center; gap: var(--space-2); width: 100%; min-height: var(--control-touch); padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: start; cursor: pointer; }
 .column__toggle:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
