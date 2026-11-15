@@ -1,0 +1,40 @@
+{
+  "id": "who-sees-what",
+  "category": "help",
+  "order": 90,
+  "title": "Kto čo vidí",
+  "summary": "Rýchly prehľad, čo je pre koho viditeľné.",
+  "covers": [],
+  "sections": [
+    {
+      "id": "table",
+      "title": "Prehľadová tabuľka",
+      "blocks": [
+        { "type": "table", "caption": "Kto čo vidí", "columns": ["Čo", "Kto to vidí", "Kto to môže meniť"], "rows": [
+          ["Úloha pre Rodinu", "Každý, kto má prístup k Úlohám", "Členovia s Úpravami v Úlohách"],
+          ["Osobná úloha", "Len ten, kto ju vytvoril. Ani správca", "Ten človek"],
+          ["Úloha pre Vybraných členov", "Tvorca a ľudia, ktorých vybral", "Členovia s Úpravami v Úlohách, ktorí ju vidia"],
+          ["Zoznam želaní", "Každý, kto má prístup k Wishlistu", "Majiteľ a správcovia, ktorých vybral správca"],
+          ["Kto rezervoval želanie", "Každý okrem majiteľa zoznamu", "Ten, kto ho rezervoval"],
+          ["Finančný účet a jeho transakcie", "Len členovia, ktorým je sprístupnený", "Títo členovia, ak majú Úpravy vo Financiách"],
+          ["Zdravotný záznam jednej osoby", "Členovia s prístupom k Zdraviu a prístupom k tej osobe", "Členovia s Môže meniť pri tej osobe"],
+          ["Nastavenia, členovia, oprávnenia, záznam aktivity, nástroje AI", "Správcovia", "Správcovia"],
+          ["Tento manuál", "Každý prihlásený člen (príručku pre správcu len správcovia)", "Nikto v aplikácii: je súčasťou aplikácie"]
+        ] },
+        { "type": "p", "text": "Viac sa dozviete v [Úlohy](tasks#who-sees), [Wishlist](wishlist#surprise), [Financie](finance#accounts), [Zdravie](health#people-access) a [Príručke pre správcu](admin#permissions)." }
+      ]
+    },
+    {
+      "id": "levels",
+      "title": "Čo znamená Žiadny, Čítanie a Úpravy",
+      "blocks": [
+        { "type": "list", "items": [
+          "**Žiadny**: časť aplikácie sa vôbec nezobrazí.",
+          "**Čítanie**: môžete čítať, ale nič pridávať ani meniť.",
+          "**Úpravy**: môžete čítať, pridávať a meniť."
+        ] },
+        { "type": "tip", "text": "Neviete, čo môžete robiť? Otvorte časť aplikácie. Ak ju môžete len zobraziť, krátka správa hore to povie." }
+      ]
+    }
+  ]
+}

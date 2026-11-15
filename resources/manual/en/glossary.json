@@ -1,0 +1,33 @@
+{
+  "id": "glossary",
+  "category": "help",
+  "order": 110,
+  "title": "Glossary",
+  "summary": "Short explanations of the words used in the app.",
+  "covers": [],
+  "sections": [
+    {
+      "id": "words",
+      "title": "Words used in the app",
+      "blocks": [
+        { "type": "table", "caption": "Glossary", "columns": ["Word", "Meaning"], "rows": [
+          ["Administrator", "The family member who manages members, permissions and settings."],
+          ["Preset", "A ready-made set of permissions, such as Parent, Child, Grandparent or Guest."],
+          ["Module", "A part of the app: Tasks, Wishlist, Finance or Health."],
+          ["Authenticator app", "A phone app that shows a new 6-digit code every 30 seconds."],
+          ["Two-step verification", "Signing in with your password and a second proof, such as a code or a passkey."],
+          ["Passkey", "A way to sign in or confirm with your fingerprint, face or screen lock."],
+          ["Recovery code", "A one-time emergency code for when you lose your phone."],
+          ["Co-buy", "Several people buying one gift together."],
+          ["Transaction", "One entry of money coming in, going out or moving between accounts."],
+          ["Recurring expense", "A bill that repeats, such as rent."],
+          ["CSV file", "A simple table file that most banks let you download."],
+          ["Archive", "Hiding a health record without deleting it, so it can be restored."],
+          ["Unverified", "A detail suggested by AI that no person has checked yet."],
+          ["Push notification", "A short alert on your device."],
+          ["PWA (installed app)", "The website installed on your device so that it opens like an app."]
+        ] }
+      ]
+    }
+  ]
+}

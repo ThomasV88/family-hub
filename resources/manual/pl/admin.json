@@ -1,0 +1,127 @@
+{
+  "id": "admin",
+  "category": "admin",
+  "order": 80,
+  "title": "Przewodnik administratora",
+  "summary": "Wszystko, co może administrator rodziny: członkowie, uprawnienia, bezpieczeństwo, dziennik zdarzeń, narzędzia AI i kopie zapasowe.",
+  "adminOnly": true,
+  "covers": ["settings:members", "settings:audit", "settings:finance_accounts", "settings:ai_calls", "settings:ai_agents"],
+  "sections": [
+    {
+      "id": "where",
+      "title": "Gdzie są ustawienia administratora",
+      "blocks": [
+        { "type": "p", "text": "Otwórz menu konta i wybierz **Ustawienia**. Jako administrator widzisz te sekcje: **Członkowie i dostęp**, **Dziennik zdarzeń**, **Konta finansowe**, **Wywołania AI**, **Agenci AI**, **Powiadomienia**, **Bezpieczeństwo** oraz **Wygląd i język**." },
+        { "type": "warning", "text": "Bycie administratorem nie daje dostępu do Zdrowia ani Finansów. Trzeba go nadać celowo, jak każdemu innemu członkowi." }
+      ]
+    },
+    {
+      "id": "members-invitations",
+      "title": "Członkowie i zaproszenia",
+      "blocks": [
+        { "type": "steps", "title": "Zapraszanie kogoś", "items": [
+          "Otwórz [Ustawienia > Członkowie i dostęp](/settings/members).",
+          "Naciśnij **Zaproś członka**.",
+          "Wpisz e-mail, wybierz **Początkowy dostęp** (Rodzic, Dziecko, Dziadek lub babcia albo Gość) i **Język**.",
+          "Naciśnij **Wyślij zaproszenie**."
+        ] },
+        { "type": "list", "items": [
+          "Zaproszenie działa raz i przez 7 dni.",
+          "W części **Zaproszenia** możesz **Wyślij ponownie** zaproszenie (stary link przestaje działać), **Kopiuj link**, aby wysłać go samemu, albo je **Odwołaj**.",
+          "Jeśli e-maila nie udało się wysłać, zobaczysz **E-mail nie został wysłany**. Skopiuj link i wyślij go inną drogą."
+        ] },
+        { "type": "p", "text": "Członka otworzysz przez **Zarządzaj**, aby zmienić jego dostęp, opiekunów listy życzeń, sesje i bezpieczeństwo." }
+      ]
+    },
+    {
+      "id": "permissions",
+      "title": "Uprawnienia dla poszczególnych modułów",
+      "blocks": [
+        { "type": "p", "text": "Każdy członek ma poziom dla każdego modułu (Zadania, Wishlist, Finanse i Zdrowie): **Brak** (nie widzi go), **Odczyt** (może czytać) albo **Edycja** (może czytać i zmieniać). Serwer wymusza to na każdej stronie." },
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "W **Członkowie i dostęp** naciśnij **Zarządzaj** przy członku.",
+          "W zakładce **Uprawnienia** wybierz **Ustawienie wstępne** i naciśnij **Zastosuj** albo ustaw każdy moduł samodzielnie.",
+          "Naciśnij **Zapisz uprawnienia**."
+        ] },
+        { "type": "list", "items": [
+          "**Rodzic**: Zadania, Wishlist i Finanse: edycja. Zdrowie: brak.",
+          "**Dziecko**: Zadania i Wishlist: edycja. Finanse i Zdrowie: brak.",
+          "**Dziadek lub babcia**: Zadania i Wishlist: edycja. Finanse i Zdrowie: brak.",
+          "**Gość**: Zadania: tylko odczyt. Wszystko inne: brak."
+        ] },
+        { "type": "p", "text": "Zakładka **Macierz uprawnień** pokazuje wszystkich członków i moduły w jednej tabeli, więc możesz sprawdzić wszystkich naraz. Zdrowie i Finanse są domyślnie ograniczone. Ustawienia są tylko dla administratorów." }
+      ]
+    },
+    {
+      "id": "health-people",
+      "title": "Dostęp do zdrowia według osoby",
+      "blocks": [
+        { "type": "p", "text": "Dostęp do zdrowia ma dwie warstwy: członek musi mieć Zdrowie w uprawnieniach, a potem dostęp do poszczególnych osób. W zakładce **Członkowie** w Członkowie i dostęp lista osób w Zdrowiu jest na karcie **Dostęp do zdrowia według osoby**." },
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Naciśnij **Zarządzaj dostępem** przy osobie.",
+          "Dla każdego członka wybierz **Brak dostępu**, **Może przeglądać** albo **Może zmieniać**.",
+          "Jeśli osoba ma własne konto, wybierz je w **Połączone konto**. Przełącznik **Zawsze zezwalaj temu członkowi na przeglądanie i zmianę własnej dokumentacji** daje mu jego własną dokumentację. Wyłącz go przy dziecku, które nie powinno otwierać swojej dokumentacji.",
+          "Naciśnij **Zapisz dostęp**."
+        ] },
+        { "type": "p", "text": "Osób w Zdrowiu nie widzisz, dopóki nie dano Ci do nich dostępu, także jako administrator." }
+      ]
+    },
+    {
+      "id": "finance-accounts",
+      "title": "Konta finansowe",
+      "blocks": [
+        { "type": "p", "text": "Otwórz [Ustawienia > Konta finansowe](/settings/finance-accounts). Tu wybierasz, kto widzi które konto. Widzisz tylko nazwy i listę członków, nigdy salda ani transakcji. Członek musi najpierw mieć dostęp do Finansów w uprawnieniach." }
+      ]
+    },
+    {
+      "id": "wishlist-managers",
+      "title": "Opiekunowie listy życzeń",
+      "blocks": [
+        { "type": "p", "text": "Niektórzy, na przykład małe dzieci, nie potrafią prowadzić własnej listy. Otwórz **Zarządzaj** przy tym członku i wybierz zakładkę **Lista życzeń**. Zaznacz członków, którzy mogą dodawać i edytować życzenia na jego liście, i naciśnij **Zapisz opiekunów**. Opiekunowie widzą listę tak jak właściciel, bez rezerwacji." }
+      ]
+    },
+    {
+      "id": "security-settings",
+      "title": "Ustawienia bezpieczeństwa",
+      "blocks": [
+        { "type": "list", "items": [
+          "**Wymagaj weryfikacji dwuetapowej**: w zakładce **Członkowie** w Członkowie i dostęp karta **Weryfikacja dwuetapowa dla danych wrażliwych** ma przełącznik **Wymagaj weryfikacji dwuetapowej dla Zdrowia i Finansów**. Członkowie z dostępem do Zdrowia lub Finansów muszą ją wtedy skonfigurować, zanim otworzą te moduły. Karta pokazuje, ilu osobom jeszcze się to nie udało.",
+          "**Zresetuj weryfikację dwuetapową**: jeśli członek straci telefon i kody odzyskiwania, otwórz jego zakładkę **Bezpieczeństwo** i naciśnij **Zresetuj weryfikację dwuetapową**. Skonfiguruje ją od nowa.",
+          "**Sesje**: w zakładce **Sesje** członka możesz **Odwołaj** urządzenie albo **Odwołaj wszystkie sesje**. Ta osoba musi zalogować się ponownie.",
+          "**Potwierdź, że to Ty**: czas, po którym aplikacja zapyta ponownie, i powiązane czasy można zmienić w Ustawienia > Bezpieczeństwo."
+        ] },
+        { "type": "p", "text": "Przy zmianie ustawień bezpieczeństwa aplikacja najpierw prosi o potwierdzenie, że to Ty." }
+      ]
+    },
+    {
+      "id": "audit-log",
+      "title": "Dziennik zdarzeń",
+      "blocks": [
+        { "type": "p", "text": "[Ustawienia > Dziennik zdarzeń](/settings/audit) zapisuje, kto co zrobił i kiedy: logowania, zaproszenia, zmiany uprawnień, zmiany bezpieczeństwa i dostęp do danych w Zdrowiu i Finansach. Nigdy nie zapisuje treści żadnego wpisu. Wpisy są przechowywane 2 lata." },
+        { "type": "p", "text": "Użyj filtrów **Członek**, **Typ zdarzenia** i dat, a potem naciśnij **Zastosuj filtry**. Przydaje się przy pytaniach takich jak kto zmienił uprawnienie albo kto otworzył dokumentację." }
+      ]
+    },
+    {
+      "id": "ai-agents",
+      "title": "Agenci AI i lista wywołań AI",
+      "blocks": [
+        { "type": "p", "text": "Otwórz [Ustawienia > Agenci AI](/settings/ai-agents). Tu wybierasz, które narzędzia AI mogą czytać dokumenty w Zdrowiu i w jakiej kolejności. Jeśli pierwsze osiągnęło limit użycia, próbowane jest następne. Każde narzędzie ma przełącznik, pozycję i opcjonalny model." },
+        { "type": "list", "items": [
+          "Co najmniej jedno narzędzie musi pozostać włączone, inaczej nikt nie uruchomi AI.",
+          "Narzędzie musi być zalogowane na serwerze. Nie da się tego zrobić na tej stronie: zapytaj osobę, która prowadzi serwer. Strona pokazuje stan logowania i **Sprawdź ponownie**.",
+          "Po włączeniu narzędzia, które wysyła dokumenty do nowej firmy, członkowie zobaczą nowy komunikat przed następnym uruchomieniem.",
+          "**Masowe przetwarzanie** odczytuje stare dokumenty ponownie. Najpierw naciśnij **Sprawdź, co zostałoby przetworzone**, potem **Rozpocznij masowe przetwarzanie**. Możesz je wstrzymać lub anulować. Nic, co człowiek już zaakceptował, nigdy się nie zmienia."
+        ] },
+        { "type": "p", "text": "Za każdym razem, gdy AI czyta dokument, jest to wpisane w [Ustawienia > Wywołania AI](/settings/ai-calls): kto to uruchomił i kiedy, nigdy co było w dokumencie. Wywołania starsze niż 12 miesięcy są usuwane automatycznie." },
+        { "type": "warning", "text": "Gdy używana jest AI, dokumenty medyczne opuszczają serwer. Zanim włączysz narzędzie, upewnij się, że rodzina się zgadza i że odpowiadają Ci warunki tej firmy." }
+      ]
+    },
+    {
+      "id": "backups",
+      "title": "Kopie zapasowe",
+      "blocks": [
+        { "type": "p", "text": "Serwer co noc tworzy zaszyfrowane kopie zapasowe i przechowuje je na tym samym serwerze: kopię bazy danych, wgranych plików i ustawień. Chronią przed pomyłkami i uszkodzeniami, ale nie przed utratą całego serwera. Usunięty wpis może pozostać w starszych kopiach, dopóki nie minie czas ich przechowywania. Kopie zapasowe, czas na usunięcie wpisów zdrowotnych i inne ustawienia serwera prowadzi osoba, która obsługuje serwer, a nie ta aplikacja." }
+      ]
+    }
+  ]
+}

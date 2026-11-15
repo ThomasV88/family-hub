@@ -1,0 +1,33 @@
+{
+  "id": "overview",
+  "category": "modules",
+  "order": 20,
+  "title": "Prehľad",
+  "summary": "Domovská stránka: čo si dnes vyžaduje vašu pozornosť, na prvý pohľad.",
+  "covers": ["module:overview"],
+  "sections": [
+    {
+      "id": "what-it-shows",
+      "title": "Čo vidíte v Prehľade",
+      "blocks": [
+        { "type": "p", "text": "Prehľad je prvá stránka po prihlásení. Zobrazuje malé karty, jednu pre každú časť aplikácie, ktorú môžete používať. Karta nikdy neukáže nič, čo nesmiete vidieť." },
+        { "type": "list", "items": [
+          "**Pridať úlohu**: pole hore, kam môžete napísať úlohu a stlačiť Enter. Zobrazí sa, len ak môžete pridávať úlohy.",
+          "**Čoskoro splatné**: vaše vlastné otvorené úlohy s termínom, najprv tie po termíne, potom najbližšie. Úlohu otvoríte stlačením.",
+          "**Nadchádzajúce príležitosti**: narodeniny, meniny a ďalšie príležitosti v nasledujúcich 60 dňoch, so skratkou na zoznam želaní.",
+          "**Ešte treba zaplatiť**: pravidelné platby splatné tento mesiac (len ak máte prístup k financiám).",
+          "**Zdravie**: skratka na otvorenie Zdravia. V Prehľade nikdy neukazuje žiadne zdravotné údaje (len ak máte prístup k zdraviu).",
+          "**Stav systému**: kedy sa aplikácia naposledy skontrolovala na pozadí."
+        ] },
+        { "type": "tip", "text": "Ak nejaká karta chýba, pravdepodobne nemáte prístup k tej časti aplikácie. Spýtajte sa správcu." }
+      ]
+    },
+    {
+      "id": "empty",
+      "title": "Keď je Prehľad prázdny",
+      "blocks": [
+        { "type": "p", "text": "Nový účet môže ukazovať málo kariet a krátke správy, napríklad Nič nie je čoskoro splatné. To je v poriadku. Pridajte prvú úlohu alebo želanie a karty sa naplnia." }
+      ]
+    }
+  ]
+}

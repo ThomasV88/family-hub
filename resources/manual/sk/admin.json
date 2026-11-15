@@ -1,0 +1,127 @@
+{
+  "id": "admin",
+  "category": "admin",
+  "order": 80,
+  "title": "Príručka pre správcu",
+  "summary": "Všetko, čo môže správca rodiny: členovia, oprávnenia, zabezpečenie, záznam aktivity, nástroje AI a zálohy.",
+  "adminOnly": true,
+  "covers": ["settings:members", "settings:audit", "settings:finance_accounts", "settings:ai_calls", "settings:ai_agents"],
+  "sections": [
+    {
+      "id": "where",
+      "title": "Kde sú nastavenia správcu",
+      "blocks": [
+        { "type": "p", "text": "Otvorte ponuku účtu a vyberte **Nastavenia**. Ako správca vidíte tieto časti: **Členovia a prístup**, **Záznam aktivity**, **Finančné účty**, **Volania AI**, **Agenti AI**, **Oznámenia**, **Zabezpečenie** a **Vzhľad a jazyk**." },
+        { "type": "warning", "text": "To, že ste správca, vám nedáva prístup k Zdraviu ani Financiám. Tie treba udeliť zámerne, ako každému inému členovi." }
+      ]
+    },
+    {
+      "id": "members-invitations",
+      "title": "Členovia a pozvánky",
+      "blocks": [
+        { "type": "steps", "title": "Pozvanie niekoho", "items": [
+          "Otvorte [Nastavenia > Členovia a prístup](/settings/members).",
+          "Stlačte **Pozvať člena**.",
+          "Napíšte e-mail, vyberte **Východzí prístup** (Rodič, Dieťa, Starý rodič alebo Hosť) a **Jazyk**.",
+          "Stlačte **Poslať pozvánku**."
+        ] },
+        { "type": "list", "items": [
+          "Pozvánka funguje raz a 7 dní.",
+          "V časti **Pozvánky** môžete pozvánku **Poslať znova** (starý odkaz prestane fungovať), **Kopírovať odkaz**, aby ste ho poslali sami, alebo ju **Zrušiť**.",
+          "Ak sa e-mail nepodarilo odoslať, uvidíte **E-mail sa neodoslal**. Skopírujte odkaz a pošlite ho iným spôsobom."
+        ] },
+        { "type": "p", "text": "Člena otvoríte cez **Spravovať** a zmeníte jeho prístup, správcov zoznamu želaní, relácie a zabezpečenie." }
+      ]
+    },
+    {
+      "id": "permissions",
+      "title": "Oprávnenia pre jednotlivé moduly",
+      "blocks": [
+        { "type": "p", "text": "Každý člen má úroveň pre každý modul (Úlohy, Wishlist, Financie a Zdravie): **Žiadny** (nevidí ho), **Čítanie** (môže čítať) alebo **Úpravy** (môže čítať aj meniť). Server to vynucuje na každej stránke." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "V **Členovia a prístup** stlačte **Spravovať** pri členovi.",
+          "Na karte **Oprávnenia** vyberte **Predvoľba** a stlačte **Použiť**, alebo nastavte každý modul sami.",
+          "Stlačte **Uložiť oprávnenia**."
+        ] },
+        { "type": "list", "items": [
+          "**Rodič**: Úlohy, Wishlist a Financie: úpravy. Zdravie: žiadny.",
+          "**Dieťa**: Úlohy a Wishlist: úpravy. Financie a Zdravie: žiadny.",
+          "**Starý rodič**: Úlohy a Wishlist: úpravy. Financie a Zdravie: žiadny.",
+          "**Hosť**: Úlohy: len čítanie. Všetko ostatné: žiadny."
+        ] },
+        { "type": "p", "text": "Karta **Matica oprávnení** ukazuje všetkých členov a moduly v jednej tabuľke, takže môžete skontrolovať všetkých naraz. Zdravie a Financie sú predvolene obmedzené. Nastavenia sú len pre správcov." }
+      ]
+    },
+    {
+      "id": "health-people",
+      "title": "Prístup k zdraviu podľa osoby",
+      "blocks": [
+        { "type": "p", "text": "Prístup k zdraviu má dve vrstvy: člen musí mať Zdravie v oprávneniach a potom prístup k jednotlivým osobám. Na karte **Členovia** v Členovia a prístup zoznam osôb v Zdraví ukazuje karta **Prístup k zdraviu podľa osoby**." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Stlačte **Spravovať prístup** pri osobe.",
+          "Pre každého člena vyberte **Bez prístupu**, **Môže zobraziť** alebo **Môže meniť**.",
+          "Ak má osoba vlastný účet, vyberte ho v **Prepojený účet**. Spínač **Vždy povoliť tomuto členovi zobraziť a meniť vlastný záznam** mu dá jeho vlastný záznam. Vypnite ho pri dieťati, ktoré nemá otvárať svoj záznam.",
+          "Stlačte **Uložiť prístup**."
+        ] },
+        { "type": "p", "text": "Osoby v Zdraví nevidíte, kým vám k nim nedali prístup, ani ako správca." }
+      ]
+    },
+    {
+      "id": "finance-accounts",
+      "title": "Finančné účty",
+      "blocks": [
+        { "type": "p", "text": "Otvorte [Nastavenia > Finančné účty](/settings/finance-accounts). Tu vyberáte, kto ktorý účet vidí. Vidíte len názvy a zoznam členov, nikdy zostatky ani transakcie. Člen musí mať najprv prístup k Financiám v oprávneniach." }
+      ]
+    },
+    {
+      "id": "wishlist-managers",
+      "title": "Správcovia zoznamu želaní",
+      "blocks": [
+        { "type": "p", "text": "Niektorí ľudia, napríklad malé deti, si nevedia viesť zoznam sami. Otvorte **Spravovať** pri tom členovi a vyberte kartu **Zoznam želaní**. Zaškrtnite členov, ktorí smú pridávať a upravovať želania v jeho zozname, a stlačte **Uložiť správcov**. Správcovia vidia zoznam tak ako majiteľ, bez rezervácií." }
+      ]
+    },
+    {
+      "id": "security-settings",
+      "title": "Nastavenia zabezpečenia",
+      "blocks": [
+        { "type": "list", "items": [
+          "**Vyžadovať dvojstupňové overenie**: na karte **Členovia** v Členovia a prístup má karta **Dvojstupňové overenie pre citlivé údaje** spínač **Vyžadovať dvojstupňové overenie pre Zdravie a Financie**. Členovia s prístupom k Zdraviu alebo Financiám ho potom musia nastaviť skôr, než tieto moduly otvoria. Karta ukazuje, koľko ľudí ho ešte nenastavilo.",
+          "**Obnoviť dvojstupňové overenie**: ak člen stratí telefón aj záložné kódy, otvorte jeho kartu **Zabezpečenie** a stlačte **Obnoviť dvojstupňové overenie**. Nastaví ho znova.",
+          "**Relácie**: na karte **Relácie** člena môžete **Odhlásiť** zariadenie alebo **Odhlásiť všetky relácie**. Ten človek sa musí znova prihlásiť.",
+          "**Potvrďte, že ste to vy**: čas, po ktorom sa aplikácia opýta znova, a súvisiace časy sa dajú zmeniť v Nastavenia > Zabezpečenie."
+        ] },
+        { "type": "p", "text": "Pri zmene nastavení zabezpečenia vás aplikácia najprv požiada o potvrdenie, že ste to vy." }
+      ]
+    },
+    {
+      "id": "audit-log",
+      "title": "Záznam aktivity",
+      "blocks": [
+        { "type": "p", "text": "[Nastavenia > Záznam aktivity](/settings/audit) zapisuje, kto čo urobil a kedy: prihlásenia, pozvánky, zmeny oprávnení, zmeny zabezpečenia a prístup k údajom v Zdraví a Financiách. Nikdy nezapisuje obsah žiadneho záznamu. Záznamy sa uchovávajú 2 roky." },
+        { "type": "p", "text": "Použite filtre **Člen**, **Typ udalosti** a dátumy a stlačte **Použiť filtre**. Hodí sa na otázky ako kto zmenil oprávnenie alebo kto otvoril záznam." }
+      ]
+    },
+    {
+      "id": "ai-agents",
+      "title": "Agenti AI a zoznam volaní AI",
+      "blocks": [
+        { "type": "p", "text": "Otvorte [Nastavenia > Agenti AI](/settings/ai-agents). Tu vyberáte, ktoré nástroje AI smú čítať dokumenty v Zdraví a v akom poradí. Ak prvý dosiahol limit používania, skúsi sa ďalší. Každý nástroj má spínač, pozíciu a voliteľný model." },
+        { "type": "list", "items": [
+          "Aspoň jeden nástroj musí ostať zapnutý, inak nikto nemôže spustiť AI.",
+          "Nástroj musí byť prihlásený na serveri. Na tejto stránke sa to urobiť nedá: spýtajte sa toho, kto spravuje server. Stránka ukazuje stav prihlásenia a **Skontrolovať znova**.",
+          "Po zapnutí nástroja, ktorý posiela dokumenty novej spoločnosti, uvidia členovia pred ďalším behom nové oznámenie.",
+          "**Hromadné spracovanie** prečíta staré dokumenty znova. Najprv stlačte **Skontrolovať, čo by sa spracovalo**, potom **Spustiť hromadné spracovanie**. Môžete ho pozastaviť alebo zrušiť. Nič, čo človek už prijal, sa nikdy nezmení."
+        ] },
+        { "type": "p", "text": "Pri každom čítaní dokumentu AI sa záznam objaví v [Nastavenia > Volania AI](/settings/ai-calls): kto ho spustil a kedy, nikdy nie to, čo v dokumente bolo. Volania staršie ako 12 mesiacov sa odstránia automaticky." },
+        { "type": "warning", "text": "Pri použití AI lekárske dokumenty opúšťajú server. Skôr než nástroj zapnete, uistite sa, že rodina súhlasí a že vám vyhovujú podmienky tej spoločnosti." }
+      ]
+    },
+    {
+      "id": "backups",
+      "title": "Zálohy",
+      "blocks": [
+        { "type": "p", "text": "Server každú noc vytvára šifrované zálohy a uchováva ich na tom istom serveri: kópiu databázy, nahraných súborov a nastavení. Chránia pred chybami a poškodením, ale nie pred stratou celého servera. Zmazaný záznam môže zostať v starších zálohách, kým nevyprší ich doba uchovávania. Zálohy, lehotu na zmazanie zdravotných záznamov a ďalšie nastavenia servera spravuje ten, kto server prevádzkuje, nie táto aplikácia." }
+      ]
+    }
+  ]
+}

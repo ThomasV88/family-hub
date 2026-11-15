@@ -1,0 +1,84 @@
+{
+  "id": "account-security",
+  "category": "account",
+  "order": 70,
+  "title": "Konto i bezpieczeństwo",
+  "summary": "Twoje hasło, weryfikacja dwuetapowa, klucze dostępu, kody odzyskiwania, wylogowanie i dodatkowa kontrola dla Zdrowia i Finansów.",
+  "covers": ["settings:security"],
+  "sections": [
+    {
+      "id": "password",
+      "title": "Zmiana lub reset hasła",
+      "blocks": [
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Na stronie logowania naciśnij **Nie pamiętasz hasła?**.",
+          "Wpisz e-mail i naciśnij **Wyślij link do resetu**.",
+          "Otwórz link z e-maila (działa 60 minut) i wybierz nowe hasło."
+        ] },
+        { "type": "p", "text": "Dobre hasło ma co najmniej 12 znaków. Długie zdanie łatwiej zapamiętać niż przypadkowe znaki. Po ustawieniu nowego hasła zostaniesz wylogowany na innych urządzeniach." }
+      ]
+    },
+    {
+      "id": "two-step",
+      "title": "Weryfikacja dwuetapowa z aplikacją uwierzytelniającą",
+      "blocks": [
+        { "type": "p", "text": "Weryfikacja dwuetapowa oprócz hasła prosi o krótki kod z Twojego telefonu. Chroni konto, gdyby ktoś poznał Twoje hasło. Administrator może jej wymagać przed otwarciem Zdrowia lub Finansów." },
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Zainstaluj w telefonie aplikację uwierzytelniającą, jeśli jeszcze jej nie masz.",
+          "Otwórz menu konta, wybierz **Ustawienia**, a potem **Bezpieczeństwo**.",
+          "Naciśnij **Skonfiguruj aplikację uwierzytelniającą**.",
+          "Zeskanuj kod QR aplikacją. Jeśli nie możesz zeskanować, naciśnij **Nie możesz zeskanować? Wpisz klucz ręcznie** i wpisz klucz.",
+          "Wpisz 6-cyfrowy kod, który pokazuje aplikacja, i naciśnij **Potwierdź kod**.",
+          "Zapisz kody odzyskiwania (patrz niżej), zaznacz **Te kody mam zapisane w bezpiecznym miejscu** i naciśnij **Zakończ konfigurację**."
+        ] },
+        { "type": "p", "text": "Przy logowaniu aplikacja po haśle prosi o 6-cyfrowy kod. Aplikację uwierzytelniającą wyłączysz przyciskiem **Wyłącz aplikację uwierzytelniającą** w tym samym miejscu." }
+      ]
+    },
+    {
+      "id": "passkeys",
+      "title": "Klucze dostępu",
+      "blocks": [
+        { "type": "p", "text": "Klucz dostępu pozwala potwierdzić, że to Ty, odciskiem palca, twarzą lub blokadą ekranu zamiast kodu. Zostaje na Twoim urządzeniu." },
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Otwórz [Ustawienia > Bezpieczeństwo](/settings/security).",
+          "Naciśnij **Dodaj klucz dostępu** i postępuj zgodnie z poleceniami urządzenia.",
+          "Nadaj kluczowi nazwę, na przykład iPhone albo Laptop służbowy, i naciśnij **Zapisz nazwę**."
+        ] },
+        { "type": "p", "text": "Klucz możesz później **Zmień nazwę** lub **Usuń**. Jeśli widzisz, że przeglądarka lub urządzenie nie obsługuje kluczy dostępu, użyj zamiast tego aplikacji uwierzytelniającej." }
+      ]
+    },
+    {
+      "id": "recovery-codes",
+      "title": "Kody odzyskiwania",
+      "blocks": [
+        { "type": "p", "text": "Kody odzyskiwania to Twój klucz awaryjny. Jeśli stracisz telefon, kod odzyskiwania pozwoli Ci się zalogować. Każdy kod działa tylko raz. Aplikacja pokazuje je tylko podczas konfiguracji." },
+        { "type": "list", "items": [
+          "Zapisz je w bezpiecznym miejscu: skopiuj, pobierz albo przepisz na papier.",
+          "Bezpieczeństwo pokazuje, ile kodów zostało. Gdy zostało ich mało, naciśnij **Utwórz nowe kody**. Stare kody przestaną wtedy działać.",
+          "Jeśli nie masz kodów ani telefonu, poproś administratora o zresetowanie weryfikacji dwuetapowej."
+        ] }
+      ]
+    },
+    {
+      "id": "sign-out",
+      "title": "Wylogowanie i inne urządzenia",
+      "blocks": [
+        { "type": "p", "text": "Wybierz **Wyloguj się** w menu konta, aby wylogować się na używanym urządzeniu. Jeśli zgubisz urządzenie, zmień hasło przez **Nie pamiętasz hasła?**: wyloguje Cię to wszędzie. Administrator może też wylogować Cię na urządzeniu, którego już nie masz." },
+        { "type": "warning", "text": "Jeśli zalogowałeś się na wspólnym komputerze i zapomniałeś się wylogować, zmień hasło jak najszybciej." }
+      ]
+    },
+    {
+      "id": "confirm",
+      "title": "Potwierdź, że to Ty, i blokada Zdrowia i Finansów",
+      "blocks": [
+        { "type": "p", "text": "Zdrowie i Finanse zawierają prywatne dane, dlatego aplikacja chroni je mocniej. Po pewnym czasie bezczynności aplikacja prosi o potwierdzenie, że to Ty, zanim znów je pokaże. Może też zapytać przed wrażliwymi czynnościami, na przykład zmianą ustawień bezpieczeństwa." },
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Gdy pojawi się okno **Potwierdź, że to Ty**, wpisz hasło albo użyj klucza dostępu lub kodu z aplikacji uwierzytelniającej.",
+          "Potem kontynuuj. Jeśli czynność została przerwana, powtórz ją."
+        ] },
+        { "type": "p", "text": "Administrator może zmienić, jak długo to trwa, w Ustawienia > Bezpieczeństwo. To normalne i nie oznacza, że coś jest nie tak." },
+        { "type": "tip", "text": "Zapisz pracę, zanim odejdziesz. Niezapisany tekst w Zdrowiu może zostać utracony, gdy strona się zablokuje." }
+      ]
+    }
+  ]
+}

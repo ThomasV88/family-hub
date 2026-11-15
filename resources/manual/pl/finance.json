@@ -1,0 +1,104 @@
+{
+  "id": "finance",
+  "category": "modules",
+  "order": 50,
+  "title": "Finanse",
+  "summary": "Konta, przychody i wydatki, płatności cykliczne, budżety i wykresy. Każde konto widzą tylko członkowie, którym zostało udostępnione.",
+  "covers": ["module:finances"],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Strona Finanse",
+      "blocks": [
+        { "type": "p", "text": "Finanse mają trzy zakładki: **Przegląd**, **Transakcje** i **Cykliczne**. Na górze możesz zmienić **Miesiąc** i wybrać jedno konto albo **Wszystkie konta**." },
+        { "type": "p", "text": "Przegląd pokazuje **Przychody**, **Wydatki** i **Saldo na koniec miesiąca**, kartę **Jeszcze do zapłaty**, Twoje budżety i dwa wykresy (zobacz [Budżety i wykresy](finance#budgets-charts))." },
+        { "type": "warning", "text": "Finanse są domyślnie prywatne. Widzisz je tylko wtedy, gdy administrator dał Ci dostęp, i nawet wtedy tylko konta udostępnione Tobie." }
+      ]
+    },
+    {
+      "id": "accounts",
+      "title": "Konta i kto je widzi",
+      "blocks": [
+        { "type": "p", "text": "Konto zawiera transakcje. Może to być **Konto bankowe**, **Gotówka**, **Oszczędności** albo **Karta**. Konta zobaczysz po naciśnięciu **Konta** na stronie Finanse." },
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Otwórz **Konta** i naciśnij **Dodaj konto**.",
+          "Wpisz nazwę, wybierz typ i walutę oraz wpisz saldo początkowe i datę, na którą obowiązuje.",
+          "W części **Widoczne dla** zaznacz członków, którzy mogą widzieć to konto.",
+          "Naciśnij **Zapisz konto**."
+        ] },
+        { "type": "list", "items": [
+          "Konto i wszystko w nim widzą tylko zaznaczeni członkowie.",
+          "Waluty nie można zmienić, gdy istnieje już transakcja.",
+          "Administrator może też ustawić, kto widzi które konto, w Ustawieniach."
+        ] },
+        { "type": "p", "text": "Jeśli widzisz komunikat **Nie udostępniono Tobie**, konto istnieje, ale nie możesz go otworzyć." }
+      ]
+    },
+    {
+      "id": "transactions",
+      "title": "Dodawanie i wyszukiwanie transakcji",
+      "blocks": [
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Otwórz zakładkę **Transakcje** i naciśnij **Dodaj transakcję**.",
+          "Wybierz **Typ**: **Przychód**, **Wydatek** albo **Przelew**.",
+          "Wpisz kwotę, datę i krótki opis. Wybierz kategorię i konto.",
+          "Naciśnij **Zapisz transakcję**."
+        ] },
+        { "type": "p", "text": "Aby znaleźć transakcję, użyj pola wyszukiwania i **Filtry**. Możesz filtrować według typu, kategorii i źródła (**Wpisane ręcznie** albo **Zaimportowane**). Aby poprawić błąd, otwórz transakcję, zmień ją i zapisz albo naciśnij **Usuń transakcję**." }
+      ]
+    },
+    {
+      "id": "transfers",
+      "title": "Przelewy między kontami",
+      "blocks": [
+        { "type": "p", "text": "Przelew przenosi pieniądze z jednego konta na drugie, na przykład ze wspólnego konta na oszczędności. Wybierz typ **Przelew**, a potem **Z konta** i **Na konto**. Nie jest liczony jako przychód ani wydatek." },
+        { "type": "p", "text": "Jeśli widzisz tylko jedno z dwóch kont, widzisz tylko swoją stronę przelewu. Nazwa drugiego, ukrytego konta nie jest pokazywana, podobnie jak jego saldo. To celowe, aby prywatne konto pozostało prywatne, nawet gdy pieniądze na nie wpływają lub z niego wychodzą." }
+      ]
+    },
+    {
+      "id": "categories",
+      "title": "Kategorie",
+      "blocks": [
+        { "type": "p", "text": "Kategorie grupują wydatki i przychody, na przykład Zakupy spożywcze albo Wynagrodzenie. Kilka jest już przygotowanych. Naciśnij **Kategorie** na stronie Finanse, aby je dodać lub edytować." },
+        { "type": "p", "text": "Gdy usuwasz kategorię, wybierasz inną, do której przeniesione zostaną jej transakcje i budżety. Nic nie ginie." }
+      ]
+    },
+    {
+      "id": "recurring",
+      "title": "Płatności cykliczne: oczekiwane i rzeczywiste",
+      "blocks": [
+        { "type": "p", "text": "Zakładki **Cykliczne** użyj do płatności, które wracają co miesiąc, takich jak czynsz czy energia. Naciśnij **Dodaj wydatek cykliczny** i wpisz nazwę, **Oczekiwana kwota** i **Pierwszy termin płatności**. Możesz ustawić datę zakończenia. Jeśli miesiąc jest krótszy, używany jest jego ostatni dzień." },
+        { "type": "list", "items": [
+          "Każda płatność ma status: **Nadchodzące**, **Zapłacone**, **Po terminie** albo **Zapłacone inaczej** (zapłacona kwota nie była kwotą oczekiwaną).",
+          "Aplikacja próbuje dopasować płatność do transakcji, która ją przypomina. W części **Wskazówki dopasowania** ustawisz tekst do wyszukania, o ile kwota może się różnić i ile dni wokół terminu się liczy.",
+          "Otwórz płatność i naciśnij **Zapisz płatność**, **Dopasuj transakcję** albo **Anuluj dopasowanie płatności**, aby zrobić to ręcznie.",
+          "Przełączaj między **Kalendarz** i **Lista**, aby zobaczyć płatności według dni."
+        ] },
+        { "type": "p", "text": "Karta **Jeszcze do zapłaty** w Przeglądzie i na stronie Finanse sumuje to, co zostało do zapłaty w tym miesiącu." }
+      ]
+    },
+    {
+      "id": "budgets-charts",
+      "title": "Budżety i wykresy",
+      "blocks": [
+        { "type": "p", "text": "Budżet to miesięczny limit dla jednej kategorii. Naciśnij **Dodaj budżet**, wybierz kategorię i wpisz **Miesięczny limit**. Pasek pokazuje, ile już wykorzystano, i ostrzega, gdy budżet jest prawie wyczerpany lub przekroczony. Budżet obowiązuje w kolejnych miesiącach, dopóki go nie zmienisz." },
+        { "type": "p", "text": "Wykresy pokazują **Wydatki według kategorii** i **Saldo w kolejnych miesiącach** (6 lub 12 miesięcy). Pod każdym wykresem **Pokaż jako tabelę** daje te same liczby jako tekst." }
+      ]
+    },
+    {
+      "id": "import",
+      "title": "Importowanie wyciągu bankowego (CSV)",
+      "blocks": [
+        { "type": "p", "text": "Wiele transakcji naraz możesz dodać z pliku CSV pobranego z banku. Plik musi być typu .csv lub .txt, do 2 MB i mieć najwyżej 5000 wierszy. Jest odczytywany raz i nie jest przechowywany. Zapisywane są tylko wiersze, które wybierzesz." },
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Na stronie Finanse naciśnij **Importuj CSV**.",
+          "Krok 1, **Plik**: wybierz konto, zapisany profil banku (albo nowy) i plik. Naciśnij **Wczytaj plik**.",
+          "Krok 2, **Kolumny**: powiedz aplikacji, która kolumna zawiera datę, kwotę i opis. Sprawdź przykładowe wiersze. Banki różnią się separatorem, kodowaniem tekstu i zapisem liczb. Zaznacz **Zapisz te ustawienia jako profil**, aby użyć ich następnym razem.",
+          "Krok 3, **Przegląd**: każdy wiersz jest oznaczony jako **Nowe**, **Możliwy duplikat** albo **Nie można odczytać**. Możliwe duplikaty wyglądają jak transakcje, które już masz, i są pomijane, dopóki ich nie zaznaczysz. Wybierz wiersze, które chcesz.",
+          "Naciśnij **Importuj**, a potem **Pokaż transakcje**."
+        ] },
+        { "type": "p", "text": "Pomyłka? Naciśnij **Cofnij import** na stronie końcowej albo w **Wcześniejsze importy**. Usunie to transakcje dodane przez ten import, a płatność dopasowana do którejś z nich znów stanie się niezapłacona." }
+      ]
+    }
+  ]
+}

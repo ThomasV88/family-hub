@@ -1,0 +1,84 @@
+{
+  "id": "faq",
+  "category": "help",
+  "order": 100,
+  "title": "Otázky a riešenie problémov",
+  "summary": "Rýchle odpovede na časté otázky a čo robiť, keď niečo nefunguje.",
+  "covers": [],
+  "sections": [
+    {
+      "id": "cannot-sign-in",
+      "title": "Neviem sa prihlásiť",
+      "blocks": [
+        { "type": "list", "items": [
+          "Skontrolujte e-mailovú adresu a heslo. Ikonou oka si ukážete, čo ste napísali.",
+          "Stlačte **Zabudnuté heslo?** a nastavte nové.",
+          "Po príliš veľa nesprávnych pokusoch aplikácia niekoľko minút počká. Skúste to neskôr.",
+          "Stratili ste telefón alebo záložné kódy? Požiadajte správcu, aby vám dvojstupňové overenie obnovil.",
+          "Odkaz z pozvánky mohol vypršať. Požiadajte o novú pozvánku."
+        ] }
+      ]
+    },
+    {
+      "id": "no-access",
+      "title": "Nevidím časť aplikácie alebo hlási, že nemám prístup",
+      "blocks": [
+        { "type": "p", "text": "O tom, čo môže kto otvoriť, rozhoduje správca. Požiadajte ho, aby skontroloval vaše oprávnenia. Pozrite [Kto čo vidí](who-sees-what)." }
+      ]
+    },
+    {
+      "id": "confirm-again",
+      "title": "Aplikácia ma stále žiada o potvrdenie, že som to ja",
+      "blocks": [
+        { "type": "p", "text": "Pri Zdraví a Financiách sa aplikácia po určitom čase nečinnosti a pred citlivými akciami opýta znova. Chráni to súkromné údaje vašej rodiny. Pozrite [Potvrďte, že ste to vy](account-security#confirm)." }
+      ]
+    },
+    {
+      "id": "no-reminders",
+      "title": "Nechodia mi pripomienky",
+      "blocks": [
+        { "type": "list", "items": [
+          "Otvorte [Nastavenia > Oznámenia](/settings/notifications) a skontrolujte, či je zapnutý e-mail alebo push.",
+          "Na pripomienku potrebuje úloha termín.",
+          "Pri push ho zapnite na každom zariadení. Na iPhone a iPade najprv nainštalujte aplikáciu na plochu.",
+          "Ak prehliadač oznámenia zablokoval, povoľte ich v nastaveniach prehliadača pre túto stránku.",
+          "E-mailové pripomienky skontrolujte aj v priečinku so spamom."
+        ] }
+      ]
+    },
+    {
+      "id": "wish-reserved",
+      "title": "Prečo nevidím, kto rezervoval moje želanie?",
+      "blocks": [
+        { "type": "p", "text": "Aby darčeky ostali prekvapením. Pozrite [Prečo nikdy nevidíte, kto rezervoval vaše vlastné želania](wishlist#surprise)." }
+      ]
+    },
+    {
+      "id": "upload-fails",
+      "title": "Dokument alebo obrázok sa nenahrá",
+      "blocks": [
+        { "type": "list", "items": [
+          "Zdravotné dokumenty: použite PDF, JPG, PNG, WebP alebo HEIC, každý do 10 MB.",
+          "Obrázky do Wishlistu: JPEG, PNG alebo WebP, do 5 MB.",
+          "Bankové súbory na import: .csv alebo .txt, do 2 MB.",
+          "Ak sa súbor nedá prečítať, uložte ho znova z pôvodného programu a skúste novú kópiu.",
+          "Skontrolujte pripojenie na internet."
+        ] }
+      ]
+    },
+    {
+      "id": "offline",
+      "title": "Aplikácia hlási, že som offline",
+      "blocks": [
+        { "type": "p", "text": "Family Hub potrebuje pripojenie, aby ukázal a uložil vaše údaje. Keď je zariadenie offline, objaví sa pruh. To, čo vidíte, nemusí byť aktuálne, a zmena sa nemusí uložiť, kým sa nepripojíte. Počkajte, kým pruh zmizne, a až potom sa na to spoliehajte." }
+      ]
+    },
+    {
+      "id": "new-version",
+      "title": "Správa hlási, že je dostupná nová verzia",
+      "blocks": [
+        { "type": "p", "text": "Stlačte **Načítať znova** v správe. Stránka sa spustí znova v najnovšej verzii. Najprv dopíšte a uložte, čo práve píšete." }
+      ]
+    }
+  ]
+}

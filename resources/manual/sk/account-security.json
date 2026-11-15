@@ -1,0 +1,84 @@
+{
+  "id": "account-security",
+  "category": "account",
+  "order": 70,
+  "title": "Účet a zabezpečenie",
+  "summary": "Vaše heslo, dvojstupňové overenie, prístupové kľúče, záložné kódy, odhlásenie a dodatočná kontrola pre Zdravie a Financie.",
+  "covers": ["settings:security"],
+  "sections": [
+    {
+      "id": "password",
+      "title": "Zmena alebo obnovenie hesla",
+      "blocks": [
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Na prihlasovacej stránke stlačte **Zabudnuté heslo?**.",
+          "Napíšte e-mail a stlačte **Poslať odkaz na obnovenie**.",
+          "Otvorte odkaz v e-maile (platí 60 minút) a vyberte nové heslo."
+        ] },
+        { "type": "p", "text": "Dobré heslo má aspoň 12 znakov. Dlhá veta sa pamätá ľahšie než náhodné znaky. Po nastavení nového hesla vás odhlásime na ostatných zariadeniach." }
+      ]
+    },
+    {
+      "id": "two-step",
+      "title": "Dvojstupňové overenie s overovacou aplikáciou",
+      "blocks": [
+        { "type": "p", "text": "Dvojstupňové overenie okrem hesla žiada aj krátky kód z vášho telefónu. Chráni váš účet, ak by niekto zistil vaše heslo. Správca ho môže vyžadovať pred otvorením Zdravia alebo Financií." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Nainštalujte si do telefónu overovaciu aplikáciu, ak ju nemáte.",
+          "Otvorte ponuku účtu, vyberte **Nastavenia** a potom **Zabezpečenie**.",
+          "Stlačte **Nastaviť overovaciu aplikáciu**.",
+          "Naskenujte QR kód aplikáciou. Ak sa nedá naskenovať, stlačte **Nemôžete naskenovať? Zadajte kľúč ručne** a kľúč napíšte.",
+          "Napíšte 6-miestny kód, ktorý aplikácia ukazuje, a stlačte **Potvrdiť kód**.",
+          "Uložte si záložné kódy (pozrite nižšie), zaškrtnite **Tieto kódy mám uložené na bezpečnom mieste** a stlačte **Dokončiť nastavenie**."
+        ] },
+        { "type": "p", "text": "Pri prihlásení vás aplikácia po hesle požiada o 6-miestny kód. Overovaciu aplikáciu vypnete tlačidlom **Vypnúť overovaciu aplikáciu** na tom istom mieste." }
+      ]
+    },
+    {
+      "id": "passkeys",
+      "title": "Prístupové kľúče",
+      "blocks": [
+        { "type": "p", "text": "Prístupový kľúč vám umožní potvrdiť, že ste to vy, odtlačkom prsta, tvárou alebo zámkom obrazovky namiesto kódu. Ostáva na vašom zariadení." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Otvorte [Nastavenia > Zabezpečenie](/settings/security).",
+          "Stlačte **Pridať prístupový kľúč** a postupujte podľa pokynov zariadenia.",
+          "Dajte kľúču názov, napríklad iPhone alebo Pracovný notebook, a stlačte **Uložiť názov**."
+        ] },
+        { "type": "p", "text": "Kľúč môžete neskôr **Premenovať** alebo **Odstrániť**. Ak vidíte, že váš prehliadač alebo zariadenie prístupové kľúče nepodporuje, použite namiesto toho overovaciu aplikáciu." }
+      ]
+    },
+    {
+      "id": "recovery-codes",
+      "title": "Záložné kódy",
+      "blocks": [
+        { "type": "p", "text": "Záložné kódy sú váš núdzový kľúč. Ak stratíte telefón, záložný kód vám umožní prihlásiť sa. Každý kód funguje len raz. Aplikácia ich ukazuje len pri nastavení." },
+        { "type": "list", "items": [
+          "Uložte si ich na bezpečné miesto: skopírujte ich, stiahnite alebo napíšte na papier.",
+          "Zabezpečenie ukazuje, koľko kódov zostáva. Keď ich zostáva málo, stlačte **Vytvoriť nové kódy**. Staré kódy potom prestanú fungovať.",
+          "Ak nemáte kódy ani telefón, požiadajte správcu, aby vám dvojstupňové overenie obnovil."
+        ] }
+      ]
+    },
+    {
+      "id": "sign-out",
+      "title": "Odhlásenie a ostatné zariadenia",
+      "blocks": [
+        { "type": "p", "text": "Voľbou **Odhlásiť sa** v ponuke účtu sa odhlásite na zariadení, ktoré používate. Ak zariadenie stratíte, zmeňte si heslo cez **Zabudnuté heslo?**: odhlási vás všade. Správca vás môže odhlásiť aj na zariadení, ktoré už nemáte." },
+        { "type": "warning", "text": "Ak ste sa prihlásili na spoločnom počítači a zabudli ste sa odhlásiť, čo najskôr si zmeňte heslo." }
+      ]
+    },
+    {
+      "id": "confirm",
+      "title": "Potvrďte, že ste to vy, a zámok pre Zdravie a Financie",
+      "blocks": [
+        { "type": "p", "text": "Zdravie a Financie obsahujú súkromné údaje, preto ich aplikácia chráni viac. Po určitom čase nečinnosti vás aplikácia požiada, aby ste potvrdili, že ste to vy, skôr než ich znova ukáže. Môže sa opýtať aj pred citlivými akciami, napríklad pri zmene nastavení zabezpečenia." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Keď sa objaví okno **Potvrďte, že ste to vy**, napíšte heslo alebo použite prístupový kľúč či kód z overovacej aplikácie.",
+          "Potom pokračujte. Ak bola akcia prerušená, zopakujte ju."
+        ] },
+        { "type": "p", "text": "Správca môže zmeniť, ako dlho to trvá, v Nastavenia > Zabezpečenie. Je to bežné a neznamená to, že je niečo zlé." },
+        { "type": "tip", "text": "Pred odchodom si uložte prácu. Neuložený text v Zdraví sa môže stratiť, keď sa stránka zamkne." }
+      ]
+    }
+  ]
+}

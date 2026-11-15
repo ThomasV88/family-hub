@@ -1,0 +1,102 @@
+{
+  "id": "getting-started",
+  "category": "start",
+  "order": 10,
+  "title": "Pierwsze kroki",
+  "summary": "Jak dołączyć, zalogować się, wybrać język i wygląd, dodać aplikację do telefonu i włączyć przypomnienia.",
+  "covers": ["settings:appearance", "settings:notifications"],
+  "sections": [
+    {
+      "id": "invitation",
+      "title": "Dołączanie z zaproszeniem",
+      "blocks": [
+        { "type": "p", "text": "Family Hub jest tylko dla zaproszonych osób. Administrator rodziny wysyła Ci zaproszenie e-mailem albo przekazuje link. Link działa tylko raz i przestaje działać po 7 dniach." },
+        { "type": "steps", "items": [
+          "Otwórz link z zaproszenia.",
+          "Wpisz swoje imię.",
+          "Wybierz hasło mające co najmniej 12 znaków. Dobrze sprawdza się długie zdanie, które łatwo zapamiętać.",
+          "Naciśnij **Utwórz konto**. Albo naciśnij **Kontynuuj przez Google**, jeśli chcesz logować się kontem Google z tym samym adresem e-mail, na który przyszło zaproszenie."
+        ] },
+        { "type": "tip", "text": "Jeśli link nie może być użyty, wygasł, został już użyty albo został anulowany. Poproś administratora o nowy." }
+      ]
+    },
+    {
+      "id": "signing-in",
+      "title": "Logowanie i wylogowanie",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Otwórz adres aplikacji w przeglądarce albo uruchom zainstalowaną aplikację.",
+          "Wpisz e-mail i hasło i naciśnij **Zaloguj się**. Albo naciśnij **Zaloguj się przez Google**.",
+          "Zaznacz **Pozostań zalogowany przez 30 dni** tylko na własnym urządzeniu.",
+          "Jeśli włączyłeś weryfikację dwuetapową, wpisz 6-cyfrowy kod z aplikacji uwierzytelniającej albo użyj klucza dostępu."
+        ] },
+        { "type": "p", "text": "Aby się wylogować, otwórz menu konta (przycisk z postacią na górnym pasku) i wybierz **Wyloguj się**." },
+        { "type": "p", "text": "Nie pamiętasz hasła? Na stronie logowania naciśnij **Nie pamiętasz hasła?**, wpisz e-mail i skorzystaj z linku, który wyślemy. Link działa przez 60 minut. Po ustawieniu nowego hasła zostaniesz wylogowany na innych urządzeniach." },
+        { "type": "warning", "text": "Na wspólnym lub publicznym komputerze nigdy nie zaznaczaj **Pozostań zalogowany**." }
+      ]
+    },
+    {
+      "id": "language-theme",
+      "title": "Język oraz jasny lub ciemny wygląd",
+      "blocks": [
+        { "type": "p", "text": "Aplikacja mówi po słowacku, polsku i angielsku. Język możesz zmienić w każdej chwili. Wybór jest zapamiętywany na tym urządzeniu." },
+        { "type": "steps", "items": [
+          "Otwórz menu konta na górnym pasku.",
+          "W części **Język** wybierz swój język.",
+          "W części **Motyw** wybierz **Systemowy** (zgodny z urządzeniem), **Jasny** albo **Ciemny**."
+        ] },
+        { "type": "p", "text": "Te same opcje są w [Ustawienia > Wygląd i język](/settings/appearance)." }
+      ]
+    },
+    {
+      "id": "install",
+      "title": "Aplikacja w telefonie, tablecie lub komputerze",
+      "blocks": [
+        { "type": "p", "text": "Family Hub można zainstalować jak aplikację. Wtedy otwiera się we własnym oknie i ma własną ikonę. Nic nie jest pobierane ze sklepu z aplikacjami." },
+        { "type": "p", "text": "**iPhone i iPad** (użyj Safari):" },
+        { "type": "steps", "items": [
+          "Otwórz Family Hub w Safari.",
+          "Dotknij przycisku **Udostępnij**.",
+          "Wybierz **Dodaj do ekranu początkowego**, a potem **Dodaj**.",
+          "Otwórz nową ikonę na ekranie początkowym."
+        ] },
+        { "type": "p", "text": "**Android** (użyj Chrome):" },
+        { "type": "steps", "items": [
+          "Otwórz Family Hub w Chrome.",
+          "Dotknij przycisku menu (trzy kropki).",
+          "Wybierz **Zainstaluj aplikację** albo **Dodaj do ekranu głównego**."
+        ] },
+        { "type": "p", "text": "**Komputer** (Chrome lub Edge): poszukaj ikony instalacji na prawym końcu paska adresu albo otwórz menu przeglądarki i wybierz **Zainstaluj Family Hub**." },
+        { "type": "tip", "text": "Nazwy w menu nieco różnią się w zależności od wersji przeglądarki. Jeśli nie możesz znaleźć przycisku, szukaj słów Zainstaluj lub Dodaj do ekranu." }
+      ]
+    },
+    {
+      "id": "notifications",
+      "title": "Włączanie przypomnień",
+      "blocks": [
+        { "type": "p", "text": "Przypomnienia o zadaniach i okazjach do prezentów możesz dostawać e-mailem oraz jako krótkie powiadomienia push na urządzeniu." },
+        { "type": "steps", "items": [
+          "Otwórz menu konta, wybierz **Ustawienia**, a potem **Powiadomienia**.",
+          "Włącz **Przypomnienia e-mailem**, **Powiadomienia push** albo oba.",
+          "W przypadku push naciśnij **Włącz push na tym urządzeniu** i zezwól na powiadomienia, gdy zapyta o to przeglądarka.",
+          "Naciśnij **Wyślij powiadomienie testowe**, aby sprawdzić, czy działa."
+        ] },
+        { "type": "warning", "text": "Na iPhonie i iPadzie push działa dopiero po dodaniu Family Hub do ekranu początkowego (patrz wyżej) i otwarciu aplikacji stamtąd." },
+        { "type": "p", "text": "Powiadomienia push pokazują tylko tytuł zadania, nigdy notatki. Jeśli oba przełączniki są wyłączone, nie dostajesz żadnych przypomnień. Każde urządzenie wymaga osobnego kroku **Włącz push**." }
+      ]
+    },
+    {
+      "id": "moving-around",
+      "title": "Jak się poruszać po aplikacji",
+      "blocks": [
+        { "type": "list", "items": [
+          "Na szerokim ekranie menu jest po lewej. W telefonie to pasek na dole.",
+          "Widzisz tylko te części aplikacji, na które zezwolił Ci administrator.",
+          "Menu konta (górny pasek) zawiera Ustawienia, tę instrukcję, język, motyw i Wyloguj się.",
+          "Przycisk **Dodaj** w telefonie pozwala szybko dodać nowy element."
+        ] },
+        { "type": "p", "text": "Jeśli strona informuje, że nie masz dostępu, zapytaj administratora. Zobacz [kto co widzi](who-sees-what)." }
+      ]
+    }
+  ]
+}

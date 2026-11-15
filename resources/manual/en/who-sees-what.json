@@ -1,0 +1,40 @@
+{
+  "id": "who-sees-what",
+  "category": "help",
+  "order": 90,
+  "title": "Who can see what",
+  "summary": "A quick overview of what is visible to whom.",
+  "covers": [],
+  "sections": [
+    {
+      "id": "table",
+      "title": "Overview table",
+      "blocks": [
+        { "type": "table", "caption": "Who can see what", "columns": ["What", "Who can see it", "Who can change it"], "rows": [
+          ["A Family task", "Everyone with access to Tasks", "Members with Edit on Tasks"],
+          ["A Personal task", "Only the person who made it. Not even the administrator", "That person"],
+          ["A task for Selected members", "The creator and the people they chose", "Members with Edit on Tasks who can see it"],
+          ["A wishlist", "Everyone with access to the Wishlist", "The owner, and the managers the administrator chose"],
+          ["Who reserved a wish", "Everyone except the owner of the list", "The person who reserved it"],
+          ["A finance account and its transactions", "Only the members it is shared with", "Those members, if they have Edit on Finances"],
+          ["A health record of one person", "Members with Health access and access to that person", "Members with Can change on that person"],
+          ["Settings, members, permissions, audit log, AI tools", "Administrators", "Administrators"],
+          ["This manual", "Every signed-in member (the administrator guide only for administrators)", "Nobody in the app: it is part of the app"]
+        ] },
+        { "type": "p", "text": "Learn more in [Tasks](tasks#who-sees), [Wishlist](wishlist#surprise), [Finance](finance#accounts), [Health](health#people-access) and the [Administrator guide](admin#permissions)." }
+      ]
+    },
+    {
+      "id": "levels",
+      "title": "What None, View and Edit mean",
+      "blocks": [
+        { "type": "list", "items": [
+          "**None**: the part of the app is not shown at all.",
+          "**View**: you can read, but not add or change anything.",
+          "**Edit**: you can read, add and change."
+        ] },
+        { "type": "tip", "text": "Not sure what you can do? Open a part of the app. If you can only view it, a short message at the top says so." }
+      ]
+    }
+  ]
+}

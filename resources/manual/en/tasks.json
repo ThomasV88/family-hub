@@ -1,0 +1,88 @@
+{
+  "id": "tasks",
+  "category": "modules",
+  "order": 30,
+  "title": "Tasks",
+  "summary": "A shared to-do list for the family, with due dates, repeating tasks, reminders and privacy choices.",
+  "covers": ["module:tasks"],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "The task list",
+      "blocks": [
+        { "type": "p", "text": "Tasks are shown in columns: one for each family member, plus **Unassigned**. A task sits in the column of the person it is assigned to. Each column shows how many open tasks it has." },
+        { "type": "list", "items": [
+          "Use the filter **All**, **Mine**, **Shared** or **Personal** to narrow the list.",
+          "Every task has a status: **To do**, **In progress** or **Done**. Done tasks are tucked away: press **Show done** to see them.",
+          "Small icons on a task tell you more: that it repeats, that it is personal, or that it is shared with selected members."
+        ] },
+        { "type": "p", "text": "If you see the message that you can view tasks but not change them, your administrator gave you view-only access." }
+      ]
+    },
+    {
+      "id": "create",
+      "title": "Adding a task",
+      "blocks": [
+        { "type": "steps", "title": "Where to click", "items": [
+          "Quickest way: on the Overview or the Tasks page, type the title in the box **Add a task and press Enter**.",
+          "For more options, press **Add task**. A panel opens on the side (on a phone, it fills the screen).",
+          "Fill in what you need. Only the title is required.",
+          "Press **Save task**."
+        ] },
+        { "type": "p", "text": "In the panel you can set:" },
+        { "type": "list", "items": [
+          "**Title** and **Notes**.",
+          "**Assigned to**: who should do it. A personal task always stays with you.",
+          "**Due date**, and optionally a **time**. Times use the family time zone, which is shown under the field.",
+          "**Repeat** and **Remind me** (see below).",
+          "**Who can see this task** (see below)."
+        ] },
+        { "type": "example", "text": "Take out the bins: assigned to Peter, repeats on chosen weekdays (Tuesday and Friday), remind 1 day before." }
+      ]
+    },
+    {
+      "id": "status",
+      "title": "Changing the status and finishing a task",
+      "blocks": [
+        { "type": "p", "text": "Open a task and choose a new **Status**, or tick the box on the task card to mark it done. Tick it again to bring it back." },
+        { "type": "p", "text": "To delete a task, open it and press **Delete task**. You are asked to confirm, because a deleted task cannot be brought back." }
+      ]
+    },
+    {
+      "id": "repeat",
+      "title": "Repeating tasks",
+      "blocks": [
+        { "type": "p", "text": "A repeating task needs a due date. Under **Repeat** you can choose:" },
+        { "type": "list", "items": [
+          "**Every day**.",
+          "**On chosen weekdays**: tick the days, for example Monday and Thursday.",
+          "**Every month**: on a day of the month, or on the last day. In shorter months it happens on the last day.",
+          "**Custom interval**: every number of days, weeks or months."
+        ] },
+        { "type": "p", "text": "**Repeat from** decides what the next date is based on. **The schedule** follows the rule no matter when you finish. **When I complete it** counts from the day you actually finish." },
+        { "type": "p", "text": "When you finish a repeating task, the next one appears with the next date. Use **Skip this occurrence** to jump over one without doing it. **Completed history** in the task shows what you did and skipped. Deleting a repeating task also removes all its future repeats." }
+      ]
+    },
+    {
+      "id": "reminders",
+      "title": "Reminders",
+      "blocks": [
+        { "type": "p", "text": "Under **Remind me**, choose **At due time**, **15 minutes before**, **1 hour before**, **1 day before** or **No reminder**. A task needs a due date for a reminder, and a time for the options in minutes or hours. Tasks without a time remind you at 08:00." },
+        { "type": "p", "text": "Reminders arrive by email, push, or both, as you set in [Settings > Notifications](/settings/notifications). See [Turning on reminders](getting-started#notifications)." }
+      ]
+    },
+    {
+      "id": "who-sees",
+      "title": "Who can see a task",
+      "blocks": [
+        { "type": "p", "text": "Under **Who can see this task** you choose one of three options:" },
+        { "type": "list", "items": [
+          "**Personal**: only you. Not even the administrator can see it. Good for surprises.",
+          "**Family**: everyone who has access to Tasks.",
+          "**Selected members**: you and the people you pick."
+        ] },
+        { "type": "warning", "text": "Check the choice before you save a task that should stay private." }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "id": "faq",
+  "category": "help",
+  "order": 100,
+  "title": "Pytania i rozwiązywanie problemów",
+  "summary": "Szybkie odpowiedzi na częste pytania i co robić, gdy coś nie działa.",
+  "covers": [],
+  "sections": [
+    {
+      "id": "cannot-sign-in",
+      "title": "Nie mogę się zalogować",
+      "blocks": [
+        { "type": "list", "items": [
+          "Sprawdź adres e-mail i hasło. Ikoną oka pokażesz, co wpisałeś.",
+          "Naciśnij **Nie pamiętasz hasła?**, aby ustawić nowe.",
+          "Po zbyt wielu błędnych próbach aplikacja czeka kilka minut. Spróbuj później.",
+          "Straciłeś telefon lub kody odzyskiwania? Poproś administratora o zresetowanie weryfikacji dwuetapowej.",
+          "Link z zaproszenia mógł wygasnąć. Poproś o nowe zaproszenie."
+        ] }
+      ]
+    },
+    {
+      "id": "no-access",
+      "title": "Nie widzę części aplikacji albo jest informacja, że nie mam dostępu",
+      "blocks": [
+        { "type": "p", "text": "O tym, co kto może otworzyć, decyduje administrator. Poproś go o sprawdzenie Twoich uprawnień. Zobacz [Kto co widzi](who-sees-what)." }
+      ]
+    },
+    {
+      "id": "confirm-again",
+      "title": "Aplikacja ciągle prosi o potwierdzenie, że to ja",
+      "blocks": [
+        { "type": "p", "text": "W Zdrowiu i Finansach aplikacja pyta ponownie po pewnym czasie bezczynności oraz przed wrażliwymi czynnościami. Chroni to prywatne dane Twojej rodziny. Zobacz [Potwierdź, że to Ty](account-security#confirm)." }
+      ]
+    },
+    {
+      "id": "no-reminders",
+      "title": "Nie dostaję przypomnień",
+      "blocks": [
+        { "type": "list", "items": [
+          "Otwórz [Ustawienia > Powiadomienia](/settings/notifications) i sprawdź, czy e-mail lub push jest włączony.",
+          "Aby dostać przypomnienie, zadanie potrzebuje terminu.",
+          "W przypadku push włącz go na każdym urządzeniu. Na iPhonie i iPadzie najpierw zainstaluj aplikację na ekranie początkowym.",
+          "Jeśli przeglądarka zablokowała powiadomienia, zezwól na nie w ustawieniach przeglądarki dla tej strony.",
+          "Przypomnienia e-mailem sprawdź także w folderze ze spamem."
+        ] }
+      ]
+    },
+    {
+      "id": "wish-reserved",
+      "title": "Dlaczego nie widzę, kto zarezerwował moje życzenie?",
+      "blocks": [
+        { "type": "p", "text": "Aby prezenty pozostały niespodzianką. Zobacz [Dlaczego nigdy nie widzisz, kto zarezerwował Twoje życzenia](wishlist#surprise)." }
+      ]
+    },
+    {
+      "id": "upload-fails",
+      "title": "Dokument lub obraz się nie wgrywa",
+      "blocks": [
+        { "type": "list", "items": [
+          "Dokumenty zdrowotne: użyj PDF, JPG, PNG, WebP lub HEIC, każdy do 10 MB.",
+          "Obrazy do Wishlist: JPEG, PNG lub WebP, do 5 MB.",
+          "Pliki bankowe do importu: .csv lub .txt, do 2 MB.",
+          "Jeśli plik nie może zostać odczytany, zapisz go ponownie z oryginalnego programu i spróbuj nowej kopii.",
+          "Sprawdź połączenie z internetem."
+        ] }
+      ]
+    },
+    {
+      "id": "offline",
+      "title": "Aplikacja pokazuje, że jestem offline",
+      "blocks": [
+        { "type": "p", "text": "Family Hub potrzebuje połączenia, aby pokazać i zapisać Twoje dane. Gdy urządzenie jest offline, pojawia się pasek. To, co widzisz, może być nieaktualne, a zmiana może nie zostać zapisana, dopóki nie wrócisz online. Poczekaj, aż pasek zniknie, zanim na tym polegasz." }
+      ]
+    },
+    {
+      "id": "new-version",
+      "title": "Komunikat informuje, że dostępna jest nowa wersja",
+      "blocks": [
+        { "type": "p", "text": "Naciśnij **Załaduj ponownie** w komunikacie. Strona uruchomi się od nowa w najnowszej wersji. Najpierw dokończ i zapisz to, co właśnie piszesz." }
+      ]
+    }
+  ]
+}

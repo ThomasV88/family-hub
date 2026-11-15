@@ -1,0 +1,88 @@
+{
+  "id": "tasks",
+  "category": "modules",
+  "order": 30,
+  "title": "Zadania",
+  "summary": "Wspólna lista zadań dla rodziny z terminami, powtarzaniem, przypomnieniami i wyborem prywatności.",
+  "covers": ["module:tasks"],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Lista zadań",
+      "blocks": [
+        { "type": "p", "text": "Zadania są w kolumnach: po jednej dla każdego członka rodziny oraz kolumna **Nieprzypisane**. Zadanie jest w kolumnie osoby, do której jest przypisane. Każda kolumna pokazuje liczbę otwartych zadań." },
+        { "type": "list", "items": [
+          "Listę zawęzisz filtrem **Wszystkie**, **Moje**, **Wspólne** albo **Osobiste**.",
+          "Każde zadanie ma status: **Do zrobienia**, **W toku** albo **Gotowe**. Ukończone zadania są schowane: naciśnij **Pokaż ukończone**, aby je zobaczyć.",
+          "Małe ikony przy zadaniu mówią więcej: że się powtarza, że jest osobiste albo że jest udostępnione wybranym członkom."
+        ] },
+        { "type": "p", "text": "Jeśli widzisz komunikat, że możesz przeglądać zadania, ale ich nie zmieniać, administrator dał Ci dostęp tylko do odczytu." }
+      ]
+    },
+    {
+      "id": "create",
+      "title": "Dodawanie zadania",
+      "blocks": [
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Najszybciej: w Przeglądzie lub na stronie Zadania wpisz tytuł w polu **Dodaj zadanie i naciśnij Enter**.",
+          "Aby mieć więcej opcji, naciśnij **Dodaj zadanie**. Z boku otworzy się panel (w telefonie zajmie cały ekran).",
+          "Wypełnij to, czego potrzebujesz. Wymagany jest tylko tytuł.",
+          "Naciśnij **Zapisz zadanie**."
+        ] },
+        { "type": "p", "text": "W panelu możesz ustawić:" },
+        { "type": "list", "items": [
+          "**Tytuł** i **Notatki**.",
+          "**Przypisane do**: kto ma to zrobić. Zadanie osobiste zawsze zostaje przy Tobie.",
+          "**Termin** i opcjonalnie **godzinę**. Godziny używają strefy czasowej rodziny, która jest podana pod polem.",
+          "**Powtarzanie** i **Przypomnij** (patrz niżej).",
+          "**Kto widzi to zadanie** (patrz niżej)."
+        ] },
+        { "type": "example", "text": "Wynieść śmieci: przypisane Piotrowi, powtarza się w wybrane dni tygodnia (wtorek i piątek), przypomnienie 1 dzień wcześniej." }
+      ]
+    },
+    {
+      "id": "status",
+      "title": "Zmiana statusu i kończenie zadania",
+      "blocks": [
+        { "type": "p", "text": "Otwórz zadanie i wybierz nowy **Status** albo zaznacz pole na karcie zadania, aby oznaczyć je jako gotowe. Zaznacz je ponownie, aby je przywrócić." },
+        { "type": "p", "text": "Aby usunąć zadanie, otwórz je i naciśnij **Usuń zadanie**. Aplikacja poprosi o potwierdzenie, bo usuniętego zadania nie da się przywrócić." }
+      ]
+    },
+    {
+      "id": "repeat",
+      "title": "Zadania powtarzalne",
+      "blocks": [
+        { "type": "p", "text": "Zadanie powtarzalne wymaga terminu. W części **Powtarzanie** możesz wybrać:" },
+        { "type": "list", "items": [
+          "**Codziennie**.",
+          "**W wybrane dni tygodnia**: zaznacz dni, na przykład poniedziałek i czwartek.",
+          "**Co miesiąc**: w wybrany dzień miesiąca albo w ostatni dzień. W krótszych miesiącach dzieje się to w ostatni dzień.",
+          "**Własny interwał**: co kilka dni, tygodni lub miesięcy."
+        ] },
+        { "type": "p", "text": "**Powtarzaj od** decyduje, od czego liczony jest następny termin. **Harmonogramu** trzyma się reguły niezależnie od tego, kiedy skończysz. **Ukończenia** liczy od dnia, w którym naprawdę skończysz." },
+        { "type": "p", "text": "Gdy skończysz zadanie powtarzalne, pojawia się następne z nowym terminem. Za pomocą **Pomiń to wystąpienie** pominiesz jeden termin bez wykonywania go. **Historia ukończeń** w zadaniu pokazuje, co zrobiłeś i pominąłeś. Usunięcie zadania powtarzalnego usuwa także wszystkie jego przyszłe powtórzenia." }
+      ]
+    },
+    {
+      "id": "reminders",
+      "title": "Przypomnienia",
+      "blocks": [
+        { "type": "p", "text": "W części **Przypomnij** wybierz **W terminie**, **15 minut wcześniej**, **1 godzinę wcześniej**, **1 dzień wcześniej** albo **Bez przypomnienia**. Aby dostać przypomnienie, zadanie potrzebuje terminu, a dla opcji w minutach i godzinach także godziny. Zadania bez godziny przypominają o 8:00." },
+        { "type": "p", "text": "Przypomnienia przychodzą e-mailem, jako push albo obydwoma drogami, zgodnie z ustawieniem w [Ustawienia > Powiadomienia](/settings/notifications). Zobacz [Włączanie przypomnień](getting-started#notifications)." }
+      ]
+    },
+    {
+      "id": "who-sees",
+      "title": "Kto widzi zadanie",
+      "blocks": [
+        { "type": "p", "text": "W części **Kto widzi to zadanie** wybierasz jedną z trzech opcji:" },
+        { "type": "list", "items": [
+          "**Osobiste**: tylko Ty. Nawet administrator go nie widzi. Dobre na niespodzianki.",
+          "**Rodzina**: każdy, kto ma dostęp do Zadań.",
+          "**Wybrani członkowie**: Ty i osoby, które wskażesz."
+        ] },
+        { "type": "warning", "text": "Sprawdź wybór, zanim zapiszesz zadanie, które ma pozostać prywatne." }
+      ]
+    }
+  ]
+}

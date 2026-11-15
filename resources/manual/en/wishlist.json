@@ -1,0 +1,79 @@
+{
+  "id": "wishlist",
+  "category": "modules",
+  "order": 40,
+  "title": "Wishlist",
+  "summary": "Everyone has a wishlist. Family members can reserve a gift or buy it together, without spoiling the surprise.",
+  "covers": ["module:wishlist"],
+  "sections": [
+    {
+      "id": "lists",
+      "title": "Finding the lists",
+      "blocks": [
+        { "type": "p", "text": "At the top of the Wishlist page there is a row of buttons, one for each person. Choose a person to open their list. Your own button says (You). Everyone with access to the Wishlist can see every list." }
+      ]
+    },
+    {
+      "id": "add-wish",
+      "title": "Adding a wish to your list",
+      "blocks": [
+        { "type": "steps", "title": "Where to click", "items": [
+          "Open your own list.",
+          "Press **Add wish**.",
+          "Type a title. Everything else is optional.",
+          "Press **Save wish**."
+        ] },
+        { "type": "list", "items": [
+          "**Links**: up to 5 addresses of shops or pages, each with an optional label.",
+          "**Price** and **Currency**: a rough price helps others plan.",
+          "**Priority**: **Top wish**, **Would love** or **Nice to have**.",
+          "**Notes**: size, colour, or anything else.",
+          "**Image**: upload a JPEG, PNG or WebP picture of up to 5 MB, or press **Load image from link** to take one from the shop page."
+        ] },
+        { "type": "p", "text": "When you get a gift, open the wish and choose **Mark as received**. Received wishes move out of the way. Press **Show received** to see them again." }
+      ]
+    },
+    {
+      "id": "reserve",
+      "title": "Reserving a gift and buying together",
+      "blocks": [
+        { "type": "p", "text": "On somebody else's list, open a wish to see the **Reservation** box." },
+        { "type": "steps", "title": "Where to click", "items": [
+          "Press **Reserve gift**. Now everyone but the owner sees that you are buying it.",
+          "Changed your mind? Press **Cancel reservation**.",
+          "Want to share the cost? Press **Open for co-buying**. Other people can then press **Join co-buy** and, if they like, type their share.",
+          "Press **Close co-buying** when the group is complete. Anyone who joined can press **Leave co-buy**."
+        ] },
+        { "type": "p", "text": "The list **Your shopping** shows the gifts you reserved and how much you promised to pay." },
+        { "type": "tip", "text": "If two people try to reserve the same gift at the same moment, the first one wins and the other sees a short message. Nothing breaks." }
+      ]
+    },
+    {
+      "id": "surprise",
+      "title": "Why you never see who reserved your own wishes",
+      "blocks": [
+        { "type": "p", "text": "This is on purpose, so gifts stay a surprise. On your own list you cannot see whether a wish is reserved, who reserved it, or who is co-buying. Everyone else can. The app also never sends you reminders about your own birthday or name day." }
+      ]
+    },
+    {
+      "id": "occasions",
+      "title": "Occasions, birthdays and name days",
+      "blocks": [
+        { "type": "p", "text": "The **Occasions** page lists upcoming birthdays, name days, Christmas and your own occasions. The Overview also shows the next ones in the coming 60 days." },
+        { "type": "list", "items": [
+          "**Dates by member**: for each person you can set a birth date and a name day. Choose **Edit dates**, pick the name day calendar (**Slovak calendar**, **Polish calendar** or none), search for a name, and pick the day.",
+          "**Custom occasions**: press **Add occasion**, type a title and date, choose **Repeat every year** if you like, and say whether it is for one person or the **Whole family**."
+        ] },
+        { "type": "p", "text": "To get a reminder before an occasion, use [Settings > Notifications](/settings/notifications) and choose 14, 7, 3 or 1 day before." }
+      ]
+    },
+    {
+      "id": "manage-child",
+      "title": "Managing a child's list",
+      "blocks": [
+        { "type": "p", "text": "A child, or anyone who finds it hard to keep a list, can have a manager. The administrator chooses the managers (see [Wishlist managers](admin#wishlist-managers))." },
+        { "type": "p", "text": "If you are a manager, the child's button is in your row and a banner says **You are managing** the list. You can add and edit wishes, and you see the list exactly as the child does: with no reservations. That keeps the surprise for the child too." }
+      ]
+    }
+  ]
+}

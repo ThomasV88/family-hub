@@ -1,0 +1,104 @@
+{
+  "id": "finance",
+  "category": "modules",
+  "order": 50,
+  "title": "Financie",
+  "summary": "Účty, príjmy a výdavky, pravidelné platby, rozpočty a grafy. Každý účet vidia len členovia, ktorým je sprístupnený.",
+  "covers": ["module:finances"],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Stránka Financie",
+      "blocks": [
+        { "type": "p", "text": "Financie majú tri karty: **Prehľad**, **Transakcie** a **Pravidelné**. Hore môžete prepnúť **Mesiac** a vybrať jeden účet alebo **Všetky účty**." },
+        { "type": "p", "text": "Prehľad ukazuje **Príjmy**, **Výdavky** a **Zostatok na konci mesiaca**, kartu **Ešte treba zaplatiť**, vaše rozpočty a dva grafy (pozrite [Rozpočty a grafy](finance#budgets-charts))." },
+        { "type": "warning", "text": "Financie sú predvolene súkromné. Vidíte ich, len ak vám správca dal prístup, a aj potom len účty, ktoré sú vám sprístupnené." }
+      ]
+    },
+    {
+      "id": "accounts",
+      "title": "Účty a kto ich vidí",
+      "blocks": [
+        { "type": "p", "text": "Účet obsahuje transakcie. Môže to byť **Bankový účet**, **Hotovosť**, **Sporenie** alebo **Karta**. Účty zobrazíte tlačidlom **Účty** na stránke Financie." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Otvorte **Účty** a stlačte **Pridať účet**.",
+          "Napíšte názov, vyberte typ a menu a zadajte počiatočný zostatok a dátum, ku ktorému platí.",
+          "V časti **Viditeľné pre** zaškrtnite členov, ktorí smú tento účet vidieť.",
+          "Stlačte **Uložiť účet**."
+        ] },
+        { "type": "list", "items": [
+          "Účet a všetko v ňom vidia len členovia, ktorých zaškrtnete.",
+          "Menu nemožno zmeniť, keď už existuje transakcia.",
+          "Správca môže určiť, kto ktorý účet vidí, aj v Nastaveniach."
+        ] },
+        { "type": "p", "text": "Ak vidíte správu **Nie je sprístupnené vám**, účet existuje, ale nesmiete ho otvoriť." }
+      ]
+    },
+    {
+      "id": "transactions",
+      "title": "Pridávanie a hľadanie transakcií",
+      "blocks": [
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Otvorte kartu **Transakcie** a stlačte **Pridať transakciu**.",
+          "Vyberte **Typ**: **Príjem**, **Výdavok** alebo **Presun**.",
+          "Napíšte sumu, dátum a krátky popis. Vyberte kategóriu a účet.",
+          "Stlačte **Uložiť transakciu**."
+        ] },
+        { "type": "p", "text": "Na hľadanie transakcie použite pole vyhľadávania a **Filtre**. Filtrovať môžete podľa typu, kategórie a zdroja (**Zadané ručne** alebo **Importované**). Chybu opravíte tak, že transakciu otvoríte, upravíte a uložíte, alebo stlačíte **Odstrániť transakciu**." }
+      ]
+    },
+    {
+      "id": "transfers",
+      "title": "Presuny medzi účtami",
+      "blocks": [
+        { "type": "p", "text": "Presun posiela peniaze z jedného účtu na druhý, napríklad zo spoločného účtu na sporenie. Vyberte typ **Presun** a potom **Z účtu** a **Na účet**. Nepočíta sa ako príjem ani výdavok." },
+        { "type": "p", "text": "Ak vidíte len jeden z dvoch účtov, vidíte len svoju stranu presunu. Názov druhého, skrytého účtu sa nezobrazí a ani jeho zostatok. Je to zámer, aby súkromný účet ostal súkromný, aj keď naň alebo z neho idú peniaze." }
+      ]
+    },
+    {
+      "id": "categories",
+      "title": "Kategórie",
+      "blocks": [
+        { "type": "p", "text": "Kategórie zoskupujú výdavky a príjmy, napríklad Potraviny alebo Plat. Niekoľko ich je pripravených. Stlačte **Kategórie** na stránke Financie, aby ste ich pridali alebo upravili." },
+        { "type": "p", "text": "Keď kategóriu odstránite, vyberiete inú, do ktorej sa presunú jej transakcie a rozpočty. Nič sa nestratí." }
+      ]
+    },
+    {
+      "id": "recurring",
+      "title": "Pravidelné platby: očakávané a skutočné",
+      "blocks": [
+        { "type": "p", "text": "Kartu **Pravidelné** použite na platby, ktoré chodia každý mesiac, napríklad nájom alebo energie. Stlačte **Pridať pravidelný výdavok** a napíšte názov, **Očakávaná suma** a **Prvý termín splatnosti**. Môžete nastaviť aj dátum ukončenia. Ak je mesiac kratší, použije sa jeho posledný deň." },
+        { "type": "list", "items": [
+          "Každá platba má stav: **Nadchádzajúce**, **Zaplatené**, **Po termíne** alebo **Zaplatené inak** (zaplatená suma nebola očakávaná suma).",
+          "Aplikácia sa snaží priradiť platbu k transakcii, ktorá jej zodpovedá. V časti **Pomôcky na priradenie** nastavíte text, ktorý sa hľadá, o koľko sa suma smie líšiť a koľko dní okolo termínu sa počíta.",
+          "Otvorte platbu a stlačte **Zaznamenať platbu**, **Priradiť transakciu** alebo **Zrušiť priradenie platby**, ak to chcete urobiť ručne.",
+          "Prepínaním medzi **Kalendár** a **Zoznam** vidíte platby po dňoch."
+        ] },
+        { "type": "p", "text": "Karta **Ešte treba zaplatiť** v Prehľade a na stránke Financie spočíta, čo ešte treba tento mesiac zaplatiť." }
+      ]
+    },
+    {
+      "id": "budgets-charts",
+      "title": "Rozpočty a grafy",
+      "blocks": [
+        { "type": "p", "text": "Rozpočet je mesačný limit pre jednu kategóriu. Stlačte **Pridať rozpočet**, vyberte kategóriu a napíšte **Mesačný limit**. Pruh ukazuje, koľko ste už použili, a upozorní, keď je rozpočet takmer minutý alebo prekročený. Rozpočet platí aj v ďalších mesiacoch, kým ho nezmeníte." },
+        { "type": "p", "text": "Grafy ukazujú **Výdavky podľa kategórie** a **Vývoj zostatku** (6 alebo 12 mesiacov). Pod každým grafom **Zobraziť ako tabuľku** dá tie isté čísla ako text." }
+      ]
+    },
+    {
+      "id": "import",
+      "title": "Import bankového výpisu (CSV)",
+      "blocks": [
+        { "type": "p", "text": "Veľa transakcií naraz môžete pridať zo súboru CSV, ktorý si stiahnete z banky. Súbor musí byť .csv alebo .txt do 2 MB a najviac s 5000 riadkami. Číta sa raz a neuchováva sa. Uložia sa len riadky, ktoré vyberiete." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Na stránke Financie stlačte **Importovať CSV**.",
+          "Krok 1, **Súbor**: vyberte účet, uložený profil banky (alebo nový) a súbor. Stlačte **Načítať súbor**.",
+          "Krok 2, **Stĺpce**: povedzte aplikácii, ktorý stĺpec obsahuje dátum, sumu a popis. Skontrolujte ukážkové riadky. Banky sa líšia oddeľovačom, kódovaním textu a zápisom čísel. Zaškrtnite **Uložiť tieto nastavenia ako profil**, aby ste ich nabudúce použili znova.",
+          "Krok 3, **Kontrola**: každý riadok je označený **Nové**, **Možný duplikát** alebo **Nedá sa prečítať**. Možné duplikáty vyzerajú ako transakcie, ktoré už máte, a vynechajú sa, kým ich nezaškrtnete. Vyberte riadky, ktoré chcete.",
+          "Stlačte **Importovať** a potom **Zobraziť transakcie**."
+        ] },
+        { "type": "p", "text": "Urobili ste chybu? Stlačte **Vrátiť import** na stránke Hotovo alebo v **Predchádzajúce importy**. Tým sa odstránia transakcie, ktoré import pridal, a platba, ktorá bola k niektorej priradená, sa znova stane nezaplatenou." }
+      ]
+    }
+  ]
+}

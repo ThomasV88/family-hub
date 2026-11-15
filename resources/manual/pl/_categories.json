@@ -1,0 +1,9 @@
+{
+  "categories": [
+    { "id": "start", "title": "Pierwsze kroki" },
+    { "id": "modules", "title": "Korzystanie z aplikacji" },
+    { "id": "account", "title": "Twoje konto" },
+    { "id": "admin", "title": "Dla administratora" },
+    { "id": "help", "title": "Pomoc i zestawienia" }
+  ]
+}

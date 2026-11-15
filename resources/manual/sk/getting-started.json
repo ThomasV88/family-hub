@@ -1,0 +1,102 @@
+{
+  "id": "getting-started",
+  "category": "start",
+  "order": 10,
+  "title": "Začíname",
+  "summary": "Ako sa pripojiť, prihlásiť, vybrať jazyk a vzhľad, dať si aplikáciu do telefónu a zapnúť pripomienky.",
+  "covers": ["settings:appearance", "settings:notifications"],
+  "sections": [
+    {
+      "id": "invitation",
+      "title": "Pripojenie cez pozvánku",
+      "blocks": [
+        { "type": "p", "text": "Family Hub je len pre pozvaných ľudí. Správca rodiny vám pošle pozvánku e-mailom alebo vám dá odkaz. Odkaz funguje len raz a po 7 dňoch prestane platiť." },
+        { "type": "steps", "items": [
+          "Otvorte odkaz z pozvánky.",
+          "Napíšte svoje meno.",
+          "Vyberte si heslo s aspoň 12 znakmi. Dobre funguje dlhá veta, ktorú si ľahko zapamätáte.",
+          "Stlačte **Vytvoriť účet**. Alebo stlačte **Pokračovať cez Google**, ak sa chcete prihlasovať účtom Google s rovnakou e-mailovou adresou, aká je v pozvánke."
+        ] },
+        { "type": "tip", "text": "Ak odkaz hlási, že sa nedá použiť, vypršal, už bol použitý alebo bol zrušený. Požiadajte správcu o nový." }
+      ]
+    },
+    {
+      "id": "signing-in",
+      "title": "Prihlásenie a odhlásenie",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Otvorte adresu aplikácie v prehliadači alebo spustite nainštalovanú aplikáciu.",
+          "Napíšte e-mail a heslo a stlačte **Prihlásiť sa**. Alebo stlačte **Prihlásiť sa cez Google**.",
+          "Zaškrtnite **Zostať prihlásený 30 dní** len na svojom vlastnom zariadení.",
+          "Ak ste zapli dvojstupňové overenie, napíšte 6-miestny kód z overovacej aplikácie alebo použite prístupový kľúč."
+        ] },
+        { "type": "p", "text": "Na odhlásenie otvorte ponuku účtu (tlačidlo s postavou v hornej lište) a vyberte **Odhlásiť sa**." },
+        { "type": "p", "text": "Zabudli ste heslo? Na prihlasovacej stránke stlačte **Zabudnuté heslo?**, napíšte e-mail a postupujte podľa odkazu, ktorý vám pošleme. Odkaz platí 60 minút. Po nastavení nového hesla vás odhlásime na ostatných zariadeniach." },
+        { "type": "warning", "text": "Na spoločnom alebo verejnom počítači nikdy nezaškrtávajte **Zostať prihlásený**." }
+      ]
+    },
+    {
+      "id": "language-theme",
+      "title": "Jazyk a svetlý alebo tmavý vzhľad",
+      "blocks": [
+        { "type": "p", "text": "Aplikácia hovorí po slovensky, poľsky a anglicky. Jazyk môžete kedykoľvek zmeniť. Voľba sa na tomto zariadení zapamätá." },
+        { "type": "steps", "items": [
+          "Otvorte ponuku účtu v hornej lište.",
+          "V časti **Jazyk** vyberte svoj jazyk.",
+          "V časti **Téma** vyberte **Podľa systému** (riadi sa zariadením), **Svetlý** alebo **Tmavý**."
+        ] },
+        { "type": "p", "text": "Rovnaké voľby nájdete v [Nastavenia > Vzhľad a jazyk](/settings/appearance)." }
+      ]
+    },
+    {
+      "id": "install",
+      "title": "Aplikácia v telefóne, tablete alebo počítači",
+      "blocks": [
+        { "type": "p", "text": "Family Hub si môžete nainštalovať ako aplikáciu. Potom sa otvára vo vlastnom okne a má vlastnú ikonu. Nič sa nesťahuje z obchodu s aplikáciami." },
+        { "type": "p", "text": "**iPhone a iPad** (použite Safari):" },
+        { "type": "steps", "items": [
+          "Otvorte Family Hub v Safari.",
+          "Ťuknite na tlačidlo **Zdieľať**.",
+          "Vyberte **Pridať na plochu** a potom **Pridať**.",
+          "Otvorte novú ikonu na ploche."
+        ] },
+        { "type": "p", "text": "**Android** (použite Chrome):" },
+        { "type": "steps", "items": [
+          "Otvorte Family Hub v Chrome.",
+          "Ťuknite na tlačidlo ponuky (tri bodky).",
+          "Vyberte **Inštalovať aplikáciu** alebo **Pridať na plochu**."
+        ] },
+        { "type": "p", "text": "**Počítač** (Chrome alebo Edge): hľadajte ikonu inštalácie na pravom konci adresného riadka, alebo otvorte ponuku prehliadača a vyberte **Inštalovať Family Hub**." },
+        { "type": "tip", "text": "Názvy v ponuke sa medzi verziami prehliadačov mierne líšia. Ak tlačidlo nenájdete, hľadajte slová Inštalovať alebo Pridať na plochu." }
+      ]
+    },
+    {
+      "id": "notifications",
+      "title": "Zapnutie pripomienok",
+      "blocks": [
+        { "type": "p", "text": "Pripomienky na úlohy a darčekové príležitosti môžete dostávať e-mailom aj ako krátke push oznámenia na zariadení." },
+        { "type": "steps", "items": [
+          "Otvorte ponuku účtu, vyberte **Nastavenia** a potom **Oznámenia**.",
+          "Zapnite **Pripomienky e-mailom**, **Push oznámenia** alebo oboje.",
+          "Pri push stlačte **Zapnúť push na tomto zariadení** a povoľte oznámenia, keď sa prehliadač opýta.",
+          "Stlačte **Poslať skúšobné oznámenie** a overte, že to funguje."
+        ] },
+        { "type": "warning", "text": "Na iPhone a iPade push funguje, až keď si Family Hub pridáte na plochu (pozrite vyššie) a otvoríte ho odtiaľ." },
+        { "type": "p", "text": "Push oznámenia ukazujú len názov úlohy, nikdy poznámky. Ak sú oba spínače vypnuté, nedostávate žiadne pripomienky. Každé zariadenie potrebuje vlastný krok **Zapnúť push**." }
+      ]
+    },
+    {
+      "id": "moving-around",
+      "title": "Ako sa v aplikácii orientovať",
+      "blocks": [
+        { "type": "list", "items": [
+          "Na širokej obrazovke je ponuka vľavo. V telefóne je to lišta dole.",
+          "Vidíte len tie časti aplikácie, ktoré vám správca povolil.",
+          "Ponuka účtu (horná lišta) obsahuje Nastavenia, tento manuál, jazyk, tému a Odhlásiť sa.",
+          "Tlačidlo **Pridať** v telefóne vám umožní rýchlo pridať novú položku."
+        ] },
+        { "type": "p", "text": "Ak stránka hlási, že nemáte prístup, spýtajte sa správcu. Pozrite [kto čo vidí](who-sees-what)." }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "id": "finance",
+  "category": "modules",
+  "order": 50,
+  "title": "Finance",
+  "summary": "Accounts, income and spending, recurring bills, budgets and charts. Each account is visible only to the members it is shared with.",
+  "covers": ["module:finances"],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "The Finance page",
+      "blocks": [
+        { "type": "p", "text": "Finance has three tabs: **Overview**, **Transactions** and **Recurring**. At the top you can switch the **Month**, and choose one account or **All accounts**." },
+        { "type": "p", "text": "The Overview shows **Income**, **Spending** and the **Balance at month end** for the month, a **Still to pay** card, your budgets and two charts (see [Budgets and charts](finance#budgets-charts))." },
+        { "type": "warning", "text": "Finance is private by default. You only see it if the administrator gave you access, and then only the accounts shared with you." }
+      ]
+    },
+    {
+      "id": "accounts",
+      "title": "Accounts and who sees them",
+      "blocks": [
+        { "type": "p", "text": "An account holds transactions. It can be a **Bank account**, **Cash**, **Savings** or a **Card**. Press **Accounts** on the Finance page to see them." },
+        { "type": "steps", "title": "Where to click", "items": [
+          "Open **Accounts** and press **Add account**.",
+          "Type a name, choose the type and the currency, and type the opening balance and the date it is valid for.",
+          "Under **Visible to**, tick the members who may see this account.",
+          "Press **Save account**."
+        ] },
+        { "type": "list", "items": [
+          "Only the members you tick can see the account and everything in it.",
+          "The currency cannot be changed once there is a transaction.",
+          "The administrator can also choose who sees each account in Settings."
+        ] },
+        { "type": "p", "text": "If you see the message **Not shared with you**, the account exists but you may not open it." }
+      ]
+    },
+    {
+      "id": "transactions",
+      "title": "Adding and finding transactions",
+      "blocks": [
+        { "type": "steps", "title": "Where to click", "items": [
+          "Open the **Transactions** tab and press **Add transaction**.",
+          "Choose the **Type**: **Income**, **Expense** or **Transfer**.",
+          "Type the amount, date and a short description. Pick a category and an account.",
+          "Press **Save transaction**."
+        ] },
+        { "type": "p", "text": "Use the search box and **Filters** to find a transaction. You can filter by type, category and source (**Entered by hand** or **Imported**). To fix a mistake, open the transaction, change it and save, or press **Delete transaction**." }
+      ]
+    },
+    {
+      "id": "transfers",
+      "title": "Transfers between accounts",
+      "blocks": [
+        { "type": "p", "text": "A transfer moves money from one account to another, for example from the family account to savings. Choose the type **Transfer**, then **From account** and **To account**. It is not counted as income or spending." },
+        { "type": "p", "text": "If you can see only one of the two accounts, you see only your side of the transfer. The name of the other, hidden account is not shown, and neither is its balance. This is on purpose, so a private account stays private even when money moves to or from it." }
+      ]
+    },
+    {
+      "id": "categories",
+      "title": "Categories",
+      "blocks": [
+        { "type": "p", "text": "Categories group your spending and income, for example Groceries or Salary. A few are made for you. Press **Categories** on the Finance page to add or edit them." },
+        { "type": "p", "text": "When you delete a category, you choose another one to move its transactions and budgets to. Nothing is lost." }
+      ]
+    },
+    {
+      "id": "recurring",
+      "title": "Recurring bills: expected and actual",
+      "blocks": [
+        { "type": "p", "text": "Use the **Recurring** tab for bills that come every month, such as rent or energy. Press **Add recurring expense**, and type a name, the **Expected amount** and the **First due date**. You can set an end date. If a month is shorter, the last day of that month is used." },
+        { "type": "list", "items": [
+          "Each bill shows a status: **Upcoming**, **Paid**, **Overdue** or **Paid differently** (the amount paid was not the amount expected).",
+          "The app tries to match a bill with a transaction that looks like it. Under **Matching hints** you can set a text to look for, how far the amount may differ, and how many days around the due date count.",
+          "Open a bill and press **Record payment**, **Match a transaction** or **Unmatch payment** to do it by hand.",
+          "Switch between **Calendar** and **List** to see the bills by day."
+        ] },
+        { "type": "p", "text": "The **Still to pay** card on the Overview and Finance pages adds up what is left to pay this month." }
+      ]
+    },
+    {
+      "id": "budgets-charts",
+      "title": "Budgets and charts",
+      "blocks": [
+        { "type": "p", "text": "A budget is a monthly limit for one category. Press **Add budget**, choose the category and type the **Monthly limit**. The bar shows how much you have used, and warns you when it is nearly used up or over budget. A budget applies to later months until you change it." },
+        { "type": "p", "text": "The charts show **Spending by category** and **Balance over months** (6 or 12 months). Under each chart, **View as table** gives the same numbers as text." }
+      ]
+    },
+    {
+      "id": "import",
+      "title": "Importing a bank statement (CSV)",
+      "blocks": [
+        { "type": "p", "text": "You can add many transactions at once from a CSV file that you download from your bank. The file must be a .csv or .txt file up to 2 MB and have up to 5000 rows. It is read once and not kept. Only the rows you choose are saved." },
+        { "type": "steps", "title": "Where to click", "items": [
+          "On the Finance page, press **Import CSV**.",
+          "Step 1, **File**: choose the account, a saved bank profile (or a new one), and the file. Press **Read file**.",
+          "Step 2, **Columns**: tell the app which column holds the date, the amount and the description. Check the sample rows. Banks differ in separator, text encoding and the way they write numbers. Tick **Save these settings as a profile** to reuse them next time.",
+          "Step 3, **Review**: every row is marked **New**, **Possible duplicate** or **Cannot be read**. Possible duplicates look like transactions you already have, and are left out unless you tick them. Choose the rows you want.",
+          "Press **Import** and then **View transactions**."
+        ] },
+        { "type": "p", "text": "Made a mistake? Press **Undo import** on the Done page or in **Earlier imports**. That removes the transactions that import added, and a payment matched to one becomes unpaid again." }
+      ]
+    }
+  ]
+}

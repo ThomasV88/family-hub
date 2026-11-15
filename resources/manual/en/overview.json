@@ -1,0 +1,33 @@
+{
+  "id": "overview",
+  "category": "modules",
+  "order": 20,
+  "title": "Overview",
+  "summary": "The home page: what needs your attention today, at a glance.",
+  "covers": ["module:overview"],
+  "sections": [
+    {
+      "id": "what-it-shows",
+      "title": "What you see on the Overview",
+      "blocks": [
+        { "type": "p", "text": "The Overview is the first page after you sign in. It shows small cards, one for each part of the app you can use. A card never shows anything you are not allowed to see." },
+        { "type": "list", "items": [
+          "**Add task**: a box at the top where you can type a task and press Enter. It appears only if you may add tasks.",
+          "**Due soon**: your own open tasks with a due date, late ones first, then the soonest. Press a task to open it.",
+          "**Upcoming occasions**: birthdays, name days and other occasions in the next 60 days, with a shortcut to the wishlist.",
+          "**Still to pay**: recurring bills that are due this month (only if you have finance access).",
+          "**Health**: a shortcut to open Health. It never shows any health details on the Overview (only if you have health access).",
+          "**System status**: when the app last checked itself in the background."
+        ] },
+        { "type": "tip", "text": "If a card is missing, you probably do not have access to that part of the app. Ask your administrator." }
+      ]
+    },
+    {
+      "id": "empty",
+      "title": "When the Overview looks empty",
+      "blocks": [
+        { "type": "p", "text": "A new account may show few cards and short messages such as Nothing is due soon. That is normal. Add your first task or wish and the cards fill up." }
+      ]
+    }
+  ]
+}

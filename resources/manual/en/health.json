@@ -1,0 +1,127 @@
+{
+  "id": "health",
+  "category": "modules",
+  "order": 60,
+  "title": "Health",
+  "summary": "Medical records for each family member: visits, medicines, allergies, vaccinations and documents. Private by default.",
+  "covers": ["module:health"],
+  "sections": [
+    {
+      "id": "people-access",
+      "title": "People and who can open them",
+      "blocks": [
+        { "type": "p", "text": "Health keeps one record for each person. A person can be a member with an account, or someone without one, such as a young child. At the top of Health, choose a person to open their record." },
+        { "type": "p", "text": "To see a person you need two things: Health access in your permissions, and access to that person. The administrator gives both. Access to a person is either **Can view** (read the record and the emergency card) or **Can change** (also edit, upload, export and decide about AI). A person you have no access to does not appear at all." },
+        { "type": "steps", "title": "Adding a person", "items": [
+          "Press **Add person**.",
+          "Type the name. You can add a birth date, sex, blood type and notes.",
+          "Add up to 3 emergency contacts with their relationship and phone number.",
+          "Press **Save person**."
+        ] },
+        { "type": "p", "text": "Health is protected with an extra check. See [Account and security](account-security#confirm)." }
+      ]
+    },
+    {
+      "id": "visits",
+      "title": "Visits",
+      "blocks": [
+        { "type": "p", "text": "A visit is one trip to a doctor. Open a person and press **Add visit**. Fill in the **Date** and the **Specialty**. You can add the doctor, a diagnosis and notes, and attach documents." },
+        { "type": "p", "text": "You can see the record **By specialty** (a folder for each kind of doctor) or as a **Timeline**. In the timeline you can filter vaccinations or documents." },
+        { "type": "warning", "text": "The page locks after a period of inactivity. If it locks before you save, long notes that were not saved can be lost. Save often." }
+      ]
+    },
+    {
+      "id": "medications",
+      "title": "Medications",
+      "blocks": [
+        { "type": "p", "text": "Press **Add medication** and type the name. You can add the dose (for example 5 mg), the schedule (for example one tablet in the morning), and the start and end dates. Leave the end date empty if the medicine continues." },
+        { "type": "p", "text": "Ended medications are hidden. Press **Show ended medications** to see them." }
+      ]
+    },
+    {
+      "id": "allergies",
+      "title": "Allergies",
+      "blocks": [
+        { "type": "p", "text": "Press **Add allergy**. Type the substance and choose a severity: **Mild**, **Moderate**, **Severe** or **Not specified**. You can add the reaction. If a person has no allergies, simply leave the list empty." }
+      ]
+    },
+    {
+      "id": "vaccinations",
+      "title": "Vaccinations and reminders",
+      "blocks": [
+        { "type": "p", "text": "Press **Add vaccination**, type the vaccine and the date it was given. Add **Next due** if another dose is needed." },
+        { "type": "p", "text": "Members who can change this record get a reminder before the next date. The reminder names the person only, not the vaccine. A due or overdue vaccination is marked on the record. When it is done, press **Mark as given**." }
+      ]
+    },
+    {
+      "id": "documents",
+      "title": "Documents and photos",
+      "blocks": [
+        { "type": "p", "text": "You can keep lab results, reports and photos of paper documents with a person's record." },
+        { "type": "steps", "title": "Where to click", "items": [
+          "Open the person, then press **Add document**. Or open a visit and press **Attach document**.",
+          "Choose one or more files. You can add up to 10 at a time.",
+          "Give each one a name and, if you like, attach it to a visit.",
+          "Press **Add document**."
+        ] },
+        { "type": "list", "items": [
+          "Allowed formats: PDF, JPG, PNG, WebP and HEIC (the iPhone photo format).",
+          "Each file can be up to 10 MB. One person can have up to 200 documents.",
+          "Photos are saved as a resized copy, and the place and camera details in them are removed. PDF and HEIC files are saved as they are.",
+          "Some photo formats have no preview. Then use **Download document** to see the original."
+        ] },
+        { "type": "p", "text": "Open a document in a new tab or download it from its page. Documents are never reachable by an address that anyone can open: only members with access to the person can view them." }
+      ]
+    },
+    {
+      "id": "exports",
+      "title": "Printing and exports for a doctor",
+      "blocks": [
+        { "type": "steps", "title": "Where to click", "items": [
+          "Open the person and choose **Export records**.",
+          "Under **What to include**, choose **Everything for this person** or **One specialty**.",
+          "Under **Format**, choose **For a doctor**, **Data file** or **For AI**.",
+          "Press **Create export**. For a doctor, a printable page opens: press **Print export** and choose **Save as PDF** to get a file."
+        ] },
+        { "type": "list", "items": [
+          "**For a doctor**: a clean printable page.",
+          "**Data file**: a structured file (JSON) to keep or move elsewhere.",
+          "**For AI**: a Markdown file with the name and birth date left out. Notes and diagnoses are copied as written and may still mention the person, so check it before you share it."
+        ] },
+        { "type": "p", "text": "Exports are made when you ask and are not stored on the server. Anything an AI suggested and nobody has checked is only included if you tick that option, and is marked **Unverified**." }
+      ]
+    },
+    {
+      "id": "emergency-card",
+      "title": "The emergency card",
+      "blocks": [
+        { "type": "p", "text": "The emergency card is a one-page summary: allergies, current medications and emergency contacts. Open it with **Open emergency card** on the person's page and press **Print card** to print it. Check that it is up to date before you rely on it." }
+      ]
+    },
+    {
+      "id": "archive-delete",
+      "title": "Deleting and archiving",
+      "blocks": [
+        { "type": "p", "text": "A health record can be deleted for good only shortly after it was created. By default that is 72 hours. The family administrator sets this time in the server settings." },
+        { "type": "p", "text": "After that time, **Delete** becomes **Archive**. An archived item is kept but hidden everywhere: in lists, exports, the emergency card, reminders and AI. Members who can change the person can find it again under **Archived items** and press **Restore**." },
+        { "type": "tip", "text": "Not sure if an entry is right? Archive it instead of deleting it. You can bring it back." }
+      ]
+    },
+    {
+      "id": "ai",
+      "title": "AI help and your consent",
+      "blocks": [
+        { "type": "p", "text": "AI can read a document and suggest visits, medications, allergies and vaccinations, so you type less. It is optional." },
+        { "type": "warning", "text": "AI is off until the administrator has set it up and turned it on, and it is off for every person until a member switches it on. When AI is used, the document leaves this server and is sent to an outside company (OpenAI, or GitHub if OpenAI is not available). That company may keep it under its own terms." },
+        { "type": "list", "items": [
+          "Each person has a switch **Allow AI to read documents of this person**. It is off by default. A member who can change that person decides, and sees a clear question before turning it on. Turn it off at any time.",
+          "AI never runs by itself on a document. Someone presses **Run AI** and sees a notice that names the company the document will be sent to.",
+          "When the suggestions are ready, press **Review suggestions**. Nothing is saved until you press **Accept** on an entry. You can **Edit** or **Reject** it.",
+          "Everything AI suggested is marked **Unverified** until a person presses **Mark as verified**. AI can be wrong, so always compare it with the document.",
+          "If AI is switched off for a person, no new run starts and runs that were waiting are stopped."
+        ] },
+        { "type": "p", "text": "If AI is not available, you will see a short message, and you can always add the details yourself. The administrator can see a list of AI calls, but never what was in a document." }
+      ]
+    }
+  ]
+}

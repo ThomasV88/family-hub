@@ -1,0 +1,33 @@
+{
+  "id": "overview",
+  "category": "modules",
+  "order": 20,
+  "title": "Przegląd",
+  "summary": "Strona główna: co dziś wymaga Twojej uwagi, na pierwszy rzut oka.",
+  "covers": ["module:overview"],
+  "sections": [
+    {
+      "id": "what-it-shows",
+      "title": "Co widzisz w Przeglądzie",
+      "blocks": [
+        { "type": "p", "text": "Przegląd to pierwsza strona po zalogowaniu. Pokazuje małe karty, po jednej dla każdej części aplikacji, z której możesz korzystać. Karta nigdy nie pokazuje niczego, czego nie wolno Ci widzieć." },
+        { "type": "list", "items": [
+          "**Dodaj zadanie**: pole na górze, w którym możesz wpisać zadanie i nacisnąć Enter. Pojawia się tylko, jeśli możesz dodawać zadania.",
+          "**Wkrótce do wykonania**: Twoje otwarte zadania z terminem, najpierw te po terminie, potem najbliższe. Naciśnij zadanie, aby je otworzyć.",
+          "**Nadchodzące okazje**: urodziny, imieniny i inne okazje w ciągu najbliższych 60 dni, ze skrótem do listy życzeń.",
+          "**Jeszcze do zapłaty**: płatności cykliczne wymagalne w tym miesiącu (tylko jeśli masz dostęp do finansów).",
+          "**Zdrowie**: skrót do otwarcia Zdrowia. Nigdy nie pokazuje w Przeglądzie żadnych danych zdrowotnych (tylko jeśli masz dostęp do zdrowia).",
+          "**Stan systemu**: kiedy aplikacja ostatnio sprawdziła się w tle."
+        ] },
+        { "type": "tip", "text": "Jeśli jakiejś karty brakuje, prawdopodobnie nie masz dostępu do tej części aplikacji. Zapytaj administratora." }
+      ]
+    },
+    {
+      "id": "empty",
+      "title": "Gdy Przegląd wygląda na pusty",
+      "blocks": [
+        { "type": "p", "text": "Nowe konto może pokazywać niewiele kart i krótkie komunikaty, na przykład Nic nie jest wkrótce do wykonania. To normalne. Dodaj pierwsze zadanie lub życzenie, a karty się wypełnią." }
+      ]
+    }
+  ]
+}
