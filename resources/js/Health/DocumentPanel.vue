@@ -113,7 +113,7 @@ function remove() {
 async function download() {
     downloadError.value = false;
     downloading.value = true;
-    const result = await securityDownload(documentUrl(props.personId, props.document.id, 'file'));
+    const result = await securityDownload(documentUrl(props.personId, props.document.id, 'file'), { replay: true });
     downloading.value = false;
     if (!result.ok) {
         if (handleHealthRefusal(result.error)) return;

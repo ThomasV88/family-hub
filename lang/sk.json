@@ -1779,7 +1779,14 @@
             "disable_keep": "Ponechať overovaciu aplikáciu"
         },
         "last_factor_warning": "Toto je váš jediný druhý krok. Pred otvorením Zdravia alebo Financií si budete musieť nastaviť ďalší.",
-        "confirm_first": "Pred zmenou dvojstupňového overenia potvrďte, že ste to vy."
+        "confirm_first": "Pred zmenou dvojstupňového overenia potvrďte, že ste to vy.",
+        "confirm_modal": {
+            "body": "Vaše potvrdenie vypršalo. Potvrďte, že ste to vy, a vaša zmena sa hneď odošle. Nič, čo ste zadali, sa nestratí.",
+            "body_no_method": "Vaše potvrdenie vypršalo a tento účet tu nemá ako potvrdiť.",
+            "cancel": "Zrušiť, nič neodoslať",
+            "expired": "Trvalo to príliš dlho, preto sa nič neodoslalo. Odošlite to znova.",
+            "replay_failed": "Zmena sa neuložila, pretože potvrdenie nebolo prijaté. Skúste to znova."
+        }
     },
     "members": {
         "security": {

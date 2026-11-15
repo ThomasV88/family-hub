@@ -54,7 +54,7 @@ async function create() {
         return;
     }
     busy.value = true;
-    const result = await securityDownload(`${base.value}/download?${queryString({ format: format.value })}`);
+    const result = await securityDownload(`${base.value}/download?${queryString({ format: format.value })}`, { replay: true });
     busy.value = false;
     if (!result.ok) {
         if (handleHealthRefusal(result.error)) return;

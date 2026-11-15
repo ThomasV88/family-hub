@@ -123,7 +123,7 @@ describe('export form', () => {
         expect(revoked).toEqual([]);
         delayed[0]();
         expect(revoked).toEqual(['blob:x']);
-        expect(download).toHaveBeenCalledWith(`/health/people/${ID}/export/download?scope=all&format=json`);
+        expect(download).toHaveBeenCalledWith(`/health/people/${ID}/export/download?scope=all&format=json`, { replay: true });
         await vi.waitFor(() => expect(document.body.textContent).toContain('Export downloaded'));
     });
 

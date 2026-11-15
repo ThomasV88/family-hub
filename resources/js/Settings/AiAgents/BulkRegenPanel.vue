@@ -185,7 +185,7 @@ async function check() {
     finished.value = null;
     say(t('settings.ai_bulk.checking'));
     const body = { scope: scope.value, cap: capValue.value };
-    const response = await securityFetch(DRY_URL, { method: 'POST', body });
+    const response = await securityFetch(DRY_URL, { method: 'POST', body, replay: true });
     checking.value = false;
     const data = response.data ?? {};
     if (response.ok && typeof data.token === 'string' && data.counts) {
@@ -227,7 +227,7 @@ async function start() {
     if (!ready.value || !result.value) return;
     starting.value = true;
     problem.value = '';
-    const response = await securityFetch(START_URL, { method: 'POST', body: { token: result.value.token, acknowledged: true, providers: [...shownProviders.value] } });
+    const response = await securityFetch(START_URL, { method: 'POST', body: { token: result.value.token, acknowledged: true, providers: [...shownProviders.value] }, replay: true });
     starting.value = false;
     const data = response.data ?? {};
     if (response.ok && response.status === 201 && data.panel) {
@@ -265,7 +265,7 @@ async function control(action) {
     if (pending.value || !active.value) return;
     pending.value = action;
     problem.value = '';
-    const response = await securityFetch(`${START_URL}/${encodeURIComponent(active.value.id)}/${action}`, { method: 'POST' });
+    const response = await securityFetch(`${START_URL}/${encodeURIComponent(active.value.id)}/${action}`, { method: 'POST', replay: true });
     pending.value = null;
     const data = response.data ?? {};
     if (response.ok && data.panel) {

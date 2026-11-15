@@ -79,7 +79,9 @@ function previewError(code) {
 // discards it and the confirm page's interrupted note tells the member to repeat the step.
 // PROVISIONAL (orchestrator), owner confirms in 06-13 Task 2: no keepalive, the wizard does not ping to hold the window open.
 function handleRefusal(code) {
-    const target = code === 'reauth_required' ? '/confirm-access' : code === 'second_factor_required' ? '/settings/security' : null;
+    // Closed "Confirm it's you": stay on the wizard, nothing was sent.
+    if (code === 'cancelled') return true;
+    const target = code === 'reauth_required' || code === 'confirm_required' ? '/confirm-access' : code === 'second_factor_required' ? '/settings/security' : null;
     if (!target) return false;
     allowLeave = true;
     router.visit(target);

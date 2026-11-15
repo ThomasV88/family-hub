@@ -2,12 +2,17 @@
 // from the XSRF-TOKEN cookie. Resolves, never rejects:
 //   { ok: true, status, data }
 //   { ok: false, status, error: 'confirm_required' | 'reauth_required' | 'second_factor_required' | 'throttle'
-//                              | 'invalid' | 'network' | 'failed', data, minutes?, errors? }
+//                              | 'invalid' | 'network' | 'failed' | 'cancelled', data, methods?, minutes?, errors? }
+// `replay: true` (writes the member just submitted) opens "Confirm it's you" over the page when the gate refuses, and
+// sends the same request once more after a successful confirmation (see staleGate.js). 'cancelled' = the member
+// closed the dialog, nothing was sent. Without a mounted dialog host the refusal is returned as before.
 
 function xsrfToken() {
     const match = document.cookie.split('; ').find((c) => c.startsWith('XSRF-TOKEN='));
     return match ? decodeURIComponent(match.slice('XSRF-TOKEN='.length)) : '';
 }
+
+import { runWithGate } from './staleGate.js';
 
 const REFUSALS = ['confirm_required', 'reauth_required', 'second_factor_required'];
 
@@ -19,7 +24,14 @@ function waitMinutes(response, data) {
     return Number.isFinite(minutes) && minutes > 0 ? Math.max(1, Math.ceil(minutes)) : 1;
 }
 
-export async function securityFetch(url, { method = 'GET', body } = {}) {
+export function securityFetch(url, options = {}) {
+    const { replay = false } = options;
+    const attempt = () => send(url, options);
+
+    return replay ? runWithGate(attempt) : attempt();
+}
+
+async function send(url, { method = 'GET', body } = {}) {
     // Same-origin relative paths only (T-06-11): never send cookies or the CSRF token to another origin.
     if (typeof url !== 'string' || !url.startsWith('/') || url.startsWith('//')) {
         return { ok: false, status: 0, error: 'failed', data: {} };
@@ -44,7 +56,7 @@ export async function securityFetch(url, { method = 'GET', body } = {}) {
     if (response.ok) return { ok: true, status, data };
     if (status === 423) {
         const error = REFUSALS.includes(data?.error) ? data.error : 'confirm_required';
-        return { ok: false, status, error, data };
+        return { ok: false, status, error, data, methods: data?.methods };
     }
     if (status === 429) return { ok: false, status, error: 'throttle', minutes: waitMinutes(response, data), data };
     if (status === 422) return { ok: false, status, error: 'invalid', errors: data?.errors ?? {}, data };

@@ -61,7 +61,7 @@ async function save(agent, control, url, request, onOk) {
     if (busy.value) return;
     busy.value = { key: agent.key, control };
     problems.value = { ...problems.value, [agent.key]: '' };
-    const result = await securityFetch(url, request);
+    const result = await securityFetch(url, { ...request, replay: true });
     busy.value = null;
     if (result.ok) {
         adopt(result.data);

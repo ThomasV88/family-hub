@@ -2,8 +2,12 @@ import { createApp, h } from 'vue';
 import { createInertiaApp, router } from '@inertiajs/vue3';
 import { INTL_LOCALES, createAppI18n, setAppLocale } from './i18n.js';
 import { initTheme } from './theme.js';
+import { installStaleGate } from './Security/staleGate.js';
+import StaleGateHost from './Components/Security/StaleGateHost.vue';
 
 initTheme();
+// Every Inertia write that the sensitive-data gate refuses opens "Confirm it's you" in place and is replayed once.
+installStaleGate(router);
 
 createInertiaApp({
     resolve: (name) => {
@@ -22,7 +26,7 @@ createInertiaApp({
             document.documentElement.lang = INTL_LOCALES[p.locale] ?? INTL_LOCALES.en;
         });
 
-        createApp({ render: () => h(App, props) })
+        createApp({ render: () => [h(App, props), h(StaleGateHost)] })
             .use(plugin)
             .use(i18n)
             .mount(el);

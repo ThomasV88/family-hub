@@ -218,7 +218,7 @@ const cancelling = ref(false);
 async function cancelRun(id, done) {
     if (cancelling.value || !id) return;
     cancelling.value = true;
-    const result = await securityFetch(`/health/people/${props.person?.id}/ai/${id}/cancel`, { method: 'POST', body: {} });
+    const result = await securityFetch(`/health/people/${props.person?.id}/ai/${id}/cancel`, { method: 'POST', body: {}, replay: true });
     cancelling.value = false;
     if (result.ok) {
         toast.show(t('health.ai.run.cancelled_toast'));

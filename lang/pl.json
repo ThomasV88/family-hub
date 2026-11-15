@@ -1779,7 +1779,14 @@
             "disable_keep": "Zachowaj aplikację uwierzytelniającą"
         },
         "last_factor_warning": "To Twój jedyny drugi krok. Przed otwarciem Zdrowia lub Finansów musisz skonfigurować kolejny.",
-        "confirm_first": "Zanim zmienisz weryfikację dwuetapową, potwierdź, że to Ty."
+        "confirm_first": "Zanim zmienisz weryfikację dwuetapową, potwierdź, że to Ty.",
+        "confirm_modal": {
+            "body": "Twoje potwierdzenie wygasło. Potwierdź, że to Ty, a zmiana zostanie od razu wysłana. Nic, co wpisano, nie przepadnie.",
+            "body_no_method": "Twoje potwierdzenie wygasło, a to konto nie ma tu sposobu na potwierdzenie.",
+            "cancel": "Anuluj, nic nie wysyłaj",
+            "expired": "To trwało zbyt długo, dlatego nic nie wysłano. Wyślij ponownie.",
+            "replay_failed": "Zmiana nie została zapisana, bo potwierdzenie nie zostało przyjęte. Spróbuj ponownie."
+        }
     },
     "members": {
         "security": {

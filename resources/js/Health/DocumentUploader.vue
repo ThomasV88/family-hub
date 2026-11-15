@@ -110,6 +110,7 @@ async function run() {
             if (visitId.value !== '') body.append('visit_id', visitId.value);
             const result = await securityUpload(`/health/people/${props.personId}/documents`, body, {
                 signal: controller.signal,
+                replay: true,
                 onProgress: (fraction) => { next.progress = fraction; },
             });
             controller = null;

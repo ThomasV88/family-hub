@@ -157,6 +157,7 @@ async function send(withAck, shown = null) {
     const result = await securityFetch(`/health/people/${props.personId}/documents/${props.document.id}/ai`, {
         method: 'POST',
         body: withAck ? { acknowledged: true, providers: [...shown] } : {},
+        replay: true,
     });
     busy.value = false;
     if (result.ok) {
@@ -189,7 +190,7 @@ async function send(withAck, shown = null) {
 async function cancel() {
     if (cancelling.value || !entry.value?.extractionId) return;
     cancelling.value = true;
-    const result = await securityFetch(`/health/people/${props.personId}/ai/${entry.value.extractionId}/cancel`, { method: 'POST', body: {} });
+    const result = await securityFetch(`/health/people/${props.personId}/ai/${entry.value.extractionId}/cancel`, { method: 'POST', body: {}, replay: true });
     cancelling.value = false;
     if (result.ok) {
         toast.show(t('health.ai.run.cancelled_toast'));

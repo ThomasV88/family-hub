@@ -116,7 +116,7 @@ describe('Bulk panel: plan block', () => {
         await capInput().setValue('5');
         await radios()[1].trigger('click');
         await doCheck();
-        expect(fetchMock).toHaveBeenCalledWith('/settings/ai-agents/bulk/dry-run', { method: 'POST', body: { scope: 'last_failed', cap: 5 } });
+        expect(fetchMock).toHaveBeenCalledWith('/settings/ai-agents/bulk/dry-run', { method: 'POST', body: { scope: 'last_failed', cap: 5 }, replay: true });
         const heading = current.find('h3[tabindex="-1"]');
         expect(heading.text()).toBe('Result of the check');
         expect(document.activeElement).toBe(heading.element);
@@ -268,7 +268,7 @@ describe('Bulk panel: start confirmation', () => {
 
     it('sends the token and acknowledged true, then 201 shows block B and focuses the Progress heading', async () => {
         await confirmStart({ ok: true, status: 201, data: { panel: PANEL(RUN()) } });
-        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk', { method: 'POST', body: { token: '11111111-1111-4111-8111-111111111111', acknowledged: true, providers: ['codex'] } });
+        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk', { method: 'POST', body: { token: '11111111-1111-4111-8111-111111111111', acknowledged: true, providers: ['codex'] }, replay: true });
         expect(useToast().toasts.map((x) => x.message)).toContain('Bulk run started');
         expect(current.text()).toContain('A bulk run is active. Pause or cancel it before planning another.');
         expect(current.find('[role="radiogroup"]').exists()).toBe(false);
@@ -279,14 +279,14 @@ describe('Bulk panel: start confirmation', () => {
 
     it('409 providers_changed starts nothing and re-opens the confirm with the current providers, which the next Start sends', async () => {
         await confirmStart({ ok: false, status: 409, error: 'failed', data: { reason: 'providers_changed', providers: ['codex', 'copilot'] } });
-        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk', { method: 'POST', body: { token: '11111111-1111-4111-8111-111111111111', acknowledged: true, providers: ['codex'] } });
+        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk', { method: 'POST', body: { token: '11111111-1111-4111-8111-111111111111', acknowledged: true, providers: ['codex'] }, replay: true });
         expect(dialog()).not.toBeNull();
         expect(dialog().textContent).toContain('sent to OpenAI or GitHub to');
         expect(current.text()).not.toContain('Bulk run started');
         fetchMock.mockResolvedValueOnce({ ok: true, status: 201, data: { panel: PANEL(RUN()) } });
         dialogButton('Start bulk run').click();
         await flushPromises();
-        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk', { method: 'POST', body: { token: '11111111-1111-4111-8111-111111111111', acknowledged: true, providers: ['codex', 'copilot'] } });
+        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk', { method: 'POST', body: { token: '11111111-1111-4111-8111-111111111111', acknowledged: true, providers: ['codex', 'copilot'] }, replay: true });
     });
 
     it('410 closes the dialog and shows the stale alert', async () => {
@@ -358,7 +358,7 @@ describe('Bulk panel: active run', () => {
         fetchMock.mockResolvedValueOnce({ ok: true, status: 200, data: { panel: PANEL(RUN({ status: 'paused', state: 'paused' })) } });
         await toggle().trigger('click');
         await flushPromises();
-        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk/run-1/pause', { method: 'POST' });
+        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk/run-1/pause', { method: 'POST', replay: true });
         expect(useToast().toasts.map((x) => x.message)).toContain('Bulk run paused');
         expect(toggle().text()).toBe('Resume');
         expect(toggle().attributes('aria-label')).toBe('Resume bulk run');
@@ -367,7 +367,7 @@ describe('Bulk panel: active run', () => {
         fetchMock.mockResolvedValueOnce({ ok: true, status: 200, data: { panel: PANEL(RUN()) } });
         await toggle().trigger('click');
         await flushPromises();
-        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk/run-1/resume', { method: 'POST' });
+        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk/run-1/resume', { method: 'POST', replay: true });
         expect(toggle().text()).toBe('Pause');
         expect(document.activeElement).toBe(toggle().element);
     });
@@ -386,7 +386,7 @@ describe('Bulk panel: active run', () => {
         fetchMock.mockResolvedValueOnce({ ok: true, status: 200, data: { panel: PANEL(null, [ROW({ status: 'cancelled' })]) } });
         dialogButton('Cancel bulk run').click();
         await flushPromises();
-        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk/run-1/cancel', { method: 'POST' });
+        expect(fetchMock).toHaveBeenLastCalledWith('/settings/ai-agents/bulk/run-1/cancel', { method: 'POST', replay: true });
         expect(useToast().toasts.map((x) => x.message)).toContain('Bulk run cancelled');
         expect(current.find('[role="radiogroup"]').exists()).toBe(true);
         const legend = current.find('[role="radiogroup"] > span');

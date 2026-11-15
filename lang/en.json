@@ -1779,7 +1779,14 @@
             "disable_keep": "Keep authenticator app"
         },
         "last_factor_warning": "This is your only second step. You will need to set up another before opening Health or Finances.",
-        "confirm_first": "Confirm it's you before changing two-step verification."
+        "confirm_first": "Confirm it's you before changing two-step verification.",
+        "confirm_modal": {
+            "body": "Your confirmation has run out. Confirm it's you and your change is sent right away. Nothing you entered is lost.",
+            "body_no_method": "Your confirmation has run out and this account has no way to confirm here.",
+            "cancel": "Cancel, send nothing",
+            "expired": "That took too long, so nothing was sent. Please submit again.",
+            "replay_failed": "Your change was not saved because the confirmation was not accepted. Please try again."
+        }
     },
     "members": {
         "security": {
