@@ -7,6 +7,7 @@ use App\Audit\AuditLogger;
 use App\Models\User;
 use App\Security\AppSettings;
 use App\Security\SecondFactorPolicy;
+use App\Security\SecurityTimings;
 use App\Security\SensitiveSession;
 use App\Security\UserScopedTwoFactorProvider;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -26,6 +27,7 @@ class SecurityServiceProvider extends ServiceProvider
         // Created by plan 06-01; referenced by class constant only.
         $this->app->scoped(AppSettings::class);
         $this->app->scoped(SecondFactorPolicy::class);
+        $this->app->scoped(SecurityTimings::class);
         // Replay marker per member secret instead of Fortify's global per-code key (06-REVIEW WR-06).
         $this->app->singleton(
             TwoFactorAuthenticationProvider::class,

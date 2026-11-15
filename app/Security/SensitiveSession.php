@@ -17,7 +17,7 @@ class SensitiveSession
     /** Last sensitive-module activity is within the idle window. */
     public function fresh(): bool
     {
-        return $this->within(self::ACTIVE_KEY, (int) config('security.idle_seconds'));
+        return $this->within(self::ACTIVE_KEY, app(SecurityTimings::class)->idle());
     }
 
     /** Record sensitive-module activity now. */
@@ -53,7 +53,7 @@ class SensitiveSession
     /** The last proof of identity is within the security confirm window. */
     public function recentlyConfirmed(): bool
     {
-        return $this->within(self::CONFIRMED_KEY, (int) config('security.confirm_window_seconds'));
+        return $this->within(self::CONFIRMED_KEY, app(SecurityTimings::class)->confirmWindow());
     }
 
     private function within(string $key, int $seconds): bool

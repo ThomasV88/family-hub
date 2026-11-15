@@ -147,10 +147,11 @@ it('keeps the recency rule on enrolment, codes, passkeys, policy and member rese
         expect(array_filter(secRouteMiddleware($name), fn ($m) => str_starts_with($m, 'access:')) === [])->toBeTrue("{$name} gained its own access rule");
     }
 
-    foreach (['passkeys.options', 'passkeys.store', 'passkeys.destroy', 'settings.security.policy', 'settings.members.second_factor.destroy'] as $name) {
+    foreach (['passkeys.options', 'passkeys.store', 'passkeys.destroy', 'settings.security.policy', 'settings.security.timings', 'settings.members.second_factor.destroy'] as $name) {
         expect(in_array('access:recent', secRouteMiddleware($name), true))->toBeTrue("{$name} lost access:recent");
     }
     expect(secRouteMiddleware('settings.security.policy'))->toContain('access:admin')
+        ->and(secRouteMiddleware('settings.security.timings'))->toContain('access:admin')
         ->and(secRouteMiddleware('settings.members.second_factor.destroy'))->toContain('access:admin');
 
     // Turning a live factor off checks recency inside the guard (cancelling a pending setup does not).

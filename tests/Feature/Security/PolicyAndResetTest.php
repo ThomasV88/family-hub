@@ -27,7 +27,7 @@ function prAddSession(User $user, string $id): void
 
 function prStaleAdminWindow(): array
 {
-    return ['auth.password_confirmed_at' => now()->subMinutes(11)->getTimestamp()];
+    return ['auth.password_confirmed_at' => now()->subMinutes(61)->getTimestamp()];
 }
 
 function prAuditRows(string $event): int

@@ -9,6 +9,7 @@ use App\Http\Requests\Security\ReauthRequest;
 use App\Models\User;
 use App\Security\ReauthMethods;
 use App\Security\SafeIntended;
+use App\Security\SecurityTimings;
 use App\Security\SensitiveSession;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -32,7 +33,7 @@ class ReauthController extends Controller
 
         return Inertia::render('Auth/ConfirmAccess', [
             'methods' => ReauthMethods::for($request->user()),
-            'minutes' => intdiv((int) config('security.idle_seconds'), 60),
+            'minutes' => intdiv(app(SecurityTimings::class)->idle(), 60),
             'interrupted' => $request->session()->get('status') === 'reauth_interrupted',
         ]);
     }
@@ -60,7 +61,7 @@ class ReauthController extends Controller
         }
 
         // Audit first (fail closed, 06-REVIEW WR-04): if the row cannot be written the request fails and the
-        // windows were never opened. Then open both the idle window and the 10-minute security window, in page
+        // windows were never opened. Then open both the idle window and the confirm-window security window, in page
         // and dialog mode alike.
         $this->audit->record(AuditEvent::ReauthConfirmed, $user, ['method' => $method]);
         $session->confirmRotating();

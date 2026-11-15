@@ -44,7 +44,7 @@ it('shows the methods, the idle minutes and the interrupted flag', function () {
     $this->actingAs($user)->get('/confirm-access')->assertInertia(fn (Assert $p) => $p
         ->component('Auth/ConfirmAccess')
         ->where('methods', ['password' => true, 'totp' => false, 'passkey' => false])
-        ->where('minutes', 15)->where('interrupted', false));
+        ->where('minutes', 60)->where('interrupted', false));
 
     Totp::enable($user);
     $this->actingAs($user)->withSession(['status' => 'reauth_interrupted'])->get('/confirm-access')
@@ -121,9 +121,9 @@ it('never follows a tampered intended address', function () {
         ->post('/confirm-access', ['password' => 'password'])->assertRedirect('/');
 });
 
-it('answers JSON callers with 200 or 422, leaves intended alone and opens the 10 minute window', function () {
+it('answers JSON callers with 200 or 422, leaves intended alone and opens the one hour window', function () {
     $user = reauthUser();
-    $stale = now()->subMinutes(11)->getTimestamp();
+    $stale = now()->subMinutes(61)->getTimestamp();
 
     $this->actingAs($user)->withSession(['url.intended' => '/finance', 'auth.password_confirmed_at' => $stale]);
 

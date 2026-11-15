@@ -90,7 +90,7 @@ it('lets a stale session confirm first, then enrol and continue', function () {
     rgRequireSecondFactor();
 
     // Stale proof (as after a remember-me restore): no windows at all except an 11 minute old confirmation.
-    rgActAs($member, 11, active: false);
+    rgActAs($member, 61, active: false);
     $this->get('/finance')->assertRedirect('/settings/security')->assertSessionHas('url.intended', '/finance');
 
     $this->postJson('/user/two-factor-authentication')->assertStatus(423)->assertJson(['error' => 'confirm_required']);
@@ -109,7 +109,7 @@ it('does not let a stolen stale session enrol or escape the guidance', function 
     rgRequireSecondFactor();
     $secret = Totp::enable($member, confirm: false);
 
-    rgActAs($member, 11, active: false);
+    rgActAs($member, 61, active: false);
     $this->postJson('/user/two-factor-authentication')->assertStatus(423);
     $this->postJson('/user/confirmed-two-factor-authentication', ['code' => Totp::code($secret)])->assertStatus(423);
     $this->get('/finance')->assertRedirect('/settings/security');
@@ -121,7 +121,7 @@ it('puts the guidance ahead of the confirm page for a stale member', function ()
     $member = rgFinanceMember();
     rgRequireSecondFactor();
 
-    rgActAs($member, 11, active: false);
+    rgActAs($member, 61, active: false);
     $this->get('/finance')->assertRedirect('/settings/security')->assertRedirectContains('/settings/security');
 });
 

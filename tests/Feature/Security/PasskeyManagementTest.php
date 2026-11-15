@@ -41,7 +41,7 @@ function pkFresh(): array
 
 function pkStale(): array
 {
-    return ['auth.password_confirmed_at' => now()->subMinutes(11)->getTimestamp()];
+    return ['auth.password_confirmed_at' => now()->subMinutes(61)->getTimestamp()];
 }
 
 /** Runs the options step, then posts a registration for the same session. */

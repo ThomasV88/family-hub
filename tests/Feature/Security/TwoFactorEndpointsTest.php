@@ -20,7 +20,7 @@ beforeEach(function () {
 
 function stale(): array
 {
-    return ['auth.password_confirmed_at' => now()->subMinutes(11)->getTimestamp()];
+    return ['auth.password_confirmed_at' => now()->subMinutes(61)->getTimestamp()];
 }
 
 function freshWindow(): array

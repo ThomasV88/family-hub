@@ -23,7 +23,7 @@ function schFresh(): array
 
 function schStale(): array
 {
-    return ['auth.password_confirmed_at' => now()->subHour()->getTimestamp(), 'sensitive.active_at' => now()->subHour()->getTimestamp()];
+    return ['auth.password_confirmed_at' => now()->subHours(2)->getTimestamp(), 'sensitive.active_at' => now()->subHours(2)->getTimestamp()];
 }
 
 function schNoStore($response, string $what): void

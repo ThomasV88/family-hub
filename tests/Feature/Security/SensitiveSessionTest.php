@@ -16,19 +16,20 @@ it('tracks the idle window', function () {
     $s = realSession();
     expect($s->fresh())->toBeFalse();
     $s->touch();
-    $this->travel(14 * 60 + 59)->seconds();
+    $this->travel(59 * 60 + 59)->seconds();
     expect($s->fresh())->toBeTrue();
     $this->travel(2)->seconds();
     expect($s->fresh())->toBeFalse();
 });
 
-it('confirm refreshes both windows and the confirm window is 10 minutes', function () {
+it('confirm refreshes both windows and the confirm window is one hour', function () {
     $this->useRealSensitiveSession();
+    config(['security.idle_seconds' => 7200]);
     $s = realSession();
     expect($s->recentlyConfirmed())->toBeFalse();
     $s->confirm();
     expect($s->fresh())->toBeTrue()->and($s->recentlyConfirmed())->toBeTrue();
-    $this->travel(10 * 60 + 1)->seconds();
+    $this->travel(60 * 60 + 1)->seconds();
     expect($s->recentlyConfirmed())->toBeFalse()->and($s->fresh())->toBeTrue();
 });
 
