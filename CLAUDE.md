@@ -236,3 +236,19 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 > Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
 > This section is managed by `generate-claude-profile` -- do not edit manually.
 <!-- GSD:profile-end -->
+
+## User documentation (mandatory)
+
+<!-- Maintained by hand, outside any GSD block, so generators do not overwrite it. -->
+
+The in-app user manual (`/manual`, files in `resources/manual/<locale>/<topic>.json`, locales `en`, `sk`, `pl`) must always describe the app as it is now.
+
+Every change that adds, changes or removes user-visible behaviour (a feature, a setting, a form field, a button, a label that users are told to press, a route or page, a permission or privacy rule, a limit or default) must, in the same change:
+
+1. Update the matching manual topic in all three languages. English is the source; write Slovak and Polish as drafts and mark them for native review in the summary. Keep the same section ids, section count and links in all three.
+2. Update the contextual help texts as well, once they exist.
+3. Add a new topic file (and its `covers` entry) for a new module or a new Settings section. Remove or reword text for removed behaviour.
+4. Run the manual coverage test (`tests/js/manual/ManualCoverage.test.js`) and the Manual Pest test (`tests/Feature/Manual`).
+5. List the touched `resources/manual/` files in the plan's `files_modified` and in the summary, or write "no user-visible change" with the reason.
+
+Do not mark a task done without checking this. Details: `.planning/v1.0-ISSUE-3-NOTES.md`.
