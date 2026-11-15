@@ -3,6 +3,7 @@
 namespace App\Medical\Queries;
 
 use App\Access\AccessLevel;
+use App\Medical\ArchiveState;
 use App\Medical\Documents\DocumentRejected;
 use App\Medical\Viewer;
 use App\Medical\Visibility;
@@ -26,6 +27,16 @@ class DocumentQuery
     public function countForSubject(Viewer $viewer, MedicalSubject $subject): int
     {
         return Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey()), $viewer)->count();
+    }
+
+    /**
+     * Every stored document of the person, archived ones included. The per-person cap counts this (PROVISIONAL: an
+     * archived document still occupies storage, so archiving does not free a slot; only a permanent delete inside the
+     * window does).
+     */
+    public function countStoredForSubject(Viewer $viewer, MedicalSubject $subject): int
+    {
+        return Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey()), $viewer, 'subject_id', AccessLevel::View, ArchiveState::Any)->count();
     }
 
     /** @return Collection<int, MedicalDocument> */
@@ -66,7 +77,7 @@ class DocumentQuery
         return DB::transaction(function () use ($viewer, $subject, $stored, $title, $visitId): MedicalDocument {
             $allowed = Visibility::apply(DB::table('medical_subjects')->where('id', $subject->getKey())->lockForUpdate(), $viewer, 'id', AccessLevel::Edit)->first(['id']);
             abort_unless($allowed !== null, 403);
-            if ($this->countForSubject($viewer, $subject) >= (int) config('medical.max_documents_per_subject')) {
+            if ($this->countStoredForSubject($viewer, $subject) >= (int) config('medical.max_documents_per_subject')) {
                 throw new DocumentRejected('limit_reached');
             }
             $visitId = $this->resolveVisit($viewer, $subject, $visitId);
@@ -142,33 +153,5 @@ class DocumentQuery
             }
             throw $e;
         }
-    }
-
-    /**
-     * Deletes the row in one scoped statement and returns the storage paths to remove after the commit, or null when
-     * no row matched (hidden, unknown, malformed or view-only).
-     *
-     * @return list<string>|null
-     */
-    public function delete(Viewer $viewer, MedicalSubject $subject, string $documentId): ?array
-    {
-        if (! Str::isUuid($documentId) || ! $viewer->canEdit()) {
-            return null;
-        }
-
-        return DB::transaction(function () use ($viewer, $subject, $documentId): ?array {
-            $scoped = fn () => Visibility::apply(
-                DB::table('medical_documents')->where('id', $documentId)->where('subject_id', $subject->getKey()),
-                $viewer,
-                'subject_id',
-                AccessLevel::Edit,
-            );
-            $row = $scoped()->first(['path', 'thumb_path']);
-            if ($row === null || $scoped()->delete() === 0) {
-                return null;
-            }
-
-            return array_values(array_filter([$row->path, $row->thumb_path]));
-        });
     }
 }

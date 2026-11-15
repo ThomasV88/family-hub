@@ -2,6 +2,7 @@
 
 use App\Access\AccessLevel;
 use App\Medical\Queries\AllergyQuery;
+use App\Medical\Queries\ArchiveQuery;
 use App\Medical\Viewer;
 use App\Models\MedicalAllergy;
 use App\Models\MedicalSubject;
@@ -87,7 +88,7 @@ describe('write', function () {
         });
 
         app(AllergyQuery::class)->update(Viewer::for($user), $person, $allergy->id, ALLERGY_BODY);
-        app(AllergyQuery::class)->delete(Viewer::for($user), $person, $allergy->id);
+        app(ArchiveQuery::class)->remove(Viewer::for($user), $person, 'allergy', $allergy->id);
 
         $writes = array_values(array_filter($queries, fn ($s) => preg_match('/^(update|delete)/i', $s)));
         expect($writes)->toHaveCount(2);

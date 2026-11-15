@@ -98,15 +98,6 @@ class MedicationQuery
             ->update($this->attributes($data) + ['updated_at' => now()]) > 0;
     }
 
-    public function delete(Viewer $viewer, MedicalSubject $subject, string $medicationId): bool
-    {
-        if (! Str::isUuid($medicationId) || ! $viewer->canEdit()) {
-            return false;
-        }
-
-        return $this->scoped($viewer, $subject, $medicationId)->delete() > 0;
-    }
-
     /**
      * Marks an AI-sourced, still unverified record as verified by this viewer. One scoped UPDATE (Edit scope); false
      * when nothing changed (manual, already verified, hidden, view-only or unknown id).

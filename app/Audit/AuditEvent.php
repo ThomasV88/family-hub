@@ -47,6 +47,8 @@ enum AuditEvent: string
     case MedicalAiRunRequested = 'medical_ai_run_requested';
     case MedicalAiRunFinished = 'medical_ai_run_finished';
     case MedicalAiEntryDecided = 'medical_ai_entry_decided';
+    case MedicalArchived = 'medical_archived';
+    case MedicalRestored = 'medical_restored';
     case AiAgentSettingChanged = 'ai_agent_setting_changed';
     case AiBulkRunChanged = 'ai_bulk_run_changed';
 
@@ -85,6 +87,7 @@ enum AuditEvent: string
             self::MedicalAiRunRequested => ['subject', 'document', 'bulk'],
             self::MedicalAiRunFinished => ['subject', 'document', 'status', 'bulk'],
             self::MedicalAiEntryDecided => ['subject', 'document', 'decision'],
+            self::MedicalArchived, self::MedicalRestored => ['subject', 'type', 'record'],
             self::AiAgentSettingChanged => ['agent', 'field', 'value'],
             self::AiBulkRunChanged => ['action', 'scope', 'count'],
             default => [],
@@ -104,6 +107,7 @@ enum AuditEvent: string
             self::MedicalSubjectCreated, self::MedicalSubjectDeleted, self::MedicalAccessChanged,
             self::MedicalAdminSelfAdded, self::MedicalExported, self::MedicalConsentChanged,
             self::MedicalAiRunRequested, self::MedicalAiRunFinished, self::MedicalAiEntryDecided,
+            self::MedicalArchived, self::MedicalRestored,
             self::AiAgentSettingChanged, self::AiBulkRunChanged => 'health',
             self::FinanceRead, self::FinanceWrite, self::FinanceVisibilityChanged, self::FinanceAdminSelfAdded, self::FinanceCategoryChanged => 'finance',
             self::AccessDenied => $module === 'finance' ? 'finance' : 'health',

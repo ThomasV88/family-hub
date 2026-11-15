@@ -1,6 +1,9 @@
 <?php
 
 return [
+    // Hours after creation during which a health record or person may still be deleted for good. Older ones can only be
+    // archived (hidden, restorable by a member with Edit). 0 = always archive. Clamped to 0..8760 (one year).
+    'delete_window_hours' => max(0, min(8760, (int) env('MEDICAL_DELETE_WINDOW_HOURS', 72))),
     'document_max_bytes' => 10485760,
     'image_full_px' => 2400,
     'image_thumb_px' => 480,

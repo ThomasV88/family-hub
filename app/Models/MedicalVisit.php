@@ -32,6 +32,7 @@ class MedicalVisit extends Model
         return [
             'visited_on' => 'date:Y-m-d',
             'verified_at' => 'datetime',
+            'archived_at' => 'datetime',
         ];
     }
 }

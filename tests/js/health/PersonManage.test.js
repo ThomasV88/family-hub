@@ -55,7 +55,7 @@ const type = (el, value) => { el.value = value; el.dispatchEvent(new Event(el.ta
 const rows = () => [...document.querySelectorAll('[data-testid="contact-row"]')];
 
 describe('header actions', () => {
-    it('offers editors Export records and a More actions menu with Edit and Delete', async () => {
+    it('offers editors Export records and a More actions menu with Edit, Archived items and Delete', async () => {
         mountPage();
         const exportLink = document.querySelector('[data-testid="header-export"]');
         expect(exportLink.textContent.trim()).toBe('Export records');
@@ -64,7 +64,7 @@ describe('header actions', () => {
         expect(trigger.textContent.trim()).toBe('More actions for this person');
         trigger.click();
         await nextTick();
-        expect([...document.querySelectorAll('[role="menuitem"]')].map((i) => i.textContent.trim())).toEqual(['Edit person', 'Delete person']);
+        expect([...document.querySelectorAll('[role="menuitem"]')].map((i) => i.textContent.trim())).toEqual(['Edit person', 'Archived items', 'Delete person']);
     });
 
     it('shows view-only members the line and no actions', () => {
@@ -86,7 +86,7 @@ describe('header actions', () => {
         mountPage();
         [...document.querySelectorAll('[data-testid="header-menu"] button')][0].click();
         await nextTick();
-        [...document.querySelectorAll('[role="menuitem"]')][1].click();
+        [...document.querySelectorAll('[role="menuitem"]')][2].click();
         await nextTick();
         await nextTick();
         expect(document.body.textContent).toContain('This cannot be undone.');

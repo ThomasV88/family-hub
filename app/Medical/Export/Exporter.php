@@ -47,9 +47,14 @@ class Exporter
         // Documents first: visits list the ids of their (included) documents.
         $documents = [];
         $byVisit = [];
+        // A visit that is archived is not exported, so a document of it carries no reference to it.
+        $activeVisits = [];
+        foreach ($this->query->visits($viewer, $subject, true) as $activeVisit) {
+            $activeVisits[(string) $activeVisit->getKey()] = true;
+        }
         foreach ($this->query->documents($viewer, $subject, $include, $specialty) as $doc) {
             $id = (string) $doc->getKey();
-            $visitId = $doc->visit_id === null ? null : (string) $doc->visit_id;
+            $visitId = $doc->visit_id === null || ! isset($activeVisits[(string) $doc->visit_id]) ? null : (string) $doc->visit_id;
             $documents[] = $item($doc, [
                 'id' => $id,
                 'title' => (string) $doc->title,

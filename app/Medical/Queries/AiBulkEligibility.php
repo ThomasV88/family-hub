@@ -86,7 +86,13 @@ final class AiBulkEligibility
             ELSE 'eligible' END";
     }
 
+    /** Archived documents and documents of archived people are never eligible; the scope predicate narrows the rest. */
     private function scopePredicate(string $scope): string
+    {
+        return 'd.archived_at IS NULL AND s.archived_at IS NULL AND ('.$this->scopeSql($scope).')';
+    }
+
+    private function scopeSql(string $scope): string
     {
         return match ($scope) {
             'no_proposal' => "NOT EXISTS (SELECT 1 FROM medical_ai_extractions p WHERE p.document_id = d.id AND p.status IN ('ready', 'superseded'))",

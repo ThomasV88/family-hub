@@ -6,7 +6,9 @@ use App\Access\AccessLevel;
 use App\Access\Module;
 use App\Audit\AuditEvent;
 use App\Audit\AuditLogger;
+use App\Medical\ArchiveState;
 use App\Medical\Documents\MedicalDocumentStore;
+use App\Medical\Retention;
 use App\Medical\Viewer;
 use App\Medical\Visibility;
 use App\Models\MedicalSubject;
@@ -189,29 +191,41 @@ class SubjectQuery
     }
 
     /**
-     * HARD delete (provisional product decision, see 07-17 SUMMARY: swap this method for a soft delete or raise the
-     * level here). One transaction: the Edit-scoped DELETE of the subject (foreign keys cascade to members, visits,
-     * medications, allergies, vaccinations, contacts and documents) and the content-free audit row. The files go only
-     * after commit, so a failing audit rolls everything back and keeps them.
+     * Removes the person the way the delete window allows (owner decision B), decided here by the server. Inside
+     * medical.delete_window_hours of created_at: a permanent delete in one transaction (the Edit-scoped DELETE of the
+     * subject, foreign keys cascading to members, visits, medications, allergies, vaccinations, contacts and documents,
+     * and the content-free audit row; the files go only after commit, so a failing audit rolls everything back and
+     * keeps them). Older: the person is archived with everything below it, nothing is deleted and no file is touched.
+     *
+     * @return 'deleted'|'archived'|null null when the subject is outside the viewer's Edit scope (the controller answers 403)
      */
-    public function delete(Viewer $viewer, MedicalSubject $subject): bool
+    public function remove(Viewer $viewer, MedicalSubject $subject): ?string
     {
         if (! $viewer->canEdit()) {
-            return false;
+            return null;
         }
         $id = (string) $subject->getKey();
 
-        return DB::transaction(function () use ($viewer, $id) {
-            $deleted = Visibility::apply(
-                DB::table('medical_subjects')->where('id', $id),
-                $viewer,
-                'id',
-                AccessLevel::Edit,
-            )->delete();
-            if ($deleted === 0) {
-                return false;
+        return DB::transaction(function () use ($viewer, $id): ?string {
+            $scoped = fn () => Visibility::apply(DB::table('medical_subjects')->where('id', $id), $viewer, 'id', AccessLevel::Edit);
+            $row = $scoped()->lockForUpdate()->first(['created_at']);
+            if ($row === null) {
+                return null;
             }
 
+            if (! Retention::canDeletePermanently($row->created_at)) {
+                $changed = $scoped()->update(['archived_at' => now(), 'archived_by' => $viewer->userId(), 'updated_at' => now()]);
+                if ($changed === 0) {
+                    return null;
+                }
+                $this->audit->record(AuditEvent::MedicalArchived, $viewer->user, ['subject' => $id, 'type' => 'person'], null, Module::Health);
+
+                return 'archived';
+            }
+
+            if ($scoped()->delete() === 0) {
+                return null;
+            }
             $this->audit->record(AuditEvent::MedicalSubjectDeleted, $viewer->user, ['subject' => $id], null, Module::Health);
             DB::afterCommit(function () use ($id): void {
                 // The rows are already gone; a failing file removal must not turn the request into a 500 (the sweep cleans up).
@@ -221,6 +235,42 @@ class SubjectQuery
                     report(new \RuntimeException('Medical directory removal failed after delete ('.$e::class.')'));
                 }
             });
+
+            return 'deleted';
+        });
+    }
+
+    /**
+     * Archived people the viewer may restore: Edit scope, archived only. Empty for a view-only viewer.
+     *
+     * @return Collection<int, MedicalSubject>
+     */
+    public function archived(Viewer $viewer): Collection
+    {
+        if (! $viewer->canEdit()) {
+            return new Collection;
+        }
+
+        return Visibility::apply(MedicalSubject::query(), $viewer, 'id', AccessLevel::Edit, ArchiveState::Only)
+            ->orderByRaw('lower(name)')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /** Restores an archived person through the Edit-scoped query. False for hidden, unknown, malformed, view-only or not archived. */
+    public function restore(Viewer $viewer, string $id): bool
+    {
+        if (! Str::isUuid($id) || ! $viewer->canEdit()) {
+            return false;
+        }
+
+        return DB::transaction(function () use ($viewer, $id): bool {
+            $changed = Visibility::apply(DB::table('medical_subjects')->where('id', $id), $viewer, 'id', AccessLevel::Edit, ArchiveState::Only)
+                ->update(['archived_at' => null, 'archived_by' => null, 'updated_at' => now()]);
+            if ($changed === 0) {
+                return false;
+            }
+            $this->audit->record(AuditEvent::MedicalRestored, $viewer->user, ['subject' => $id, 'type' => 'person'], null, Module::Health);
 
             return true;
         });

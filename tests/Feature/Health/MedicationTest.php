@@ -1,6 +1,7 @@
 <?php
 
 use App\Access\AccessLevel;
+use App\Medical\Queries\ArchiveQuery;
 use App\Medical\Queries\MedicationQuery;
 use App\Medical\Viewer;
 use App\Models\MedicalMedication;
@@ -90,7 +91,7 @@ describe('write', function () {
         });
 
         app(MedicationQuery::class)->update(Viewer::for($user), $person, $row->id, MEDICATION_BODY);
-        app(MedicationQuery::class)->delete(Viewer::for($user), $person, $row->id);
+        app(ArchiveQuery::class)->remove(Viewer::for($user), $person, 'medication', $row->id);
 
         $writes = array_values(array_filter($queries, fn ($s) => preg_match('/^(update|delete)/i', $s)));
         expect($writes)->toHaveCount(2);

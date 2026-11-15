@@ -1,4 +1,5 @@
 <script setup>
+import { useRemoval } from './useRemoval.js';
 import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -20,6 +21,7 @@ const props = defineProps({
     canEdit: { type: Boolean, default: false },
 });
 const emit = defineEmits(['close']);
+const removal = useRemoval('allergy', () => props.allergy);
 const verifying = ref(false);
 function verify() {
     if (!props.allergy || verifying.value) return;
@@ -134,7 +136,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
             </UiField>
         </form>
         <template #footer>
-            <UiButton v-if="editing && !readOnly" variant="ghost" class="allergy-delete" data-testid="allergy-delete" @click="deleteOpen = true">{{ t('health.allergy.delete') }}</UiButton>
+            <UiButton v-if="editing && !readOnly" variant="ghost" class="allergy-delete" data-testid="allergy-delete" @click="deleteOpen = true">{{ removal.action.value }}</UiButton>
             <UiButton variant="secondary" @click="requestClose">{{ t('ui.close') }}</UiButton>
             <UiButton v-if="!readOnly" variant="primary" :loading="processing" data-testid="allergy-save" @click="save">{{ t('health.allergy.save') }}</UiButton>
         </template>
@@ -142,9 +144,9 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
 
     <UiConfirmDialog
         v-model:open="deleteOpen"
-        :title="t('health.allergy.delete_title')"
-        :body="t('health.allergy.delete_body')"
-        :confirm-label="t('health.allergy.delete')"
+        :title="removal.title.value"
+        :body="removal.body.value"
+        :confirm-label="removal.action.value"
         :cancel-label="t('health.allergy.delete_keep')"
         @confirm="remove"
     />

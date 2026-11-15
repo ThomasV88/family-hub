@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Health;
 
 use App\Access\AccessLevel;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Health\Concerns\FlashesRemoval;
 use App\Http\Requests\Health\StorePersonRequest;
 use App\Http\Requests\Health\UpdatePersonRequest;
 use App\Medical\PersonPage;
@@ -15,6 +16,8 @@ use Inertia\Response;
 
 class PersonController extends Controller
 {
+    use FlashesRemoval;
+
     public function index(Request $request, SubjectQuery $subjects, PersonPage $page): Response|RedirectResponse
     {
         $viewer = Viewer::for($request->user());
@@ -57,8 +60,9 @@ class PersonController extends Controller
         $viewer = Viewer::for($request->user());
         $subject = $subjects->findVisible($viewer, $person, AccessLevel::Edit);
         abort_if($subject === null, 403);
-        abort_unless($subjects->delete($viewer, $subject), 403);
+        $outcome = $subjects->remove($viewer, $subject);
+        abort_if($outcome === null, 403);
 
-        return redirect()->route('health.index')->with('toast', ['key' => 'health.person.deleted']);
+        return redirect()->route('health.index')->with('toast', $this->removalToast($outcome, 'health.person.deleted'));
     }
 }

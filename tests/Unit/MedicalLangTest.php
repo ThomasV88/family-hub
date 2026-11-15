@@ -34,7 +34,7 @@ it('pluralises the due-in phrase', function (string $locale, int $n) {
     expect($out)->not->toBe('')->not->toBe('notifications.vaccination_due_in')->toContain((string) $n);
 })->with(['en', 'sk', 'pl'])->with([0, 1, 2, 5, 22]);
 
-it('has all nine medical audit events in the health group with content-free meta', function () {
+it('has all eleven medical audit events in the health group with content-free meta', function () {
     $expected = [
         'medical_subject_created' => ['subject'],
         'medical_subject_deleted' => ['subject'],
@@ -45,6 +45,8 @@ it('has all nine medical audit events in the health group with content-free meta
         'medical_ai_run_requested' => ['subject', 'document', 'bulk'],
         'medical_ai_run_finished' => ['subject', 'document', 'status', 'bulk'],
         'medical_ai_entry_decided' => ['subject', 'document', 'decision'],
+        'medical_archived' => ['subject', 'type', 'record'],
+        'medical_restored' => ['subject', 'type', 'record'],
     ];
 
     foreach ($expected as $value => $meta) {
@@ -64,6 +66,7 @@ it('labels every medical audit event in every locale', function (string $locale)
         'medical_subject_created', 'medical_subject_deleted', 'medical_access_changed', 'medical_admin_self_added',
         'medical_exported', 'medical_consent_changed',
         'medical_ai_run_requested', 'medical_ai_run_finished', 'medical_ai_entry_decided',
+        'medical_archived', 'medical_restored',
     ] as $key) {
         expect(trim($detail[$key] ?? ''))->not->toBe('', $key);
     }

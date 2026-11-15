@@ -87,6 +87,15 @@ const FULL_PAGE = {
 };
 const page = (over = {}) => ({ ...FULL_PAGE, ...over });
 const viewOnly = { ...PERSON, canEdit: false };
+// Archive (owner decision B): archived records of the person, archived people, and the copy of a delete that will archive.
+const ARCHIVE_ITEMS = [
+    { type: 'visit', id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1', label: 'Dr Heart Murmur with a rather long diagnosis text', date: '2024-02-01', archivedOn: '2026-11-10' },
+    { type: 'medication', id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2', label: 'Ibuprofen', date: null, archivedOn: '2026-11-09' },
+    { type: 'allergy', id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb3', label: 'Peanuts', date: null, archivedOn: '2026-11-09' },
+    { type: 'vaccination', id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb4', label: 'MMR', date: '2020-01-10', archivedOn: '2026-11-08' },
+    { type: 'document', id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb5', label: 'ECG scan', date: null, archivedOn: '2026-11-07' },
+];
+const ARCHIVED_PEOPLE = [{ id: 'cccccccc-cccc-4ccc-8ccc-ccccccccccc1', name: 'Old Aunt Mary with a long name', initials: 'OA' }];
 
 const CARD = {
     person: { id: ID, name: 'Ada Novak', ageYears: 11, birthDate: '2015-04-02', bloodType: 'A+' },
@@ -176,10 +185,16 @@ const states = {
     'Person timeline filtered empty': personState({ view: 'timeline', filter: 'cardiology', timeline: [] }, '[data-testid="timeline-empty"]'),
     'Person no visits': personState({ visits: [], folders: [], timeline: [], timelineFilters: [], documents: [], unattachedDocumentIds: [] }, '[data-testid="person-main"]'),
     'Person no people': personState({ person: null, people: [], panel: null }, '[data-testid="empty-add"]'),
+    'Archive panel': personState({ panel: { kind: 'archive', id: null }, archive: { items: ARCHIVE_ITEMS, people: [] } }, '[data-testid="archive-panel"] [data-testid="archive-group-document"]'),
+    'Archive panel empty': personState({ panel: { kind: 'archive', id: null }, archive: { items: [], people: [] } }, '[data-testid="archive-empty"]'),
+    'Archived people under the switcher': personState({ archive: { items: [], people: ARCHIVED_PEOPLE } }, '[data-testid="archived-people"]'),
+    'Archived people with no active person': personState({ person: null, people: [], panel: null, archive: { items: [], people: ARCHIVED_PEOPLE } }, '[data-testid="archived-people"]'),
+    'Person archive confirm': personState({ person: { ...PERSON, permanentDelete: false } }, '.ui-dialog', async () => { await click('[data-testid="header-menu"] button'); await click([...document.querySelectorAll('[role="menuitem"]')][2]); }),
+    'Visit archive confirm': personState({ visits: [{ ...V1, permanentDelete: false }, V2, V3], panel: { kind: 'visit', id: V1.id } }, '.ui-dialog', async () => { await click('[data-testid="visit-delete"]'); }),
     'Person view-only': personState({ person: viewOnly }, '[data-testid="person-header"]'),
     'Person view-only no people': personState({ person: null, people: [], canCreate: false }, '[data-testid="health-person"]'),
     'Person header menu': personState({}, '[role="menu"]', async () => { await click('[data-testid="header-menu"] button'); }),
-    'Person delete confirm': personState({}, '.ui-dialog', async () => { await click('[data-testid="header-menu"] button'); await click([...document.querySelectorAll('[role="menuitem"]')][1]); }),
+    'Person delete confirm': personState({}, '.ui-dialog', async () => { await click('[data-testid="header-menu"] button'); await click([...document.querySelectorAll('[role="menuitem"]')][2]); }),
     'Person panel new person': personState({ panel: { kind: 'new-person', id: null } }, '[data-testid="person-form"]'),
     'Person panel edit person 0 contacts': personState({ panel: { kind: 'edit-person', id: null } }, '[data-testid="person-form"]'),
     'Person panel edit person 3 contacts': personState({ person: { ...PERSON, contacts: CONTACTS }, panel: { kind: 'edit-person', id: null } }, '[data-testid="person-form"]'),

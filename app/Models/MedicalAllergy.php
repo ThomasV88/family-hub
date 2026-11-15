@@ -29,6 +29,6 @@ class MedicalAllergy extends Model
 
     protected function casts(): array
     {
-        return ['verified_at' => 'datetime'];
+        return ['verified_at' => 'datetime', 'archived_at' => 'datetime'];
     }
 }

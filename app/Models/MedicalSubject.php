@@ -34,6 +34,7 @@ class MedicalSubject extends Model
             'self_access_enabled' => 'boolean',
             'ai_consent' => 'boolean',
             'ai_consent_changed_at' => 'datetime',
+            'archived_at' => 'datetime',
         ];
     }
 }

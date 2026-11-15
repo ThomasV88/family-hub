@@ -36,6 +36,6 @@ class MedicalVaccination extends Model
 
     protected function casts(): array
     {
-        return ['verified_at' => 'datetime', 'given_on' => 'date', 'next_due_on' => 'date'];
+        return ['verified_at' => 'datetime', 'archived_at' => 'datetime', 'given_on' => 'date', 'next_due_on' => 'date'];
     }
 }

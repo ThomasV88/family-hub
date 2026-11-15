@@ -34,10 +34,14 @@ final class DocumentsSeeder
             'vaccination_pdf' => ['child', 'Očkovací preukaz, kópia (demo)', 'pdf', ['Ockovaci preukaz', 'Dalsie davky']],
             'discharge_pdf' => ['grandparent', 'Prepúšťacia správa (demo)', 'pdf', ['Prepustacia sprava', 'Odporucania']],
             'prescription_jpg' => ['hidden', 'Recept (demo)', 'jpg', 'Recept'],
+            // Archived demo document: older than the delete window and archived, so it is hidden everywhere and restorable.
+            'archived_pdf' => ['adult_linked', 'Archivovaný starý výsledok (demo)', 'pdf', ['Stary vysledok', 'Archivovane'], true],
         ];
 
         $out = [];
-        foreach ($plan as $key => [$who, $title, $kind, $text]) {
+        foreach ($plan as $key => $row) {
+            [$who, $title, $kind, $text] = $row;
+            $archived = $row[4] ?? false;
             try {
                 $bytes = $kind === 'pdf' ? $this->pdf($text) : $this->image($text, $kind);
                 $stored = $store->put($subjects[$who]['id'], $bytes);
@@ -45,6 +49,8 @@ final class DocumentsSeeder
                     'subject_id' => $subjects[$who]['id'], 'visit_id' => null, 'kind' => $stored['kind'], 'title' => $title, 'mime' => $stored['mime'],
                     'size_bytes' => $stored['size_bytes'], 'sha256' => $stored['sha256'], 'path' => $stored['path'], 'thumb_path' => $stored['thumb_path'],
                     'width' => $stored['width'], 'height' => $stored['height'], 'source' => 'manual', 'verified_at' => null, 'uploaded_by' => $uploader,
+                    'created_at' => $ctx->at($archived ? -70 : -30, 10), 'updated_at' => $ctx->at($archived ? -70 : -30, 10),
+                    'archived_at' => $archived ? $ctx->at(-4, 10) : null, 'archived_by' => $archived ? $uploader : null,
                 ]);
                 $out[$key] = ['id' => (string) $doc->getKey(), 'subject_id' => $subjects[$who]['id'], 'kind' => $stored['kind']];
             } catch (DocumentRejected $e) {

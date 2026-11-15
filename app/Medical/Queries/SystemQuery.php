@@ -12,23 +12,24 @@ use Illuminate\Support\Str;
  */
 class SystemQuery
 {
-    /** True only when the subject exists and its consent flag is on; false for a non-uuid (no SQL) or a missing row. */
+    /** True only when the subject exists, is not archived and its consent flag is on; false for a non-uuid (no SQL) or a missing row. */
     public function aiConsentFor(string $subjectId): bool
     {
         if (! Str::isUuid($subjectId)) {
             return false;
         }
 
-        return (bool) DB::table('medical_subjects')->where('id', $subjectId)->value('ai_consent');
+        // An archived person never has AI consent in effect (fail closed).
+        return (bool) DB::table('medical_subjects')->where('id', $subjectId)->whereNull('archived_at')->value('ai_consent');
     }
 
-    /** The subject id of a document, or null for a non-uuid (no SQL) or a missing row. */
+    /** The subject id of a document, or null for a non-uuid (no SQL), a missing row or an archived document. */
     public function documentSubjectId(string $documentId): ?string
     {
         if (! Str::isUuid($documentId)) {
             return null;
         }
-        $id = DB::table('medical_documents')->where('id', $documentId)->value('subject_id');
+        $id = DB::table('medical_documents')->where('id', $documentId)->whereNull('archived_at')->value('subject_id');
 
         return $id === null ? null : (string) $id;
     }
@@ -87,7 +88,8 @@ class SystemQuery
     }
 
     /**
-     * Vaccinations whose next due date lies in [fromDate, toDate] (inclusive, Y-m-d), soonest first.
+     * Vaccinations whose next due date lies in [fromDate, toDate] (inclusive, Y-m-d), soonest first. Archived
+     * vaccinations and those of archived people never remind.
      *
      * @return list<array{id: int, public_id: string, subject_id: string, next_due_on: string}>
      */
@@ -95,6 +97,8 @@ class SystemQuery
     {
         return DB::table('medical_vaccinations')
             ->select(['id', 'public_id', 'subject_id', 'next_due_on'])
+            ->whereNull('archived_at')
+            ->whereIn('subject_id', fn ($q) => $q->select('id')->from('medical_subjects')->whereNull('archived_at'))
             ->whereNotNull('next_due_on')
             ->whereBetween('next_due_on', [$fromDate, $toDate])
             ->orderBy('next_due_on')
@@ -107,11 +111,14 @@ class SystemQuery
             ->all();
     }
 
-    /** @return array{public_id: string, subject_id: string, next_due_on: string}|null null when gone or without a due date */
+    /** @return array{public_id: string, subject_id: string, next_due_on: string}|null null when gone, archived (it or its person) or without a due date */
     public function vaccinationDue(int $id): ?array
     {
         $row = DB::table('medical_vaccinations')->select(['public_id', 'subject_id', 'next_due_on'])
-            ->where('id', $id)->whereNotNull('next_due_on')->first();
+            ->where('id', $id)->whereNotNull('next_due_on')
+            ->whereNull('archived_at')
+            ->whereIn('subject_id', fn ($q) => $q->select('id')->from('medical_subjects')->whereNull('archived_at'))
+            ->first();
 
         return $row === null ? null : [
             'public_id' => (string) $row->public_id, 'subject_id' => (string) $row->subject_id,
@@ -151,7 +158,7 @@ class SystemQuery
         if (! Str::isUuid($subjectId)) {
             return null;
         }
-        $name = DB::table('medical_subjects')->where('id', $subjectId)->value('name');
+        $name = DB::table('medical_subjects')->where('id', $subjectId)->whereNull('archived_at')->value('name');
 
         return $name === null ? null : (string) $name;
     }

@@ -55,6 +55,7 @@ final class AiProposalsSeeder
             $subjectId = $subjects['adult_linked']['id'];
             $visit = MedicalVisitFactory::new()->create($payload['visits'][0] + [
                 'subject_id' => $subjectId, 'source' => 'ai', 'verified_at' => null, 'verified_by' => null, 'created_by' => $by,
+                'created_at' => $ctx->at(-27, 10), 'updated_at' => $ctx->at(-27, 10),
             ]);
             $this->decide($extraction, 'visit-0', 'accepted', 'visit', (string) $visit->getKey(), $by);
             DB::table('medical_documents')->where('id', $documents['blood_pdf']['id'])->update(['visit_id' => $visit->getKey()]);
@@ -62,6 +63,7 @@ final class AiProposalsSeeder
             // accepted, then marked as verified by the reviewer
             $allergy = MedicalAllergyFactory::new()->create($payload['allergies'][0] + [
                 'subject_id' => $subjectId, 'source' => 'ai', 'verified_at' => $ctx->at(-1, 9), 'verified_by' => $by, 'created_by' => $by,
+                'created_at' => $ctx->at(-27, 10), 'updated_at' => $ctx->at(-27, 10),
             ]);
             $this->decide($extraction, 'allergy-0', 'accepted', 'allergy', (string) $allergy->getKey(), $by);
 

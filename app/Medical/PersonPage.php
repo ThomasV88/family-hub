@@ -5,6 +5,7 @@ namespace App\Medical;
 use App\Access\AccessLevel;
 use App\Medical\Queries\AiRunQuery;
 use App\Medical\Queries\AllergyQuery;
+use App\Medical\Queries\ArchiveQuery;
 use App\Medical\Queries\ContactQuery;
 use App\Medical\Queries\DocumentQuery;
 use App\Medical\Queries\MedicationQuery;
@@ -31,11 +32,11 @@ use Inertia\Response;
 class PersonPage
 {
     /** Panel kinds that exist so far; those listed in WITH_ID resolve a record id inside the visible person. */
-    private const PANELS = ['new-person', 'new-visit', 'visit', 'new-allergy', 'allergy', 'new-medication', 'medication', 'new-vaccination', 'vaccination', 'new-document', 'document', 'edit-person'];
+    private const PANELS = ['new-person', 'new-visit', 'visit', 'new-allergy', 'allergy', 'new-medication', 'medication', 'new-vaccination', 'vaccination', 'new-document', 'document', 'edit-person', 'archive'];
 
     private const WITH_ID = ['visit', 'allergy', 'medication', 'vaccination', 'document'];
 
-    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations, private readonly DocumentQuery $documents, private readonly ContactQuery $contacts, private readonly AiRunQuery $aiRuns) {}
+    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations, private readonly DocumentQuery $documents, private readonly ContactQuery $contacts, private readonly AiRunQuery $aiRuns, private readonly ArchiveQuery $archive) {}
 
     public function render(Viewer $viewer, ?MedicalSubject $subject, Request $request): Response
     {
@@ -66,6 +67,27 @@ class PersonPage
             'canCreate' => $viewer->canEdit(),
             'panel' => $this->panel($viewer, $subject, $request),
             'ai' => $this->aiProps($viewer, $subject),
+            'archive' => $this->archiveProps($viewer, $subject),
+        ];
+    }
+
+    /**
+     * The Archive section: archived records of this person and the archived people, both only for members with Edit
+     * (empty for everyone else, so a view-only member sees no archive at all). Labels are the record's own title.
+     *
+     * @return array{items: list<array<string, mixed>>, people: list<array{id: string, name: string, initials: string}>}
+     */
+    private function archiveProps(Viewer $viewer, ?MedicalSubject $subject): array
+    {
+        $canEditPerson = $subject !== null && $this->subjects->levelFor($viewer, $subject) === AccessLevel::Edit;
+
+        return [
+            'items' => $canEditPerson ? $this->archive->forSubject($viewer, $subject) : [],
+            'people' => $this->subjects->archived($viewer)->map(fn (MedicalSubject $p) => [
+                'id' => (string) $p->getKey(),
+                'name' => $p->name,
+                'initials' => $this->initials($p->name),
+            ])->values()->all(),
         ];
     }
 
@@ -101,6 +123,7 @@ class PersonPage
             'hasAccount' => $subject->user_id !== null,
             'aiConsent' => (bool) $subject->ai_consent,
             'canEdit' => $this->subjects->levelFor($viewer, $subject) === AccessLevel::Edit,
+            'permanentDelete' => Retention::canDeletePermanently($subject->created_at),
             'notes' => $subject->notes,
             'contacts' => $this->contacts->forSubject($viewer, $subject)->map(fn (MedicalContact $c) => [
                 'name' => $c->name,
@@ -131,6 +154,7 @@ class PersonPage
             'diagnosis' => $v->diagnosis,
             'notes' => $v->notes,
             'documentCount' => (int) ($perVisit[(string) $v->getKey()] ?? 0),
+            'permanentDelete' => Retention::canDeletePermanently($v->created_at),
             'provenance' => $this->provenance($v),
         ])->values();
 
@@ -187,14 +211,17 @@ class PersonPage
             return [];
         }
         $timezone = (string) config('family.timezone');
+        // A document of an archived visit reads as unattached (its visit is hidden) until that visit is restored.
+        $activeVisits = $this->visits->forSubject($viewer, $subject)->map(fn (MedicalVisit $v) => (string) $v->getKey())->flip();
 
         return $this->documents->forSubject($viewer, $subject)->map(fn (MedicalDocument $d) => [
             'id' => (string) $d->getKey(),
             'kind' => (string) $d->kind,
             'title' => (string) $d->title,
-            'visitId' => $d->visit_id === null ? null : (string) $d->visit_id,
+            'visitId' => $d->visit_id === null || ! $activeVisits->has((string) $d->visit_id) ? null : (string) $d->visit_id,
             'uploadedOn' => $d->created_at->copy()->setTimezone($timezone)->format('Y-m-d'),
             'sizeBytes' => (int) $d->size_bytes,
+            'permanentDelete' => Retention::canDeletePermanently($d->created_at),
         ])->values()->all();
     }
 
@@ -210,6 +237,7 @@ class PersonPage
             'substance' => $a->substance,
             'reaction' => $a->reaction,
             'severity' => $a->severity,
+            'permanentDelete' => Retention::canDeletePermanently($a->created_at),
             'provenance' => $this->provenance($a),
         ])->values()->all();
     }
@@ -235,6 +263,7 @@ class PersonPage
             'endedOn' => $m->ended_on?->format('Y-m-d'),
             'notes' => $m->notes,
             'ongoing' => $m->ended_on === null || $m->ended_on->format('Y-m-d') >= $today,
+            'permanentDelete' => Retention::canDeletePermanently($m->created_at),
             'provenance' => $this->provenance($m),
         ])->values()->all();
     }
@@ -258,6 +287,7 @@ class PersonPage
             'notes' => $v->notes,
             'status' => (string) $v->getAttribute('status'),
             'dueInDays' => $v->getAttribute('dueInDays'),
+            'permanentDelete' => Retention::canDeletePermanently($v->created_at),
             'provenance' => $this->provenance($v),
         ])->values()->all();
     }
@@ -315,7 +345,7 @@ class PersonPage
         if ($kind === 'new-person' && ! $viewer->canEdit()) {
             return null;
         }
-        if ($kind === 'edit-person') {
+        if ($kind === 'edit-person' || $kind === 'archive') {
             abort_if($subject === null || $this->subjects->levelFor($viewer, $subject) !== AccessLevel::Edit, 403);
         }
         if (in_array($kind, ['new-visit', 'new-allergy', 'new-medication', 'new-vaccination', 'new-document'], true)) {

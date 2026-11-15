@@ -1,6 +1,7 @@
 <?php
 
 use App\Access\AccessLevel;
+use App\Medical\Queries\ArchiveQuery;
 use App\Medical\Queries\VaccinationQuery;
 use App\Medical\Viewer;
 use App\Models\MedicalSubject;
@@ -134,7 +135,7 @@ describe('write', function () {
 
         app(VaccinationQuery::class)->update(Viewer::for($user), $person, $row->public_id, VACCINATION_BODY);
         app(VaccinationQuery::class)->markGiven(Viewer::for($user), $person, $row->public_id, '2026-02-01', null);
-        app(VaccinationQuery::class)->delete(Viewer::for($user), $person, $row->public_id);
+        app(ArchiveQuery::class)->remove(Viewer::for($user), $person, 'vaccination', $row->public_id);
 
         $writes = array_values(array_filter($queries, fn ($s) => preg_match('/^(update|delete)/i', $s)));
         expect($writes)->toHaveCount(3);

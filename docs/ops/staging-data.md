@@ -48,7 +48,7 @@ Predvolené oprávnenia (Rodič, Dieťa, Starý rodič, Hosť) zostávajú. Demo
 - **Import:** jedna potvrdená dávka na spoločnom účte (výdavky z jedného mesiaca spred pol roka majú zdroj "import") a jeden rozpracovaný import na kreditnej karte s riadkami "nový", "duplicita" a "neplatný" (rozpracovaný import sa o 24 hodín samočinne zmaže).
 
 ### Zdravie (`/health`)
-- **Päť osôb:** (A) člen `sk_sk.1` s vlastným záznamom, (B) Peter Kováč (demo), dospelý bez účtu, (C) Miško Horváth (demo), dieťa asi 8 rokov, (D) starý rodič `pl_pl.3` s vlastným záznamom, (E) Marek Skrytý (demo).
+- **Päť osôb (plus archivovaná šiesta):** (A) člen `sk_sk.1` s vlastným záznamom, (B) Peter Kováč (demo), dospelý bez účtu, (C) Miško Horváth (demo), dieťa asi 8 rokov, (D) starý rodič `pl_pl.3` s vlastným záznamom, (E) Marek Skrytý (demo).
 - **Skrytá osoba:** Marek Skrytý (demo) je vidieť len rodičom. `sk_sk.2` ho vo zozname nenájde a priamy odkaz mu dá odmietnutie. Hosť, `en_gb.6` a správca nemajú v zdraví žiadne oprávnenie.
 - **Prístupy:** rodičia menia všetko. `sk_sk.2` má na čítanie len Miška a starého rodiča. `pl_pl.3` má na čítanie vlastný záznam, Petra Kováča a Miška.
 - **Návštevy a lekári:** spolu asi 55 návštev za posledné roky, 15 a viac špecializácií (všeobecný lekár, zubár, kardiológ, ortopéd, dermatológ, očný, alergológ, diabetológ, neurológ a ďalšie, jedna "iná" so zadaným názvom), s diagnózami a poznámkami.
@@ -58,13 +58,14 @@ Predvolené oprávnenia (Rodič, Dieťa, Starý rodič, Hosť) zostávajú. Demo
 - **Núdzové kontakty a krvné skupiny:** každá osoba má 1 až 3 kontakty (vymyslené čísla) a krvnú skupinu, takže funguje aj núdzová karta.
 - **Vek:** od približne 8 do 74 rokov.
 - **Súhlas s AI:** zapnutý len pri osobe A a pri starom rodičovi D, vypnutý pri ostatných.
+- **Archív (rozhodnutie majiteľa: po lehote len archivácia):** všetky osoby a záznamy sú vytvorené viac než 72 hodín dozadu (lehota `MEDICAL_DELETE_WINDOW_HOURS`, predvolene 72), takže zmazanie na staging záznam **archivuje**, nie zmaže. Navyše je v demo dátach archivovaná jedna návšteva osoby A ("Archivovaná návšteva (demo)"), jeden dokument osoby A ("Archivovaný starý výsledok (demo)") a jedna osoba "Archivovaná osoba (demo)" (s návštevou a alergiou). Archivované veci nie sú v zoznamoch, exportoch, núdzovej karte ani v pripomienkach. Rodičia (Edit) ich obnovia z položky "Archivované položky" v menu osoby a z časti "Archivované osoby" pod výberom osôb; `sk_sk.2` a `pl_pl.3` (len čítanie) archív nevidia. Nový záznam vytvorený na staging dnes sa dá do lehoty zmazať natrvalo.
 
 ### Dokumenty a návrhy od AI (`/health`, detail osoby)
-- **Šesť malých súborov:** výsledky krvných testov (PDF, 2 strany) a fotka vyrážky (obrázok) u osoby A, laboratórny výsledok (obrázok) u Petra Kováča, očkovací preukaz (PDF, 2 strany) u Miška, prepúšťacia správa (PDF, 2 strany) u starého rodiča a recept (obrázok) u skrytého Mareka. Náhľady a sťahovanie fungujú. Obsah je len nápis "SYNTHETIC DEMO DOCUMENT".
+- **Sedem malých súborov (jeden je archivovaný):** výsledky krvných testov (PDF, 2 strany) a fotka vyrážky (obrázok) u osoby A, laboratórny výsledok (obrázok) u Petra Kováča, očkovací preukaz (PDF, 2 strany) u Miška, prepúšťacia správa (PDF, 2 strany) u starého rodiča a recept (obrázok) u skrytého Mareka. K tomu archivovaný PDF dokument osoby A (v Archíve, nie v zozname). Náhľady a sťahovanie fungujú. Obsah je len nápis "SYNTHETIC DEMO DOCUMENT".
 - **Návrhy na kontrolu bez Codexu:** dokument "Výsledky krvných testov" (osoba A) má hotový návrh. Návšteva je už prijatá ako "AI vyťažené, neoverené" (značka "Mark as verified" / "Označiť ako overené" funguje), alergia je prijatá a overená, liek je zamietnutý a očkovanie čaká na rozhodnutie. Dokument "Prepúšťacia správa" (starý rodič) má návrh, kde nie je nič rozhodnuté (štyri položky na prijatie alebo zamietnutie). "Fotka vyrážky" má neúspešný beh (neplatný výstup). V zozname AI volaní v nastaveniach sú tri bezobsahové záznamy.
 - Žiadne volanie na žiadneho poskytovateľa AI sa pri seedovaní nevykoná.
 
 ## Poznámky pre správu
-- Súbory dokumentov sa pri novom nasadení zmažú spolu s osobami, ktorým patrili (po úspešnom dokončení seedovania); `medical:prune-orphans` je poistka pre prípadné zvyšky.
+- Súbory dokumentov sa pri novom nasadení zmažú spolu s osobami, ktorým patrili, aj archivovanými (zmazanie osôb ide podľa vlastníka, bez ohľadu na archív; po úspešnom dokončení seedovania); `medical:prune-orphans` je poistka pre prípadné zvyšky.
 - História volaní AI (`ai_calls`) a audit sa nikdy nemažú. Každé nasadenie pridá tri záznamy o volaniach AI so zaniknutými demo používateľmi (audit ich akceptuje, `ai:prune-calls` ich odstráni po období uchovania). Seedovanie samo nezapisuje žiadne audit záznamy.
 - Seedovanie sa nikdy nespúšťa na produkcii (`staging:seed` aj `staging:audit` odmietnu prostredie `production`).

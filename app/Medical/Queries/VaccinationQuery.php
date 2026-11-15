@@ -95,15 +95,6 @@ class VaccinationQuery
             ->update($this->attributes($data) + ['updated_at' => now()]) > 0;
     }
 
-    public function delete(Viewer $viewer, MedicalSubject $subject, string $publicId): bool
-    {
-        if (! Str::isUuid($publicId) || ! $viewer->canEdit()) {
-            return false;
-        }
-
-        return $this->scoped($viewer, $subject, $publicId)->delete() > 0;
-    }
-
     /**
      * Records the new dose and clears the old row's next due date in one transaction, so the old reminder goes
      * irrelevant. False (and nothing written) when the old row is not editable by this viewer inside this subject.

@@ -707,7 +707,15 @@
             "ai_bulk_run_changed_paused": "Wstrzymano masowe ponowne przetwarzanie AI: {scope}. Dokumenty: {count}",
             "ai_bulk_run_changed_resumed": "Wznowiono masowe ponowne przetwarzanie AI: {scope}. Dokumenty: {count}",
             "ai_bulk_run_changed_cancelled": "Anulowano masowe ponowne przetwarzanie AI: {scope}. Dokumenty: {count}",
-            "ai_bulk_run_changed_completed": "Masowe ponowne przetwarzanie AI zakończone: {scope}. Dokumenty: {count}"
+            "ai_bulk_run_changed_completed": "Masowe ponowne przetwarzanie AI zakończone: {scope}. Dokumenty: {count}",
+            "medical_archived": "Zarchiwizowano w Zdrowiu",
+            "medical_restored": "Przywrócono w Zdrowiu",
+            "medical_type_person": "Osoba",
+            "medical_type_visit": "Wizyta",
+            "medical_type_medication": "Lek",
+            "medical_type_allergy": "Alergia",
+            "medical_type_vaccination": "Szczepienie",
+            "medical_type_document": "Dokument"
         },
         "page": "Strona {n} z {total}",
         "prev": "Poprzednia",
@@ -2330,6 +2338,35 @@
             "laboratory": "Badania laboratoryjne",
             "geriatrics": "Geriatria",
             "other": "Inne"
+        },
+        "archive": {
+            "title": "Archiwum",
+            "open": "Zarchiwizowane elementy",
+            "intro": "Zarchiwizowane wpisy są ukryte wszędzie: na listach, w eksportach, na karcie ratunkowej, w przypomnieniach i w AI. Pozostają zapisane i można je tutaj przywrócić.",
+            "empty": "Dla tej osoby nic nie jest zarchiwizowane.",
+            "people_title": "Zarchiwizowane osoby",
+            "restore": "Przywróć",
+            "restore_person": "Przywróć osobę {name}",
+            "archived": "Zarchiwizowano. Możesz to przywrócić w Archiwum.",
+            "restored": "Przywrócono",
+            "archived_on": "Zarchiwizowano {date}",
+            "type_visit": "Wizyty",
+            "type_medication": "Leki",
+            "type_allergy": "Alergie",
+            "type_vaccination": "Szczepienia",
+            "type_document": "Dokumenty",
+            "title_person": "Archiwizuj osobę",
+            "title_visit": "Archiwizuj wizytę",
+            "title_medication": "Archiwizuj lek",
+            "title_allergy": "Archiwizuj alergię",
+            "title_vaccination": "Archiwizuj szczepienie",
+            "title_doc": "Archiwizuj dokument",
+            "body_person": "Wpisy zdrowotne można usunąć na stałe tylko krótko po utworzeniu, a dla tej osoby ten czas już minął. Osoba i wszystko w jej dokumentacji zostaną więc zarchiwizowane: ukryte wszędzie, zachowane i możliwe do przywrócenia w sekcji Zarchiwizowane osoby.",
+            "body_visit": "Wpisy zdrowotne można usunąć na stałe tylko krótko po utworzeniu, a dla tej wizyty ten czas już minął. Wizyta zostanie więc zarchiwizowana: ukryta wszędzie, zachowana i możliwa do przywrócenia w Archiwum tej osoby.",
+            "body_medication": "Wpisy zdrowotne można usunąć na stałe tylko krótko po utworzeniu, a dla tego leku ten czas już minął. Lek zostanie więc zarchiwizowany: ukryty wszędzie, zachowany i możliwy do przywrócenia w Archiwum tej osoby.",
+            "body_allergy": "Wpisy zdrowotne można usunąć na stałe tylko krótko po utworzeniu, a dla tej alergii ten czas już minął. Alergia zostanie więc zarchiwizowana: ukryta wszędzie, zachowana i możliwa do przywrócenia w Archiwum tej osoby.",
+            "body_vaccination": "Wpisy zdrowotne można usunąć na stałe tylko krótko po utworzeniu, a dla tego szczepienia ten czas już minął. Szczepienie zostanie więc zarchiwizowane: ukryte wszędzie, zachowane i możliwe do przywrócenia w Archiwum tej osoby.",
+            "body_doc": "Wpisy zdrowotne można usunąć na stałe tylko krótko po utworzeniu, a dla tego dokumentu ten czas już minął. Dokument zostanie więc zarchiwizowany: ukryty wszędzie, plik zostanie zachowany, a dokument będzie można przywrócić w Archiwum tej osoby."
         }
     }
 }

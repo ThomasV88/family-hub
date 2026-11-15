@@ -7,6 +7,8 @@ import AppShell from '../../Layouts/AppShell.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
 import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
+import ArchivedPeople from '../../Health/ArchivedPeople.vue';
+import ArchivePanel from '../../Health/ArchivePanel.vue';
 import AllergyList from '../../Health/AllergyList.vue';
 import EmergencySummaryCard from '../../Health/EmergencySummaryCard.vue';
 import DocumentPanel from '../../Health/DocumentPanel.vue';
@@ -47,6 +49,7 @@ const props = defineProps({
     unattachedDocumentIds: { type: Array, default: () => [] },
     limits: { type: Object, default: () => ({ maxMb: 10, filesAtOnce: 10 }) },
     ai: { type: Object, default: () => ({ canRun: false, available: false, noticeAcknowledged: false, statuses: {} }) },
+    archive: { type: Object, default: () => ({ items: [], people: [] }) },
 });
 const { t } = useI18n();
 
@@ -67,6 +70,7 @@ function go(params, only) {
 }
 const openNew = () => go({ panel: 'new-person' }, ['panel']);
 const openEditPerson = () => go({ panel: 'edit-person' }, ['panel']);
+const openArchive = () => go({ panel: 'archive' }, ['panel']);
 const openNewVisit = () => go({ panel: 'new-visit' }, ['panel']);
 const openVisit = (id) => go({ panel: 'visit', id }, ['panel']);
 const openNewAllergy = () => go({ panel: 'new-allergy' }, ['panel']);
@@ -81,6 +85,7 @@ const closePanel = () => go({}, ['panel']);
 const setView = (view) => go({ view: view === 'folders' ? undefined : view, filter: undefined }, ['view', 'filter', 'timeline']);
 const setFilter = (filter) => go({ filter: filter === 'all' ? undefined : filter }, ['timeline', 'filter']);
 
+const archivePanelOpen = computed(() => props.panel?.kind === 'archive' && Boolean(props.person));
 const canAddVisit = computed(() => Boolean(props.person?.canEdit));
 const activeVisit = computed(() => (props.panel?.kind === 'visit' ? props.visits.find((v) => v.id === props.panel.id) ?? null : null));
 const visitPanelOpen = computed(() => props.panel?.kind === 'new-visit' || (props.panel?.kind === 'visit' && activeVisit.value !== null));
@@ -104,7 +109,8 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
 
             <template v-if="person">
                 <PersonSwitcher :people="people" :current-id="person.id" :can-create="canCreate" @add="openNew" />
-                <PersonHeader :person="person" @add-visit="openNewVisit" @add-document="openNewDocument" @edit-person="openEditPerson" />
+                <ArchivedPeople :people="archive.people" />
+                <PersonHeader :person="person" @add-visit="openNewVisit" @add-document="openNewDocument" @edit-person="openEditPerson" @open-archive="openArchive" />
                 <UiAlert v-if="vaccinationAttention > 0" variant="warning" data-testid="vaccination-alert">
                     <strong>{{ t('health.vaccination.attention_title') }}</strong>
                     {{ t('health.vacc.attention', { n: vaccinationAttention }, vaccinationAttention) }}
@@ -140,13 +146,17 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                     </section>
                 </div>
             </template>
-            <UiEmptyState v-else :title="t('health.empty.title')" :body="t('health.empty.body')" :icon="HeartPulse" :heading-level="2">
-                <template v-if="canCreate" #action>
-                    <UiButton variant="primary" data-testid="empty-add" @click="openNew">{{ t('health.empty.add_person') }}</UiButton>
-                </template>
-            </UiEmptyState>
+            <template v-else>
+                <UiEmptyState :title="t('health.empty.title')" :body="t('health.empty.body')" :icon="HeartPulse" :heading-level="2">
+                    <template v-if="canCreate" #action>
+                        <UiButton variant="primary" data-testid="empty-add" @click="openNew">{{ t('health.empty.add_person') }}</UiButton>
+                    </template>
+                </UiEmptyState>
+                <ArchivedPeople :people="archive.people" />
+            </template>
         </div>
         <PersonPanel :open="panel?.kind === 'new-person' || (panel?.kind === 'edit-person' && Boolean(person))" :person="panel?.kind === 'edit-person' ? person : null" @close="closePanel" />
+        <ArchivePanel v-if="person" :open="archivePanelOpen" :person-id="person.id" :items="archive.items" @close="closePanel" />
         <VisitPanel v-if="person" :open="visitPanelOpen" :person-id="person.id" :visit="activeVisit" :can-edit="canAddVisit" :specialties="specialties" :documents="documents" @close="closePanel" @open-document="openDocument" @upload-document="openNewDocument" />
         <AllergyPanel v-if="person" :open="allergyPanelOpen" :person-id="person.id" :allergy="activeAllergy" :can-edit="canAddVisit" @close="closePanel" />
         <MedicationPanel v-if="person" :open="medicationPanelOpen" :person-id="person.id" :medication="activeMedication" :can-edit="canAddVisit" @close="closePanel" />

@@ -346,6 +346,16 @@ class AiReviewQuery
             if ($row === null) {
                 return null;
             }
+            // An archived document (or a document of an archived person, hidden by the scope) takes no more decisions.
+            $documentActive = Visibility::apply(
+                DB::table('medical_documents')->where('id', $row->document_id)->where('subject_id', $subjectId),
+                $viewer,
+                'subject_id',
+                AccessLevel::Edit,
+            )->exists();
+            if (! $documentActive) {
+                return null;
+            }
             if ($row->status === 'superseded') {
                 return ['state' => 'superseded'];
             }
@@ -445,7 +455,8 @@ class AiReviewQuery
             'allergy' => ['medical_allergies', 'id', ['substance' => 'text', 'reaction' => 'text']],
             default => ['medical_vaccinations', 'public_id', ['vaccine' => 'text', 'given_on' => 'date', 'next_due_on' => 'date']],
         };
-        $query = DB::table($table)->where('subject_id', $subjectId);
+        // An archived record is hidden, so it is never the match: the proposal creates a fresh active record.
+        $query = DB::table($table)->where('subject_id', $subjectId)->whereNull('archived_at');
         foreach ($columns as $column => $kind) {
             $value = $valid[$column] ?? null;
             if ($kind === 'date') {

@@ -12,9 +12,11 @@ use App\Medical\Ai\ExtractionValidator;
 use App\Medical\Documents\PdfRasterizer;
 use App\Medical\Provenance;
 use App\Medical\Queries\AiReviewQuery;
+use App\Medical\Queries\ArchiveQuery;
 use App\Medical\Queries\DocumentQuery;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Queries\VaccinationQuery;
+use App\Medical\Queries\VisitQuery;
 use App\Medical\Specialty;
 use App\Medical\Viewer as MedicalViewer;
 use App\Models\FinanceTransaction;
@@ -88,9 +90,9 @@ it('fills every module within the expected ranges and measures the run', functio
         ->and($c['finance_recurring'])->toBeBetween(4, 10)
         ->and($c['finance_budgets'])->toBeBetween(4, 12)
         ->and($c['finance_import_batches'])->toBeBetween(1, 3)
-        ->and($c['medical_subjects'])->toBeBetween(4, 5)
+        ->and($c['medical_subjects'])->toBeBetween(5, 6)
         ->and($c['medical_visits'])->toBeBetween(40, 80)
-        ->and($c['medical_documents'])->toBe(6)
+        ->and($c['medical_documents'])->toBe(7)
         ->and($c['medical_ai_extractions'])->toBe(3)
         ->and($seconds)->toBeLessThan(60);
 });
@@ -267,7 +269,7 @@ it('keeps health private per person and seeds a full record for each', function 
     $ages = MedicalSubject::all()->map(fn ($s) => (int) $s->birth_date->age)->sort()->values()->all();
     expect($ages[0])->toBeLessThan(12)->and(end($ages))->toBeGreaterThan(70);
 
-    foreach (MedicalSubject::all() as $s) {
+    foreach (MedicalSubject::whereNull('archived_at')->get() as $s) {
         expect(DB::table('medical_visits')->where('subject_id', $s->id)->count())->toBeGreaterThanOrEqual(7)
             ->and(DB::table('medical_medications')->where('subject_id', $s->id)->count())->toBeGreaterThanOrEqual(2)
             ->and(DB::table('medical_allergies')->where('subject_id', $s->id)->count())->toBeGreaterThanOrEqual(1)
@@ -290,12 +292,12 @@ it('keeps health private per person and seeds a full record for each', function 
         ->and($c->firstWhere('vaccine', 'MMR (2. dávka)')->status)->toBe('overdue');
 });
 
-it('stores six synthetic documents that can be read back, with a two-page PDF', function () {
+it('stores seven synthetic documents (one archived) that can be read back, with a two-page PDF', function () {
     demoSeed();
 
     $docs = DB::table('medical_documents')->get();
-    expect($docs)->toHaveCount(6)
-        ->and($docs->where('kind', 'pdf'))->toHaveCount(3)
+    expect($docs)->toHaveCount(7)
+        ->and($docs->where('kind', 'pdf'))->toHaveCount(4)
         ->and($docs->where('kind', 'image'))->toHaveCount(3);
     $disk = Storage::disk('medical');
     foreach ($docs as $doc) {
@@ -426,4 +428,27 @@ it('still flags real data after the demo seed (audit rules are unchanged)', func
         ->expectsOutputToContain('non-synthetic users')
         ->expectsOutputToContain('non-synthetic medical_subjects')
         ->assertExitCode(1);
+});
+
+it('seeds records older than the delete window and an archive demo (one visit, one document, one person)', function () {
+    demoSeed();
+    $window = now()->subHours((int) config('medical.delete_window_hours'));
+    foreach (['medical_subjects', 'medical_visits', 'medical_medications', 'medical_allergies', 'medical_vaccinations', 'medical_documents'] as $table) {
+        expect(DB::table($table)->where('created_at', '>', $window)->count())->toBe(0, "{$table} has a row inside the delete window");
+    }
+
+    expect(DB::table('medical_visits')->whereNotNull('archived_at')->count())->toBe(1) // person A's visit; the archived person's own rows are hidden through the person
+        ->and(DB::table('medical_documents')->whereNotNull('archived_at')->count())->toBe(1)
+        ->and(DB::table('medical_subjects')->whereNotNull('archived_at')->pluck('name')->all())->toBe(['Archivovaná osoba (demo)']);
+
+    $parent = demoUser('sk_sk.1');
+    $viewer = MedicalViewer::for($parent);
+    $subjects = app(SubjectQuery::class);
+    expect($subjects->visible($viewer)->pluck('name')->all())->not->toContain('Archivovaná osoba (demo)')
+        ->and($subjects->archived($viewer)->pluck('name')->all())->toBe(['Archivovaná osoba (demo)'])
+        ->and($subjects->archived(MedicalViewer::for(demoUser('sk_sk.2')))->count())->toBe(0);
+
+    $a = demoSubject($parent->name);
+    expect(app(VisitQuery::class)->forSubject($viewer, $a)->pluck('diagnosis')->all())->not->toContain('Archivovaná návšteva (demo)')
+        ->and(collect(app(ArchiveQuery::class)->forSubject($viewer, $a))->pluck('type')->sort()->values()->all())->toBe(['document', 'visit']);
 });

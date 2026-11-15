@@ -165,6 +165,9 @@ MAIL_MAILER=log
 # Google sign-in (empty = hidden)
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
+# Health records: hours a record or person can still be deleted for good; after that only archived (0 = always archive)
+MEDICAL_DELETE_WINDOW_HOURS=72
+
 # Web Push (VAPID): generate per environment with php artisan push:vapid
 VAPID_SUBJECT=
 VAPID_PUBLIC_KEY=

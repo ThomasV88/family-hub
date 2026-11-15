@@ -49,8 +49,14 @@ class StagingAudit extends Command
             ['finance_account_members', "(user_id not in {$synthetic})"],
             // Phase 7: staging must never hold real medical data. A subject created by a deleted (null) or real user, or
             // linked to a real user, fails; so does any membership of a real user.
-            ['medical_subjects', "{$createdByReal} or (user_id is not null and user_id not in {$synthetic})"],
+            ['medical_subjects', "{$createdByReal} or (user_id is not null and user_id not in {$synthetic}) or archived_by in {$real}"],
             ['medical_subject_members', "(user_id not in {$synthetic})"],
+            // Archive (owner decision B): a record archived by a real user means real use of the archive on staging.
+            ['medical_visits', "(archived_by in {$real})"],
+            ['medical_medications', "(archived_by in {$real})"],
+            ['medical_allergies', "(archived_by in {$real})"],
+            ['medical_vaccinations', "(archived_by in {$real})"],
+            ['medical_documents', "(archived_by in {$real})"],
             // Phase 8: a run started by a real user means a real document may have gone to the AI provider and a proposal
             // (health content) may sit in the database. started_by has no foreign key and ai_calls is append-only, so a
             // dangling id is a deleted synthetic user and is accepted; an existing non-synthetic user fails.

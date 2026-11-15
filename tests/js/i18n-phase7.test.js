@@ -27,6 +27,14 @@ const AUDIT = [
     'medical_format_md',
     'medical_value_on',
     'medical_value_off',
+    'medical_archived',
+    'medical_restored',
+    'medical_type_person',
+    'medical_type_visit',
+    'medical_type_medication',
+    'medical_type_allergy',
+    'medical_type_vaccination',
+    'medical_type_document',
 ].map((k) => `audit.detail.${k}`);
 
 const SPECIALTIES = [

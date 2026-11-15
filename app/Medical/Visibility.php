@@ -16,19 +16,30 @@ use Illuminate\Support\Facades\DB;
  */
 final class Visibility
 {
-    /** Subquery: ids of the subjects the viewer may see at the given minimum level. */
-    public static function subjectIds(Viewer $viewer, AccessLevel $min = AccessLevel::View): Builder
+    /** Record tables that carry archived_at / archived_by (medical_subjects is handled by subjectIds). */
+    private const ARCHIVABLE = ['medical_visits', 'medical_medications', 'medical_allergies', 'medical_vaccinations', 'medical_documents'];
+
+    /**
+     * Subquery: ids of the subjects the viewer may see at the given minimum level. Archived people are excluded unless
+     * $archive says otherwise, so everything below an archived person (records, documents, AI rows) disappears with it.
+     */
+    public static function subjectIds(Viewer $viewer, AccessLevel $min = AccessLevel::View, ArchiveState $archive = ArchiveState::Active): Builder
     {
         $own = DB::table('medical_subjects')
             ->select('id')
             ->where('user_id', $viewer->userId())
             ->where('self_access_enabled', true);
+        self::archiveClause($own, 'archived_at', $archive);
 
-        return DB::table('medical_subject_members')
+        $members = DB::table('medical_subject_members')
             ->select('subject_id')
             ->where('user_id', $viewer->userId())
-            ->where('level', '>=', $min->value)
-            ->union($own);
+            ->where('level', '>=', $min->value);
+        if ($archive !== ArchiveState::Any) {
+            $members->whereIn('subject_id', fn ($q) => self::archiveClause($q->select('id')->from('medical_subjects'), 'archived_at', $archive));
+        }
+
+        return $members->union($own);
     }
 
     /**
@@ -36,9 +47,40 @@ final class Visibility
      *
      * @param  T  $query
      * @return T
+     *
+     * On medical_subjects (column id) $archive selects the subject's own state; on a record table the subject must be
+     * active and $archive selects the record's state. Other tables only get the subject constraint.
      */
-    public static function apply($query, Viewer $viewer, string $column = 'subject_id', AccessLevel $min = AccessLevel::View)
+    public static function apply($query, Viewer $viewer, string $column = 'subject_id', AccessLevel $min = AccessLevel::View, ArchiveState $archive = ArchiveState::Active)
     {
-        return $query->whereIn($column, self::subjectIds($viewer, $min));
+        $table = self::tableOf($query);
+        if ($table === 'medical_subjects') {
+            return $query->whereIn($column, self::subjectIds($viewer, $min, $archive));
+        }
+        $query->whereIn($column, self::subjectIds($viewer, $min));
+        if (in_array($table, self::ARCHIVABLE, true)) {
+            self::archiveClause($query, "{$table}.archived_at", $archive);
+        }
+
+        return $query;
+    }
+
+    /** @param  mixed  $query */
+    private static function archiveClause($query, string $column, ArchiveState $archive)
+    {
+        return match ($archive) {
+            ArchiveState::Active => $query->whereNull($column),
+            ArchiveState::Only => $query->whereNotNull($column),
+            ArchiveState::Any => $query,
+        };
+    }
+
+    /** The table a builder reads, without alias; '' when it cannot be told. */
+    private static function tableOf(mixed $query): string
+    {
+        $base = $query instanceof \Illuminate\Database\Eloquent\Builder ? $query->getQuery() : $query;
+        $from = $base instanceof Builder ? $base->from : null;
+
+        return is_string($from) ? strtolower(trim((string) preg_split('/\s+as\s+/i', $from)[0], '"')) : '';
     }
 }

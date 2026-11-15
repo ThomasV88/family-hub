@@ -3,6 +3,7 @@
 namespace Database\Seeders\Staging;
 
 use App\Access\AccessLevel;
+use Carbon\CarbonImmutable;
 use Database\Factories\MedicalAllergyFactory;
 use Database\Factories\MedicalContactFactory;
 use Database\Factories\MedicalMedicationFactory;
@@ -46,20 +47,20 @@ final class HealthSeeder
                     'subject_id' => $id, 'visited_on' => $ctx->day(-$ago), 'doctor' => $doctor, 'specialty_key' => $specialty,
                     'specialty_other' => $specialty === 'other' ? 'Športová medicína' : null, 'diagnosis' => $diagnosis, 'notes' => $notes,
                     'source' => 'manual', 'created_by' => $by,
-                ]);
+                ] + $this->aged(-max($ago, 30)));
                 $counts['visits']++;
             }
             foreach ($p['medications'] as [$name, $dose, $schedule, $startAgo, $endAgo, $notes]) {
                 MedicalMedicationFactory::new()->create([
                     'subject_id' => $id, 'name' => $name, 'dose' => $dose, 'schedule' => $schedule, 'started_on' => $ctx->day(-$startAgo),
                     'ended_on' => $endAgo === null ? null : $ctx->day(-$endAgo), 'notes' => $notes, 'source' => 'manual', 'created_by' => $by,
-                ]);
+                ] + $this->aged(-max($startAgo, 30)));
                 $counts['medications']++;
             }
             foreach ($p['allergies'] as [$substance, $reaction, $severity]) {
                 MedicalAllergyFactory::new()->create([
                     'subject_id' => $id, 'substance' => $substance, 'reaction' => $reaction, 'severity' => $severity, 'source' => 'manual', 'created_by' => $by,
-                ]);
+                ] + $this->aged(-30));
                 $counts['allergies']++;
             }
             // Vaccinations: [vaccine, given days ago, next due in days (negative = overdue) or null, notes]
@@ -67,7 +68,7 @@ final class HealthSeeder
                 MedicalVaccinationFactory::new()->create([
                     'subject_id' => $id, 'vaccine' => $vaccine, 'given_on' => $ctx->day(-$givenAgo),
                     'next_due_on' => $dueIn === null ? null : $ctx->day($dueIn), 'notes' => $notes, 'source' => 'manual', 'created_by' => $by,
-                ]);
+                ] + $this->aged(-max($givenAgo, 30)));
                 $counts['vaccinations']++;
             }
             foreach ($p['contacts'] as $sort => $contact) {
@@ -78,7 +79,64 @@ final class HealthSeeder
             }
         }
 
+        $this->seedArchived($subjects, $counts, $by);
+
         return ['subjects' => $subjects, 'counts' => $counts];
+    }
+
+    /**
+     * created_at / updated_at for a seeded row. Every seeded person and record is older than the delete window (72 hours by
+     * default), so on staging deleting one archives it instead, and the Archive section can be tried with the demo data.
+     *
+     * @return array{created_at: CarbonImmutable, updated_at: CarbonImmutable}
+     */
+    private function aged(int $dayOffset): array
+    {
+        $at = $this->ctx->at($dayOffset, 9);
+
+        return ['created_at' => $at, 'updated_at' => $at];
+    }
+
+    /**
+     * The archive demo: one archived visit of person A (hidden from every list, export and reminder, restorable from the
+     * Archive of that person) and one archived person with a visit and an allergy (listed under "Archived people" for
+     * parent1 and parent2, who can change it). The archived document is added by DocumentsSeeder.
+     *
+     * @param  array<string, array{id: string, name: string}>  $subjects
+     * @param  array<string, int>  $counts
+     */
+    private function seedArchived(array &$subjects, array &$counts, int $by): void
+    {
+        $ctx = $this->ctx;
+        MedicalVisitFactory::new()->create([
+            'subject_id' => $subjects['adult_linked']['id'], 'visited_on' => $ctx->day(-1500), 'doctor' => 'MUDr. Starý (demo)', 'specialty_key' => 'general_practice',
+            'diagnosis' => 'Archivovaná návšteva (demo)', 'notes' => 'Archivovaný záznam, obnoviteľný v Archíve osoby.', 'source' => 'manual', 'created_by' => $by,
+            'archived_at' => $ctx->at(-5, 10), 'archived_by' => $by,
+        ] + $this->aged(-90));
+        $counts['visits']++;
+
+        $parents = ['parent1' => AccessLevel::Edit->value, 'parent2' => AccessLevel::Edit->value];
+        $person = MedicalSubjectFactory::new()->create([
+            'name' => 'Archivovaná osoba (demo)', 'birth_date' => $ctx->today->subYears(67)->format('Y-m-d'), 'sex' => 'female', 'blood_type' => 'B+',
+            'notes' => 'Archivovaná osoba pre demo, obnoviteľná z časti Archivované osoby.', 'user_id' => null, 'self_access_enabled' => true, 'ai_consent' => false,
+            'created_by' => $by, 'archived_at' => $ctx->at(-3, 10), 'archived_by' => $by,
+        ] + $this->aged(-45));
+        foreach ($parents as $role => $level) {
+            DB::table('medical_subject_members')->insert([
+                'subject_id' => $person->getKey(), 'user_id' => $ctx->user($role)->id, 'level' => $level, 'granted_by' => $by, 'created_at' => $ctx->at(-45, 9),
+            ]);
+        }
+        MedicalVisitFactory::new()->create([
+            'subject_id' => $person->getKey(), 'visited_on' => $ctx->day(-200), 'doctor' => 'MUDr. Archívna (demo)', 'specialty_key' => 'general_practice',
+            'diagnosis' => 'Kontrola (demo)', 'source' => 'manual', 'created_by' => $by,
+        ] + $this->aged(-45));
+        MedicalAllergyFactory::new()->create([
+            'subject_id' => $person->getKey(), 'substance' => 'Peľ (demo)', 'reaction' => 'Kýchanie', 'severity' => 'mild', 'source' => 'manual', 'created_by' => $by,
+        ] + $this->aged(-45));
+        $counts['subjects']++;
+        $counts['visits']++;
+        $counts['allergies']++;
+        // Not part of the $subjects map the other demo seeders address by key.
     }
 
     /** @param  array<string, mixed>  $p */
@@ -100,7 +158,7 @@ final class HealthSeeder
             'ai_consent_changed_at' => $p['consent'] ? $this->ctx->at(-20, 9) : null,
             'ai_consent_changed_by' => $p['consent'] ? $parent1 : null,
             'created_by' => $parent1,
-        ]);
+        ] + $this->aged(-60));
 
         // Per-person grants: parent1 and parent2 change everything; the others only what the plan lists.
         foreach ($p['members'] as $role => $level) {

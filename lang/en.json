@@ -707,7 +707,15 @@
             "ai_bulk_run_changed_paused": "Paused a bulk AI re-generation: {scope}. Documents: {count}",
             "ai_bulk_run_changed_resumed": "Resumed a bulk AI re-generation: {scope}. Documents: {count}",
             "ai_bulk_run_changed_cancelled": "Cancelled a bulk AI re-generation: {scope}. Documents: {count}",
-            "ai_bulk_run_changed_completed": "A bulk AI re-generation finished: {scope}. Documents: {count}"
+            "ai_bulk_run_changed_completed": "A bulk AI re-generation finished: {scope}. Documents: {count}",
+            "medical_archived": "Archived in Health",
+            "medical_restored": "Restored in Health",
+            "medical_type_person": "Person",
+            "medical_type_visit": "Visit",
+            "medical_type_medication": "Medication",
+            "medical_type_allergy": "Allergy",
+            "medical_type_vaccination": "Vaccination",
+            "medical_type_document": "Document"
         },
         "page": "Page {n} of {total}",
         "prev": "Previous",
@@ -2330,6 +2338,35 @@
             "laboratory": "Laboratory tests",
             "geriatrics": "Geriatrics",
             "other": "Other"
+        },
+        "archive": {
+            "title": "Archive",
+            "open": "Archived items",
+            "intro": "Archived records are hidden everywhere: lists, exports, the emergency card, reminders and AI. They are kept, and you can restore them here.",
+            "empty": "Nothing is archived for this person.",
+            "people_title": "Archived people",
+            "restore": "Restore",
+            "restore_person": "Restore {name}",
+            "archived": "Archived. You can restore it from the Archive.",
+            "restored": "Restored",
+            "archived_on": "Archived {date}",
+            "type_visit": "Visits",
+            "type_medication": "Medications",
+            "type_allergy": "Allergies",
+            "type_vaccination": "Vaccinations",
+            "type_document": "Documents",
+            "title_person": "Archive person",
+            "title_visit": "Archive visit",
+            "title_medication": "Archive medication",
+            "title_allergy": "Archive allergy",
+            "title_vaccination": "Archive vaccination",
+            "title_doc": "Archive document",
+            "body_person": "Health records can be deleted for good only shortly after they are created, and this person is past that time. The person and everything in the record will be archived instead: hidden everywhere, kept, and restorable from Archived people.",
+            "body_visit": "Health records can be deleted for good only shortly after they are created, and this visit is past that time. It will be archived instead: hidden everywhere, kept, and restorable from the Archive of this person.",
+            "body_medication": "Health records can be deleted for good only shortly after they are created, and this medication is past that time. It will be archived instead: hidden everywhere, kept, and restorable from the Archive of this person.",
+            "body_allergy": "Health records can be deleted for good only shortly after they are created, and this allergy is past that time. It will be archived instead: hidden everywhere, kept, and restorable from the Archive of this person.",
+            "body_vaccination": "Health records can be deleted for good only shortly after they are created, and this vaccination is past that time. It will be archived instead: hidden everywhere, kept, and restorable from the Archive of this person.",
+            "body_doc": "Health records can be deleted for good only shortly after they are created, and this document is past that time. It will be archived instead: hidden everywhere, the file is kept, and it is restorable from the Archive of this person."
         }
     }
 }

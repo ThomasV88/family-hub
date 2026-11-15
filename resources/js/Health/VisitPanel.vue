@@ -1,4 +1,5 @@
 <script setup>
+import { useRemoval } from './useRemoval.js';
 import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -25,6 +26,7 @@ const props = defineProps({
     documents: { type: Array, default: () => [] },
 });
 const emit = defineEmits(['close', 'open-document', 'upload-document']);
+const removal = useRemoval('visit', () => props.visit);
 const verifying = ref(false);
 function verify() {
     if (!props.visit || verifying.value) return;
@@ -206,7 +208,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
             <UiButton v-if="!readOnly" variant="secondary" data-testid="visit-attach" @click="attachOpen = true">{{ t('health.visit.attach') }}</UiButton>
         </section>
         <template #footer>
-            <UiButton v-if="editing && !readOnly" variant="ghost" class="visit-delete" data-testid="visit-delete" @click="deleteOpen = true">{{ t('health.visit.delete') }}</UiButton>
+            <UiButton v-if="editing && !readOnly" variant="ghost" class="visit-delete" data-testid="visit-delete" @click="deleteOpen = true">{{ removal.action.value }}</UiButton>
             <UiButton variant="secondary" @click="requestClose">{{ t('ui.close') }}</UiButton>
             <UiButton v-if="!readOnly" variant="primary" :loading="processing" data-testid="visit-save" @click="save">{{ t('health.visit.save') }}</UiButton>
         </template>
@@ -221,9 +223,9 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
     />
     <UiConfirmDialog
         v-model:open="deleteOpen"
-        :title="t('health.visit.delete_title')"
-        :body="t('health.visit.delete_body')"
-        :confirm-label="t('health.visit.delete')"
+        :title="removal.title.value"
+        :body="removal.body.value"
+        :confirm-label="removal.action.value"
         :cancel-label="t('health.visit.delete_keep')"
         @confirm="remove"
     />

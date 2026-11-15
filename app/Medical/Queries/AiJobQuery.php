@@ -67,20 +67,27 @@ class AiJobQuery
         }
         $row = DB::table('medical_ai_extractions as e')
             ->join('medical_documents as d', fn ($j) => $j->on('d.id', '=', 'e.document_id')->on('d.subject_id', '=', 'e.subject_id'))
+            ->join('medical_subjects as s', 's.id', '=', 'e.subject_id')
             ->where('e.id', $id)
+            ->whereNull('d.archived_at')
+            ->whereNull('s.archived_at')
             ->select(['d.path', 'd.kind'])
             ->first();
 
         return $row === null ? null : ['path' => (string) $row->path, 'kind' => (string) $row->kind];
     }
 
-    /** 'user' after a cancel request, 'consent' when the person's AI consent is off, otherwise null. Access is rechecked by the job. */
+    /**
+     * 'user' after a cancel request, 'consent' when the person's AI consent is off, 'access' when the document or its
+     * person has been archived meanwhile (a running job of an archived record is cancelled), otherwise null. Access is
+     * rechecked by the job.
+     */
     public function abortReason(string $id): ?string
     {
         if (! Str::isUuid($id)) {
             return 'user';
         }
-        $row = DB::table('medical_ai_extractions')->where('id', $id)->select(['subject_id', 'cancel_requested_at'])->first();
+        $row = DB::table('medical_ai_extractions')->where('id', $id)->select(['subject_id', 'document_id', 'cancel_requested_at'])->first();
         if ($row === null) {
             return 'user';
         }
@@ -90,8 +97,12 @@ class AiJobQuery
         if (! AiConsent::allows((string) $row->subject_id)) {
             return 'consent';
         }
+        $archived = DB::table('medical_documents as d')->join('medical_subjects as s', 's.id', '=', 'd.subject_id')
+            ->where('d.id', $row->document_id)
+            ->where(fn ($q) => $q->whereNotNull('d.archived_at')->orWhereNotNull('s.archived_at'))
+            ->exists();
 
-        return null;
+        return $archived ? 'access' : null;
     }
 
     /**
@@ -119,9 +130,12 @@ class AiJobQuery
                     throw new LogicException('not running');
                 }
                 // FOR SHARE serializes with a consent change, which takes FOR UPDATE on the subject row.
-                $consent = DB::table('medical_subjects')->where('id', $row->subject_id)->sharedLock()->value('ai_consent');
+                $consent = DB::table('medical_subjects')->where('id', $row->subject_id)->whereNull('archived_at')->sharedLock()->value('ai_consent');
                 if (! $consent) {
                     throw new LogicException('consent withdrawn');
+                }
+                if (DB::table('medical_documents')->where('id', $row->document_id)->whereNotNull('archived_at')->exists()) {
+                    throw new LogicException('document archived');
                 }
                 // A bulk re-read never replaces a proposal a human has already accepted entries of.
                 if ($row->bulk_run_id !== null && $this->hasAcceptedDecision((string) $row->document_id)) {

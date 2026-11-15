@@ -93,6 +93,12 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
 - Decision (provisional, owner to confirm in plan 07-20): no app-level file encryption in v1. `APP_KEY` lives on the same host, so it
   would add little; restic encrypts the backups and the volume is 0700/0600.
 - nginx: only `POST /health/people/<uuid>/documents` accepts a body up to 12m; PHP `upload_max_filesize=11M`, `post_max_size=13M`.
+- Delete window (owner decision, 2026-11-15): a health person or record (visit, medication, allergy, vaccination, document) can be
+  deleted for good only within `MEDICAL_DELETE_WINDOW_HOURS` of its creation (default 72, range 0 to 8760, 0 = always archive; set in
+  `app.env`, template `ops/env/app.env.example`). Older ones are archived: the row and the files stay, they are hidden from lists,
+  exports, the emergency card, reminders and AI, and a member with Edit restores them from the Archive. `medical:prune-orphans`
+  keeps the files of archived documents (the rows still reference them). Nothing in the app deletes archived data; only a restore
+  from backup or a direct database change would.
 
 ## AI worker (Phase 8)
 

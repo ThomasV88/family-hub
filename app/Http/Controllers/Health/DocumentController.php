@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Health;
 
 use App\Access\AccessLevel;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Health\Concerns\FlashesRemoval;
 use App\Http\Requests\Health\StoreDocumentRequest;
 use App\Http\Requests\Health\UpdateDocumentRequest;
 use App\Medical\Documents\DocumentRejected;
 use App\Medical\Documents\MedicalDocumentStore;
 use App\Medical\Documents\PdfRasterizer;
+use App\Medical\Queries\ArchiveQuery;
 use App\Medical\Queries\DocumentQuery;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Viewer;
@@ -24,6 +26,8 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class DocumentController extends Controller
 {
+    use FlashesRemoval;
+
     private const MESSAGES = [
         'too_large' => 'health.upload.err_size',
         'unsupported_type' => 'health.upload.err_type',
@@ -166,18 +170,19 @@ class DocumentController extends Controller
             ->with('toast', ['key' => 'health.doc.saved']);
     }
 
-    public function destroy(Request $request, string $person, string $document, SubjectQuery $subjects, DocumentQuery $documents, MedicalDocumentStore $store): RedirectResponse
+    public function destroy(Request $request, string $person, string $document, SubjectQuery $subjects, ArchiveQuery $archive, MedicalDocumentStore $store): RedirectResponse
     {
         $viewer = Viewer::for($request->user());
         $subject = $subjects->findVisible($viewer, $person, AccessLevel::Edit);
         abort_if($subject === null, 403);
-        $paths = $documents->delete($viewer, $subject, $document);
-        abort_if($paths === null, 403);
-        // After the commit: a failed file removal leaves an orphan for the daily sweep, never a dangling row.
-        $store->delete($paths);
+        $result = $archive->remove($viewer, $subject, 'document', $document);
+        abort_if($result === null, 403);
+        // After the commit: a failed file removal leaves an orphan for the daily sweep, never a dangling row. An archived
+        // document keeps its files (the paths list is empty).
+        $store->delete($result['paths']);
 
         return redirect()->route('health.people.show', ['person' => $subject->getKey()])
-            ->with('toast', ['key' => 'health.doc.deleted']);
+            ->with('toast', $this->removalToast($result['outcome'], 'health.doc.deleted'));
     }
 
     /** Hidden, unknown, malformed and mismatched ids all end in the same 403. */

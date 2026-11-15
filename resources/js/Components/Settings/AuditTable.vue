@@ -36,6 +36,7 @@ const MEDICAL_META = {
     scope: ['person', 'specialty', 'emergency'],
     format: ['html', 'json', 'md'],
     value: ['on', 'off'],
+    type: ['person', 'visit', 'medication', 'allergy', 'vaccination', 'document'],
 };
 const medicalPhrase = (field, value) => (MEDICAL_META[field].includes(value) ? t(`audit.detail.medical_${field}_${value}`) : '');
 const joinPhrases = (base, ...parts) => [base, ...parts.filter(Boolean)].join(': ');
@@ -127,6 +128,9 @@ function details(row) {
             return joinPhrases(t('audit.detail.medical_exported'), medicalPhrase('scope', meta.scope), medicalPhrase('format', meta.format));
         case 'medical_consent_changed':
             return joinPhrases(t('audit.detail.medical_consent_changed'), medicalPhrase('value', meta.value));
+        case 'medical_archived':
+        case 'medical_restored':
+            return joinPhrases(t(`audit.detail.${row.event}`), medicalPhrase('type', meta.type));
         case 'medical_subject_created':
         case 'medical_subject_deleted':
         case 'medical_admin_self_added':

@@ -37,6 +37,7 @@ class MedicalDocument extends Model
             'width' => 'integer',
             'height' => 'integer',
             'verified_at' => 'datetime',
+            'archived_at' => 'datetime',
         ];
     }
 }

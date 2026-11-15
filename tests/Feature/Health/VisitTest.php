@@ -1,6 +1,7 @@
 <?php
 
 use App\Access\AccessLevel;
+use App\Medical\Queries\ArchiveQuery;
 use App\Medical\Queries\VisitQuery;
 use App\Medical\Specialty;
 use App\Medical\Viewer;
@@ -125,7 +126,7 @@ describe('write', function () {
         });
 
         app(VisitQuery::class)->update($viewer, $person, $visit->id, VISIT_BODY);
-        app(VisitQuery::class)->delete($viewer, $person, $visit->id);
+        app(ArchiveQuery::class)->remove($viewer, $person, 'visit', $visit->id);
 
         $writes = array_values(array_filter($queries, fn ($s) => preg_match('/^(update|delete)/i', $s)));
         expect($writes)->toHaveCount(2);

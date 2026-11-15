@@ -1,4 +1,5 @@
 <script setup>
+import { useRemoval } from './useRemoval.js';
 import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -35,6 +36,7 @@ const props = defineProps({
     consentOn: { type: Boolean, default: false },
 });
 const emit = defineEmits(['close']);
+const removal = useRemoval('doc', () => props.document);
 const { t, te } = useI18n();
 
 const form = ref({ title: '', visit_id: '' });
@@ -164,7 +166,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
             </dl>
         </div>
         <template #footer>
-            <UiButton v-if="!creating && !readOnly" variant="ghost" class="doc-delete" data-testid="doc-delete" @click="deleteOpen = true">{{ t('health.doc.delete') }}</UiButton>
+            <UiButton v-if="!creating && !readOnly" variant="ghost" class="doc-delete" data-testid="doc-delete" @click="deleteOpen = true">{{ removal.action.value }}</UiButton>
             <template v-if="!creating">
                 <UiButton variant="secondary" @click="requestClose">{{ t('ui.close') }}</UiButton>
                 <UiButton v-if="!readOnly" variant="primary" :loading="processing" data-testid="doc-save" @click="save">{{ t('health.visit.save') }}</UiButton>
@@ -174,9 +176,9 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
 
     <UiConfirmDialog
         v-model:open="deleteOpen"
-        :title="t('health.doc.delete_title')"
-        :body="t('health.doc.delete_body')"
-        :confirm-label="t('health.doc.delete')"
+        :title="removal.title.value"
+        :body="removal.body.value"
+        :confirm-label="removal.action.value"
         :cancel-label="t('health.doc.delete_keep')"
         @confirm="remove"
     />

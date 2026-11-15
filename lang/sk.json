@@ -707,7 +707,15 @@
             "ai_bulk_run_changed_paused": "Pozastavené hromadné opätovné spracovanie AI: {scope}. Dokumenty: {count}",
             "ai_bulk_run_changed_resumed": "Obnovené hromadné opätovné spracovanie AI: {scope}. Dokumenty: {count}",
             "ai_bulk_run_changed_cancelled": "Zrušené hromadné opätovné spracovanie AI: {scope}. Dokumenty: {count}",
-            "ai_bulk_run_changed_completed": "Hromadné opätovné spracovanie AI skončilo: {scope}. Dokumenty: {count}"
+            "ai_bulk_run_changed_completed": "Hromadné opätovné spracovanie AI skončilo: {scope}. Dokumenty: {count}",
+            "medical_archived": "Archivované v Zdraví",
+            "medical_restored": "Obnovené v Zdraví",
+            "medical_type_person": "Osoba",
+            "medical_type_visit": "Návšteva",
+            "medical_type_medication": "Liek",
+            "medical_type_allergy": "Alergia",
+            "medical_type_vaccination": "Očkovanie",
+            "medical_type_document": "Dokument"
         },
         "page": "Strana {n} z {total}",
         "prev": "Predchádzajúca",
@@ -2330,6 +2338,35 @@
             "laboratory": "Laboratórne vyšetrenia",
             "geriatrics": "Geriatria",
             "other": "Iné"
+        },
+        "archive": {
+            "title": "Archív",
+            "open": "Archivované položky",
+            "intro": "Archivované záznamy sú všade skryté: v zoznamoch, exportoch, núdzovej karte, pripomienkach aj AI. Zostávajú uložené a môžete ich tu obnoviť.",
+            "empty": "Pre túto osobu nie je nič archivované.",
+            "people_title": "Archivované osoby",
+            "restore": "Obnoviť",
+            "restore_person": "Obnoviť osobu {name}",
+            "archived": "Archivované. Môžete to obnoviť v Archíve.",
+            "restored": "Obnovené",
+            "archived_on": "Archivované {date}",
+            "type_visit": "Návštevy",
+            "type_medication": "Lieky",
+            "type_allergy": "Alergie",
+            "type_vaccination": "Očkovania",
+            "type_document": "Dokumenty",
+            "title_person": "Archivovať osobu",
+            "title_visit": "Archivovať návštevu",
+            "title_medication": "Archivovať liek",
+            "title_allergy": "Archivovať alergiu",
+            "title_vaccination": "Archivovať očkovanie",
+            "title_doc": "Archivovať dokument",
+            "body_person": "Zdravotné záznamy sa dajú natrvalo odstrániť iba krátko po vytvorení a pri tejto osobe už tento čas uplynul. Osoba a všetko v jej zázname sa preto archivuje: je všade skryté, zostane uložené a dá sa obnoviť v časti Archivované osoby.",
+            "body_visit": "Zdravotné záznamy sa dajú natrvalo odstrániť iba krátko po vytvorení a pri tejto návšteve už tento čas uplynul. Návšteva sa preto archivuje: je všade skrytá, zostane uložená a dá sa obnoviť v Archíve tejto osoby.",
+            "body_medication": "Zdravotné záznamy sa dajú natrvalo odstrániť iba krátko po vytvorení a pri tomto lieku už tento čas uplynul. Liek sa preto archivuje: je všade skrytý, zostane uložený a dá sa obnoviť v Archíve tejto osoby.",
+            "body_allergy": "Zdravotné záznamy sa dajú natrvalo odstrániť iba krátko po vytvorení a pri tejto alergii už tento čas uplynul. Alergia sa preto archivuje: je všade skrytá, zostane uložená a dá sa obnoviť v Archíve tejto osoby.",
+            "body_vaccination": "Zdravotné záznamy sa dajú natrvalo odstrániť iba krátko po vytvorení a pri tomto očkovaní už tento čas uplynul. Očkovanie sa preto archivuje: je všade skryté, zostane uložené a dá sa obnoviť v Archíve tejto osoby.",
+            "body_doc": "Zdravotné záznamy sa dajú natrvalo odstrániť iba krátko po vytvorení a pri tomto dokumente už tento čas uplynul. Dokument sa preto archivuje: je všade skrytý, súbor zostane uložený a dá sa obnoviť v Archíve tejto osoby."
         }
     }
 }
