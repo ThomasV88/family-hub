@@ -66,7 +66,7 @@ services:
 
   app:
     <<: *app
-    mem_limit: ${MEM_APP:-192m}
+    mem_limit: ${MEM_APP:-256m}
     volumes: *medical
     healthcheck:
       # php-fpm has no TCP client tools in the alpine image: a successful connect to the pool port is the check

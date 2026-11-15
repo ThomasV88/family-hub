@@ -12,11 +12,11 @@ Decided by the owner on 2026-11-13 (option "recommended, no off-site").
 | HOST_STAGE | `family-hub-stage.vostack.dev` | 2026-11-13 |
 | Repo visibility | public (kept: GitHub Free has no required-reviewer `production` environment on private repos; rule: no secrets, real data or private keys ever committed, CI secret scan enforces it; revisit if the plan is upgraded) | 2026-11-13 |
 | mem_limit postgres | 192m (prod), 192m (staging) | 2026-11-13 |
-| mem_limit app | 192m (prod), 192m (staging) | 2026-11-13 |
+| mem_limit app | 256m (prod), 256m (staging) | 2026-11-15 (was 192m; 3600 px medical images peak near 141 MiB per decode) |
 | mem_limit worker | 160m (prod), 160m (staging) | 2026-11-13 |
 | mem_limit scheduler | 128m (prod), 128m (staging) | 2026-11-13 |
 | mem_limit nginx | 48m (prod), 48m (staging) | 2026-11-13 |
-| Memory total per stack | about 720 MB, about 1.44 GB for both stacks (about 2.7 GB available) | 2026-11-13 |
+| Memory total per stack | about 784 MB (limits), about 1.57 GB for both stacks (about 2.5 GB available) | 2026-11-15 |
 | Retention production | `--keep-daily 14 --keep-weekly 8 --keep-monthly 6` | 2026-11-13 |
 | Retention staging | `--keep-daily 7` | 2026-11-13 |
 | Off-site backup target | none in Phase 1 (protects against mistakes and corruption, not against loss of the VPS) | 2026-11-13 |
@@ -104,11 +104,7 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
   die with a fatal error), so `medical.image_decode_budget_bytes` (106 MB) also bounds an estimate of input bytes plus 4.4 bytes
   per pixel of source and output; over it the upload is refused as unreadable before any decode. In practice: a 12 MP phone photo
   up to about 4 MB passes, near-square images above about 10 MP and 10 MB files of 12 MP are refused. Container: the app
-  container has `mem_limit` 192m with up to 4 php-fpm children, and one decode peaks near 141 MiB RSS, so with three more busy
-  children the container could be killed. Decodes are serialized (one at a time per container), so this needs a busy moment
-  as well as a large upload. If it ever shows up (container restarts with exit 137), raise `MEM_APP` to 256m in the stack `.env`
-  or lower `pm.max_children` in `docker/app/php-fpm-prod.conf` to 3. This was not changed here because it is a server sizing
-  decision.
+  container has `mem_limit` 256m (raised from 192m on 2026-11-15 as a server sizing decision) with up to 4 php-fpm children, and one decode peaks near 141 MiB RSS. Decodes are serialized (one at a time per container). If a container restart with exit 137 ever shows up anyway, lower `pm.max_children` in `docker/app/php-fpm-prod.conf` to 3.
 - Delete window (owner decision, 2026-11-15): a health person or record (visit, medication, allergy, vaccination, document) can be
   deleted for good only within `MEDICAL_DELETE_WINDOW_HOURS` of its creation (default 72, range 0 to 8760, 0 = always archive; set in
   `app.env`, template `ops/env/app.env.example`). Older ones are archived: the row and the files stay, they are hidden from lists,
