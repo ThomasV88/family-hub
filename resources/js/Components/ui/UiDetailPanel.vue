@@ -14,7 +14,16 @@ const props = defineProps({
 const emit = defineEmits(['update:open']);
 const { t } = useI18n();
 const injected = inject('fh-panel-mode', 'overlay');
-const effective = computed(() => props.mode ?? unwrap(injected));
+// The shell picks 'docked' on wide screens, but only a host that lays out a docked column can show it: the task board and
+// the shell's own panel provide `fh-dock-host`. Everywhere else (health, finance, wishlist, settings) an inherited 'docked'
+// would drop an <aside> into the page flow below the content, so it becomes the right-hand overlay instead. An explicit
+// `mode` prop is always honoured.
+const dockHost = inject('fh-dock-host', false);
+const effective = computed(() => {
+    if (props.mode) return props.mode;
+    const inherited = unwrap(injected);
+    return inherited === 'docked' && !unwrap(dockHost) ? 'overlay' : inherited;
+});
 const modal = computed(() => effective.value !== 'docked');
 const titleId = useId();
 const root = ref(null);

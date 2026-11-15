@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { Plus } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
@@ -60,6 +60,8 @@ const panelOpen = computed(() => panelMode.value !== null && !closing.value);
 watch(panelMode, (mode) => { if (mode === null) closing.value = false; });
 
 const injectedMode = inject('fh-panel-mode', 'overlay');
+// This board lays out a docked column (board--docked), so its detail panel may be docked (see UiDetailPanel).
+provide('fh-dock-host', true);
 const docked = computed(() => (injectedMode && typeof injectedMode === 'object' && 'value' in injectedMode ? injectedMode.value : injectedMode) === 'docked');
 
 function navigate(next) {

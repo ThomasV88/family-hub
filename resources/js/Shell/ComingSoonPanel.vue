@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, provide } from 'vue';
 import { useI18n } from 'vue-i18n';
 import UiDetailPanel from '../Components/ui/UiDetailPanel.vue';
 import UiEmptyState from '../Components/ui/UiEmptyState.vue';
@@ -9,6 +9,8 @@ import { useShell } from './shellState.js';
 
 const { t } = useI18n();
 const shell = useShell();
+// Rendered in the shell body next to <main>, which is a docked column host (see UiDetailPanel).
+provide('fh-dock-host', true);
 const module = computed(() => MODULES.find((m) => m.key === shell.panelModule.value));
 </script>
 

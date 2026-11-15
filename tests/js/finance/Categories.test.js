@@ -139,7 +139,7 @@ describe('CategoryPanel', () => {
         await flushPromises();
         btn('Delete category').click();
         await flushPromises();
-        const dialog = document.body.querySelector('[role="dialog"]');
+        const dialog = [...document.body.querySelectorAll('[role="dialog"]')].at(-1); // topmost: the confirm opens over the panel
         expect(dialog.textContent).toContain('Delete "Pets"? Its transactions and budgets move to the category you choose below.');
         const select = dialog.querySelector('select');
         expect(select.value).toBe('');
@@ -163,7 +163,7 @@ describe('CategoryPanel', () => {
         await flushPromises();
         btn('Delete category').click();
         await flushPromises();
-        const dialog = document.body.querySelector('[role="dialog"]');
+        const dialog = [...document.body.querySelectorAll('[role="dialog"]')].at(-1); // topmost: the confirm opens over the panel
         const select = dialog.querySelector('select');
         select.value = 'c-groc';
         select.dispatchEvent(new Event('change', { bubbles: true }));

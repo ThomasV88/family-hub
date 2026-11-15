@@ -132,8 +132,44 @@ describe('UiDetailPanel', () => {
     });
 
     it('uses the injected fh-panel-mode when mode is absent', async () => {
-        wrapper = mountUi(UiDetailPanel, { props: { open: true, title: 'Panel' }, global: { provide: { 'fh-panel-mode': 'docked' } } });
+        wrapper = mountUi(UiDetailPanel, { props: { open: true, title: 'Panel' }, global: { provide: { 'fh-panel-mode': 'docked', 'fh-dock-host': true } } });
         await nextTick();
         expect(wrapper.find('aside').exists()).toBe(true);
+    });
+
+    // Regression: on a wide screen the shell says 'docked', but pages other than the task board have no docked column.
+    // The panel used to render as an <aside> in the page flow below the content (health, finance, wishlist, settings).
+    it('turns an inherited docked into the right-hand overlay when the page does not host a docked column', async () => {
+        wrapper = mountUi(UiDetailPanel, { props: { open: true, title: 'Panel' }, global: { provide: { 'fh-panel-mode': 'docked' } } });
+        await nextTick();
+        expect(wrapper.find('aside').exists()).toBe(false);
+        const dialog = document.body.querySelector('[role="dialog"]');
+        expect(dialog).not.toBeNull();
+        expect(dialog.getAttribute('aria-modal')).toBe('true');
+        expect(document.body.querySelector('.ui-panel__scrim--overlay')).not.toBeNull();
+    });
+
+    it('also unwraps a reactive inherited mode', async () => {
+        const mode = ref('docked');
+        wrapper = mountUi(UiDetailPanel, { props: { open: true, title: 'Panel' }, global: { provide: { 'fh-panel-mode': mode } } });
+        await nextTick();
+        expect(wrapper.find('aside').exists()).toBe(false);
+        expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
+    });
+
+    it('keeps an explicit docked mode even without a host', async () => {
+        wrapper = mountUi(UiDetailPanel, { props: { open: true, title: 'Panel', mode: 'docked' }, global: { provide: { 'fh-panel-mode': 'overlay' } } });
+        await nextTick();
+        expect(wrapper.find('aside').exists()).toBe(true);
+    });
+
+    it('leaves sheet and overlay untouched', async () => {
+        for (const m of ['sheet', 'overlay']) {
+            wrapper = mountUi(UiDetailPanel, { props: { open: true, title: 'Panel' }, global: { provide: { 'fh-panel-mode': m } } });
+            await nextTick();
+            expect(document.body.querySelector(`.ui-panel__scrim--${m}`)).not.toBeNull();
+            wrapper.unmount();
+        }
+        wrapper = null;
     });
 });
