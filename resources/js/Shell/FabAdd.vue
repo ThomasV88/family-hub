@@ -7,7 +7,7 @@ import { useShell } from './shellState.js';
 
 const { t } = useI18n();
 const shell = useShell();
-const canAdd = computed(() => usePage().props.auth?.access?.todo === 'edit' || Boolean(shell?.addLabel?.value));
+const canAdd = computed(() => (shell?.defaultAdd?.value && usePage().props.auth?.access?.todo === 'edit') || Boolean(shell?.addLabel?.value));
 const addText = computed(() => shell?.addLabel?.value ?? t('nav.add_task'));
 </script>
 

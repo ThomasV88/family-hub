@@ -231,6 +231,57 @@ describe('AppShell topbar Add task', () => {
     });
 });
 
+describe('AppShell Add task per page', () => {
+    const pageProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' } };
+    const topbarHas = () => wrapper.findAll('header button').some((b) => b.text() === en.nav.add_task);
+    const fabHas = () => wrapper.find(`button[aria-label="${en.nav.add_task}"]`).exists();
+
+    it.each([['overview', true], ['tasks', true], ['wishlist', false], ['finances', false], ['health', false], ['', false]])(
+        'default Add task on page "%s" shown=%s (desktop and phone)',
+        async (current, shown) => {
+            mockProps = pageProps;
+            setWidth(1280);
+            mountShell({ props: { current } });
+            await nextTick();
+            expect(topbarHas()).toBe(shown);
+            wrapper.unmount();
+            setWidth(390);
+            mountShell({ props: { current } });
+            await nextTick();
+            expect(fabHas()).toBe(shown);
+        },
+    );
+
+    it('a page that registers its own labelled handler shows it even outside Overview and Tasks', async () => {
+        mockProps = pageProps;
+        setWidth(1280);
+        const Child = { setup() { useShell().registerAddHandler(() => {}, 'Add visit'); return () => h('span'); } };
+        wrapper = mount(AppShell, {
+            props: { current: 'health' },
+            slots: { default: () => h(Child) },
+            attachTo: document.body,
+            global: { plugins: [createAppI18n('en', loadMessages('en'))] },
+        });
+        await nextTick();
+        expect(wrapper.findAll('header button').some((b) => b.text() === 'Add visit')).toBe(true);
+        expect(topbarHas()).toBe(false);
+    });
+
+    it('Wishlist without its own handler (cannot add) shows nothing, with the labelled handler shows its label', async () => {
+        mockProps = pageProps;
+        setWidth(1280);
+        const Child = { setup() { useShell().registerAddHandler(() => {}, 'Add wish'); return () => h('span'); } };
+        wrapper = mount(AppShell, {
+            props: { current: 'wishlist' },
+            slots: { default: () => h(Child) },
+            attachTo: document.body,
+            global: { plugins: [createAppI18n('en', loadMessages('en'))] },
+        });
+        await nextTick();
+        expect(wrapper.findAll('header button').some((b) => b.text() === 'Add wish')).toBe(true);
+    });
+});
+
 describe('AppShell flash toast count', () => {
     it('uses the plural form for a toast with a count (sk, n=2 selects the second segment)', async () => {
         setWidth(1280);

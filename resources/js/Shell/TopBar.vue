@@ -12,7 +12,7 @@ defineEmits(['toggle']);
 const { t } = useI18n();
 const page = usePage();
 const shell = useShell();
-const canAdd = computed(() => page.props.auth?.access?.todo === 'edit' || Boolean(shell?.addLabel?.value));
+const canAdd = computed(() => (shell?.defaultAdd?.value && page.props.auth?.access?.todo === 'edit') || Boolean(shell?.addLabel?.value));
 const addText = computed(() => shell?.addLabel?.value ?? t('nav.add_task'));
 const appName = computed(() => page.props.app?.name ?? t('app.name'));
 </script>

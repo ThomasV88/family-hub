@@ -30,7 +30,7 @@ function signInAgain() {
 
 <template>
     <Head :title="t('reauth.title')" />
-    <AppShell>
+    <AppShell current="">
         <div class="confirm" data-testid="confirm-access">
             <UiCard class="confirm__card">
                 <h1 class="confirm__title">{{ t('reauth.title') }}</h1>

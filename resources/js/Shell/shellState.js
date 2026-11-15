@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/vue3';
-import { inject, nextTick, onBeforeUnmount, onMounted, provide, ref } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, provide, ref, unref } from 'vue';
 import { FRAME_DESKTOP } from '../design/panelMode.js';
 
 export const SIDEBAR_STORAGE_KEY = 'fh-sidebar';
@@ -50,7 +50,11 @@ export function useFrameWidth(elRef) {
 
 const SHELL_KEY = 'fh-shell';
 
-export function provideShell({ panelMode, isPhone }) {
+// Pages where the default "Add task" entry (create panel of the To-do module) is offered: Overview and Tasks.
+export const DEFAULT_ADD_PAGES = ['overview', 'tasks'];
+
+// defaultAdd: boolean ref/getter; true on pages that may fall back to the To-do create panel.
+export function provideShell({ panelMode, isPhone, defaultAdd = true }) {
     const panelModule = ref(null);
     let addHandler = null;
     let lastTrigger = null;
@@ -72,6 +76,7 @@ export function provideShell({ panelMode, isPhone }) {
             if (target?.isConnected) nextTick(() => target.focus());
         },
         addLabel,
+        defaultAdd: computed(() => Boolean(unref(defaultAdd))),
         registerAddHandler(fn, label = null) {
             addHandler = fn;
             addLabel.value = label;

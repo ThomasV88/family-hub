@@ -11,10 +11,10 @@ import BottomNav from '../Shell/BottomNav.vue';
 import TopBar from '../Shell/TopBar.vue';
 import FabAdd from '../Shell/FabAdd.vue';
 import ComingSoonPanel from '../Shell/ComingSoonPanel.vue';
-import { provideShell, readSidebar, resolveSidebarOpen, useFrameWidth, writeSidebar } from '../Shell/shellState.js';
+import { DEFAULT_ADD_PAGES, provideShell, readSidebar, resolveSidebarOpen, useFrameWidth, writeSidebar } from '../Shell/shellState.js';
 import { FRAME_TABLET, panelMode } from '../design/panelMode.js';
 
-defineProps({
+const props = defineProps({
     // Module key marked as the current page for screen readers.
     current: { type: String, default: 'overview' },
 });
@@ -39,7 +39,7 @@ const mainWidth = useFrameWidth(main);
 const isPhone = computed(() => frameWidth.value < FRAME_TABLET);
 const mode = computed(() => panelMode({ frameWidth: frameWidth.value, mainWidth: mainWidth.value }));
 provide('fh-panel-mode', mode);
-provideShell({ panelMode: mode, isPhone });
+provideShell({ panelMode: mode, isPhone, defaultAdd: computed(() => DEFAULT_ADD_PAGES.includes(props.current)) });
 
 // Sidebar: stored choice wins, otherwise open from 1024px.
 const stored = ref(readSidebar());
