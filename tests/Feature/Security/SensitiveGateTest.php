@@ -75,7 +75,7 @@ it('answers a stale JSON request with 423 and remembers the same-origin referer'
     $user = gateParent();
 
     $this->actingAs($user)->withHeader('Referer', url('/finance/import'))
-        ->postJson('/finance/import/preview')->assertStatus(423)->assertExactJson(['error' => 'reauth_required'])
+        ->postJson('/finance/import/preview')->assertStatus(423)->assertJson(['error' => 'reauth_required'])
         ->assertSessionHas('url.intended', '/finance/import')->assertSessionHas('status', 'reauth_interrupted');
 
     $this->flushSession();
@@ -87,15 +87,15 @@ it('answers a stale non-navigational load with 423', function () {
     $this->actingAs(gateParent())->withHeader('Sec-Fetch-Mode', 'no-cors')->get('/finance')->assertStatus(423);
 });
 
-it('bounces a stale Inertia write with 303 and leaves the record alone', function () {
+it('answers a stale Inertia write in place with 423 and leaves the record alone', function () {
     $user = gateParent();
     $account = FinanceAccount::factory()->withMembers($user)->create();
     $tx = FinanceTransaction::factory()->onAccount($account)->expense(1000)->create(['booked_on' => '2026-03-05', 'description' => 'Keep']);
 
     $this->actingAs($user)->withHeaders(['X-Inertia' => 'true', 'Referer' => url('/finance/transactions')])
         ->patch('/finance/transactions/'.$tx->id, ['amount' => '1,00', 'description' => 'Changed'])
-        ->assertStatus(303)->assertRedirect('/confirm-access')
-        ->assertSessionHas('status', 'reauth_interrupted')->assertSessionHas('url.intended', '/finance/transactions');
+        ->assertStatus(423)->assertJsonPath('error', 'reauth_required')->assertJsonStructure(['methods' => ['password', 'totp', 'passkey']])
+        ->assertSessionMissing('url.intended');
 
     expect($tx->fresh()->description)->toBe('Keep')->and(gateFinanceRows())->toBe(0);
 });

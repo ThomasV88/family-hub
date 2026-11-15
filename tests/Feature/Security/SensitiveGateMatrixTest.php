@@ -317,7 +317,9 @@ it('refuses every sensitive route in every request shape for a missing and an ex
                 [$response, $method] = $replay;
                 $ctx = "$name [$shape, $label]";
 
-                if ($shape === 'json' || $shape === 'prefetch') {
+                // An Inertia write is answered in place (423 + methods) so the dialog can replay it; Inertia navigations still redirect.
+                $inertiaWrite = $shape === 'inertia' && ! in_array($method, ['GET', 'HEAD'], true);
+                if ($shape === 'json' || $shape === 'prefetch' || $inertiaWrite) {
                     expect($response->getStatusCode())->toBe(423, $ctx);
                     expect($response->headers->get('Content-Type'))->toContain('json');
                 } else {

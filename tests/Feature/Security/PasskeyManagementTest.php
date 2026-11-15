@@ -70,12 +70,12 @@ it('refuses options and store on a stale session: no options stored, no passkey,
     $user = pkMember();
 
     $this->actingAs($user)->withSession(pkStale())->getJson('/settings/security/passkeys/options')
-        ->assertStatus(423)->assertExactJson(['error' => 'confirm_required']);
+        ->assertStatus(423)->assertJson(['error' => 'confirm_required']);
     expect(session()->has('passkey.registration_options'))->toBeFalse();
 
     FakePasskeys::registers();
     $this->postJson('/settings/security/passkeys', ['name' => 'iPhone', 'credential' => FakePasskeys::attestation()])
-        ->assertStatus(423)->assertExactJson(['error' => 'confirm_required']);
+        ->assertStatus(423)->assertJson(['error' => 'confirm_required']);
 
     expect(DB::table('passkeys')->count())->toBe(0)->and(pkAudit('passkey_added'))->toHaveCount(0);
 });
@@ -150,7 +150,7 @@ it('removes an own passkey only within the confirmation window', function () {
     $id = pkRow($user);
 
     $this->actingAs($user)->withSession(pkStale())->deleteJson("/settings/security/passkeys/{$id}")
-        ->assertStatus(423)->assertExactJson(['error' => 'confirm_required']);
+        ->assertStatus(423)->assertJson(['error' => 'confirm_required']);
     expect(DB::table('passkeys')->where('id', $id)->exists())->toBeTrue()->and(pkAudit('passkey_removed'))->toHaveCount(0);
 
     $this->withSession(pkFresh())->deleteJson("/settings/security/passkeys/{$id}")->assertNoContent();

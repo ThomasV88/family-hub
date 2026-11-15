@@ -21,7 +21,7 @@ it('refuses a stale proof with 423 for JSON and a redirect for browsers, without
     $user = User::factory()->create();
     $before = AuditEntry::count();
 
-    $this->actingAs($user)->getJson('/test-probe/recent')->assertStatus(423)->assertExactJson(['error' => 'confirm_required']);
+    $this->actingAs($user)->getJson('/test-probe/recent')->assertStatus(423)->assertJson(['error' => 'confirm_required']);
     $this->actingAs($user)->get('/test-probe/recent')->assertRedirect('/confirm-access')
         ->assertSessionHas('url.intended', '/test-probe/recent');
     $this->actingAs($user)->withHeaders(['X-Inertia' => 'true', 'X-Inertia-Version' => (string) Inertia::getVersion()])->getJson('/test-probe/recent')->assertRedirect('/confirm-access');
