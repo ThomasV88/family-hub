@@ -56,7 +56,8 @@
         "language": "Jazyk",
         "skip": "Preskočiť na hlavný obsah",
         "add_task": "Pridať úlohu",
-        "style_guide": "Sprievodca štýlom"
+        "style_guide": "Sprievodca štýlom",
+        "manual": "Manuál"
     },
     "module": {
         "tasks": "Úlohy",
@@ -2368,5 +2369,25 @@
             "body_vaccination": "Zdravotné záznamy sa dajú natrvalo odstrániť iba krátko po vytvorení a pri tomto očkovaní už tento čas uplynul. Očkovanie sa preto archivuje: je všade skryté, zostane uložené a dá sa obnoviť v Archíve tejto osoby.",
             "body_doc": "Zdravotné záznamy sa dajú natrvalo odstrániť iba krátko po vytvorení a pri tomto dokumente už tento čas uplynul. Dokument sa preto archivuje: je všade skrytý, súbor zostane uložený a dá sa obnoviť v Archíve tejto osoby."
         }
+    },
+    "manual": {
+        "title": "Manuál",
+        "intro": "Všetko o Family Hub, vysvetlené jednoducho. Vyhľadávajte, alebo vyberte tému zo zoznamu.",
+        "search_label": "Hľadať v manuáli",
+        "search_placeholder": "Napríklad: pripomienka",
+        "clear_search": "Vymazať hľadanie",
+        "results": "{n} nájdená časť | {n} nájdené časti | {n} nájdenej časti | {n} nájdených častí",
+        "no_results_title": "Nič sa nenašlo",
+        "no_results_body": "Skúste iné slovo alebo vymažte hľadanie, aby sa zobrazilo všetko.",
+        "on_this_page": "Na tejto stránke",
+        "in_topic": "V tejto téme",
+        "expand_all": "Rozbaliť všetko",
+        "collapse_all": "Zbaliť všetko",
+        "print": "Tlačiť",
+        "admin_only": "Len pre správcu",
+        "steps_title": "Kam kliknúť",
+        "tip": "Tip:",
+        "warning": "Dôležité:",
+        "example": "Príklad:"
     }
 }

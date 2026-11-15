@@ -40,6 +40,15 @@ describe('account header and log out', () => {
         w.unmount();
     });
 
+    it('lists the manual right after Settings and opens /manual', async () => {
+        const w = await open({ app: { name: 'FH', env: 'local', styleGuide: false } });
+        const entries = [...document.querySelectorAll('[role=menuitem],[role=menuitemradio]')];
+        expect(entries[1].textContent).toContain(messages.nav.manual);
+        entries[1].click();
+        expect(visit).toHaveBeenCalledWith('/manual');
+        w.unmount();
+    });
+
     it('lists Settings first, before Language and Theme, and navigates to /settings', async () => {
         const w = await open({ app: { name: 'FH', env: 'local', styleGuide: false } });
         const entries = [...document.querySelectorAll('[role=menuitem],[role=menuitemradio]')];

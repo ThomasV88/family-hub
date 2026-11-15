@@ -60,8 +60,10 @@ describe('AppShell desktop', () => {
         const navs = wrapper.findAll(`nav[aria-label="${en.nav.main}"]`);
         expect(navs).toHaveLength(1);
         const items = navs[0].findAll('li');
-        expect(items).toHaveLength(5);
-        items.forEach((li, i) => expect(li.text()).toContain(navLabels(en)[i]));
+        // Five modules, then the manual (always available, not a module) in its own group.
+        expect(items).toHaveLength(6);
+        items.forEach((li, i) => expect(li.text()).toContain([...navLabels(en), en.nav.manual][i]));
+        expect(items[5].find('a').attributes('href')).toBe('/manual');
         expect(navs[0].find('[aria-current="page"]').text()).toContain(en.nav.overview);
         expect(wrapper.find('main#main-content').exists()).toBe(true);
         const toggle = wrapper.find('button[aria-controls="fh-sidebar"]');
@@ -76,6 +78,27 @@ describe('AppShell desktop', () => {
         await wrapper.find('button[aria-controls="fh-sidebar"]').trigger('click');
         expect(localStorage.getItem('fh-sidebar')).toBe('closed');
         expect(wrapper.find('button[aria-controls="fh-sidebar"]').attributes('aria-expanded')).toBe('false');
+    });
+
+    it('keeps the manual in the sidebar without any module grant and marks it current on its page', async () => {
+        setWidth(1280);
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, auth: { access: { todo: 'none', wishlist: 'none', finance: 'none', health: 'none' } } };
+        wrapper = mount(AppShell, { props: { current: 'manual' }, slots: { default: () => h('p', 'x') }, attachTo: document.body, global: { plugins: [createAppI18n('en', en)] } });
+        await nextTick();
+        const nav = wrapper.find(`nav[aria-label="${en.nav.main}"]`);
+        const links = nav.findAll('li a').map((a) => a.attributes('href'));
+        expect(links).toEqual(['/', '/manual']);
+        expect(nav.find('[aria-current="page"]').text()).toContain(en.nav.manual);
+    });
+
+    it('does not add the manual to the phone bottom bar (five modules already fill it)', async () => {
+        setWidth(390);
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, auth: { access: FULL_ACCESS } };
+        mountShell();
+        await nextTick();
+        const nav = wrapper.find(`nav[aria-label="${en.nav.main}"]`);
+        expect(nav.findAll('li')).toHaveLength(5);
+        expect(nav.find('a[href="/manual"]').exists()).toBe(false);
     });
 
     it('links Health in the nav to /health with no badge or count', () => {

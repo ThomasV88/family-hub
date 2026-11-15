@@ -56,7 +56,8 @@
         "language": "Język",
         "skip": "Przejdź do głównej treści",
         "add_task": "Dodaj zadanie",
-        "style_guide": "Przewodnik stylu"
+        "style_guide": "Przewodnik stylu",
+        "manual": "Instrukcja"
     },
     "module": {
         "tasks": "Zadania",
@@ -2368,5 +2369,25 @@
             "body_vaccination": "Wpisy zdrowotne można usunąć na stałe tylko krótko po utworzeniu, a dla tego szczepienia ten czas już minął. Szczepienie zostanie więc zarchiwizowane: ukryte wszędzie, zachowane i możliwe do przywrócenia w Archiwum tej osoby.",
             "body_doc": "Wpisy zdrowotne można usunąć na stałe tylko krótko po utworzeniu, a dla tego dokumentu ten czas już minął. Dokument zostanie więc zarchiwizowany: ukryty wszędzie, plik zostanie zachowany, a dokument będzie można przywrócić w Archiwum tej osoby."
         }
+    },
+    "manual": {
+        "title": "Instrukcja",
+        "intro": "Wszystko o Family Hub, wyjaśnione prostymi słowami. Skorzystaj z wyszukiwarki albo wybierz temat z listy.",
+        "search_label": "Szukaj w instrukcji",
+        "search_placeholder": "Na przykład: przypomnienie",
+        "clear_search": "Wyczyść wyszukiwanie",
+        "results": "{n} znaleziona sekcja | {n} znalezione sekcje | {n} znalezionych sekcji | {n} znalezionej sekcji",
+        "no_results_title": "Nic nie znaleziono",
+        "no_results_body": "Spróbuj innego słowa albo wyczyść wyszukiwanie, aby zobaczyć wszystko.",
+        "on_this_page": "Na tej stronie",
+        "in_topic": "W tym temacie",
+        "expand_all": "Rozwiń wszystko",
+        "collapse_all": "Zwiń wszystko",
+        "print": "Drukuj",
+        "admin_only": "Tylko dla administratora",
+        "steps_title": "Gdzie kliknąć",
+        "tip": "Wskazówka:",
+        "warning": "Ważne:",
+        "example": "Przykład:"
     }
 }

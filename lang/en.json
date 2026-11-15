@@ -56,7 +56,8 @@
         "language": "Language",
         "skip": "Skip to main content",
         "add_task": "Add task",
-        "style_guide": "Style guide"
+        "style_guide": "Style guide",
+        "manual": "Manual"
     },
     "module": {
         "tasks": "To-do",
@@ -2368,5 +2369,25 @@
             "body_vaccination": "Health records can be deleted for good only shortly after they are created, and this vaccination is past that time. It will be archived instead: hidden everywhere, kept, and restorable from the Archive of this person.",
             "body_doc": "Health records can be deleted for good only shortly after they are created, and this document is past that time. It will be archived instead: hidden everywhere, the file is kept, and it is restorable from the Archive of this person."
         }
+    },
+    "manual": {
+        "title": "Manual",
+        "intro": "Everything about Family Hub, explained in plain words. Search, or choose a topic from the list.",
+        "search_label": "Search the manual",
+        "search_placeholder": "For example: reminder",
+        "clear_search": "Clear search",
+        "results": "{n} section found | {n} sections found",
+        "no_results_title": "Nothing found",
+        "no_results_body": "Try a different word, or clear the search to see everything.",
+        "on_this_page": "On this page",
+        "in_topic": "In this topic",
+        "expand_all": "Expand all",
+        "collapse_all": "Collapse all",
+        "print": "Print",
+        "admin_only": "For the administrator only",
+        "steps_title": "Where to click",
+        "tip": "Tip:",
+        "warning": "Important:",
+        "example": "Example:"
     }
 }
