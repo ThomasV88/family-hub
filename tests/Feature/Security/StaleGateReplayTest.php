@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 use Tests\Support\MedicalFixtures;
+use Tests\Support\Totp;
 
 uses(RefreshDatabase::class);
 
@@ -123,7 +124,7 @@ it('keeps redirecting stale GET navigations to the confirm page (the page flow s
 
 it('never offers the password to a member with a second factor in the 423 body', function () {
     $user = sgrMember();
-    \Tests\Support\Totp::enable($user);
+    Totp::enable($user);
     $this->actingAs($user)->withSession(sgrStale());
 
     $this->withHeaders(sgrInertia())->post('/settings/finance-accounts', ['name' => 'X', 'type' => 'bank', 'currency' => 'EUR', 'balance_as_of' => '2026-01-01'])

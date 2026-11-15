@@ -183,7 +183,7 @@ Passkeys are bound to the host of each environment's `APP_URL` (the relying-part
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `SECURITY_IDLE_SECONDS` | 3600 | Idle window for Health and Finances; after it the member confirms again. Only activity inside those modules extends it. Clamped to 60..86400; a malformed value (for example `15m` or `0`) falls back to 3600. The admin can override it in Settings > Members > Security (stored in `app_settings`, key `security.idle_seconds`); the stored value wins when valid, otherwise this default applies. |
+| `SECURITY_IDLE_SECONDS` | 3600 | Idle window for Health and Finances; after it the member confirms again. Only activity inside those modules extends it. Clamped to 60..86400; a malformed value (for example `15m` or `0`) falls back to 3600. The admin can override it in Settings > Members, card "Re-confirmation" (stored in `app_settings`, key `security.idle_seconds`); the stored value wins when valid, otherwise this default applies. |
 | `SECURITY_CONFIRM_WINDOW_SECONDS` | 3600 | How long a confirmation (password, code, passkey) or a sign-in counts for security actions. Clamped to 60..3600; a malformed value falls back to 3600. Overridable in Settings the same way (`security.confirm_window_seconds`). |
 | `SECURITY_PASSKEYS_ENABLED` | true | `false` closes passkey enrolment, rename and removal (404) and hides the passkey card. Members who already have a passkey can still sign in and confirm with it, so flipping the switch never locks them out. |
 
