@@ -209,3 +209,14 @@ An admin opens Settings > Members and switches on "Require two-step verification
 ### What is and is not logged
 
 Audit and application logs never contain a code, secret, recovery code, passkey name or credential id; the canary tests (`SecurityAuditContentTest`) fail the build if one appears. Security pages and secret-bearing endpoints answer `Cache-Control: no-store` and the service worker never caches them.
+
+## Rodinné a osobné použitie (GDPR)
+
+Rozhodnutie majiteľa z 2026-11-15. Platí pre produkciu aj staging.
+
+- **Len rodina majiteľa.** Family Hub používa iba rodina majiteľa na vlastné domáce záležitosti (úlohy, priania, rodinné financie a zdravie). Ide o čisto osobnú a domácu činnosť, na ktorú sa podľa čl. 2 ods. 2 písm. c) GDPR nariadenie nevzťahuje (výnimka pre domácnosť).
+- **Len pozvaní členovia.** Účet vznikne iba na pozvánku správcu (žiadna verejná registrácia). Členom sa dajú len ľudia z rodiny, každý vidí iba moduly a osoby, ktoré mu správca povolil. Zdravie a financie sú predvolene zatvorené.
+- **Údaje ostávajú v rodine.** Zdravotné údaje a údaje detí sa nezdieľajú mimo rodiny: ani s tretími stranami, ani cez verejné odkazy. Server je vo vlastnej správe majiteľa. Zálohy sú šifrované a zostávajú na serveri (mimo servera sa nezálohuje).
+- **Exporty.** Export zdravotných záznamov (tlač, JSON, Markdown) a núdzová karta slúžia na vlastné použitie rodiny. Exportovaný súbor už nechráni oprávnenie aplikácie, preto s ním zaobchádza ten, kto ho stiahol, ako so súkromným dokumentom a neposiela ho mimo rodiny. Každý export sa zapíše do auditu (`medical_exported`, bez obsahu).
+- **AI.** AI zostáva vypnutá, kým sa majiteľ nerozhodne: súhlas je predvolene vypnutý a ai-worker nie je prihlásený. Zapnutie by znamenalo, že dokument opustí server smerom k poskytovateľovi AI, a to by bolo nové rozhodnutie majiteľa (podmienky použitia dát, rozsah, kto smie súhlas zapnúť). Do tohto rozhodnutia sa žiadny dokument ani údaj nikam neodosiela.
+- **Mazanie.** Zdravotný záznam sa dá natrvalo zmazať len krátko po vytvorení (predvolene 72 hodín, `MEDICAL_DELETE_WINDOW_HOURS`), neskôr sa archivuje: zostáva uložený, ale je skrytý. Zálohy držia zmazané údaje počas doby uchovávania (produkcia: denne 14, týždenne 8, mesačne 6).
