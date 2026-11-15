@@ -40,7 +40,14 @@ final class MedicalDocumentStore
         $height = null;
         if ($type['kind'] === 'image') {
             try {
-                $image = $this->images->process($bytes, $max, (int) config('medical.image_full_px'), (int) config('medical.image_thumb_px'));
+                $image = $this->images->process(
+                    $bytes,
+                    $max,
+                    (int) config('medical.image_full_px'),
+                    (int) config('medical.image_thumb_px'),
+                    (int) config('medical.image_jpeg_quality'),
+                    (int) config('medical.image_decode_budget_bytes'),
+                );
             } catch (ImageRejected $e) {
                 throw new DocumentRejected(match ($e->reason) {
                     'too_large' => 'too_large',

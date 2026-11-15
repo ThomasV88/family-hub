@@ -93,6 +93,22 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
 - Decision (provisional, owner to confirm in plan 07-20): no app-level file encryption in v1. `APP_KEY` lives on the same host, so it
   would add little; restic encrypts the backups and the volume is 0700/0600.
 - nginx: only `POST /health/people/<uuid>/documents` accepts a body up to 12m; PHP `upload_max_filesize=11M`, `post_max_size=13M`.
+- Medical image processing (owner decision WR-12, 2026-11-15): an uploaded image is re-encoded to a JPEG with its longest edge at
+  most 3600 px (was 2400) at quality 90 (was 82), plus a 480 px thumbnail. EXIF and GPS are stripped and the original is not kept
+  (PDF and HEIC are stored unchanged). Settings: `config/medical.php` `image_full_px`, `image_jpeg_quality`, `image_thumb_px`.
+  The wishlist keeps 1280 px at quality 82. Decode memory (GD, measured in a PHP 8.4 process with `memory_limit=128M`, the
+  production value, by `tests/Support/medical-image-memory-probe.php`): the source bitmap and the resized copy are alive together,
+  about 4.4 bytes per pixel each. A 4032 x 3024 (12 MP) photo peaks at 89.5 MiB above the 24 MiB framework baseline, 112 MiB in
+  total (RSS about 141 MiB), so it fits the 128M limit with 16 MiB to spare. With the old 2400 px output the same photo needed
+  about 70 MiB. The input cap of 13 MP alone no longer bounds memory (a 3600 x 3600 image would copy 13 MP twice, about 114 MB, and
+  die with a fatal error), so `medical.image_decode_budget_bytes` (106 MB) also bounds an estimate of input bytes plus 4.4 bytes
+  per pixel of source and output; over it the upload is refused as unreadable before any decode. In practice: a 12 MP phone photo
+  up to about 4 MB passes, near-square images above about 10 MP and 10 MB files of 12 MP are refused. Container: the app
+  container has `mem_limit` 192m with up to 4 php-fpm children, and one decode peaks near 141 MiB RSS, so with three more busy
+  children the container could be killed. Decodes are serialized (one at a time per container), so this needs a busy moment
+  as well as a large upload. If it ever shows up (container restarts with exit 137), raise `MEM_APP` to 256m in the stack `.env`
+  or lower `pm.max_children` in `docker/app/php-fpm-prod.conf` to 3. This was not changed here because it is a server sizing
+  decision.
 - Delete window (owner decision, 2026-11-15): a health person or record (visit, medication, allergy, vaccination, document) can be
   deleted for good only within `MEDICAL_DELETE_WINDOW_HOURS` of its creation (default 72, range 0 to 8760, 0 = always archive; set in
   `app.env`, template `ops/env/app.env.example`). Older ones are archived: the row and the files stay, they are hidden from lists,

@@ -71,7 +71,7 @@ describe('store', function () {
     });
 
     it('re-encodes an oriented JPEG without EXIF or GPS and within the size caps', function () {
-        $out = mdPut(ImageFixtures::jpegWithExif(6, 3000, 1000));
+        $out = mdPut(ImageFixtures::jpegWithExif(6, 4000, 1500));
 
         $full = Storage::disk('medical')->get($out['path']);
         $thumb = Storage::disk('medical')->get($out['thumb_path']);
@@ -81,7 +81,7 @@ describe('store', function () {
         expect($out['kind'])->toBe('image')
             ->and($full)->not->toContain('Exif')
             ->and($thumb)->not->toContain('Exif')
-            ->and(max($fullInfo[0], $fullInfo[1]))->toBeLessThanOrEqual(2400)
+            ->and(max($fullInfo[0], $fullInfo[1]))->toBe(3600)
             ->and(max($thumbInfo[0], $thumbInfo[1]))->toBeLessThanOrEqual(480)
             ->and($fullInfo[1])->toBeGreaterThan($fullInfo[0])
             ->and($out['width'])->toBe($fullInfo[0])->and($out['height'])->toBe($fullInfo[1])

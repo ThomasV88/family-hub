@@ -5,8 +5,15 @@ return [
     // archived (hidden, restorable by a member with Edit). 0 = always archive. Clamped to 0..8760 (one year).
     'delete_window_hours' => max(0, min(8760, (int) env('MEDICAL_DELETE_WINDOW_HOURS', 72))),
     'document_max_bytes' => 10485760,
-    'image_full_px' => 2400,
+    // Stored image: longest edge and JPEG quality (owner decision WR-12: 3600 px, q90; was 2400 px, q82). The re-encode strips
+    // EXIF and GPS and the original is not kept. The input pixel cap stays wishlist.image_max_pixels (13 MP). Because the
+    // resized copy is now as large as 10 MP, the decode is also bounded by an estimate of its memory (input bytes plus 4.4
+    // bytes per pixel of source and of output) that must stay under image_decode_budget_bytes, which keeps the whole decode
+    // inside the app container's 128M PHP memory_limit (a 12 MP phone photo of up to about 4 MB passes). See docs/ops/server.md.
+    'image_full_px' => 3600,
     'image_thumb_px' => 480,
+    'image_jpeg_quality' => 90,
+    'image_decode_budget_bytes' => 106000000,
     'max_documents_per_subject' => 200,
     'upload_batch_max' => 10,
     'max_contacts' => 3,

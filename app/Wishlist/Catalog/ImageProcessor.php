@@ -23,11 +23,17 @@ final class ImageProcessor
 
     private const QUALITY = 82;
 
+    /** Measured GD cost per pixel of one truecolor bitmap including row pointers and the encoded outputs (see docs/ops/server.md). */
+    private const BYTES_PER_PIXEL = 4.4;
+
     /**
      * @param  ?int  $fullPx  longest edge of the full image (null: config wishlist.image_full_px)
      * @param  ?int  $thumbPx  longest edge of the thumbnail (null: config wishlist.image_thumb_px)
+     * @param  ?int  $quality  JPEG quality of both outputs (null: 82, the wishlist default)
+     * @param  ?int  $decodeBudget  when set, the estimated decode memory (input bytes plus BYTES_PER_PIXEL for the source
+     *                              bitmap and for the resized copy) must stay under it, else 'too_many_pixels' (null: no estimate)
      */
-    public function process(string $bytes, int $maxBytes, ?int $fullPx = null, ?int $thumbPx = null): ProcessedImage
+    public function process(string $bytes, int $maxBytes, ?int $fullPx = null, ?int $thumbPx = null, ?int $quality = null, ?int $decodeBudget = null): ProcessedImage
     {
         if (strlen($bytes) > $maxBytes) {
             throw new ImageRejected('too_large');
@@ -42,6 +48,14 @@ final class ImageProcessor
             throw new ImageRejected('too_many_pixels');
         }
 
+        if ($decodeBudget !== null) {
+            // Source bitmap plus the resized copy are alive together while resampling; a larger output makes the copy larger.
+            [$outW, $outH] = $this->fit($width, $height, $fullPx ?? (int) config('wishlist.image_full_px'));
+            if (strlen($bytes) + self::BYTES_PER_PIXEL * ($width * $height + $outW * $outH) > $decodeBudget) {
+                throw new ImageRejected('too_many_pixels');
+            }
+        }
+
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($bytes);
         if (! is_string($mime) || ! in_array($mime, self::MIMES, true)) {
             throw new ImageRejected('unsupported_type');
@@ -54,11 +68,12 @@ final class ImageProcessor
             $info,
             $fullPx ?? (int) config('wishlist.image_full_px'),
             $thumbPx ?? (int) config('wishlist.image_thumb_px'),
+            $quality ?? self::QUALITY,
         ));
     }
 
     /** @param  array<int, mixed>  $info  getimagesizefromstring result */
-    private function render(string $bytes, array $info, int $fullMax, int $thumbMax): ProcessedImage
+    private function render(string $bytes, array $info, int $fullMax, int $thumbMax, int $quality): ProcessedImage
     {
         [$width, $height] = $info;
         $orientation = $info[2] === IMAGETYPE_JPEG ? $this->orientation($bytes) : 1;
@@ -83,7 +98,7 @@ final class ImageProcessor
         [$thumbW, $thumbH] = $this->fit(imagesx($full), imagesy($full), $thumbMax);
         $thumb = $this->resample($full, $thumbW, $thumbH);
 
-        $result = new ProcessedImage($this->encode($full), $this->encode($thumb), imagesx($full), imagesy($full));
+        $result = new ProcessedImage($this->encode($full, $quality), $this->encode($thumb, $quality), imagesx($full), imagesy($full));
         imagedestroy($full);
         imagedestroy($thumb);
 
@@ -205,10 +220,10 @@ final class ImageProcessor
         return $img;
     }
 
-    private function encode(GdImage $img): string
+    private function encode(GdImage $img, int $quality): string
     {
         ob_start();
-        imagejpeg($img, null, self::QUALITY);
+        imagejpeg($img, null, max(1, min(100, $quality)));
 
         return (string) ob_get_clean();
     }
