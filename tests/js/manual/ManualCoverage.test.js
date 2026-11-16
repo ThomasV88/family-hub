@@ -20,7 +20,17 @@ const settingsPhp = readFileSync(`${ROOT}/app/Support/SettingsSections.php`, 'ut
 const settingsKeys = [...settingsPhp.matchAll(/'key' => '(\w+)'/g)].map((m) => m[1]);
 const adminSettingsKeys = [...settingsPhp.matchAll(/\$user->is_admin && [^{]*\{\s*\$sections\[\] = \['key' => '(\w+)'/g)].map((m) => m[1]);
 
+// Features that are not a module or a Settings section but must be explained: the green question marks (issue 4).
+const FEATURES = ['feature:help', 'feature:help-admin'];
+
 describe('manual covers the app', () => {
+    it('explains the green question marks to everyone and how administrators edit them in an administrator-only part', () => {
+        expect(covered(false).has('feature:help'), 'no manual section covers the green question marks').toBe(true);
+        expect(covered(true).has('feature:help-admin'), 'no administrator-only section covers editing the help texts').toBe(true);
+        expect(covered(true).has('feature:help'), 'the question marks are for everyone, not administrator-only').toBe(false);
+        expect(readFileSync(`${ROOT}/resources/help/topics.json`, 'utf8')).toContain('"topics"');
+    });
+
     it('has a topic for every module in the navigation', () => {
         const all = covered(false);
         for (const m of MODULES) expect(all.has(`module:${m.key}`), `no manual topic covers module "${m.key}"`).toBe(true);
@@ -36,8 +46,8 @@ describe('manual covers the app', () => {
     });
 
     it('only claims coverage of things that exist', () => {
-        const valid = new Set([...MODULES.map((m) => `module:${m.key}`), ...settingsKeys.map((k) => `settings:${k}`)]);
-        for (const tp of Object.values(en)) for (const c of tp.covers ?? []) expect(valid.has(c), `${tp.id} covers unknown "${c}"`).toBe(true);
+        const valid = new Set([...MODULES.map((m) => `module:${m.key}`), ...settingsKeys.map((k) => `settings:${k}`), ...FEATURES]);
+        for (const tp of Object.values(en)) for (const c of [...(tp.covers ?? []), ...tp.sections.flatMap((s) => s.covers ?? [])]) expect(valid.has(c), `${tp.id} covers unknown "${c}"`).toBe(true);
     });
 });
 
@@ -137,7 +147,7 @@ describe('manual content is clean', () => {
     });
 
     it('links to administrator pages only from administrator-only parts', () => {
-        const adminPaths = new Set(['/settings/members', '/settings/audit', '/settings/finance-accounts', '/settings/ai-calls', '/settings/ai-agents']);
+        const adminPaths = new Set(['/settings/members', '/settings/audit', '/settings/finance-accounts', '/settings/ai-calls', '/settings/ai-agents', '/settings/help']);
         for (const [id, tp] of Object.entries(en))
             for (const section of tp.sections)
                 for (const block of section.blocks)

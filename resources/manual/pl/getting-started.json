@@ -86,6 +86,20 @@
       ]
     },
     {
+      "id": "question-marks",
+      "title": "Zielone znaki zapytania",
+      "covers": ["feature:help"],
+      "blocks": [
+        { "type": "p", "text": "Mały zielony krąg ze znakiem zapytania przy polu, sekcji lub przycisku wyjaśnia, do czego służy, co wpisać albo co się stanie po naciśnięciu. Pojawiają się tylko tam, gdzie funkcja nie jest oczywista." },
+        { "type": "steps", "title": "Gdzie ich szukać", "items": [
+          "Na komputerze najedź na znak zapytania myszą. Otwiera się też po dojściu do niego klawiszem Tab.",
+          "Na telefonie lub tablecie dotknij znaku zapytania. Zamkniesz go ponownym dotknięciem, dotknięciem gdzie indziej lub klawiszem Esc.",
+          "Tekst jest pokazywany w języku, który wybrano w aplikacji."
+        ] },
+        { "type": "tip", "text": "Otwarte jest naraz tylko jedno wyjaśnienie. Niczego nie zmieniają: to tylko pomoc." }
+      ]
+    },
+    {
       "id": "moving-around",
       "title": "Jak się poruszać po aplikacji",
       "blocks": [

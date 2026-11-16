@@ -86,6 +86,20 @@
       ]
     },
     {
+      "id": "question-marks",
+      "title": "Zelené otázniky",
+      "covers": ["feature:help"],
+      "blocks": [
+        { "type": "p", "text": "Malý zelený kruh s otáznikom pri poli, sekcii alebo tlačidle vysvetľuje, načo slúži, čo treba vyplniť alebo čo sa stane po stlačení. Zobrazujú sa len tam, kde funkcia nie je zrejmá." },
+        { "type": "steps", "title": "Kde ich nájsť", "items": [
+          "Na počítači nad otáznik prejdite myšou. Otvorí sa aj vtedy, keď naň prejdete klávesom Tab.",
+          "Na telefóne alebo tablete otáznik ťuknite. Zavriete ho opätovným ťuknutím, ťuknutím inam alebo klávesom Esc.",
+          "Text sa zobrazuje v jazyku, ktorý ste si v aplikácii zvolili."
+        ] },
+        { "type": "tip", "text": "Naraz je otvorené len jedno vysvetlenie. Nič nemenia: sú iba pomocou." }
+      ]
+    },
+    {
       "id": "moving-around",
       "title": "Ako sa v aplikácii orientovať",
       "blocks": [

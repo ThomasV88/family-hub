@@ -3,9 +3,9 @@
   "category": "admin",
   "order": 80,
   "title": "Administrator guide",
-  "summary": "Everything the family administrator can do: members, permissions, security, the audit log, AI tools and backups.",
+  "summary": "Everything the family administrator can do: members, permissions, security, the audit log, AI tools, the help texts and backups.",
   "adminOnly": true,
-  "covers": ["settings:members", "settings:audit", "settings:finance_accounts", "settings:ai_calls", "settings:ai_agents"],
+  "covers": ["settings:members", "settings:audit", "settings:finance_accounts", "settings:ai_calls", "settings:ai_agents", "settings:help"],
   "sections": [
     {
       "id": "where",
@@ -114,6 +114,25 @@
         ] },
         { "type": "p", "text": "Every time AI reads a document, it is listed under [Settings > AI calls](/settings/ai-calls): who started it and when, never what was in the document. Calls older than 12 months are removed automatically." },
         { "type": "warning", "text": "Medical documents leave the server when AI is used. Before you turn a tool on, make sure the family agrees and that you are comfortable with the company's terms." }
+      ]
+    },
+    {
+      "id": "contextual-help",
+      "title": "Editing the help texts",
+      "covers": ["feature:help-admin"],
+      "blocks": [
+        { "type": "p", "text": "Every green question mark takes its text from the database, in Slovak, Polish and English. Administrators can reword any of them; other members only read them." },
+        { "type": "steps", "title": "Edit one text", "items": [
+          "Hold **Ctrl** and click the question mark (on a Mac, **Cmd** and click).",
+          "Change the text in any language: plain text, 1 to 400 characters. Your current language is highlighted.",
+          "Press **Save**. Everyone sees the change straight away. **Reset to default** brings back the original wording of one language."
+        ] },
+        { "type": "steps", "title": "Edit many texts", "items": [
+          "Open [Settings > Contextual help](/settings/help).",
+          "Use the search box and the area filter to find a question mark. Each row shows where it sits and its three texts.",
+          "Press **Edit** on a row to change its texts in all languages."
+        ] },
+        { "type": "p", "text": "Texts you edited are kept when the app is updated; texts you did not edit are refreshed with new default wording. Keys the app no longer uses are listed under Unused keys and kept. Every change is written to the audit log with the question mark and the languages, never with the text." }
       ]
     },
     {

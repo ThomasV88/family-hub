@@ -3,9 +3,9 @@
   "category": "admin",
   "order": 80,
   "title": "Príručka pre správcu",
-  "summary": "Všetko, čo môže správca rodiny: členovia, oprávnenia, zabezpečenie, záznam aktivity, nástroje AI a zálohy.",
+  "summary": "Všetko, čo môže správca rodiny: členovia, oprávnenia, zabezpečenie, záznam aktivity, nástroje AI, texty nápovedy a zálohy.",
   "adminOnly": true,
-  "covers": ["settings:members", "settings:audit", "settings:finance_accounts", "settings:ai_calls", "settings:ai_agents"],
+  "covers": ["settings:members", "settings:audit", "settings:finance_accounts", "settings:ai_calls", "settings:ai_agents", "settings:help"],
   "sections": [
     {
       "id": "where",
@@ -114,6 +114,25 @@
         ] },
         { "type": "p", "text": "Pri každom čítaní dokumentu AI sa záznam objaví v [Nastavenia > Volania AI](/settings/ai-calls): kto ho spustil a kedy, nikdy nie to, čo v dokumente bolo. Volania staršie ako 12 mesiacov sa odstránia automaticky." },
         { "type": "warning", "text": "Pri použití AI lekárske dokumenty opúšťajú server. Skôr než nástroj zapnete, uistite sa, že rodina súhlasí a že vám vyhovujú podmienky tej spoločnosti." }
+      ]
+    },
+    {
+      "id": "contextual-help",
+      "title": "Úprava textov nápovedy",
+      "covers": ["feature:help-admin"],
+      "blocks": [
+        { "type": "p", "text": "Každý zelený otáznik berie text z databázy, v slovenčine, poľštine a angličtine. Administrátori môžu ktorýkoľvek prepísať; ostatní členovia ich len čítajú." },
+        { "type": "steps", "title": "Úprava jedného textu", "items": [
+          "Podržte **Ctrl** a kliknite na otáznik (na Macu **Cmd** a kliknutie).",
+          "Zmeňte text v ľubovoľnom jazyku: čistý text, 1 až 400 znakov. Váš aktuálny jazyk je zvýraznený.",
+          "Stlačte **Uložiť**. Zmenu uvidia všetci hneď. **Obnoviť predvolený text** vráti pôvodné znenie jedného jazyka."
+        ] },
+        { "type": "steps", "title": "Úprava viacerých textov", "items": [
+          "Otvorte [Nastavenia > Kontextová nápoveda](/settings/help).",
+          "Otáznik nájdete cez vyhľadávanie a filter oblasti. Každý riadok ukazuje, kde sa nachádza, a jeho tri texty.",
+          "Stlačením **Upraviť** pri riadku zmeníte jeho texty vo všetkých jazykoch."
+        ] },
+        { "type": "p", "text": "Texty, ktoré ste upravili, sa pri aktualizácii aplikácie zachovajú; neupravené texty sa obnovia novým predvoleným znením. Kľúče, ktoré aplikácia už nepoužíva, sú v časti Nepoužívané kľúče a ostávajú zachované. Každá zmena sa zapíše do záznamu aktivity s otáznikom a jazykmi, nikdy s textom." }
       ]
     },
     {

@@ -86,6 +86,20 @@
       ]
     },
     {
+      "id": "question-marks",
+      "title": "The green question marks",
+      "covers": ["feature:help"],
+      "blocks": [
+        { "type": "p", "text": "A small green circle with a question mark next to a field, a section or a button explains what it is for, what to enter, or what happens when you press it. They appear only where a function is not obvious." },
+        { "type": "steps", "title": "Where to look", "items": [
+          "On a computer, point at the question mark with the mouse. It also opens when you reach it with the Tab key.",
+          "On a phone or tablet, tap the question mark. Tap it again, tap somewhere else or press Esc to close it.",
+          "The text is shown in the language you chose for the app."
+        ] },
+        { "type": "tip", "text": "Only one explanation is open at a time. They never change anything: they are only help." }
+      ]
+    },
+    {
       "id": "moving-around",
       "title": "Finding your way around",
       "blocks": [

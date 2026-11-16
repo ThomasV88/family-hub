@@ -3,9 +3,9 @@
   "category": "admin",
   "order": 80,
   "title": "Przewodnik administratora",
-  "summary": "Wszystko, co może administrator rodziny: członkowie, uprawnienia, bezpieczeństwo, dziennik zdarzeń, narzędzia AI i kopie zapasowe.",
+  "summary": "Wszystko, co może administrator rodziny: członkowie, uprawnienia, bezpieczeństwo, dziennik zdarzeń, narzędzia AI, teksty pomocy i kopie zapasowe.",
   "adminOnly": true,
-  "covers": ["settings:members", "settings:audit", "settings:finance_accounts", "settings:ai_calls", "settings:ai_agents"],
+  "covers": ["settings:members", "settings:audit", "settings:finance_accounts", "settings:ai_calls", "settings:ai_agents", "settings:help"],
   "sections": [
     {
       "id": "where",
@@ -114,6 +114,25 @@
         ] },
         { "type": "p", "text": "Za każdym razem, gdy AI czyta dokument, jest to wpisane w [Ustawienia > Wywołania AI](/settings/ai-calls): kto to uruchomił i kiedy, nigdy co było w dokumencie. Wywołania starsze niż 12 miesięcy są usuwane automatycznie." },
         { "type": "warning", "text": "Gdy używana jest AI, dokumenty medyczne opuszczają serwer. Zanim włączysz narzędzie, upewnij się, że rodzina się zgadza i że odpowiadają Ci warunki tej firmy." }
+      ]
+    },
+    {
+      "id": "contextual-help",
+      "title": "Edycja tekstów pomocy",
+      "covers": ["feature:help-admin"],
+      "blocks": [
+        { "type": "p", "text": "Każdy zielony znak zapytania bierze tekst z bazy danych, po słowacku, polsku i angielsku. Administratorzy mogą przeredagować każdy z nich; pozostali członkowie tylko je czytają." },
+        { "type": "steps", "title": "Edycja jednego tekstu", "items": [
+          "Przytrzymaj **Ctrl** i kliknij znak zapytania (na Macu **Cmd** i kliknięcie).",
+          "Zmień tekst w dowolnym języku: zwykły tekst, od 1 do 400 znaków. Twój aktualny język jest wyróżniony.",
+          "Naciśnij **Zapisz**. Zmianę widzą od razu wszyscy. **Przywróć domyślny** wraca do pierwotnego brzmienia jednego języka."
+        ] },
+        { "type": "steps", "title": "Edycja wielu tekstów", "items": [
+          "Otwórz [Ustawienia > Pomoc kontekstowa](/settings/help).",
+          "Znak zapytania znajdziesz wyszukiwarką i filtrem obszaru. Każdy wiersz pokazuje, gdzie się znajduje, i jego trzy teksty.",
+          "Naciśnij **Edytuj** przy wierszu, aby zmienić jego teksty we wszystkich językach."
+        ] },
+        { "type": "p", "text": "Teksty, które zmieniłeś, są zachowywane przy aktualizacji aplikacji; niezmienione teksty są odświeżane nowym domyślnym brzmieniem. Klucze, których aplikacja już nie używa, są na liście Nieużywane klucze i pozostają zachowane. Każda zmiana trafia do dziennika zdarzeń ze znakiem zapytania i językami, nigdy z tekstem." }
       ]
     },
     {
