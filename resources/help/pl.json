@@ -197,7 +197,7 @@
         },
         "health.ai_run": {
             "title": "Uruchom AI",
-            "text": "Wysyła ten jeden dokument do zewnętrznej firmy AI, aby go odczytała i zaproponowała wpisy. Nic nie zostanie zapisane, dopóki nie sprawdzisz i nie zaakceptujesz propozycji."
+            "text": "Wysyła ten jeden dokument do zewnętrznej firmy AI, aby go odczytała i zaproponowała wpisy. PDF jest czytany do pierwszych 20 stron; zdjęcie HEIC jest zamieniane na zwykły obraz tylko dla AI. Nic nie zostanie zapisane, dopóki nie sprawdzisz i nie zaakceptujesz propozycji."
         },
         "health.export_format": {
             "title": "Format eksportu",

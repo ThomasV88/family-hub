@@ -117,9 +117,18 @@ it('counts the exclusive buckets per scope', function () {
     bkFixture();
     $e = app(AiBulkEligibility::class);
 
-    expect($e->counts('no_proposal'))->toBe(['eligible' => 2, 'skipped_consent' => 1, 'skipped_unsupported' => 1, 'skipped_decided' => 0, 'skipped_active' => 1])
+    expect($e->counts('no_proposal'))->toBe(['eligible' => 2, 'skipped_consent' => 2, 'skipped_unsupported' => 0, 'skipped_decided' => 0, 'skipped_active' => 1])
         ->and($e->counts('last_failed'))->toBe(['eligible' => 1, 'skipped_consent' => 0, 'skipped_unsupported' => 0, 'skipped_decided' => 0, 'skipped_active' => 0])
-        ->and($e->counts('all'))->toBe(['eligible' => 4, 'skipped_consent' => 1, 'skipped_unsupported' => 1, 'skipped_decided' => 1, 'skipped_active' => 1]);
+        ->and($e->counts('all'))->toBe(['eligible' => 4, 'skipped_consent' => 2, 'skipped_unsupported' => 0, 'skipped_decided' => 1, 'skipped_active' => 1]);
+});
+
+it('counts a HEIC document as eligible, never as unsupported, and lets the bulk pick it', function () {
+    $heic = bkDoc(true, 'heic');
+    $e = app(AiBulkEligibility::class);
+
+    expect($e->counts('all'))->toMatchArray(['eligible' => 1, 'skipped_unsupported' => 0])
+        ->and($e->nextCandidate('all', AiBulkRun::factory()->create(['scope' => 'all'])->id))
+        ->toBe(['document_id' => $heic->id, 'subject_id' => $heic->subject_id]);
 });
 
 it('does not treat a document with only rejected decisions as decided', function () {

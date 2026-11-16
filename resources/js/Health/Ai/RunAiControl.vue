@@ -63,7 +63,7 @@ watch(() => props.ai?.available, () => { availableLocal.value = null; });
 
 const consent = computed(() => consentLocal.value ?? props.consentOn);
 const available = computed(() => availableLocal.value ?? (props.poller.available?.value ?? props.ai?.available ?? false));
-const unsupported = computed(() => unsupportedLocal.value || props.document.kind === 'heic');
+const unsupported = computed(() => unsupportedLocal.value);
 const acknowledged = computed(() => ackLocal.value || Boolean(props.ai?.noticeAcknowledged));
 
 // The one reason the button is dead, if any (HEIC cannot be fixed by consent, so it comes first).

@@ -201,7 +201,7 @@ final class AiBulkJobQuery
         // A concurrent consent change takes FOR UPDATE on this row and so serializes with the share lock.
         $person = DB::table('medical_subjects')->where('id', $subjectId)->whereNull('archived_at')->sharedLock()->first(['id']);
         $document = DB::table('medical_documents')->where('id', $docId)->where('subject_id', $subjectId)->whereNull('archived_at')->first(['id', 'kind']);
-        if ($person === null || $document === null || ! in_array((string) $document->kind, ['pdf', 'image'], true) || ! AiConsent::allows($subjectId)) {
+        if ($person === null || $document === null || ! in_array((string) $document->kind, ['pdf', 'image', 'heic'], true) || ! AiConsent::allows($subjectId)) {
             return $skip();
         }
         $decided = DB::table('medical_ai_extractions as e')->join('medical_ai_decisions as x', 'x.extraction_id', '=', 'e.id')

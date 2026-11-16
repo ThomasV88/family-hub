@@ -50,6 +50,12 @@ final class MedicalFileFixtures
         return pack('N', 24).'ftyp'.$brand.pack('N', 0).'heic'.'mif1'.str_repeat("\0", 64);
     }
 
+    /** A small real, decodable HEIC (64x48, with EXIF incl. GPS in the source), made with heif-enc. */
+    public static function realHeic(): string
+    {
+        return (string) file_get_contents(__DIR__.'/../fixtures/ai/sample.heic');
+    }
+
     public static function avif(): string
     {
         return self::heic('avif');

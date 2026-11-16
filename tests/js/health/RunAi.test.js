@@ -114,6 +114,12 @@ describe('Run AI start flow', () => {
         expect($('[data-testid="ai-run"]').getAttribute('aria-disabled')).toBe('true');
     });
 
+    it('offers the normal Run AI button for a HEIC photo (it is converted on the server)', () => {
+        mountControl({ document: HEIC, ai: { ...AI, noticeAcknowledged: true } });
+        expect($('[data-testid="ai-run"]').getAttribute('aria-disabled')).not.toBe('true');
+        expect($('[data-testid="ai-blocked"]')).toBeNull();
+    });
+
     it.each([
         ['unavailable', 'AI is not available right now.'],
         ['unsupported', 'AI cannot read this file type.'],
@@ -237,8 +243,8 @@ describe('status states', () => {
     });
 
     it('shows the page-cap line when fewer pages were read than the document has', () => {
-        mountControl({ statuses: { [DOC.id]: entry({ pagesRead: 10, pagesTotal: 12 }) } });
-        expect($('[data-testid="ai-pages"]').textContent).toBe('Only the first 10 pages were read.');
+        mountControl({ statuses: { [DOC.id]: entry({ pagesRead: 20, pagesTotal: 25 }) } });
+        expect($('[data-testid="ai-pages"]').textContent).toBe('Only the first 20 pages were read.');
         wrapper.unmount();
         mountControl({ statuses: { [DOC.id]: entry({ pagesRead: 12, pagesTotal: 12 }) } });
         expect($('[data-testid="ai-pages"]')).toBeNull();
@@ -260,7 +266,6 @@ describe('disabled explanations', () => {
     it.each([
         ['consent off', { consentOn: false }, DOC, 'AI is off for this person.'],
         ['unavailable', { ai: { ...AI, available: false } }, DOC, 'AI is not available right now.'],
-        ['HEIC', {}, HEIC, 'AI cannot read this file type.'],
     ])('%s: aria-disabled Run AI with a visible line; pressing announces and sends nothing', async (_n, opts, doc, text) => {
         mountControl({ ...opts, document: doc });
         const button = $('[data-testid="ai-run"]');
@@ -325,7 +330,7 @@ describe('accessibility', () => {
         none: {},
         queued: { statuses: { [DOC.id]: entry({ status: 'queued' }) } },
         running: { statuses: { [DOC.id]: entry({ status: 'running' }) } },
-        ready: { statuses: { [DOC.id]: entry({ pagesRead: 10, pagesTotal: 12 }) } },
+        ready: { statuses: { [DOC.id]: entry({ pagesRead: 20, pagesTotal: 25 }) } },
         empty: { statuses: { [DOC.id]: entry({ entryCount: 0 }) } },
         failed: { statuses: { [DOC.id]: entry({ status: 'failed' }) } },
         cancelled: { statuses: { [DOC.id]: entry({ status: 'cancelled', cancelReason: 'consent' }) }, consentOn: false },

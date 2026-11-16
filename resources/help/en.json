@@ -197,7 +197,7 @@
         },
         "health.ai_run": {
             "title": "Run AI",
-            "text": "Sends this one document to the outside AI company to read it and suggest entries. Nothing is saved until you review and accept the suggestions."
+            "text": "Sends this one document to the outside AI company to read it and suggest entries. A PDF is read up to its first 20 pages; a HEIC photo is converted to a plain picture for AI only. Nothing is saved until you review and accept the suggestions."
         },
         "health.export_format": {
             "title": "Export format",

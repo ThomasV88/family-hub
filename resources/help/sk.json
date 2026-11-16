@@ -197,7 +197,7 @@
         },
         "health.ai_run": {
             "title": "Spustiť AI",
-            "text": "Pošle tento jeden dokument externej AI firme, aby ho prečítala a navrhla záznamy. Nič sa neuloží, kým návrhy neskontrolujete a neprijmete."
+            "text": "Pošle tento jeden dokument externej AI firme, aby ho prečítala a navrhla záznamy. PDF sa číta do prvých 20 strán; fotografia HEIC sa premení na bežný obrázok iba pre AI. Nič sa neuloží, kým návrhy neskontrolujete a neprijmete."
         },
         "health.export_format": {
             "title": "Formát exportu",

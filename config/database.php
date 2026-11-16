@@ -97,6 +97,9 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // The app writes UTC strings into timestamptz columns; without this the server's own TZ (Europe/Bratislava in the
+            // containers) would read them as local time and every stored instant would be 1-2 hours early.
+            'timezone' => 'UTC',
         ],
 
         'sqlsrv' => [

@@ -86,8 +86,8 @@ describe('start', function () {
         expect(aiTables())->toBe($before)->and(MedicalAiExtraction::query()->whereIn('status', ['queued', 'running'])->count())->toBe(1);
     });
 
-    it('refuses with consent off, an unsupported kind, an unavailable service and writes nothing', function (string $case) {
-        [$user, $person, $document] = aiSetup(consent: $case !== 'consent_off', kind: $case === 'unsupported' ? 'heic' : 'image');
+    it('refuses with consent off, an unavailable service and writes nothing', function (string $case) {
+        [$user, $person, $document] = aiSetup(consent: $case !== 'consent_off');
         if ($case === 'unavailable') {
             app(AgentHealth::class)->recordCheck('codex', LoginState::LoggedOut);
         }
@@ -97,7 +97,16 @@ describe('start', function () {
             ->assertStatus(409)->assertExactJson(['reason' => $case]);
 
         expect(aiTables())->toBe($before);
-    })->with(['consent_off', 'unsupported', 'unavailable']);
+    })->with(['consent_off', 'unavailable']);
+
+    it('accepts a HEIC photo like an image and queues one extraction', function () {
+        [$user, $person, $document] = aiSetup(kind: 'heic');
+
+        $response = $this->actingAs($user)->postJson(aiRunUrl($person, $document->id), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202);
+
+        expect(MedicalAiExtraction::query()->sole()->id)->toBe($response->json('extractionId'))
+            ->and(DB::table('jobs')->where('queue', 'ai')->count())->toBe(1);
+    });
 
     it('treats a service of unknown state as available and one that does not answer as unavailable', function () {
         [$user, $person, $document] = aiSetup();

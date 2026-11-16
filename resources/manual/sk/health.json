@@ -116,6 +116,7 @@
         { "type": "list", "items": [
           "Každá osoba má spínač **Povoliť AI čítať dokumenty tejto osoby**. Predvolene je vypnutý. Rozhoduje člen, ktorý môže túto osobu meniť, a pred zapnutím uvidí jasnú otázku. Kedykoľvek ho môžete vypnúť.",
           "AI sa nikdy nespustí sama od seba. Niekto stlačí **Spustiť AI** a uvidí oznámenie, ktoré uvádza spoločnosť, ktorej sa dokument pošle.",
+          "AI číta PDF súbory do ich prvých 20 strán a fotografie vrátane fotografií HEIC z iPhonu. Fotografia HEIC sa na serveri premení na bežný obrázok iba pre beh AI; uložený originál sa nemení a údaje o mieste a fotoaparáte sa neposielajú.",
           "Keď sú návrhy hotové, stlačte **Skontrolovať návrhy**. Nič sa neuloží, kým pri položke nestlačíte **Prijať**. Môžete ju **Upraviť** alebo **Odmietnuť**.",
           "Všetko, čo AI navrhla, je označené **Neoverené**, kým človek nestlačí **Označiť ako overené**. AI sa môže mýliť, preto vždy porovnajte s dokumentom.",
           "Ak je AI pre osobu vypnutá, nezačne nový beh a behy, ktoré čakali, sa zastavia."

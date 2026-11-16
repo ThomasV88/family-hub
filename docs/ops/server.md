@@ -95,7 +95,7 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
 - nginx: only `POST /health/people/<uuid>/documents` accepts a body up to 12m; PHP `upload_max_filesize=11M`, `post_max_size=13M`.
 - Medical image processing (owner decision WR-12, 2026-11-15): an uploaded image is re-encoded to a JPEG with its longest edge at
   most 3600 px (was 2400) at quality 90 (was 82), plus a 480 px thumbnail. EXIF and GPS are stripped and the original is not kept
-  (PDF and HEIC are stored unchanged). Settings: `config/medical.php` `image_full_px`, `image_jpeg_quality`, `image_thumb_px`.
+  (PDF and HEIC are stored unchanged; for AI a HEIC is converted in the job work dir only, see the `ai-worker` service below). Settings: `config/medical.php` `image_full_px`, `image_jpeg_quality`, `image_thumb_px`.
   The wishlist keeps 1280 px at quality 82. Decode memory (GD, measured in a PHP 8.4 process with `memory_limit=128M`, the
   production value, by `tests/Support/medical-image-memory-probe.php`): the source bitmap and the resized copy are alive together,
   about 4.4 bytes per pixel each. A 4032 x 3024 (12 MP) photo peaks at 89.5 MiB above the 24 MiB framework baseline, 112 MiB in
@@ -117,6 +117,20 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
 - Service `ai-worker` (compose.server.yaml; locally only with `docker compose --profile ai up`). Image `$IMAGE_PREFIX-ai:$IMAGE_TAG`
   (Dockerfile target `ai-worker`, the only image with the pinned Codex CLI). Runs as www-data, one process
   (`queue:work --queue=ai-control,ai,ai-bulk --tries=1 --timeout=720`: the login check runs on the priority queue `ai-control`, so an extraction backlog never makes the agent look "not responding"), `init: true`, no ports, `mem_limit` `MEM_AI` (default 768m, PROVISIONAL, confirmed in 09-20).
+- AI inputs (quick 261116-n1p, owner decisions 2026-11-16). PDFs: `ai.pdf.max_pages` is 20 (was 10); the web viewer keeps `view_max_pages` 50.
+  The worker rasterizes all pages in one `pdftoppm` spawn bounded by `ai.pdf.pages_timeout` (60 s; `ai.pdf.timeout`, 20 s, stays the
+  single-page viewer bound). pdftoppm renders pages one after another, so more pages do not raise peak memory; pages are JPEG q82 at
+  scale 1800 (a few hundred KB each), so 20 pages fit the 192m `/ai-work` tmpfs and `MEM_AI` 768m stays. The job bound (`ai.timeouts.job`
+  660 s) still covers 60 s rasterize plus 30 s HEIC decode plus the attempts that `min_call` guards.
+  HEIC: the `ai-runtime` image stage (so only the `ai-worker` images, not `app`) installs `libheif-tools` (`heif-dec`, libheif 1.23.7 on
+  the current base) whose dependencies bring the libde265 HEVC decoder (`libheif-libde265`); the build fails when `heif-dec --list-decoders`
+  shows no HEVC decoder. `App\Medical\Documents\HeicConverter` decodes the stored HEIC inside the job work dir on the `/ai-work` tmpfs
+  (argv only, `ulimit -v` `ai.heic.ulimit_kb` 524288, hard timeout `ai.heic.timeout` 30 s) and re-encodes the result through
+  `ImageProcessor` (GD: EXIF, GPS and XMP are dropped), writing `doc.jpg`; the HEIC is removed before the CLI starts, nothing is
+  stored and the medical volume stays read-only. A HEIC that cannot be decoded fails as `unreadable_document` without starting an
+  agent. Keys: `ai.heic.binary` (env `AI_HEIF_BINARY`, default `heif-dec`), `timeout`, `ulimit_kb`, `max_jpeg_bytes`. Measured (dev,
+  ai image): a 12 MP (4000x3000) HEIC decodes in about 1.4 s end to end with a 116 MB real PHP peak under `memory_limit=128M`; `heif-dec` alone
+  peaks at about 49 MB resident in 0.4 s. libheif applies the HEIC rotation on decode and writes orientation 1, so there is no double rotation.
 - Env file `ai-worker.env` (template `ops/env/ai-worker.env.example`), never `app.env`: no `APP_KEY`, `MAIL_*`, `GOOGLE_*`, `VAPID_*`, `AWS_*`, `STRIPE_*`, `*_API_KEY`, `*_SECRET`.
   `ai:preflight` refuses to start if one is set (codes `app_key_present`, `forbidden_env`, `forbidden_secret`; names are matched by
   `ai.forbidden_env_patterns`, values are never printed). The dev `ai-worker` reads `ops/env/ai-worker.dev.env` and has the repo `.env` masked. `server-provision.sh` creates `ai-worker.env` (mode 600, never overwritten); `deploy.sh` does not require it: without a non-empty file it skips every ai-worker step with a warning and the core app deploys. It uses the runtime role `fh_app`
