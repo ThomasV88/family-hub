@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\BlockDisabledSignIn;
 use App\Http\Middleware\EnsureRouteDeclaresAccess;
 use App\Http\Middleware\GuardTwoFactorRoutes;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -44,6 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             NoStoreDynamicResponses::class,
             SetLocale::class,
+            BlockDisabledSignIn::class,
             HandleInertiaRequests::class,
             EnsureRouteDeclaresAccess::class,
             ThrottleAuthRoutes::class,
