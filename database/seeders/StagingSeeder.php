@@ -19,6 +19,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -42,8 +43,23 @@ class StagingSeeder extends Seeder
         $this->summary = [];
 
         DB::transaction(function () {
-            $this->deleteSyntheticOwnedRows(User::where('email', 'like', '%@example.test')->pluck('id')->all());
-            User::where('email', 'like', '%@example.test')->delete();
+            // Synthetic = example.test e-mail, or a child (no e-mail) with the demo suffix. Never a real child.
+            $synthetic = fn () => User::query()->where(fn ($q) => $q->where('email', 'like', '%@example.test')
+                ->orWhere(fn ($c) => $c->whereNull('email')->where('name', 'like', '% (demo)')));
+            $ids = $synthetic()->pluck('id')->all();
+            $this->deleteSyntheticOwnedRows($ids);
+            $synthetic()->delete();
+            if ($ids !== []) {
+                DB::afterCommit(function () use ($ids) {
+                    foreach ($ids as $id) {
+                        try {
+                            Storage::disk('local')->deleteDirectory("wish-images/profile-photos/{$id}");
+                        } catch (\Throwable $e) {
+                            Log::warning('staging seed: could not remove the photos of a reseeded member', ['reason' => $e::class]);
+                        }
+                    }
+                });
+            }
         });
 
         // A shared, server-side password makes the synthetic accounts usable and survives the reseed on every deploy.

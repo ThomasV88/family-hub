@@ -19,16 +19,19 @@ class StagingAudit extends Command
      */
     protected function rules(): array
     {
-        $synthetic = "(select id from users where email like '%@example.test')";
+        // A child has no e-mail (NULL), so NOT LIKE would be NULL and silently pass: the synthetic marker is explicit.
+        $synthetic = "(select id from users where email like '%@example.test' or (email is null and name like '% (demo)'))";
         // Phase 5: staging must never hold real finance data. Rows created by a deleted (null) or non-synthetic user fail.
         // Null stays flagged: StagingSeeder deletes the rows of the synthetic users before it deletes them, so a null
         // creator can only be a real user who was deleted (real data) and never a reseeded synthetic one.
-        $real = "(select id from users where email not like '%@example.test')";
+        $real = "(select id from users where id not in {$synthetic})";
         $anyUser = '(select id from users)';
         $createdByReal = "(created_by is null or created_by not in {$synthetic})";
 
         return [
-            ['users', "email not like '%@example.test'"],
+            ['users', "id not in {$synthetic}"],
+            // Phase 10: a real child's photo is a real person's picture.
+            ['users', "photo_path is not null and id not in {$synthetic}"],
             // Phase 2: invitations hold the invited address; audit rows keep names (labels) and invite emails.
             ['invitations', "email not like '%@example.test'"],
             // A reseed deletes the synthetic users, and audit_logs and ai_calls are append-only, so their rows keep ids that no

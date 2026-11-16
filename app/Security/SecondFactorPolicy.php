@@ -26,6 +26,11 @@ class SecondFactorPolicy
 
     public function appliesTo(User $user): bool
     {
+        // A child (or any account that cannot sign in) never has to enrol.
+        if (! $user->canSignIn()) {
+            return false;
+        }
+
         foreach ([Module::Finance, Module::Health] as $module) {
             if ($this->gate->level($user, $module)->value >= AccessLevel::View->value) {
                 return true;
