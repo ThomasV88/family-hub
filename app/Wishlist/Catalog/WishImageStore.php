@@ -67,6 +67,10 @@ final class WishImageStore
 
         $deleted = 0;
         foreach ($disk->allFiles('wish-images') as $path) {
+            // Profile photos share the wish-images volume path but are owned by users rows; their own sweeper handles them.
+            if (str_starts_with($path, 'wish-images/profile-photos/')) {
+                continue;
+            }
             if (! isset($referenced[$path]) && $disk->lastModified($path) < $cutoff) {
                 $disk->delete($path);
                 $deleted++;
