@@ -30,6 +30,9 @@ class StagingSeed extends Command
         $count = DB::transaction(fn () => $seeder->run());
 
         $this->info("staging:seed created {$count} synthetic users");
+
+        // The help tips are not demo data (no user owns them), but a reseeded staging must have them, so the seed path syncs them too.
+        $this->call('help:sync');
         foreach ($seeder->summary as $module => $counts) {
             $this->line('  '.$module.': '.(is_array($counts) ? json_encode($counts) : $counts));
         }

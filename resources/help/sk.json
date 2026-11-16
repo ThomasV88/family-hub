@@ -1,0 +1,22 @@
+{
+    "areas": {
+        "tasks": "Úlohy"
+    },
+    "screens": {
+        "task_panel": "Panel úlohy"
+    },
+    "topics": {
+        "tasks.visibility": {
+            "title": "Kto úlohu vidí",
+            "text": "Osobná: iba vy. Rodinná: všetci, ktorí môžu používať Úlohy. Vybraní členovia: iba ľudia, ktorých označíte (vy ste vždy zahrnutí)."
+        },
+        "tasks.recurrence": {
+            "title": "Opakovanie",
+            "text": "Úloha sa po dokončení sama vráti, napríklad každý týždeň. Potrebuje termín; ďalší dátum sa z neho vypočíta."
+        },
+        "tasks.reminder": {
+            "title": "Pripomienka",
+            "text": "Kedy vám príde upozornenie na túto úlohu: v čase termínu alebo určitý čas pred ním. Čas pred termínom vyžaduje čas termínu."
+        }
+    }
+}

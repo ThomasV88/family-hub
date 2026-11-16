@@ -1,0 +1,23 @@
+{
+    "version": 1,
+    "topics": [
+        {
+            "key": "tasks.visibility",
+            "area": "tasks",
+            "screen": "task_panel",
+            "field": "visibility"
+        },
+        {
+            "key": "tasks.recurrence",
+            "area": "tasks",
+            "screen": "task_panel",
+            "field": "recurrence"
+        },
+        {
+            "key": "tasks.reminder",
+            "area": "tasks",
+            "screen": "task_panel",
+            "field": "reminder"
+        }
+    ]
+}

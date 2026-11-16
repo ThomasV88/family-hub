@@ -1,0 +1,22 @@
+{
+    "areas": {
+        "tasks": "Zadania"
+    },
+    "screens": {
+        "task_panel": "Panel zadania"
+    },
+    "topics": {
+        "tasks.visibility": {
+            "title": "Kto widzi zadanie",
+            "text": "Osobiste: tylko Ty. Rodzinne: wszyscy, którzy mogą korzystać z Zadań. Wybrani członkowie: tylko osoby, które zaznaczysz (Ty zawsze jesteś uwzględniony)."
+        },
+        "tasks.recurrence": {
+            "title": "Powtarzanie",
+            "text": "Zadanie samo wraca po ukończeniu, na przykład co tydzień. Wymaga terminu; kolejna data jest z niego wyliczana."
+        },
+        "tasks.reminder": {
+            "title": "Przypomnienie",
+            "text": "Kiedy dostaniesz powiadomienie o zadaniu: w chwili terminu lub określony czas wcześniej. Czas przed terminem wymaga godziny terminu."
+        }
+    }
+}

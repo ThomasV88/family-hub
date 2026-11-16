@@ -1,0 +1,22 @@
+{
+    "areas": {
+        "tasks": "Tasks"
+    },
+    "screens": {
+        "task_panel": "Task panel"
+    },
+    "topics": {
+        "tasks.visibility": {
+            "title": "Who can see this task",
+            "text": "Personal: only you. Family: everyone who may use Tasks. Selected members: only the people you tick (you are always included)."
+        },
+        "tasks.recurrence": {
+            "title": "Repeat",
+            "text": "Makes the task come back on its own after you finish it, for example every week. It needs a due date; the next date is worked out from it."
+        },
+        "tasks.reminder": {
+            "title": "Reminder",
+            "text": "When you are notified about this task: at the due time or a set time before it. A time before needs a due time."
+        }
+    }
+}

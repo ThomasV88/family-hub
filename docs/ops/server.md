@@ -165,6 +165,10 @@ reports "login expired" once the health check exists). Never set `OPENAI_API_KEY
 
 `server-provision.sh` creates `ai-worker.env` (mode 600, from the same keys as `ops/env/ai-worker.env.example`, `DB_PASSWORD` = the generated `fh_app` password) next to `app.env` and never overwrites an existing one. `deploy.sh` does not abort when it is missing or empty: it logs a warning, creates an empty mode-600 placeholder so compose can load the project, and skips the ai-worker pull, start and rollback restart (AI extraction unavailable). Re-run `server-provision.sh` to fill the placeholder.
 
+### Contextual help sync (`help:sync`)
+
+The green "?" tips keep their texts in the table `help_texts` (one row per topic key of `resources/help/topics.json`, a text per language, a per-language "edited by an administrator" marker). `deploy.sh` runs `php artisan help:sync` in a one-shot `app` container right after the migration, on staging and production, with the runtime role (the table needs only read and write, which the default privileges of `fh_owner` already grant; no migrate profile). It is idempotent: it inserts keys that are missing, refreshes the default text and the placement of every language an administrator has NOT edited, keeps edited texts and only reports orphan keys (in the table, no longer in the registry); it never deletes. A failure is logged as a warning and does not stop the release: the app falls back to the registry default whenever a row or text is missing. Run it by hand with `docker compose run --rm --no-deps -T app php artisan help:sync`. `staging:seed` calls it too. See `.planning/v1.0-ISSUE-4-NOTES.md`.
+
 ## Two-step verification and re-authentication
 
 Phase 6. Values live in each stack's `.env` / `app.env`; this section records meaning and procedure only, never a value.
