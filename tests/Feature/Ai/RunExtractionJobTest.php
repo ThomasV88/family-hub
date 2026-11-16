@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\Support\FakeCodex;
 use Tests\Support\FakeCopilot;
+use Tests\Support\ImageFixtures;
 use Tests\Support\MedicalFileFixtures;
 use Tests\Support\MedicalFixtures;
 
@@ -373,7 +374,7 @@ function ejDiskState(): array
 
 it('converts a HEIC to a metadata-free doc.jpg in the work dir only and hands only that to the CLI', function () {
     $s = ejSetup('heic');
-    ejFakeDecoder(\Tests\Support\ImageFixtures::jpegWithExif(1, 64, 48));
+    ejFakeDecoder(ImageFixtures::jpegWithExif(1, 64, 48));
     $record = sys_get_temp_dir().'/ej-rec-'.bin2hex(random_bytes(4));
     $copy = sys_get_temp_dir().'/ej-copy-'.bin2hex(random_bytes(4));
     $this->files[] = $record;
