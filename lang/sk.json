@@ -315,7 +315,8 @@
             "finance_accounts": "Finančné účty",
             "security": "Zabezpečenie",
             "ai_calls": "Volania AI",
-            "ai_agents": "Agenti AI"
+            "ai_agents": "Agenti AI",
+            "help": "Kontextová nápoveda"
         },
         "back": "Späť do nastavení",
         "members": {
@@ -735,7 +736,8 @@
             "medical_type_vaccination": "Očkovanie",
             "medical_type_document": "Dokument",
             "timings_idle": "Opätovné potvrdenie po nečinnosti nastavené na {duration}",
-            "timings_confirm": "Opätovné potvrdenie citlivých akcií nastavené na {duration}"
+            "timings_confirm": "Opätovné potvrdenie citlivých akcií nastavené na {duration}",
+            "help_text_changed": "Upravený text nápovedy {key} ({locales})"
         },
         "page": "Strana {n} z {total}",
         "prev": "Predchádzajúca",

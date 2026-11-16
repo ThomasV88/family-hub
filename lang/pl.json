@@ -315,7 +315,8 @@
             "finance_accounts": "Konta finansowe",
             "security": "Bezpieczeństwo",
             "ai_calls": "Wywołania AI",
-            "ai_agents": "Agenci AI"
+            "ai_agents": "Agenci AI",
+            "help": "Pomoc kontekstowa"
         },
         "back": "Wróć do ustawień",
         "members": {
@@ -735,7 +736,8 @@
             "medical_type_vaccination": "Szczepienie",
             "medical_type_document": "Dokument",
             "timings_idle": "Ponowne potwierdzenie po bezczynności ustawione na {duration}",
-            "timings_confirm": "Ponowne potwierdzenie wrażliwych czynności ustawione na {duration}"
+            "timings_confirm": "Ponowne potwierdzenie wrażliwych czynności ustawione na {duration}",
+            "help_text_changed": "Zmieniono tekst pomocy {key} ({locales})"
         },
         "page": "Strona {n} z {total}",
         "prev": "Poprzednia",

@@ -41,7 +41,7 @@ it('shows both agents in saved order with health and a future cooldown only', fu
 
     $this->actingAs(aaAdmin())->get('/settings/ai-agents')->assertOk()->assertInertia(fn (Assert $p) => $p
         ->component('Settings/AiAgents', false)
-        ->has('sections', 8)
+        ->has('sections', 9)
         ->has('agents', 2)
         ->where('agents.0.key', 'codex')
         ->where('agents.0.enabled', true)

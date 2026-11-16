@@ -73,6 +73,14 @@ function bulkRunDetail(meta) {
     });
 }
 
+// Help text edits record the topic key and the language codes, never the text; unknown codes print nothing.
+const HELP_LOCALES = ['sk', 'pl', 'en'];
+function helpTextDetail(meta) {
+    const locales = String(meta.locales ?? '').split(',').filter((l) => HELP_LOCALES.includes(l)).join(', ');
+    const key = /^[a-z0-9._-]{1,120}$/.test(String(meta.key ?? '')) ? String(meta.key) : '';
+    return t('audit.detail.help_text_changed', { key, locales });
+}
+
 const moduleName = (key) => (key ? t(`permissions.module.${key}`) : '');
 const levelName = (key) => (key ? t(`permissions.level.${key}`) : '');
 
@@ -131,6 +139,8 @@ function details(row) {
             return t(`audit.detail.requirement_${meta.value === true || meta.value === 1 || meta.value === '1' ? 'on' : 'off'}`);
         case 'reauth_confirmed':
             return t('audit.detail.reauth_confirmed');
+        case 'help_text_changed':
+            return helpTextDetail(meta);
         case 'medical_access_changed':
             return joinPhrases(t('audit.detail.medical_access_changed'), medicalPhrase('change', meta.change));
         case 'medical_exported':

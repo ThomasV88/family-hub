@@ -315,7 +315,8 @@
             "finance_accounts": "Finance accounts",
             "security": "Security",
             "ai_calls": "AI calls",
-            "ai_agents": "AI agents"
+            "ai_agents": "AI agents",
+            "help": "Contextual help"
         },
         "back": "Back to settings",
         "members": {
@@ -735,7 +736,8 @@
             "medical_type_vaccination": "Vaccination",
             "medical_type_document": "Document",
             "timings_idle": "Re-confirmation after inactivity set to {duration}",
-            "timings_confirm": "Re-confirmation of sensitive actions set to {duration}"
+            "timings_confirm": "Re-confirmation of sensitive actions set to {duration}",
+            "help_text_changed": "Edited help text {key} ({locales})"
         },
         "page": "Page {n} of {total}",
         "prev": "Previous",
