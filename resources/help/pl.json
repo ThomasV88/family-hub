@@ -1,22 +1,263 @@
 {
     "areas": {
-        "tasks": "Zadania"
+        "overview": "Przegląd",
+        "tasks": "Zadania",
+        "wishlist": "Wishlist",
+        "finance": "Finanse",
+        "health": "Zdrowie",
+        "account": "Konto i bezpieczeństwo",
+        "settings": "Ustawienia (administratorzy)"
     },
     "screens": {
-        "task_panel": "Panel zadania"
+        "task_panel": "Panel zadania",
+        "gift_panel": "Panel prezentu (życzenie innej osoby)",
+        "wish_panel": "Panel życzenia (własne)",
+        "wishlist_page": "Strona Wishlist",
+        "occasion_panel": "Panel wydarzenia",
+        "notifications": "Powiadomienia",
+        "members_wishlist": "Członkowie, karta Wishlist",
+        "transaction_form": "Formularz transakcji",
+        "category_panel": "Panel kategorii",
+        "account_panel": "Panel konta",
+        "recurring_panel": "Panel wydatku cyklicznego",
+        "bill_panel": "Panel płatności",
+        "budget_panel": "Panel budżetu",
+        "overview": "Przegląd finansów",
+        "import": "Import CSV",
+        "health_person_access": "Dostęp do zdrowia według osoby",
+        "vaccination_panel": "Panel szczepienia",
+        "document_upload": "Wgrywanie dokumentów",
+        "person_record": "Kartoteka osoby",
+        "archive": "Archiwum",
+        "ai_run": "AI na dokumencie",
+        "export": "Eksport",
+        "security_page": "Strona Bezpieczeństwo",
+        "members_security": "Członkowie, karta Bezpieczeństwo",
+        "invite_dialog": "Okno zaproszenia",
+        "members_permissions": "Członkowie, karta Uprawnienia",
+        "ai_agents": "Agenci AI",
+        "home": "Strona Przegląd"
     },
     "topics": {
         "tasks.visibility": {
             "title": "Kto widzi zadanie",
-            "text": "Osobiste: tylko Ty. Rodzinne: wszyscy, którzy mogą korzystać z Zadań. Wybrani członkowie: tylko osoby, które zaznaczysz (Ty zawsze jesteś uwzględniony)."
+            "text": "Osobiste: tylko Ty, nawet administrator nie widzi. Rodzinne: wszyscy, którzy mogą korzystać z Zadań. Wybrani członkowie: tylko osoby, które zaznaczysz (Ty zawsze jesteś uwzględniony)."
         },
         "tasks.recurrence": {
             "title": "Powtarzanie",
-            "text": "Zadanie samo wraca po ukończeniu, na przykład co tydzień. Wymaga terminu; kolejna data jest z niego wyliczana."
+            "text": "Zadanie samo wraca po ukończeniu, na przykład co tydzień. Wymaga terminu, a kolejna data jest z niego wyliczana."
+        },
+        "tasks.repeat_from": {
+            "title": "Powtarzaj od",
+            "text": "Harmonogram: kolejny termin wynika z reguły, nawet gdy skończysz późno. Gdy ją ukończę: kolejny termin liczy się od dnia faktycznego ukończenia."
         },
         "tasks.reminder": {
             "title": "Przypomnienie",
-            "text": "Kiedy dostaniesz powiadomienie o zadaniu: w chwili terminu lub określony czas wcześniej. Czas przed terminem wymaga godziny terminu."
+            "text": "Kiedy dostaniesz powiadomienie o zadaniu: w chwili terminu lub określony czas wcześniej. Czas przed terminem wymaga godziny terminu; zadania bez godziny przypominają o 8:00."
+        },
+        "tasks.skip": {
+            "title": "Pomiń to wystąpienie",
+            "text": "Przesuwa powtarzające się zadanie na kolejny termin bez oznaczania tego wystąpienia jako wykonanego. Pominięcie trafia do historii."
+        },
+        "wishlist.reservation": {
+            "title": "Rezerwacja",
+            "text": "Zarezerwuj prezent, aby nikt inny go nie kupił. Kto zarezerwował, widzą wszyscy poza osobą, której to życzenie; ona nigdy tego nie zobaczy."
+        },
+        "wishlist.cobuy": {
+            "title": "Wspólny zakup",
+            "text": "Otwórz, gdy prezent jest za duży dla jednej osoby. Inni członkowie mogą wtedy dołączyć z udziałem w cenie; Ty zostajesz organizatorem. Zamknięcie wstrzymuje dołączanie kolejnych osób."
+        },
+        "wishlist.share": {
+            "title": "Twój udział",
+            "text": "Kwota, którą chcesz dołożyć do tego prezentu. Jest opcjonalna; zostaw puste, jeśli kwoty ustalisz z innymi później."
+        },
+        "wishlist.image": {
+            "title": "Obraz życzenia",
+            "text": "Obraz ułatwia znalezienie życzenia. Wgraj JPEG, PNG lub WebP do 5 MB albo pozwól aplikacji poszukać obrazu pod pierwszym dodanym linkiem."
+        },
+        "wishlist.links": {
+            "title": "Linki",
+            "text": "Sklepy lub strony, gdzie można kupić prezent, maksymalnie 5. Pomaga krótki opis, np. nazwa sklepu. Inni widzą je przy życzeniu."
+        },
+        "wishlist.received": {
+            "title": "Oznacz jako otrzymane",
+            "text": "Użyj, gdy dostaniesz prezent. Życzenie trafia do sekcji Otrzymane na Twojej liście i nie można go już edytować."
+        },
+        "wishlist.shopping": {
+            "title": "Podsumowanie zakupów",
+            "text": "Prezenty, które zarezerwowałeś lub do których dołączyłeś, pogrupowane według osoby, dla której są, abyś widział, co jeszcze trzeba kupić. Tę listę widzisz tylko Ty."
+        },
+        "occasions.calendar": {
+            "title": "Kalendarz imion",
+            "text": "Wybierz kalendarz słowacki lub polski, aby znaleźć imię, a potem imieniny, które obowiązują. Jeśli osoba nie ma imienin, wybierz Brak."
+        },
+        "occasions.yearly": {
+            "title": "Powtarzaj co roku",
+            "text": "Włączone: wydarzenie wraca co roku tego samego dnia, jak urodziny. Wyłączone: odbywa się raz, w wybranym dniu."
+        },
+        "occasions.for": {
+            "title": "Wydarzenie dla",
+            "text": "Czyje to wydarzenie albo cała rodzina. Przypomnienia o prezencie dostają wszyscy poza osobą, której dotyczy wydarzenie."
+        },
+        "notifications.gift_reminders": {
+            "title": "Przypomnienia o prezentach",
+            "text": "Zaznacz, ile dni przed urodzinami, imieninami lub innym wydarzeniem chcesz przypomnienie. Za własne wydarzenia nigdy go nie dostaniesz."
+        },
+        "settings.wishlist_managers": {
+            "title": "Zarządcy listy życzeń",
+            "text": "Wybrani członkowie mogą dodawać i edytować życzenia na liście tej osoby, np. małego dziecka. Widzą listę tak jak jej właściciel, więc niespodzianki pozostają ukryte także przed nimi."
+        },
+        "finance.transfer": {
+            "title": "Rodzaj wpisu",
+            "text": "Wydatek i przychód zmieniają Twoje sumy. Przelew przenosi pieniądze między dwoma Twoimi kontami w tej samej walucie i nie liczy się jako wydatek ani przychód."
+        },
+        "finance.category_type": {
+            "title": "Typ kategorii",
+            "text": "Kategorie wydatków grupują to, co wydajesz, kategorie przychodów to, co zarabiasz. Typ ustala się przy tworzeniu kategorii i nie można go później zmienić."
+        },
+        "finance.account_visibility": {
+            "title": "Kto widzi to konto",
+            "text": "To konto i wszystko w nim zobaczą tylko zaznaczeni członkowie. Członków bez dostępu do finansów nie można zaznaczyć, dopóki nie nadasz dostępu w Członkach."
+        },
+        "finance.account_opening": {
+            "title": "Saldo początkowe",
+            "text": "Saldo konta w dniu „Saldo na dzień”. Transakcje po tej dacie są do niego dodawane, więc pokazywane saldo pozostaje poprawne."
+        },
+        "finance.recurring_matching": {
+            "title": "Wskazówki dopasowania",
+            "text": "Pomagają aplikacji rozpoznać płatność bankową za ten rachunek: tekst od odbiorcy lub z opisu, o ile może różnić się kwota i ile dni wokół terminu się liczy."
+        },
+        "finance.bill_match": {
+            "title": "Dopasuj transakcję",
+            "text": "Łączy istniejącą transakcję bankową, np. zaimportowaną, z tym rachunkiem. Wtedy liczy się jako zapłacony i nie powstaje nowa transakcja."
+        },
+        "finance.budget_limit": {
+            "title": "Miesięczny limit",
+            "text": "Maksimum, który planujesz wydawać w tej kategorii miesięcznie. Pasek pokazuje, ile z niego wykorzystano. Obowiązuje od tego miesiąca, wcześniejsze miesiące zachowują stary limit."
+        },
+        "finance.still_to_pay": {
+            "title": "Jeszcze do zapłaty",
+            "text": "Suma i liczba cyklicznych rachunków z tego miesiąca, które nie są jeszcze zapłacone, w tym zaległych. Rachunek liczy się jako zapłacony, gdy istnieje pasująca transakcja."
+        },
+        "finance.import_profile": {
+            "title": "Profil banku",
+            "text": "Zapisane ustawienie kolumn dla jednego banku. Wybierz je, aby następnym razem pominąć krok z kolumnami, albo wybierz nowy profil, ustaw kolumny raz i zapisz."
+        },
+        "finance.import_mapping": {
+            "title": "Dopasowanie kolumn",
+            "text": "Wskaż aplikacji, w której kolumnie pliku z banku jest data, kwota i opis. Separator, kodowanie i format liczb muszą pasować do pliku; podgląd pokazuje efekt."
+        },
+        "finance.import_amounts": {
+            "title": "Jak zapisane są kwoty",
+            "text": "Sprawdź, jak plik z banku pokazuje pieniądze: jedna kolumna z ujemnymi wydatkami, dwie kolumny dla przychodów i wydatków albo jedna kolumna i kolumna z rodzajem ruchu."
+        },
+        "finance.import_review": {
+            "title": "Przegląd wierszy",
+            "text": "Nowe wiersze zostaną zaimportowane. Możliwe duplikaty wyglądają jak transakcje, które już masz, i są pomijane, dopóki ich nie zaznaczysz. Wiersze, których nie da się odczytać, są pomijane."
+        },
+        "finance.import_undo": {
+            "title": "Cofnij import",
+            "text": "Usuwa transakcje dodane przez ten import. Płatności z nimi dopasowane znów staną się niezapłacone. Transakcje, które potem edytowałeś, zostają."
+        },
+        "health.access_levels": {
+            "title": "Poziomy dostępu",
+            "text": "Dla każdego członka: Brak dostępu ukrywa osobę. Może przeglądać czyta kartotekę i kartę awaryjną. Może zmieniać także edytuje, wgrywa, eksportuje i ustawia zgodę na AI. Najpierw potrzebny jest dostęp do Zdrowia w jego uprawnieniach."
+        },
+        "health.linked_account": {
+            "title": "Powiązane konto",
+            "text": "Łączy tę kartotekę zdrowia z członkiem rodziny, którego dotyczy, aby mógł dostać dostęp do własnej kartoteki. Dla osoby bez logowania zostaw Brak konta."
+        },
+        "health.self_access": {
+            "title": "Własna kartoteka",
+            "text": "Włączone: ten członek zawsze widzi i może zmieniać własną kartotekę, niezależnie od poziomów powyżej. Wyłącz tylko, gdy np. dziecko nie powinno otwierać własnej kartoteki."
+        },
+        "health.vaccination_next_due": {
+            "title": "Następny termin",
+            "text": "Kiedy przypada kolejna dawka lub dawka przypominająca. Członkowie, którzy mogą edytować kartotekę, dostaną przypomnienie przed tą datą; wymienia tylko osobę, nic medycznego."
+        },
+        "health.vaccination_mark_given": {
+            "title": "Oznacz jako podane",
+            "text": "Użyj, gdy podano kolejną dawkę: wpisujesz datę i nowy następny termin, a historia tego szczepienia zostaje zachowana."
+        },
+        "health.upload_files": {
+            "title": "Pliki",
+            "text": "PDF, JPG, PNG, WebP lub HEIC, każdy do 10 MB, po 10 plików naraz. Kartoteka osoby mieści do 200 dokumentów. Pliki są przechowywane prywatnie na serwerze."
+        },
+        "health.emergency_card": {
+            "title": "Karta awaryjna",
+            "text": "Jednostronicowe podsumowanie alergii, aktualnych leków i kontaktów awaryjnych, które można wydrukować lub pokazać lekarzowi. Zanim na nim polegasz, sprawdź, czy jest aktualne."
+        },
+        "health.archive": {
+            "title": "Archiwum",
+            "text": "Wpisy można usunąć na stałe tylko krótko po utworzeniu (72 godziny). Starsze są zamiast tego archiwizowane: ukryte wszędzie, ale zachowane, i możesz je tutaj przywrócić."
+        },
+        "health.ai_consent": {
+            "title": "AI dla tej osoby",
+            "text": "Domyślnie wyłączone. Gdy włączone, dokumenty tej osoby można wysłać do zewnętrznej firmy AI, która zaproponuje wpisy. Każdą propozycję sprawdzasz przed zapisem. Wyłączenie niczego nie usuwa."
+        },
+        "health.ai_run": {
+            "title": "Uruchom AI",
+            "text": "Wysyła ten jeden dokument do zewnętrznej firmy AI, aby go odczytała i zaproponowała wpisy. Nic nie zostanie zapisane, dopóki nie sprawdzisz i nie zaakceptujesz propozycji."
+        },
+        "health.export_format": {
+            "title": "Format eksportu",
+            "text": "Dla lekarza: strona do druku. Plik danych: uporządkowany JSON do przechowania. Dla AI: plik Markdown bez imienia i daty urodzenia; notatki są kopiowane bez zmian, więc sprawdź go przed udostępnieniem."
+        },
+        "health.export_unverified": {
+            "title": "Uwzględnij niesprawdzone dane z AI",
+            "text": "Dodaje wpisy zaproponowane przez AI, których nikt jeszcze nie potwierdził. Każdy jest w eksporcie oznaczony jako Niezweryfikowany, aby czytelnik wiedział, że nie był sprawdzony."
+        },
+        "security.totp": {
+            "title": "Aplikacja uwierzytelniająca",
+            "text": "Drugi krok po haśle: 6-cyfrowy kod z aplikacji w telefonie, zmieniający się co 30 sekund. Chroni Twoje konto, nawet gdy hasło wycieknie."
+        },
+        "security.passkeys": {
+            "title": "Klucze dostępu",
+            "text": "Zaloguj się odciskiem palca, twarzą lub blokadą ekranu zamiast kodu. Klucz dostępu zostaje na Twoim urządzeniu i działa tylko dla tej strony, więc nie da się go wyłudzić."
+        },
+        "security.recovery_codes": {
+            "title": "Kody odzyskiwania",
+            "text": "Jednorazowe kody, którymi zalogujesz się po utracie telefonu. Każdy działa raz. Przechowuj je w bezpiecznym miejscu; utworzenie nowych unieważnia stare."
+        },
+        "settings.security_requirement": {
+            "title": "Wymagaj weryfikacji dwuetapowej",
+            "text": "Gdy włączone, członkowie mogący otwierać Zdrowie lub Finanse muszą ustawić drugi krok (aplikację uwierzytelniającą lub klucz dostępu), zanim otworzą te moduły."
+        },
+        "settings.reconfirm_idle": {
+            "title": "Ponowne potwierdzenie po bezczynności",
+            "text": "Jak długo członek może być bezczynny w Zdrowiu lub Finansach, zanim aplikacja ponownie poprosi o potwierdzenie tożsamości. Czas podtrzymuje tylko aktywność w tych modułach."
+        },
+        "settings.reconfirm_sensitive": {
+            "title": "Ponowne potwierdzenie wrażliwych działań",
+            "text": "Jak długo po potwierdzeniu tożsamości ustawienia takie jak uprawnienia, zaproszenia i zabezpieczenia pozostają odblokowane, zanim trzeba potwierdzić ponownie."
+        },
+        "settings.invite_preset": {
+            "title": "Początkowy dostęp",
+            "text": "Gotowy zestaw uprawnień dla nowego członka: Rodzic, Dziecko, Dziadek lub Gość. Każdy moduł można potem dopracować w Członkach."
+        },
+        "settings.permission_levels": {
+            "title": "Poziomy uprawnień",
+            "text": "Brak: członek nie widzi modułu. Podgląd: może czytać. Edycja: może czytać i zmieniać. Zdrowie i Finanse są domyślnie ograniczone i rola administratora nie nadaje ich automatycznie."
+        },
+        "settings.preset_apply": {
+            "title": "Zastosuj ustawienie",
+            "text": "Wypełnia poziomy wszystkich modułów z wybranego ustawienia. Nic nie zostanie zapisane, dopóki nie klikniesz Zapisz uprawnienia, więc możesz jeszcze poprawić."
+        },
+        "settings.ai_agent_order": {
+            "title": "Kolejność narzędzi AI",
+            "text": "Dokumenty czyta pierwsze włączone narzędzie. Jeśli osiągnęło limit użycia, próbowane jest kolejne z listy. Kolejność zmienisz strzałkami."
+        },
+        "settings.ai_agent_model": {
+            "title": "Model AI",
+            "text": "Nazwa modelu, którego ma używać narzędzie. Zostaw puste, aby użyć domyślnego modelu narzędzia. Błędna nazwa powoduje błędy uruchomień, więc zmieniaj ją tylko, jeśli ją znasz."
+        },
+        "settings.ai_bulk": {
+            "title": "Zbiorcze ponowne przetwarzanie",
+            "text": "Ponownie czyta starsze dokumenty z pomocą AI, kilka dziennie. Najpierw sprawdź, co by się uruchomiło, potem rozpocznij. Zaakceptowane już propozycje nigdy się nie zmieniają. Widzisz tylko liczby."
+        },
+        "overview.system_status": {
+            "title": "Stan systemu",
+            "text": "Pokazuje, że działają kontrole w tle wysyłające przypomnienia. Jeśli pokrycie jest niskie lub żadna kontrola nie ruszyła, przypomnienia mogą się spóźniać; zapytaj osobę zarządzającą serwerem."
         }
     }
 }
