@@ -29,12 +29,13 @@ class HelpTexts
     /** Changes whenever any text changes; part of the once-prop key and of the cache keys, so every client reloads after an edit. */
     public function version(): int
     {
-        return (int) Cache::rememberForever(self::VERSION_KEY, fn () => (int) (microtime(true) * 1000));
+        // A plain counter, so the shared prop is identical for identical data (no clock in the response).
+        return (int) Cache::rememberForever(self::VERSION_KEY, fn () => 1);
     }
 
     public function flush(): void
     {
-        Cache::forever(self::VERSION_KEY, max($this->version() + 1, (int) (microtime(true) * 1000)));
+        Cache::forever(self::VERSION_KEY, $this->version() + 1);
     }
 
     /**

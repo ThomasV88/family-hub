@@ -101,7 +101,6 @@ it('restores a deleted row on the next sync and flushes the cache', function () 
     $before = $help->version();
     HelpText::find('tasks.visibility')->delete();
 
-    usleep(2000);
     Artisan::call('help:sync');
 
     expect(HelpText::find('tasks.visibility'))->not->toBeNull()

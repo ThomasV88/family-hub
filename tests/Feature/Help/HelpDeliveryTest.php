@@ -81,7 +81,6 @@ it('changes the once-prop key after an edit so clients reload the texts', functi
     $help = app(HelpTexts::class);
 
     $before = $this->actingAs($admin)->get('/settings/appearance')->viewData('page')['onceProps'];
-    usleep(2000);
     $help->update($admin, 'tasks.visibility', ['en' => 'Brand new text.'], []);
     $after = $this->actingAs($admin)->get('/settings/appearance')->viewData('page')['onceProps'];
 
