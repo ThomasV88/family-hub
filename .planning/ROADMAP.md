@@ -343,3 +343,94 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Medical Records | 0/TBD | Not started | - |
 | 8. AI Extraction Platform | 0/TBD | Not started | - |
 | 9. Multi-Agent, Quota and Bulk Re-generation | 0/TBD | Not started | - |
+
+### Phase 10: Profile settings and child accounts (issues #7, #6)
+
+**Goal:** Members can edit their own profile (name, photo shown in all avatars, read-only e-mail) and an admin can create child members directly, without an invitation and with direct sign-in disabled, so a child who cannot sign in (a 2-year-old) still appears in Wishlist and has a list managed by a parent.
+**Requirements**: GitHub #7 and #6 (see description)
+**Depends on:** Phase 9
+**Success Criteria** (what must be TRUE):
+1. #7: the account menu has a new item "Profile settings" above "Settings".
+2. #7: a member can change their display name; the e-mail address is shown but cannot be changed yet.
+3. #7: a member can add or replace a profile photo (reuse the existing private image pipeline: sanitized re-encode, no metadata) and it replaces the initials in every avatar across the app.
+4. #6: an admin can create a child member by direct account creation (no invitation); such an account can be marked "no direct sign-in" and then cannot sign in by any route (password, reset, passkey, invitation).
+5. #6: the child appears as a Wishlist owner and a parent/admin can add and manage wishes on the child's behalf; finance is out of scope for now and health stays separated from sign-in accounts as already decided.
+6. #6: owner asked Claude to propose the best design (discuss-phase decides it: a normal member row with a nullable credential and a login_disabled flag versus a separate non-account person type; permissions default to the Child preset, with managing parent link).
+7. Privacy tests prove a sign-in-disabled child account can never authenticate and never receives mail; profile photo files are not publicly reachable.
+
+Open decisions for discuss-phase: child-account data model and who manages it (guardian link); what happens when the child grows up and gets sign-in; whether profile photos use the same cache rules as wish images.
+**Commit rule:** every commit that resolves part of #7 and #6 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
+
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 10 to break down)
+
+### Phase 11: Shopping lists section Nákupy (issue #8)
+
+**Goal:** A new Shopping module where members create shared shopping lists from an item catalog (with images and units), assign a store chain, a responsible person and per-list contributor/viewer access, lock the list for shopping, mark items bought or unavailable, finish the shop into the archive and carry unavailable items into a new list, with e-mail sharing and push reminders.
+**Requirements**: GitHub #8 (see description)
+**Depends on:** Phase 10
+**Success Criteria** (what must be TRUE):
+1. Lists: create a list; add items through a pop-up with the item catalog (with images); a free-text name + quantity is always possible without adding to the catalog; quantities carry a unit (owner answer: yes, including measure units such as kg, l, pcs).
+2. Stores: a list can be assigned to a store chain; chains (name + logo) and the item catalog (with images) are managed in the section's own settings page.
+3. Access: each list has one responsible person (changeable any time), members who may contribute (add/edit items) and members who may only view; only authorised members can open a list; module permissions enforced server-side.
+4. Locking: only the responsible person can lock a list and (owner answer: yes) unlock it again; while locked, items cannot be added, removed or edited, and only the responsible person (owner answer) marks items Bought or Unavailable.
+5. Finishing: when every item is Bought or Unavailable, "Finish shopping" appears; finishing marks the list done and moves it to the archive.
+6. Unavailable carry-over: if unavailable items exist, ask "Some items could not be bought. Create a new shopping list from them?"; on yes a new OPEN list keeps store, responsible person and access rights and receives only the unbought items with quantities; the original stays archived.
+7. Copy: an existing or archived list can be copied into a new list (owner answer: yes).
+8. E-mail: a list can be sent by e-mail to share it outside the app.
+9. Reminders: a list can have a reminder date and time that sends a push notification, for now only to the responsible person (owner answer).
+10. Claude proposes further features and flags conflicts for owner decision before implementation (issue section 8): e.g. rights for archived lists, behaviour when a responsible person is removed, catalog deletion while used, e-mail content and privacy.
+
+Open decisions for discuss-phase: new module permission area, data model for catalog/units/stores, archive retention, e-mail content, notification preference integration, interaction with Phase 10 children as list members.
+**Commit rule:** every commit that resolves part of #8 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
+
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 11 to break down)
+
+### Phase 12: Recipe book section Receptár (issue #9)
+
+**Goal:** A new Recipes module where every member creates and manages own recipes (manually or from a URL read by AI), with photos, structured ingredients with units, step-by-step progress tracking, private/shared visibility and a link to Shopping to add a recipe's ingredients to a list.
+**Requirements**: GitHub #9 (see description)
+**Depends on:** Phase 11 (Shopping catalog and lists), Phase 8 (AI platform)
+**Success Criteria** (what must be TRUE):
+1. Create: manual recipe form, or paste a URL and the AI extracts the fields; the source URL is kept on the recipe; all auto-filled values are reviewable and editable before saving.
+2. Photos: one or more photos per recipe, one marked as main, shown in the overview.
+3. Overview: responsive grid of cards (photo + title), at most 3 per row, card opens the detail.
+4. Detail: photos, structured ingredients (name, quantity, unit such as g, kg, ml, l, pcs, tbsp, tsp) with per-item "prepared" ticks, steps each markable as done; ticks and step progress are stored per member so members never overwrite each other's cooking state.
+5. Shopping link: "Add to shopping list" creates a new list or adds to an existing open list, carries names, quantities and units, lets the user review/edit before confirming, and matches catalog items automatically when possible (otherwise adds a manual item).
+6. Sharing: a recipe is private or shared with other members; only the author edits it.
+7. Claude evaluates and recommends the suggested extras (servings with recalculation, prep time, categories, favourites, search/filter, notes, cooking history, meal planning) and asks the owner which to include.
+8. Risks analysed and answered in the plan: reliability of AI recipe extraction from URLs (and SSRF/untrusted page content handling in the worker), ingredient and unit recognition, catalog matching, servings recalculation, private versus shared access rules.
+
+Open decisions for discuss-phase: AI-from-URL needs the worker to fetch a web page (a new outbound path; Codex has web search disabled by design) and the provider data-use consent for recipes (non-medical); which suggested extras are in v1.
+**Commit rule:** every commit that resolves part of #9 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
+
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 12 to break down)
+
+### Phase 13: AI full-text OCR and document search (issue #11)
+
+**Goal:** Evaluate and, if it holds up, change AI document reading so the AI first transcribes all text of the document, stores the complete recognised text with the document for full-text search, then extracts the structured JSON from that text; also evaluate image pre-processing and measure whether it improves accuracy.
+**Requirements**: GitHub #11 (see description)
+**Depends on:** Phase 9 (AI platform and bulk re-generation)
+**Success Criteria** (what must be TRUE):
+1. Evaluate first, implement after the owner decides: how OCR works today, whether Codex adjusts contrast/brightness itself, and what pre-processing (contrast/brightness, denoise, deskew/perspective, sharpen, grayscale/binarise) actually helps.
+2. Measure OCR with and without image pre-processing on a labelled synthetic set and report accuracy, time and subscription-quota cost; recommend the best trade-off.
+3. Two-step reading: transcribe all text, store the complete recognised text with the document, then extract the structured JSON entries from that text (schema stays validated).
+4. Full-text search: users search documents by words in their content as well as by name/metadata, limited by the same per-person access rules as the document itself (no leakage across hidden persons, archived or unauthorised documents).
+5. Privacy decision recorded by the owner BEFORE implementation: the full recognised medical text is stored in the database (today only the extracted structured entries are stored). Decide access control, retention and deletion with the document, archive behaviour, exclusion from logs/exports, backup implications and the data-use notice; update the AI notice and the manual.
+6. Bulk re-generation can backfill text for existing documents within quota limits; running OCR is still an explicit per-document action with consent.
+
+Conflict to resolve with the owner: issue #11 reverses the current design rule that the full text is not kept (see the AI data-flow explanation given on 2026-11-17 and the extraction prompt's rule against free-form transcription); this needs an explicit decision, a prompt/schema version bump and a migration plan.
+**Commit rule:** every commit that resolves part of #11 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
+
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 13 to break down)
