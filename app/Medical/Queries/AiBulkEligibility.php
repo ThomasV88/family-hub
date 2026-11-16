@@ -78,7 +78,7 @@ final class AiBulkEligibility
     private function bucket(): string
     {
         return "CASE
-            WHEN d.kind NOT IN ('pdf', 'image') THEN 'unsupported'
+            WHEN d.kind NOT IN ('pdf', 'image', 'heic') THEN 'unsupported'
             WHEN NOT s.ai_consent THEN 'consent'
             WHEN EXISTS (SELECT 1 FROM medical_ai_extractions e JOIN medical_ai_decisions x ON x.extraction_id = e.id
                          WHERE e.document_id = d.id AND x.decision = 'accepted') THEN 'decided'

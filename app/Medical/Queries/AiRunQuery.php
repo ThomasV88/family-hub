@@ -102,7 +102,7 @@ class AiRunQuery
                 if ($document === null) {
                     return new StartResult('denied');
                 }
-                if (! in_array((string) $document->kind, ['pdf', 'image'], true)) {
+                if (! in_array((string) $document->kind, ['pdf', 'image', 'heic'], true)) {
                     return new StartResult('unsupported');
                 }
                 if (! AiConsent::allows($subjectId)) {

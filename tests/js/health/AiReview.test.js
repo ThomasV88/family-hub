@@ -245,8 +245,8 @@ describe('header', () => {
     });
 
     it('shows the pages-read line only when fewer pages were read than exist', () => {
-        mountPage({ extraction: extraction({ pagesRead: 10, pagesTotal: 12 }) });
-        expect($('[data-testid="pages-read"]').textContent).toBe('Only the first 10 pages were read.');
+        mountPage({ extraction: extraction({ pagesRead: 20, pagesTotal: 25 }) });
+        expect($('[data-testid="pages-read"]').textContent).toBe('Only the first 20 pages were read.');
         wrapper.unmount();
         mountPage({ extraction: extraction({ pagesRead: 12, pagesTotal: 12 }) });
         expect($('[data-testid="pages-read"]')).toBeNull();
@@ -520,7 +520,7 @@ describe('accessibility', () => {
         pending: {},
         accepted: { extraction: extraction({ sections: { visits: [item('visit-0', visit, { state: 'accepted', recordId: 'r1', edited: true })], medications: [item('medication-0', med, { state: 'rejected' })], allergies: [], vaccinations: [] } }) },
         superseded: { extraction: extraction({ readOnly: true }), newestExtractionId: NEWEST },
-        'consent off and pages': { consentOn: false, extraction: extraction({ pagesRead: 10, pagesTotal: 12 }) },
+        'consent off and pages': { consentOn: false, extraction: extraction({ pagesRead: 20, pagesTotal: 25 }) },
         pdf: { document: { id: DOC_ID, kind: 'pdf', title: 'Lab', pageCount: 3 } },
         card: { document: { id: DOC_ID, kind: 'heic', title: 'Scan', pageCount: null } },
         empty: { extraction: extraction({ sections: { visits: [], medications: [], allergies: [], vaccinations: [] } }) },
