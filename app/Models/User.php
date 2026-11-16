@@ -22,7 +22,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Passkeys\Contracts\PasskeyUser;
 
 #[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token', 'google_id', 'birth_date', 'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at'])]
+#[Hidden(['password', 'remember_token', 'google_id', 'birth_date', 'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at', 'photo_path', 'photo_thumb_path'])]
 class User extends Authenticatable implements HasLocalePreference, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
@@ -42,6 +42,8 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
             'birth_date' => 'date',
             'two_factor_confirmed_at' => 'datetime',
             'password_set' => 'boolean',
+            'sign_in_disabled' => 'boolean',
+            'photo_version' => 'integer',
         ];
     }
 
@@ -92,8 +94,23 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
         return in_array($this->locale, ['sk', 'pl', 'en'], true) ? $this->locale : null;
     }
 
+    /** The one answer to "may this row ever sign in or receive mail": a child (no e-mail) or a disabled account never may. */
+    public function canSignIn(): bool
+    {
+        return ! $this->sign_in_disabled && $this->email !== null;
+    }
+
+    public function routeNotificationForMail($notification = null): ?string
+    {
+        return $this->canSignIn() ? $this->email : null;
+    }
+
     public function sendPasswordResetNotification($token): void
     {
+        if (! $this->canSignIn()) {
+            return;
+        }
+
         $this->notify(new ResetPasswordNotification((string) $token));
     }
 
