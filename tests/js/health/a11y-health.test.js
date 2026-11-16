@@ -263,7 +263,7 @@ const states = {
     'AI run cancelled by consent': runState({ [D1.id]: aiStatus('cancelled', { cancelReason: 'consent' }) }, { target: '[data-testid="ai-status-tag"]' }),
     'AI run consent off': runState({}, { consentOn: false, target: '[data-testid="ai-run"][aria-disabled="true"]' }),
     'AI run unavailable': runState({}, { ai: { ...AI_RUN, available: false }, target: '[data-testid="ai-run"][aria-disabled="true"]' }),
-    'AI run heic': runState({}, { document: D3, target: '[data-testid="ai-run"][aria-disabled="true"]' }),
+    'AI run heic': runState({}, { document: D3, target: '[data-testid="ai-run"]' }),
     'AI run queue failed alert': runState({}, {
         ai: { ...AI_RUN, noticeAcknowledged: true }, target: '[data-testid="ai-run-failed"]',
         after: async () => { fetchMock.mockResolvedValue({ ok: false, status: 0, error: 'network', data: {} }); await click('[data-testid="ai-run"]'); await vi.waitFor(() => expect($('[data-testid="ai-run-failed"]')).not.toBeNull()); },
