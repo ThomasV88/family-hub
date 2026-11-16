@@ -27,6 +27,10 @@ class ReminderRecipients
 
     public function canSee(User $user, Task $task): bool
     {
+        if (! $user->canSignIn()) {
+            return false;
+        }
+
         // The gate caches levels per instance; a long-lived process must not trust a stale grant.
         $this->gate->forget($user);
 

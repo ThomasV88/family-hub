@@ -27,6 +27,7 @@ final class OccasionGivers
                 ->select('user_id')
                 ->where('module', Module::Wishlist->value)
                 ->where('level', '>=', AccessLevel::Edit->value))
+            ->where('users.sign_in_disabled', false)
             ->when($excluded !== [], fn ($q) => $q->whereNotIn('users.id', $excluded))
             ->orderBy('id')
             ->get();
@@ -41,6 +42,10 @@ final class OccasionGivers
 
     private function hasEdit(User $user): bool
     {
+        if (! $user->canSignIn()) {
+            return false;
+        }
+
         // Long-lived process: never trust a cached grant.
         $this->gate->forget($user);
 
