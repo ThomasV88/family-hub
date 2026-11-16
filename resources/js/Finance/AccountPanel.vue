@@ -10,6 +10,7 @@ import UiField from '../Components/ui/UiField.vue';
 import UiInput from '../Components/ui/UiInput.vue';
 import UiSelect from '../Components/ui/UiSelect.vue';
 import { CURRENCIES, parseMoney, toInputString } from './money.js';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // Admin account panel: metadata and "Visible to". Money fields exist only when the admin is ticked on the account
 // (account.opening is non-null); otherwise they are neither rendered nor sent.
@@ -115,15 +116,16 @@ function submit() {
                 />
             </UiField>
             <template v-if="showOpening">
-                <UiField :label="t('finance.acc.field_opening')" :error="err('opening_balance')">
+                <UiField :label="t('finance.acc.field_opening')" help="finance.account_opening" :error="err('opening_balance')">
                     <UiInput v-model="form.opening_balance" inputmode="decimal" autocomplete="off" />
                 </UiField>
                 <UiField :label="t('finance.acc.field_opening_date')" :error="err('balance_as_of')">
                     <UiInput v-model="form.balance_as_of" type="date" />
                 </UiField>
             </template>
-            <fieldset class="acc-panel__members">
+            <fieldset class="acc-panel__members help-fieldset">
                 <legend class="acc-panel__legend">{{ t('finance.acc.visible_legend') }}</legend>
+                <span class="help-corner"><HelpTip topic="finance.account_visibility" :label="t('finance.acc.visible_legend')" /></span>
                 <p class="acc-panel__hint">{{ t('finance.acc.visible_hint') }}</p>
                 <ul class="acc-panel__list" role="list">
                     <li v-for="member in members" :key="member.id">

@@ -14,6 +14,7 @@ import { useToast } from '../../Components/ui/useToast.js';
 import { securityDownload } from '../../Security/securityTransfer.js';
 import { saveBlob } from '../../Security/saveBlob.js';
 import { handleHealthRefusal } from '../../Health/healthRefusal.js';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 
 // Export form. Nothing is kept: the choices live in this component only, downloads are blobs in memory that are
 // handed to the browser and revoked at once, and the print option is a plain visit.
@@ -89,7 +90,10 @@ async function create() {
                     </div>
 
                     <div class="export__group">
-                        <p :id="ids.format" class="export__legend">{{ t('health.export.format_label') }}</p>
+                        <div class="help-head">
+                            <p :id="ids.format" class="export__legend">{{ t('health.export.format_label') }}</p>
+                            <HelpTip topic="health.export_format" :label="t('health.export.format_label')" />
+                        </div>
                         <div role="radiogroup" :aria-labelledby="ids.format" class="export__options">
                             <div class="export__option">
                                 <UiRadio v-model="format" value="print" :name="`${uid}-format`" :aria-describedby="`${ids.format}-print`" data-testid="format-print">{{ t('health.export.format_doctor') }}</UiRadio>
@@ -109,6 +113,7 @@ async function create() {
 
                     <div v-if="hasUnverified" class="export__option" data-testid="unverified-option">
                         <UiCheckbox v-model="includeUnverified" :aria-describedby="ids.unverified" data-testid="include-unverified">{{ t('health.export.include_unverified') }}</UiCheckbox>
+                        <HelpTip topic="health.export_unverified" :label="t('health.export.include_unverified')" />
                         <p :id="ids.unverified" class="export__hint">{{ t('health.export.include_unverified_hint') }}</p>
                     </div>
 

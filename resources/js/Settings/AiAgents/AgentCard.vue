@@ -11,6 +11,7 @@ import UiInput from '../../Components/ui/UiInput.vue';
 import UiSwitch from '../../Components/ui/UiSwitch.vue';
 import AiLoginHealthCard from '../AiCalls/AiLoginHealthCard.vue';
 import { agentName } from './agentNames.js';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 
 // Mirrors the server rule (ModelId::PATTERN, max 60). The server stays the authority.
 const MODEL_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,59}$/;
@@ -115,6 +116,7 @@ defineExpose({ check: () => health.value?.check() });
             <header class="agent__header">
                 <span class="agent__badge" aria-hidden="true">{{ agent.position }}</span>
                 <h3 :id="headingId" class="agent__name">{{ name }}</h3>
+                <HelpTip v-if="agent.position === 1" topic="settings.ai_agent_order" :label="t('settings.ai_agents.list_label')" />
                 <UiTag :variant="agent.enabled ? 'success' : 'neutral'" :icon="agent.enabled ? Check : Ban">{{ t(agent.enabled ? 'settings.ai_agents.on' : 'settings.ai_agents.off') }}</UiTag>
                 <span class="agent__saving" role="status">
                     <template v-if="busy"><Loader :size="16" :stroke-width="1.75" aria-hidden="true" />{{ t('settings.ai_agents.saving') }}</template>
@@ -167,7 +169,7 @@ defineExpose({ check: () => health.value?.check() });
 
                 <div class="agent__side">
                     <form class="agent__model" novalidate @submit.prevent="submitModel">
-                        <UiField :label="t('settings.ai_agents.model_label')" :hint="t('settings.ai_agents.model_helper')" :error="modelError">
+                        <UiField :label="t('settings.ai_agents.model_label')" help="settings.ai_agent_model" :hint="t('settings.ai_agents.model_helper')" :error="modelError">
                             <UiInput
                                 v-model="draft"
                                 autocomplete="off"

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import UiAlert from '../../Components/ui/UiAlert.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import UiConfirmDialog from '../../Components/ui/UiConfirmDialog.vue';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 
 // Step 4. Only counts are shown: no file name or row text exists after the commit.
 const props = defineProps({
@@ -40,6 +41,7 @@ function undo() {
             <UiButton v-if="committed" variant="primary" :href="transactionsHref">{{ t('finance.imp.view_tx') }}</UiButton>
             <UiButton variant="secondary" :href="anotherHref">{{ t('finance.imp.another') }}</UiButton>
             <UiButton v-if="committed && canEdit" variant="ghost" class="imp-done__undo" @click="confirmOpen = true">{{ t('finance.imp.undo') }}</UiButton>
+            <HelpTip v-if="committed && canEdit" topic="finance.import_undo" :label="t('finance.imp.undo')" />
         </div>
         <UiConfirmDialog
             v-model:open="confirmOpen"

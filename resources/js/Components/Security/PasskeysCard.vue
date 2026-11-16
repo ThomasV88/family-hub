@@ -16,6 +16,7 @@ import PasskeyNameDialog from './PasskeyNameDialog.vue';
 import PasskeyRemoveDialog from './PasskeyRemoveDialog.vue';
 import PasskeyRow from './PasskeyRow.vue';
 import ReauthPrompt from './ReauthPrompt.vue';
+import HelpTip from '../ui/HelpTip.vue';
 
 // The Passkeys card on Settings > Security. Adding a passkey (and removing one) needs the 10-minute security
 // confirmation: when it is stale the confirm form opens in a dialog BEFORE any options are fetched, and a 423 from
@@ -187,7 +188,10 @@ function removed(id) {
 
 <template>
     <UiCard class="passkeys" data-testid="passkeys-card">
-        <h2 id="security-passkeys-title" class="passkeys__heading">{{ t('passkey.title') }}</h2>
+        <div class="help-head">
+            <h2 id="security-passkeys-title" class="passkeys__heading">{{ t('passkey.title') }}</h2>
+            <HelpTip topic="security.passkeys" :label="t('passkey.title')" />
+        </div>
         <p class="passkeys__text">{{ t('passkey.body') }}</p>
 
         <UiAlert v-if="error" :variant="error === 'passkey.error.cancelled' ? 'info' : 'danger'" class="passkeys__alert" data-testid="passkey-alert">

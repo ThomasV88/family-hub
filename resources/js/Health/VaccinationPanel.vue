@@ -10,6 +10,7 @@ import UiConfirmDialog from '../Components/ui/UiConfirmDialog.vue';
 import UiDetailPanel from '../Components/ui/UiDetailPanel.vue';
 import UiField from '../Components/ui/UiField.vue';
 import UiInput from '../Components/ui/UiInput.vue';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // Create, edit, mark-as-given and read-only presentation of one vaccination. The draft lives in component memory only:
 // no Inertia form-state persistence and no browser storage. Free text is interpolated, never rendered as HTML.
@@ -149,12 +150,13 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
                 <UiField :label="`${t('health.vaccination.given_on')} ${t('health.required')}`" :error="errors.given_on">
                     <UiInput v-model="form.given_on" type="date" />
                 </UiField>
-                <UiField :label="t('health.vaccination.next_due')" :hint="t('health.vaccination.next_due_hint')" :error="errors.next_due_on">
+                <UiField :label="t('health.vaccination.next_due')" help="health.vaccination_next_due" :hint="t('health.vaccination.next_due_hint')" :error="errors.next_due_on">
                     <UiInput v-model="form.next_due_on" type="date" />
                 </UiField>
             </form>
             <section v-if="editing" class="vacc-mark" data-testid="vaccination-mark">
                 <UiButton v-if="!marking" variant="secondary" data-testid="vaccination-mark-open" @click="startMark">{{ t('health.vaccination.mark_given') }}</UiButton>
+                <HelpTip v-if="!marking" topic="health.vaccination_mark_given" :label="t('health.vaccination.mark_given')" />
                 <form v-else novalidate data-testid="vaccination-mark-form" class="vacc-form" @submit.prevent="submitMark" @keydown.enter="onEnter">
                     <UiField :label="`${t('health.vaccination.given_on')} ${t('health.required')}`" :error="markErrors.given_on">
                         <UiInput v-model="mark.given_on" type="date" />

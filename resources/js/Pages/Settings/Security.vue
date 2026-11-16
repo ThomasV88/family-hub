@@ -12,6 +12,7 @@ import RegenerateCodesDialog from '../../Components/Security/RegenerateCodesDial
 import PasskeysCard from '../../Components/Security/PasskeysCard.vue';
 import TotpDisableDialog from '../../Components/Security/TotpDisableDialog.vue';
 import TwoFactorSetupDialog from '../../Components/Security/TwoFactorSetupDialog.vue';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 
 const props = defineProps({
     sections: { type: Array, default: () => [] },
@@ -98,7 +99,10 @@ function setupFinished() {
         </UiCard>
 
         <UiCard class="security__card" data-testid="totp-card">
-            <h2 id="security-totp-title" class="security__heading">{{ t('security.totp.title') }}</h2>
+            <div class="help-head">
+                <h2 id="security-totp-title" class="security__heading">{{ t('security.totp.title') }}</h2>
+                <HelpTip topic="security.totp" :label="t('security.totp.title')" />
+            </div>
             <p class="security__text">{{ t('security.totp.body') }}</p>
             <UiButton v-if="!status.totp" variant="primary" data-testid="setup-totp" @click="setupOpen = true">
                 {{ t('twofactor.cta.setup') }}
@@ -121,7 +125,10 @@ function setupFinished() {
         </section>
 
         <UiCard v-if="status.totp" class="security__card" data-testid="recovery-card">
-            <h2 class="security__heading">{{ t('twofactor.recovery.title') }}</h2>
+            <div class="help-head">
+                <h2 class="security__heading">{{ t('twofactor.recovery.title') }}</h2>
+                <HelpTip topic="security.recovery_codes" :label="t('twofactor.recovery.title')" />
+            </div>
             <p class="security__text" data-testid="remaining">
                 <template v-if="status.recoveryRemaining === 0">{{ t('twofactor.recovery.none_left') }}</template>
                 <template v-else>{{ t('twofactor.recovery.remaining', { n: status.recoveryRemaining }, status.recoveryRemaining) }}</template>

@@ -10,6 +10,7 @@ import UiSelect from '../Components/ui/UiSelect.vue';
 import UiTextarea from '../Components/ui/UiTextarea.vue';
 import { categoryLabel } from './labels.js';
 import { exponentOf, parseMoney, toInputString } from './money.js';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // Reusable transaction form: the transaction panel uses it for new and edit, the bill panel (05-14) for 'record'.
 // Edit payloads never carry account_id, kind, from_account_id or to_account_id: they are immutable server-side.
@@ -218,7 +219,10 @@ defineExpose({ save, canSave, dirty, processing, focusAmount, reset });
 
             <div class="tx-form__fields">
                 <div v-if="mode === 'new' || editing" class="tx-form__block">
-                    <span class="tx-form__label" aria-hidden="true">{{ t('finance.field.kind') }}</span>
+                    <span class="help-head">
+                        <span class="tx-form__label" aria-hidden="true">{{ t('finance.field.kind') }}</span>
+                        <HelpTip v-if="!editing" topic="finance.transfer" :label="t('finance.field.kind')" />
+                    </span>
                     <div v-if="!editing" ref="kindRoot" class="tx-form__kinds" role="radiogroup" :aria-label="t('finance.field.kind')">
                         <UiChip
                             v-for="(option, index) in kindOptions"

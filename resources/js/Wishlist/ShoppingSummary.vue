@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiCard from '../Components/ui/UiCard.vue';
 import { formatMoney } from './money.js';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // "Your shopping": the viewer's own reservations on other people's lists. Data comes from the JSON endpoint
 // GET /wishlist/shopping (never from page props). Renders nothing when empty or when the request fails.
@@ -39,7 +40,10 @@ const share = (item) => (item.cobuy_state && item.cobuy_state !== 'none' && item
 <template>
     <UiCard v-if="visible" class="shopping" data-testid="shopping-summary">
         <div class="shopping__head">
-            <h3 class="shopping__title"><ShoppingBag :size="20" :stroke-width="1.75" aria-hidden="true" />{{ t('wishlist.shopping.title') }}</h3>
+            <div class="help-head">
+                <h3 class="shopping__title"><ShoppingBag :size="20" :stroke-width="1.75" aria-hidden="true" />{{ t('wishlist.shopping.title') }}</h3>
+                <HelpTip topic="wishlist.shopping" :label="t('wishlist.shopping.title')" />
+            </div>
             <UiButton variant="ghost" size="sm" :aria-expanded="expanded ? 'true' : 'false'" :aria-controls="regionId" @click="expanded = !expanded">{{ expanded ? t('wishlist.shopping.hide') : t('wishlist.shopping.show') }}</UiButton>
         </div>
         <div v-show="expanded" :id="regionId" class="shopping__body">

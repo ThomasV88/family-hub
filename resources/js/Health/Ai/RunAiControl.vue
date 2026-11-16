@@ -12,6 +12,7 @@ import AiNoticeDialog from './AiNoticeDialog.vue';
 import AiProvenanceLine from './AiProvenanceLine.vue';
 import AiStatusTag from './AiStatusTag.vue';
 import { formatWhen, isPast } from './aiWhen.js';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 
 // Start, follow and cancel the AI reading of one document. Model-free: only run state is rendered, never anything
 // the AI produced. Nothing is stored in the browser; the server answer always wins over the props it was given.
@@ -243,6 +244,7 @@ const pollFailed = computed(() => props.poller.failedPolls.value >= 3);
                         data-testid="ai-run"
                         @click="begin"
                     >{{ runLabel }}</UiButton>
+                    <HelpTip topic="health.ai_run" :label="t('health.ai.run.run')" />
                 </template>
             </div>
             <template v-if="!waiting">

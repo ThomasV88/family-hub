@@ -12,6 +12,7 @@ import DueSoonCard from '../Dashboard/DueSoonCard.vue';
 import UpcomingOccasionsCard from '../Dashboard/UpcomingOccasionsCard.vue';
 import HomeStillToPayCard from '../Dashboard/HomeStillToPayCard.vue';
 import { visibleModules } from '../Shell/modules.js';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 const { t, d, n } = useI18n();
 const page = usePage();
@@ -65,7 +66,10 @@ function runCheck() {
             </div>
             <UiCard :title="t('dashboard.system_status')" class="home__status">
                 <section data-testid="heartbeat">
-                    <h3 class="home__status-title">{{ t('home.status_title') }}</h3>
+                    <div class="help-head">
+                        <h3 class="home__status-title">{{ t('home.status_title') }}</h3>
+                        <HelpTip topic="overview.system_status" :label="t('home.status_title')" />
+                    </div>
                     <p v-if="heartbeat.last_recorded_at" data-testid="heartbeat-last">
                         {{ t('home.last_check', { time: lastTime }) }} ({{ t('home.source.' + heartbeat.last_source) }})
                     </p>

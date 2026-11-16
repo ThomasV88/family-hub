@@ -8,6 +8,7 @@ import { INTL_LOCALES } from '../i18n.js';
 import MoneyAmount from './MoneyAmount.vue';
 import { formatDay } from './labels.js';
 import { financeUrl } from './financeQuery.js';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // Still-to-pay card for one currency block of the server's `recurring.stillToPay`. Renders nothing without a block;
 // the parent omits it entirely when the viewer has no visible recurring items.
@@ -24,6 +25,7 @@ const href = () => financeUrl('/finance/recurring', { account: props.finance.sel
 
 <template>
     <UiCard v-if="block" :title="t('finance.still.title')" data-testid="still-to-pay">
+        <template #action><HelpTip topic="finance.still_to_pay" :label="t('finance.still.title')" /></template>
         <p v-if="(finance.currencies ?? []).length > 1" class="still__currency">{{ t('finance.currency_heading', { code: block.currency }) }}</p>
         <template v-if="block.count > 0">
             <p class="still__sum"><MoneyAmount :minor="block.sumMinor" :currency="block.currency" /></p>

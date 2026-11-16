@@ -12,6 +12,7 @@ import { securityFetch } from '../../Security/securityFetch.js';
 import BulkHistoryTable from './BulkHistoryTable.vue';
 import BulkProgress from './BulkProgress.vue';
 import { useBulkStatus } from './useBulkStatus.js';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 
 // Screen 3: plan block (scope, cap, mandatory dry run, freshness rule, guarded Start) or the active run, plus
 // counts-only history. The dry-run token lives in component memory only; a reload discards it. Nothing is kept
@@ -300,6 +301,7 @@ const problemText = computed(() => ({
 
 <template>
     <UiCard :title="t('settings.ai_bulk.heading')" :heading-level="2">
+        <template #action><HelpTip topic="settings.ai_bulk" :label="t('settings.ai_bulk.heading')" /></template>
         <section class="bulk" :aria-busy="checking || starting || status.refreshing.value ? 'true' : undefined" data-testid="bulk-panel">
             <p class="bulk__intro">{{ t('settings.ai_bulk.intro') }}</p>
 

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import UiAvatar from '../Components/ui/UiAvatar.vue';
 import UiCheckbox from '../Components/ui/UiCheckbox.vue';
 import UiRadio from '../Components/ui/UiRadio.vue';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 const props = defineProps({
     modelValue: { type: String, default: 'family' },
@@ -40,6 +41,7 @@ function toggle(id, on) {
     </p>
     <fieldset v-else class="visibility" :aria-describedby="error ? `${uid}-error` : undefined">
         <legend class="visibility__label">{{ t('todo.visibility.label') }}</legend>
+        <span class="visibility__tip"><HelpTip topic="tasks.visibility" :label="t('todo.visibility.label')" /></span>
         <div class="visibility__cards">
             <div v-for="o in options" :key="o.value" class="visibility__card" :class="{ 'is-selected': modelValue === o.value }">
                 <UiRadio :model-value="modelValue" :value="o.value" :name="`${uid}-visibility`" @update:model-value="(v) => emit('update:modelValue', v)">
@@ -67,7 +69,8 @@ function toggle(id, on) {
 </template>
 
 <style scoped>
-.visibility { border: 0; margin: 0 0 var(--space-4); padding: 0; min-width: 0; }
+.visibility { position: relative; border: 0; margin: 0 0 var(--space-4); padding: 0; min-width: 0; }
+.visibility__tip { position: absolute; inset-block-start: 0; inset-inline-end: var(--space-2); }
 .visibility__label { font-size: var(--text-sm); font-weight: 600; line-height: 1.4; padding: 0; }
 .visibility__cards { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-1); }
 .visibility__card { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3); background: var(--color-surface); }

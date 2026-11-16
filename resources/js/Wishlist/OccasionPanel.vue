@@ -13,6 +13,7 @@ import UiRadio from '../Components/ui/UiRadio.vue';
 import UiSelect from '../Components/ui/UiSelect.vue';
 import UiSwitch from '../Components/ui/UiSwitch.vue';
 import { formatDayMonth } from './occasionIcons.js';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // Two modes: 'dates' (birth date and name day of one member) and 'custom' (create or edit a custom occasion).
 const props = defineProps({
@@ -277,7 +278,7 @@ defineExpose({ guard, dirty });
                         <UiInput ref="firstField" v-model="form.birth_date" type="date" :max="today" />
                     </UiField>
 
-                    <UiField :label="t('occasions.dates.calendar')">
+                    <UiField :label="t('occasions.dates.calendar')" help="occasions.calendar">
                         <UiSelect v-model="form.calendar" :options="calendarOptions" />
                     </UiField>
 
@@ -314,8 +315,11 @@ defineExpose({ guard, dirty });
                     <UiField :label="t('occasions.custom.field_date')" required :error="errors.date">
                         <UiInput v-model="form.date" type="date" />
                     </UiField>
-                    <UiSwitch v-model="form.yearly">{{ t('occasions.custom.field_yearly') }}</UiSwitch>
-                    <UiField :label="t('occasions.custom.field_for')">
+                    <div class="help-head">
+                        <UiSwitch v-model="form.yearly">{{ t('occasions.custom.field_yearly') }}</UiSwitch>
+                        <HelpTip topic="occasions.yearly" :label="t('occasions.custom.field_yearly')" />
+                    </div>
+                    <UiField :label="t('occasions.custom.field_for')" help="occasions.for">
                         <UiSelect v-model="form.owner_id" :options="ownerOptions" />
                     </UiField>
                 </div>

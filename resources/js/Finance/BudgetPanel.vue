@@ -131,7 +131,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
                 <UiSelect v-model="form.currency" :options="currencyOptions" />
             </UiField>
 
-            <UiField :label="t('finance.budget.field_limit')" required :hint="t('finance.budget.hint', { month: monthLabel })" :error="errors.amount">
+            <UiField :label="t('finance.budget.field_limit')" help="finance.budget_limit" required :hint="t('finance.budget.hint', { month: monthLabel })" :error="errors.amount">
                 <div class="bud-form__amount">
                     <UiInput v-model="form.amount" inputmode="decimal" autocomplete="off" />
                     <span class="bud-form__suffix" data-testid="currency-suffix">{{ form.currency }}</span>

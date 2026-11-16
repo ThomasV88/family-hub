@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { ArchiveRestore } from '@lucide/vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiDetailPanel from '../Components/ui/UiDetailPanel.vue';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // The Archive section of one person: archived records grouped by type, each with a Restore action. The server sends this only
 // to members who can change the person. Labels are the record's own text, interpolated, never rendered as HTML.
@@ -37,7 +38,7 @@ function restore(item) {
 <template>
     <UiDetailPanel :open="open" :title="t('health.archive.title')" @update:open="(v) => (v ? null : emit('close'))">
         <div data-testid="archive-panel" class="archive">
-            <p class="archive__intro">{{ t('health.archive.intro') }}</p>
+            <p class="archive__intro">{{ t('health.archive.intro') }} <HelpTip topic="health.archive" :label="t('health.archive.title')" /></p>
             <p v-if="groups.length === 0" class="archive__empty" data-testid="archive-empty">{{ t('health.archive.empty') }}</p>
             <section v-for="group in groups" :key="group.type" class="archive__group" :data-testid="`archive-group-${group.type}`">
                 <h3 class="archive__heading">{{ t(`health.archive.type_${group.type}`) }}</h3>

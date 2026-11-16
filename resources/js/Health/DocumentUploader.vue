@@ -192,7 +192,7 @@ function leave() {
 
 <template>
     <div class="uploader" data-testid="document-uploader">
-        <UiField :id="inputId" :label="t('health.upload.files')" :hint="hint" :error="groupError">
+        <UiField :id="inputId" :label="t('health.upload.files')" help="health.upload_files" :hint="hint" :error="groupError">
             <input
                 :id="inputId"
                 type="file"

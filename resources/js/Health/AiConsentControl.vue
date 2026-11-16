@@ -8,6 +8,7 @@ import UiButton from '../Components/ui/UiButton.vue';
 import UiDialog from '../Components/ui/UiDialog.vue';
 import UiSwitch from '../Components/ui/UiSwitch.vue';
 import UiTag from '../Components/ui/UiTag.vue';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // Per-person AI consent. Off is the safe default: turning on always goes through the consent dialog, turning off is
 // immediate. The switch shows the saved value only, so a failed request leaves it where it was.
@@ -80,6 +81,7 @@ function cancel() {
             >
                 <Bot :size="16" :stroke-width="1.75" aria-hidden="true" /> {{ t('health.ai.label') }}
             </UiSwitch>
+            <HelpTip topic="health.ai_consent" :label="t('health.ai.label')" />
         </template>
         <UiTag v-else :variant="value ? 'success' : 'neutral'" :icon="Bot" data-testid="ai-tag">{{ value ? t('health.ai.tag_on') : t('health.ai.tag_off') }}</UiTag>
         <p :id="explainId" class="ai-consent__text">{{ t('health.ai.explain') }}</p>

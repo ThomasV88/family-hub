@@ -12,6 +12,7 @@ import UiField from '../Components/ui/UiField.vue';
 import UiInput from '../Components/ui/UiInput.vue';
 import UiSelect from '../Components/ui/UiSelect.vue';
 import UiSwitch from '../Components/ui/UiSwitch.vue';
+import HelpTip from '../Components/ui/HelpTip.vue';
 import UiTextarea from '../Components/ui/UiTextarea.vue';
 import ReminderField from './ReminderField.vue';
 import RecurrenceFields from './RecurrenceFields.vue';
@@ -375,6 +376,7 @@ defineExpose({ guard, dirty });
             <template v-else>
                 <UiButton v-if="!creating && abilities.delete" variant="ghost" :icon="Trash2" class="todo-panel__delete" @click="deleteOpen = true">{{ t('todo.delete.action') }}</UiButton>
                 <UiButton v-if="canSkip" variant="secondary" :icon="SkipForward" @click="skip">{{ t('todo.skip') }}</UiButton>
+                <HelpTip v-if="canSkip" topic="tasks.skip" :label="t('todo.skip')" />
                 <UiButton variant="secondary" @click="cancel">{{ t('todo.cancel') }}</UiButton>
                 <UiButton variant="primary" :disabled="!canSave" :loading="processing" @click="save">{{ t('todo.save') }}</UiButton>
             </template>

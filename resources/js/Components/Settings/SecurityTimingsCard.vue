@@ -88,7 +88,7 @@ async function save() {
         <p class="timings-card__intro">{{ t('settings.security.intro') }}</p>
         <form novalidate class="timings-card__form" data-testid="timings-form" @submit.prevent="save">
             <div v-for="key in ['idle', 'confirm']" :key="key" class="timings-card__row">
-                <UiField :label="t(`settings.security.${key}_label`)" :hint="t(`settings.security.${key}_help`)" :error="fields[key].error" class="timings-card__value">
+                <UiField :label="t(`settings.security.${key}_label`)" :help="key === 'idle' ? 'settings.reconfirm_idle' : 'settings.reconfirm_sensitive'" :hint="t(`settings.security.${key}_help`)" :error="fields[key].error" class="timings-card__value">
                     <UiInput v-model="fields[key].value" inputmode="numeric" autocomplete="off" :disabled="busy" :data-testid="`timing-${key}`" />
                 </UiField>
                 <UiField :label="t('settings.security.unit_label')" label-visually-hidden class="timings-card__unit">

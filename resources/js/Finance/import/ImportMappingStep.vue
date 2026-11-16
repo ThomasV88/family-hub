@@ -10,6 +10,7 @@ import UiSelect from '../../Components/ui/UiSelect.vue';
 import UiSwitch from '../../Components/ui/UiSwitch.vue';
 import { useFrameWidth } from '../../Shell/shellState.js';
 import { dateFormatLabel, delimiterKey, encodingLabel } from './importApi.js';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 
 // Step 2. The sample table shows the first rows exactly as decoded, text only (cells that start with = + - @ stay
 // plain text). Every parse-relevant change is reported to the parent, which re-sends the file to the preview route.
@@ -74,7 +75,10 @@ const cell = (row, i) => row[i] ?? '';
 
 <template>
     <form ref="root" class="imp-map" data-testid="import-step-columns" @submit.prevent="emit('submit')" @keydown.enter="onEnter">
-        <h2 class="imp-map__title">{{ t('finance.imp.map_title') }}</h2>
+        <div class="help-head">
+            <h2 class="imp-map__title">{{ t('finance.imp.map_title') }}</h2>
+            <HelpTip topic="finance.import_mapping" :label="t('finance.imp.map_title')" />
+        </div>
         <UiAlert v-if="alert" variant="warning" live>{{ alert }}</UiAlert>
         <UiAlert v-if="errors.general" variant="danger" live>{{ errors.general }}</UiAlert>
         <p v-if="suggested?.encoding" class="imp-map__suggest" data-testid="import-suggested">{{ t('finance.imp.enc_suggested', { encoding: encodingLabel(suggested.encoding, t) }) }}</p>
@@ -131,7 +135,10 @@ const cell = (row, i) => row[i] ?? '';
         <UiSwitch :model-value="settings.hasHeader" @update:model-value="set({ hasHeader: $event }, true)">{{ t('finance.imp.has_header') }}</UiSwitch>
 
         <div role="radiogroup" :aria-label="t('finance.imp.amount_mode')" class="imp-map__modes">
-            <span class="imp-map__sub" aria-hidden="true">{{ t('finance.imp.amount_mode') }}</span>
+            <span class="help-head">
+                <span class="imp-map__sub" aria-hidden="true">{{ t('finance.imp.amount_mode') }}</span>
+                <HelpTip topic="finance.import_amounts" :label="t('finance.imp.amount_mode')" />
+            </span>
             <UiRadio name="imp-amount-mode" value="single" :model-value="settings.amountMode" @update:model-value="set({ amountMode: $event })">{{ t('finance.imp.amount_single') }}</UiRadio>
             <UiRadio name="imp-amount-mode" value="split" :model-value="settings.amountMode" @update:model-value="set({ amountMode: $event })">{{ t('finance.imp.amount_split') }}</UiRadio>
             <UiRadio name="imp-amount-mode" value="indicator" :model-value="settings.amountMode" @update:model-value="set({ amountMode: $event })">{{ t('finance.imp.amount_indicator') }}</UiRadio>

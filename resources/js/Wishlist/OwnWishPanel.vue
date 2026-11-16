@@ -15,6 +15,7 @@ import UiTextarea from '../Components/ui/UiTextarea.vue';
 import LinksEditor from './LinksEditor.vue';
 import WishImage from './WishImage.vue';
 import { isValidPrice, normalizePrice } from './money.js';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // Create and edit form for the owner and designated managers. Props are the wish and the list owner only.
 const props = defineProps({
@@ -320,6 +321,7 @@ defineExpose({ guard, dirty });
                             <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" hidden data-testid="image-input" @change="onImagePicked" />
                             <UiButton variant="secondary" size="sm" :icon="Upload" :disabled="!canUpload" @click="pickImage">{{ t('wishlist.image.upload') }}</UiButton>
                             <UiButton v-if="canLoad" variant="secondary" size="sm" :icon="Link" @click="loadFromLink">{{ t('wishlist.image.load') }}</UiButton>
+                            <HelpTip topic="wishlist.image" :label="t('wishlist.image.upload')" />
                             <UiButton v-if="canRemove" variant="ghost" size="sm" :icon="Trash2" :loading="imageBusy" @click="removeImage">{{ t('wishlist.image.remove') }}</UiButton>
                         </div>
                     </div>
@@ -363,6 +365,7 @@ defineExpose({ guard, dirty });
         <template #footer>
             <UiButton v-if="!creating" variant="ghost" :icon="Trash2" class="wish-panel__delete" @click="deleteOpen = true">{{ t('wishlist.delete.action') }}</UiButton>
             <UiButton v-if="!creating && !received" variant="secondary" :icon="Check" @click="markReceived">{{ t('wishlist.received.mark') }}</UiButton>
+            <HelpTip v-if="!creating && !received" topic="wishlist.received" :label="t('wishlist.received.mark')" />
             <UiButton variant="secondary" @click="requestClose">{{ t('wishlist.close') }}</UiButton>
             <UiButton v-if="!received" variant="primary" :disabled="!canSave" :loading="processing" @click="save">{{ t('wishlist.save') }}</UiButton>
         </template>

@@ -11,6 +11,7 @@ import UiButton from '../ui/UiButton.vue';
 import UiAlert from '../ui/UiAlert.vue';
 import UiTag from '../ui/UiTag.vue';
 import UiConfirmDialog from '../ui/UiConfirmDialog.vue';
+import HelpTip from '../ui/HelpTip.vue';
 
 // Who can open this person (None / View / Change per member), the linked account and the own-record switch.
 // Names and levels only. The linked-account select never marks members that are linked to another person.
@@ -95,7 +96,7 @@ function save() {
         <form class="pap" @submit.prevent="save">
             <p class="pap__person">{{ person.name }}</p>
             <UiAlert v-if="failed" variant="danger" live>{{ t('health.access.failed') }}</UiAlert>
-            <p class="pap__legend">{{ t('health.access.legend') }}</p>
+            <p class="pap__legend">{{ t('health.access.legend') }} <HelpTip topic="health.access_levels" :label="t('health.access.panel_title')" /></p>
 
             <div v-for="m in members" :key="m.id" class="pap__member" role="radiogroup" :aria-label="m.name">
                 <span class="pap__name">
@@ -113,11 +114,14 @@ function save() {
                 </p>
             </div>
 
-            <UiField :label="t('health.access.linked_account')" :error="linkError || undefined">
+            <UiField :label="t('health.access.linked_account')" help="health.linked_account" :error="linkError || undefined">
                 <UiSelect v-model="userId" :options="accountOptions" />
             </UiField>
             <div v-if="userId !== ''" class="pap__self">
-                <UiSwitch v-model="selfAccess">{{ t('health.access.self_switch') }}</UiSwitch>
+                <div class="help-head">
+                    <UiSwitch v-model="selfAccess">{{ t('health.access.self_switch') }}</UiSwitch>
+                    <HelpTip topic="health.self_access" :label="t('health.access.self_switch')" />
+                </div>
                 <p class="pap__hint">{{ t('health.access.self_hint') }}</p>
             </div>
 
