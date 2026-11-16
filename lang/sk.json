@@ -2417,5 +2417,35 @@
         "tip": "Tip:",
         "warning": "Dôležité:",
         "example": "Príklad:"
+    },
+    "help": {
+        "tip_label": "Nápoveda: {topic}",
+        "admin_hint": "Administrátor: Ctrl+klik (na Macu Cmd+klik) upraví tento text.",
+        "editor": {
+            "title": "Upraviť text nápovedy",
+            "where": "Kde sa zobrazuje",
+            "intro": "Čistý text, 1 až {max} znakov, jednoduchým jazykom. Zmenu uvidia všetci hneď. Bez lomených zátvoriek.",
+            "language": {
+                "sk": "Slovenčina",
+                "pl": "Poľština",
+                "en": "Angličtina"
+            },
+            "text_label": "Text nápovedy v jazyku: {language}",
+            "current_language": "Váš aktuálny jazyk",
+            "edited": "Upravené",
+            "counter": "{n} / {max} znakov",
+            "reset": "Obnoviť predvolený text",
+            "reset_name": "Obnoviť predvolený text v jazyku: {language}",
+            "save": "Uložiť",
+            "cancel": "Zrušiť",
+            "saved": "Text nápovedy je uložený",
+            "loading": "Načítava sa text nápovedy",
+            "load_failed": "Text nápovedy sa nepodarilo načítať.",
+            "error_empty": "Napíšte aspoň jeden znak.",
+            "error_too_long": "Použite najviac {max} znakov.",
+            "error_markup": "Nepoužívajte lomené zátvorky.",
+            "error_invalid": "Text sa neprijal. Každý jazyk potrebuje 1 až {max} znakov a žiadne lomené zátvorky.",
+            "error_failed": "Text nápovedy sa nepodarilo uložiť. Skúste to znova."
+        }
     }
 }

@@ -2417,5 +2417,35 @@
         "tip": "Wskazówka:",
         "warning": "Ważne:",
         "example": "Przykład:"
+    },
+    "help": {
+        "tip_label": "Pomoc: {topic}",
+        "admin_hint": "Administrator: Ctrl+klik (na Macu Cmd+klik) pozwala edytować ten tekst.",
+        "editor": {
+            "title": "Edytuj tekst pomocy",
+            "where": "Gdzie się pojawia",
+            "intro": "Zwykły tekst, od 1 do {max} znaków, prostym językiem. Zmianę widzą od razu wszyscy. Bez nawiasów ostrych.",
+            "language": {
+                "sk": "Słowacki",
+                "pl": "Polski",
+                "en": "Angielski"
+            },
+            "text_label": "Tekst pomocy w języku: {language}",
+            "current_language": "Twój aktualny język",
+            "edited": "Zmieniony",
+            "counter": "{n} / {max} znaków",
+            "reset": "Przywróć domyślny",
+            "reset_name": "Przywróć domyślny tekst w języku: {language}",
+            "save": "Zapisz",
+            "cancel": "Anuluj",
+            "saved": "Tekst pomocy zapisany",
+            "loading": "Wczytywanie tekstu pomocy",
+            "load_failed": "Nie udało się wczytać tekstu pomocy.",
+            "error_empty": "Wpisz co najmniej jeden znak.",
+            "error_too_long": "Użyj najwyżej {max} znaków.",
+            "error_markup": "Nie używaj nawiasów ostrych.",
+            "error_invalid": "Tekst nie został przyjęty. Każdy język wymaga od 1 do {max} znaków i nie może zawierać nawiasów ostrych.",
+            "error_failed": "Nie udało się zapisać tekstu pomocy. Spróbuj ponownie."
+        }
     }
 }

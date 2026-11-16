@@ -20,6 +20,7 @@ export const TOKEN_PAIRS = [
     pair('color-danger', 'color-surface', 4.5, 'Error text on cards'),
     pair('color-success', 'color-bg', 4.5, 'Success text on page'),
     pair('color-success', 'color-surface', 4.5, 'Success text on cards'),
+    pair('color-success', 'color-surface-2', 4.5, 'Help mark on a subtle surface'),
     pair('color-warn-text', 'color-warn-bg', 4.5, 'Staging banner'),
     pair('color-border-strong', 'color-bg', 3, 'Control border on page'),
     pair('color-border-strong', 'color-surface', 3, 'Control border on cards'),

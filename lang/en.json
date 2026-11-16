@@ -2417,5 +2417,35 @@
         "tip": "Tip:",
         "warning": "Important:",
         "example": "Example:"
+    },
+    "help": {
+        "tip_label": "Help: {topic}",
+        "admin_hint": "Administrator: Ctrl+click (Cmd+click on a Mac) to edit this text.",
+        "editor": {
+            "title": "Edit help text",
+            "where": "Where it appears",
+            "intro": "Plain text, 1 to {max} characters, in friendly everyday language. Everyone sees a change straight away. No angle brackets.",
+            "language": {
+                "sk": "Slovak",
+                "pl": "Polish",
+                "en": "English"
+            },
+            "text_label": "Help text in {language}",
+            "current_language": "Your current language",
+            "edited": "Edited",
+            "counter": "{n} / {max} characters",
+            "reset": "Reset to default",
+            "reset_name": "Reset the {language} text to its default",
+            "save": "Save",
+            "cancel": "Cancel",
+            "saved": "Help text saved",
+            "loading": "Loading the help text",
+            "load_failed": "The help text could not be loaded.",
+            "error_empty": "Write at least one character.",
+            "error_too_long": "Use at most {max} characters.",
+            "error_markup": "Do not use angle brackets.",
+            "error_invalid": "The text was not accepted. Each language needs 1 to {max} characters and no angle brackets.",
+            "error_failed": "The help text could not be saved. Try again."
+        }
     }
 }
