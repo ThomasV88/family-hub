@@ -68,7 +68,7 @@ it('writes only the first N pages into the directory', function () {
 });
 
 it('returns nothing and leaves no process when the timeout is hit', function () {
-    config(['ai.pdf.timeout' => 0.001, 'ai.pdf.info_timeout' => 0.001]);
+    config(['ai.pdf.timeout' => 0.001, 'ai.pdf.pages_timeout' => 0.001, 'ai.pdf.info_timeout' => 0.001]);
     $r = new PdfRasterizer;
     $pdf = ($this->pdf)(2);
 
@@ -118,4 +118,10 @@ it('answers a page past the end with null from a single pdftoppm spawn, without 
     config(['ai.pdf.info_timeout' => 0.000001]);
 
     expect($r->page($pdf, 3))->toBeNull()->and($r->page($pdf, 2))->not->toBeNull();
+});
+
+it('reads up to 20 pages for AI, keeps the viewer limit at 50 and gives the worker batch its own longer timeout', function () {
+    expect((int) config('ai.pdf.max_pages'))->toBe(20)
+        ->and((int) config('ai.pdf.view_max_pages'))->toBe(50)
+        ->and((float) config('ai.pdf.pages_timeout'))->toBeGreaterThan((float) config('ai.pdf.timeout'));
 });

@@ -69,14 +69,28 @@ return [
 
     // [ASSUMED] tune after the first real run (research A8)
     'pdf' => [
-        'max_pages' => 10,
+        // Pages the AI reads (owner decision 2026-11-16: 20). The viewer limit view_max_pages is a separate setting.
+        'max_pages' => 20,
         'view_max_pages' => 50,
         'scale' => 1800,
+        // Single-page spawn of the web viewer.
         'timeout' => 20,
+        // The worker rasterizes all pages in one pdftoppm spawn, so it gets a longer bound than one viewer page.
+        'pages_timeout' => 60,
         'info_timeout' => 5,
         // ulimit -v (virtual) of pdfinfo/pdftoppm. Below the container limits: app 192m, ai-worker 768m (MEM_AI in compose.server.yaml, which also holds the 192m /ai-work tmpfs).
         'ulimit_kb' => 131072,
         'ulimit_kb_worker' => 262144,
+    ],
+
+    // [ASSUMED] tune after the first real run (research A8). HEIC photos are decoded to a JPEG inside the job work dir only.
+    'heic' => [
+        'binary' => env('AI_HEIF_BINARY', 'heif-dec'),
+        'timeout' => 30,
+        // ulimit -v (virtual) of the decoder; libde265 threads need more address space than poppler.
+        'ulimit_kb' => 524288,
+        // Cap of the decoded intermediate JPEG that is handed to ImageProcessor.
+        'max_jpeg_bytes' => 33554432,
     ],
 
     // [ASSUMED] case-insensitive substrings of an auth failure; frozen in 08-22 from a real transcript.

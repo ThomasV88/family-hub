@@ -159,8 +159,8 @@ it('turns an image run into a ready proposal with call row, audit row and a clea
     expect(AiAgentStatus::find('codex')->last_success_at)->not->toBeNull();
 });
 
-it('hands at most ten page images of a PDF to the CLI and never the PDF itself', function () {
-    $s = ejSetup('pdf', MedicalFileFixtures::pdfPages(12));
+it('hands at most twenty page images of a PDF to the CLI and never the PDF itself', function () {
+    $s = ejSetup('pdf', MedicalFileFixtures::pdfPages(25));
     $record = sys_get_temp_dir().'/ej-rec-'.bin2hex(random_bytes(4));
     $this->files[] = $record;
     ejUse(FakeCodex::recording($record, json_encode(ejPayload())));
@@ -173,12 +173,12 @@ it('hands at most ten page images of a PDF to the CLI and never the PDF itself',
     preg_match_all('/page-\d+\.jpg/', $args, $m);
     $row = ejRow($s['run']);
 
-    expect(array_unique($m[0]))->toHaveCount(10)
+    expect(array_unique($m[0]))->toHaveCount(20)
         ->and($ls)->not->toContain('doc.pdf')
-        ->and($ls)->toContain('page-10.jpg')
+        ->and($ls)->toContain('page-20.jpg')
         ->and($row->status)->toBe('ready')
-        ->and($row->pages_read)->toBe(10)
-        ->and($row->pages_total)->toBe(12);
+        ->and($row->pages_read)->toBe(20)
+        ->and($row->pages_total)->toBe(25);
 });
 
 it('records the model the CLI reports, and default for a run ended before the spawn', function () {
@@ -344,18 +344,104 @@ it('refuses to spawn when a per-token key is in the worker environment', functio
     expect(ejRow($s['run'])->failure_code)->toBe('preflight')->and(file_exists($record))->toBeFalse();
 });
 
-it('fails HEIC as unsupported and an unreadable PDF as unreadable without spawning', function () {
+/** A fake heif-dec: copies the given bytes to its second argument (the output path). */
+function ejFakeDecoder(string $jpegBytes): string
+{
+    $src = sys_get_temp_dir().'/ej-dec-src-'.bin2hex(random_bytes(6));
+    file_put_contents($src, $jpegBytes);
+    $path = sys_get_temp_dir().'/ej-dec-'.bin2hex(random_bytes(6));
+    file_put_contents($path, "#!/bin/sh\ncp ".escapeshellarg($src)." \"\$2\"\n");
+    chmod($path, 0700);
+    $GLOBALS['ej_scripts'][] = $src;
+    $GLOBALS['ej_scripts'][] = $path;
+    config(['ai.heic.binary' => $path]);
+
+    return $path;
+}
+
+/** Everything under the medical disk root with its content hash. */
+function ejDiskState(): array
+{
+    $out = [];
+    foreach (Storage::disk('medical')->allFiles() as $f) {
+        $out[$f] = md5((string) Storage::disk('medical')->get($f));
+    }
+    ksort($out);
+
+    return $out;
+}
+
+it('converts a HEIC to a metadata-free doc.jpg in the work dir only and hands only that to the CLI', function () {
+    $s = ejSetup('heic');
+    ejFakeDecoder(\Tests\Support\ImageFixtures::jpegWithExif(1, 64, 48));
+    $record = sys_get_temp_dir().'/ej-rec-'.bin2hex(random_bytes(4));
+    $copy = sys_get_temp_dir().'/ej-copy-'.bin2hex(random_bytes(4));
+    $this->files[] = $record;
+    $this->files[] = $copy;
+    // Also keep a copy of doc.jpg as the CLI saw it.
+    ejUse(FakeCodex::recording($record, json_encode(ejPayload())));
+    $wrapper = sys_get_temp_dir().'/ej-wrap-'.bin2hex(random_bytes(4));
+    file_put_contents($wrapper, "#!/bin/sh\ncp doc.jpg ".escapeshellarg($copy)."\nexec ".escapeshellarg(config('ai.codex.binary'))." \"\$@\"\n");
+    chmod($wrapper, 0700);
+    $GLOBALS['ej_scripts'][] = $wrapper;
+    config(['ai.codex.binary' => $wrapper]);
+    $before = ejDiskState();
+
+    ejRun($s['run']);
+
+    $log = (string) file_get_contents($record);
+    [$args, $rest] = explode('---ENV---', $log, 2);
+    $ls = explode('---STDIN---', explode('---LS---', $rest, 2)[1], 2)[0];
+    $jpeg = (string) file_get_contents($copy);
+    $row = ejRow($s['run']);
+
+    expect($row->status)->toBe('ready')->and($row->pages_read)->toBe(1)->and($row->pages_total)->toBe(1)
+        ->and($args)->toContain('doc.jpg')->and($args)->not->toContain('.heic')
+        ->and($ls)->toContain('doc.jpg')->and($ls)->not->toContain('doc.heic')->and($ls)->not->toContain('d.jpg')
+        ->and(substr($jpeg, 0, 3))->toBe("\xFF\xD8\xFF")
+        ->and($jpeg)->not->toContain('Exif')
+        ->and(ejDiskState())->toBe($before)
+        ->and(glob($this->root.'/*'))->toBe([]);
+    $tmp = sys_get_temp_dir().'/ej-meta-'.bin2hex(random_bytes(4)).'.jpg';
+    $this->files[] = $tmp;
+    file_put_contents($tmp, $jpeg);
+    $exif = @exif_read_data($tmp);
+    expect($exif === false || ! array_key_exists('GPSLatitude', $exif))->toBeTrue();
+});
+
+it('fails a HEIC the decoder cannot read as unreadable without spawning', function (string $decoder) {
+    $record = sys_get_temp_dir().'/ej-rec-'.bin2hex(random_bytes(4));
+    $this->files[] = $record;
+    ejUse(FakeCodex::recording($record, json_encode(ejPayload())));
+    $bin = sys_get_temp_dir().'/ej-dec-'.bin2hex(random_bytes(6));
+    file_put_contents($bin, "#!/bin/sh\n".$decoder."\n");
+    chmod($bin, 0700);
+    $GLOBALS['ej_scripts'][] = $bin;
+    config(['ai.heic.binary' => $bin, 'ai.heic.timeout' => 1]);
+
+    $h = ejSetup('heic');
+    ejRun($h['run']);
+    $row = ejRow($h['run']);
+
+    expect($row->failure_code)->toBe('unreadable_document')
+        ->and(file_exists($record))->toBeFalse()
+        ->and(glob($this->root.'/*'))->toBe([]);
+})->with([
+    'exit 1' => ['echo secret-path "$1" >&2; exit 1'],
+    'no file' => ['exit 0'],
+    'garbage' => ['echo not-an-image > "$2"'],
+    'hang' => ['while :; do sleep 1; done'],
+]);
+
+it('fails an unreadable PDF as unreadable without spawning', function () {
     $record = sys_get_temp_dir().'/ej-rec-'.bin2hex(random_bytes(4));
     $this->files[] = $record;
     ejUse(FakeCodex::recording($record, json_encode(ejPayload())));
 
-    $h = ejSetup('heic');
-    ejRun($h['run']);
     $p = ejSetup('pdf', 'not a pdf at all');
     ejRun($p['run']);
 
-    expect(ejRow($h['run'])->failure_code)->toBe('unsupported_document')
-        ->and(ejRow($p['run'])->failure_code)->toBe('unreadable_document')
+    expect(ejRow($p['run'])->failure_code)->toBe('unreadable_document')
         ->and(file_exists($record))->toBeFalse()
         ->and(glob($this->root.'/*'))->toBe([]);
 });

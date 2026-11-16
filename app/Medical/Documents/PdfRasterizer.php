@@ -72,7 +72,7 @@ final class PdfRasterizer
             $p = $this->process(
                 ['pdftoppm', '-f', '1', '-l', (string) $k, '-jpeg', '-jpegopt', 'quality=82',
                     '-scale-to', (string) (int) config('ai.pdf.scale'), $absPdf, $tmp.'/p'],
-                (float) config('ai.pdf.timeout'),
+                (float) config('ai.pdf.pages_timeout'),
                 $tmp,
                 'worker',
             );

@@ -11,6 +11,7 @@ use App\Medical\Ai\Agents\AgentInput;
 use App\Medical\Ai\Agents\AgentRegistry;
 use App\Medical\Ai\Work\WorkDir;
 use App\Medical\AiConsent;
+use App\Medical\Documents\HeicConverter;
 use App\Medical\Documents\MedicalDocumentStore;
 use App\Medical\Documents\PdfRasterizer;
 use App\Medical\Queries\AiJobQuery;
@@ -119,6 +120,18 @@ class RunExtractionJob implements ShouldQueue
 
         if ($document['kind'] === 'image') {
             if (! $store->copyTo($document['path'], $workDir->file('doc.jpg'))) {
+                return $query->finishFailed($id, FailureCode::UnreadableDocument, $label, 0) ? 'failed' : null;
+            }
+            $images = ['doc.jpg'];
+        } elseif ($document['kind'] === 'heic') {
+            // The photo is decoded into a metadata-free JPEG in this work dir only: nothing is stored, the original on the
+            // medical disk stays as it is, and the CLI only ever sees doc.jpg (never the HEIC).
+            $copied = $store->copyTo($document['path'], $workDir->file('doc.heic'));
+            $converted = $copied && (new HeicConverter)->toJpeg($workDir->file('doc.heic'), $workDir->file('doc.jpg'));
+            @unlink($workDir->file('doc.heic'));
+            if (! $converted) {
+                @unlink($workDir->file('doc.jpg'));
+
                 return $query->finishFailed($id, FailureCode::UnreadableDocument, $label, 0) ? 'failed' : null;
             }
             $images = ['doc.jpg'];

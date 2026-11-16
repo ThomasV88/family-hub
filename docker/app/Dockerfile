@@ -107,6 +107,11 @@ RUN set -eux; \
     ln -s /opt/codex/bin/codex /usr/local/bin/codex; \
     ln -s /opt/copilot/bin/copilot /usr/local/bin/copilot; \
     mkdir -p /codex /copilot /ai-work
+# HEIC decoder for the AI run only (HeicConverter): heif-dec from libheif-tools, whose dependencies bring the libde265 HEVC
+# decoder. The web `app` never converts, so this stays out of `base`. The build fails when no HEVC decoder is listed.
+RUN set -eux; \
+    apk add --no-cache libheif-tools; \
+    heif-dec --list-decoders | grep -qi hevc
 
 # ---- ai-worker-dev: bind-mounted code, non-root `app` user ----
 FROM ai-runtime AS ai-worker-dev
