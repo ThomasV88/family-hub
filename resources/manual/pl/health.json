@@ -116,6 +116,7 @@
         { "type": "list", "items": [
           "Każda osoba ma przełącznik **Zezwól AI na czytanie dokumentów tej osoby**. Domyślnie jest wyłączony. Decyduje członek, który może zmieniać tę osobę, i przed włączeniem widzi wyraźne pytanie. Możesz go wyłączyć w każdej chwili.",
           "AI nigdy nie uruchamia się sama na dokumencie. Ktoś naciska **Uruchom AI** i widzi komunikat z nazwą firmy, do której dokument zostanie wysłany.",
+          "AI odczytuje pliki PDF do ich pierwszych 20 stron oraz zdjęcia, w tym zdjęcia HEIC z iPhone'a. Zdjęcie HEIC jest zamieniane na serwerze na zwykły obraz tylko na potrzeby uruchomienia AI; zapisany oryginał nie jest zmieniany, a dane o miejscu i aparacie nie są wysyłane.",
           "Gdy sugestie są gotowe, naciśnij **Sprawdź sugestie**. Nic nie jest zapisywane, dopóki nie naciśniesz **Zaakceptuj** przy wpisie. Możesz go **Edytuj** albo **Odrzuć**.",
           "Wszystko, co zasugerowała AI, jest oznaczone jako **Niezweryfikowane**, dopóki człowiek nie naciśnie **Oznacz jako zweryfikowane**. AI może się mylić, więc zawsze porównuj z dokumentem.",
           "Jeśli AI jest wyłączona dla osoby, nowe uruchomienie się nie rozpocznie, a oczekujące uruchomienia zostaną zatrzymane."
