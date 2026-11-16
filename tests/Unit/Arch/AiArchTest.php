@@ -45,7 +45,7 @@ const AI_ARCH_PROCESS_PATTERNS = [
     "'pdfinfo'" => "/'pdfinfo'/",
 ];
 
-const AI_ARCH_PROCESS_ALLOWED = ['Medical/Ai/CodexRunner.php', 'Medical/Ai/CopilotRunner.php', 'Medical/Documents/PdfRasterizer.php', 'Medical/Ai/Preflight.php'];
+const AI_ARCH_PROCESS_ALLOWED = ['Medical/Ai/CodexRunner.php', 'Medical/Ai/CopilotRunner.php', 'Medical/Documents/PdfRasterizer.php', 'Medical/Documents/HeicConverter.php', 'Medical/Ai/Preflight.php'];
 
 // Where Copilot's environment variable names and fixed login location may be spelled out. WorkDir names '/copilot' only
 // to refuse a work dir that overlaps the login volume (added in 09-08).
@@ -101,7 +101,7 @@ function aiArchViolations(array $sources, array $patterns, array $allowed = []):
     return $bad;
 }
 
-it('spawns processes only in the runners, PdfRasterizer and Preflight', function () {
+it('spawns processes only in the runners, PdfRasterizer, HeicConverter and Preflight', function () {
     expect(aiArchViolations(aiArchSources(), AI_ARCH_PROCESS_PATTERNS, AI_ARCH_PROCESS_ALLOWED))->toBe([]);
 });
 
