@@ -1,0 +1,335 @@
+{
+    "version": 1,
+    "topics": [
+        {
+            "key": "tasks.visibility",
+            "area": "tasks",
+            "screen": "task_panel",
+            "field": "visibility"
+        },
+        {
+            "key": "tasks.recurrence",
+            "area": "tasks",
+            "screen": "task_panel",
+            "field": "recurrence"
+        },
+        {
+            "key": "tasks.repeat_from",
+            "area": "tasks",
+            "screen": "task_panel",
+            "field": "repeat_from"
+        },
+        {
+            "key": "tasks.reminder",
+            "area": "tasks",
+            "screen": "task_panel",
+            "field": "reminder"
+        },
+        {
+            "key": "tasks.skip",
+            "area": "tasks",
+            "screen": "task_panel",
+            "field": "skip"
+        },
+        {
+            "key": "wishlist.reservation",
+            "area": "wishlist",
+            "screen": "gift_panel",
+            "field": "reservation"
+        },
+        {
+            "key": "wishlist.cobuy",
+            "area": "wishlist",
+            "screen": "gift_panel",
+            "field": "cobuy"
+        },
+        {
+            "key": "wishlist.share",
+            "area": "wishlist",
+            "screen": "gift_panel",
+            "field": "share"
+        },
+        {
+            "key": "wishlist.image",
+            "area": "wishlist",
+            "screen": "wish_panel",
+            "field": "image"
+        },
+        {
+            "key": "wishlist.links",
+            "area": "wishlist",
+            "screen": "wish_panel",
+            "field": "links"
+        },
+        {
+            "key": "wishlist.received",
+            "area": "wishlist",
+            "screen": "wish_panel",
+            "field": "received"
+        },
+        {
+            "key": "wishlist.shopping",
+            "area": "wishlist",
+            "screen": "wishlist_page",
+            "field": "shopping"
+        },
+        {
+            "key": "occasions.calendar",
+            "area": "wishlist",
+            "screen": "occasion_panel",
+            "field": "name_day_calendar"
+        },
+        {
+            "key": "occasions.yearly",
+            "area": "wishlist",
+            "screen": "occasion_panel",
+            "field": "yearly"
+        },
+        {
+            "key": "occasions.for",
+            "area": "wishlist",
+            "screen": "occasion_panel",
+            "field": "for"
+        },
+        {
+            "key": "notifications.gift_reminders",
+            "area": "account",
+            "screen": "notifications",
+            "field": "gift_reminders"
+        },
+        {
+            "key": "settings.wishlist_managers",
+            "area": "settings",
+            "screen": "members_wishlist",
+            "field": "managers"
+        },
+        {
+            "key": "finance.transfer",
+            "area": "finance",
+            "screen": "transaction_form",
+            "field": "kind"
+        },
+        {
+            "key": "finance.category_type",
+            "area": "finance",
+            "screen": "category_panel",
+            "field": "type"
+        },
+        {
+            "key": "finance.account_visibility",
+            "area": "finance",
+            "screen": "account_panel",
+            "field": "visible_to"
+        },
+        {
+            "key": "finance.account_opening",
+            "area": "finance",
+            "screen": "account_panel",
+            "field": "opening_balance"
+        },
+        {
+            "key": "finance.recurring_matching",
+            "area": "finance",
+            "screen": "recurring_panel",
+            "field": "matching_hints"
+        },
+        {
+            "key": "finance.bill_match",
+            "area": "finance",
+            "screen": "bill_panel",
+            "field": "match"
+        },
+        {
+            "key": "finance.budget_limit",
+            "area": "finance",
+            "screen": "budget_panel",
+            "field": "monthly_limit"
+        },
+        {
+            "key": "finance.still_to_pay",
+            "area": "finance",
+            "screen": "overview",
+            "field": "still_to_pay"
+        },
+        {
+            "key": "finance.import_profile",
+            "area": "finance",
+            "screen": "import",
+            "field": "bank_profile"
+        },
+        {
+            "key": "finance.import_mapping",
+            "area": "finance",
+            "screen": "import",
+            "field": "columns"
+        },
+        {
+            "key": "finance.import_amounts",
+            "area": "finance",
+            "screen": "import",
+            "field": "amounts"
+        },
+        {
+            "key": "finance.import_review",
+            "area": "finance",
+            "screen": "import",
+            "field": "review"
+        },
+        {
+            "key": "finance.import_undo",
+            "area": "finance",
+            "screen": "import",
+            "field": "undo"
+        },
+        {
+            "key": "health.access_levels",
+            "area": "settings",
+            "screen": "health_person_access",
+            "field": "levels"
+        },
+        {
+            "key": "health.linked_account",
+            "area": "settings",
+            "screen": "health_person_access",
+            "field": "linked_account"
+        },
+        {
+            "key": "health.self_access",
+            "area": "settings",
+            "screen": "health_person_access",
+            "field": "own_record"
+        },
+        {
+            "key": "health.vaccination_next_due",
+            "area": "health",
+            "screen": "vaccination_panel",
+            "field": "next_due"
+        },
+        {
+            "key": "health.vaccination_mark_given",
+            "area": "health",
+            "screen": "vaccination_panel",
+            "field": "mark_given"
+        },
+        {
+            "key": "health.upload_files",
+            "area": "health",
+            "screen": "document_upload",
+            "field": "files"
+        },
+        {
+            "key": "health.emergency_card",
+            "area": "health",
+            "screen": "person_record",
+            "field": "emergency_card"
+        },
+        {
+            "key": "health.archive",
+            "area": "health",
+            "screen": "archive",
+            "field": "archive"
+        },
+        {
+            "key": "health.ai_consent",
+            "area": "health",
+            "screen": "person_record",
+            "field": "ai_consent"
+        },
+        {
+            "key": "health.ai_run",
+            "area": "health",
+            "screen": "ai_run",
+            "field": "run"
+        },
+        {
+            "key": "health.export_format",
+            "area": "health",
+            "screen": "export",
+            "field": "format"
+        },
+        {
+            "key": "health.export_unverified",
+            "area": "health",
+            "screen": "export",
+            "field": "include_unverified"
+        },
+        {
+            "key": "security.totp",
+            "area": "account",
+            "screen": "security_page",
+            "field": "authenticator"
+        },
+        {
+            "key": "security.passkeys",
+            "area": "account",
+            "screen": "security_page",
+            "field": "passkeys"
+        },
+        {
+            "key": "security.recovery_codes",
+            "area": "account",
+            "screen": "security_page",
+            "field": "recovery_codes"
+        },
+        {
+            "key": "settings.security_requirement",
+            "area": "settings",
+            "screen": "members_security",
+            "field": "require_second_factor"
+        },
+        {
+            "key": "settings.reconfirm_idle",
+            "area": "settings",
+            "screen": "members_security",
+            "field": "reconfirm_idle"
+        },
+        {
+            "key": "settings.reconfirm_sensitive",
+            "area": "settings",
+            "screen": "members_security",
+            "field": "reconfirm_sensitive"
+        },
+        {
+            "key": "settings.invite_preset",
+            "area": "settings",
+            "screen": "invite_dialog",
+            "field": "starting_access"
+        },
+        {
+            "key": "settings.permission_levels",
+            "area": "settings",
+            "screen": "members_permissions",
+            "field": "levels"
+        },
+        {
+            "key": "settings.preset_apply",
+            "area": "settings",
+            "screen": "members_permissions",
+            "field": "apply_preset"
+        },
+        {
+            "key": "settings.ai_agent_order",
+            "area": "settings",
+            "screen": "ai_agents",
+            "field": "order"
+        },
+        {
+            "key": "settings.ai_agent_model",
+            "area": "settings",
+            "screen": "ai_agents",
+            "field": "model"
+        },
+        {
+            "key": "settings.ai_bulk",
+            "area": "settings",
+            "screen": "ai_agents",
+            "field": "bulk"
+        },
+        {
+            "key": "overview.system_status",
+            "area": "overview",
+            "screen": "home",
+            "field": "system_status"
+        }
+    ]
+}

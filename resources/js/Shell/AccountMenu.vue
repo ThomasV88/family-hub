@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { CircleUser, LogOut, Palette, Settings } from '@lucide/vue';
+import { BookOpen, CircleUser, LogOut, Palette, Settings } from '@lucide/vue';
 import UiMenu from '../Components/ui/UiMenu.vue';
 import { currentSubscription, disable } from '../push.js';
 import { THEME_OPTIONS, getThemePreference, setThemePreference } from '../theme.js';
@@ -23,6 +23,7 @@ const items = computed(() => {
     const list = [
         ...(user ? [{ type: 'header', key: 'account-header', label: user.name, sublabel: user.email }] : []),
         ...(user ? [{ type: 'item', key: 'settings', label: t('account.settings'), icon: Settings }] : []),
+        ...(user ? [{ type: 'item', key: 'manual', label: t('nav.manual'), icon: BookOpen }] : []),
         { type: 'radio-group', key: 'language', label: t('nav.language'), value: page.props.locale ?? 'en', options: LANGUAGES },
         { type: 'radio-group', key: 'theme', label: t('theme.label'), value: theme.value, options: THEME_OPTIONS.map((value) => ({ value, label: t(`theme.${value}`) })) },
     ];
@@ -42,6 +43,7 @@ function onSelect({ key, value }) {
         setThemePreference(value);
         theme.value = value;
     } else if (key === 'settings') router.visit('/settings');
+    else if (key === 'manual') router.visit('/manual');
     else if (key === 'style') router.visit('/_style');
     else if (key === 'logout') logout();
 }

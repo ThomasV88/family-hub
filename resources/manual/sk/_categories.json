@@ -1,0 +1,9 @@
+{
+  "categories": [
+    { "id": "start", "title": "Začíname" },
+    { "id": "modules", "title": "Používanie aplikácie" },
+    { "id": "account", "title": "Váš účet" },
+    { "id": "admin", "title": "Pre správcu" },
+    { "id": "help", "title": "Pomoc a prehľady" }
+  ]
+}

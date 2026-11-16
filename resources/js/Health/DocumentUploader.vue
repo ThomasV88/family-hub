@@ -110,6 +110,7 @@ async function run() {
             if (visitId.value !== '') body.append('visit_id', visitId.value);
             const result = await securityUpload(`/health/people/${props.personId}/documents`, body, {
                 signal: controller.signal,
+                replay: true,
                 onProgress: (fraction) => { next.progress = fraction; },
             });
             controller = null;
@@ -191,7 +192,7 @@ function leave() {
 
 <template>
     <div class="uploader" data-testid="document-uploader">
-        <UiField :id="inputId" :label="t('health.upload.files')" :hint="hint" :error="groupError">
+        <UiField :id="inputId" :label="t('health.upload.files')" help="health.upload_files" :hint="hint" :error="groupError">
             <input
                 :id="inputId"
                 type="file"

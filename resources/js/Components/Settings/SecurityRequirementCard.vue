@@ -9,6 +9,7 @@ import UiButton from '../ui/UiButton.vue';
 import ReauthForm from '../Security/ReauthForm.vue';
 import { useToast } from '../ui/useToast.js';
 import { securityFetch } from '../../Security/securityFetch.js';
+import HelpTip from '../ui/HelpTip.vue';
 
 // Requirement switch (UI-SPEC Screen 9 + amendment A3). Saves immediately when the admin's security window is
 // fresh; otherwise the switch reverts and "Confirm it's you" opens in place, then the change is retried.
@@ -80,6 +81,7 @@ function signInAgain() {
 
 <template>
     <UiCard :title="t('members.security.card_title')" class="requirement-card">
+        <template #action><HelpTip topic="settings.security_requirement" :label="t('members.security.card_title')" /></template>
         <UiSwitch :model-value="shown" :aria-busy="busy ? 'true' : 'false'" aria-describedby="requirement-help" data-testid="requirement-switch" @update:model-value="change">
             {{ t('members.security.require_label') }}
         </UiSwitch>

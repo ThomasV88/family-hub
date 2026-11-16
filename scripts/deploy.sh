@@ -5,7 +5,7 @@
 # started afterwards and never gates the deploy or the rollback.
 #
 # Order: guards -> pull -> postgres -> encrypted pre-migrate backup (restic, backup.sh) -> migrate
-#        (one-shot owner-role container) -> [staging reseed + audit] -> certificate -> up (healthchecks)
+#        (one-shot owner-role container) -> help:sync -> [staging reseed + audit] -> certificate -> up (healthchecks)
 #        -> .last-good-tag -> ai-worker (non-gating). Migrations never run without a fresh backup. If `up` fails, the previous
 #        good tag is started again. Migrations are additive in this project; a destructive migration
 #        needs a manual restore from the `pre-migrate` restic snapshot (restore-drill.sh documents it).
@@ -237,6 +237,15 @@ main() {
   if ! dc --profile migrate run --rm --no-deps -T migrate; then
     err "Migration failed. The previous version keeps running; recover from the pre-migrate snapshot if needed."
     exit 1
+  fi
+
+  # Contextual help (the "?" tips): insert missing keys, refresh unedited default texts, keep admin edits, report orphans.
+  # Idempotent, runtime role (the table is read/write for fh_app), runs on every deploy, staging and production.
+  log "Syncing contextual help texts"
+  # A failure is reported but does not stop the release: the app falls back to the default texts of the registry when a row is
+  # missing, so no tip is ever empty, and the next deploy syncs again.
+  if ! dc run --rm --no-deps -T app php artisan help:sync; then
+    err "WARNING: help:sync failed; the app shows the default help texts until the next successful sync."
   fi
 
   if [ "$reseed" = 1 ]; then

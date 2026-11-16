@@ -21,7 +21,7 @@ it('refuses a stale proof with 423 for JSON and a redirect for browsers, without
     $user = User::factory()->create();
     $before = AuditEntry::count();
 
-    $this->actingAs($user)->getJson('/test-probe/recent')->assertStatus(423)->assertExactJson(['error' => 'confirm_required']);
+    $this->actingAs($user)->getJson('/test-probe/recent')->assertStatus(423)->assertJson(['error' => 'confirm_required']);
     $this->actingAs($user)->get('/test-probe/recent')->assertRedirect('/confirm-access')
         ->assertSessionHas('url.intended', '/test-probe/recent');
     $this->actingAs($user)->withHeaders(['X-Inertia' => 'true', 'X-Inertia-Version' => (string) Inertia::getVersion()])->getJson('/test-probe/recent')->assertRedirect('/confirm-access');
@@ -29,14 +29,14 @@ it('refuses a stale proof with 423 for JSON and a redirect for browsers, without
     expect(AuditEntry::count())->toBe($before);
 });
 
-it('honours the 10 minute window', function () {
+it('honours the one hour window', function () {
     $this->useRealSensitiveSession();
     $user = User::factory()->create();
-    $at = now()->subMinutes(5)->getTimestamp();
+    $at = now()->subMinutes(30)->getTimestamp();
 
     $this->actingAs($user)->withSession(['auth.password_confirmed_at' => $at])->get('/test-probe/recent')->assertOk();
 
-    $stale = now()->subMinutes(11)->getTimestamp();
+    $stale = now()->subMinutes(61)->getTimestamp();
     $this->actingAs($user)->withSession(['auth.password_confirmed_at' => $stale])->getJson('/test-probe/recent')->assertStatus(423);
 });
 

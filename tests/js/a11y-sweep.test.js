@@ -28,6 +28,8 @@ import Home from '../../resources/js/Pages/Home.vue';
 import TodoIndex from '../../resources/js/Pages/Todo/Index.vue';
 import AiCalls from '../../resources/js/Pages/Settings/AiCalls.vue';
 import AiAgents from '../../resources/js/Pages/Settings/AiAgents.vue';
+import HelpSettings from '../../resources/js/Pages/Settings/Help.vue';
+import { helpAreas, helpRows } from './helpers/help.js';
 import AppShell from '../../resources/js/Layouts/AppShell.vue';
 
 let wrapper;
@@ -39,7 +41,7 @@ afterEach(() => {
     window.innerWidth = originalWidth;
 });
 
-const pages = { StyleGuide, Home, 'Todo/Index': TodoIndex, 'Settings/AiCalls': AiCalls, 'Settings/AiAgents': AiAgents };
+const pages = { StyleGuide, Home, 'Todo/Index': TodoIndex, 'Settings/AiCalls': AiCalls, 'Settings/AiAgents': AiAgents, 'Settings/Help': HelpSettings };
 const ME = 1;
 const todoTask = (id, extra = {}) => ({
     id, title: `Task ${id}`, notes: null, status: 'todo', visibility: 'family', creatorId: ME, assigneeId: ME,
@@ -85,6 +87,19 @@ pageProps['Settings/AiAgents'] = {
     ],
     providers: ['codex', 'copilot'],
     checkRoute: 'settings.ai_calls.check',
+};
+pageProps['Settings/Help'] = {
+    sections: [
+        { key: 'ai_agents', href: '/settings/ai-agents', labelKey: 'settings.section.ai_agents', icon: 'bot' },
+        { key: 'help', href: '/settings/help', labelKey: 'settings.section.help', icon: 'circle-help' },
+        { key: 'appearance', href: '/settings/appearance', labelKey: 'settings.section.appearance', icon: 'palette' },
+    ],
+    topics: helpRows('en'),
+    orphans: [{ key: 'old.removed.key', texts: { sk: 'a', pl: 'b', en: 'c' }, edited: { sk: false, pl: false, en: false } }],
+    areas: helpAreas('en'),
+    locales: ['sk', 'pl', 'en'],
+    maxLength: 400,
+    error: false,
 };
 const cases = [];
 for (const locale of ['en', 'sk', 'pl'])

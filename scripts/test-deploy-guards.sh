@@ -119,6 +119,17 @@ else
   FAILS=$((FAILS + 1)); echo "FAIL deploy.sh gates or rolls back on ai-worker, or lacks the guards" >&2
 fi
 
+# contextual help: help:sync runs on every deploy, after the migration and before the staging reseed (runtime role, non-gating)
+mig_line=$(grep -n 'profile migrate run --rm --no-deps -T migrate;' "$DEPLOY" | head -n1 | cut -d: -f1)
+sync_line=$(grep -n 'php artisan help:sync' "$DEPLOY" | head -n1 | cut -d: -f1)
+seed_line=$(grep -n 'php artisan staging:seed' "$DEPLOY" | head -n1 | cut -d: -f1)
+if [ -n "$mig_line" ] && [ -n "$sync_line" ] && [ -n "$seed_line" ] && [ "$mig_line" -lt "$sync_line" ] && [ "$sync_line" -lt "$seed_line" ] \
+  && ! sed -n "${sync_line}p" "$DEPLOY" | grep -q 'profile migrate'; then
+  PASS=$((PASS + 1)); echo "ok   deploy.sh runs help:sync after the migration and before the staging reseed"
+else
+  FAILS=$((FAILS + 1)); echo "FAIL deploy.sh does not run help:sync between the migration and the staging reseed" >&2
+fi
+
 # ai_image_available: true only when docker finds the -ai image of that tag
 d=$(make_fixture aiimg family-hub-staging staging 0 staging)
 for case in has:0:pass missing:1:fail; do

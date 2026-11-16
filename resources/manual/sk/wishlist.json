@@ -1,0 +1,79 @@
+{
+  "id": "wishlist",
+  "category": "modules",
+  "order": 40,
+  "title": "Wishlist (zoznam želaní)",
+  "summary": "Každý má zoznam želaní. Členovia rodiny si môžu darček rezervovať alebo ho kúpiť spolu, bez prezradenia prekvapenia.",
+  "covers": ["module:wishlist"],
+  "sections": [
+    {
+      "id": "lists",
+      "title": "Ako nájsť zoznamy",
+      "blocks": [
+        { "type": "p", "text": "Hore na stránke Wishlist je rad tlačidiel, jedno pre každého človeka. Vyberte osobu a otvorí sa jej zoznam. Vaše vlastné tlačidlo má pri mene (Vy). Každý, kto má prístup k Wishlistu, vidí všetky zoznamy." }
+      ]
+    },
+    {
+      "id": "add-wish",
+      "title": "Pridanie želania do vášho zoznamu",
+      "blocks": [
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Otvorte svoj vlastný zoznam.",
+          "Stlačte **Pridať želanie**.",
+          "Napíšte názov. Všetko ostatné je voliteľné.",
+          "Stlačte **Uložiť želanie**."
+        ] },
+        { "type": "list", "items": [
+          "**Odkazy**: až 5 adries obchodov alebo stránok, každá s voliteľným popisom.",
+          "**Cena** a **Mena**: približná cena pomáha ostatným plánovať.",
+          "**Priorita**: **Hlavné želanie**, **Veľmi by ma potešilo** alebo **Bolo by fajn**.",
+          "**Poznámky**: veľkosť, farba alebo čokoľvek iné.",
+          "**Obrázok**: nahrajte obrázok JPEG, PNG alebo WebP do 5 MB, alebo stlačte **Načítať obrázok z odkazu** a vezmite ho zo stránky obchodu."
+        ] },
+        { "type": "p", "text": "Keď darček dostanete, otvorte želanie a vyberte **Označiť ako prijaté**. Prijaté želania sa odsunú nabok. Stlačením **Prijaté** ich znova zobrazíte." }
+      ]
+    },
+    {
+      "id": "reserve",
+      "title": "Rezervácia darčeka a spoločný nákup",
+      "blocks": [
+        { "type": "p", "text": "V cudzom zozname otvorte želanie a uvidíte pole **Rezervácia**." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Stlačte **Rezervovať darček**. Teraz všetci okrem majiteľa vidia, že ho kupujete vy.",
+          "Rozmysleli ste si to? Stlačte **Zrušiť rezerváciu**.",
+          "Chcete sa o cenu podeliť? Stlačte **Otvoriť pre spoločný nákup**. Ďalší ľudia môžu stlačiť **Pripojiť sa k nákupu** a podľa chuti napísať svoj podiel.",
+          "Keď je skupina úplná, stlačte **Uzavrieť spoločný nákup**. Každý, kto sa pripojil, môže stlačiť **Odísť zo spoločného nákupu**."
+        ] },
+        { "type": "p", "text": "Zoznam **Váš nákup** ukazuje darčeky, ktoré ste rezervovali, a koľko ste sa zaviazali zaplatiť." },
+        { "type": "tip", "text": "Ak sa dvaja ľudia pokúsia rezervovať ten istý darček v tom istom okamihu, vyhrá prvý a druhý uvidí krátku správu. Nič sa nepokazí." }
+      ]
+    },
+    {
+      "id": "surprise",
+      "title": "Prečo nikdy nevidíte, kto rezervoval vaše vlastné želania",
+      "blocks": [
+        { "type": "p", "text": "Je to zámer, aby darčeky ostali prekvapením. Vo svojom zozname nevidíte, či je želanie rezervované, kto ho rezervoval ani kto sa pripojil k spoločnému nákupu. Všetci ostatní to vidia. Aplikácia vám tiež nikdy neposiela pripomienky na vaše vlastné narodeniny alebo meniny." }
+      ]
+    },
+    {
+      "id": "occasions",
+      "title": "Príležitosti, narodeniny a meniny",
+      "blocks": [
+        { "type": "p", "text": "Stránka **Príležitosti** uvádza nadchádzajúce narodeniny, meniny, Vianoce a vaše vlastné príležitosti. Prehľad ukazuje aj najbližšie v nasledujúcich 60 dňoch." },
+        { "type": "list", "items": [
+          "**Dátumy podľa členov**: pre každého človeka môžete nastaviť dátum narodenia a meniny. Vyberte **Upraviť dátumy**, zvoľte kalendár mien (**Slovenský kalendár**, **Poľský kalendár** alebo žiadny), vyhľadajte meno a vyberte deň.",
+          "**Vlastné príležitosti**: stlačte **Pridať príležitosť**, napíšte názov a dátum, podľa potreby zvoľte **Opakovať každý rok** a určte, či je pre jednu osobu alebo pre **Celá rodina**."
+        ] },
+        { "type": "p", "text": "Ak chcete pripomienku pred príležitosťou, použite [Nastavenia > Oznámenia](/settings/notifications) a vyberte 14, 7, 3 alebo 1 deň vopred." }
+      ]
+    },
+    {
+      "id": "manage-child",
+      "title": "Správa zoznamu dieťaťa",
+      "blocks": [
+        { "type": "p", "text": "Dieťa alebo niekto, komu sa ťažko vedie zoznam, môže mať správcu zoznamu. Správcov vyberá správca rodiny (pozrite [Správcovia zoznamu želaní](admin#wishlist-managers))." },
+        { "type": "p", "text": "Ak ste správcom zoznamu, tlačidlo dieťaťa je vo vašom rade a nad zoznamom je pruh s textom, že ho spravujete. Môžete pridávať a upravovať želania a zoznam vidíte presne tak ako dieťa: bez rezervácií. Tak ostane prekvapenie aj pre dieťa." }
+      ]
+    }
+  ]
+}

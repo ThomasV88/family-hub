@@ -29,7 +29,7 @@ function prMember(bool $passkey = true): array
 
 function prStale(array $extra = []): array
 {
-    return ['auth.password_confirmed_at' => now()->subMinutes(30)->getTimestamp(), 'sensitive.active_at' => now()->subMinutes(30)->getTimestamp()] + $extra;
+    return ['auth.password_confirmed_at' => now()->subMinutes(90)->getTimestamp(), 'sensitive.active_at' => now()->subMinutes(90)->getTimestamp()] + $extra;
 }
 
 function prRows(string $event)

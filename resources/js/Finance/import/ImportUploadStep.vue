@@ -37,7 +37,7 @@ defineExpose({ focus: () => input.value?.focus() });
         <UiField :label="t('finance.imp.account')" required>
             <UiSelect :model-value="account" :options="accountOptions" @update:model-value="emit('update:account', $event)" />
         </UiField>
-        <UiField :label="t('finance.imp.profile')">
+        <UiField :label="t('finance.imp.profile')" help="finance.import_profile">
             <UiSelect :model-value="profile" :options="profileOptions" @update:model-value="emit('update:profile', $event)" />
         </UiField>
         <UiField id="imp-file" :label="t('finance.imp.file')" :hint="t('finance.imp.file_note')" :error="fileError" required>

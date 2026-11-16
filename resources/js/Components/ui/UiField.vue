@@ -2,6 +2,7 @@
 import { computed, useId } from 'vue';
 import { CircleAlert } from '@lucide/vue';
 import { provideField } from './useField.js';
+import HelpTip from './HelpTip.vue';
 
 const props = defineProps({
     label: { type: String, required: true },
@@ -10,6 +11,8 @@ const props = defineProps({
     id: { type: String, default: '' },
     required: { type: Boolean, default: false },
     labelVisuallyHidden: { type: Boolean, default: false },
+    // Contextual help topic (registry key): a small green "?" after the label. Ignored when the label is visually hidden.
+    help: { type: String, default: '' },
 });
 
 const generated = useId();
@@ -27,7 +30,13 @@ provideField({ id: controlId, describedBy, invalid: computed(() => Boolean(props
 
 <template>
     <div class="ui-field">
-        <label :for="controlId" class="ui-field__label" :class="{ 'visually-hidden': labelVisuallyHidden }">
+        <div v-if="help && !labelVisuallyHidden" class="ui-field__head">
+            <label :for="controlId" class="ui-field__label">
+                {{ label }}<span v-if="required" class="ui-field__required" aria-hidden="true"> *</span>
+            </label>
+            <HelpTip :topic="help" :label="label" />
+        </div>
+        <label v-else :for="controlId" class="ui-field__label" :class="{ 'visually-hidden': labelVisuallyHidden }">
             {{ label }}<span v-if="required" class="ui-field__required" aria-hidden="true"> *</span>
         </label>
         <slot />
@@ -41,6 +50,7 @@ provideField({ id: controlId, describedBy, invalid: computed(() => Boolean(props
 
 <style scoped>
 .ui-field { display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-4); }
+.ui-field__head { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
 .ui-field__label { font-size: var(--text-sm); font-weight: 600; line-height: 1.4; color: var(--color-text); }
 .ui-field__hint { margin: 0; font-size: var(--text-sm); font-weight: 400; line-height: 1.4; color: var(--color-text-muted); }
 .ui-field__error { display: flex; align-items: flex-start; gap: var(--space-1); margin: 0; font-size: var(--text-sm); font-weight: 400; line-height: 1.4; color: var(--color-danger); }

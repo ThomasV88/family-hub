@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import UiAlert from '../ui/UiAlert.vue';
 import UiButton from '../ui/UiButton.vue';
 import UiCheckbox from '../ui/UiCheckbox.vue';
+import HelpTip from '../ui/HelpTip.vue';
 
 // Admin picks who may manage (add and edit wishes on) this member's list; managers see the list as the member does.
 const props = defineProps({
@@ -45,7 +46,10 @@ function submit() {
 <template>
     <form class="wm-tab" @submit.prevent="submit">
         <UiAlert v-if="failed" variant="danger" live>{{ t('settings.members.wishlist_managers.save_failed') }}</UiAlert>
-        <h3 class="wm-tab__title">{{ t('settings.members.wishlist_managers.title') }}</h3>
+        <div class="help-head">
+            <h3 class="wm-tab__title">{{ t('settings.members.wishlist_managers.title') }}</h3>
+            <HelpTip topic="settings.wishlist_managers" :label="t('settings.members.wishlist_managers.title')" />
+        </div>
         <p class="wm-tab__hint">{{ t('settings.members.wishlist_managers.hint', { name: member.name }) }}</p>
         <p v-if="others.length === 0" class="wm-tab__hint">{{ t('settings.members.wishlist_managers.none') }}</p>
         <ul v-else class="wm-tab__list" role="list">

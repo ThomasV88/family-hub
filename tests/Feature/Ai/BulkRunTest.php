@@ -458,6 +458,9 @@ it('never puts a name, title, document id, canary or starter into the dry run or
 // Task 3: endpoints
 
 it('runs the whole flow over HTTP', function () {
+    // The panel reports `next_batch` before ai.bulk.start_hour (01:00 family time), so pin the clock to midday: this test
+    // used to fail deterministically for anyone running the suite after midnight.
+    $this->travelTo(now(config('family.timezone'))->setTime(12, 0));
     bkDoc();
     $admin = bkAdmin();
     $this->actingAs($admin);

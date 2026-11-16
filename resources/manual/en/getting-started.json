@@ -1,0 +1,116 @@
+{
+  "id": "getting-started",
+  "category": "start",
+  "order": 10,
+  "title": "Getting started",
+  "summary": "How to join, sign in, choose your language and theme, put the app on your phone and turn on reminders.",
+  "covers": ["settings:appearance", "settings:notifications"],
+  "sections": [
+    {
+      "id": "invitation",
+      "title": "Joining with an invitation",
+      "blocks": [
+        { "type": "p", "text": "Family Hub is only for invited people. Your family administrator sends you an invitation by email, or gives you a link. The link works once and stops working after 7 days." },
+        { "type": "steps", "items": [
+          "Open the link from the invitation.",
+          "Type your name.",
+          "Choose a password with at least 12 characters. A long sentence works well and is easy to remember.",
+          "Press **Create account**. Or press **Continue with Google** if you want to sign in with the Google account that uses the same email address as the invitation."
+        ] },
+        { "type": "tip", "text": "If the link says it cannot be used, it has expired, was already used, or was cancelled. Ask your administrator for a new one." }
+      ]
+    },
+    {
+      "id": "signing-in",
+      "title": "Signing in and out",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Open the app address in your browser or start the installed app.",
+          "Type your email and password and press **Sign in**. Or press **Sign in with Google**.",
+          "Tick **Stay signed in for 30 days** only on your own device.",
+          "If you turned on two-step verification, type the 6-digit code from your authenticator app, or use your passkey."
+        ] },
+        { "type": "p", "text": "To sign out, open the account menu (the person button in the top bar) and choose **Log out**." },
+        { "type": "p", "text": "Forgot your password? Press **Forgot password?** on the sign-in page, type your email and follow the link we send. The link works for 60 minutes. After you set a new password you are signed out on your other devices." },
+        { "type": "warning", "text": "Never tick **Stay signed in** on a shared or public computer." }
+      ]
+    },
+    {
+      "id": "language-theme",
+      "title": "Language and light or dark theme",
+      "blocks": [
+        { "type": "p", "text": "The app speaks Slovak, Polish and English. You can switch at any time. The choice is remembered on this device." },
+        { "type": "steps", "items": [
+          "Open the account menu in the top bar.",
+          "Under **Language**, pick your language.",
+          "Under **Theme**, pick **System** (follows your device), **Light** or **Dark**."
+        ] },
+        { "type": "p", "text": "The same choices are in [Settings > Appearance and language](/settings/appearance)." }
+      ]
+    },
+    {
+      "id": "install",
+      "title": "Putting the app on your phone, tablet or computer",
+      "blocks": [
+        { "type": "p", "text": "Family Hub can be installed like an app. It then opens in its own window and gets its own icon. Nothing is downloaded from an app store." },
+        { "type": "p", "text": "**iPhone and iPad** (use Safari):" },
+        { "type": "steps", "items": [
+          "Open Family Hub in Safari.",
+          "Tap the **Share** button.",
+          "Choose **Add to Home Screen**, then **Add**.",
+          "Open the new icon on your Home Screen."
+        ] },
+        { "type": "p", "text": "**Android** (use Chrome):" },
+        { "type": "steps", "items": [
+          "Open Family Hub in Chrome.",
+          "Tap the menu button (three dots).",
+          "Choose **Install app** or **Add to Home screen**."
+        ] },
+        { "type": "p", "text": "**Computer** (Chrome or Edge): look for the install icon at the right end of the address bar, or open the browser menu and choose **Install Family Hub**." },
+        { "type": "tip", "text": "Menu names change a little between browser versions. If you cannot find the button, look for the word Install or Add to Home Screen." }
+      ]
+    },
+    {
+      "id": "notifications",
+      "title": "Turning on reminders",
+      "blocks": [
+        { "type": "p", "text": "You can get reminders about tasks and gift occasions by email and as short push alerts on your device." },
+        { "type": "steps", "items": [
+          "Open the account menu, choose **Settings**, then **Notifications**.",
+          "Turn on **Email reminders**, **Push notifications**, or both.",
+          "For push, press **Enable push on this device** and allow notifications when your browser asks.",
+          "Press **Send test notification** to check that it works."
+        ] },
+        { "type": "warning", "text": "On iPhone and iPad, push only works after you add Family Hub to your Home Screen (see above) and open it from there." },
+        { "type": "p", "text": "Push alerts show only the task title, never your notes. If both switches are off you get no reminders. Each device needs its own **Enable push** step." }
+      ]
+    },
+    {
+      "id": "question-marks",
+      "title": "The green question marks",
+      "covers": ["feature:help"],
+      "blocks": [
+        { "type": "p", "text": "A small green circle with a question mark next to a field, a section or a button explains what it is for, what to enter, or what happens when you press it. They appear only where a function is not obvious." },
+        { "type": "steps", "title": "Where to look", "items": [
+          "On a computer, point at the question mark with the mouse. It also opens when you reach it with the Tab key.",
+          "On a phone or tablet, tap the question mark. Tap it again, tap somewhere else or press Esc to close it.",
+          "The text is shown in the language you chose for the app."
+        ] },
+        { "type": "tip", "text": "Only one explanation is open at a time. They never change anything: they are only help." }
+      ]
+    },
+    {
+      "id": "moving-around",
+      "title": "Finding your way around",
+      "blocks": [
+        { "type": "list", "items": [
+          "On a wide screen, the menu is on the left. On a phone, it is the bar at the bottom.",
+          "You only see the parts of the app that your administrator allowed for you.",
+          "The account menu (top bar) holds Settings, this manual, language, theme and Log out.",
+          "The **Add** button on phones lets you quickly add a new item."
+        ] },
+        { "type": "p", "text": "If a page says you have no access, ask your administrator. See [who can see what](who-sees-what)." }
+      ]
+    }
+  ]
+}

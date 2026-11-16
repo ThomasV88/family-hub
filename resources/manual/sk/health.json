@@ -1,0 +1,127 @@
+{
+  "id": "health",
+  "category": "modules",
+  "order": 60,
+  "title": "Zdravie",
+  "summary": "Zdravotné záznamy pre každého člena rodiny: návštevy, lieky, alergie, očkovania a dokumenty. Predvolene súkromné.",
+  "covers": ["module:health"],
+  "sections": [
+    {
+      "id": "people-access",
+      "title": "Osoby a kto ich môže otvoriť",
+      "blocks": [
+        { "type": "p", "text": "Zdravie uchováva jeden záznam pre každú osobu. Osobou môže byť člen s účtom alebo niekto bez účtu, napríklad malé dieťa. Hore v Zdraví vyberte osobu a otvorí sa jej záznam." },
+        { "type": "p", "text": "Aby ste osobu videli, potrebujete dve veci: prístup k Zdraviu vo svojich oprávneniach a prístup k tej osobe. Oboje dáva správca. Prístup k osobe je buď **Môže zobraziť** (čítať záznam a núdzovú kartu), alebo **Môže meniť** (aj upravovať, nahrávať, exportovať a rozhodovať o AI). Osoba, ku ktorej nemáte prístup, sa vám vôbec nezobrazí." },
+        { "type": "steps", "title": "Pridanie osoby", "items": [
+          "Stlačte **Pridať osobu**.",
+          "Napíšte meno. Môžete pridať dátum narodenia, pohlavie, krvnú skupinu a poznámky.",
+          "Pridajte až 3 núdzové kontakty s ich vzťahom a telefónnym číslom.",
+          "Stlačte **Uložiť osobu**."
+        ] },
+        { "type": "p", "text": "Zdravie je chránené dodatočnou kontrolou. Pozrite [Účet a zabezpečenie](account-security#confirm)." }
+      ]
+    },
+    {
+      "id": "visits",
+      "title": "Návštevy",
+      "blocks": [
+        { "type": "p", "text": "Návšteva je jedna cesta k lekárovi. Otvorte osobu a stlačte **Pridať návštevu**. Vyplňte **Dátum** a **Špecializácia**. Môžete pridať lekára, diagnózu a poznámky a pripojiť dokumenty." },
+        { "type": "p", "text": "Záznam môžete vidieť **Podľa špecializácií** (priečinok pre každý druh lekára) alebo ako **Časová os**. V časovej osi môžete filtrovať očkovania alebo dokumenty." },
+        { "type": "warning", "text": "Stránka sa po nejakom čase nečinnosti zamkne. Ak sa zamkne skôr, než uložíte, dlhé neuložené poznámky sa môžu stratiť. Ukladajte často." }
+      ]
+    },
+    {
+      "id": "medications",
+      "title": "Lieky",
+      "blocks": [
+        { "type": "p", "text": "Stlačte **Pridať liek** a napíšte názov. Môžete pridať dávku (napríklad 5 mg), rozpis (napríklad jedna tableta ráno) a dátum začiatku a konca. Ak liek pokračuje, nechajte dátum konca prázdny." },
+        { "type": "p", "text": "Ukončené lieky sú skryté. Stlačením **Zobraziť ukončené lieky** ich zobrazíte." }
+      ]
+    },
+    {
+      "id": "allergies",
+      "title": "Alergie",
+      "blocks": [
+        { "type": "p", "text": "Stlačte **Pridať alergiu**. Napíšte látku a vyberte závažnosť: **Mierna**, **Stredná**, **Ťažká** alebo **Neuvedená**. Môžete pridať reakciu. Ak osoba nemá žiadne alergie, zoznam jednoducho nechajte prázdny." }
+      ]
+    },
+    {
+      "id": "vaccinations",
+      "title": "Očkovania a pripomienky",
+      "blocks": [
+        { "type": "p", "text": "Stlačte **Pridať očkovanie**, napíšte vakcínu a dátum podania. Ak je potrebná ďalšia dávka, pridajte **Ďalší termín**." },
+        { "type": "p", "text": "Členovia, ktorí môžu tento záznam meniť, dostanú pripomienku pred ďalším termínom. Pripomienka uvádza len osobu, nie vakcínu. Očkovanie, ktoré je splatné alebo po termíne, je v zázname označené. Keď je hotové, stlačte **Označiť ako podané**." }
+      ]
+    },
+    {
+      "id": "documents",
+      "title": "Dokumenty a fotografie",
+      "blocks": [
+        { "type": "p", "text": "K záznamu osoby môžete uložiť laboratórne výsledky, správy a fotografie papierových dokumentov." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Otvorte osobu a stlačte **Pridať dokument**. Alebo otvorte návštevu a stlačte **Pripojiť dokument**.",
+          "Vyberte jeden alebo viac súborov. Naraz môžete pridať až 10.",
+          "Každému dajte názov a podľa chuti ho pripojte k návšteve.",
+          "Stlačte **Pridať dokument**."
+        ] },
+        { "type": "list", "items": [
+          "Povolené formáty: PDF, JPG, PNG, WebP a HEIC (formát fotografií z iPhonu).",
+          "Každý súbor môže mať až 10 MB. Jedna osoba môže mať až 200 dokumentov.",
+          "Fotografie sa uložia ako zmenšená kópia a miesto a údaje o fotoaparáte sa z nich odstránia. Súbory PDF a HEIC sa uložia tak, ako sú.",
+          "Niektoré formáty fotografií nemajú náhľad. Vtedy použite **Stiahnuť dokument**, aby ste videli originál."
+        ] },
+        { "type": "p", "text": "Dokument môžete otvoriť na novej karte alebo ho stiahnuť zo stránky dokumentu. Dokumenty nie sú nikdy dostupné cez adresu, ktorú by mohol otvoriť ktokoľvek: vidieť ich môžu len členovia s prístupom k osobe." }
+      ]
+    },
+    {
+      "id": "exports",
+      "title": "Tlač a exporty pre lekára",
+      "blocks": [
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Otvorte osobu a vyberte **Exportovať záznamy**.",
+          "V časti **Čo zahrnúť** vyberte **Všetko o tejto osobe** alebo **Jedna špecializácia**.",
+          "V časti **Formát** vyberte **Pre lekára**, **Dátový súbor** alebo **Pre AI**.",
+          "Stlačte **Vytvoriť export**. Pre lekára sa otvorí stránka na tlač: stlačte **Tlačiť export** a vyberte **Uložiť ako PDF**, aby ste dostali súbor."
+        ] },
+        { "type": "list", "items": [
+          "**Pre lekára**: prehľadná stránka na tlač.",
+          "**Dátový súbor**: štruktúrovaný súbor (JSON), ktorý si môžete nechať alebo preniesť inam.",
+          "**Pre AI**: súbor Markdown bez mena a dátumu narodenia. Poznámky a diagnózy sa kopírujú tak, ako sú napísané, a stále môžu osobu spomínať, preto ich skontrolujte skôr, než súbor niekomu pošlete."
+        ] },
+        { "type": "p", "text": "Exporty sa vytvárajú, keď si o ne poviete, a neukladajú sa na serveri. Všetko, čo navrhla AI a nikto to neskontroloval, sa zahrnie, len ak túto možnosť zaškrtnete, a je označené **Neoverené**." }
+      ]
+    },
+    {
+      "id": "emergency-card",
+      "title": "Núdzová karta",
+      "blocks": [
+        { "type": "p", "text": "Núdzová karta je súhrn na jednej strane: alergie, súčasné lieky a núdzové kontakty. Otvoríte ju cez **Otvoriť núdzovú kartu** na stránke osoby a stlačením **Tlačiť kartu** ju vytlačíte. Skôr než sa na ňu spoliehate, skontrolujte, či je aktuálna." }
+      ]
+    },
+    {
+      "id": "archive-delete",
+      "title": "Mazanie a archivácia",
+      "blocks": [
+        { "type": "p", "text": "Zdravotný záznam sa dá natrvalo zmazať len krátko po vytvorení. Predvolene je to 72 hodín. Správca rodiny túto dobu nastavuje v nastaveniach servera." },
+        { "type": "p", "text": "Po tejto dobe sa **Odstrániť** zmení na **Archivovať**. Archivovaná položka sa uchová, ale je skrytá všade: v zoznamoch, exportoch, núdzovej karte, pripomienkach a AI. Členovia, ktorí môžu osobu meniť, ju nájdu v **Archivované položky** a môžu stlačiť **Obnoviť**." },
+        { "type": "tip", "text": "Nie ste si istí, či je záznam správny? Archivujte ho namiesto mazania. Môžete ho vrátiť." }
+      ]
+    },
+    {
+      "id": "ai",
+      "title": "Pomoc od AI a váš súhlas",
+      "blocks": [
+        { "type": "p", "text": "AI vie prečítať dokument a navrhnúť návštevy, lieky, alergie a očkovania, takže píšete menej. Je to voliteľné." },
+        { "type": "warning", "text": "AI je vypnutá, kým ju správca nenastaví a nezapne, a pre každú osobu je vypnutá, kým ju člen nezapne. Keď sa AI použije, dokument opustí tento server a pošle sa externej spoločnosti (OpenAI, alebo GitHub, ak OpenAI nie je dostupná). Tá ho môže uchovať podľa vlastných podmienok." },
+        { "type": "list", "items": [
+          "Každá osoba má spínač **Povoliť AI čítať dokumenty tejto osoby**. Predvolene je vypnutý. Rozhoduje člen, ktorý môže túto osobu meniť, a pred zapnutím uvidí jasnú otázku. Kedykoľvek ho môžete vypnúť.",
+          "AI sa nikdy nespustí sama od seba. Niekto stlačí **Spustiť AI** a uvidí oznámenie, ktoré uvádza spoločnosť, ktorej sa dokument pošle.",
+          "Keď sú návrhy hotové, stlačte **Skontrolovať návrhy**. Nič sa neuloží, kým pri položke nestlačíte **Prijať**. Môžete ju **Upraviť** alebo **Odmietnuť**.",
+          "Všetko, čo AI navrhla, je označené **Neoverené**, kým človek nestlačí **Označiť ako overené**. AI sa môže mýliť, preto vždy porovnajte s dokumentom.",
+          "Ak je AI pre osobu vypnutá, nezačne nový beh a behy, ktoré čakali, sa zastavia."
+        ] },
+        { "type": "p", "text": "Ak AI nie je dostupná, uvidíte krátku správu a údaje môžete vždy doplniť sami. Správca vidí zoznam volaní AI, ale nikdy nie to, čo bolo v dokumente." }
+      ]
+    }
+  ]
+}

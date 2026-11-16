@@ -109,7 +109,7 @@ describe('AI agents page: enable switch', () => {
         await control('copilot', 'switch').setValue(true);
         expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(fetchMock.mock.calls[0][0]).toBe('/settings/ai-agents/copilot');
-        expect(fetchMock.mock.calls[0][1]).toEqual({ method: 'PATCH', body: { enabled: true } });
+        expect(fetchMock.mock.calls[0][1]).toEqual({ method: 'PATCH', body: { enabled: true }, replay: true });
         expect(control('copilot', 'switch').attributes('aria-busy')).toBe('true');
         expect(control('copilot', 'down').attributes('aria-disabled')).toBe('true');
         expect(control('copilot', 'model').attributes('aria-disabled')).toBe('true');
@@ -214,7 +214,7 @@ describe('AI agents page: order', () => {
         expect(control('copilot', 'up').attributes('aria-label')).toBe('Move GitHub Copilot up, now position 1 of 2');
         await control('copilot', 'up').trigger('click');
         expect(fetchMock.mock.calls[0][0]).toBe('/settings/ai-agents/copilot/move');
-        expect(fetchMock.mock.calls[0][1]).toEqual({ method: 'POST', body: { direction: 'up', expectedPosition: 2 } });
+        expect(fetchMock.mock.calls[0][1]).toEqual({ method: 'POST', body: { direction: 'up', expectedPosition: 2 }, replay: true });
         await flushPromises();
         expect(current.findAll('ol > li').map((l) => l.attributes('data-agent'))).toEqual(['copilot', 'codex']);
         expect(document.activeElement).toBe(control('copilot', 'down').element);
@@ -295,7 +295,7 @@ describe('AI agents page: model', () => {
         await control('copilot', 'model').setValue('gpt-5.1');
         await card('copilot').find('form').trigger('submit');
         expect(fetchMock.mock.calls[0][0]).toBe('/settings/ai-agents/copilot');
-        expect(fetchMock.mock.calls[0][1]).toEqual({ method: 'PATCH', body: { model: 'gpt-5.1' } });
+        expect(fetchMock.mock.calls[0][1]).toEqual({ method: 'PATCH', body: { model: 'gpt-5.1' }, replay: true });
         await flushPromises();
         expect(status()).toBe('Model for GitHub Copilot saved.');
         expect(control('copilot', 'model').element.value).toBe('gpt-5.1');

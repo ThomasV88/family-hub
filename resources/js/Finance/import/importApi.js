@@ -1,5 +1,8 @@
 // Preview call of the import wizard. The browser re-sends the File held in memory on every settings change; the
 // server decodes it and answers JSON, nothing is stored on either side. Called only from user actions, never on mount.
+// A stale gate opens "Confirm it's you" over the wizard and the preview is sent once more from the File in memory
+// (staleGate.js); 'cancelled' means the member closed the dialog.
+import { runWithGate } from '../../Security/staleGate.js';
 
 export const EXTENSIONS = ['csv', 'txt'];
 
@@ -25,6 +28,10 @@ export async function preview(file, settings = {}) {
     if (settings.delimiter) body.append('delimiter', settings.delimiter === '\t' ? 'tab' : settings.delimiter);
     if (settings.headerRow !== undefined && settings.headerRow !== null && settings.headerRow !== '') body.append('header_row', String(settings.headerRow));
 
+    return runWithGate(() => send(body));
+}
+
+async function send(body) {
     try {
         const response = await fetch('/finance/import/preview', {
             method: 'POST',
@@ -35,8 +42,8 @@ export async function preview(file, settings = {}) {
         const data = await response.json().catch(() => ({}));
         if (response.ok) return { ok: true, data };
         // Idle gate refusal (Phase 6). Mapped to its own codes so the page can send the member to the right screen.
-        if (response.status === 423 && (data?.error === 'reauth_required' || data?.error === 'second_factor_required')) {
-            return { ok: false, error: data.error };
+        if (response.status === 423 && ['reauth_required', 'confirm_required', 'second_factor_required'].includes(data?.error)) {
+            return { ok: false, error: data.error, methods: data.methods };
         }
         return { ok: false, error: data?.error ?? 'decode_failed' };
     } catch {

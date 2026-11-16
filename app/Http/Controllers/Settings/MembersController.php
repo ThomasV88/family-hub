@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\WishlistManager;
 use App\Security\ReauthMethods;
 use App\Security\SecondFactorPolicy;
+use App\Security\SecurityTimings;
 use App\Security\SensitiveSession;
 use App\Support\SettingsSections;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ use Inertia\Response;
 
 class MembersController extends Controller
 {
-    public function index(Request $request, AccessGate $gate, SecondFactorPolicy $policy, SensitiveSession $sensitive, AdminSubjectQuery $people): Response
+    public function index(Request $request, AccessGate $gate, SecondFactorPolicy $policy, SensitiveSession $sensitive, AdminSubjectQuery $people, SecurityTimings $timings): Response
     {
         $viewer = $request->user();
 
@@ -75,6 +76,12 @@ class MembersController extends Controller
             'presets' => $presets,
             'invitations' => $invitations,
             'securityPolicy' => ['required' => $policy->required(), 'pending' => $policy->pendingCount()],
+            'securityTimings' => [
+                'idleSeconds' => $timings->idle(),
+                'confirmSeconds' => $timings->confirmWindow(),
+                'idle' => SecurityTimings::range(SecurityTimings::IDLE),
+                'confirm' => SecurityTimings::range(SecurityTimings::CONFIRM),
+            ],
             'confirmFresh' => $sensitive->recentlyConfirmed(),
             'methods' => ReauthMethods::for($viewer),
             // Admin-only page: person names and member levels, never record data or counts (PROVISIONAL, owner confirms in 07-20).

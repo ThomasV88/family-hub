@@ -87,7 +87,7 @@ describe('Run AI start flow', () => {
         await flush();
         $('[data-testid="ai-notice-confirm"]').click();
         await flush();
-        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: { acknowledged: true, providers: ['codex'] } });
+        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: { acknowledged: true, providers: ['codex'] }, replay: true });
         expect(useToast().toasts.map((x) => x.message)).toContain('AI run started');
         expect(poller.refresh).toHaveBeenCalled();
         expect($('[data-testid="ai-status-tag"]').textContent).toBe('Waiting for AI');
@@ -101,7 +101,7 @@ describe('Run AI start flow', () => {
         $('[data-testid="ai-run"]').click();
         await flush();
         expect($('[role="dialog"]')).toBeNull();
-        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: {} });
+        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: {}, replay: true });
     });
 
     it('switches to the consent-off line on 409 consent_off without an error alert', async () => {
@@ -165,7 +165,7 @@ describe('status states', () => {
         expect($('[data-testid="ai-run"]')).toBeNull();
         $('[data-testid="ai-cancel"]').click();
         await flush();
-        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/ex1/cancel`, { method: 'POST', body: {} });
+        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/ex1/cancel`, { method: 'POST', body: {}, replay: true });
         expect(useToast().toasts.map((x) => x.message)).toContain('AI run cancelled');
         expect($('[data-testid="ai-status-tag"]').textContent).toBe('AI is reading');
     });
@@ -200,7 +200,7 @@ describe('status states', () => {
         await flush();
         $('[data-testid="ai-rerun-confirm"]').click();
         await flush();
-        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: {} });
+        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: {}, replay: true });
     });
 
     it('Run AI again without pending suggestions starts straight away', async () => {
@@ -398,7 +398,7 @@ describe('waiting for AI quota, provenance and providers', () => {
         mountControl({ ai: ACK, statuses: { [DOC.id]: waitingEntry() } });
         $('[data-testid="ai-cancel"]').click();
         await flush();
-        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/ex7/cancel`, { method: 'POST', body: {} });
+        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/ex7/cancel`, { method: 'POST', body: {}, replay: true });
         expect(useToast().toasts.map((x) => x.message)).toContain('AI run cancelled');
         expect(poller.refresh).toHaveBeenCalled();
     });
@@ -497,7 +497,7 @@ describe('waiting for AI quota, provenance and providers', () => {
         expect(document.activeElement).toBe($('[data-testid="ai-notice-cancel"]'));
         $('[data-testid="ai-notice-confirm"]').click();
         await flush();
-        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: { acknowledged: true, providers } });
+        expect(fetchMock).toHaveBeenCalledWith(runUrl, { method: 'POST', body: { acknowledged: true, providers }, replay: true });
     });
 
     it('re-opens the notice with the current provider set when the server says another provider was enabled meanwhile', async () => {
@@ -510,13 +510,13 @@ describe('waiting for AI quota, provenance and providers', () => {
         expect($('[role="dialog"]').textContent).toContain('Send this document to OpenAI?');
         $('[data-testid="ai-notice-confirm"]').click();
         await flush();
-        expect(fetchMock).toHaveBeenNthCalledWith(1, runUrl, { method: 'POST', body: { acknowledged: true, providers: ['codex'] } });
+        expect(fetchMock).toHaveBeenNthCalledWith(1, runUrl, { method: 'POST', body: { acknowledged: true, providers: ['codex'] }, replay: true });
         // Nothing started; the dialog is open again and now names both providers.
         expect(poller.markQueued).not.toHaveBeenCalled();
         expect($('[role="dialog"]').textContent).toContain('or to GitHub if OpenAI is not available');
         $('[data-testid="ai-notice-confirm"]').click();
         await flush();
-        expect(fetchMock).toHaveBeenNthCalledWith(2, runUrl, { method: 'POST', body: { acknowledged: true, providers: ['codex', 'copilot'] } });
+        expect(fetchMock).toHaveBeenNthCalledWith(2, runUrl, { method: 'POST', body: { acknowledged: true, providers: ['codex', 'copilot'] }, replay: true });
         expect(poller.markQueued).toHaveBeenCalled();
     });
 

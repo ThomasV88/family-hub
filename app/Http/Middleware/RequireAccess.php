@@ -10,6 +10,7 @@ use App\Audit\AuditLogger;
 use App\Security\SafeIntended;
 use App\Security\SensitiveGate;
 use App\Security\SensitiveSession;
+use App\Security\StaleGateResponse;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -127,11 +128,11 @@ class RequireAccess
         return $meta;
     }
 
-    /** Stale proof of identity: 423 for JSON callers, otherwise to the confirm page (no audit row). */
+    /** Stale proof of identity: 423 for JSON callers and Inertia writes (answered in place), otherwise to the confirm page (no audit row). */
     private function toConfirm(Request $request): Response
     {
-        if ($request->expectsJson() && ! $request->header('X-Inertia')) {
-            return response()->json(['error' => 'confirm_required'], 423);
+        if (($request->expectsJson() && ! $request->header('X-Inertia')) || StaleGateResponse::inertiaWrite($request)) {
+            return StaleGateResponse::make('confirm_required', $request->user());
         }
 
         $back = $request->isMethod('GET') ? $request->fullUrl() : (string) url()->previous();

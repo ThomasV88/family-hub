@@ -6,6 +6,7 @@ import UiField from '../Components/ui/UiField.vue';
 import UiInput from '../Components/ui/UiInput.vue';
 import UiRadio from '../Components/ui/UiRadio.vue';
 import UiSelect from '../Components/ui/UiSelect.vue';
+import HelpTip from '../Components/ui/HelpTip.vue';
 import { WEEKDAYS } from './recurrenceState.js';
 
 const props = defineProps({
@@ -70,7 +71,7 @@ const summary = computed(() => {
 
 <template>
     <div class="repeat" data-testid="repeat-fields">
-        <UiField :label="t('todo.repeat.label')" :hint="noDate ? t('todo.repeat.need_date') : ''" :error="errors.repeat">
+        <UiField :label="t('todo.repeat.label')" help="tasks.recurrence" :hint="noDate ? t('todo.repeat.need_date') : ''" :error="errors.repeat">
             <UiSelect :model-value="modelValue.kind" :options="kindOptions" :disabled="disabled || noDate" @update:model-value="(v) => set({ kind: v })" />
         </UiField>
 
@@ -106,6 +107,7 @@ const summary = computed(() => {
 
             <fieldset v-if="showMode" class="repeat__from">
                 <legend class="repeat__legend">{{ t('todo.repeat.from') }}</legend>
+                <span class="repeat__tip"><HelpTip topic="tasks.repeat_from" :label="t('todo.repeat.from')" /></span>
                 <div class="repeat__radios">
                     <UiRadio :model-value="modelValue.mode" value="schedule" :name="`${uid}-from`" :disabled="disabled" @update:model-value="(v) => set({ mode: v })">{{ t('todo.repeat.from_schedule') }}</UiRadio>
                     <UiRadio :model-value="modelValue.mode" value="completion" :name="`${uid}-from`" :disabled="disabled" @update:model-value="(v) => set({ mode: v })">{{ t('todo.repeat.from_completion') }}</UiRadio>
@@ -121,7 +123,8 @@ const summary = computed(() => {
 <style scoped>
 .repeat { margin-bottom: var(--space-4); }
 .repeat > :deep(.ui-field) { margin-bottom: var(--space-3); }
-.repeat__weekdays, .repeat__from { border: 0; margin: 0 0 var(--space-3); padding: 0; min-width: 0; }
+.repeat__weekdays, .repeat__from { position: relative; border: 0; margin: 0 0 var(--space-3); padding: 0; min-width: 0; }
+.repeat__tip { position: absolute; inset-block-start: 0; inset-inline-end: var(--space-2); }
 .repeat__legend { font-size: var(--text-sm); font-weight: 600; line-height: 1.4; padding: 0; margin-bottom: var(--space-1); }
 .repeat__chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .repeat__chip { justify-content: center; min-width: 44px; min-height: 44px; }

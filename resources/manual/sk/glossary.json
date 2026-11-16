@@ -1,0 +1,33 @@
+{
+  "id": "glossary",
+  "category": "help",
+  "order": 110,
+  "title": "Slovník pojmov",
+  "summary": "Krátke vysvetlenia slov použitých v aplikácii.",
+  "covers": [],
+  "sections": [
+    {
+      "id": "words",
+      "title": "Slová použité v aplikácii",
+      "blocks": [
+        { "type": "table", "caption": "Slovník pojmov", "columns": ["Pojem", "Význam"], "rows": [
+          ["Správca", "Člen rodiny, ktorý spravuje členov, oprávnenia a nastavenia."],
+          ["Predvoľba", "Hotová sada oprávnení, napríklad Rodič, Dieťa, Starý rodič alebo Hosť."],
+          ["Modul", "Časť aplikácie: Úlohy, Wishlist, Financie alebo Zdravie."],
+          ["Overovacia aplikácia", "Aplikácia v telefóne, ktorá každých 30 sekúnd ukáže nový 6-miestny kód."],
+          ["Dvojstupňové overenie", "Prihlásenie heslom a druhým dôkazom, napríklad kódom alebo prístupovým kľúčom."],
+          ["Prístupový kľúč", "Spôsob prihlásenia alebo potvrdenia odtlačkom prsta, tvárou alebo zámkom obrazovky."],
+          ["Záložný kód", "Jednorazový núdzový kód pre prípad, že stratíte telefón."],
+          ["Spoločný nákup", "Viac ľudí kupuje jeden darček spolu."],
+          ["Transakcia", "Jeden záznam o peniazoch, ktoré prišli, odišli alebo sa presunuli medzi účtami."],
+          ["Pravidelný výdavok", "Platba, ktorá sa opakuje, napríklad nájom."],
+          ["Súbor CSV", "Jednoduchý tabuľkový súbor, ktorý väčšina bánk umožňuje stiahnuť."],
+          ["Archív", "Skrytie zdravotného záznamu bez zmazania, aby sa dal obnoviť."],
+          ["Neoverené", "Údaj, ktorý navrhla AI a ešte ho nikto neskontroloval."],
+          ["Push oznámenie", "Krátke upozornenie na zariadení."],
+          ["PWA (nainštalovaná aplikácia)", "Webová stránka nainštalovaná do zariadenia, aby sa otvárala ako aplikácia."]
+        ] }
+      ]
+    }
+  ]
+}

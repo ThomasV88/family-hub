@@ -7,6 +7,8 @@
 // data) | throttled (429) | aborted | invalid_url | network | failed.
 // Blobs live in memory only; this module never stores anything.
 
+import { runWithGate } from './staleGate.js';
+
 const REFUSALS = ['confirm_required', 'reauth_required', 'second_factor_required'];
 
 function xsrfToken() {
@@ -19,7 +21,7 @@ function sameOriginPath(url) {
 }
 
 function failure(status, data) {
-    if (status === 423) return { ok: false, status, error: REFUSALS.includes(data?.error) ? data.error : 'confirm_required', data };
+    if (status === 423) return { ok: false, status, error: REFUSALS.includes(data?.error) ? data.error : 'confirm_required', data, methods: data?.methods };
     if (status === 413) return { ok: false, status, error: 'too_large', data };
     if (status === 422) return { ok: false, status, error: 'validation', data };
     if (status === 429) return { ok: false, status, error: 'throttled', data };
@@ -34,7 +36,15 @@ function filenameFrom(disposition) {
     return name === '' ? undefined : name;
 }
 
-export async function securityDownload(url) {
+// `replay: true` on both: a refused call opens "Confirm it's you" and is sent once more after confirming (staleGate.js).
+// The FormData / URL is kept in the caller's memory; a cancelled dialog resolves { ok: false, error: 'cancelled' }.
+export function securityDownload(url, { replay = false } = {}) {
+    const attempt = () => download(url);
+
+    return replay ? runWithGate(attempt) : attempt();
+}
+
+async function download(url) {
     if (!sameOriginPath(url)) return { ok: false, status: 0, error: 'invalid_url' };
 
     let response;
@@ -55,7 +65,13 @@ export async function securityDownload(url) {
     return failure(response.status, data);
 }
 
-export function securityUpload(url, formData, { onProgress, signal } = {}) {
+export function securityUpload(url, formData, { onProgress, signal, replay = false } = {}) {
+    const attempt = () => upload(url, formData, { onProgress, signal });
+
+    return replay ? runWithGate(attempt) : attempt();
+}
+
+function upload(url, formData, { onProgress, signal } = {}) {
     if (!sameOriginPath(url)) return Promise.resolve({ ok: false, status: 0, error: 'invalid_url' });
     if (signal?.aborted) return Promise.resolve({ ok: false, status: 0, error: 'aborted' });
 

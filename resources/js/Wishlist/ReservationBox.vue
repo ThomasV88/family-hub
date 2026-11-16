@@ -8,6 +8,7 @@ import UiCard from '../Components/ui/UiCard.vue';
 import UiConfirmDialog from '../Components/ui/UiConfirmDialog.vue';
 import ContributorList from './ContributorList.vue';
 import ShareForm from './ShareForm.vue';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // Giver-side state machine. Everything comes from wish.reservation (server contract); nothing is summed here.
 const props = defineProps({
@@ -73,7 +74,10 @@ function cancel() {
 
 <template>
     <UiCard class="res-box">
-        <h3 class="res__heading">{{ t('wishlist.res.title') }}</h3>
+        <div class="help-head">
+            <h3 class="res__heading">{{ t('wishlist.res.title') }}</h3>
+            <HelpTip topic="wishlist.reservation" :label="t('wishlist.res.title')" />
+        </div>
         <div class="res" aria-live="polite" data-testid="reservation-box">
             <UiAlert v-if="conflict" variant="warning" live data-testid="res-conflict">{{ t('wishlist.res.conflict', { name: conflict.name }) }}</UiAlert>
             <UiAlert v-if="failed" variant="danger" live data-testid="res-error">{{ t('wishlist.res.error') }}</UiAlert>
@@ -100,6 +104,7 @@ function cancel() {
                 <template v-else-if="mine">
                     <UiButton v-if="cobuy === 'open'" variant="secondary" :loading="busy === 'close'" @click="closeCobuy">{{ t('wishlist.res.close_cobuy') }}</UiButton>
                     <UiButton v-else variant="secondary" :loading="busy === 'open'" @click="openCobuy">{{ t('wishlist.res.open_cobuy') }}</UiButton>
+                    <HelpTip topic="wishlist.cobuy" :label="t('wishlist.res.open_cobuy')" />
                     <UiButton variant="ghost" :loading="busy === 'cancel'" @click="cancel">{{ t('wishlist.res.cancel') }}</UiButton>
                 </template>
                 <template v-else-if="cobuy === 'open'">

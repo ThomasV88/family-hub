@@ -37,7 +37,7 @@ function pick(key) {
 </script>
 
 <template>
-    <UiField :label="t('todo.reminder.label')" :hint="hint" :error="error">
+    <UiField :label="t('todo.reminder.label')" help="tasks.reminder" :hint="hint" :error="error">
         <UiSelect :model-value="current" :disabled="disabled || !hasDate" @update:model-value="pick">
             <option v-for="o in OPTIONS" :key="o.key" :value="o.key" :disabled="isDisabled(o)">{{ t(`todo.reminder.${o.key}`) }}</option>
         </UiSelect>

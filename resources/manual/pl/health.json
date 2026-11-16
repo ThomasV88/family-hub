@@ -1,0 +1,127 @@
+{
+  "id": "health",
+  "category": "modules",
+  "order": 60,
+  "title": "Zdrowie",
+  "summary": "Dokumentacja medyczna każdego członka rodziny: wizyty, leki, alergie, szczepienia i dokumenty. Domyślnie prywatna.",
+  "covers": ["module:health"],
+  "sections": [
+    {
+      "id": "people-access",
+      "title": "Osoby i kto może je otworzyć",
+      "blocks": [
+        { "type": "p", "text": "Zdrowie przechowuje jedną dokumentację dla każdej osoby. Osobą może być członek z kontem albo ktoś bez konta, na przykład małe dziecko. Na górze Zdrowia wybierz osobę, aby otworzyć jej dokumentację." },
+        { "type": "p", "text": "Aby zobaczyć osobę, potrzebujesz dwóch rzeczy: dostępu do Zdrowia w swoich uprawnieniach oraz dostępu do tej osoby. Oba daje administrator. Dostęp do osoby to albo **Może przeglądać** (czytać dokumentację i kartę awaryjną), albo **Może zmieniać** (także edytować, wgrywać, eksportować i decydować o AI). Osoba, do której nie masz dostępu, w ogóle się nie pojawia." },
+        { "type": "steps", "title": "Dodawanie osoby", "items": [
+          "Naciśnij **Dodaj osobę**.",
+          "Wpisz imię. Możesz dodać datę urodzenia, płeć, grupę krwi i notatki.",
+          "Dodaj do 3 kontaktów awaryjnych z ich relacją i numerem telefonu.",
+          "Naciśnij **Zapisz osobę**."
+        ] },
+        { "type": "p", "text": "Zdrowie jest chronione dodatkową kontrolą. Zobacz [Konto i bezpieczeństwo](account-security#confirm)." }
+      ]
+    },
+    {
+      "id": "visits",
+      "title": "Wizyty",
+      "blocks": [
+        { "type": "p", "text": "Wizyta to jedna wizyta u lekarza. Otwórz osobę i naciśnij **Dodaj wizytę**. Wypełnij **Data** i **Specjalizacja**. Możesz dodać lekarza, diagnozę i notatki oraz dołączyć dokumenty." },
+        { "type": "p", "text": "Dokumentację możesz oglądać **Według specjalizacji** (folder dla każdego rodzaju lekarza) albo jako **Oś czasu**. Na osi czasu możesz filtrować szczepienia lub dokumenty." },
+        { "type": "warning", "text": "Strona blokuje się po pewnym czasie bezczynności. Jeśli zablokuje się, zanim zapiszesz, długie niezapisane notatki mogą zostać utracone. Zapisuj często." }
+      ]
+    },
+    {
+      "id": "medications",
+      "title": "Leki",
+      "blocks": [
+        { "type": "p", "text": "Naciśnij **Dodaj lek** i wpisz nazwę. Możesz dodać dawkę (na przykład 5 mg), harmonogram (na przykład jedna tabletka rano) oraz daty rozpoczęcia i zakończenia. Jeśli lek jest stosowany nadal, zostaw datę zakończenia pustą." },
+        { "type": "p", "text": "Zakończone leki są ukryte. Naciśnij **Pokaż zakończone leki**, aby je zobaczyć." }
+      ]
+    },
+    {
+      "id": "allergies",
+      "title": "Alergie",
+      "blocks": [
+        { "type": "p", "text": "Naciśnij **Dodaj alergię**. Wpisz substancję i wybierz nasilenie: **Łagodna**, **Umiarkowana**, **Ciężka** albo **Nie podano**. Możesz dodać reakcję. Jeśli osoba nie ma alergii, po prostu zostaw listę pustą." }
+      ]
+    },
+    {
+      "id": "vaccinations",
+      "title": "Szczepienia i przypomnienia",
+      "blocks": [
+        { "type": "p", "text": "Naciśnij **Dodaj szczepienie**, wpisz szczepionkę i datę podania. Dodaj **Następny termin**, jeśli potrzebna jest kolejna dawka." },
+        { "type": "p", "text": "Członkowie, którzy mogą zmieniać tę dokumentację, dostają przypomnienie przed następnym terminem. Przypomnienie podaje tylko osobę, nie szczepionkę. Szczepienie, którego termin nadchodzi lub minął, jest oznaczone w dokumentacji. Gdy jest wykonane, naciśnij **Oznacz jako podane**." }
+      ]
+    },
+    {
+      "id": "documents",
+      "title": "Dokumenty i zdjęcia",
+      "blocks": [
+        { "type": "p", "text": "Do dokumentacji osoby możesz zapisać wyniki badań, zaświadczenia i zdjęcia papierowych dokumentów." },
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Otwórz osobę i naciśnij **Dodaj dokument**. Albo otwórz wizytę i naciśnij **Dołącz dokument**.",
+          "Wybierz jeden lub więcej plików. Naraz możesz dodać do 10.",
+          "Nadaj każdemu nazwę i, jeśli chcesz, dołącz go do wizyty.",
+          "Naciśnij **Dodaj dokument**."
+        ] },
+        { "type": "list", "items": [
+          "Dozwolone formaty: PDF, JPG, PNG, WebP i HEIC (format zdjęć z iPhone'a).",
+          "Każdy plik może mieć do 10 MB. Jedna osoba może mieć do 200 dokumentów.",
+          "Zdjęcia są zapisywane jako pomniejszona kopia, a miejsce i dane aparatu są z nich usuwane. Pliki PDF i HEIC są zapisywane bez zmian.",
+          "Niektóre formaty zdjęć nie mają podglądu. Wtedy użyj **Pobierz dokument**, aby zobaczyć oryginał."
+        ] },
+        { "type": "p", "text": "Dokument możesz otworzyć w nowej karcie albo pobrać z jego strony. Dokumenty nigdy nie są dostępne pod adresem, który mógłby otworzyć każdy: widzą je tylko członkowie z dostępem do osoby." }
+      ]
+    },
+    {
+      "id": "exports",
+      "title": "Drukowanie i eksporty dla lekarza",
+      "blocks": [
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Otwórz osobę i wybierz **Eksportuj dokumentację**.",
+          "W części **Co uwzględnić** wybierz **Wszystko o tej osobie** albo **Jedna specjalizacja**.",
+          "W części **Format** wybierz **Dla lekarza**, **Plik z danymi** albo **Dla AI**.",
+          "Naciśnij **Utwórz eksport**. Dla lekarza otworzy się strona do wydruku: naciśnij **Drukuj eksport** i wybierz **Zapisz jako PDF**, aby dostać plik."
+        ] },
+        { "type": "list", "items": [
+          "**Dla lekarza**: czytelna strona do wydruku.",
+          "**Plik z danymi**: ustrukturyzowany plik (JSON) do zachowania lub przeniesienia gdzie indziej.",
+          "**Dla AI**: plik Markdown bez imienia i daty urodzenia. Notatki i diagnozy są kopiowane tak, jak je napisano, i nadal mogą wspominać o osobie, więc sprawdź plik, zanim go komuś udostępnisz."
+        ] },
+        { "type": "p", "text": "Eksporty są tworzone na Twoją prośbę i nie są przechowywane na serwerze. Wszystko, co zasugerowała AI i czego nikt nie sprawdził, jest uwzględniane tylko po zaznaczeniu tej opcji i jest oznaczone jako **Niezweryfikowane**." }
+      ]
+    },
+    {
+      "id": "emergency-card",
+      "title": "Karta awaryjna",
+      "blocks": [
+        { "type": "p", "text": "Karta awaryjna to jednostronicowe podsumowanie: alergie, aktualne leki i kontakty awaryjne. Otworzysz ją przez **Otwórz kartę awaryjną** na stronie osoby, a naciskając **Drukuj kartę**, wydrukujesz ją. Zanim na niej polegasz, sprawdź, czy jest aktualna." }
+      ]
+    },
+    {
+      "id": "archive-delete",
+      "title": "Usuwanie i archiwizowanie",
+      "blocks": [
+        { "type": "p", "text": "Wpis w dokumentacji zdrowotnej można usunąć na stałe tylko krótko po jego utworzeniu. Domyślnie to 72 godziny. Administrator rodziny ustawia ten czas w ustawieniach serwera." },
+        { "type": "p", "text": "Po tym czasie **Usuń** zmienia się w **Archiwizuj**. Zarchiwizowany element jest zachowany, ale ukryty wszędzie: na listach, w eksportach, na karcie awaryjnej, w przypomnieniach i w AI. Członkowie, którzy mogą zmieniać osobę, znajdą go w **Zarchiwizowane elementy** i mogą nacisnąć **Przywróć**." },
+        { "type": "tip", "text": "Nie masz pewności, czy wpis jest poprawny? Zarchiwizuj go zamiast usuwać. Możesz go przywrócić." }
+      ]
+    },
+    {
+      "id": "ai",
+      "title": "Pomoc AI i Twoja zgoda",
+      "blocks": [
+        { "type": "p", "text": "AI potrafi przeczytać dokument i zasugerować wizyty, leki, alergie i szczepienia, dzięki czemu piszesz mniej. To opcjonalne." },
+        { "type": "warning", "text": "AI jest wyłączona, dopóki administrator jej nie skonfiguruje i nie włączy, a dla każdej osoby jest wyłączona, dopóki członek jej nie włączy. Gdy AI jest używana, dokument opuszcza ten serwer i trafia do zewnętrznej firmy (OpenAI albo GitHub, jeśli OpenAI jest niedostępne). Firma ta może go przechowywać zgodnie z własnymi warunkami." },
+        { "type": "list", "items": [
+          "Każda osoba ma przełącznik **Zezwól AI na czytanie dokumentów tej osoby**. Domyślnie jest wyłączony. Decyduje członek, który może zmieniać tę osobę, i przed włączeniem widzi wyraźne pytanie. Możesz go wyłączyć w każdej chwili.",
+          "AI nigdy nie uruchamia się sama na dokumencie. Ktoś naciska **Uruchom AI** i widzi komunikat z nazwą firmy, do której dokument zostanie wysłany.",
+          "Gdy sugestie są gotowe, naciśnij **Sprawdź sugestie**. Nic nie jest zapisywane, dopóki nie naciśniesz **Zaakceptuj** przy wpisie. Możesz go **Edytuj** albo **Odrzuć**.",
+          "Wszystko, co zasugerowała AI, jest oznaczone jako **Niezweryfikowane**, dopóki człowiek nie naciśnie **Oznacz jako zweryfikowane**. AI może się mylić, więc zawsze porównuj z dokumentem.",
+          "Jeśli AI jest wyłączona dla osoby, nowe uruchomienie się nie rozpocznie, a oczekujące uruchomienia zostaną zatrzymane."
+        ] },
+        { "type": "p", "text": "Jeśli AI jest niedostępna, zobaczysz krótki komunikat, a dane zawsze możesz dodać sam. Administrator widzi listę wywołań AI, ale nigdy tego, co było w dokumencie." }
+      ]
+    }
+  ]
+}

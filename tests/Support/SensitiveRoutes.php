@@ -61,6 +61,9 @@ class SensitiveRoutes
             'settings.members.wishlist_managers.update',
             // Removes a member's authenticator, passkeys and recovery codes: it lowers the protection of their account (v1.0 gap W3).
             'settings.members.second_factor.destroy',
+            // Raising or lowering the re-confirmation windows changes how long a stolen session keeps sensitive access (issue 2).
+            'settings.security.policy',
+            'settings.security.timings',
             // Queues a login check in the AI worker. Grants nothing; listed so it needs a recent confirmation (08-14).
             'settings.ai_calls.check',
             // Changes where medical documents are sent (which agent, which model, in what order) (09-12).

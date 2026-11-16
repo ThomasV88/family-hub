@@ -10,6 +10,7 @@ import UiAlert from '../ui/UiAlert.vue';
 import UiTag from '../ui/UiTag.vue';
 import PermissionSelect from './PermissionSelect.vue';
 import { MODULE_KEYS, applyPreset } from '../../Settings/presets.js';
+import HelpTip from '../ui/HelpTip.vue';
 
 const props = defineProps({
     member: { type: Object, required: true },
@@ -73,13 +74,17 @@ function submit() {
         <UiAlert v-if="failed" variant="danger" live>{{ t('permissions.save_failed') }}</UiAlert>
 
         <div class="perm-tab__preset">
-            <UiField :label="t('permissions.apply_label')" :hint="presetHint">
+            <UiField :label="t('permissions.apply_label')" help="settings.preset_apply" :hint="presetHint">
                 <UiSelect v-model="preset" :options="presetOptions" />
             </UiField>
             <UiButton variant="secondary" @click="apply">{{ t('permissions.apply_label') }}</UiButton>
         </div>
         <UiAlert v-if="applied" variant="info" live>{{ t('permissions.applied') }}</UiAlert>
 
+        <div class="help-head">
+            <span class="perm-tab__legend">{{ t('permissions.matrix_caption') }}</span>
+            <HelpTip topic="settings.permission_levels" :label="t('permissions.matrix_caption')" />
+        </div>
         <ul class="perm-tab__rows" role="list">
             <li v-for="key in MODULE_KEYS" :key="key" class="perm-tab__row">
                 <div class="perm-tab__module">
@@ -115,6 +120,7 @@ function submit() {
 </template>
 
 <style scoped>
+.perm-tab__legend { font-size: var(--text-sm); font-weight: 600; }
 .perm-tab { display: flex; flex-direction: column; gap: var(--space-4); padding-block: var(--space-3); }
 .perm-tab__preset { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3); }
 .perm-tab__preset :deep(.ui-field) { flex: 1; min-width: 160px; }

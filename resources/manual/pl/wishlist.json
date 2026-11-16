@@ -1,0 +1,79 @@
+{
+  "id": "wishlist",
+  "category": "modules",
+  "order": 40,
+  "title": "Wishlist (lista życzeń)",
+  "summary": "Każdy ma listę życzeń. Członkowie rodziny mogą zarezerwować prezent albo kupić go razem, nie psując niespodzianki.",
+  "covers": ["module:wishlist"],
+  "sections": [
+    {
+      "id": "lists",
+      "title": "Jak znaleźć listy",
+      "blocks": [
+        { "type": "p", "text": "Na górze strony Wishlist jest rząd przycisków, po jednym dla każdej osoby. Wybierz osobę, aby otworzyć jej listę. Twój przycisk ma przy imieniu (Ty). Każdy, kto ma dostęp do Wishlist, widzi wszystkie listy." }
+      ]
+    },
+    {
+      "id": "add-wish",
+      "title": "Dodawanie życzenia do swojej listy",
+      "blocks": [
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Otwórz własną listę.",
+          "Naciśnij **Dodaj życzenie**.",
+          "Wpisz tytuł. Wszystko inne jest opcjonalne.",
+          "Naciśnij **Zapisz życzenie**."
+        ] },
+        { "type": "list", "items": [
+          "**Linki**: do 5 adresów sklepów lub stron, każdy z opcjonalnym opisem.",
+          "**Cena** i **Waluta**: przybliżona cena pomaga innym planować.",
+          "**Priorytet**: **Największe marzenie**, **Bardzo by mnie ucieszyło** albo **Byłoby miło**.",
+          "**Notatki**: rozmiar, kolor albo cokolwiek innego.",
+          "**Obraz**: wgraj obraz JPEG, PNG lub WebP do 5 MB albo naciśnij **Pobierz obraz z linku**, aby wziąć go ze strony sklepu."
+        ] },
+        { "type": "p", "text": "Gdy dostaniesz prezent, otwórz życzenie i wybierz **Oznacz jako otrzymane**. Otrzymane życzenia schodzą z drogi. Naciśnij **Otrzymane**, aby zobaczyć je znowu." }
+      ]
+    },
+    {
+      "id": "reserve",
+      "title": "Rezerwowanie prezentu i wspólny zakup",
+      "blocks": [
+        { "type": "p", "text": "Na cudzej liście otwórz życzenie, aby zobaczyć pole **Rezerwacja**." },
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Naciśnij **Zarezerwuj prezent**. Teraz wszyscy oprócz właściciela widzą, że kupujesz go Ty.",
+          "Zmieniłeś zdanie? Naciśnij **Anuluj rezerwację**.",
+          "Chcesz podzielić koszt? Naciśnij **Otwórz na wspólny zakup**. Inne osoby mogą wtedy nacisnąć **Dołącz do zakupu** i, jeśli chcą, wpisać swój udział.",
+          "Naciśnij **Zamknij wspólny zakup**, gdy grupa jest kompletna. Każdy, kto dołączył, może nacisnąć **Opuść wspólny zakup**."
+        ] },
+        { "type": "p", "text": "Lista **Twoje zakupy** pokazuje prezenty, które zarezerwowałeś, i ile zobowiązałeś się zapłacić." },
+        { "type": "tip", "text": "Jeśli dwie osoby spróbują zarezerwować ten sam prezent w tym samym momencie, wygrywa pierwsza, a druga zobaczy krótki komunikat. Nic się nie psuje." }
+      ]
+    },
+    {
+      "id": "surprise",
+      "title": "Dlaczego nigdy nie widzisz, kto zarezerwował Twoje życzenia",
+      "blocks": [
+        { "type": "p", "text": "To celowe, aby prezenty pozostały niespodzianką. Na własnej liście nie widzisz, czy życzenie jest zarezerwowane, kto je zarezerwował ani kto dołączył do wspólnego zakupu. Wszyscy inni to widzą. Aplikacja nigdy też nie wysyła Ci przypomnień o Twoich własnych urodzinach czy imieninach." }
+      ]
+    },
+    {
+      "id": "occasions",
+      "title": "Okazje, urodziny i imieniny",
+      "blocks": [
+        { "type": "p", "text": "Strona **Okazje** wymienia nadchodzące urodziny, imieniny, Boże Narodzenie i Twoje własne okazje. Przegląd pokazuje też najbliższe w ciągu następnych 60 dni." },
+        { "type": "list", "items": [
+          "**Daty według członków**: dla każdej osoby możesz ustawić datę urodzenia i imieniny. Wybierz **Edytuj daty**, wskaż kalendarz imienin (**Kalendarz słowacki**, **Kalendarz polski** albo żaden), wyszukaj imię i wybierz dzień.",
+          "**Własne okazje**: naciśnij **Dodaj okazję**, wpisz tytuł i datę, w razie potrzeby wybierz **Powtarzaj co roku** i określ, czy dotyczy jednej osoby, czy **Cała rodzina**."
+        ] },
+        { "type": "p", "text": "Aby dostać przypomnienie przed okazją, użyj [Ustawienia > Powiadomienia](/settings/notifications) i wybierz 14, 7, 3 lub 1 dzień wcześniej." }
+      ]
+    },
+    {
+      "id": "manage-child",
+      "title": "Zarządzanie listą dziecka",
+      "blocks": [
+        { "type": "p", "text": "Dziecko albo ktoś, komu trudno prowadzić listę, może mieć opiekuna listy. Opiekunów wybiera administrator (zobacz [Opiekunowie listy życzeń](admin#wishlist-managers))." },
+        { "type": "p", "text": "Jeśli jesteś opiekunem, przycisk dziecka jest w Twoim rzędzie, a nad listą widać pasek informujący, że nią zarządzasz. Możesz dodawać i edytować życzenia, a listę widzisz dokładnie tak jak dziecko: bez rezerwacji. Dzięki temu niespodzianka zostaje także dla dziecka." }
+      ]
+    }
+  ]
+}

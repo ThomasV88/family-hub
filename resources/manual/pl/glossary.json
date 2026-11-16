@@ -1,0 +1,33 @@
+{
+  "id": "glossary",
+  "category": "help",
+  "order": 110,
+  "title": "Słowniczek",
+  "summary": "Krótkie wyjaśnienia słów używanych w aplikacji.",
+  "covers": [],
+  "sections": [
+    {
+      "id": "words",
+      "title": "Słowa używane w aplikacji",
+      "blocks": [
+        { "type": "table", "caption": "Słowniczek", "columns": ["Słowo", "Znaczenie"], "rows": [
+          ["Administrator", "Członek rodziny, który zarządza członkami, uprawnieniami i ustawieniami."],
+          ["Ustawienie wstępne", "Gotowy zestaw uprawnień, na przykład Rodzic, Dziecko, Dziadek lub babcia albo Gość."],
+          ["Moduł", "Część aplikacji: Zadania, Wishlist, Finanse lub Zdrowie."],
+          ["Aplikacja uwierzytelniająca", "Aplikacja w telefonie, która co 30 sekund pokazuje nowy 6-cyfrowy kod."],
+          ["Weryfikacja dwuetapowa", "Logowanie hasłem i drugim dowodem, na przykład kodem albo kluczem dostępu."],
+          ["Klucz dostępu", "Sposób logowania lub potwierdzania odciskiem palca, twarzą lub blokadą ekranu."],
+          ["Kod odzyskiwania", "Jednorazowy kod awaryjny na wypadek utraty telefonu."],
+          ["Wspólny zakup", "Kilka osób kupuje jeden prezent razem."],
+          ["Transakcja", "Jeden wpis o pieniądzach, które przyszły, wyszły albo zostały przeniesione między kontami."],
+          ["Wydatek cykliczny", "Płatność, która się powtarza, na przykład czynsz."],
+          ["Plik CSV", "Prosty plik z tabelą, który większość banków pozwala pobrać."],
+          ["Archiwum", "Ukrycie wpisu zdrowotnego bez usuwania, aby można go było przywrócić."],
+          ["Niezweryfikowane", "Dane zasugerowane przez AI, których jeszcze nikt nie sprawdził."],
+          ["Powiadomienie push", "Krótki alert na urządzeniu."],
+          ["PWA (zainstalowana aplikacja)", "Strona internetowa zainstalowana na urządzeniu, aby otwierała się jak aplikacja."]
+        ] }
+      ]
+    }
+  ]
+}

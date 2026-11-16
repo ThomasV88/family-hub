@@ -15,7 +15,7 @@ beforeEach(function () {
 
 function mchStale(): array
 {
-    return ['auth.password_confirmed_at' => now()->subHour()->getTimestamp(), 'sensitive.active_at' => now()->subHour()->getTimestamp()];
+    return ['auth.password_confirmed_at' => now()->subHours(2)->getTimestamp(), 'sensitive.active_at' => now()->subHours(2)->getTimestamp()];
 }
 
 it('marks every health page, panel variant, download and refusal no-store for an authorised member', function () {

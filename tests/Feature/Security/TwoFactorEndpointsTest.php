@@ -20,7 +20,7 @@ beforeEach(function () {
 
 function stale(): array
 {
-    return ['auth.password_confirmed_at' => now()->subMinutes(11)->getTimestamp()];
+    return ['auth.password_confirmed_at' => now()->subMinutes(61)->getTimestamp()];
 }
 
 function freshWindow(): array
@@ -277,7 +277,7 @@ it('refuses to read the pending seed on a stale window', function () {
     $user = User::factory()->create();
     Totp::enable($user, confirm: false);
 
-    $this->actingAs($user)->withSession(stale())->getJson('/user/two-factor-qr-code')->assertStatus(423)->assertExactJson(['error' => 'confirm_required']);
+    $this->actingAs($user)->withSession(stale())->getJson('/user/two-factor-qr-code')->assertStatus(423)->assertJson(['error' => 'confirm_required']);
     $this->getJson('/user/two-factor-secret-key')->assertStatus(423);
     $this->withSession(freshWindow())->getJson('/user/two-factor-secret-key')->assertOk();
 });

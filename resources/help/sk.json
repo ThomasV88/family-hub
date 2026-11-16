@@ -1,0 +1,263 @@
+{
+    "areas": {
+        "overview": "Prehľad",
+        "tasks": "Úlohy",
+        "wishlist": "Wishlist",
+        "finance": "Financie",
+        "health": "Zdravie",
+        "account": "Účet a zabezpečenie",
+        "settings": "Nastavenia (administrátori)"
+    },
+    "screens": {
+        "task_panel": "Panel úlohy",
+        "gift_panel": "Panel darčeka (želanie niekoho iného)",
+        "wish_panel": "Panel želania (vaše vlastné)",
+        "wishlist_page": "Stránka Wishlist",
+        "occasion_panel": "Panel udalosti",
+        "notifications": "Upozornenia",
+        "members_wishlist": "Členovia, karta Wishlist",
+        "transaction_form": "Formulár transakcie",
+        "category_panel": "Panel kategórie",
+        "account_panel": "Panel účtu",
+        "recurring_panel": "Panel opakovaného výdavku",
+        "bill_panel": "Panel platby",
+        "budget_panel": "Panel rozpočtu",
+        "overview": "Prehľad financií",
+        "import": "Import CSV",
+        "health_person_access": "Prístup k zdraviu podľa osoby",
+        "vaccination_panel": "Panel očkovania",
+        "document_upload": "Nahrávanie dokumentov",
+        "person_record": "Záznam osoby",
+        "archive": "Archív",
+        "ai_run": "AI na dokumente",
+        "export": "Export",
+        "security_page": "Stránka Zabezpečenie",
+        "members_security": "Členovia, karta Zabezpečenie",
+        "invite_dialog": "Dialóg pozvánky",
+        "members_permissions": "Členovia, karta Oprávnenia",
+        "ai_agents": "AI agenti",
+        "home": "Stránka Prehľad"
+    },
+    "topics": {
+        "tasks.visibility": {
+            "title": "Kto úlohu vidí",
+            "text": "Osobná: iba vy, ani administrátor. Rodinná: všetci, ktorí môžu používať Úlohy. Vybraní členovia: iba ľudia, ktorých označíte (vy ste vždy zahrnutí)."
+        },
+        "tasks.recurrence": {
+            "title": "Opakovanie",
+            "text": "Úloha sa po dokončení sama vráti, napríklad každý týždeň. Potrebuje termín a ďalší dátum sa z neho vypočíta."
+        },
+        "tasks.repeat_from": {
+            "title": "Opakovať od",
+            "text": "Rozvrh: ďalší termín sa riadi pravidlom, aj keď úlohu dokončíte neskoro. Keď ju dokončím: ďalší termín sa počíta od dňa, keď ju naozaj dokončíte."
+        },
+        "tasks.reminder": {
+            "title": "Pripomienka",
+            "text": "Kedy vám príde upozornenie na túto úlohu: v čase termínu alebo určitý čas pred ním. Čas pred termínom vyžaduje čas termínu; úlohy bez času upozorňujú o 8:00."
+        },
+        "tasks.skip": {
+            "title": "Preskočiť tento výskyt",
+            "text": "Opakovanú úlohu posunie na ďalší termín bez toho, aby tento výskyt označila za hotový. Preskočenie sa zapíše do histórie."
+        },
+        "wishlist.reservation": {
+            "title": "Rezervácia",
+            "text": "Rezervujte darček, aby ho nekúpil aj niekto iný. Kto rezervoval, vidia všetci okrem osoby, ktorej je to želanie; tá to nikdy neuvidí."
+        },
+        "wishlist.cobuy": {
+            "title": "Spoločný nákup",
+            "text": "Otvorte ho, ak je darček príliš veľký pre jedného. Ďalší členovia sa potom môžu pripojiť s podielom z ceny; vy ostávate organizátorom. Zatvorením zastavíte pripájanie ďalších."
+        },
+        "wishlist.share": {
+            "title": "Váš podiel",
+            "text": "Suma, ktorou chcete prispieť na tento darček. Nie je povinná; nechajte prázdne, ak sa na sumách dohodnete s ostatnými neskôr."
+        },
+        "wishlist.image": {
+            "title": "Obrázok želania",
+            "text": "Obrázok uľahčí nájdenie želania. Nahrajte JPEG, PNG alebo WebP do 5 MB, alebo nechajte aplikáciu nájsť obrázok na prvom pridanom odkaze."
+        },
+        "wishlist.links": {
+            "title": "Odkazy",
+            "text": "Obchody alebo stránky, kde sa darček dá kúpiť, najviac 5. Pomôže krátky popis, napríklad názov obchodu. Ostatní ich uvidia pri želaní."
+        },
+        "wishlist.received": {
+            "title": "Označiť ako dostané",
+            "text": "Použite, keď ste darček dostali. Želanie sa presunie do časti Dostané vo vašom zozname a už sa nedá upravovať."
+        },
+        "wishlist.shopping": {
+            "title": "Nákupný súhrn",
+            "text": "Darčeky, ktoré ste rezervovali alebo do ktorých ste sa pripojili, zoskupené podľa osoby, pre ktorú sú, aby ste videli, čo ešte treba kúpiť. Tento zoznam vidíte len vy."
+        },
+        "occasions.calendar": {
+            "title": "Kalendár mien",
+            "text": "Vyberte slovenský alebo poľský kalendár na vyhľadanie mena a potom meniny, ktoré platia. Ak osoba meniny nemá, zvoľte Žiadny."
+        },
+        "occasions.yearly": {
+            "title": "Opakovať každý rok",
+            "text": "Zapnuté: udalosť sa vracia každý rok v ten istý deň, ako narodeniny. Vypnuté: stane sa raz, v zvolený dátum."
+        },
+        "occasions.for": {
+            "title": "Udalosť je pre",
+            "text": "Koho udalosť je, alebo celá rodina. Pripomienky na darček dostanú všetci okrem osoby, pre ktorú udalosť je."
+        },
+        "notifications.gift_reminders": {
+            "title": "Pripomienky darčekov",
+            "text": "Označte, koľko dní pred narodeninami, meninami alebo inou udalosťou chcete pripomienku. Za vlastné udalosti ju nikdy nedostanete."
+        },
+        "settings.wishlist_managers": {
+            "title": "Správcovia zoznamu želaní",
+            "text": "Vybraní členovia môžu pridávať a upravovať želania v zozname tejto osoby, napríklad pre malé dieťa. Vidia zoznam tak ako jeho vlastník, takže prekvapenia ostanú skryté aj pred nimi."
+        },
+        "finance.transfer": {
+            "title": "Typ záznamu",
+            "text": "Výdavok a príjem menia vaše súčty. Prevod presúva peniaze medzi dvoma vašimi účtami v rovnakej mene a nepočíta sa ako výdavok ani príjem."
+        },
+        "finance.category_type": {
+            "title": "Typ kategórie",
+            "text": "Výdavkové kategórie zoskupujú, čo míňate, príjmové to, čo zarábate. Typ sa určuje pri vytvorení kategórie a neskôr sa nedá zmeniť."
+        },
+        "finance.account_visibility": {
+            "title": "Kto účet vidí",
+            "text": "Tento účet a všetko v ňom uvidia len členovia, ktorých označíte. Členov bez prístupu k financiám nemožno označiť, kým prístup neudelíte v Členoch."
+        },
+        "finance.account_opening": {
+            "title": "Počiatočný zostatok",
+            "text": "Zostatok účtu v deň „Zostatok k dátumu“. Transakcie po tomto dátume sa k nemu pripočítavajú, takže zobrazený zostatok ostáva správny."
+        },
+        "finance.recurring_matching": {
+            "title": "Tipy na párovanie",
+            "text": "Pomôžu aplikácii spoznať bankovú platbu za tento účet: text od príjemcu alebo z popisu, o koľko sa môže suma líšiť a koľko dní okolo splatnosti sa počíta."
+        },
+        "finance.bill_match": {
+            "title": "Spárovať transakciu",
+            "text": "Prepojí už existujúcu bankovú transakciu, napríklad importovanú, s týmto účtom. Potom sa počíta ako zaplatený a nevytvorí sa nová transakcia."
+        },
+        "finance.budget_limit": {
+            "title": "Mesačný limit",
+            "text": "Najviac, koľko plánujete míňať v tejto kategórii za mesiac. Lišta ukazuje, koľko z neho je vyčerpané. Platí od tohto mesiaca, skoršie mesiace si ponechajú starý limit."
+        },
+        "finance.still_to_pay": {
+            "title": "Ešte treba zaplatiť",
+            "text": "Súčet a počet opakovaných platieb tohto mesiaca, ktoré ešte nie sú zaplatené, vrátane tých po splatnosti. Platba sa počíta ako zaplatená, keď existuje zodpovedajúca transakcia."
+        },
+        "finance.import_profile": {
+            "title": "Profil banky",
+            "text": "Uložené nastavenie stĺpcov pre jednu banku. Vyberte ho, aby ste nabudúce preskočili krok so stĺpcami, alebo zvoľte nový profil, nastavte stĺpce raz a uložte ich."
+        },
+        "finance.import_mapping": {
+            "title": "Priradenie stĺpcov",
+            "text": "Povedzte aplikácii, ktorý stĺpec súboru z banky obsahuje dátum, sumu a popis. Oddeľovač, kódovanie a formát čísel musia sedieť so súborom; náhľad ukáže výsledok."
+        },
+        "finance.import_amounts": {
+            "title": "Ako sú uložené sumy",
+            "text": "Skontrolujte, ako súbor z banky zobrazuje peniaze: jeden stĺpec so zápornými výdavkami, dva stĺpce pre príjmy a výdavky, alebo jeden stĺpec a stĺpec s druhom pohybu."
+        },
+        "finance.import_review": {
+            "title": "Kontrola riadkov",
+            "text": "Nové riadky sa naimportujú. Možné duplicity vyzerajú ako transakcie, ktoré už máte, a vynechajú sa, kým ich neoznačíte. Riadky, ktoré sa nedajú prečítať, sa preskočia."
+        },
+        "finance.import_undo": {
+            "title": "Vrátiť import",
+            "text": "Odstráni transakcie, ktoré tento import pridal. Platby s nimi spárované budú opäť nezaplatené. Transakcie, ktoré ste medzitým upravili, ostanú zachované."
+        },
+        "health.access_levels": {
+            "title": "Úrovne prístupu",
+            "text": "Pre každého člena: Bez prístupu osobu skryje. Môže zobraziť číta záznam a kartu pre núdzové situácie. Môže meniť tiež upravuje, nahráva, exportuje a nastavuje súhlas s AI. Najprv treba prístup k Zdraviu v jeho oprávneniach."
+        },
+        "health.linked_account": {
+            "title": "Prepojený účet",
+            "text": "Prepojí tento zdravotný záznam s členom rodiny, ktorému patrí, aby mohol dostať prístup k vlastnému záznamu. Pri osobe bez prihlásenia nechajte Bez účtu."
+        },
+        "health.self_access": {
+            "title": "Vlastný záznam",
+            "text": "Zapnuté: tento člen vždy vidí a môže meniť vlastný záznam, nech úrovne vyššie hovoria čokoľvek. Vypnite iba ak napríklad dieťa nemá otvárať vlastný záznam."
+        },
+        "health.vaccination_next_due": {
+            "title": "Ďalší termín",
+            "text": "Kedy je na rade ďalšia dávka alebo preočkovanie. Členovia, ktorí môžu záznam upravovať, dostanú pred dátumom pripomienku; uvádza len meno osoby, nič zdravotné."
+        },
+        "health.vaccination_mark_given": {
+            "title": "Označiť ako podané",
+            "text": "Použite, keď bola podaná ďalšia dávka: zadáte dátum a nový ďalší termín a história tohto očkovania sa zachová."
+        },
+        "health.upload_files": {
+            "title": "Súbory",
+            "text": "PDF, JPG, PNG, WebP alebo HEIC, každý do 10 MB a naraz 10 súborov. Záznam osoby pojme do 200 dokumentov. Súbory sa ukladajú súkromne na serveri."
+        },
+        "health.emergency_card": {
+            "title": "Karta pre núdzové situácie",
+            "text": "Jednostranový prehľad alergií, aktuálnych liekov a kontaktov pre núdzu, ktorý môžete vytlačiť alebo ukázať lekárovi. Skôr než sa naň spoliehate, skontrolujte, že je aktuálny."
+        },
+        "health.archive": {
+            "title": "Archív",
+            "text": "Záznamy sa dajú natrvalo zmazať iba krátko po vytvorení (72 hodín). Staršie sa namiesto toho archivujú: sú všade skryté, ale zachované, a môžete ich tu obnoviť."
+        },
+        "health.ai_consent": {
+            "title": "AI pre túto osobu",
+            "text": "Predvolene vypnuté. Keď je zapnuté, dokumenty tejto osoby možno poslať externej AI firme, ktorá navrhne záznamy. Každý návrh skontrolujete, kým sa uloží. Vypnutie nič nezmaže."
+        },
+        "health.ai_run": {
+            "title": "Spustiť AI",
+            "text": "Pošle tento jeden dokument externej AI firme, aby ho prečítala a navrhla záznamy. Nič sa neuloží, kým návrhy neskontrolujete a neprijmete."
+        },
+        "health.export_format": {
+            "title": "Formát exportu",
+            "text": "Pre lekára: stránka na tlač. Dátový súbor: štruktúrovaný JSON na uchovanie. Pre AI: súbor Markdown bez mena a dátumu narodenia; poznámky sa kopírujú tak, ako sú, preto ho pred zdieľaním skontrolujte."
+        },
+        "health.export_unverified": {
+            "title": "Zahrnúť nekontrolované údaje z AI",
+            "text": "Pridá záznamy, ktoré AI navrhla a nikto ich ešte nepotvrdil. Každý je v exporte označený ako Neoverený, aby čitateľ vedel, že nebol skontrolovaný."
+        },
+        "security.totp": {
+            "title": "Autentifikačná aplikácia",
+            "text": "Druhý krok po hesle: 6-miestny kód z aplikácie v telefóne, ktorý sa mení každých 30 sekúnd. Chráni váš účet, aj keď heslo unikne."
+        },
+        "security.passkeys": {
+            "title": "Prístupové kľúče",
+            "text": "Prihláste sa odtlačkom, tvárou alebo zámkou obrazovky namiesto kódu. Prístupový kľúč ostáva vo vašom zariadení a funguje len pre túto stránku, takže sa nedá vylákať."
+        },
+        "security.recovery_codes": {
+            "title": "Záložné kódy",
+            "text": "Jednorazové kódy, ktorými sa prihlásite, ak stratíte telefón. Každý funguje raz. Uložte ich na bezpečné miesto; vytvorením nových prestanú staré fungovať."
+        },
+        "settings.security_requirement": {
+            "title": "Vyžadovať dvojkrokové overenie",
+            "text": "Keď je zapnuté, členovia, ktorí môžu otvoriť Zdravie alebo Financie, musia si nastaviť druhý krok (autentifikačnú aplikáciu alebo prístupový kľúč), kým tieto moduly otvoria."
+        },
+        "settings.reconfirm_idle": {
+            "title": "Opätovné potvrdenie po nečinnosti",
+            "text": "Ako dlho môže člen zostať nečinný v Zdraví alebo Financiách, kým sa ho aplikácia opäť opýta, či je to on. Čas predlžuje len aktivita v týchto moduloch."
+        },
+        "settings.reconfirm_sensitive": {
+            "title": "Opätovné potvrdenie citlivých akcií",
+            "text": "Ako dlho po potvrdení, že ste to vy, ostávajú odomknuté nastavenia ako oprávnenia, pozvánky a zabezpečenie, kým ich musíte potvrdiť znova."
+        },
+        "settings.invite_preset": {
+            "title": "Počiatočný prístup",
+            "text": "Hotová sada oprávnení pre nového člena: Rodič, Dieťa, Starý rodič alebo Hosť. Každý modul môžete potom doladiť v Členoch."
+        },
+        "settings.permission_levels": {
+            "title": "Úrovne oprávnení",
+            "text": "Žiadna: člen modul nevidí. Zobraziť: môže čítať. Upraviť: môže čítať a meniť. Zdravie a Financie sú predvolene obmedzené a rola administrátora ich nedáva automaticky."
+        },
+        "settings.preset_apply": {
+            "title": "Použiť predvoľbu",
+            "text": "Vyplní úrovne všetkých modulov z vybranej predvoľby. Nič sa neuloží, kým nestlačíte Uložiť oprávnenia, takže môžete ešte upraviť."
+        },
+        "settings.ai_agent_order": {
+            "title": "Poradie AI nástrojov",
+            "text": "Dokumenty číta prvý zapnutý nástroj. Ak dosiahol limit používania, skúsi sa ďalší v zozname. Poradie zmeníte šípkami."
+        },
+        "settings.ai_agent_model": {
+            "title": "Model AI",
+            "text": "Názov modelu, ktorý má nástroj používať. Nechajte prázdne, ak chcete predvolený model nástroja. Zlý názov spôsobí zlyhanie behov, preto ho meňte, len ak ho poznáte."
+        },
+        "settings.ai_bulk": {
+            "title": "Hromadné opätovné spracovanie",
+            "text": "Znova prečíta staršie dokumenty pomocou AI, niekoľko denne. Najprv skontrolujte, čo by sa spustilo, potom spustite. Návrhy, ktoré ste už prijali, sa nikdy nezmenia. Vidíte len počty."
+        },
+        "overview.system_status": {
+            "title": "Stav systému",
+            "text": "Ukazuje, že bežia kontroly na pozadí, ktoré posielajú pripomienky. Ak je pokrytie nízke alebo nebežala žiadna kontrola, pripomienky môžu meškať; opýtajte sa toho, kto spravuje server."
+        }
+    }
+}

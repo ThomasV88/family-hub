@@ -32,7 +32,7 @@ function submit() {
 
 <template>
     <form class="share-form" novalidate @submit.prevent="submit">
-        <UiField :label="t('wishlist.res.share_label')" :hint="t('wishlist.res.share_hint')" :error="error">
+        <UiField :label="t('wishlist.res.share_label')" help="wishlist.share" :hint="t('wishlist.res.share_hint')" :error="error">
             <span class="share-form__input">
                 <UiInput v-model="amount" inputmode="decimal" autocomplete="off" />
                 <span class="share-form__currency">{{ currency }}</span>

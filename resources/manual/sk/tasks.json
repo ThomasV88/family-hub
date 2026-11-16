@@ -1,0 +1,88 @@
+{
+  "id": "tasks",
+  "category": "modules",
+  "order": 30,
+  "title": "Úlohy",
+  "summary": "Spoločný zoznam úloh pre rodinu s termínmi, opakovaním, pripomienkami a voľbou súkromia.",
+  "covers": ["module:tasks"],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Zoznam úloh",
+      "blocks": [
+        { "type": "p", "text": "Úlohy sú v stĺpcoch: jeden pre každého člena rodiny a jeden **Nepriradené**. Úloha je v stĺpci toho, komu je priradená. Každý stĺpec ukazuje počet otvorených úloh." },
+        { "type": "list", "items": [
+          "Zoznam zúžite filtrom **Všetky**, **Moje**, **Spoločné** alebo **Osobné**.",
+          "Každá úloha má stav: **Treba urobiť**, **Rozpracované** alebo **Hotovo**. Hotové úlohy sú schované: stlačte **Zobraziť hotové**, aby ste ich videli.",
+          "Malé ikony pri úlohe prezrádzajú viac: že sa opakuje, že je osobná alebo že je zdieľaná s vybranými členmi."
+        ] },
+        { "type": "p", "text": "Ak vidíte správu, že úlohy môžete len zobraziť, ale nie meniť, správca vám dal prístup len na čítanie." }
+      ]
+    },
+    {
+      "id": "create",
+      "title": "Pridanie úlohy",
+      "blocks": [
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Najrýchlejšie: v Prehľade alebo na stránke Úlohy napíšte názov do poľa **Pridajte úlohu a stlačte Enter**.",
+          "Pre viac možností stlačte **Pridať úlohu**. Vedľa sa otvorí panel (v telefóne zaplní obrazovku).",
+          "Vyplňte, čo potrebujete. Povinný je len názov.",
+          "Stlačte **Uložiť úlohu**."
+        ] },
+        { "type": "p", "text": "V paneli môžete nastaviť:" },
+        { "type": "list", "items": [
+          "**Názov** a **Poznámky**.",
+          "**Priradené**: kto to má urobiť. Osobná úloha ostáva vždy pri vás.",
+          "**Termín** a voliteľne **čas**. Časy používajú časové pásmo rodiny, ktoré je uvedené pod poľom.",
+          "**Opakovanie** a **Pripomenúť** (pozrite nižšie).",
+          "**Kto túto úlohu vidí** (pozrite nižšie)."
+        ] },
+        { "type": "example", "text": "Vyniesť smeti: priradené Petrovi, opakuje sa vo vybrané dni v týždni (utorok a piatok), pripomienka 1 deň predtým." }
+      ]
+    },
+    {
+      "id": "status",
+      "title": "Zmena stavu a dokončenie úlohy",
+      "blocks": [
+        { "type": "p", "text": "Otvorte úlohu a vyberte nový **Stav**, alebo zaškrtnite pole na karte úlohy, čím ju označíte ako hotovú. Opätovným zaškrtnutím ju vrátite späť." },
+        { "type": "p", "text": "Úlohu odstránite tak, že ju otvoríte a stlačíte **Odstrániť úlohu**. Aplikácia sa spýta na potvrdenie, pretože odstránenú úlohu nie je možné vrátiť." }
+      ]
+    },
+    {
+      "id": "repeat",
+      "title": "Opakované úlohy",
+      "blocks": [
+        { "type": "p", "text": "Opakovaná úloha potrebuje termín. V časti **Opakovanie** môžete vybrať:" },
+        { "type": "list", "items": [
+          "**Každý deň**.",
+          "**V vybrané dni v týždni**: zaškrtnite dni, napríklad pondelok a štvrtok.",
+          "**Každý mesiac**: v určitý deň mesiaca alebo v posledný deň. V kratších mesiacoch sa to stane v posledný deň.",
+          "**Vlastný interval**: každých niekoľko dní, týždňov alebo mesiacov."
+        ] },
+        { "type": "p", "text": "**Opakovať od** určuje, od čoho sa počíta ďalší termín. **Plánu** sa riadi pravidlom bez ohľadu na to, kedy úlohu dokončíte. **Dokončenia** počíta od dňa, keď úlohu naozaj dokončíte." },
+        { "type": "p", "text": "Keď dokončíte opakovanú úlohu, objaví sa ďalšia s novým termínom. Pomocou **Preskočiť tento výskyt** jeden termín preskočíte bez toho, aby ste ho robili. **História dokončenia** v úlohe ukazuje, čo ste urobili a preskočili. Odstránením opakovanej úlohy zmiznú aj všetky jej budúce opakovania." }
+      ]
+    },
+    {
+      "id": "reminders",
+      "title": "Pripomienky",
+      "blocks": [
+        { "type": "p", "text": "V časti **Pripomenúť** vyberte **V čase termínu**, **15 minút predtým**, **1 hodinu predtým**, **1 deň predtým** alebo **Bez pripomienky**. Na pripomienku úloha potrebuje termín a na možnosti v minútach alebo hodinách aj čas. Úlohy bez času pripomenú o 8:00." },
+        { "type": "p", "text": "Pripomienky chodia e-mailom, ako push alebo oboma spôsobmi podľa toho, čo nastavíte v [Nastavenia > Oznámenia](/settings/notifications). Pozrite [Zapnutie pripomienok](getting-started#notifications)." }
+      ]
+    },
+    {
+      "id": "who-sees",
+      "title": "Kto úlohu vidí",
+      "blocks": [
+        { "type": "p", "text": "V časti **Kto túto úlohu vidí** vyberáte jednu z troch možností:" },
+        { "type": "list", "items": [
+          "**Osobná**: len vy. Ani správca ju nevidí. Hodí sa na prekvapenia.",
+          "**Rodina**: každý, kto má prístup k Úlohám.",
+          "**Vybraní členovia**: vy a ľudia, ktorých vyberiete."
+        ] },
+        { "type": "warning", "text": "Skontrolujte voľbu skôr, než uložíte úlohu, ktorá má zostať súkromná." }
+      ]
+    }
+  ]
+}

@@ -56,7 +56,8 @@
         "language": "Language",
         "skip": "Skip to main content",
         "add_task": "Add task",
-        "style_guide": "Style guide"
+        "style_guide": "Style guide",
+        "manual": "Manual"
     },
     "module": {
         "tasks": "To-do",
@@ -314,7 +315,8 @@
             "finance_accounts": "Finance accounts",
             "security": "Security",
             "ai_calls": "AI calls",
-            "ai_agents": "AI agents"
+            "ai_agents": "AI agents",
+            "help": "Contextual help"
         },
         "back": "Back to settings",
         "members": {
@@ -536,6 +538,46 @@
             "col_status": "Status",
             "history_empty_heading": "No bulk runs yet",
             "history_empty_body": "When you start a bulk run, its counts are listed here."
+        },
+        "security": {
+            "title": "Re-confirmation",
+            "intro": "How long members stay signed in to Health and Finances and to sensitive actions before they are asked to confirm it's them again.",
+            "idle_label": "Re-confirm after inactivity in Health and Finance",
+            "idle_help": "Between 1 minute and 24 hours. Only activity in Health and Finances keeps the time running.",
+            "confirm_label": "Re-confirm sensitive actions after",
+            "confirm_help": "Between 1 minute and 1 hour. Applies to settings such as permissions, invitations and security.",
+            "unit_minutes": "minutes",
+            "unit_hours": "hours",
+            "unit_label": "Unit",
+            "save": "Save times",
+            "saved": "Times saved",
+            "error_range": "Enter a time between {min} and {max}.",
+            "duration_minutes": "{n} minute | {n} minutes",
+            "duration_hours": "{n} hour | {n} hours",
+            "timings_toast": "Times saved"
+        },
+        "help": {
+            "intro": "Every green question mark in the app: where it sits and what it says in each language. Edit a text here, or hold Ctrl and click the question mark itself.",
+            "count_total": "Question marks: {n}.",
+            "count_edited": "With an edited text: {n}.",
+            "filters_label": "Filter the question marks",
+            "search_label": "Search",
+            "search_placeholder": "Text, place or key",
+            "area_label": "Area",
+            "area_all": "All areas",
+            "list_label": "Question marks",
+            "key": "Key:",
+            "edit": "Edit",
+            "close_editor": "Close",
+            "edit_name": "Edit the texts of {topic}",
+            "close_editor_name": "Close the editor of {topic}",
+            "empty_title": "No question marks yet",
+            "empty_body": "No contextual help is registered in this version of the app.",
+            "filtered_empty": "No question mark matches your search.",
+            "clear": "Clear search and filter",
+            "load_failed": "The list of question marks could not be loaded.",
+            "orphans_title": "Unused keys",
+            "orphans_body": "These keys are still stored but no longer used in the app. They are kept, so nothing is lost; they are not shown anywhere."
         }
     },
     "permissions": {
@@ -715,7 +757,10 @@
             "medical_type_medication": "Medication",
             "medical_type_allergy": "Allergy",
             "medical_type_vaccination": "Vaccination",
-            "medical_type_document": "Document"
+            "medical_type_document": "Document",
+            "timings_idle": "Re-confirmation after inactivity set to {duration}",
+            "timings_confirm": "Re-confirmation of sensitive actions set to {duration}",
+            "help_text_changed": "Edited help text {key} ({locales})"
         },
         "page": "Page {n} of {total}",
         "prev": "Previous",
@@ -1778,7 +1823,14 @@
             "disable_keep": "Keep authenticator app"
         },
         "last_factor_warning": "This is your only second step. You will need to set up another before opening Health or Finances.",
-        "confirm_first": "Confirm it's you before changing two-step verification."
+        "confirm_first": "Confirm it's you before changing two-step verification.",
+        "confirm_modal": {
+            "body": "Your confirmation has run out. Confirm it's you and your change is sent right away. Nothing you entered is lost.",
+            "body_no_method": "Your confirmation has run out and this account has no way to confirm here.",
+            "cancel": "Cancel, send nothing",
+            "expired": "That took too long, so nothing was sent. Please submit again.",
+            "replay_failed": "Your change was not saved because the confirmation was not accepted. Please try again."
+        }
     },
     "members": {
         "security": {
@@ -2367,6 +2419,56 @@
             "body_allergy": "Health records can be deleted for good only shortly after they are created, and this allergy is past that time. It will be archived instead: hidden everywhere, kept, and restorable from the Archive of this person.",
             "body_vaccination": "Health records can be deleted for good only shortly after they are created, and this vaccination is past that time. It will be archived instead: hidden everywhere, kept, and restorable from the Archive of this person.",
             "body_doc": "Health records can be deleted for good only shortly after they are created, and this document is past that time. It will be archived instead: hidden everywhere, the file is kept, and it is restorable from the Archive of this person."
+        }
+    },
+    "manual": {
+        "title": "Manual",
+        "intro": "Everything about Family Hub, explained in plain words. Search, or choose a topic from the list.",
+        "search_label": "Search the manual",
+        "search_placeholder": "For example: reminder",
+        "clear_search": "Clear search",
+        "results": "{n} section found | {n} sections found",
+        "no_results_title": "Nothing found",
+        "no_results_body": "Try a different word, or clear the search to see everything.",
+        "on_this_page": "On this page",
+        "in_topic": "In this topic",
+        "expand_all": "Expand all",
+        "collapse_all": "Collapse all",
+        "print": "Print",
+        "admin_only": "For the administrator only",
+        "steps_title": "Where to click",
+        "tip": "Tip:",
+        "warning": "Important:",
+        "example": "Example:"
+    },
+    "help": {
+        "tip_label": "Help: {topic}",
+        "admin_hint": "Administrator: Ctrl+click (Cmd+click on a Mac) to edit this text.",
+        "editor": {
+            "title": "Edit help text",
+            "where": "Where it appears",
+            "intro": "Plain text, 1 to {max} characters, in friendly everyday language. Everyone sees a change straight away. No angle brackets.",
+            "language": {
+                "sk": "Slovak",
+                "pl": "Polish",
+                "en": "English"
+            },
+            "text_label": "Help text in {language}",
+            "current_language": "Your current language",
+            "edited": "Edited",
+            "counter": "{n} / {max} characters",
+            "reset": "Reset to default",
+            "reset_name": "Reset the {language} text to its default",
+            "save": "Save",
+            "cancel": "Cancel",
+            "saved": "Help text saved",
+            "loading": "Loading the help text",
+            "load_failed": "The help text could not be loaded.",
+            "error_empty": "Write at least one character.",
+            "error_too_long": "Use at most {max} characters.",
+            "error_markup": "Do not use angle brackets.",
+            "error_invalid": "The text was not accepted. Each language needs 1 to {max} characters and no angle brackets.",
+            "error_failed": "The help text could not be saved. Try again."
         }
     }
 }

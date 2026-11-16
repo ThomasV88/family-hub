@@ -14,6 +14,7 @@ import RecurrenceFields from '../Todo/RecurrenceFields.vue';
 import { emptyRepeat, intervalValid, patternFromRepeat, repeatFromTask } from '../Todo/recurrenceState.js';
 import { categoryLabel } from './labels.js';
 import { exponentOf, parseMoney, toInputString } from './money.js';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // New or edit form for one recurring expense (schedule mode only). The account is chosen on create and read-only
 // afterwards: the edit payload never carries account_id or kind (immutable server-side).
@@ -181,8 +182,9 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
                     <UiInput v-model="form.ends_on" type="date" />
                 </UiField>
 
-                <fieldset class="rec-form__hints">
+                <fieldset class="rec-form__hints help-fieldset">
                     <legend>{{ t('finance.rec.hints_title') }}</legend>
+                    <span class="help-corner"><HelpTip topic="finance.recurring_matching" :label="t('finance.rec.hints_title')" /></span>
                     <UiField :label="t('finance.rec.hint_text')" :hint="t('finance.rec.hint_text_help')" :error="errors.text_hint">
                         <UiInput v-model="form.text_hint" maxlength="120" autocomplete="off" />
                     </UiField>

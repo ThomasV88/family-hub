@@ -1,0 +1,9 @@
+{
+  "categories": [
+    { "id": "start", "title": "Getting started" },
+    { "id": "modules", "title": "Using the app" },
+    { "id": "account", "title": "Your account" },
+    { "id": "admin", "title": "For the administrator" },
+    { "id": "help", "title": "Help and reference" }
+  ]
+}

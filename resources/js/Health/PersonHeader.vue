@@ -10,6 +10,7 @@ import UiMenu from '../Components/ui/UiMenu.vue';
 import UiTag from '../Components/ui/UiTag.vue';
 import AiConsentControl from './AiConsentControl.vue';
 import { useRemoval } from './useRemoval.js';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // Name, age line, blood type and the "No account" marker. Free text is interpolated, never rendered as HTML.
 const props = defineProps({
@@ -65,6 +66,7 @@ const remove = () => router.delete(`/health/people/${props.person.id}`);
                 <UiButton variant="secondary" :icon="FileDown" class="person-header__edit-action" :href="`/health/people/${person.id}/export`" data-testid="header-export">{{ t('health.export.title') }}</UiButton>
             </template>
             <UiButton variant="secondary" :icon="IdCard" :href="`/health/people/${person.id}/emergency-card`" data-testid="header-emergency">{{ t('health.emergency.title') }}</UiButton>
+            <HelpTip topic="health.emergency_card" :label="t('health.emergency.title')" />
         </div>
         <div v-if="person.canEdit" class="person-header__menu" data-testid="header-menu">
             <UiMenu :label="t('health.person.more_actions')" :items="menuItems" @select="onMenu" />

@@ -1,0 +1,263 @@
+{
+    "areas": {
+        "overview": "Overview",
+        "tasks": "Tasks",
+        "wishlist": "Wishlist",
+        "finance": "Finances",
+        "health": "Health",
+        "account": "Account and security",
+        "settings": "Settings (administrators)"
+    },
+    "screens": {
+        "task_panel": "Task panel",
+        "gift_panel": "Gift panel (a wish of someone else)",
+        "wish_panel": "Wish panel (your own wish)",
+        "wishlist_page": "Wishlist page",
+        "occasion_panel": "Occasion panel",
+        "notifications": "Notifications",
+        "members_wishlist": "Members, Wishlist tab",
+        "transaction_form": "Transaction form",
+        "category_panel": "Category panel",
+        "account_panel": "Account panel",
+        "recurring_panel": "Recurring expense panel",
+        "bill_panel": "Payment panel",
+        "budget_panel": "Budget panel",
+        "overview": "Finance overview",
+        "import": "CSV import",
+        "health_person_access": "Health access by person",
+        "vaccination_panel": "Vaccination panel",
+        "document_upload": "Document upload",
+        "person_record": "Person record",
+        "archive": "Archive",
+        "ai_run": "AI on a document",
+        "export": "Export",
+        "security_page": "Security page",
+        "members_security": "Members, Security tab",
+        "invite_dialog": "Invite dialog",
+        "members_permissions": "Members, Permissions tab",
+        "ai_agents": "AI agents",
+        "home": "Overview page"
+    },
+    "topics": {
+        "tasks.visibility": {
+            "title": "Who can see this task",
+            "text": "Personal: only you, not even the admin. Family: everyone who may use Tasks. Selected members: only the people you tick (you are always included)."
+        },
+        "tasks.recurrence": {
+            "title": "Repeat",
+            "text": "Makes the task come back on its own after you finish it, for example every week. It needs a due date, and the next date is worked out from it."
+        },
+        "tasks.repeat_from": {
+            "title": "Repeat from",
+            "text": "The schedule: the next date follows the rule, even if you finish late. When I complete it: the next date counts from the day you actually finish."
+        },
+        "tasks.reminder": {
+            "title": "Reminder",
+            "text": "When you are notified about this task: at the due time or a set time before it. A time before the due time needs a due time; tasks without a time remind at 08:00."
+        },
+        "tasks.skip": {
+            "title": "Skip this occurrence",
+            "text": "Moves a repeating task to its next date without marking this one as done. The skip is written to the history."
+        },
+        "wishlist.reservation": {
+            "title": "Reservation",
+            "text": "Reserve a gift so nobody else buys it too. Everyone except the person whose wish it is can see who reserved it; that person never sees it."
+        },
+        "wishlist.cobuy": {
+            "title": "Co-buying",
+            "text": "Open it when the gift is too big for one person. Other members can then join with a share of the price; you stay the organizer. Close it to stop new people joining."
+        },
+        "wishlist.share": {
+            "title": "Your share",
+            "text": "The amount you plan to put towards this gift. It is optional; leave it empty if you will agree on amounts with the others later."
+        },
+        "wishlist.image": {
+            "title": "Wish image",
+            "text": "A picture makes the wish easier to spot. Upload a JPEG, PNG or WebP up to 5 MB, or let the app look for a picture on the first link you added."
+        },
+        "wishlist.links": {
+            "title": "Links",
+            "text": "Shops or pages where the gift can be bought, up to 5. A short label such as the shop name helps. Others see them on the wish."
+        },
+        "wishlist.received": {
+            "title": "Mark as received",
+            "text": "Use it once you got the gift. The wish moves to the Received section of your list and can no longer be edited."
+        },
+        "wishlist.shopping": {
+            "title": "Shopping summary",
+            "text": "The gifts you reserved or joined, grouped by the person they are for, so you can see what you still have to buy. Only you see this list."
+        },
+        "occasions.calendar": {
+            "title": "Name day calendar",
+            "text": "Choose the Slovak or Polish calendar to look up a name, then pick the name day that applies. Choose None if this person has no name day."
+        },
+        "occasions.yearly": {
+            "title": "Repeat every year",
+            "text": "On: the occasion comes back every year on the same day, like a birthday. Off: it happens once, on the date you chose."
+        },
+        "occasions.for": {
+            "title": "Occasion is for",
+            "text": "Whose occasion it is, or the whole family. Gift reminders are sent to everyone except the person the occasion is for."
+        },
+        "notifications.gift_reminders": {
+            "title": "Gift reminders",
+            "text": "Tick how many days before a birthday, name day or other occasion you want a reminder. You never get one for your own occasions."
+        },
+        "settings.wishlist_managers": {
+            "title": "Wishlist managers",
+            "text": "Chosen members can add and edit wishes on this person's list, for example for a small child. They see the list the way its owner does, so surprises stay hidden from them too."
+        },
+        "finance.transfer": {
+            "title": "Type of entry",
+            "text": "Expense and income change your totals. A transfer moves money between two of your accounts in the same currency and is not counted as spending or income."
+        },
+        "finance.category_type": {
+            "title": "Category type",
+            "text": "Expense categories group what you spend, income categories group what you earn. The type is set when the category is created and cannot be changed later."
+        },
+        "finance.account_visibility": {
+            "title": "Who can see this account",
+            "text": "Only the members you tick can see this account and everything in it. Members without finance access cannot be ticked until you grant it in Members."
+        },
+        "finance.account_opening": {
+            "title": "Opening balance",
+            "text": "The balance of the account on the \"Balance as of\" date. Transactions after that date are added to it, so the balance shown stays correct."
+        },
+        "finance.recurring_matching": {
+            "title": "Matching hints",
+            "text": "Help the app recognise the bank payment for this bill: a text from the payee or description, how far the amount may differ, and how many days around the due date count."
+        },
+        "finance.bill_match": {
+            "title": "Match a transaction",
+            "text": "Link a bank transaction you already have, for example an imported one, to this bill. It then counts as paid, and no new transaction is created."
+        },
+        "finance.budget_limit": {
+            "title": "Monthly limit",
+            "text": "The most you plan to spend in this category per month. The bar shows how much of it is used. It applies from this month on, earlier months keep their old limit."
+        },
+        "finance.still_to_pay": {
+            "title": "Still to pay",
+            "text": "The sum and number of recurring bills of this month that are not paid yet, including overdue ones. A bill counts as paid when a matching transaction exists."
+        },
+        "finance.import_profile": {
+            "title": "Bank profile",
+            "text": "A saved column setup for one bank. Pick it to skip the column step next time, or choose a new profile to set the columns up once and save them."
+        },
+        "finance.import_mapping": {
+            "title": "Match the columns",
+            "text": "Tell the app which column of your bank file holds the date, the amount and the description. The separator, encoding and number format must fit the file; the preview shows the result."
+        },
+        "finance.import_amounts": {
+            "title": "How amounts are stored",
+            "text": "Check how your bank file shows money: one column where expenses are negative, two columns for income and expenses, or one column plus a column saying which kind it is."
+        },
+        "finance.import_review": {
+            "title": "Review rows",
+            "text": "New rows will be imported. Possible duplicates look like transactions you already have and are left out unless you tick them. Rows that cannot be read are skipped."
+        },
+        "finance.import_undo": {
+            "title": "Undo import",
+            "text": "Removes the transactions this import added. Payments matched to them become unpaid again. Transactions you edited afterwards are kept."
+        },
+        "health.access_levels": {
+            "title": "Access levels",
+            "text": "For each member: No access hides the person. Can view reads the record and emergency card. Can change also edits, uploads, exports and sets AI consent. Health access in their permissions is needed first."
+        },
+        "health.linked_account": {
+            "title": "Linked account",
+            "text": "Connects this health record to the family member it belongs to, so that member can be given access to their own record. Leave on No account for a person without a login."
+        },
+        "health.self_access": {
+            "title": "Own record",
+            "text": "On: this member can always see and change their own record, whatever the levels above say. Turn it off only if, for example, a child should not open their own record."
+        },
+        "health.vaccination_next_due": {
+            "title": "Next due",
+            "text": "When the next dose or booster is due. Members who can edit this record get a reminder before the date; the reminder names the person only, nothing medical."
+        },
+        "health.vaccination_mark_given": {
+            "title": "Mark as given",
+            "text": "Use it when the next dose has been given: you enter the date and the new next-due date, and the history of this vaccination is kept."
+        },
+        "health.upload_files": {
+            "title": "Files",
+            "text": "PDF, JPG, PNG, WebP or HEIC, up to 10 MB each and 10 files at a time. A person's record holds up to 200 documents. Files are stored privately on the server."
+        },
+        "health.emergency_card": {
+            "title": "Emergency card",
+            "text": "A one-page summary of allergies, current medications and emergency contacts that you can print or show to a doctor. Check that it is up to date before you rely on it."
+        },
+        "health.archive": {
+            "title": "Archive",
+            "text": "Records can be deleted for good only shortly after they were created (72 hours). Older ones are archived instead: hidden everywhere but kept, and you can restore them here."
+        },
+        "health.ai_consent": {
+            "title": "AI for this person",
+            "text": "Off by default. When on, documents of this person can be sent to an outside AI company to suggest entries. You check every suggestion before it is saved. Turning it off deletes nothing."
+        },
+        "health.ai_run": {
+            "title": "Run AI",
+            "text": "Sends this one document to the outside AI company to read it and suggest entries. Nothing is saved until you review and accept the suggestions."
+        },
+        "health.export_format": {
+            "title": "Export format",
+            "text": "For a doctor: a printable page. Data file: structured JSON to keep. For AI: a Markdown file without name and birth date; notes are copied as written, so check it before sharing."
+        },
+        "health.export_unverified": {
+            "title": "Include unchecked AI data",
+            "text": "Adds entries that AI suggested and nobody has confirmed yet. Each one is labelled Unverified in the export, so the reader knows it was not checked."
+        },
+        "security.totp": {
+            "title": "Authenticator app",
+            "text": "A second step after your password: a 6-digit code from an app on your phone that changes every 30 seconds. It protects your account even if the password leaks."
+        },
+        "security.passkeys": {
+            "title": "Passkeys",
+            "text": "Sign in with your fingerprint, face or screen lock instead of a code. A passkey stays on your device and works only for this site, so it cannot be phished."
+        },
+        "security.recovery_codes": {
+            "title": "Recovery codes",
+            "text": "One-time codes that let you sign in if you lose your phone. Each works once. Keep them somewhere safe; creating new codes makes the old ones stop working."
+        },
+        "settings.security_requirement": {
+            "title": "Require two-step verification",
+            "text": "When on, members who can open Health or Finances must set up a second step (authenticator app or passkey) before they can open those modules."
+        },
+        "settings.reconfirm_idle": {
+            "title": "Re-confirm after inactivity",
+            "text": "How long a member can stay idle in Health or Finances before being asked to confirm it is them again. Only activity in those modules keeps the time running."
+        },
+        "settings.reconfirm_sensitive": {
+            "title": "Re-confirm sensitive actions",
+            "text": "How long after confirming that it is you, settings such as permissions, invitations and security stay unlocked before you must confirm again."
+        },
+        "settings.invite_preset": {
+            "title": "Starting access",
+            "text": "A ready-made set of permissions for the new member: Parent, Child, Grandparent or Guest. You can fine-tune each module afterwards in Members."
+        },
+        "settings.permission_levels": {
+            "title": "Permission levels",
+            "text": "None: the member cannot see the module. View: can read. Edit: can read and change. Health and Finances are restricted by default and never come with the admin role."
+        },
+        "settings.preset_apply": {
+            "title": "Apply preset",
+            "text": "Fills all module levels from the chosen preset. Nothing is saved until you press Save permissions, so you can adjust first."
+        },
+        "settings.ai_agent_order": {
+            "title": "Order of AI tools",
+            "text": "Documents are read by the first tool that is on. If it has reached its usage limit, the next one in the list is tried. Use the arrows to change the order."
+        },
+        "settings.ai_agent_model": {
+            "title": "AI model",
+            "text": "The name of the model this tool should use. Leave it empty to use the tool's own default. A wrong name makes runs fail, so change it only if you know the name."
+        },
+        "settings.ai_bulk": {
+            "title": "Bulk re-generation",
+            "text": "Reads older documents with AI again, a few per day. First check what would run, then start. Suggestions you already accepted are never changed. You see counts only."
+        },
+        "overview.system_status": {
+            "title": "System status",
+            "text": "Shows that the background checks which send reminders are running. If the coverage is low or no check has run, reminders may be late; ask whoever runs the server."
+        }
+    }
+}

@@ -348,7 +348,7 @@ describe('accept', () => {
         expect(group.getAttribute('aria-busy')).toBe('true');
         expect(action('medication-0', 'accept').disabled).toBe(true);
         expect(action('medication-0', 'reject').disabled).toBe(true);
-        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/${EX}/entries/medication-0/accept`, { method: 'POST' });
+        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/${EX}/entries/medication-0/accept`, { method: 'POST', replay: true });
         resolve(accepted('medication', 'rec-9'));
         await flush();
         expect(group.getAttribute('aria-busy')).toBeNull();
@@ -456,7 +456,7 @@ describe('reject and undo', () => {
         fetchMock.mockResolvedValueOnce({ ok: true, status: 200, data: { state: 'rejected', pending: 3 } });
         action('medication-0', 'reject').click();
         await flush();
-        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/${EX}/entries/medication-0/reject`, { method: 'POST' });
+        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/${EX}/entries/medication-0/reject`, { method: 'POST', replay: true });
         const el = entryEl('medication-0');
         expect(el.querySelector('[data-testid="entry-tag"]').textContent).toBe('Rejected');
         expect(el.querySelector('dl')).toBeNull();
@@ -469,7 +469,7 @@ describe('reject and undo', () => {
         fetchMock.mockResolvedValueOnce({ ok: true, status: 200, data: { state: 'pending', pending: 4 } });
         action('medication-0', 'undo').click();
         await flush();
-        expect(fetchMock).toHaveBeenLastCalledWith(`/health/people/${PID}/ai/${EX}/entries/medication-0/reject`, { method: 'DELETE' });
+        expect(fetchMock).toHaveBeenLastCalledWith(`/health/people/${PID}/ai/${EX}/entries/medication-0/reject`, { method: 'DELETE', replay: true });
         expect(el.querySelector('[data-testid="entry-tag"]').textContent).toBe('Not reviewed yet');
         expect(el.querySelector('dl')).not.toBeNull();
         expect(document.activeElement).toBe(action('medication-0', 'accept'));
@@ -589,7 +589,7 @@ describe('waiting for AI quota and provenance', () => {
         fetchMock.mockResolvedValue({ ok: true, status: 200, data: {} });
         $('[data-testid="cancel-newer"]').click();
         await flush();
-        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/nnnnnnnn-nnnn-4nnn-8nnn-nnnnnnnnnnn1/cancel`, { method: 'POST', body: {} });
+        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/nnnnnnnn-nnnn-4nnn-8nnn-nnnnnnnnnnn1/cancel`, { method: 'POST', body: {}, replay: true });
         expect($('[data-testid="newer-waiting"]')).toBeNull();
     });
 
@@ -603,7 +603,7 @@ describe('waiting for AI quota and provenance', () => {
         fetchMock.mockResolvedValue({ ok: true, status: 200, data: {} });
         $('[data-testid="cancel-waiting"]').click();
         await flush();
-        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/${EX}/cancel`, { method: 'POST', body: {} });
+        expect(fetchMock).toHaveBeenCalledWith(`/health/people/${PID}/ai/${EX}/cancel`, { method: 'POST', body: {}, replay: true });
         expect(router.visit).toHaveBeenCalledWith(`/health/people/${PID}?panel=document&id=${DOC_ID}`);
     });
 

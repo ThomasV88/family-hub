@@ -6,5 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::put('/settings/security/policy', [SecurityPolicyController::class, 'update'])
     ->middleware(['access:admin', 'access:recent', 'throttle:20,1'])->name('settings.security.policy');
+Route::put('/settings/security/timings', [SecurityPolicyController::class, 'updateTimings'])
+    ->middleware(['access:admin', 'access:recent', 'throttle:20,1'])->name('settings.security.timings');
 Route::delete('/settings/members/{user}/second-factor', [MemberSecondFactorController::class, 'destroy'])
     ->middleware(['access:admin', 'access:recent', 'throttle:20,1'])->whereNumber('user')->name('settings.members.second_factor.destroy');

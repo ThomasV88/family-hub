@@ -34,7 +34,7 @@ it('lists calls newest first with names only and the page shape', function () {
 
     $this->actingAs($admin)->get('/settings/ai-calls')->assertOk()->assertInertia(fn (Assert $p) => $p
         ->component('Settings/AiCalls', false)
-        ->has('sections', 8)
+        ->has('sections', 9)
         ->has('calls.rows', 2)
         ->where('calls.total', 2)
         ->where('calls.rows.0.status', 'succeeded')

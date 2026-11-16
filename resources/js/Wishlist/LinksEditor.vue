@@ -6,6 +6,7 @@ import UiButton from '../Components/ui/UiButton.vue';
 import UiField from '../Components/ui/UiField.vue';
 import UiInput from '../Components/ui/UiInput.vue';
 import { isHttpUrl } from './money.js';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // Controlled repeater of { url, label } rows (max 5). Blank rows are ignored on save by the parent.
 const props = defineProps({
@@ -52,8 +53,9 @@ defineExpose({ validateAll });
 </script>
 
 <template>
-    <fieldset ref="root" class="links">
+    <fieldset ref="root" class="links help-fieldset">
         <legend class="links__legend">{{ t('wishlist.field.links') }}</legend>
+        <span class="help-corner"><HelpTip topic="wishlist.links" :label="t('wishlist.field.links')" /></span>
         <div v-for="(row, index) in modelValue" :key="index" class="links__row">
             <div class="links__fields">
                 <UiField :label="`${t('wishlist.field.link_url')} ${index + 1}`" :error="rowError(index)">

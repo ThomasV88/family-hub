@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import UiCard from '../ui/UiCard.vue';
 import UiCheckbox from '../ui/UiCheckbox.vue';
 import UiAlert from '../ui/UiAlert.vue';
+import HelpTip from '../ui/HelpTip.vue';
 
 const props = defineProps({
     leadDays: { type: Array, default: () => [14, 3] },
@@ -32,6 +33,7 @@ function toggle(day, on) {
 
 <template>
     <UiCard :title="t('notifications.gifts_title')" class="gift-prefs" data-testid="gift-reminders">
+        <template #action><HelpTip topic="notifications.gift_reminders" :label="t('notifications.gifts_title')" /></template>
         <p class="gift-prefs__text">{{ t('notifications.gifts_intro') }}</p>
         <p class="gift-prefs__hint">{{ t('notifications.gifts_channels') }}</p>
         <UiAlert v-if="failed" variant="danger" live class="gift-prefs__alert">{{ t('notifications.save_failed') }}</UiAlert>

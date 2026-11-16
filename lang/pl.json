@@ -56,7 +56,8 @@
         "language": "Język",
         "skip": "Przejdź do głównej treści",
         "add_task": "Dodaj zadanie",
-        "style_guide": "Przewodnik stylu"
+        "style_guide": "Przewodnik stylu",
+        "manual": "Instrukcja"
     },
     "module": {
         "tasks": "Zadania",
@@ -314,7 +315,8 @@
             "finance_accounts": "Konta finansowe",
             "security": "Bezpieczeństwo",
             "ai_calls": "Wywołania AI",
-            "ai_agents": "Agenci AI"
+            "ai_agents": "Agenci AI",
+            "help": "Pomoc kontekstowa"
         },
         "back": "Wróć do ustawień",
         "members": {
@@ -536,6 +538,46 @@
             "col_status": "Status",
             "history_empty_heading": "Brak masowych przetwarzań",
             "history_empty_body": "Gdy rozpoczniesz masowe przetwarzanie, jego liczby pojawią się tutaj."
+        },
+        "security": {
+            "title": "Ponowne potwierdzenie",
+            "intro": "Jak długo członkowie pozostają zalogowani w Zdrowiu i Finansach oraz przy wrażliwych czynnościach, zanim aplikacja ponownie zapyta, czy to oni.",
+            "idle_label": "Potwierdzaj ponownie po bezczynności w Zdrowiu i Finansach",
+            "idle_help": "Od 1 minuty do 24 godzin. Czas liczy się tylko według aktywności w Zdrowiu i Finansach.",
+            "confirm_label": "Wrażliwe czynności potwierdzaj ponownie po",
+            "confirm_help": "Od 1 minuty do 1 godziny. Dotyczy ustawień takich jak uprawnienia, zaproszenia i zabezpieczenia.",
+            "unit_minutes": "minut",
+            "unit_hours": "godzin",
+            "unit_label": "Jednostka",
+            "save": "Zapisz czasy",
+            "saved": "Czasy zapisane",
+            "error_range": "Podaj czas od {min} do {max}.",
+            "duration_minutes": "{n} minuta | {n} minuty | {n} minut | {n} minuty",
+            "duration_hours": "{n} godzina | {n} godziny | {n} godzin | {n} godziny",
+            "timings_toast": "Czasy zapisane"
+        },
+        "help": {
+            "intro": "Każdy zielony znak zapytania w aplikacji: gdzie się znajduje i co mówi w poszczególnych językach. Tekst zmienisz tutaj albo przytrzymując Ctrl i klikając sam znak zapytania.",
+            "count_total": "Znaki zapytania: {n}.",
+            "count_edited": "Ze zmienionym tekstem: {n}.",
+            "filters_label": "Filtruj znaki zapytania",
+            "search_label": "Szukaj",
+            "search_placeholder": "Tekst, miejsce lub klucz",
+            "area_label": "Obszar",
+            "area_all": "Wszystkie obszary",
+            "list_label": "Znaki zapytania",
+            "key": "Klucz:",
+            "edit": "Edytuj",
+            "close_editor": "Zamknij",
+            "edit_name": "Edytuj teksty: {topic}",
+            "close_editor_name": "Zamknij edytor: {topic}",
+            "empty_title": "Na razie brak znaków zapytania",
+            "empty_body": "W tej wersji aplikacji nie zarejestrowano żadnej pomocy kontekstowej.",
+            "filtered_empty": "Żaden znak zapytania nie pasuje do wyszukiwania.",
+            "clear": "Wyczyść wyszukiwanie i filtr",
+            "load_failed": "Nie udało się wczytać listy znaków zapytania.",
+            "orphans_title": "Nieużywane klucze",
+            "orphans_body": "Te klucze są nadal zapisane, ale aplikacja już ich nie używa. Zostają zachowane, nic nie ginie; nigdzie się nie wyświetlają."
         }
     },
     "permissions": {
@@ -715,7 +757,10 @@
             "medical_type_medication": "Lek",
             "medical_type_allergy": "Alergia",
             "medical_type_vaccination": "Szczepienie",
-            "medical_type_document": "Dokument"
+            "medical_type_document": "Dokument",
+            "timings_idle": "Ponowne potwierdzenie po bezczynności ustawione na {duration}",
+            "timings_confirm": "Ponowne potwierdzenie wrażliwych czynności ustawione na {duration}",
+            "help_text_changed": "Zmieniono tekst pomocy {key} ({locales})"
         },
         "page": "Strona {n} z {total}",
         "prev": "Poprzednia",
@@ -1778,7 +1823,14 @@
             "disable_keep": "Zachowaj aplikację uwierzytelniającą"
         },
         "last_factor_warning": "To Twój jedyny drugi krok. Przed otwarciem Zdrowia lub Finansów musisz skonfigurować kolejny.",
-        "confirm_first": "Zanim zmienisz weryfikację dwuetapową, potwierdź, że to Ty."
+        "confirm_first": "Zanim zmienisz weryfikację dwuetapową, potwierdź, że to Ty.",
+        "confirm_modal": {
+            "body": "Twoje potwierdzenie wygasło. Potwierdź, że to Ty, a zmiana zostanie od razu wysłana. Nic, co wpisano, nie przepadnie.",
+            "body_no_method": "Twoje potwierdzenie wygasło, a to konto nie ma tu sposobu na potwierdzenie.",
+            "cancel": "Anuluj, nic nie wysyłaj",
+            "expired": "To trwało zbyt długo, dlatego nic nie wysłano. Wyślij ponownie.",
+            "replay_failed": "Zmiana nie została zapisana, bo potwierdzenie nie zostało przyjęte. Spróbuj ponownie."
+        }
     },
     "members": {
         "security": {
@@ -2367,6 +2419,56 @@
             "body_allergy": "Wpisy zdrowotne można usunąć na stałe tylko krótko po utworzeniu, a dla tej alergii ten czas już minął. Alergia zostanie więc zarchiwizowana: ukryta wszędzie, zachowana i możliwa do przywrócenia w Archiwum tej osoby.",
             "body_vaccination": "Wpisy zdrowotne można usunąć na stałe tylko krótko po utworzeniu, a dla tego szczepienia ten czas już minął. Szczepienie zostanie więc zarchiwizowane: ukryte wszędzie, zachowane i możliwe do przywrócenia w Archiwum tej osoby.",
             "body_doc": "Wpisy zdrowotne można usunąć na stałe tylko krótko po utworzeniu, a dla tego dokumentu ten czas już minął. Dokument zostanie więc zarchiwizowany: ukryty wszędzie, plik zostanie zachowany, a dokument będzie można przywrócić w Archiwum tej osoby."
+        }
+    },
+    "manual": {
+        "title": "Instrukcja",
+        "intro": "Wszystko o Family Hub, wyjaśnione prostymi słowami. Skorzystaj z wyszukiwarki albo wybierz temat z listy.",
+        "search_label": "Szukaj w instrukcji",
+        "search_placeholder": "Na przykład: przypomnienie",
+        "clear_search": "Wyczyść wyszukiwanie",
+        "results": "{n} znaleziona sekcja | {n} znalezione sekcje | {n} znalezionych sekcji | {n} znalezionej sekcji",
+        "no_results_title": "Nic nie znaleziono",
+        "no_results_body": "Spróbuj innego słowa albo wyczyść wyszukiwanie, aby zobaczyć wszystko.",
+        "on_this_page": "Na tej stronie",
+        "in_topic": "W tym temacie",
+        "expand_all": "Rozwiń wszystko",
+        "collapse_all": "Zwiń wszystko",
+        "print": "Drukuj",
+        "admin_only": "Tylko dla administratora",
+        "steps_title": "Gdzie kliknąć",
+        "tip": "Wskazówka:",
+        "warning": "Ważne:",
+        "example": "Przykład:"
+    },
+    "help": {
+        "tip_label": "Pomoc: {topic}",
+        "admin_hint": "Administrator: Ctrl+klik (na Macu Cmd+klik) pozwala edytować ten tekst.",
+        "editor": {
+            "title": "Edytuj tekst pomocy",
+            "where": "Gdzie się pojawia",
+            "intro": "Zwykły tekst, od 1 do {max} znaków, prostym językiem. Zmianę widzą od razu wszyscy. Bez nawiasów ostrych.",
+            "language": {
+                "sk": "Słowacki",
+                "pl": "Polski",
+                "en": "Angielski"
+            },
+            "text_label": "Tekst pomocy w języku: {language}",
+            "current_language": "Twój aktualny język",
+            "edited": "Zmieniony",
+            "counter": "{n} / {max} znaków",
+            "reset": "Przywróć domyślny",
+            "reset_name": "Przywróć domyślny tekst w języku: {language}",
+            "save": "Zapisz",
+            "cancel": "Anuluj",
+            "saved": "Tekst pomocy zapisany",
+            "loading": "Wczytywanie tekstu pomocy",
+            "load_failed": "Nie udało się wczytać tekstu pomocy.",
+            "error_empty": "Wpisz co najmniej jeden znak.",
+            "error_too_long": "Użyj najwyżej {max} znaków.",
+            "error_markup": "Nie używaj nawiasów ostrych.",
+            "error_invalid": "Tekst nie został przyjęty. Każdy język wymaga od 1 do {max} znaków i nie może zawierać nawiasów ostrych.",
+            "error_failed": "Nie udało się zapisać tekstu pomocy. Spróbuj ponownie."
         }
     }
 }

@@ -56,7 +56,8 @@
         "language": "Jazyk",
         "skip": "Preskočiť na hlavný obsah",
         "add_task": "Pridať úlohu",
-        "style_guide": "Sprievodca štýlom"
+        "style_guide": "Sprievodca štýlom",
+        "manual": "Manuál"
     },
     "module": {
         "tasks": "Úlohy",
@@ -314,7 +315,8 @@
             "finance_accounts": "Finančné účty",
             "security": "Zabezpečenie",
             "ai_calls": "Volania AI",
-            "ai_agents": "Agenti AI"
+            "ai_agents": "Agenti AI",
+            "help": "Kontextová nápoveda"
         },
         "back": "Späť do nastavení",
         "members": {
@@ -536,6 +538,46 @@
             "col_status": "Stav",
             "history_empty_heading": "Zatiaľ žiadne hromadné spracovania",
             "history_empty_body": "Keď spustíte hromadné spracovanie, jeho počty sa zobrazia tu."
+        },
+        "security": {
+            "title": "Opätovné potvrdenie",
+            "intro": "Ako dlho zostávajú členovia prihlásení v Zdraví a Financiách a pri citlivých akciách, kým sa ich app znova opýta, či sú to oni.",
+            "idle_label": "Znova potvrdiť po nečinnosti v Zdraví a Financiách",
+            "idle_help": "Od 1 minúty do 24 hodín. Čas beží len podľa aktivity v Zdraví a Financiách.",
+            "confirm_label": "Citlivé akcie znova potvrdiť po",
+            "confirm_help": "Od 1 minúty do 1 hodiny. Platí pre nastavenia ako oprávnenia, pozvánky a zabezpečenie.",
+            "unit_minutes": "minút",
+            "unit_hours": "hodín",
+            "unit_label": "Jednotka",
+            "save": "Uložiť časy",
+            "saved": "Časy uložené",
+            "error_range": "Zadajte čas od {min} do {max}.",
+            "duration_minutes": "{n} minúta | {n} minúty | {n} minúty | {n} minút",
+            "duration_hours": "{n} hodina | {n} hodiny | {n} hodiny | {n} hodín",
+            "timings_toast": "Časy uložené"
+        },
+        "help": {
+            "intro": "Každý zelený otáznik v aplikácii: kde sa nachádza a čo hovorí v jednotlivých jazykoch. Text upravíte tu, alebo podržaním Ctrl a kliknutím na samotný otáznik.",
+            "count_total": "Otázniky: {n}.",
+            "count_edited": "S upraveným textom: {n}.",
+            "filters_label": "Filtrovať otázniky",
+            "search_label": "Hľadať",
+            "search_placeholder": "Text, miesto alebo kľúč",
+            "area_label": "Oblasť",
+            "area_all": "Všetky oblasti",
+            "list_label": "Otázniky",
+            "key": "Kľúč:",
+            "edit": "Upraviť",
+            "close_editor": "Zavrieť",
+            "edit_name": "Upraviť texty: {topic}",
+            "close_editor_name": "Zavrieť editor: {topic}",
+            "empty_title": "Zatiaľ žiadne otázniky",
+            "empty_body": "V tejto verzii aplikácie nie je zaregistrovaná žiadna kontextová nápoveda.",
+            "filtered_empty": "Hľadaniu nezodpovedá žiadny otáznik.",
+            "clear": "Zrušiť hľadanie a filter",
+            "load_failed": "Zoznam otáznikov sa nepodarilo načítať.",
+            "orphans_title": "Nepoužívané kľúče",
+            "orphans_body": "Tieto kľúče sú stále uložené, ale aplikácia ich už nepoužíva. Ostávajú zachované, nič sa nestráca; nikde sa nezobrazujú."
         }
     },
     "permissions": {
@@ -715,7 +757,10 @@
             "medical_type_medication": "Liek",
             "medical_type_allergy": "Alergia",
             "medical_type_vaccination": "Očkovanie",
-            "medical_type_document": "Dokument"
+            "medical_type_document": "Dokument",
+            "timings_idle": "Opätovné potvrdenie po nečinnosti nastavené na {duration}",
+            "timings_confirm": "Opätovné potvrdenie citlivých akcií nastavené na {duration}",
+            "help_text_changed": "Upravený text nápovedy {key} ({locales})"
         },
         "page": "Strana {n} z {total}",
         "prev": "Predchádzajúca",
@@ -1778,7 +1823,14 @@
             "disable_keep": "Ponechať overovaciu aplikáciu"
         },
         "last_factor_warning": "Toto je váš jediný druhý krok. Pred otvorením Zdravia alebo Financií si budete musieť nastaviť ďalší.",
-        "confirm_first": "Pred zmenou dvojstupňového overenia potvrďte, že ste to vy."
+        "confirm_first": "Pred zmenou dvojstupňového overenia potvrďte, že ste to vy.",
+        "confirm_modal": {
+            "body": "Vaše potvrdenie vypršalo. Potvrďte, že ste to vy, a vaša zmena sa hneď odošle. Nič, čo ste zadali, sa nestratí.",
+            "body_no_method": "Vaše potvrdenie vypršalo a tento účet tu nemá ako potvrdiť.",
+            "cancel": "Zrušiť, nič neodoslať",
+            "expired": "Trvalo to príliš dlho, preto sa nič neodoslalo. Odošlite to znova.",
+            "replay_failed": "Zmena sa neuložila, pretože potvrdenie nebolo prijaté. Skúste to znova."
+        }
     },
     "members": {
         "security": {
@@ -2367,6 +2419,56 @@
             "body_allergy": "Zdravotné záznamy sa dajú natrvalo odstrániť iba krátko po vytvorení a pri tejto alergii už tento čas uplynul. Alergia sa preto archivuje: je všade skrytá, zostane uložená a dá sa obnoviť v Archíve tejto osoby.",
             "body_vaccination": "Zdravotné záznamy sa dajú natrvalo odstrániť iba krátko po vytvorení a pri tomto očkovaní už tento čas uplynul. Očkovanie sa preto archivuje: je všade skryté, zostane uložené a dá sa obnoviť v Archíve tejto osoby.",
             "body_doc": "Zdravotné záznamy sa dajú natrvalo odstrániť iba krátko po vytvorení a pri tomto dokumente už tento čas uplynul. Dokument sa preto archivuje: je všade skrytý, súbor zostane uložený a dá sa obnoviť v Archíve tejto osoby."
+        }
+    },
+    "manual": {
+        "title": "Manuál",
+        "intro": "Všetko o Family Hub, vysvetlené jednoducho. Vyhľadávajte, alebo vyberte tému zo zoznamu.",
+        "search_label": "Hľadať v manuáli",
+        "search_placeholder": "Napríklad: pripomienka",
+        "clear_search": "Vymazať hľadanie",
+        "results": "{n} nájdená časť | {n} nájdené časti | {n} nájdenej časti | {n} nájdených častí",
+        "no_results_title": "Nič sa nenašlo",
+        "no_results_body": "Skúste iné slovo alebo vymažte hľadanie, aby sa zobrazilo všetko.",
+        "on_this_page": "Na tejto stránke",
+        "in_topic": "V tejto téme",
+        "expand_all": "Rozbaliť všetko",
+        "collapse_all": "Zbaliť všetko",
+        "print": "Tlačiť",
+        "admin_only": "Len pre správcu",
+        "steps_title": "Kam kliknúť",
+        "tip": "Tip:",
+        "warning": "Dôležité:",
+        "example": "Príklad:"
+    },
+    "help": {
+        "tip_label": "Nápoveda: {topic}",
+        "admin_hint": "Administrátor: Ctrl+klik (na Macu Cmd+klik) upraví tento text.",
+        "editor": {
+            "title": "Upraviť text nápovedy",
+            "where": "Kde sa zobrazuje",
+            "intro": "Čistý text, 1 až {max} znakov, jednoduchým jazykom. Zmenu uvidia všetci hneď. Bez lomených zátvoriek.",
+            "language": {
+                "sk": "Slovenčina",
+                "pl": "Poľština",
+                "en": "Angličtina"
+            },
+            "text_label": "Text nápovedy v jazyku: {language}",
+            "current_language": "Váš aktuálny jazyk",
+            "edited": "Upravené",
+            "counter": "{n} / {max} znakov",
+            "reset": "Obnoviť predvolený text",
+            "reset_name": "Obnoviť predvolený text v jazyku: {language}",
+            "save": "Uložiť",
+            "cancel": "Zrušiť",
+            "saved": "Text nápovedy je uložený",
+            "loading": "Načítava sa text nápovedy",
+            "load_failed": "Text nápovedy sa nepodarilo načítať.",
+            "error_empty": "Napíšte aspoň jeden znak.",
+            "error_too_long": "Použite najviac {max} znakov.",
+            "error_markup": "Nepoužívajte lomené zátvorky.",
+            "error_invalid": "Text sa neprijal. Každý jazyk potrebuje 1 až {max} znakov a žiadne lomené zátvorky.",
+            "error_failed": "Text nápovedy sa nepodarilo uložiť. Skúste to znova."
         }
     }
 }

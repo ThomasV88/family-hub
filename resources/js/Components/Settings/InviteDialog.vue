@@ -85,7 +85,7 @@ async function copy() {
             <UiField :label="t('auth.email')" :error="emailError" required>
                 <UiInput ref="emailInput" v-model="form.email" type="email" autocomplete="off" inputmode="email" />
             </UiField>
-            <UiField :label="t('invite.dialog.preset')" :hint="presetHint">
+            <UiField :label="t('invite.dialog.preset')" help="settings.invite_preset" :hint="presetHint">
                 <UiSelect v-model="form.preset" :options="presetOptions" />
             </UiField>
             <UiField :label="t('invite.dialog.language')">

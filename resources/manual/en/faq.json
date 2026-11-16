@@ -1,0 +1,84 @@
+{
+  "id": "faq",
+  "category": "help",
+  "order": 100,
+  "title": "Questions and troubleshooting",
+  "summary": "Quick answers to common questions and what to do when something does not work.",
+  "covers": [],
+  "sections": [
+    {
+      "id": "cannot-sign-in",
+      "title": "I cannot sign in",
+      "blocks": [
+        { "type": "list", "items": [
+          "Check the email address and password. Press the eye icon to see what you typed.",
+          "Press **Forgot password?** to set a new one.",
+          "After too many wrong attempts the app waits a few minutes. Try again later.",
+          "Lost your phone or recovery codes? Ask your administrator to reset your two-step verification.",
+          "Your invitation link may have expired. Ask for a new invitation."
+        ] }
+      ]
+    },
+    {
+      "id": "no-access",
+      "title": "I do not see a part of the app, or it says I have no access",
+      "blocks": [
+        { "type": "p", "text": "The administrator decides what each person can open. Ask them to check your permissions. See [Who can see what](who-sees-what)." }
+      ]
+    },
+    {
+      "id": "confirm-again",
+      "title": "The app keeps asking me to confirm it's you",
+      "blocks": [
+        { "type": "p", "text": "For Health and Finances, the app asks again after a period of inactivity, and before sensitive actions. This protects your family's private data. See [Confirm it's you](account-security#confirm)." }
+      ]
+    },
+    {
+      "id": "no-reminders",
+      "title": "I get no reminders",
+      "blocks": [
+        { "type": "list", "items": [
+          "Open [Settings > Notifications](/settings/notifications) and check that email or push is on.",
+          "A task needs a due date for a reminder.",
+          "For push, enable it on each device. On iPhone and iPad install the app on the Home Screen first.",
+          "If your browser blocked notifications, allow them in the browser settings for this site.",
+          "Look in your spam folder for email reminders."
+        ] }
+      ]
+    },
+    {
+      "id": "wish-reserved",
+      "title": "Why can I not see who reserved my wish?",
+      "blocks": [
+        { "type": "p", "text": "To keep gifts a surprise. See [Why you never see who reserved your own wishes](wishlist#surprise)." }
+      ]
+    },
+    {
+      "id": "upload-fails",
+      "title": "A document or image will not upload",
+      "blocks": [
+        { "type": "list", "items": [
+          "Health documents: use PDF, JPG, PNG, WebP or HEIC, up to 10 MB each.",
+          "Wishlist images: JPEG, PNG or WebP, up to 5 MB.",
+          "Bank files for import: .csv or .txt, up to 2 MB.",
+          "If a file cannot be read, save it again from the original program and try the new copy.",
+          "Check your internet connection."
+        ] }
+      ]
+    },
+    {
+      "id": "offline",
+      "title": "The app says I am offline",
+      "blocks": [
+        { "type": "p", "text": "Family Hub needs a connection to show and save your data. When your device is offline, a banner appears. Your changes are not saved until you are back online, so wait for the banner to disappear before you rely on a change." }
+      ]
+    },
+    {
+      "id": "new-version",
+      "title": "A message says a new version is available",
+      "blocks": [
+        { "type": "p", "text": "Press **Reload** in the message. The page restarts with the newest version. Finish what you are typing and save it first." }
+      ]
+    }
+  ]
+}

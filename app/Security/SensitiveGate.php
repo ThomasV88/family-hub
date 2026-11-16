@@ -36,6 +36,11 @@ class SensitiveGate
                 return response()->json(['error' => 'reauth_required'], 423);
             }
 
+            // A write the page sends through Inertia is answered in place, so the form on screen survives.
+            if (StaleGateResponse::inertiaWrite($request)) {
+                return StaleGateResponse::make('reauth_required', $user);
+            }
+
             $inertia = (bool) $request->header('X-Inertia');
             $mode = $request->headers->get('Sec-Fetch-Mode');
             $nonNavigation = ! $inertia && $mode !== null && $mode !== 'navigate';
@@ -46,7 +51,7 @@ class SensitiveGate
                     $request->session()->flash('status', 'reauth_interrupted');
                 }
 
-                return $json ? response()->json(['error' => 'reauth_required'], 423) : response('', 423);
+                return $json ? StaleGateResponse::make('reauth_required', $user) : response('', 423);
             }
 
             $this->remember($request, $get);

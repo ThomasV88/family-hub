@@ -12,6 +12,7 @@ import { securityFetch } from '../../Security/securityFetch.js';
 import BulkHistoryTable from './BulkHistoryTable.vue';
 import BulkProgress from './BulkProgress.vue';
 import { useBulkStatus } from './useBulkStatus.js';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 
 // Screen 3: plan block (scope, cap, mandatory dry run, freshness rule, guarded Start) or the active run, plus
 // counts-only history. The dry-run token lives in component memory only; a reload discards it. Nothing is kept
@@ -185,7 +186,7 @@ async function check() {
     finished.value = null;
     say(t('settings.ai_bulk.checking'));
     const body = { scope: scope.value, cap: capValue.value };
-    const response = await securityFetch(DRY_URL, { method: 'POST', body });
+    const response = await securityFetch(DRY_URL, { method: 'POST', body, replay: true });
     checking.value = false;
     const data = response.data ?? {};
     if (response.ok && typeof data.token === 'string' && data.counts) {
@@ -227,7 +228,7 @@ async function start() {
     if (!ready.value || !result.value) return;
     starting.value = true;
     problem.value = '';
-    const response = await securityFetch(START_URL, { method: 'POST', body: { token: result.value.token, acknowledged: true, providers: [...shownProviders.value] } });
+    const response = await securityFetch(START_URL, { method: 'POST', body: { token: result.value.token, acknowledged: true, providers: [...shownProviders.value] }, replay: true });
     starting.value = false;
     const data = response.data ?? {};
     if (response.ok && response.status === 201 && data.panel) {
@@ -265,7 +266,7 @@ async function control(action) {
     if (pending.value || !active.value) return;
     pending.value = action;
     problem.value = '';
-    const response = await securityFetch(`${START_URL}/${encodeURIComponent(active.value.id)}/${action}`, { method: 'POST' });
+    const response = await securityFetch(`${START_URL}/${encodeURIComponent(active.value.id)}/${action}`, { method: 'POST', replay: true });
     pending.value = null;
     const data = response.data ?? {};
     if (response.ok && data.panel) {
@@ -300,6 +301,7 @@ const problemText = computed(() => ({
 
 <template>
     <UiCard :title="t('settings.ai_bulk.heading')" :heading-level="2">
+        <template #action><HelpTip topic="settings.ai_bulk" :label="t('settings.ai_bulk.heading')" /></template>
         <section class="bulk" :aria-busy="checking || starting || status.refreshing.value ? 'true' : undefined" data-testid="bulk-panel">
             <p class="bulk__intro">{{ t('settings.ai_bulk.intro') }}</p>
 

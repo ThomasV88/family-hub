@@ -12,6 +12,7 @@ import UiInput from '../Components/ui/UiInput.vue';
 import UiRadio from '../Components/ui/UiRadio.vue';
 import UiSelect from '../Components/ui/UiSelect.vue';
 import { categoryLabel } from './labels.js';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // Family category panel. `category` is { mode: 'new' } or { id, kind, defaultKey, name }. Names and kinds are
 // family-wide and non-sensitive; nothing here knows how many rows use a category (the server never sends it).
@@ -89,8 +90,9 @@ function confirmDelete() {
             <UiField :label="t('finance.cat.field_name')" :error="nameError" required>
                 <UiInput v-model="form.name" maxlength="40" autocomplete="off" />
             </UiField>
-            <fieldset class="cat-panel__type">
+            <fieldset class="cat-panel__type help-fieldset">
                 <legend class="cat-panel__legend">{{ t('finance.cat.field_type') }}</legend>
+                <span class="help-corner"><HelpTip topic="finance.category_type" :label="t('finance.cat.field_type')" /></span>
                 <div class="cat-panel__choices" role="radiogroup" :aria-label="t('finance.cat.field_type')">
                     <UiRadio v-model="form.kind" name="category-kind" value="expense" :disabled="!isNew">{{ t('finance.kind.expense') }}</UiRadio>
                     <UiRadio v-model="form.kind" name="category-kind" value="income" :disabled="!isNew">{{ t('finance.kind.income') }}</UiRadio>

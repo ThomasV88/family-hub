@@ -13,6 +13,12 @@ return [
         'data' => ['required' => false],
         'expect' => $adminOnly(303),
     ],
+    'settings.security.timings' => [
+        'method' => 'PUT',
+        'uri' => '/settings/security/timings',
+        'data' => ['idle_seconds' => 3600, 'confirm_window_seconds' => 3600],
+        'expect' => $adminOnly(303),
+    ],
     // The fixture child has no second factor, so the admin gets the scoped 422.
     'settings.members.second_factor.destroy' => [
         'method' => 'DELETE',

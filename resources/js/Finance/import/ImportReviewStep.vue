@@ -12,6 +12,7 @@ import { INTL_LOCALES } from '../../i18n.js';
 import { useFrameWidth } from '../../Shell/shellState.js';
 import MoneyAmount from '../MoneyAmount.vue';
 import { categoryLabel, formatDay } from '../labels.js';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 
 // Step 3. Counts, states and match names come from the server; the client only tracks which rows are ticked and the
 // category overrides. Nothing is saved until the commit button. Row text is rendered as text only.
@@ -87,7 +88,7 @@ function back() {
 <template>
     <div ref="root" class="imp-review" data-testid="import-step-review">
         <div class="imp-review__summary">
-            <p class="imp-review__total">{{ t('finance.imp.rows', { n: counts.total }, counts.total) }}</p>
+            <p class="imp-review__total">{{ t('finance.imp.rows', { n: counts.total }, counts.total) }} <HelpTip topic="finance.import_review" :label="t('finance.imp.step_review')" /></p>
             <ul class="imp-review__tags">
                 <li><UiTag variant="success">{{ t('finance.imp.tag_new', { n: counts.new }) }}</UiTag></li>
                 <li><UiTag variant="warn" :icon="Copy">{{ t('finance.imp.tag_dup', { n: duplicateCount }) }}</UiTag></li>

@@ -135,7 +135,9 @@ async function call(method, tail, body, inForm = false) {
     busy.value = true;
     failed.value = false;
     serverErrors.value = [];
-    const result = await securityFetch(`${base.value}/${tail}`, body === undefined ? { method } : { method, body });
+    const result = await securityFetch(`${base.value}/${tail}`, body === undefined ? { method, replay: true } : { method, body, replay: true });
+    // The member closed "Confirm it's you": nothing was sent, the draft stays open.
+    if (result.error === 'cancelled') return null;
     busy.value = false;
     if (result.ok) return result.data;
     if (result.status === 409) {
@@ -144,7 +146,7 @@ async function call(method, tail, body, inForm = false) {
         return null;
     }
     if (result.status === 423) {
-        // The draft is discarded and nothing is replayed; the refusal flow takes over.
+        // Refused again after the confirmation (or no dialog available): the draft is discarded and the refusal flow takes over.
         if (inForm) edit?.close(props.entry.key);
         handleHealthRefusal(result.error);
         return null;

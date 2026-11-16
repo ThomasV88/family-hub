@@ -13,6 +13,7 @@ import StatusTag from './StatusTag.vue';
 import TransactionForm from './TransactionForm.vue';
 import { categoryLabel, formatDay } from './labels.js';
 import { formatMinor } from './money.js';
+import HelpTip from '../Components/ui/HelpTip.vue';
 
 // One payment (occurrence) of a recurring expense: expected vs actual, record a payment, pick or drop the matching
 // transaction. Status, difference and candidates are server values; nothing is computed here.
@@ -140,6 +141,7 @@ const submitRecord = () => form.value?.save();
                 <UiButton variant="secondary" @click="emit('close')">{{ t('finance.close') }}</UiButton>
                 <template v-if="finance.canEdit">
                     <UiButton v-if="unpaid && !matching && !recording" variant="secondary" @click="emit('match')">{{ t('finance.bill.match') }}</UiButton>
+                    <HelpTip v-if="unpaid && !matching && !recording" topic="finance.bill_match" :label="t('finance.bill.match')" />
                     <UiButton v-if="unpaid && !matching && !recording" variant="primary" @click="startRecord">{{ t('finance.bill.record') }}</UiButton>
                     <UiButton v-if="recording" variant="primary" @click="submitRecord">{{ t('finance.bill.record') }}</UiButton>
                     <UiButton v-if="!unpaid && bill.match" variant="ghost" :icon="Unlink2" :loading="busy" @click="unmatch">{{ t('finance.bill.unmatch') }}</UiButton>

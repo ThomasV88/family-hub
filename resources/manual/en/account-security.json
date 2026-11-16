@@ -1,0 +1,84 @@
+{
+  "id": "account-security",
+  "category": "account",
+  "order": 70,
+  "title": "Account and security",
+  "summary": "Your password, two-step verification, passkeys, recovery codes, signing out, and the extra check for Health and Finances.",
+  "covers": ["settings:security"],
+  "sections": [
+    {
+      "id": "password",
+      "title": "Changing or resetting your password",
+      "blocks": [
+        { "type": "steps", "title": "Where to click", "items": [
+          "On the sign-in page, press **Forgot password?**.",
+          "Type your email and press **Send reset link**.",
+          "Open the link in the email (it works for 60 minutes) and choose a new password."
+        ] },
+        { "type": "p", "text": "A good password has at least 12 characters. A long sentence is easier to remember than random symbols. After you set a new password you are signed out on your other devices." }
+      ]
+    },
+    {
+      "id": "two-step",
+      "title": "Two-step verification with an authenticator app",
+      "blocks": [
+        { "type": "p", "text": "Two-step verification asks for a short code from your phone, as well as your password. It protects your account if somebody learns your password. The administrator may require it before you open Health or Finances." },
+        { "type": "steps", "title": "Where to click", "items": [
+          "Install an authenticator app on your phone, if you do not have one.",
+          "Open the account menu, choose **Settings**, then **Security**.",
+          "Press **Set up authenticator app**.",
+          "Scan the QR code with the app. If you cannot scan, press **Can't scan? Enter the key instead** and type the key.",
+          "Type the 6-digit code the app shows and press **Confirm code**.",
+          "Save your recovery codes (see below), tick **I have saved these codes somewhere safe**, and press **Finish setup**."
+        ] },
+        { "type": "p", "text": "When you sign in, the app asks for the 6-digit code after your password. To turn the authenticator app off, use **Turn off authenticator app** in the same place." }
+      ]
+    },
+    {
+      "id": "passkeys",
+      "title": "Passkeys",
+      "blocks": [
+        { "type": "p", "text": "A passkey lets you confirm it's you with your fingerprint, your face or your screen lock, instead of a code. It stays on your device." },
+        { "type": "steps", "title": "Where to click", "items": [
+          "Open [Settings > Security](/settings/security).",
+          "Press **Add passkey** and follow the prompt of your device.",
+          "Give the passkey a name, for example iPhone or Work laptop, and press **Save name**."
+        ] },
+        { "type": "p", "text": "You can **Rename** or **Remove** a passkey later. If you see that your browser or device does not support passkeys, use an authenticator app instead." }
+      ]
+    },
+    {
+      "id": "recovery-codes",
+      "title": "Recovery codes",
+      "blocks": [
+        { "type": "p", "text": "Recovery codes are your emergency key. If you lose your phone, a recovery code lets you sign in. Each code works only once. The app shows them only at setup." },
+        { "type": "list", "items": [
+          "Save them in a safe place: copy or download them, or write them on paper.",
+          "Security shows how many codes are left. When few are left, press **Create new codes**. Old codes then stop working.",
+          "If you have no codes and no phone, ask your administrator to reset your two-step verification."
+        ] }
+      ]
+    },
+    {
+      "id": "sign-out",
+      "title": "Signing out, and other devices",
+      "blocks": [
+        { "type": "p", "text": "Choose **Log out** in the account menu to sign out on the device you are using. If you lose a device, change your password with **Forgot password?**: this signs you out everywhere. The administrator can also sign you out on a device you no longer have." },
+        { "type": "warning", "text": "If you signed in on a shared computer and forgot to log out, change your password as soon as you can." }
+      ]
+    },
+    {
+      "id": "confirm",
+      "title": "Confirm it's you, and the lock for Health and Finances",
+      "blocks": [
+        { "type": "p", "text": "Health and Finances hold private data, so the app protects them more. After a period of inactivity, the app asks you to confirm it's you before it shows them again. It may also ask before sensitive actions, such as changing your security settings." },
+        { "type": "steps", "title": "Where to click", "items": [
+          "When the **Confirm it's you** window appears, type your password, or use your passkey or authenticator code.",
+          "Then carry on. If an action was interrupted, repeat it."
+        ] },
+        { "type": "p", "text": "The administrator can change how long this takes in Settings > Security. This is normal and not a sign that anything is wrong." },
+        { "type": "tip", "text": "Save your work before you step away. Unsaved text in Health can be lost when the page locks." }
+      ]
+    }
+  ]
+}

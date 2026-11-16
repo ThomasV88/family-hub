@@ -33,9 +33,9 @@ it('is what config/security.php reads the idle and confirm knobs through', funct
         return $config;
     };
 
-    expect($load([])['idle_seconds'])->toBe(900)->and($load([])['confirm_window_seconds'])->toBe(600);
+    expect($load([])['idle_seconds'])->toBe(3600)->and($load([])['confirm_window_seconds'])->toBe(3600);
     $typo = $load(['SECURITY_IDLE_SECONDS' => '15m', 'SECURITY_CONFIRM_WINDOW_SECONDS' => '0']);
-    expect($typo['idle_seconds'])->toBe(900)->and($typo['confirm_window_seconds'])->toBe(600);
+    expect($typo['idle_seconds'])->toBe(3600)->and($typo['confirm_window_seconds'])->toBe(3600);
     $extreme = $load(['SECURITY_IDLE_SECONDS' => '900000000', 'SECURITY_CONFIRM_WINDOW_SECONDS' => '1']);
     expect($extreme['idle_seconds'])->toBe(86400)->and($extreme['confirm_window_seconds'])->toBe(60);
 });

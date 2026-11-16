@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Access\AccessGate;
+use App\Help\HelpTexts;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -70,6 +71,11 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
                 'access' => $request->user() ? app(AccessGate::class)->levels($request->user()) : (object) [],
             ],
+            // Contextual help ("?" tips) for the active language: a small cached map, the same for everyone, sent once and
+            // remembered by the client until an administrator edits a text or the language changes (the key carries both).
+            'help' => $request->user()
+                ? Inertia::once(fn () => app(HelpTexts::class)->payload($locale()))->as('help-'.$locale().'-'.app(HelpTexts::class)->version())
+                : null,
             'flash' => [
                 'status' => $request->session()->get('status'),
                 'toast' => $request->session()->get('toast'),

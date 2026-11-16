@@ -158,7 +158,7 @@ describe('document panel', () => {
         expect(revoked).toEqual([]);
         delayed[0]();
         expect(revoked).toEqual(['blob:x']);
-        expect(download).toHaveBeenCalledWith(docUrl(D1.id, 'file'));
+        expect(download).toHaveBeenCalledWith(docUrl(D1.id, 'file'), { replay: true });
         expect(created).toHaveLength(1);
     });
 

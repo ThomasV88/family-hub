@@ -1,0 +1,146 @@
+{
+  "id": "admin",
+  "category": "admin",
+  "order": 80,
+  "title": "Administrator guide",
+  "summary": "Everything the family administrator can do: members, permissions, security, the audit log, AI tools, the help texts and backups.",
+  "adminOnly": true,
+  "covers": ["settings:members", "settings:audit", "settings:finance_accounts", "settings:ai_calls", "settings:ai_agents", "settings:help"],
+  "sections": [
+    {
+      "id": "where",
+      "title": "Where the administrator settings are",
+      "blocks": [
+        { "type": "p", "text": "Open the account menu and choose **Settings**. As administrator you see these sections: **Members and access**, **Audit log**, **Finance accounts**, **AI calls**, **AI agents**, **Notifications**, **Security** and **Appearance and language**." },
+        { "type": "warning", "text": "Being an administrator does not give access to Health or Finances. Those need to be granted on purpose, like for any other member." }
+      ]
+    },
+    {
+      "id": "members-invitations",
+      "title": "Members and invitations",
+      "blocks": [
+        { "type": "steps", "title": "Inviting someone", "items": [
+          "Open [Settings > Members and access](/settings/members).",
+          "Press **Invite member**.",
+          "Type their email, choose the **Starting access** (Parent, Child, Grandparent or Guest) and their **Language**.",
+          "Press **Send invite**."
+        ] },
+        { "type": "list", "items": [
+          "An invitation works once and for 7 days.",
+          "Under **Invitations** you can **Resend** an invitation (the old link stops working), **Copy link** to send it yourself, or **Revoke** it.",
+          "If the email could not be sent, you see **Email not sent**. Copy the link and send it another way."
+        ] },
+        { "type": "p", "text": "Open a member with **Manage** to change their access, wishlist managers, sessions and security." }
+      ]
+    },
+    {
+      "id": "permissions",
+      "title": "Permissions for each module",
+      "blocks": [
+        { "type": "p", "text": "Each member has a level for each module (To-do, Wishlist, Finances and Health): **None** (cannot see it), **View** (can read) or **Edit** (can read and change). The server enforces this on every page." },
+        { "type": "steps", "title": "Where to click", "items": [
+          "In **Members and access**, press **Manage** next to a member.",
+          "On the **Permissions** tab, choose a **Preset** and press **Apply**, or set each module yourself.",
+          "Press **Save permissions**."
+        ] },
+        { "type": "list", "items": [
+          "**Parent**: To-do, Wishlist and Finances: edit. Health: none.",
+          "**Child**: To-do and Wishlist: edit. Finances and Health: none.",
+          "**Grandparent**: To-do and Wishlist: edit. Finances and Health: none.",
+          "**Guest**: To-do: view only. Everything else: none."
+        ] },
+        { "type": "p", "text": "The **Permission matrix** tab shows all members and modules in one table, so you can check everyone at a glance. Health and Finances are restricted by default. Settings are for administrators only." }
+      ]
+    },
+    {
+      "id": "health-people",
+      "title": "Health access for each person",
+      "blocks": [
+        { "type": "p", "text": "Health access works in two layers: the member needs Health in their permissions, and then access to each person. On the **Members** tab of Members and access, the card **Health access by person** lists the people in Health." },
+        { "type": "steps", "title": "Where to click", "items": [
+          "Press **Manage access** next to a person.",
+          "For each member choose **No access**, **Can view** or **Can change**.",
+          "If the person has an account of their own, choose it under **Linked account**. The switch **Always allow this member to see and change their own record** gives them their own record. Turn it off for a child who should not open their own record.",
+          "Press **Save access**."
+        ] },
+        { "type": "p", "text": "You do not see people in Health unless you were given access to them, as an administrator too." }
+      ]
+    },
+    {
+      "id": "finance-accounts",
+      "title": "Finance accounts",
+      "blocks": [
+        { "type": "p", "text": "Open [Settings > Finance accounts](/settings/finance-accounts). Here you choose who sees each account. You see only the names and the member list, never balances or transactions. A member must have Finance access in their permissions first." }
+      ]
+    },
+    {
+      "id": "wishlist-managers",
+      "title": "Wishlist managers",
+      "blocks": [
+        { "type": "p", "text": "Some people, such as young children, cannot keep their own list. Open **Manage** for that member and choose the **Wishlist** tab. Tick the members who may add and edit wishes on their list, and press **Save managers**. Managers see the list as the owner does, without reservations." }
+      ]
+    },
+    {
+      "id": "security-settings",
+      "title": "Security settings",
+      "blocks": [
+        { "type": "list", "items": [
+          "**Require two-step verification**: on the **Members** tab of Members and access, the card **Two-step verification for sensitive data** has the switch **Require two-step verification for Health and Finances**. Members with access to Health or Finances must then set it up before they can open these modules. The card shows how many have not done it yet.",
+          "**Reset two-step verification**: if a member loses their phone and recovery codes, open their **Security** tab and press **Reset two-step verification**. They set it up again.",
+          "**Sessions**: on a member's **Sessions** tab you can **Revoke** a device or **Revoke all sessions**. That person must sign in again.",
+          "**Confirm it's you**: the time before the app asks again, and related timings, can be changed in Settings > Security."
+        ] },
+        { "type": "p", "text": "Changes to security settings ask you to confirm it's you first." }
+      ]
+    },
+    {
+      "id": "audit-log",
+      "title": "The audit log",
+      "blocks": [
+        { "type": "p", "text": "[Settings > Audit log](/settings/audit) records who did what and when: sign-ins, invitations, permission changes, security changes, and access to Health and Finance data. It never records the content of any record. Entries are kept for 2 years." },
+        { "type": "p", "text": "Use the filters **Member**, **Event type** and the dates, and press **Apply filters**. Use it to answer questions like who changed a permission, or who opened a record." }
+      ]
+    },
+    {
+      "id": "ai-agents",
+      "title": "AI agents and the AI call log",
+      "blocks": [
+        { "type": "p", "text": "Open [Settings > AI agents](/settings/ai-agents). Here you choose which AI tools may read documents in Health and in which order. If the first has reached its usage limit, the next is tried. Each tool has a switch, a position and an optional model." },
+        { "type": "list", "items": [
+          "At least one tool must stay on, or nobody can run AI.",
+          "A tool must be signed in on the server. This cannot be done on this page: ask whoever runs the server. The page shows the login status and **Check again**.",
+          "Turning on a tool that sends documents to a new company shows members a new notice before their next run.",
+          "**Bulk re-generation** reads past documents again. First press **Check what would run**, then **Start bulk run**. You can pause or cancel it. Anything a person already accepted is never changed."
+        ] },
+        { "type": "p", "text": "Every time AI reads a document, it is listed under [Settings > AI calls](/settings/ai-calls): who started it and when, never what was in the document. Calls older than 12 months are removed automatically." },
+        { "type": "warning", "text": "Medical documents leave the server when AI is used. Before you turn a tool on, make sure the family agrees and that you are comfortable with the company's terms." }
+      ]
+    },
+    {
+      "id": "contextual-help",
+      "title": "Editing the help texts",
+      "covers": ["feature:help-admin"],
+      "blocks": [
+        { "type": "p", "text": "Every green question mark takes its text from the database, in Slovak, Polish and English. Administrators can reword any of them; other members only read them." },
+        { "type": "steps", "title": "Edit one text", "items": [
+          "Hold **Ctrl** and click the question mark (on a Mac, **Cmd** and click).",
+          "Change the text in any language: plain text, 1 to 400 characters. Your current language is highlighted.",
+          "Press **Save**. Everyone sees the change straight away. **Reset to default** brings back the original wording of one language."
+        ] },
+        { "type": "steps", "title": "Edit many texts", "items": [
+          "Open [Settings > Contextual help](/settings/help).",
+          "Use the search box and the area filter to find a question mark. Each row shows where it sits and its three texts.",
+          "Press **Edit** on a row to change its texts in all languages."
+        ] },
+        { "type": "p", "text": "Texts you edited are kept when the app is updated; texts you did not edit are refreshed with new default wording. Keys the app no longer uses are listed under Unused keys and kept. Every change is written to the audit log with the question mark and the languages, never with the text." }
+      ]
+    },
+    {
+      "id": "backups",
+      "title": "Backups",
+      "blocks": [
+        { "type": "p", "text": "The server makes encrypted backups every night, and keeps them on the same server: a copy of the database, uploaded files and settings. They protect against mistakes and damage, but not against losing the whole server. A deleted record can stay in older backups until they expire. Backups, the delete window for Health records and other server settings are managed by the person who runs the server, not in this app." }
+      ]
+    }
+  ]
+}
