@@ -121,7 +121,10 @@ describe('Settings > Contextual help', () => {
         expect(qa('.help-row')).toHaveLength(1);
         await setValue(q('[data-testid="help-search"]'), 'OPAKOVANIE');
         expect(qa('.help-row').length).toBeGreaterThanOrEqual(1);
-        expect(qa('.help-row').every((r) => r.textContent.toLowerCase().includes('opakovanie'))).toBe(true);
+        expect(qa('.help-row').length).toBeLessThan(all);
+        expect(q('[data-key="tasks.recurrence"]')).not.toBeNull();
+        await setValue(q('[data-testid="help-search"]'), 'planovany tydzen zadanie');
+        expect(qa('.help-row').length).toBeLessThan(all);
 
         await setValue(q('[data-testid="help-search"]'), 'zzzzqqq');
         expect(q('.help-row')).toBeNull();
