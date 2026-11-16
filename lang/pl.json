@@ -555,6 +555,29 @@
             "duration_minutes": "{n} minuta | {n} minuty | {n} minut | {n} minuty",
             "duration_hours": "{n} godzina | {n} godziny | {n} godzin | {n} godziny",
             "timings_toast": "Czasy zapisane"
+        },
+        "help": {
+            "intro": "Każdy zielony znak zapytania w aplikacji: gdzie się znajduje i co mówi w poszczególnych językach. Tekst zmienisz tutaj albo przytrzymując Ctrl i klikając sam znak zapytania.",
+            "count_total": "Znaki zapytania: {n}.",
+            "count_edited": "Ze zmienionym tekstem: {n}.",
+            "filters_label": "Filtruj znaki zapytania",
+            "search_label": "Szukaj",
+            "search_placeholder": "Tekst, miejsce lub klucz",
+            "area_label": "Obszar",
+            "area_all": "Wszystkie obszary",
+            "list_label": "Znaki zapytania",
+            "key": "Klucz:",
+            "edit": "Edytuj",
+            "close_editor": "Zamknij",
+            "edit_name": "Edytuj teksty: {topic}",
+            "close_editor_name": "Zamknij edytor: {topic}",
+            "empty_title": "Na razie brak znaków zapytania",
+            "empty_body": "W tej wersji aplikacji nie zarejestrowano żadnej pomocy kontekstowej.",
+            "filtered_empty": "Żaden znak zapytania nie pasuje do wyszukiwania.",
+            "clear": "Wyczyść wyszukiwanie i filtr",
+            "load_failed": "Nie udało się wczytać listy znaków zapytania.",
+            "orphans_title": "Nieużywane klucze",
+            "orphans_body": "Te klucze są nadal zapisane, ale aplikacja już ich nie używa. Zostają zachowane, nic nie ginie; nigdzie się nie wyświetlają."
         }
     },
     "permissions": {

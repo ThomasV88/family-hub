@@ -32,6 +32,7 @@ it('lists every registered tip with placement, all three texts and the edited ma
         ->has('topics.0.texts.sk')->has('topics.0.texts.pl')->has('topics.0.texts.en')
         ->has('topics.0.defaults')->has('topics.0.edited')->has('topics.0.location.area')->has('topics.0.location.screen')->has('topics.0.location.field')
         ->where('orphans', [])
+        ->where('error', false)
         ->where('locales', ['sk', 'pl', 'en'])
         ->where('maxLength', 400));
 });
@@ -151,4 +152,11 @@ it('keeps help texts when the editing user is removed', function () {
 it('does not require a recent confirmation to edit (plain text, grants nothing)', function () {
     $route = app('router')->getRoutes()->getByName('settings.help.update');
     expect($route->gatherMiddleware())->toContain('access:admin')->not->toContain('access:recent');
+});
+
+it('shows the page error state instead of a server error when the registry cannot be read', function () {
+    app()->instance(HelpRegistry::class, new HelpRegistry(sys_get_temp_dir().'/no-such-help-registry'));
+
+    $this->actingAs(helpAdmin())->get('/settings/help')->assertOk()->assertInertia(fn (Assert $p) => $p
+        ->where('error', true)->where('topics', [])->where('orphans', []));
 });

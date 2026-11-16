@@ -8,6 +8,7 @@ use App\Models\HelpText;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 /**
  * Runtime side of the contextual help: the texts the app shows (database row, else the registry default), the cached
@@ -47,6 +48,19 @@ class HelpTexts
         $locale = in_array($locale, HelpRegistry::LOCALES, true) ? $locale : 'en';
         $version = $this->version();
 
+        // An unreadable registry must never take a page down: no tips are shown (an empty map) and the error is reported.
+        try {
+            return $this->build($locale, $version);
+        } catch (Throwable $e) {
+            report($e);
+
+            return ['version' => $version, 'locale' => $locale, 'topics' => []];
+        }
+    }
+
+    /** @return array{version: int, locale: string, topics: array<string, array{title: string, text: string}>} */
+    private function build(string $locale, int $version): array
+    {
         return Cache::remember("help.payload.{$locale}.{$version}", now()->addDays(7), function () use ($locale, $version): array {
             $rows = HelpText::query()->get(['key', "text_{$locale}"])->keyBy('key');
             $topics = [];

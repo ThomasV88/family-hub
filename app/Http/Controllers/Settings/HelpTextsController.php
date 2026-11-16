@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 /**
  * Admin management of the contextual help (the green "?" tips): the list of every tip with its placement and its texts in all
@@ -23,13 +24,24 @@ final class HelpTextsController extends Controller
     {
         $registry = $help->registry();
         $locale = app()->getLocale();
-        $all = $help->all($locale);
+        // An unreadable registry shows the page's error state instead of a server error page.
+        try {
+            $all = $help->all($locale);
+            $areas = $registry->areas($locale);
+            $error = false;
+        } catch (Throwable $e) {
+            report($e);
+            $all = ['topics' => [], 'orphans' => []];
+            $areas = [];
+            $error = true;
+        }
 
         return Inertia::render('Settings/Help', [
             'sections' => SettingsSections::for($request->user()),
             'topics' => $all['topics'],
             'orphans' => $all['orphans'],
-            'areas' => collect($registry->areas($locale))->map(fn (string $label, string $id) => ['id' => $id, 'label' => $label])->values()->all(),
+            'error' => $error,
+            'areas' => collect($areas)->map(fn (string $label, string $id) => ['id' => $id, 'label' => $label])->values()->all(),
             'locales' => HelpRegistry::LOCALES,
             'maxLength' => HelpRegistry::MAX_LENGTH,
         ]);

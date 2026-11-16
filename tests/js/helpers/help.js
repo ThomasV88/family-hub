@@ -21,3 +21,29 @@ export function installHelp(locale = 'en', { admin = false, pad = null } = {}) {
     setHelp(helpPayload(locale, { pad }));
     setHelpAdmin(admin);
 }
+
+/** The `topics` prop of Settings > Contextual help, built from the registry the way HelpTexts::all() does. */
+export function helpRows(labelLocale = 'en', { edited = {} } = {}) {
+    const files = { sk: readHelpLocale('sk'), pl: readHelpLocale('pl'), en: readHelpLocale('en') };
+    return readTopics().map((topic) => {
+        const texts = {};
+        const defaults = {};
+        const titles = {};
+        for (const l of ['sk', 'pl', 'en']) {
+            defaults[l] = files[l].topics[topic.key].text;
+            texts[l] = edited[topic.key]?.[l] ?? defaults[l];
+            titles[l] = files[l].topics[topic.key].title;
+        }
+        return {
+            ...topic,
+            location: { area: files[labelLocale].areas[topic.area], screen: files[labelLocale].screens[topic.screen], field: titles[labelLocale] },
+            titles,
+            texts,
+            defaults,
+            edited: { sk: Boolean(edited[topic.key]?.sk), pl: Boolean(edited[topic.key]?.pl), en: Boolean(edited[topic.key]?.en) },
+            editedAt: null,
+        };
+    });
+}
+
+export const helpAreas = (locale = 'en') => Object.entries(readHelpLocale(locale).areas).map(([id, label]) => ({ id, label }));

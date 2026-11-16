@@ -555,6 +555,29 @@
             "duration_minutes": "{n} minúta | {n} minúty | {n} minúty | {n} minút",
             "duration_hours": "{n} hodina | {n} hodiny | {n} hodiny | {n} hodín",
             "timings_toast": "Časy uložené"
+        },
+        "help": {
+            "intro": "Každý zelený otáznik v aplikácii: kde sa nachádza a čo hovorí v jednotlivých jazykoch. Text upravíte tu, alebo podržaním Ctrl a kliknutím na samotný otáznik.",
+            "count_total": "Otázniky: {n}.",
+            "count_edited": "S upraveným textom: {n}.",
+            "filters_label": "Filtrovať otázniky",
+            "search_label": "Hľadať",
+            "search_placeholder": "Text, miesto alebo kľúč",
+            "area_label": "Oblasť",
+            "area_all": "Všetky oblasti",
+            "list_label": "Otázniky",
+            "key": "Kľúč:",
+            "edit": "Upraviť",
+            "close_editor": "Zavrieť",
+            "edit_name": "Upraviť texty: {topic}",
+            "close_editor_name": "Zavrieť editor: {topic}",
+            "empty_title": "Zatiaľ žiadne otázniky",
+            "empty_body": "V tejto verzii aplikácie nie je zaregistrovaná žiadna kontextová nápoveda.",
+            "filtered_empty": "Hľadaniu nezodpovedá žiadny otáznik.",
+            "clear": "Zrušiť hľadanie a filter",
+            "load_failed": "Zoznam otáznikov sa nepodarilo načítať.",
+            "orphans_title": "Nepoužívané kľúče",
+            "orphans_body": "Tieto kľúče sú stále uložené, ale aplikácia ich už nepoužíva. Ostávajú zachované, nič sa nestráca; nikde sa nezobrazujú."
         }
     },
     "permissions": {

@@ -555,6 +555,29 @@
             "duration_minutes": "{n} minute | {n} minutes",
             "duration_hours": "{n} hour | {n} hours",
             "timings_toast": "Times saved"
+        },
+        "help": {
+            "intro": "Every green question mark in the app: where it sits and what it says in each language. Edit a text here, or hold Ctrl and click the question mark itself.",
+            "count_total": "Question marks: {n}.",
+            "count_edited": "With an edited text: {n}.",
+            "filters_label": "Filter the question marks",
+            "search_label": "Search",
+            "search_placeholder": "Text, place or key",
+            "area_label": "Area",
+            "area_all": "All areas",
+            "list_label": "Question marks",
+            "key": "Key:",
+            "edit": "Edit",
+            "close_editor": "Close",
+            "edit_name": "Edit the texts of {topic}",
+            "close_editor_name": "Close the editor of {topic}",
+            "empty_title": "No question marks yet",
+            "empty_body": "No contextual help is registered in this version of the app.",
+            "filtered_empty": "No question mark matches your search.",
+            "clear": "Clear search and filter",
+            "load_failed": "The list of question marks could not be loaded.",
+            "orphans_title": "Unused keys",
+            "orphans_body": "These keys are still stored but no longer used in the app. They are kept, so nothing is lost; they are not shown anywhere."
         }
     },
     "permissions": {
