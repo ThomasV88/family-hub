@@ -199,6 +199,7 @@ class FortifyServiceProvider extends ServiceProvider
         // Booleans only: no ids, names or emails reach the page.
         Fortify::twoFactorChallengeView(function (Request $request) {
             $user = User::find($request->session()->get('login.id'));
+            $user = $user !== null && $user->canSignIn() ? $user : null;
             $totp = $user !== null && $user->two_factor_secret !== null && $user->two_factor_confirmed_at !== null;
             $passkey = $user !== null && $user->passkeys()->exists();
 
@@ -210,7 +211,8 @@ class FortifyServiceProvider extends ServiceProvider
 
             $matches = Hash::check(RequestInput::string($request, 'password'), $user?->password ?? self::DUMMY_HASH);
 
-            return ($user && $matches) ? $user : null;
+            // The hash is compared first (constant time); only then is the account allowed to sign in at all.
+            return ($user && $user->canSignIn() && $matches) ? $user : null;
         });
     }
 }

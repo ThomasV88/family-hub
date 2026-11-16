@@ -68,7 +68,7 @@ class ChallengePasskeyController extends Controller
 
         $user = User::find((int) $id);
 
-        return $user !== null && $user->passkeys()->exists() ? $user : null;
+        return $user !== null && $user->canSignIn() && $user->passkeys()->exists() ? $user : null;
     }
 
     private function noPendingLogin(Request $request): JsonResponse|RedirectResponse
