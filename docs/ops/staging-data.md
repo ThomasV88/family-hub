@@ -50,6 +50,17 @@ Všetko vzniká cez produkčné služby (rovnaké pravidlá ako v aplikácii). K
 - **"Nákup na víkend (kópia)"** (**kópia** ukončeného zoznamu, rodič `sk_sk.1`, ľudia zachovaní).
 - Hosť `pl_pl.4` má Nákupy len na čítanie (vidí len zoznamy, kde je čitateľ). Pri ďalšom nasadení sa všetko vrátane obrázkov (`wish-images/shopping/`) zmaže a vytvorí nanovo; na produkcii sa katalóg ani obchody nevytvárajú, tam ho plní rodina.
 
+### Recepty (`/recipes`)
+Všetko vzniká cez produkčné služby (recepty, fotky, odškrtávanie, nákupný most), rovnaké pravidlá ako v aplikácii. Je tam 12 vymyslených slovenských receptov; fotky sú vygenerované farebné tvary (žiadny text, žiadne tváre, žiadna sieť). Použité sú všetky štartovacie kategórie (Raňajky, Obed, Večera, Polievka, Šalát, Dezert, Pečenie, Desiata, Nápoj, Vegetariánske).
+- **Zdieľané recepty** (vidia ich všetci členovia s Receptami): "Palacinky s džemom" (rodič `sk_sk.1`), "Zemiaková polievka", "Jablkový koláč" a dlhý názov "Babičkina nedeľná slepačia polievka ..." (starý rodič `pl_pl.3`), "Cestoviny s paradajkovou omáčkou" a "Zemlovka" (rodič `en_gb.5`), "Vyprážané kuracie rezne" (rodič `sk_sk.1`), "Chlebíčky na desiatu" (`sk_sk.2`).
+- **Súkromné recepty** (vidí ich len autor): "Domáca limonáda" (`sk_sk.1`), "Ovsená kaša s ovocím" (`en_gb.5`, bez počtu porcií), "Šalát z čerstvej zeleniny" (`sk_sk.2`), "Lečo s vajíčkom" (`pl_pl.3`).
+- **Fotky:** "Jablkový koláč" má 10 fotiek (strop), väčšina ostatných jednu.
+- **Množstvá, ktoré sa zle prepočítavajú:** "Vyprážané kuracie rezne" (soľ bez množstva, 1 vajce, 3 strúčiky cesnaku v kusoch, 1/2 lyžičky rasce).
+- **Pokrok členov na jednom zdieľanom recepte:** "Palacinky s džemom" má odškrtnuté suroviny a hotové kroky u `sk_sk.1` aj `sk_sk.2`; `sk_sk.2` má vlastný počet porcií 2. Obľúbené: "Palacinky" u `sk_sk.1` aj `sk_sk.2`, "Zemiaková polievka" u `sk_sk.1`, "Jablkový koláč" u `pl_pl.3`. Jedna osobná poznámka u `sk_sk.1` k palacinkám.
+- **Recept z adresy:** "Zemlovka" je označená ako z adresy (`https://recepty.example/zemlovka`, vymyslený web). Samotný import sa na stagingu **nedá nasadiť ako demo**: žiadny AI beh sa pri seedovaní nespúšťa a tabuľka importov zostáva prázdna (žiadny návrh ani text stránky). Import si vyskúšaš len ručne, so skutočným behom AI.
+- **Pridanie do nákupu:** suroviny "Palaciniek" sú už pridané do otvoreného zoznamu "Týždenný nákup" (rodič `sk_sk.1`); múka, mlieko, vajcia, maslo, cukor a soľ sa spárovali s katalógom, džem je voľným textom.
+- Pri ďalšom nasadení sa všetko vrátane fotiek (`wish-images/recipes/`) zmaže a vytvorí nanovo. Skutočný recept, fotka alebo import skutočného člena na stagingu zhodí `staging:audit`.
+
 ### Financie (`/finance`)
 - **Päť účtov:** Spoločný účet (bežný), Súkromný účet rodiča, Úspory, Kreditná karta, Hotovosť v peňaženke. Všetko v eurách.
 - **Skrytý účet:** prihlás sa ako `sk_sk.2` a over, že vidí len Spoločný účet a Hotovosť. Súkromný účet, úspory a karta pre neho neexistujú. `sk_sk.1` vidí všetkých päť, `en_gb.5` štyri (bez súkromného účtu rodiča 1).

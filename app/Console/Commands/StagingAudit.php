@@ -77,6 +77,15 @@ class StagingAudit extends Command
             ['shopping_catalog_items', "(created_by is null or created_by not in {$synthetic})"],
             ['shopping_stores', "(created_by is null or created_by not in {$synthetic})"],
             ['shopping_units', "(key is null and (created_by is null or created_by not in {$synthetic})) or (key is not null and created_by is not null and created_by not in {$synthetic})"],
+            // Phase 12: recipes (titles, ingredients, photos, personal notes) of a real member must never reach staging.
+            // author_id is NOT NULL and RESTRICT, so a null cannot occur. Member state, ticks and done marks cascade with
+            // their user, so any row of a non-synthetic user is real use. recipe_imports.user_id has no foreign key and holds
+            // the pasted address of a real member, so it is checked like ai_calls.started_by but any non-synthetic id fails.
+            ['recipes', "(author_id not in {$synthetic})"],
+            ['recipe_member_states', "(user_id not in {$synthetic})"],
+            ['recipe_ingredient_ticks', "(user_id not in {$synthetic})"],
+            ['recipe_step_done', "(user_id not in {$synthetic})"],
+            ['recipe_imports', "(user_id not in {$synthetic})"],
         ];
     }
 
