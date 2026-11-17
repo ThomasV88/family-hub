@@ -6,7 +6,8 @@
         "finance": "Finances",
         "health": "Health",
         "account": "Account and security",
-        "settings": "Settings (administrators)"
+        "settings": "Settings (administrators)",
+        "shopping": "Shopping"
     },
     "screens": {
         "task_panel": "Task panel",
@@ -38,7 +39,8 @@
         "ai_agents": "AI agents",
         "home": "Overview page",
         "profile_page": "Profile settings page",
-        "members_child": "Members, child dialog and panel"
+        "members_child": "Members, child dialog and panel",
+        "shopping_settings": "Settings, Shopping"
     },
     "topics": {
         "tasks.visibility": {
@@ -276,6 +278,18 @@
         "members.convert": {
             "title": "Why an e-mail for a child?",
             "text": "The e-mail is where the invitation goes. When the child accepts it, this same account gets the e-mail and can sign in. Wish list, tasks, permissions and parents are kept. Until then the child cannot sign in, and revoking the invitation changes nothing."
+        },
+        "shopping.catalog": {
+            "title": "Item catalog",
+            "text": "The catalog is a shared list of things the family buys often, with a picture and a default unit, so anyone can pick them quickly. You can also type your own item on a list. Deleting a catalog item never removes it from lists: it stays there as plain text without the picture."
+        },
+        "shopping.store": {
+            "title": "Stores",
+            "text": "Add the shops you use, with a logo, and assign one to a shopping list. A PNG with a transparent background works best; it is shown on a white background. If you delete a store, the lists stay but they then have no store."
+        },
+        "shopping.units": {
+            "title": "Units",
+            "text": "Built-in units such as pcs, g, kg and l are shown in every language and cannot be changed. Administrators can add more units, each with an English, a Slovak and a Polish name. If you delete a unit that is in use, the items keep their quantity but show it without a unit."
         }
     }
 }

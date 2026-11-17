@@ -354,6 +354,24 @@
             "area": "settings",
             "screen": "members_child",
             "field": "convert"
+        },
+        {
+            "key": "shopping.catalog",
+            "area": "shopping",
+            "screen": "shopping_settings",
+            "field": "catalog"
+        },
+        {
+            "key": "shopping.store",
+            "area": "shopping",
+            "screen": "shopping_settings",
+            "field": "store"
+        },
+        {
+            "key": "shopping.units",
+            "area": "shopping",
+            "screen": "shopping_settings",
+            "field": "units"
         }
     ]
 }

@@ -6,7 +6,8 @@
         "finance": "Financie",
         "health": "Zdravie",
         "account": "Účet a zabezpečenie",
-        "settings": "Nastavenia (administrátori)"
+        "settings": "Nastavenia (administrátori)",
+        "shopping": "Nákupy"
     },
     "screens": {
         "task_panel": "Panel úlohy",
@@ -38,7 +39,8 @@
         "ai_agents": "AI agenti",
         "home": "Stránka Prehľad",
         "profile_page": "Stránka Nastavenia profilu",
-        "members_child": "Členovia, dialóg a panel dieťaťa"
+        "members_child": "Členovia, dialóg a panel dieťaťa",
+        "shopping_settings": "Nastavenia, Nákupy"
     },
     "topics": {
         "tasks.visibility": {
@@ -276,6 +278,18 @@
         "members.convert": {
             "title": "Načo e-mail pre dieťa?",
             "text": "Na e-mail príde pozvánka. Keď ju dieťa prijme, ten istý účet dostane e-mail a môže sa prihlásiť. Zoznam želaní, úlohy, oprávnenia aj rodičia zostanú. Dovtedy sa dieťa prihlásiť nemôže a zrušenie pozvánky nič nezmení."
+        },
+        "shopping.catalog": {
+            "title": "Katalóg položiek",
+            "text": "Katalóg je spoločný zoznam vecí, ktoré rodina často kupuje, s obrázkom a predvolenou jednotkou, aby ich ktokoľvek vedel rýchlo vybrať. Do zoznamu môžete zadať aj vlastnú položku. Odstránenie položky z katalógu ju nikdy neodstráni zo zoznamov: ostane tam ako obyčajný text bez obrázka."
+        },
+        "shopping.store": {
+            "title": "Obchody",
+            "text": "Pridajte obchody, v ktorých nakupujete, aj s logom, a priraďte ich k nákupnému zoznamu. Najlepšie je PNG s priehľadným pozadím, zobrazí sa na bielom pozadí. Ak obchod odstránite, zoznamy ostanú, ale už nebudú mať obchod."
+        },
+        "shopping.units": {
+            "title": "Jednotky",
+            "text": "Vstavané jednotky ako ks, g, kg a l sa zobrazujú v každom jazyku a nedajú sa meniť. Správcovia môžu pridať ďalšie jednotky, každú s anglickým, slovenským a poľským názvom. Ak odstránite jednotku, ktorá sa používa, položky si ponechajú množstvo, no zobrazia ho bez jednotky."
         }
     }
 }

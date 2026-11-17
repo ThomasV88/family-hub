@@ -1,0 +1,47 @@
+{
+  "id": "shopping",
+  "category": "modules",
+  "order": 35,
+  "title": "Shopping",
+  "summary": "Shared shopping lists for the family, with an item catalog, stores and units that you manage in Settings.",
+  "covers": ["settings:shopping"],
+  "sections": [
+    {
+      "id": "stores-catalog",
+      "title": "Item catalog and stores",
+      "blocks": [
+        { "type": "p", "text": "In **Settings**, the section **Shopping** has three tabs: **Item catalog**, **Stores** and **Units**. You see the section only if you are allowed to change Shopping. Everyone with that permission shares the same catalog, stores and units." },
+        { "type": "steps", "title": "Adding an item to the catalog", "items": [
+          "Open **Settings**, choose **Shopping** and stay on the tab **Item catalog**.",
+          "Press **Add item**.",
+          "Type the **Name**. A name can be used only once: an item that differs only in capital letters or accents counts as the same item.",
+          "If you like, press **Upload image** to add a JPG, PNG or WebP picture of up to 5 MB, and choose a **Default unit**.",
+          "Press **Save item**."
+        ] },
+        { "type": "p", "text": "Each row shows the default unit and on how many lists the item is used. Use the search box to find an item, and the pencil button to change it." },
+        { "type": "steps", "title": "Adding a store", "items": [
+          "Open the tab **Stores** and press **Add store**.",
+          "Type the **Store name** and, if you like, add a **Logo** (PNG, JPG or WebP, up to 2 MB).",
+          "Press **Save store**."
+        ] },
+        { "type": "tip", "text": "A PNG logo with a transparent background works best. Transparent areas are filled with white." },
+        { "type": "warning", "text": "Deleting an item or a store asks you to confirm and tells you on how many lists it is used. Items already on a list stay there as plain text, without the picture. A list whose store you delete simply has no store afterwards." }
+      ]
+    },
+    {
+      "id": "units",
+      "title": "Units",
+      "adminOnly": true,
+      "blocks": [
+        { "type": "p", "text": "Quantities use units. The built-in units (pcs, g, kg, ml, l, pack, bunch, tbsp and tsp) are shown in your language and cannot be changed or deleted. Members see them in the tab **Units**; only administrators can add more." },
+        { "type": "steps", "title": "Adding a unit", "items": [
+          "Open **Settings**, choose **Shopping** and open the tab **Units**.",
+          "Press **Add unit**.",
+          "Type the name in three languages: **Name (English)**, **Name (Slovak)** and **Name (Polish)**. Each name can have up to 12 characters, for example \"can\".",
+          "Press **Save unit**."
+        ] },
+        { "type": "warning", "text": "If you delete a unit that items already use, you are told how many items use it. Those items keep their quantity but show it without a unit." }
+      ]
+    }
+  ]
+}

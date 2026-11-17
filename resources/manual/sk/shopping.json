@@ -1,0 +1,47 @@
+{
+  "id": "shopping",
+  "category": "modules",
+  "order": 35,
+  "title": "Nákupy",
+  "summary": "Spoločné nákupné zoznamy pre rodinu s katalógom položiek, obchodmi a jednotkami, ktoré spravujete v Nastaveniach.",
+  "covers": ["settings:shopping"],
+  "sections": [
+    {
+      "id": "stores-catalog",
+      "title": "Katalóg položiek a obchody",
+      "blocks": [
+        { "type": "p", "text": "V **Nastaveniach** má sekcia **Nákupy** tri záložky: **Katalóg položiek**, **Obchody** a **Jednotky**. Sekciu vidíte, iba ak smiete meniť Nákupy. Všetci s týmto oprávnením zdieľajú rovnaký katalóg, obchody a jednotky." },
+        { "type": "steps", "title": "Pridanie položky do katalógu", "items": [
+          "Otvorte **Nastavenia**, vyberte **Nákupy** a ostaňte na záložke **Katalóg položiek**.",
+          "Stlačte **Pridať položku**.",
+          "Zadajte **Názov**. Názov sa dá použiť iba raz: položka, ktorá sa líši len veľkými písmenami alebo diakritikou, sa považuje za tú istú.",
+          "Ak chcete, stlačte **Nahrať obrázok** a pridajte obrázok JPG, PNG alebo WebP do 5 MB a vyberte **Predvolenú jednotku**.",
+          "Stlačte **Uložiť položku**."
+        ] },
+        { "type": "p", "text": "Každý riadok ukazuje predvolenú jednotku a v koľkých zoznamoch sa položka používa. Položku nájdete cez vyhľadávacie pole a zmeníte tlačidlom s ceruzkou." },
+        { "type": "steps", "title": "Pridanie obchodu", "items": [
+          "Otvorte záložku **Obchody** a stlačte **Pridať obchod**.",
+          "Zadajte **Názov obchodu** a ak chcete, pridajte **Logo** (PNG, JPG alebo WebP, najviac 2 MB).",
+          "Stlačte **Uložiť obchod**."
+        ] },
+        { "type": "tip", "text": "Najlepšie je logo vo formáte PNG s priehľadným pozadím. Priehľadné miesta sa vyplnia bielou." },
+        { "type": "warning", "text": "Pri odstránení položky alebo obchodu vás aplikácia požiada o potvrdenie a povie, v koľkých zoznamoch sa používa. Položky, ktoré už sú v zozname, v ňom ostanú ako obyčajný text bez obrázka. Zoznam, ktorému odstránite obchod, bude bez obchodu." }
+      ]
+    },
+    {
+      "id": "units",
+      "title": "Jednotky",
+      "adminOnly": true,
+      "blocks": [
+        { "type": "p", "text": "Množstvá používajú jednotky. Vstavané jednotky (ks, g, kg, ml, l, balenie, zväzok, PL a ČL) sa zobrazujú vo vašom jazyku a nedajú sa meniť ani odstrániť. Členovia ich vidia na záložke **Jednotky**, ďalšie môžu pridávať iba správcovia." },
+        { "type": "steps", "title": "Pridanie jednotky", "items": [
+          "Otvorte **Nastavenia**, vyberte **Nákupy** a otvorte záložku **Jednotky**.",
+          "Stlačte **Pridať jednotku**.",
+          "Zadajte názov v troch jazykoch: **Názov (anglicky)**, **Názov (slovensky)** a **Názov (poľsky)**. Každý názov môže mať najviac 12 znakov, napríklad „plechovka“.",
+          "Stlačte **Uložiť jednotku**."
+        ] },
+        { "type": "warning", "text": "Ak odstránite jednotku, ktorú už položky používajú, aplikácia povie, koľko položiek ju používa. Tieto položky si ponechajú množstvo, ale zobrazia ho bez jednotky." }
+      ]
+    }
+  ]
+}

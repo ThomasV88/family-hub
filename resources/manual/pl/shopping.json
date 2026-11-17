@@ -1,0 +1,47 @@
+{
+  "id": "shopping",
+  "category": "modules",
+  "order": 35,
+  "title": "Zakupy",
+  "summary": "Wspólne listy zakupów dla rodziny z katalogiem produktów, sklepami i jednostkami, którymi zarządzasz w Ustawieniach.",
+  "covers": ["settings:shopping"],
+  "sections": [
+    {
+      "id": "stores-catalog",
+      "title": "Katalog produktów i sklepy",
+      "blocks": [
+        { "type": "p", "text": "W **Ustawieniach** sekcja **Zakupy** ma trzy karty: **Katalog produktów**, **Sklepy** i **Jednostki**. Widzisz tę sekcję tylko wtedy, gdy możesz zmieniać Zakupy. Wszyscy z tym uprawnieniem dzielą ten sam katalog, sklepy i jednostki." },
+        { "type": "steps", "title": "Dodawanie produktu do katalogu", "items": [
+          "Otwórz **Ustawienia**, wybierz **Zakupy** i zostań na karcie **Katalog produktów**.",
+          "Naciśnij **Dodaj produkt**.",
+          "Wpisz **Nazwę**. Nazwa może być użyta tylko raz: produkt różniący się tylko wielkimi literami lub znakami diakrytycznymi jest uznawany za ten sam.",
+          "Jeśli chcesz, naciśnij **Prześlij obraz**, aby dodać obraz JPG, PNG lub WebP do 5 MB, i wybierz **Domyślną jednostkę**.",
+          "Naciśnij **Zapisz produkt**."
+        ] },
+        { "type": "p", "text": "Każdy wiersz pokazuje domyślną jednostkę i na ilu listach produkt jest używany. Produkt znajdziesz w polu wyszukiwania, a zmienisz go przyciskiem z ołówkiem." },
+        { "type": "steps", "title": "Dodawanie sklepu", "items": [
+          "Otwórz kartę **Sklepy** i naciśnij **Dodaj sklep**.",
+          "Wpisz **Nazwę sklepu** i, jeśli chcesz, dodaj **Logo** (PNG, JPG lub WebP, do 2 MB).",
+          "Naciśnij **Zapisz sklep**."
+        ] },
+        { "type": "tip", "text": "Najlepiej działa logo w formacie PNG z przezroczystym tłem. Przezroczyste miejsca są wypełniane bielą." },
+        { "type": "warning", "text": "Przy usuwaniu produktu lub sklepu aplikacja prosi o potwierdzenie i podaje, na ilu listach jest używany. Produkty, które już są na liście, zostają na niej jako zwykły tekst bez obrazu. Lista, której usuniesz sklep, będzie po prostu bez sklepu." }
+      ]
+    },
+    {
+      "id": "units",
+      "title": "Jednostki",
+      "adminOnly": true,
+      "blocks": [
+        { "type": "p", "text": "Ilości używają jednostek. Jednostki wbudowane (szt., g, kg, ml, l, opakowanie, pęczek, łyżka i łyżeczka) są pokazywane w Twoim języku i nie można ich zmieniać ani usuwać. Członkowie widzą je na karcie **Jednostki**, kolejne mogą dodawać tylko administratorzy." },
+        { "type": "steps", "title": "Dodawanie jednostki", "items": [
+          "Otwórz **Ustawienia**, wybierz **Zakupy** i otwórz kartę **Jednostki**.",
+          "Naciśnij **Dodaj jednostkę**.",
+          "Wpisz nazwę w trzech językach: **Nazwa (angielska)**, **Nazwa (słowacka)** i **Nazwa (polska)**. Każda nazwa może mieć najwyżej 12 znaków, na przykład „puszka”.",
+          "Naciśnij **Zapisz jednostkę**."
+        ] },
+        { "type": "warning", "text": "Jeśli usuniesz jednostkę, której produkty już używają, aplikacja poda, ile produktów jej używa. Te produkty zachowają ilość, ale pokażą ją bez jednostki." }
+      ]
+    }
+  ]
+}

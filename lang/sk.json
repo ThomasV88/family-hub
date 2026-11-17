@@ -316,7 +316,8 @@
             "security": "Zabezpečenie",
             "ai_calls": "Volania AI",
             "ai_agents": "Agenti AI",
-            "help": "Kontextová nápoveda"
+            "help": "Kontextová nápoveda",
+            "shopping": "Nákupy"
         },
         "back": "Späť do nastavení",
         "members": {
@@ -2560,6 +2561,113 @@
             "error_markup": "Nepoužívajte lomené zátvorky.",
             "error_invalid": "Text sa neprijal. Každý jazyk potrebuje 1 až {max} znakov a žiadne lomené zátvorky.",
             "error_failed": "Text nápovedy sa nepodarilo uložiť. Skúste to znova."
+        }
+    },
+    "shopping": {
+        "settings": {
+            "title": "Nastavenia nákupov",
+            "tabs_label": "Nastavenia nákupov",
+            "tab_catalog": "Katalóg položiek",
+            "tab_stores": "Obchody",
+            "tab_units": "Jednotky",
+            "add_item": "Pridať položku",
+            "add_store": "Pridať obchod",
+            "add_unit": "Pridať jednotku",
+            "cancel": "Zrušiť",
+            "save_failed": "Zmeny sa neuložili. Skontrolujte zvýraznené polia a skúste to znova.",
+            "edit": "Upraviť {name}",
+            "delete": "Odstrániť {name}",
+            "used_on": "Použité v {n} zozname | Použité v {n} zoznamoch | Použité v {n} zoznamoch",
+            "used_on_items": "Používa {n} položka | Používajú {n} položky | Používa {n} položiek",
+            "default_unit": "Predvolená jednotka: {unit}",
+            "default_unit_label": "Predvolená jednotka",
+            "no_default_unit": "Bez predvolenej jednotky",
+            "builtin": "Vstavaná",
+            "err_duplicate": "Položka s týmto názvom už existuje.",
+            "err_duplicate_store": "Obchod s týmto názvom už existuje.",
+            "err_builtin_unit": "Vstavané jednotky sa nedajú meniť ani odstrániť.",
+            "catalog": {
+                "search": "Hľadať v katalógu",
+                "no_match": "Vášmu hľadaniu nezodpovedá žiadna položka.",
+                "add_title": "Pridať položku katalógu",
+                "edit_title": "Upraviť položku katalógu",
+                "name": "Názov",
+                "image": "Obrázok",
+                "save": "Uložiť položku",
+                "delete_title": "Odstrániť „{name}“ z katalógu?",
+                "delete_body_used": "Je v {n} zozname. Zoznam si položku ponechá ako obyčajný text bez obrázka. | Je v {n} zoznamoch. Zoznamy si položku ponechajú ako obyčajný text bez obrázka. | Je v {n} zoznamoch. Zoznamy si položku ponechajú ako obyčajný text bez obrázka.",
+                "delete_body_free": "Nedá sa to vrátiť.",
+                "delete_confirm": "Odstrániť položku",
+                "delete_cancel": "Ponechať položku",
+                "empty_title": "Katalóg je prázdny",
+                "empty_body": "Pridajte veci, ktoré často kupujete, aj s obrázkom, aby ich rodina vedela rýchlo vybrať."
+            },
+            "stores": {
+                "add_title": "Pridať obchod",
+                "edit_title": "Upraviť obchod",
+                "name": "Názov obchodu",
+                "logo": "Logo",
+                "save": "Uložiť obchod",
+                "delete_title": "Odstrániť „{name}“?",
+                "delete_body_used": "Je priradený k {n} zoznamu. Zoznam bude bez obchodu. | Je priradený k {n} zoznamom. Zoznamy budú bez obchodu. | Je priradený k {n} zoznamom. Zoznamy budú bez obchodu.",
+                "delete_body_free": "Nedá sa to vrátiť.",
+                "delete_confirm": "Odstrániť obchod",
+                "delete_cancel": "Ponechať obchod",
+                "empty_title": "Zatiaľ žiadne obchody",
+                "empty_body": "Pridajte reťazce, v ktorých nakupujete, aj s logom, a priraďte ich k zoznamom."
+            },
+            "units": {
+                "admin_note": "Jednotky môžu pridávať a meniť iba správcovia.",
+                "add_title": "Pridať jednotku",
+                "edit_title": "Upraviť jednotku",
+                "name_en": "Názov (anglicky)",
+                "name_sk": "Názov (slovensky)",
+                "name_pl": "Názov (poľsky)",
+                "name_hint": "Krátky, napríklad „plechovka“ alebo „krabica“.",
+                "save": "Uložiť jednotku",
+                "delete_title": "Odstrániť jednotku „{name}“?",
+                "delete_body_used": "Používa ju {n} položka. Položka zobrazí množstvo bez jednotky. | Používajú ju {n} položky. Položky zobrazia množstvo bez jednotky. | Používa ju {n} položiek. Položky zobrazia množstvo bez jednotky.",
+                "delete_body_free": "Nedá sa to vrátiť.",
+                "delete_confirm": "Odstrániť jednotku",
+                "delete_cancel": "Ponechať jednotku"
+            },
+            "toast": {
+                "catalog_saved": "Položka uložená",
+                "catalog_deleted": "Položka odstránená",
+                "store_saved": "Obchod uložený",
+                "store_deleted": "Obchod odstránený",
+                "unit_saved": "Jednotka uložená",
+                "unit_deleted": "Jednotka odstránená",
+                "image_saved": "Obrázok uložený",
+                "image_removed": "Obrázok odstránený"
+            }
+        },
+        "image": {
+            "upload": "Nahrať obrázok",
+            "replace": "Zmeniť obrázok",
+            "remove": "Odstrániť obrázok",
+            "hint": "JPG, PNG alebo WebP, najviac 5 MB. Najlepšie vyzerá štvorcový obrázok.",
+            "hint_logo": "PNG, JPG alebo WebP, najviac 2 MB. Najlepšie je priehľadné PNG.",
+            "uploading": "Obrázok sa nahráva",
+            "err_type": "Tento obrázok sa nepodarilo použiť. Vyberte JPG, PNG alebo WebP a skúste to znova.",
+            "err_size": "Tento obrázok je príliš veľký. Vyberte menší.",
+            "err_pixels": "Tento obrázok má príliš veľa pixelov. Vyberte menší.",
+            "err_write": "Obrázok sa nepodarilo uložiť. Skúste to znova."
+        },
+        "unit": {
+            "pcs": "ks",
+            "g": "g",
+            "kg": "kg",
+            "ml": "ml",
+            "l": "l",
+            "pack": "balenie | balenia | balení",
+            "bunch": "zväzok | zväzky | zväzkov",
+            "tbsp": "PL",
+            "tsp": "ČL"
+        },
+        "error": {
+            "name_invalid": "Zadajte názov, ktorý nie je prázdny ani príliš dlhý.",
+            "unit_unknown": "Táto jednotka už neexistuje. Obnovte stránku a skúste to znova."
         }
     }
 }

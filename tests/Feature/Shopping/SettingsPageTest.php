@@ -22,7 +22,7 @@ it('shows the catalog, stores and units with usage counts to a member with Shopp
     F::item($b, ['catalog_item_id' => $milk->id]);
 
     $this->actingAs($me)->get('/settings/shopping')->assertOk()->assertInertia(fn (Assert $p) => $p
-        ->component('Settings/Shopping', false)
+        ->component('Settings/Shopping')
         ->where('catalog.0.name', 'Apple')->where('catalog.0.usedOn', 0)->where('catalog.0.imageVersion', null)
         ->where('catalog.1.name', 'Milk')->where('catalog.1.usedOn', 2)->where('catalog.1.defaultUnitId', $custom->id)
         ->where('stores.0.name', 'Tesco')->where('stores.0.usedOn', 1)->where('stores.0.logoVersion', null)

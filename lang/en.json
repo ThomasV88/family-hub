@@ -316,7 +316,8 @@
             "security": "Security",
             "ai_calls": "AI calls",
             "ai_agents": "AI agents",
-            "help": "Contextual help"
+            "help": "Contextual help",
+            "shopping": "Shopping"
         },
         "back": "Back to settings",
         "members": {
@@ -2560,6 +2561,113 @@
             "error_markup": "Do not use angle brackets.",
             "error_invalid": "The text was not accepted. Each language needs 1 to {max} characters and no angle brackets.",
             "error_failed": "The help text could not be saved. Try again."
+        }
+    },
+    "shopping": {
+        "settings": {
+            "title": "Shopping settings",
+            "tabs_label": "Shopping settings",
+            "tab_catalog": "Item catalog",
+            "tab_stores": "Stores",
+            "tab_units": "Units",
+            "add_item": "Add item",
+            "add_store": "Add store",
+            "add_unit": "Add unit",
+            "cancel": "Cancel",
+            "save_failed": "Your changes were not saved. Check the highlighted fields and try again.",
+            "edit": "Edit {name}",
+            "delete": "Delete {name}",
+            "used_on": "Used on {n} list | Used on {n} lists",
+            "used_on_items": "Used by {n} item | Used by {n} items",
+            "default_unit": "Default unit: {unit}",
+            "default_unit_label": "Default unit",
+            "no_default_unit": "No default unit",
+            "builtin": "Built in",
+            "err_duplicate": "An item with this name already exists.",
+            "err_duplicate_store": "A store with this name already exists.",
+            "err_builtin_unit": "Built-in units cannot be changed or deleted.",
+            "catalog": {
+                "search": "Search the catalog",
+                "no_match": "No items match your search.",
+                "add_title": "Add catalog item",
+                "edit_title": "Edit catalog item",
+                "name": "Name",
+                "image": "Image",
+                "save": "Save item",
+                "delete_title": "Delete “{name}” from the catalog?",
+                "delete_body_used": "It is on {n} list. That list keeps the item as plain text without the image. | It is on {n} lists. Those lists keep the item as plain text without the image.",
+                "delete_body_free": "This cannot be undone.",
+                "delete_confirm": "Delete item",
+                "delete_cancel": "Keep item",
+                "empty_title": "The catalog is empty",
+                "empty_body": "Add the things you buy often, with a picture, so the family can pick them quickly."
+            },
+            "stores": {
+                "add_title": "Add store",
+                "edit_title": "Edit store",
+                "name": "Store name",
+                "logo": "Logo",
+                "save": "Save store",
+                "delete_title": "Delete “{name}”?",
+                "delete_body_used": "It is assigned to {n} list. That list will have no store. | It is assigned to {n} lists. Those lists will have no store.",
+                "delete_body_free": "This cannot be undone.",
+                "delete_confirm": "Delete store",
+                "delete_cancel": "Keep store",
+                "empty_title": "No stores yet",
+                "empty_body": "Add the chains you shop at, with a logo, to assign them to lists."
+            },
+            "units": {
+                "admin_note": "Only administrators can add or change units.",
+                "add_title": "Add unit",
+                "edit_title": "Edit unit",
+                "name_en": "Name (English)",
+                "name_sk": "Name (Slovak)",
+                "name_pl": "Name (Polish)",
+                "name_hint": "Short, for example “can” or “box”.",
+                "save": "Save unit",
+                "delete_title": "Delete unit “{name}”?",
+                "delete_body_used": "It is used by {n} item. That item will show the quantity without a unit. | It is used by {n} items. Those items will show the quantity without a unit.",
+                "delete_body_free": "This cannot be undone.",
+                "delete_confirm": "Delete unit",
+                "delete_cancel": "Keep unit"
+            },
+            "toast": {
+                "catalog_saved": "Item saved",
+                "catalog_deleted": "Item deleted",
+                "store_saved": "Store saved",
+                "store_deleted": "Store deleted",
+                "unit_saved": "Unit saved",
+                "unit_deleted": "Unit deleted",
+                "image_saved": "Image saved",
+                "image_removed": "Image removed"
+            }
+        },
+        "image": {
+            "upload": "Upload image",
+            "replace": "Replace image",
+            "remove": "Remove image",
+            "hint": "JPG, PNG or WebP, up to 5 MB. A square picture works best.",
+            "hint_logo": "PNG, JPG or WebP, up to 2 MB. Transparent PNG works best.",
+            "uploading": "Uploading the picture",
+            "err_type": "We could not use that picture. Choose a JPG, PNG or WebP image and try again.",
+            "err_size": "That picture is too large. Choose a smaller one.",
+            "err_pixels": "That picture has too many pixels. Choose a smaller one.",
+            "err_write": "We could not save the picture. Try again."
+        },
+        "unit": {
+            "pcs": "pc | pcs",
+            "g": "g",
+            "kg": "kg",
+            "ml": "ml",
+            "l": "l",
+            "pack": "pack | packs",
+            "bunch": "bunch | bunches",
+            "tbsp": "tbsp",
+            "tsp": "tsp"
+        },
+        "error": {
+            "name_invalid": "Enter a name that is not empty and not too long.",
+            "unit_unknown": "That unit no longer exists. Reload the page and try again."
         }
     }
 }

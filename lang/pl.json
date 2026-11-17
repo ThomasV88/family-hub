@@ -316,7 +316,8 @@
             "security": "Bezpieczeństwo",
             "ai_calls": "Wywołania AI",
             "ai_agents": "Agenci AI",
-            "help": "Pomoc kontekstowa"
+            "help": "Pomoc kontekstowa",
+            "shopping": "Zakupy"
         },
         "back": "Wróć do ustawień",
         "members": {
@@ -2560,6 +2561,113 @@
             "error_markup": "Nie używaj nawiasów ostrych.",
             "error_invalid": "Tekst nie został przyjęty. Każdy język wymaga od 1 do {max} znaków i nie może zawierać nawiasów ostrych.",
             "error_failed": "Nie udało się zapisać tekstu pomocy. Spróbuj ponownie."
+        }
+    },
+    "shopping": {
+        "settings": {
+            "title": "Ustawienia zakupów",
+            "tabs_label": "Ustawienia zakupów",
+            "tab_catalog": "Katalog produktów",
+            "tab_stores": "Sklepy",
+            "tab_units": "Jednostki",
+            "add_item": "Dodaj produkt",
+            "add_store": "Dodaj sklep",
+            "add_unit": "Dodaj jednostkę",
+            "cancel": "Anuluj",
+            "save_failed": "Zmiany nie zostały zapisane. Sprawdź zaznaczone pola i spróbuj ponownie.",
+            "edit": "Edytuj {name}",
+            "delete": "Usuń {name}",
+            "used_on": "Użyty na {n} liście | Użyty na {n} listach | Użyty na {n} listach",
+            "used_on_items": "Używa {n} produkt | Używają {n} produkty | Używa {n} produktów",
+            "default_unit": "Domyślna jednostka: {unit}",
+            "default_unit_label": "Domyślna jednostka",
+            "no_default_unit": "Bez domyślnej jednostki",
+            "builtin": "Wbudowana",
+            "err_duplicate": "Produkt o tej nazwie już istnieje.",
+            "err_duplicate_store": "Sklep o tej nazwie już istnieje.",
+            "err_builtin_unit": "Wbudowanych jednostek nie można zmieniać ani usuwać.",
+            "catalog": {
+                "search": "Szukaj w katalogu",
+                "no_match": "Żaden produkt nie pasuje do wyszukiwania.",
+                "add_title": "Dodaj produkt do katalogu",
+                "edit_title": "Edytuj produkt w katalogu",
+                "name": "Nazwa",
+                "image": "Obraz",
+                "save": "Zapisz produkt",
+                "delete_title": "Usunąć „{name}” z katalogu?",
+                "delete_body_used": "Jest na {n} liście. Lista zachowa produkt jako zwykły tekst bez obrazu. | Jest na {n} listach. Listy zachowają produkt jako zwykły tekst bez obrazu. | Jest na {n} listach. Listy zachowają produkt jako zwykły tekst bez obrazu.",
+                "delete_body_free": "Tego nie można cofnąć.",
+                "delete_confirm": "Usuń produkt",
+                "delete_cancel": "Zachowaj produkt",
+                "empty_title": "Katalog jest pusty",
+                "empty_body": "Dodaj rzeczy, które często kupujesz, z obrazkiem, aby rodzina mogła je szybko wybrać."
+            },
+            "stores": {
+                "add_title": "Dodaj sklep",
+                "edit_title": "Edytuj sklep",
+                "name": "Nazwa sklepu",
+                "logo": "Logo",
+                "save": "Zapisz sklep",
+                "delete_title": "Usunąć „{name}”?",
+                "delete_body_used": "Jest przypisany do {n} listy. Lista będzie bez sklepu. | Jest przypisany do {n} list. Listy będą bez sklepu. | Jest przypisany do {n} list. Listy będą bez sklepu.",
+                "delete_body_free": "Tego nie można cofnąć.",
+                "delete_confirm": "Usuń sklep",
+                "delete_cancel": "Zachowaj sklep",
+                "empty_title": "Brak sklepów",
+                "empty_body": "Dodaj sieci, w których robisz zakupy, z logo, aby przypisać je do list."
+            },
+            "units": {
+                "admin_note": "Jednostki mogą dodawać i zmieniać tylko administratorzy.",
+                "add_title": "Dodaj jednostkę",
+                "edit_title": "Edytuj jednostkę",
+                "name_en": "Nazwa (angielska)",
+                "name_sk": "Nazwa (słowacka)",
+                "name_pl": "Nazwa (polska)",
+                "name_hint": "Krótka, na przykład „puszka” lub „pudełko”.",
+                "save": "Zapisz jednostkę",
+                "delete_title": "Usunąć jednostkę „{name}”?",
+                "delete_body_used": "Używa jej {n} produkt. Produkt pokaże ilość bez jednostki. | Używają jej {n} produkty. Produkty pokażą ilość bez jednostki. | Używa jej {n} produktów. Produkty pokażą ilość bez jednostki.",
+                "delete_body_free": "Tego nie można cofnąć.",
+                "delete_confirm": "Usuń jednostkę",
+                "delete_cancel": "Zachowaj jednostkę"
+            },
+            "toast": {
+                "catalog_saved": "Produkt zapisany",
+                "catalog_deleted": "Produkt usunięty",
+                "store_saved": "Sklep zapisany",
+                "store_deleted": "Sklep usunięty",
+                "unit_saved": "Jednostka zapisana",
+                "unit_deleted": "Jednostka usunięta",
+                "image_saved": "Obraz zapisany",
+                "image_removed": "Obraz usunięty"
+            }
+        },
+        "image": {
+            "upload": "Prześlij obraz",
+            "replace": "Zmień obraz",
+            "remove": "Usuń obraz",
+            "hint": "JPG, PNG lub WebP, do 5 MB. Najlepiej wygląda kwadratowy obraz.",
+            "hint_logo": "PNG, JPG lub WebP, do 2 MB. Najlepiej przezroczysty PNG.",
+            "uploading": "Trwa przesyłanie obrazu",
+            "err_type": "Nie udało się użyć tego obrazu. Wybierz JPG, PNG lub WebP i spróbuj ponownie.",
+            "err_size": "Ten obraz jest za duży. Wybierz mniejszy.",
+            "err_pixels": "Ten obraz ma zbyt wiele pikseli. Wybierz mniejszy.",
+            "err_write": "Nie udało się zapisać obrazu. Spróbuj ponownie."
+        },
+        "unit": {
+            "pcs": "szt.",
+            "g": "g",
+            "kg": "kg",
+            "ml": "ml",
+            "l": "l",
+            "pack": "opakowanie | opakowania | opakowań",
+            "bunch": "pęczek | pęczki | pęczków",
+            "tbsp": "łyżka | łyżki | łyżek",
+            "tsp": "łyżeczka | łyżeczki | łyżeczek"
+        },
+        "error": {
+            "name_invalid": "Podaj nazwę, która nie jest pusta ani zbyt długa.",
+            "unit_unknown": "Ta jednostka już nie istnieje. Odśwież stronę i spróbuj ponownie."
         }
     }
 }

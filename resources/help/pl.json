@@ -6,7 +6,8 @@
         "finance": "Finanse",
         "health": "Zdrowie",
         "account": "Konto i bezpieczeństwo",
-        "settings": "Ustawienia (administratorzy)"
+        "settings": "Ustawienia (administratorzy)",
+        "shopping": "Zakupy"
     },
     "screens": {
         "task_panel": "Panel zadania",
@@ -38,7 +39,8 @@
         "ai_agents": "Agenci AI",
         "home": "Strona Przegląd",
         "profile_page": "Strona Ustawienia profilu",
-        "members_child": "Członkowie, okno i panel dziecka"
+        "members_child": "Członkowie, okno i panel dziecka",
+        "shopping_settings": "Ustawienia, Zakupy"
     },
     "topics": {
         "tasks.visibility": {
@@ -276,6 +278,18 @@
         "members.convert": {
             "title": "Po co e-mail dla dziecka?",
             "text": "Na e-mail trafia zaproszenie. Gdy dziecko je przyjmie, to samo konto dostaje adres e-mail i może się zalogować. Lista życzeń, zadania, uprawnienia i rodzice zostają. Do tego czasu dziecko nie może się zalogować, a cofnięcie zaproszenia niczego nie zmienia."
+        },
+        "shopping.catalog": {
+            "title": "Katalog produktów",
+            "text": "Katalog to wspólna lista rzeczy, które rodzina często kupuje, z obrazem i domyślną jednostką, aby każdy mógł je szybko wybrać. Na liście możesz też wpisać własny produkt. Usunięcie produktu z katalogu nigdy nie usuwa go z list: zostaje tam jako zwykły tekst bez obrazu."
+        },
+        "shopping.store": {
+            "title": "Sklepy",
+            "text": "Dodaj sklepy, w których robisz zakupy, z logo, i przypisz je do listy zakupów. Najlepiej działa PNG z przezroczystym tłem, które jest pokazywane na białym tle. Jeśli usuniesz sklep, listy zostaną, ale nie będą miały sklepu."
+        },
+        "shopping.units": {
+            "title": "Jednostki",
+            "text": "Wbudowane jednostki, takie jak szt., g, kg i l, są pokazywane w każdym języku i nie można ich zmieniać. Administratorzy mogą dodać kolejne jednostki, każdą z angielską, słowacką i polską nazwą. Jeśli usuniesz jednostkę, która jest używana, produkty zachowają ilość, ale pokażą ją bez jednostki."
         }
     }
 }
