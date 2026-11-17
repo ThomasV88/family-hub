@@ -390,6 +390,18 @@
             "area": "shopping",
             "screen": "shopping_email",
             "field": "addresses"
+        },
+        {
+            "key": "shopping.lock",
+            "area": "shopping",
+            "screen": "shopping_list",
+            "field": "lock"
+        },
+        {
+            "key": "shopping.carry_over",
+            "area": "shopping",
+            "screen": "shopping_finish",
+            "field": "carry_over"
         }
     ]
 }

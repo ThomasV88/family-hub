@@ -42,7 +42,9 @@
         "members_child": "Członkowie, okno i panel dziecka",
         "shopping_settings": "Ustawienia, Zakupy",
         "shopping_list_panel": "Panel ustawień listy zakupów",
-        "shopping_email": "Okno wysyłania listy zakupów e-mailem"
+        "shopping_email": "Okno wysyłania listy zakupów e-mailem",
+        "shopping_list": "Strona listy zakupów",
+        "shopping_finish": "Okno kończenia zakupów"
     },
     "topics": {
         "tasks.visibility": {
@@ -304,6 +306,14 @@
         "shopping.email": {
             "title": "Wysyłanie listy e-mailem",
             "text": "Wpisz lub wklej do 5 adresów, działa każdy adres. E-mail to zwykły tekst z produktami, ilościami, sklepem i osobą odpowiedzialną, bez linku do aplikacji. Osoby, które mogą tylko przeglądać, nie mogą wysyłać. Obowiązują dzienne limity, więc listy nie da się wysyłać bez końca."
+        },
+        "shopping.lock": {
+            "title": "Blokowanie listy",
+            "text": "Zablokowanie listy rozpoczyna zakupy: nikt nie może już dodawać, usuwać ani edytować produktów. Tylko osoba odpowiedzialna blokuje i odblokowuje listę oraz oznacza każdy produkt jako Kupione lub Niedostępne; kolejne dotknięcie cofa oznaczenie. Inni widzą oznaczenia po odświeżeniu strony. Odblokowanie zachowuje oznaczenia."
+        },
+        "shopping.carry_over": {
+            "title": "Produkty, których nie udało się kupić",
+            "text": "Produkty oznaczone jako Niedostępne mogą trafić na nową otwartą listę o nazwie z dopiskiem „(niekupione)”, z tym samym sklepem, osobą odpowiedzialną i dostępem, bez przypomnienia. Zakończona lista w obu przypadkach trafia do archiwum i jest tylko do odczytu."
         }
     }
 }

@@ -2683,7 +2683,10 @@
             "member_not_eligible": "That person cannot be added to this list.",
             "member_overlap": "A person can be in only one role on a list.",
             "reminder_past": "Choose a time in the future.",
-            "reminder_invalid": "Enter a valid date and time."
+            "reminder_invalid": "Enter a valid date and time.",
+            "lock_empty": "Add at least one item before you lock the list.",
+            "finish_failed": "We could not finish the shopping. Nothing was changed. Try again.",
+            "mark_failed": "Could not save. Try again."
         },
         "overview": {
             "title": "Shopping",
@@ -2749,7 +2752,11 @@
             "item_removed": "Item removed",
             "list_deleted": "List deleted",
             "settings_saved": "Settings saved",
-            "responsible_changed": "{name} is now responsible"
+            "responsible_changed": "{name} is now responsible",
+            "locked": "List locked",
+            "unlocked": "List unlocked",
+            "finished": "Shopping finished",
+            "finished_carry": "Shopping finished. New list created."
         },
         "detail": {
             "add_items": "Add items",
@@ -2860,6 +2867,49 @@
             "err_too_many": "You can send to at most 5 addresses at a time.",
             "err_limit": "You have sent too many lists today. Try again later.",
             "toast_sent": "List sent to {count} address | List sent to {count} addresses"
+        },
+        "lock": {
+            "button": "Lock list",
+            "unlock_button": "Unlock list",
+            "empty_hint": "Add at least one item before you lock the list.",
+            "only": "Only {name} can lock this list.",
+            "title": "Lock this list?",
+            "body": "Nobody can add, remove or edit items while it is locked. You can unlock it again.",
+            "confirm": "Lock list",
+            "unlock_title": "Unlock this list?",
+            "unlock_body": "Items can be changed again. Marks Bought and Unavailable are kept.",
+            "unlock_confirm": "Unlock list",
+            "cancel": "Cancel"
+        },
+        "mark": {
+            "group": "Mark {name}",
+            "bought": "Bought",
+            "unavailable": "Unavailable"
+        },
+        "finish": {
+            "button": "Finish shopping",
+            "title": "Finish shopping?",
+            "body": "The list moves to the archive and becomes read-only.",
+            "not_yet": "Not yet",
+            "carry_title": "Some items could not be bought",
+            "question": "Some items could not be bought. Create a new shopping list from them?",
+            "more": "+{n} more",
+            "note": "The new list keeps the store, the responsible person and who can see it.",
+            "create": "Create new list",
+            "just_finish": "No, just finish",
+            "cancel": "Cancel",
+            "carry_name": "{name} (unbought)",
+            "items": "Items that could not be bought",
+            "failed": "We could not finish the shopping. Nothing was changed. Try again."
+        },
+        "archived": {
+            "banner": "This shopping is finished. You can copy it into a new list."
+        },
+        "progress": {
+            "label": "Shopping progress",
+            "summary": "Bought {bought} · Unavailable {unavailable} · Left {left}",
+            "left": "{n} item left | {n} items left",
+            "all_done": "Everything is marked"
         }
     }
 }

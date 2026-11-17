@@ -2683,7 +2683,10 @@
             "member_not_eligible": "Tej osoby nie można dodać do listy.",
             "member_overlap": "Osoba może mieć na liście tylko jedną rolę.",
             "reminder_past": "Wybierz czas w przyszłości.",
-            "reminder_invalid": "Podaj prawidłową datę i godzinę."
+            "reminder_invalid": "Podaj prawidłową datę i godzinę.",
+            "lock_empty": "Przed zablokowaniem dodaj co najmniej jeden produkt.",
+            "finish_failed": "Nie udało się zakończyć zakupów. Nic się nie zmieniło. Spróbuj ponownie.",
+            "mark_failed": "Nie udało się zapisać. Spróbuj ponownie."
         },
         "overview": {
             "title": "Zakupy",
@@ -2749,7 +2752,11 @@
             "item_removed": "Produkt usunięty",
             "list_deleted": "Lista usunięta",
             "settings_saved": "Ustawienia zapisane",
-            "responsible_changed": "Osobą odpowiedzialną jest teraz {name}"
+            "responsible_changed": "Osobą odpowiedzialną jest teraz {name}",
+            "locked": "Lista zablokowana",
+            "unlocked": "Lista odblokowana",
+            "finished": "Zakupy zakończone",
+            "finished_carry": "Zakupy zakończone. Nowa lista utworzona."
         },
         "detail": {
             "add_items": "Dodaj produkty",
@@ -2860,6 +2867,49 @@
             "err_too_many": "Jednorazowo można wysłać najwyżej na 5 adresów.",
             "err_limit": "Dziś wysłano zbyt wiele list. Spróbuj ponownie później.",
             "toast_sent": "Listę wysłano na {count} adres | Listę wysłano na {count} adresy | Listę wysłano na {count} adresów"
+        },
+        "lock": {
+            "button": "Zablokuj listę",
+            "unlock_button": "Odblokuj listę",
+            "empty_hint": "Przed zablokowaniem dodaj co najmniej jeden produkt.",
+            "only": "Listę może zablokować tylko {name}.",
+            "title": "Zablokować listę?",
+            "body": "Po zablokowaniu nikt nie może dodawać, usuwać ani edytować produktów. Możesz ją ponownie odblokować.",
+            "confirm": "Zablokuj listę",
+            "unlock_title": "Odblokować listę?",
+            "unlock_body": "Produkty będzie można znowu zmieniać. Oznaczenia Kupione i Niedostępne zostaną zachowane.",
+            "unlock_confirm": "Odblokuj listę",
+            "cancel": "Anuluj"
+        },
+        "mark": {
+            "group": "Oznacz produkt {name}",
+            "bought": "Kupione",
+            "unavailable": "Niedostępne"
+        },
+        "finish": {
+            "button": "Zakończ zakupy",
+            "title": "Zakończyć zakupy?",
+            "body": "Lista trafi do archiwum i będzie tylko do odczytu.",
+            "not_yet": "Jeszcze nie",
+            "carry_title": "Nie udało się kupić niektórych produktów",
+            "question": "Nie udało się kupić niektórych produktów. Czy chcesz utworzyć z nich nową listę zakupów?",
+            "more": "+{n} więcej",
+            "note": "Nowa lista zachowa sklep, osobę odpowiedzialną i prawa dostępu.",
+            "create": "Utwórz nową listę",
+            "just_finish": "Nie, tylko zakończ",
+            "cancel": "Anuluj",
+            "carry_name": "{name} (niekupione)",
+            "items": "Produkty, których nie udało się kupić",
+            "failed": "Nie udało się zakończyć zakupów. Nic się nie zmieniło. Spróbuj ponownie."
+        },
+        "archived": {
+            "banner": "Te zakupy są zakończone. Możesz skopiować je do nowej listy."
+        },
+        "progress": {
+            "label": "Postęp zakupów",
+            "summary": "Kupione {bought} · Niedostępne {unavailable} · Zostało {left}",
+            "left": "Został {n} produkt | Zostały {n} produkty | Zostało {n} produktów",
+            "all_done": "Wszystko jest oznaczone"
         }
     }
 }

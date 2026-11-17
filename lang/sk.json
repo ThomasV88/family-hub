@@ -2683,7 +2683,10 @@
             "member_not_eligible": "Túto osobu nemožno pridať do zoznamu.",
             "member_overlap": "Osoba môže mať v zozname iba jednu rolu.",
             "reminder_past": "Vyberte čas v budúcnosti.",
-            "reminder_invalid": "Zadajte platný dátum a čas."
+            "reminder_invalid": "Zadajte platný dátum a čas.",
+            "lock_empty": "Pred uzamknutím pridajte aspoň jednu položku.",
+            "finish_failed": "Nákup sa nepodarilo ukončiť. Nič sa nezmenilo. Skúste to znova.",
+            "mark_failed": "Nepodarilo sa uložiť. Skúste to znova."
         },
         "overview": {
             "title": "Nákupy",
@@ -2749,7 +2752,11 @@
             "item_removed": "Položka odstránená",
             "list_deleted": "Zoznam odstránený",
             "settings_saved": "Nastavenia uložené",
-            "responsible_changed": "Zodpovedná osoba je teraz {name}"
+            "responsible_changed": "Zodpovedná osoba je teraz {name}",
+            "locked": "Zoznam uzamknutý",
+            "unlocked": "Zoznam odomknutý",
+            "finished": "Nákup ukončený",
+            "finished_carry": "Nákup ukončený. Nový zoznam vytvorený."
         },
         "detail": {
             "add_items": "Pridať položky",
@@ -2860,6 +2867,49 @@
             "err_too_many": "Naraz možno odoslať najviac na 5 adries.",
             "err_limit": "Dnes ste odoslali príliš veľa zoznamov. Skúste to neskôr.",
             "toast_sent": "Zoznam odoslaný na {count} adresu | Zoznam odoslaný na {count} adresy | Zoznam odoslaný na {count} adries"
+        },
+        "lock": {
+            "button": "Uzamknúť zoznam",
+            "unlock_button": "Odomknúť zoznam",
+            "empty_hint": "Pred uzamknutím pridajte aspoň jednu položku.",
+            "only": "Zoznam môže uzamknúť iba {name}.",
+            "title": "Uzamknúť zoznam?",
+            "body": "Po uzamknutí nikto nemôže pridávať, odstraňovať ani upravovať položky. Môžete ho znova odomknúť.",
+            "confirm": "Uzamknúť zoznam",
+            "unlock_title": "Odomknúť zoznam?",
+            "unlock_body": "Položky sa budú dať opäť meniť. Označenia Zakúpené a Nedostupné ostanú zachované.",
+            "unlock_confirm": "Odomknúť zoznam",
+            "cancel": "Zrušiť"
+        },
+        "mark": {
+            "group": "Označiť položku {name}",
+            "bought": "Zakúpené",
+            "unavailable": "Nedostupné"
+        },
+        "finish": {
+            "button": "Ukončiť nákup",
+            "title": "Ukončiť nákup?",
+            "body": "Zoznam sa presunie do archívu a bude iba na čítanie.",
+            "not_yet": "Ešte nie",
+            "carry_title": "Niektoré položky sa nepodarilo zakúpiť",
+            "question": "Niektoré položky sa nepodarilo zakúpiť. Chcete z nich vytvoriť nový nákupný zoznam?",
+            "more": "+{n} ďalších",
+            "note": "Nový zoznam zachová obchod, zodpovednú osobu a prístupové práva.",
+            "create": "Vytvoriť nový zoznam",
+            "just_finish": "Nie, iba ukončiť",
+            "cancel": "Zrušiť",
+            "carry_name": "{name} (nezakúpené)",
+            "items": "Položky, ktoré sa nepodarilo zakúpiť",
+            "failed": "Nákup sa nepodarilo ukončiť. Nič sa nezmenilo. Skúste to znova."
+        },
+        "archived": {
+            "banner": "Tento nákup je vybavený. Môžete ho skopírovať do nového zoznamu."
+        },
+        "progress": {
+            "label": "Priebeh nákupu",
+            "summary": "Zakúpené {bought} · Nedostupné {unavailable} · Zostáva {left}",
+            "left": "Zostáva {n} položka | Zostávajú {n} položky | Zostáva {n} položiek",
+            "all_done": "Všetko je označené"
         }
     }
 }

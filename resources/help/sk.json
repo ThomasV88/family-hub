@@ -42,7 +42,9 @@
         "members_child": "Členovia, dialóg a panel dieťaťa",
         "shopping_settings": "Nastavenia, Nákupy",
         "shopping_list_panel": "Panel nastavení nákupného zoznamu",
-        "shopping_email": "Dialóg odoslania nákupného zoznamu e-mailom"
+        "shopping_email": "Dialóg odoslania nákupného zoznamu e-mailom",
+        "shopping_list": "Stránka nákupného zoznamu",
+        "shopping_finish": "Dialóg ukončenia nákupu"
     },
     "topics": {
         "tasks.visibility": {
@@ -304,6 +306,14 @@
         "shopping.email": {
             "title": "Odoslanie zoznamu e-mailom",
             "text": "Zadajte alebo vložte najviac 5 adries, funguje akákoľvek adresa. E-mail je čistý text s položkami, množstvami, obchodom a zodpovednou osobou a neobsahuje odkaz do aplikácie. Ľudia, ktorí môžu iba zobraziť, odosielať nemôžu. Platia denné limity, zoznam sa teda nedá posielať stále dokola."
+        },
+        "shopping.lock": {
+            "title": "Uzamknutie zoznamu",
+            "text": "Uzamknutím sa začína nákup: nikto už nemôže pridávať, odstraňovať ani upravovať položky. Zoznam uzamyká a odomyká a každú položku označuje ako Zakúpené alebo Nedostupné iba zodpovedná osoba; ďalším ťuknutím označenie zrušíte. Ostatní vidia označenia po opätovnom načítaní. Odomknutím sa označenia zachovajú."
+        },
+        "shopping.carry_over": {
+            "title": "Položky, ktoré sa nepodarilo zakúpiť",
+            "text": "Položky označené ako Nedostupné môžu ísť do nového otvoreného zoznamu s názvom pôvodného a dodatkom „(nezakúpené)“, s rovnakým obchodom, zodpovednou osobou a prístupom a bez pripomienky. Ukončený zoznam sa tak či tak presunie do archívu a ostane iba na čítanie."
         }
     }
 }

@@ -5,6 +5,7 @@ import { Ban, Check } from '@lucide/vue';
 import UiListRow from '../Components/ui/UiListRow.vue';
 import UiTag from '../Components/ui/UiTag.vue';
 import CatalogImage from './CatalogImage.vue';
+import MarkButtons from './MarkButtons.vue';
 import { formatQuantity } from './units.js';
 
 // One item of a list. item: { id, name, quantity, unitId, note, state, catalogItemId, imageVersion }; unit: { key, names } or null.
@@ -14,8 +15,11 @@ const props = defineProps({
     item: { type: Object, required: true },
     unit: { type: Object, default: null },
     interactive: { type: Boolean, default: false },
+    // markable: the responsible person shops on a locked list and sees the Bought / Unavailable buttons instead of the state tag.
+    markable: { type: Boolean, default: false },
+    busy: { type: Boolean, default: false },
 });
-const emit = defineEmits(['edit']);
+const emit = defineEmits(['edit', 'mark']);
 const { t, locale } = useI18n();
 
 const quantity = computed(() => formatQuantity(props.item.quantity, props.unit, t, locale.value));
@@ -27,7 +31,7 @@ const unavailable = computed(() => props.item.state === 'unavailable');
     <UiListRow
         :as="interactive ? 'button' : 'static'"
         :title="interactive ? t('shopping.detail.edit_item', { name: item.name }) : ''"
-        :class="['shop-item', { 'shop-item--done': bought || unavailable }]"
+        :class="['shop-item', { 'shop-item--done': bought || unavailable, 'shop-item--markable': markable }]"
         data-testid="item-row"
         @select="emit('edit', item)"
     >
@@ -36,7 +40,8 @@ const unavailable = computed(() => props.item.state === 'unavailable');
         <template v-if="item.note" #meta><span class="shop-item__note">{{ item.note }}</span></template>
         <template #trailing>
             <span v-if="quantity" class="shop-item__quantity" data-testid="item-quantity">{{ quantity }}</span>
-            <span v-if="bought" class="shop-item__bought"><Check :size="18" :stroke-width="2" aria-hidden="true" />{{ t('shopping.detail.state_bought') }}</span>
+            <MarkButtons v-if="markable" :name="item.name" :state="item.state" :busy="busy" @mark="(target) => emit('mark', item, target)" />
+            <span v-else-if="bought" class="shop-item__bought"><Check :size="18" :stroke-width="2" aria-hidden="true" />{{ t('shopping.detail.state_bought') }}</span>
             <UiTag v-else-if="unavailable" variant="warn" :icon="Ban">{{ t('shopping.detail.state_unavailable') }}</UiTag>
         </template>
     </UiListRow>
@@ -48,6 +53,8 @@ const unavailable = computed(() => props.item.state === 'unavailable');
 .shop-item :deep(.ui-row__meta) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .shop-item :deep(.ui-row__trailing) { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); }
 .shop-item--done .shop-item__name { color: var(--color-text-muted); }
+.shop-item--markable :deep(.ui-row__trailing) { justify-content: flex-end; }
+.shop-item--markable { min-height: 64px; }
 .shop-item__quantity { font-size: var(--text-sm); font-weight: 600; white-space: nowrap; }
 .shop-item__bought { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-primary); font-size: var(--text-sm); font-weight: 600; }
 .shop-item__note { overflow-wrap: anywhere; }

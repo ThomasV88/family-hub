@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 35,
   "title": "Zakupy",
-  "summary": "Wspólne listy zakupów dla rodziny: przegląd, tworzenie i kopiowanie list, dodawanie i zmiana produktów, kto co może na liście, wysyłanie listy e-mailem, przypomnienia oraz katalog produktów, sklepy i jednostki, którymi zarządzasz w Ustawieniach.",
+  "summary": "Wspólne listy zakupów dla rodziny: przegląd, tworzenie i kopiowanie list, dodawanie i zmiana produktów, kto co może na liście, blokowanie i zakupy, kończenie i archiwum, wysyłanie listy e-mailem, przypomnienia oraz katalog produktów, sklepy i jednostki, którymi zarządzasz w Ustawieniach.",
   "covers": ["module:shopping", "settings:shopping"],
   "sections": [
     {
@@ -89,6 +89,41 @@
           "type": "tip",
           "text": "Jeśli osoba odpowiedzialna opuści rodzinę lub straci dostęp do Zakupów, odpowiedzialnym zostaje autor. Autor widzi o tym uwagę na górze listy, dopóki osoba odpowiedzialna nie zostanie zapisana ponownie."
         }
+      ]
+    },
+    {
+      "id": "lock-and-shop",
+      "title": "Blokowanie listy i zakupy",
+      "blocks": [
+        { "type": "p", "text": "Gdy lista jest gotowa, **osoba odpowiedzialna** blokuje ją i idzie na zakupy. Przycisk **Zablokuj listę** widzi tylko osoba odpowiedzialna. Inni widzą krótką informację, kto może ją zablokować." },
+        { "type": "list", "items": [
+          "Lista musi mieć co najmniej jeden produkt, zanim ją zablokujesz. Na pustej liście **Zablokuj listę** jest wyszarzone, a informacja wyjaśnia dlaczego.",
+          "Dopóki lista jest zablokowana, nikt nie może dodawać, usuwać ani edytować produktów.",
+          "W sklepie osoba odpowiedzialna naciska przy każdym produkcie **Kupione** albo **Niedostępne**. Zmiana jest widoczna od razu. Ponowne naciśnięcie tego samego przycisku cofa oznaczenie.",
+          "Jeśli oznaczenia nie da się zapisać, wraca ono do poprzedniego stanu i pojawia się komunikat **Nie udało się zapisać. Spróbuj ponownie.**",
+          "Pozostali widzą oznaczenia i wiersz postępu dopiero po odświeżeniu strony.",
+          "**Odblokuj listę** przywraca planowanie, na przykład gdy o czymś zapomniałeś. Oznaczenia zostają zachowane."
+        ] },
+        { "type": "steps", "title": "Blokowanie i odblokowanie", "items": [
+          "Otwórz listę i naciśnij **Zablokuj listę**.",
+          "Potwierdź przyciskiem **Zablokuj listę** w pytaniu, które się pojawi.",
+          "Aby znowu zmieniać produkty, naciśnij **Odblokuj listę** i potwierdź."
+        ] },
+        { "type": "tip", "text": "Pasek u dołu ekranu na telefonie pokazuje, ile produktów zostało, a po oznaczeniu wszystkich zmienia się w **Zakończ zakupy**." }
+      ]
+    },
+    {
+      "id": "finish",
+      "title": "Kończenie zakupów",
+      "blocks": [
+        { "type": "p", "text": "**Zakończ zakupy** pojawia się u osoby odpowiedzialnej, gdy każdy produkt jest oznaczony jako **Kupione** albo **Niedostępne**. Lista trafia wtedy do **archiwum** i jest tylko do odczytu. Nadal możesz ją skopiować i wysłać e-mailem." },
+        { "type": "p", "text": "Jeśli niektóre produkty są oznaczone jako **Niedostępne**, aplikacja pyta: **Nie udało się kupić niektórych produktów. Czy chcesz utworzyć z nich nową listę zakupów?**" },
+        { "type": "list", "items": [
+          "**Utwórz nową listę** tworzy nową otwartą listę o nazwie starej z dopiskiem „(niekupione)”, tylko z niedostępnymi produktami i ich ilościami. Zachowuje sklep, osobę odpowiedzialną i to, kto ją widzi, i nie ma przypomnienia. Możesz dodać do niej kolejne produkty.",
+          "**Nie, tylko zakończ** tylko archiwizuje listę.",
+          "**Anuluj** wraca do listy bez żadnych zmian."
+        ] },
+        { "type": "p", "text": "W obu przypadkach oryginalna lista zostaje w archiwum jako zakończona. Jeśli zakończenie się nie powiedzie, nic się nie zmienia i możesz spróbować ponownie." }
       ]
     },
     {

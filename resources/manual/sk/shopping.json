@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 35,
   "title": "Nákupy",
-  "summary": "Spoločné nákupné zoznamy pre rodinu: prehľad, vytváranie a kopírovanie zoznamov, pridávanie a zmena položiek, kto čo smie na zozname, odoslanie zoznamu e-mailom, pripomienky a katalóg položiek, obchody a jednotky, ktoré spravujete v Nastaveniach.",
+  "summary": "Spoločné nákupné zoznamy pre rodinu: prehľad, vytváranie a kopírovanie zoznamov, pridávanie a zmena položiek, kto čo smie na zozname, uzamknutie a nákup, ukončenie a archív, odoslanie zoznamu e-mailom, pripomienky a katalóg položiek, obchody a jednotky, ktoré spravujete v Nastaveniach.",
   "covers": ["module:shopping", "settings:shopping"],
   "sections": [
     {
@@ -89,6 +89,41 @@
           "type": "tip",
           "text": "Ak zodpovedná osoba opustí rodinu alebo stratí prístup k Nákupom, zodpovedným sa stane autor. Autor o tom vidí poznámku na začiatku zoznamu, kým sa znova neuloží zodpovedná osoba."
         }
+      ]
+    },
+    {
+      "id": "lock-and-shop",
+      "title": "Uzamknutie zoznamu a nákup",
+      "blocks": [
+        { "type": "p", "text": "Keď je zoznam pripravený, **zodpovedná osoba** ho uzamkne a ide nakupovať. Tlačidlo **Uzamknúť zoznam** vidí iba zodpovedná osoba. Ostatní vidia krátku poznámku, kto ho môže uzamknúť." },
+        { "type": "list", "items": [
+          "Pred uzamknutím musí mať zoznam aspoň jednu položku. Na prázdnom zozname je **Uzamknúť zoznam** zosivené a poznámka vysvetľuje prečo.",
+          "Kým je zoznam uzamknutý, nikto nemôže pridávať, odstraňovať ani upravovať položky.",
+          "V obchode zodpovedná osoba pri každej položke stlačí **Zakúpené** alebo **Nedostupné**. Zmena sa zobrazí hneď. Opätovným stlačením rovnakého tlačidla označenie zrušíte.",
+          "Ak sa označenie nepodarí uložiť, vráti sa späť a zobrazí sa hlásenie **Nepodarilo sa uložiť. Skúste to znova.**",
+          "Ostatní vidia označenia a riadok o priebehu až po opätovnom načítaní stránky.",
+          "**Odomknúť zoznam** vráti zoznam do plánovania, napríklad keď ste na niečo zabudli. Označenia ostanú zachované."
+        ] },
+        { "type": "steps", "title": "Uzamknutie a odomknutie", "items": [
+          "Otvorte zoznam a stlačte **Uzamknúť zoznam**.",
+          "Potvrďte tlačidlom **Uzamknúť zoznam** v otázke, ktorá sa zobrazí.",
+          "Ak chcete položky znova meniť, stlačte **Odomknúť zoznam** a potvrďte."
+        ] },
+        { "type": "tip", "text": "Lišta v spodnej časti obrazovky na telefóne ukazuje, koľko položiek zostáva, a po označení všetkých sa zmení na **Ukončiť nákup**." }
+      ]
+    },
+    {
+      "id": "finish",
+      "title": "Ukončenie nákupu",
+      "blocks": [
+        { "type": "p", "text": "**Ukončiť nákup** sa zodpovednej osobe zobrazí, keď je každá položka označená ako **Zakúpené** alebo **Nedostupné**. Zoznam sa potom presunie do **archívu** a bude iba na čítanie. Stále ho môžete kopírovať a poslať e-mailom." },
+        { "type": "p", "text": "Ak sú niektoré položky označené ako **Nedostupné**, aplikácia sa opýta: **Niektoré položky sa nepodarilo zakúpiť. Chcete z nich vytvoriť nový nákupný zoznam?**" },
+        { "type": "list", "items": [
+          "**Vytvoriť nový zoznam** vytvorí nový otvorený zoznam s názvom pôvodného a dodatkom „(nezakúpené)“, iba s nedostupnými položkami a ich množstvom. Zachová obchod, zodpovednú osobu a to, kto ho vidí, a nemá pripomienku. Môžete doň pridať ďalšie položky.",
+          "**Nie, iba ukončiť** zoznam iba archivuje.",
+          "**Zrušiť** vás vráti na zoznam bez akejkoľvek zmeny."
+        ] },
+        { "type": "p", "text": "V oboch prípadoch pôvodný zoznam ostane v archíve ako vybavený. Ak sa ukončenie nepodarí, nič sa nezmení a môžete to skúsiť znova." }
       ]
     },
     {

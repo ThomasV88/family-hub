@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 35,
   "title": "Shopping",
-  "summary": "Shared shopping lists for the family: the overview, creating and copying lists, adding and changing items, who may do what on a list, sending a list by e-mail, reminders, and the item catalog, stores and units that you manage in Settings.",
+  "summary": "Shared shopping lists for the family: the overview, creating and copying lists, adding and changing items, who may do what on a list, locking the list and shopping, finishing and the archive, sending a list by e-mail, reminders, and the item catalog, stores and units that you manage in Settings.",
   "covers": ["module:shopping", "settings:shopping"],
   "sections": [
     {
@@ -89,6 +89,41 @@
           "type": "tip",
           "text": "If the responsible person leaves the family or loses access to Shopping, the creator becomes responsible. The creator sees a note about it at the top of the list until a responsible person is saved again."
         }
+      ]
+    },
+    {
+      "id": "lock-and-shop",
+      "title": "Locking the list and shopping",
+      "blocks": [
+        { "type": "p", "text": "When the list is ready, the **responsible person** locks it and goes shopping. Only the responsible person sees **Lock list**. Others see a short note saying who can lock it." },
+        { "type": "list", "items": [
+          "A list needs at least one item before it can be locked. On an empty list **Lock list** is greyed out and a note says why.",
+          "While the list is locked nobody can add, remove or edit items.",
+          "In the shop the responsible person presses **Bought** or **Unavailable** next to each item. The change shows at once. Press the same button again to clear the mark.",
+          "If a mark cannot be saved, it jumps back and a message says **Could not save. Try again.**",
+          "Everyone else sees the marks, and the progress line, after they reload the page.",
+          "**Unlock list** brings the list back to planning, for example when you forgot an item. The marks are kept."
+        ] },
+        { "type": "steps", "title": "Locking and unlocking", "items": [
+          "Open the list and press **Lock list**.",
+          "Confirm with **Lock list** in the question that appears.",
+          "To change items again, press **Unlock list** and confirm."
+        ] },
+        { "type": "tip", "text": "A bar at the bottom of the screen on a phone shows how many items are left, and turns into **Finish shopping** when every item is marked." }
+      ]
+    },
+    {
+      "id": "finish",
+      "title": "Finishing the shopping",
+      "blocks": [
+        { "type": "p", "text": "**Finish shopping** appears for the responsible person once every item is marked **Bought** or **Unavailable**. The list then moves to the **Archive** and becomes read-only. You can still copy it and send it by e-mail." },
+        { "type": "p", "text": "If some items are marked **Unavailable**, you are asked: **Some items could not be bought. Create a new shopping list from them?**" },
+        { "type": "list", "items": [
+          "**Create new list** makes a new open list named like the old one followed by \"(unbought)\", with only the unavailable items and their quantities. It keeps the store, the responsible person and who can see it, and has no reminder. You can add more items to it.",
+          "**No, just finish** only archives the list.",
+          "**Cancel** returns to the list without changing anything."
+        ] },
+        { "type": "p", "text": "Either way the original list stays in the Archive as finished. If finishing fails, nothing is changed and you can try again." }
       ]
     },
     {

@@ -73,7 +73,7 @@ describe('phase 11 notifications wording', () => {
 });
 
 describe('phase 11 help texts', () => {
-    for (const topic of ['shopping.catalog', 'shopping.store', 'shopping.units', 'shopping.roles', 'shopping.reminder', 'shopping.email']) {
+    for (const topic of ['shopping.catalog', 'shopping.store', 'shopping.units', 'shopping.roles', 'shopping.reminder', 'shopping.email', 'shopping.lock', 'shopping.carry_over']) {
         it(`${topic} has a title and a text in en, sk and pl`, () => {
             for (const locale of LOCALES) {
                 const entry = help[locale].topics?.[topic];
