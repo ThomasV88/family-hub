@@ -166,6 +166,49 @@ final class FakeCodex
         return self::script($body);
     }
 
+    /**
+     * Answers the transcription schema with one page per received image (the -i argument is a comma separated list):
+     * the page text is `<prefix> <absolute page number>`, the absolute counter lives in the state file and only moves on a
+     * successful call, so a test can assert order and resume. Every exec call appends `T <images>` (transcription) or `X`
+     * (any other schema) to the log file. Options: extract (reply for the extraction schema), fail_nth (the Nth
+     * transcription call fails once) with fail_kind invalid (default), quota or error.
+     *
+     * @param  array{extract?: string, fail_nth?: int, fail_kind?: string}  $options
+     */
+    public static function transcribing(string $state, string $log, string $prefix = 'Page', array $options = []): string
+    {
+        $st = escapeshellarg($state);
+        $lg = escapeshellarg($log);
+        $transcription = md5_file(resource_path('ai/transcription.v1.schema.json'));
+        $body = 'if [ "$1" = "login" ]; then echo "Logged in using ChatGPT"; exit 0; fi; '.self::PARSE
+            .'schema=; imgs=; prev=; for a in "$@"; do [ "$prev" = "--output-schema" ] && schema="$a"; [ "$prev" = "-i" ] && imgs="$a"; prev="$a"; done; cat >/dev/null; '
+            .'sum=$(md5sum "$schema" | cut -d" " -f1); '
+            .'if [ "$sum" = '.$transcription.' ]; then '
+            .'ni=0; [ -n "$imgs" ] && ni=$(printf %s "$imgs" | tr "," "\n" | wc -l); '
+            .'echo "T $ni" >> '.$lg.'; n=$(grep -c "^T " '.$lg.'); ';
+        if (isset($options['fail_nth'])) {
+            $fail = match ($options['fail_kind'] ?? 'invalid') {
+                'quota' => 'echo "You\'ve hit your usage limit. Try again later." >&2; exit 1;',
+                'error' => 'echo "unexpected failure" >&2; exit 1;',
+                default => 'printf %s "{not json" > "$out"; exit 0;',
+            };
+            $body .= 'if [ "$n" -eq '.(int) $options['fail_nth'].' ]; then '.$fail.' fi; ';
+        }
+        $body .= 'base=0; [ -f '.$st.' ] && base=$(cat '.$st.'); '
+            .'json="{\"schema_version\":1,\"language\":\"sk\",\"pages\":["; i=1; '
+            .'while [ "$i" -le "$ni" ]; do abs=$((base+i)); [ "$i" -gt 1 ] && json="$json,"; '
+            .'json="$json{\"page\":$i,\"legible\":true,\"text\":\"'.addcslashes($prefix, '"\\$`').' $abs\"}"; i=$((i+1)); done; '
+            .'json="$json]}"; printf %s "$json" > "$out"; printf %s $((base+ni)) > '.$st.'; exit 0; fi; '
+            .'echo X >> '.$lg.'; ';
+        if (isset($options['extract'])) {
+            $body .= 'printf %s '.escapeshellarg($options['extract']).' > "$out"; ';
+        } else {
+            $body .= ': > "$out"; ';
+        }
+
+        return self::script($body.'exit 0');
+    }
+
     private static function script(string $body): string
     {
         $path = sys_get_temp_dir().'/fake-codex-'.bin2hex(random_bytes(6));
