@@ -9,9 +9,17 @@ final class ExtractionSchema
 
     public const PROMPT_VERSION = 1;
 
+    /** Extraction from the stored recognised text (the schema stays version 1). */
+    public const TEXT_PROMPT_VERSION = 2;
+
     public static function path(): string
     {
         return resource_path('ai/extraction.v1.schema.json');
+    }
+
+    public static function textPromptPath(): string
+    {
+        return resource_path('ai/prompt.v2.md');
     }
 
     /** @return array<string, mixed> */

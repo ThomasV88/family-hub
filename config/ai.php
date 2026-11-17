@@ -183,6 +183,8 @@ return [
         'extract_reserve_seconds' => 120,
         // Bytes of one transcription reply file.
         'result_cap' => 524288,
+        // Bytes of the whole Copilot prompt of the extraction from text (argv limit); the text is cut on a line boundary.
+        'max_prompt_bytes' => 90000,
     ],
 
     'login_stale_minutes' => 15,
