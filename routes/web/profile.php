@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Profile\ProfilePhotoController;
 use Illuminate\Support\Facades\Route;
 
@@ -11,3 +12,9 @@ Route::delete('/people/{user}/photo', [ProfilePhotoController::class, 'destroy']
 Route::get('/people/{user}/photo/{variant}', [ProfilePhotoController::class, 'show'])
     ->whereNumber('user')->whereIn('variant', ['thumb', 'full'])
     ->middleware('access:authenticated')->name('profile.photo.show');
+
+// Own profile page and display name. The request authorizes per target through ProfileAccess.
+Route::get('/profile', [ProfileController::class, 'show'])
+    ->middleware('access:authenticated')->name('profile.show');
+Route::put('/people/{user}/name', [ProfileController::class, 'updateName'])
+    ->whereNumber('user')->middleware(['access:authenticated', 'throttle:30,1,profile.name.update'])->name('profile.name.update');

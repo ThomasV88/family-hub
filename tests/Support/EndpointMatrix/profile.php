@@ -51,4 +51,23 @@ return [
             'grandparent' => 403, 'guestPreset' => 403, 'noGrants' => 403,
         ],
     ],
+    'profile.show' => [
+        'method' => 'GET',
+        'uri' => '/profile',
+        'expect' => [
+            'guest' => 302, 'admin' => 200, 'parent' => 200, 'child' => 200,
+            'grandparent' => 200, 'guestPreset' => 200, 'noGrants' => 200,
+        ],
+    ],
+    // Only the parent (self) may rename; everyone else is refused with 403 before validation.
+    'profile.name.update' => [
+        'method' => 'PUT',
+        'uri' => '/people/{user}/name',
+        'params' => $parentTarget,
+        'data' => ['name' => 'Renamed Parent'],
+        'expect' => [
+            'guest' => 302, 'admin' => 403, 'parent' => 303, 'child' => 403,
+            'grandparent' => 403, 'guestPreset' => 403, 'noGrants' => 403,
+        ],
+    ],
 ];
