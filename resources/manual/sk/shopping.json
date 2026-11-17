@@ -65,7 +65,7 @@
         {
           "type": "list",
           "items": [
-            "**Zodpovedná osoba**: jediná osoba, ktorá môže zoznam uzamknúť a odomknúť, označovať položky ako zakúpené alebo nedostupné a ukončiť nákup. Zodpovednú osobu môžete zmeniť kedykoľvek, aj keď je zoznam uzamknutý.",
+            "**Zodpovedná osoba**: jediná osoba, ktorá môže zoznam uzamknúť a odomknúť, označovať položky ako zakúpené alebo nedostupné a ukončiť nákup. Zodpovednú osobu môžete zmeniť kedykoľvek, aj keď je zoznam uzamknutý. Osoba, ktorá zoznam odovzdá, na ňom zostane ako ten, kto môže pridávať a upravovať položky, takže jej zoznam nezmizne.",
             "**Môže pridávať a upravovať položky**: ľudia, ktorí smú pridávať, meniť a odstraňovať položky v otvorenom zozname.",
             "**Môže iba zobraziť**: ľudia, ktorí zoznam vidia, ale nemôžu nič meniť.",
             "Osoba má naraz jednu rolu. Ak vyberiete niekoho, kto je už v druhej skupine, presunie sa a poznámka vás o tom informuje.",
@@ -87,7 +87,7 @@
         },
         {
           "type": "tip",
-          "text": "Ak zodpovedná osoba opustí rodinu alebo stratí prístup k Nákupom, zodpovedným sa stane autor. Autor o tom vidí poznámku na začiatku zoznamu, kým sa znova neuloží zodpovedná osoba."
+          "text": "Ak zodpovedná osoba opustí rodinu alebo stratí prístup k Nákupom, zodpovedným sa stane autor. Autor o tom vidí poznámku na začiatku zoznamu, kým sa znova neuloží zodpovedná osoba. Ak nemôže konať ani autor, zodpovedným sa stane prvý, kto bol do zoznamu pridaný ako ten, kto môže pridávať a upravovať položky. Ak na zozname nemôže konať nikto, môže zoznam otvoriť správca s právom úprav v Nákupoch a konať ako zodpovedná osoba, takže zoznam nikdy nezostane navždy uzamknutý."
         }
       ]
     },

@@ -65,7 +65,7 @@
         {
           "type": "list",
           "items": [
-            "**Osoba odpowiedzialna**: jedyna osoba, która może zablokować i odblokować listę, oznaczać produkty jako kupione lub niedostępne i zakończyć zakupy. Osobę odpowiedzialną możesz zmienić w każdej chwili, także gdy lista jest zablokowana.",
+            "**Osoba odpowiedzialna**: jedyna osoba, która może zablokować i odblokować listę, oznaczać produkty jako kupione lub niedostępne i zakończyć zakupy. Osobę odpowiedzialną możesz zmienić w każdej chwili, także gdy lista jest zablokowana. Osoba, która przekazuje listę, zostaje na niej jako ktoś, kto może dodawać i edytować produkty, więc lista nie znika jej sprzed oczu.",
             "**Może dodawać i edytować produkty**: osoby, które mogą dodawać, zmieniać i usuwać produkty na otwartej liście.",
             "**Może tylko przeglądać**: osoby, które widzą listę, ale niczego nie mogą zmieniać.",
             "Osoba ma jednocześnie jedną rolę. Jeśli wybierzesz kogoś, kto jest już w drugiej grupie, zostanie przeniesiony, a uwaga o tym poinformuje.",
@@ -87,7 +87,7 @@
         },
         {
           "type": "tip",
-          "text": "Jeśli osoba odpowiedzialna opuści rodzinę lub straci dostęp do Zakupów, odpowiedzialnym zostaje autor. Autor widzi o tym uwagę na górze listy, dopóki osoba odpowiedzialna nie zostanie zapisana ponownie."
+          "text": "Jeśli osoba odpowiedzialna opuści rodzinę lub straci dostęp do Zakupów, odpowiedzialnym zostaje autor. Autor widzi o tym uwagę na górze listy, dopóki osoba odpowiedzialna nie zostanie zapisana ponownie. Jeśli nie może działać także autor, odpowiedzialną zostaje pierwsza osoba dodana do listy jako mogąca dodawać i edytować produkty. Jeśli nikt na liście nie może działać, administrator z prawem edycji w Zakupach może otworzyć listę i działać jako osoba odpowiedzialna, więc lista nigdy nie zostaje zablokowana na zawsze."
         }
       ]
     },

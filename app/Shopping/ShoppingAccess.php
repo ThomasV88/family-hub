@@ -38,6 +38,9 @@ final class ShoppingAccess
         if ($list->creator_id === $user->id) {
             return self::CREATOR;
         }
+        if ($this->adminActs($user, $list)) {
+            return self::RESPONSIBLE;
+        }
 
         $member = ShoppingListMember::query()->where('list_id', $list->id)->where('user_id', $user->id)->first();
         if ($member !== null) {
@@ -51,7 +54,17 @@ final class ShoppingAccess
 
     public function isResponsible(User $user, ShoppingList $list): bool
     {
-        return $this->hasEdit($user) && $this->responsible->effective($list)->id === $user->id;
+        return $this->hasEdit($user)
+            && ($this->responsible->effective($list)->id === $user->id || $this->adminActs($user, $list));
+    }
+
+    /**
+     * Last resort so a list is never stuck: when nobody on it (stored responsible, creator, contributors) is eligible,
+     * an administrator who can sign in and holds Shopping edit acts as the responsible person.
+     */
+    private function adminActs(User $user, ShoppingList $list): bool
+    {
+        return (bool) $user->is_admin && $user->canSignIn() && $this->hasEdit($user) && ! $this->responsible->hasActive($list);
     }
 
     public function canView(User $user, ShoppingList $list): bool

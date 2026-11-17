@@ -65,7 +65,7 @@
         {
           "type": "list",
           "items": [
-            "**Responsible person**: the only person who can lock and unlock the list, mark items as bought or unavailable and finish the shopping. You can change the responsible person at any time, even while the list is locked.",
+            "**Responsible person**: the only person who can lock and unlock the list, mark items as bought or unavailable and finish the shopping. You can change the responsible person at any time, even while the list is locked. The person who hands the list over stays on it as someone who can add and edit items, so the list does not disappear for them.",
             "**Can add and edit items**: people who may add, change and remove items on an open list.",
             "**Can only view**: people who see the list but cannot change anything.",
             "A person has one role at a time. If you choose someone who is already in the other group, they are moved and a note says so.",
@@ -87,7 +87,7 @@
         },
         {
           "type": "tip",
-          "text": "If the responsible person leaves the family or loses access to Shopping, the creator becomes responsible. The creator sees a note about it at the top of the list until a responsible person is saved again."
+          "text": "If the responsible person leaves the family or loses access to Shopping, the creator becomes responsible. The creator sees a note about it at the top of the list until a responsible person is saved again. If the creator cannot act either, the first person who was added to the list as able to add and edit items becomes responsible. If nobody on the list can act, an administrator who has edit access to Shopping can open the list and act as the responsible person, so a list never stays locked for good."
         }
       ]
     },

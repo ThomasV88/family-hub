@@ -6,6 +6,8 @@ use App\Models\ShoppingStore;
 use App\Models\User;
 use App\Shopping\ListService;
 use App\Shopping\ListStatus;
+use App\Shopping\MemberRole;
+use App\Shopping\ShoppingAccess;
 use Carbon\CarbonImmutable;
 use Tests\Support\ShoppingFixtures as F;
 
@@ -189,4 +191,50 @@ it('refuses delete by a contributor and hides it from an outsider', function () 
         ->and(F::status(fn () => lists()->delete(F::user(), $list->id)))->toBe(404)
         ->and(F::status(fn () => lists()->delete(User::factory()->admin()->create(), $list->id)))->toBe(404)
         ->and(ShoppingList::count())->toBe(1);
+});
+
+it('keeps the previous responsible person on the list as a contributor after a hand-over', function () {
+    $creator = F::user();
+    $b = F::user();
+    $c = F::user();
+    $list = F::list($creator, $b);
+
+    lists()->updateSettings($b, $list->id, ['responsible_id' => $c->id]);
+
+    $member = $list->members()->where('user_id', $b->id)->first();
+    expect($member?->role)->toBe(MemberRole::Contributor)
+        ->and(app(ShoppingAccess::class)->canView($b, $list->fresh()))->toBeTrue()
+        ->and(app(ShoppingAccess::class)->role($b, $list->fresh()))->toBe(ShoppingAccess::CONTRIBUTOR);
+});
+
+it('does not add a member row for the creator who hands the list over', function () {
+    $creator = F::user();
+    $other = F::user();
+    $list = F::list($creator);
+
+    lists()->updateSettings($creator, $list->id, ['responsible_id' => $other->id]);
+
+    expect($list->members()->count())->toBe(0);
+});
+
+it('keeps a previous responsible person without Shopping edit as a viewer', function () {
+    $creator = F::user();
+    $b = F::user();
+    $c = F::user();
+    $list = F::list($creator, $b);
+    F::setLevel($b, AccessLevel::View);
+
+    lists()->updateSettings($creator, $list->id, ['responsible_id' => $c->id]);
+
+    expect($list->members()->where('user_id', $b->id)->first()?->role)->toBe(MemberRole::Viewer);
+});
+
+it('answers the hand-over redirect for the previous responsible person with the list, not a 404', function () {
+    $creator = F::user();
+    $b = F::user();
+    $c = F::user();
+    $list = F::list($creator, $b);
+
+    $this->actingAs($b)->put("/shopping/lists/{$list->id}", ['responsible_id' => $c->id])->assertRedirect();
+    $this->actingAs($b)->get("/shopping/lists/{$list->id}")->assertOk();
 });

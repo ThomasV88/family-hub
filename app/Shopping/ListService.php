@@ -70,10 +70,12 @@ final class ListService
                 $list->store_id = $data['store_id'];
             }
             $responsibleChanged = false;
+            $previousId = null;
             if (array_key_exists('responsible_id', $data)) {
                 $newId = $data['responsible_id'] ?? $actor->id;
                 if ($newId !== $list->responsible_id) {
                     $this->assertResponsible($newId);
+                    $previousId = $list->responsible_id;
                     $list->responsible_id = $newId;
                     $responsibleChanged = true;
                 }
@@ -97,11 +99,41 @@ final class ListService
                     $contributors = array_values(array_diff($contributors, [$list->responsible_id]));
                     $viewers = array_values(array_diff($viewers, [$list->responsible_id]));
                 }
+                if ($previousId !== null) {
+                    [$contributors, $viewers] = $this->keepPreviousResponsible($list, $previousId, $contributors, $viewers);
+                }
                 $this->members->sync($list, $contributors, $viewers);
             }
 
             return $list->refresh();
         });
+    }
+
+    /**
+     * The person who handed the list over keeps access: as contributor (they could act, so they hold Shopping edit) or,
+     * if that no longer holds, as viewer. The creator needs no row, and someone the request placed explicitly stays as asked.
+     *
+     * @param  list<int|string>  $contributors
+     * @param  list<int|string>  $viewers
+     * @return array{0: list<int|string>, 1: list<int|string>}
+     */
+    private function keepPreviousResponsible(ShoppingList $list, int $previousId, array $contributors, array $viewers): array
+    {
+        $listed = array_map('intval', array_merge($contributors, $viewers));
+        if ($previousId === (int) $list->creator_id || $previousId === (int) $list->responsible_id || in_array($previousId, $listed, true)) {
+            return [$contributors, $viewers];
+        }
+        $previous = User::query()->find($previousId);
+        if ($previous === null) {
+            return [$contributors, $viewers];
+        }
+        if ($this->gate->allows($previous, Module::Shopping, AccessLevel::Edit)) {
+            $contributors[] = $previousId;
+        } elseif ($this->gate->allows($previous, Module::Shopping, AccessLevel::View)) {
+            $viewers[] = $previousId;
+        }
+
+        return [$contributors, $viewers];
     }
 
     public function delete(User $actor, int $listId): void
