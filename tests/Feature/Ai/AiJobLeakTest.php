@@ -4,6 +4,7 @@ use App\Access\AccessLevel;
 use App\Console\Commands\AiReapStuck;
 use App\Medical\Ai\RunExtractionJob;
 use App\Medical\Ai\Work\WorkDir;
+use App\Medical\Queries\DocumentTextStore;
 use App\Models\AiAgentSetting;
 use App\Models\AiCall;
 use App\Models\MedicalAiExtraction;
@@ -367,4 +368,38 @@ it('ends as the content-free worker_lost failure when the text write raises an e
         ->and(DB::table('medical_document_texts')->count())->toBe(0)
         ->and(json_encode($thrown->getTrace()))->not->toContain('ZxCanaryOcr');
     lkTxClean($logs, $s, 'ZxCanaryOcr');
+});
+
+it('keeps the stored text out of every sink when step 2 of a reused text fails with output full of the canary', function () {
+    $s = lkSetup();
+    DB::table('medical_ai_extractions')->where('id', $s['run']->id)->update(['mode' => 'full']);
+    app(DocumentTextStore::class)->save($s['doc']->id, null, $s['user']->id, 'codex', 'gpt-test', 'sk', ['ZxCanaryOcr one', 'ZxCanaryOcr two'], 2, true);
+    $this->scripts[] = $script = FakeCodex::echoing('ZxCanaryOcr');
+    config(['ai.codex.binary' => $script]);
+    $logs = lkLogSizes();
+
+    (new RunExtractionJob($s['run']->id))->handle();
+
+    $row = DB::table('medical_ai_extractions')->where('id', $s['run']->id)->first();
+    expect($row->status)->toBe('failed')->and($row->payload)->toBeNull()
+        ->and((string) DB::table('medical_document_texts')->where('document_id', $s['doc']->id)->value('body'))->toContain('ZxCanaryOcr');
+    lkTxClean($logs, $s, 'ZxCanaryOcr');
+});
+
+it('records prompt version 2 and the text only in the text table after a ready two-step run', function () {
+    $s = lkSetup();
+    DB::table('medical_ai_extractions')->where('id', $s['run']->id)->update(['mode' => 'full']);
+    $state = sys_get_temp_dir().'/lk-ts-state-'.bin2hex(random_bytes(4));
+    $log = sys_get_temp_dir().'/lk-ts-log-'.bin2hex(random_bytes(4));
+    $this->scripts[] = $script = FakeCodex::transcribing($state, $log, 'ZxCanaryTwo Page', ['extract' => json_encode(lkPayload('Dr Clean'))]);
+    array_push($this->scripts, $state, $log);
+    config(['ai.codex.binary' => $script]);
+    $logs = lkLogSizes();
+
+    (new RunExtractionJob($s['run']->id))->handle();
+
+    $row = DB::table('medical_ai_extractions')->where('id', $s['run']->id)->first();
+    expect($row->status)->toBe('ready')->and((int) $row->prompt_version)->toBe(2)->and((string) $row->payload)->not->toContain('ZxCanaryTwo');
+    lkTxClean($logs, $s, 'ZxCanaryTwo');
+    expect(glob(config('ai.work_dir').'/*') ?: [])->toBe([]);
 });

@@ -90,6 +90,40 @@ class AiJobQuery
         ];
     }
 
+    /**
+     * The stored text of the run's document, whichever run wrote it (job side only; savedText answers only for this run's
+     * own text). Pages are the stored pages in order; language, agent and model are carried so the text can be re-saved
+     * unchanged under this run.
+     *
+     * @return array{pages: list<string>, pagesRead: int, pagesTotal: int, complete: bool, textVersion: int, extractionId: ?string, language: ?string, agent: ?string, model: ?string}|null
+     */
+    public function storedText(string $id): ?array
+    {
+        if (! Str::isUuid($id)) {
+            return null;
+        }
+        $row = DB::table('medical_document_texts as t')
+            ->join('medical_ai_extractions as e', 'e.document_id', '=', 't.document_id')
+            ->where('e.id', $id)
+            ->first(['t.body', 't.pages_read', 't.pages_total', 't.complete', 't.text_version', 't.extraction_id', 't.language', 't.agent', 't.model']);
+        if ($row === null) {
+            return null;
+        }
+        $pagesRead = (int) $row->pages_read;
+
+        return [
+            'pages' => $pagesRead === 0 ? [] : array_slice(explode(TextNormalizer::PAGE_SEPARATOR, (string) $row->body), 0, $pagesRead),
+            'pagesRead' => $pagesRead,
+            'pagesTotal' => (int) $row->pages_total,
+            'complete' => (bool) $row->complete,
+            'textVersion' => (int) $row->text_version,
+            'extractionId' => $row->extraction_id === null ? null : (string) $row->extraction_id,
+            'language' => $row->language === null ? null : (string) $row->language,
+            'agent' => $row->agent === null ? null : (string) $row->agent,
+            'model' => $row->model === null ? null : (string) $row->model,
+        ];
+    }
+
     /** Closes the open call row of the run as succeeded (one transcription batch done); the extraction stays running. */
     public function closeStep(string $id, string $model, int $durationMs): void
     {
@@ -202,7 +236,7 @@ class AiJobQuery
      *
      * @param  array<string, mixed>  $payload
      */
-    public function finishReady(string $id, array $payload, int $entryCount, ?int $pagesRead, ?int $pagesTotal, string $agent, string $model, int $durationMs): bool
+    public function finishReady(string $id, array $payload, int $entryCount, ?int $pagesRead, ?int $pagesTotal, string $agent, string $model, int $durationMs, int $promptVersion = ExtractionSchema::PROMPT_VERSION): bool
     {
         if (! Str::isUuid($id)) {
             return false;
@@ -212,7 +246,7 @@ class AiJobQuery
         $decided = false;
 
         try {
-            DB::transaction(function () use ($id, $payload, $entryCount, $pagesRead, $pagesTotal, $agent, $model, $durationMs, $now, &$decided) {
+            DB::transaction(function () use ($id, $payload, $entryCount, $pagesRead, $pagesTotal, $agent, $model, $durationMs, $now, $promptVersion, &$decided) {
                 $row = DB::table('medical_ai_extractions')->where('id', $id)->where('status', 'running')
                     ->whereNull('cancel_requested_at')->lockForUpdate()->first(['document_id', 'subject_id', 'bulk_run_id']);
                 if ($row === null) {
@@ -247,7 +281,7 @@ class AiJobQuery
                     'pages_total' => $pagesTotal,
                     'model' => $model,
                     'schema_version' => (int) ($payload['schema_version'] ?? 1),
-                    'prompt_version' => ExtractionSchema::PROMPT_VERSION,
+                    'prompt_version' => $promptVersion,
                     'finished_at' => $now,
                     'updated_at' => $now,
                 ]);

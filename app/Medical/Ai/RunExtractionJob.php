@@ -11,6 +11,7 @@ use App\Medical\Ai\Agents\Agent;
 use App\Medical\Ai\Agents\AgentInput;
 use App\Medical\Ai\Agents\AgentOutcome;
 use App\Medical\Ai\Agents\AgentRegistry;
+use App\Medical\Ai\Transcribe\ExtractFromTextTask;
 use App\Medical\Ai\Transcribe\TranscribeTask;
 use App\Medical\Ai\Work\WorkDir;
 use App\Medical\AiConsent;
@@ -121,8 +122,25 @@ class RunExtractionJob implements ShouldQueue
         $images = [];
         $pagesRead = 1;
         $pagesTotal = 1;
+        $mode = $claim['mode'] ?? 'entries';
 
-        if ($document['kind'] === 'image') {
+        // A full run on a document whose stored text is current and read up to the page cap does not read the pages again.
+        $reused = $mode === 'full' ? $this->reusableText($query, $id) : null;
+        if ($reused !== null && $reused['extractionId'] !== $id) {
+            // Marks the text as this run's and re-checks consent and archive under the store's locks (no catch: the message carries the text).
+            $saved = app(DocumentTextStore::class)->save(
+                $claim['document_id'], $id, $claim['started_by'], $reused['agent'], $reused['model'], $reused['language'], $reused['pages'], $reused['pagesTotal'], $reused['complete'],
+            );
+            if ($saved !== SaveOutcome::Saved) {
+                return $query->finishCancelled($id, $saved === SaveOutcome::ConsentOff ? 'consent' : 'access', $label, 0) ? 'cancelled' : null;
+            }
+        }
+
+        if ($reused !== null) {
+            // No page image, no copy, no rasterizing.
+            $pagesRead = $reused['pagesRead'];
+            $pagesTotal = $reused['pagesTotal'];
+        } elseif ($document['kind'] === 'image') {
             if (! $store->copyTo($document['path'], $workDir->file('doc.jpg'))) {
                 return $query->finishFailed($id, FailureCode::UnreadableDocument, $label, 0) ? 'failed' : null;
             }
@@ -159,11 +177,10 @@ class RunExtractionJob implements ShouldQueue
         $registry = app(AgentRegistry::class);
         $health = new AgentHealth;
         $deadline = time() + (int) config('ai.timeouts.job') - 30;
-        $mode = $claim['mode'] ?? 'entries';
 
         $textPages = null;
         $textTotal = null;
-        if ($mode !== 'entries') {
+        if ($mode !== 'entries' && $reused === null) {
             // Step 1: the text of the pages, stored after every validated batch.
             $step = $this->transcribe($query, $registry, $health, $claim, $workDir, $images, $pagesTotal, $mode, $deadline);
             if ($step['end']) {
@@ -179,13 +196,24 @@ class RunExtractionJob implements ShouldQueue
 
                 return $query->finishCancelled($id, $query->abortReason($id) ?? 'user', $step['model'] ?? $label, $step['durationMs']) ? 'cancelled' : null;
             }
-            $text = $query->savedText($id);
-            $textPages = $text['pagesRead'] ?? null;
-            $textTotal = $text['pagesTotal'] ?? null;
         }
 
-        // The image-to-entries call: the whole run in mode entries, step 2 in mode full (until the entries are read from the text).
-        $r = $this->attempt($query, $registry, $health, $claim, $workDir, $images, $images, null, $deadline);
+        $promptVersion = ExtractionSchema::PROMPT_VERSION;
+        if ($mode === 'full') {
+            // Step 2: the entries are read from the stored text (no image is sent). The text stays whatever happens here.
+            $text = $reused ?? $query->savedText($id);
+            $pages = $text['pages'] ?? [];
+            if (count(array_filter($pages, fn (string $page) => trim($page) !== '')) === 0) {
+                return $query->finishFailed($id, FailureCode::UnreadableDocument, $label, 0) ? 'failed' : null;
+            }
+            $textPages = $text['pagesRead'];
+            $textTotal = $text['pagesTotal'];
+            $promptVersion = ExtractionSchema::TEXT_PROMPT_VERSION;
+            $r = $this->attempt($query, $registry, $health, $claim, $workDir, $images, [], new ExtractFromTextTask($pages), $deadline);
+        } else {
+            // The image-to-entries call: the whole run in mode entries.
+            $r = $this->attempt($query, $registry, $health, $claim, $workDir, $images, $images, null, $deadline);
+        }
         if ($r['kind'] === 'end') {
             return $r['status'];
         }
@@ -195,7 +223,7 @@ class RunExtractionJob implements ShouldQueue
 
         $agent = $r['agent'];
         $outcome = $r['outcome'];
-        $done = $query->finishReady($id, $outcome->payload, (int) $outcome->entryCount, $textPages ?? $pagesRead, $textTotal ?? $pagesTotal, $agent->key(), $outcome->model, $outcome->durationMs);
+        $done = $query->finishReady($id, $outcome->payload, (int) $outcome->entryCount, $textPages ?? $pagesRead, $textTotal ?? $pagesTotal, $agent->key(), $outcome->model, $outcome->durationMs, $promptVersion);
         if ($done) {
             $this->safely(fn () => $health->recordSuccess($agent->key()));
 
@@ -211,6 +239,25 @@ class RunExtractionJob implements ShouldQueue
         $why = $query->abortReason($id) ?? 'user';
 
         return $query->finishCancelled($id, $why, $outcome->model, $outcome->durationMs) ? 'cancelled' : null;
+    }
+
+    /**
+     * The stored text of the document when a full run may extract from it without reading the pages again: current
+     * text version and read up to the page cap (or complete). Either another run's text or this run's own (a resume).
+     *
+     * @return array{pages: list<string>, pagesRead: int, pagesTotal: int, complete: bool, textVersion: int, extractionId: ?string, language: ?string, agent: ?string, model: ?string}|null
+     */
+    private function reusableText(AiJobQuery $query, string $id): ?array
+    {
+        $text = $query->storedText($id);
+        if ($text === null || $text['textVersion'] !== (int) config('ai.ocr.text_version')) {
+            return null;
+        }
+        if (! $text['complete'] && $text['pagesRead'] < min($text['pagesTotal'], (int) config('ai.ocr.max_pages'))) {
+            return null;
+        }
+
+        return $text;
     }
 
     /**

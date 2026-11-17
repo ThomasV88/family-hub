@@ -2,6 +2,7 @@
 
 use App\Access\AccessLevel;
 use App\Medical\Ai\AgentHealth;
+use App\Medical\Ai\ExtractionSchema;
 use App\Medical\Ai\FailureCode;
 use App\Medical\Ai\RunExtractionJob;
 use App\Medical\Ai\Work\WorkDir;
@@ -475,11 +476,11 @@ it('finishes as cancelled and keeps the old proposal when a cancel lands between
     ejUse(FakeCodex::succeeding(json_encode(ejPayload())));
     app()->instance(AiJobQuery::class, new class extends AiJobQuery
     {
-        public function finishReady(string $id, array $payload, int $entryCount, ?int $pagesRead, ?int $pagesTotal, string $agent, string $model, int $durationMs): bool
+        public function finishReady(string $id, array $payload, int $entryCount, ?int $pagesRead, ?int $pagesTotal, string $agent, string $model, int $durationMs, int $promptVersion = ExtractionSchema::PROMPT_VERSION): bool
         {
             DB::table('medical_ai_extractions')->where('id', $id)->update(['cancel_requested_at' => now()]);
 
-            return parent::finishReady($id, $payload, $entryCount, $pagesRead, $pagesTotal, $agent, $model, $durationMs);
+            return parent::finishReady($id, $payload, $entryCount, $pagesRead, $pagesTotal, $agent, $model, $durationMs, $promptVersion);
         }
     });
 
