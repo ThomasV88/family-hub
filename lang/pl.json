@@ -2988,7 +2988,10 @@
             "visibility_changed": "Widoczność przepisu została zmieniona",
             "ingredient_removed": "Składnik usunięty",
             "step_removed": "Krok usunięty",
-            "undo": "Cofnij"
+            "undo": "Cofnij",
+            "deleted": "Przepis usunięty",
+            "progress_reset": "Postęp zresetowany",
+            "state_failed": "Nie udało się zapisać. Spróbuj ponownie."
         },
         "form": {
             "title_new": "Nowy przepis",
@@ -3119,6 +3122,81 @@
             "changed": "Przepis w międzyczasie się zmienił. Odśwież stronę i spróbuj ponownie.",
             "too_many_requests": "Zbyt wiele prób. Poczekaj chwilę i spróbuj ponownie.",
             "session_expired": "Sesja wygasła. Odśwież stronę i zaloguj się ponownie."
+        },
+        "detail": {
+            "prep": "Przygotowanie {n} min",
+            "cook": "Gotowanie {n} min",
+            "source": "Źródło: {host}",
+            "only_author": "Ten przepis może edytować tylko {name}.",
+            "edit": "Edytuj",
+            "more": "Więcej działań",
+            "change_visibility": "Zmień widoczność",
+            "reset_progress": "Zresetuj mój postęp",
+            "delete": "Usuń przepis",
+            "sections": "Sekcje przepisu",
+            "tab_ingredients": "Składniki",
+            "tab_steps": "Kroki",
+            "tab_notes": "Notatki",
+            "ingredients": "Składniki",
+            "steps": "Kroki",
+            "visibility_save": "Zapisz",
+            "visibility_cancel": "Anuluj"
+        },
+        "gallery": {
+            "open": "Otwórz zdjęcie na pełnym ekranie",
+            "previous": "Poprzednie zdjęcie",
+            "next": "Następne zdjęcie",
+            "position": "{i} z {n}",
+            "show": "Pokaż zdjęcie {i}"
+        },
+        "servings": {
+            "label": "Porcje",
+            "fewer": "Mniej porcji",
+            "more": "Więcej porcji",
+            "input": "Liczba porcji",
+            "scaled": "Przeliczone",
+            "reset": "Przywróć {n}",
+            "updated": "Ilości zmienione dla {n} porcji."
+        },
+        "progress": {
+            "prepared": "{x} z {y} przygotowanych",
+            "steps_done": "{x} z {y} kroków gotowych",
+            "prepared_label": "Przygotowane: {name}",
+            "done_label": "Gotowe: krok {n}",
+            "all_done": "Wszystkie kroki gotowe. Smacznego.",
+            "ingredients_bar": "Składniki {x}/{y}",
+            "steps_bar": "Kroki {x}/{y}"
+        },
+        "cooking": {
+            "toggle": "Tryb gotowania",
+            "leave": "Wyłącz tryb gotowania",
+            "hint": "Ekran pozostanie włączony podczas gotowania.",
+            "anchors": "Przejdź do"
+        },
+        "notes": {
+            "label": "Moje notatki (widzisz je tylko ty)",
+            "placeholder": "Na przykład: następnym razem mniej soli.",
+            "saving": "Zapisywanie...",
+            "saved": "Zapisano",
+            "failed": "Nie udało się zapisać notatek",
+            "retry": "Spróbuj ponownie"
+        },
+        "delete": {
+            "title": "Usunąć przepis „{title}”?",
+            "body": "Przepis, jego zdjęcia oraz notatki i odhaczenia wszystkich zostaną usunięte. Listy zakupów już z niego utworzone nie zostaną zmienione. Tego nie można cofnąć.",
+            "confirm": "Usuń przepis",
+            "cancel": "Zachowaj przepis"
+        },
+        "reset": {
+            "title": "Zresetować twój postęp?",
+            "body": "Twoje odhaczenia przy tym przepisie zostaną wyczyszczone. Nie dotyczy to innych członków.",
+            "confirm": "Zresetuj postęp",
+            "cancel": "Zachowaj postęp"
+        },
+        "unavailable": {
+            "title": "Ten przepis jest niedostępny",
+            "body": "Mógł zostać usunięty lub ustawiony jako prywatny.",
+            "back": "Wróć do przepisów"
         }
     }
 }

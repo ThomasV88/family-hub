@@ -85,7 +85,7 @@ it('shows the detail with lines, photos, units and only the own state', function
     app(RecipeStateService::class)->favourite($a, $recipe->id, true);
 
     $response = $this->actingAs($a)->get("/recipes/{$recipe->id}")->assertOk()->assertInertia(fn (Assert $p) => $p
-        ->component('Recipes/Show', false)
+        ->component('Recipes/Show')
         ->where('recipe.id', $recipe->id)
         ->has('recipe.ingredients', 3)->has('recipe.steps', 3)
         ->where('recipe.ingredients.0.quantity', '1')
@@ -103,7 +103,7 @@ it('gives the author edit abilities and the form props', function () {
     $recipe = RecipeFixtures::sharedRecipe($author);
 
     $this->actingAs($author)->get("/recipes/{$recipe->id}")->assertInertia(fn (Assert $p) => $p
-        ->component('Recipes/Show', false)->where('abilities.edit', true)->where('abilities.changeVisibility', true));
+        ->component('Recipes/Show')->where('abilities.edit', true)->where('abilities.changeVisibility', true));
     $this->actingAs($author)->get('/recipes/create')->assertOk()->assertInertia(fn (Assert $p) => $p
         ->component('Recipes/Form')->where('recipe', null)->where('defaults.servings', 4)->where('defaults.visibility', 'private')
         ->has('starterCategories', 10)->has('units')->where('limits.titleMax', 120)->where('isShared', false));

@@ -2988,7 +2988,10 @@
             "visibility_changed": "Viditeľnosť receptu sa zmenila",
             "ingredient_removed": "Surovina odstránená",
             "step_removed": "Krok odstránený",
-            "undo": "Vrátiť späť"
+            "undo": "Vrátiť späť",
+            "deleted": "Recept odstránený",
+            "progress_reset": "Postup obnovený",
+            "state_failed": "Nepodarilo sa uložiť. Skúste znova."
         },
         "form": {
             "title_new": "Nový recept",
@@ -3119,6 +3122,81 @@
             "changed": "Recept sa medzitým zmenil. Načítajte stránku znova a skúste to ešte raz.",
             "too_many_requests": "Príliš veľa pokusov. Chvíľu počkajte a skúste to znova.",
             "session_expired": "Platnosť relácie vypršala. Načítajte stránku znova a prihláste sa."
+        },
+        "detail": {
+            "prep": "Príprava {n} min",
+            "cook": "Varenie {n} min",
+            "source": "Zdroj: {host}",
+            "only_author": "Tento recept môže upraviť iba {name}.",
+            "edit": "Upraviť",
+            "more": "Ďalšie akcie",
+            "change_visibility": "Zmeniť viditeľnosť",
+            "reset_progress": "Obnoviť môj postup",
+            "delete": "Odstrániť recept",
+            "sections": "Časti receptu",
+            "tab_ingredients": "Suroviny",
+            "tab_steps": "Postup",
+            "tab_notes": "Poznámky",
+            "ingredients": "Suroviny",
+            "steps": "Postup",
+            "visibility_save": "Uložiť",
+            "visibility_cancel": "Zrušiť"
+        },
+        "gallery": {
+            "open": "Otvoriť fotku na celú obrazovku",
+            "previous": "Predchádzajúca fotka",
+            "next": "Ďalšia fotka",
+            "position": "{i} z {n}",
+            "show": "Zobraziť fotku {i}"
+        },
+        "servings": {
+            "label": "Porcie",
+            "fewer": "Menej porcií",
+            "more": "Viac porcií",
+            "input": "Počet porcií",
+            "scaled": "Prepočítané",
+            "reset": "Vrátiť na {n}",
+            "updated": "Množstvá upravené pre {n} porcií."
+        },
+        "progress": {
+            "prepared": "{x} z {y} pripravených",
+            "steps_done": "{x} z {y} krokov hotových",
+            "prepared_label": "Pripravené: {name}",
+            "done_label": "Hotovo: krok {n}",
+            "all_done": "Všetky kroky sú hotové. Dobrú chuť.",
+            "ingredients_bar": "Suroviny {x}/{y}",
+            "steps_bar": "Postup {x}/{y}"
+        },
+        "cooking": {
+            "toggle": "Režim varenia",
+            "leave": "Opustiť režim varenia",
+            "hint": "Obrazovka ostane počas varenia zapnutá.",
+            "anchors": "Prejsť na"
+        },
+        "notes": {
+            "label": "Moje poznámky (vidíte ich iba vy)",
+            "placeholder": "Napríklad: nabudúce menej soli.",
+            "saving": "Ukladá sa...",
+            "saved": "Uložené",
+            "failed": "Poznámky sa nepodarilo uložiť",
+            "retry": "Skúsiť znova"
+        },
+        "delete": {
+            "title": "Odstrániť recept „{title}“?",
+            "body": "Recept, jeho fotky a poznámky i odškrtnutia všetkých sa odstránia. Nákupné zoznamy, ktoré ste z neho už vytvorili, sa nezmenia. Nedá sa to vrátiť.",
+            "confirm": "Odstrániť recept",
+            "cancel": "Ponechať recept"
+        },
+        "reset": {
+            "title": "Obnoviť váš postup?",
+            "body": "Vaše odškrtnutia pri tomto recepte sa zrušia. Ostatných členov sa to netýka.",
+            "confirm": "Obnoviť postup",
+            "cancel": "Ponechať postup"
+        },
+        "unavailable": {
+            "title": "Tento recept nie je dostupný",
+            "body": "Možno bol odstránený alebo nastavený ako súkromný.",
+            "back": "Späť na recepty"
         }
     }
 }

@@ -2988,7 +2988,10 @@
             "visibility_changed": "Who can see the recipe was changed",
             "ingredient_removed": "Ingredient removed",
             "step_removed": "Step removed",
-            "undo": "Undo"
+            "undo": "Undo",
+            "deleted": "Recipe deleted",
+            "progress_reset": "Progress reset",
+            "state_failed": "Could not save. Try again."
         },
         "form": {
             "title_new": "New recipe",
@@ -3119,6 +3122,81 @@
             "changed": "The recipe changed in the meantime. Reload the page and try again.",
             "too_many_requests": "Too many attempts. Wait a moment and try again.",
             "session_expired": "Your session expired. Reload the page and sign in again."
+        },
+        "detail": {
+            "prep": "Prep {n} min",
+            "cook": "Cook {n} min",
+            "source": "Source: {host}",
+            "only_author": "Only {name} can edit this recipe.",
+            "edit": "Edit",
+            "more": "More actions",
+            "change_visibility": "Change visibility",
+            "reset_progress": "Reset my progress",
+            "delete": "Delete recipe",
+            "sections": "Recipe sections",
+            "tab_ingredients": "Ingredients",
+            "tab_steps": "Steps",
+            "tab_notes": "Notes",
+            "ingredients": "Ingredients",
+            "steps": "Steps",
+            "visibility_save": "Save",
+            "visibility_cancel": "Cancel"
+        },
+        "gallery": {
+            "open": "Open photo full screen",
+            "previous": "Previous photo",
+            "next": "Next photo",
+            "position": "{i} of {n}",
+            "show": "Show photo {i}"
+        },
+        "servings": {
+            "label": "Servings",
+            "fewer": "Fewer servings",
+            "more": "More servings",
+            "input": "Number of servings",
+            "scaled": "Scaled",
+            "reset": "Reset to {n}",
+            "updated": "Quantities updated for {n} servings."
+        },
+        "progress": {
+            "prepared": "{x} of {y} prepared",
+            "steps_done": "{x} of {y} steps done",
+            "prepared_label": "Prepared: {name}",
+            "done_label": "Done: step {n}",
+            "all_done": "All steps done. Enjoy your meal.",
+            "ingredients_bar": "Ingredients {x}/{y}",
+            "steps_bar": "Steps {x}/{y}"
+        },
+        "cooking": {
+            "toggle": "Cooking mode",
+            "leave": "Leave cooking mode",
+            "hint": "The screen stays on while you cook.",
+            "anchors": "Jump to"
+        },
+        "notes": {
+            "label": "My notes (only you can see them)",
+            "placeholder": "For example: use less salt next time.",
+            "saving": "Saving...",
+            "saved": "Saved",
+            "failed": "Could not save your notes",
+            "retry": "Try again"
+        },
+        "delete": {
+            "title": "Delete “{title}”?",
+            "body": "The recipe, its photos and everyone's notes and ticks will be deleted. Shopping lists you already made from it are not changed. This cannot be undone.",
+            "confirm": "Delete recipe",
+            "cancel": "Keep recipe"
+        },
+        "reset": {
+            "title": "Reset your progress?",
+            "body": "Your ticks on this recipe will be cleared. Other members are not affected.",
+            "confirm": "Reset progress",
+            "cancel": "Keep progress"
+        },
+        "unavailable": {
+            "title": "This recipe is not available",
+            "body": "It may have been deleted or made private.",
+            "back": "Back to recipes"
         }
     }
 }
