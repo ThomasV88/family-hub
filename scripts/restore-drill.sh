@@ -104,8 +104,13 @@ if [ "$T_EXISTS" = "1" ]; then
   FOLDED="$(q "$DRILL_DB" "select public.fh_unaccent(chr(321) || 'ukasz')")"
   [ "$FOLDED" = "Lukasz" ] || die "fh_unaccent does not work in the restored database"
   T_ROWS="$(q "$DRILL_DB" 'select count(*) from public.medical_document_texts')"
-  T_SEARCH="$(q "$DRILL_DB" 'select count(*) from public.medical_document_texts where search is not null')"
-  [ "$T_SEARCH" = "$T_ROWS" ] || die "search column of the recognised text is incomplete after restore"
+  # A generated column is never null, so "not null" proves nothing. Prove it works: (1) a probe string run through the
+  # same expression must match a prefix tsquery built the way the search builds it, (2) every restored row's stored
+  # search value equals the expression recomputed from its body.
+  PROBE="$(q "$DRILL_DB" "select to_tsvector('simple', public.fh_unaccent(chr(321) || 'ukasz probe')) @@ to_tsquery('simple', public.fh_unaccent(lower('LUKASZ')) || ':*')")"
+  [ "$PROBE" = "t" ] || die "search expression of the recognised text does not match a probe query after restore"
+  T_STALE="$(q "$DRILL_DB" "select count(*) from public.medical_document_texts where search is distinct from to_tsvector('simple', public.fh_unaccent(body))")"
+  [ "$T_STALE" = "0" ] || die "search column of the recognised text differs from its body after restore"
   TMSG="RESTORE-DRILL TEXT OK rows=$T_ROWS"
   log "$TMSG"
   echo "$TMSG"
