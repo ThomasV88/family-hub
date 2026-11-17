@@ -68,9 +68,15 @@ const progressLabel = computed(() => t('shopping.overview.progress', { bought: p
 
 <style scoped>
 .shop-list-row { min-height: 64px; }
-.shop-list-row :deep(.ui-row__title) { overflow-wrap: anywhere; font-weight: 600; }
-.shop-list-row__meta { display: block; overflow-wrap: anywhere; }
+.shop-list-row :deep(.ui-row__title) { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: break-word; font-weight: 600; }
+.shop-list-row :deep(.ui-row__main) { flex: 1 1 12rem; min-width: 0; }
+.shop-list-row__meta { display: block; overflow-wrap: break-word; }
 .shop-list-row__progress { margin-block-start: var(--space-1); }
-.shop-list-row :deep(.ui-row__trailing) { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); }
+.shop-list-row :deep(.ui-row__trailing) { display: flex; flex: 0 1 auto; max-width: 100%; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); }
 .shop-list-row__reminder { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-text-muted); font-size: var(--text-sm); }
+@media (max-width: 480px) {
+    .shop-list-row { flex-wrap: wrap; align-items: flex-start; }
+    .shop-list-row :deep(.ui-row__main) { flex-basis: calc(100% - 40px - var(--space-3)); }
+    .shop-list-row :deep(.ui-row__trailing) { flex-basis: 100%; justify-content: flex-start; padding-inline-start: calc(40px + var(--space-3)); padding-block-end: var(--space-2); }
+}
 </style>

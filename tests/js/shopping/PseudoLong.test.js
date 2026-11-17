@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { readFileSync } from 'node:fs';
 import { createAppI18n } from '../../../resources/js/i18n.js';
 import { loadMessages } from '../helpers/mount.js';
 import { pseudoLong } from '../helpers/pseudoLong.js';
@@ -33,8 +34,8 @@ const PLAN = { editItems: true, lock: true, unlock: false, mark: false, finish: 
 const SHOP = { editItems: false, lock: false, unlock: true, mark: true, finish: true, copy: true, mail: true, delete: false };
 
 let current;
-function mountPage(component, props, locale = 'en') {
-    window.innerWidth = 390;
+function mountPage(component, props, locale = 'en', width = 390) {
+    window.innerWidth = width;
     mockProps = {
         locale, flash: { status: null, toast: null, data: null }, availableLocales: ['sk', 'pl', 'en'],
         auth: { user: { id: 1, name: 'Mira', email: 'm@example.test', isAdmin: true }, access: { shopping: 'edit' } },
@@ -77,6 +78,34 @@ describe('Shopping pages with pseudo-long text (+40 percent)', () => {
         mountPage(Index, { tab: 'open', lists, archive: { data: [], currentPage: 1, lastPage: 1, perPage: 20, total: 0 }, counts: { open: 1, archive: 0 }, stores: [], responsibleCandidates: [person(1, 'Mira')], canCreate: true });
         expect(current.find('[data-testid="list-row"]').text()).toContain(LONG_NAME);
         expect(noEllipsis(current.element).filter((t) => t.includes('Veľmi'))).toEqual([]);
+    });
+
+    it('Index at 360 px keeps a locked row with progress readable', () => {
+        const lists = [{ id: 2, name: LONG_NAME, status: 'locked', itemsCount: 6, boughtCount: 2, store: { id: 5, name: 'Zelený košík', logoVersion: null }, responsible: person(3, 'Leon Novák'), remindAt: null, reminderPassed: false, unavailableCount: 0, abilities: { copy: true } }];
+        mountPage(Index, { tab: 'open', lists, archive: { data: [], currentPage: 1, lastPage: 1, perPage: 20, total: 0 }, counts: { open: 1, archive: 0 }, stores: [], responsibleCandidates: [person(1, 'Mira')], canCreate: true }, 'sk', 360);
+        const row = current.find('[data-testid="list-row"]');
+        expect(row.classes()).toContain('shop-list-row');
+        expect(row.text()).toContain(LONG_NAME);
+        const meta = row.find('.shop-list-row__meta').text();
+        expect(meta).toContain('Zelený košík');
+        expect(meta).toContain('Leon');
+        expect(row.find('[role="progressbar"], progress, .ui-progress').exists()).toBe(true);
+        const trailing = row.find('.ui-row__trailing');
+        expect(trailing.exists()).toBe(true);
+        expect(trailing.find('button').exists()).toBe(true);
+        expect(trailing.text().length).toBeGreaterThan(0);
+        expect(noEllipsis(row.element)).toEqual([]);
+    });
+
+    it('ListRow CSS stacks the trailing cluster under the text at narrow widths', () => {
+        const css = readFileSync('resources/js/Shopping/ListRow.vue', 'utf8');
+        const media = css.match(/@media \(max-width: 480px\) \{([\s\S]*)\}\s*<\/style>/)?.[1] ?? '';
+        expect(media).toMatch(/\.shop-list-row \{[^}]*flex-wrap: wrap/);
+        expect(media).toContain('flex-basis: 100%');
+        const title = css.match(/\.shop-list-row :deep\(\.ui-row__title\) \{([^}]*)\}/)?.[1] ?? '';
+        expect(title).toContain('white-space: normal');
+        expect(title).toContain('overflow-wrap: break-word');
+        expect(title).not.toContain('anywhere');
     });
 
     it('Settings/Shopping renders without clipped names', () => {

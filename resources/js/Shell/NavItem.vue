@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useShell } from './shellState.js';
@@ -10,9 +11,13 @@ const props = defineProps({
     variant: { type: String, default: 'side' },
     // Rail mode: label becomes visually hidden text plus a visual tooltip.
     rail: { type: Boolean, default: false },
+    // Bottom bar density by item count: 'normal' | 'dense' | 'tight'
+    density: { type: String, default: 'normal' },
 });
 const { t } = useI18n();
 const shell = useShell();
+const dense = computed(() => props.variant === 'bottom' && props.density !== 'normal');
+const tight = computed(() => props.variant === 'bottom' && props.density === 'tight');
 
 function open(event) {
     shell.openComingSoon(props.module.key, event.currentTarget);
@@ -26,11 +31,11 @@ function open(event) {
             :href="module.href ?? undefined"
             :type="module.href ? undefined : 'button'"
             :aria-current="current ? 'page' : undefined"
-            :class="['nav-item__link', `nav-item__link--${variant}`, { 'is-current': current, 'is-soon': !module.href, 'is-rail': rail }]"
+            :class="['nav-item__link', `nav-item__link--${variant}`, { 'is-current': current, 'is-soon': !module.href, 'is-rail': rail, 'is-dense': dense, 'is-tight': tight }]"
             @click="module.href ? undefined : open($event)"
         >
-            <component :is="module.icon" :size="24" :stroke-width="1.75" aria-hidden="true" class="nav-item__icon" />
-            <span :class="['nav-item__label', { 'visually-hidden': rail }]">{{ t(module.labelKey) }}</span>
+            <component :is="module.icon" :size="dense ? 20 : 24" :stroke-width="1.75" aria-hidden="true" class="nav-item__icon" />
+            <span :class="['nav-item__label', { 'visually-hidden': rail }]" :title="variant === 'bottom' ? t(module.labelKey) : undefined">{{ t(module.labelKey) }}</span>
             <span v-if="rail" class="nav-item__tip" aria-hidden="true">{{ t(module.labelKey) }}</span>
         </component>
     </li>
@@ -72,7 +77,7 @@ function open(event) {
 }
 .nav-item__link.is-rail { justify-content: center; padding-inline: 0; }
 .nav-item__icon { flex: none; }
-.nav-item__label { overflow-wrap: anywhere; min-width: 0; }
+.nav-item__link--side .nav-item__label { overflow-wrap: anywhere; min-width: 0; }
 
 .nav-item__link--bottom {
     flex-direction: column;
@@ -81,7 +86,21 @@ function open(event) {
     padding: var(--space-1);
     text-align: center;
 }
-.nav-item__link--bottom .nav-item__label { text-align: center; }
+.nav-item__link--bottom .nav-item__label {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: manual;
+}
+.nav-item__link--bottom.is-dense { padding-inline: 2px; }
+.nav-item__link--bottom.is-dense .nav-item__label { font-size: var(--text-xs); letter-spacing: -0.01em; }
+.nav-item__link--bottom.is-tight .nav-item__label { font-size: 0.6875rem; }
 
 .nav-item__tip {
     position: absolute;

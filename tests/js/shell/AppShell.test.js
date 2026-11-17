@@ -242,7 +242,7 @@ describe('AppShell text length', () => {
         ['pseudo-long en', () => pseudoLong(loadMessages('en'))],
     ];
     for (const [name, get] of cases) {
-        for (const width of [390, 1280]) {
+        for (const width of [360, 390, 1280]) {
             it(`shows full nav labels in ${name} at ${width}`, async () => {
                 setWidth(width);
                 mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' } };

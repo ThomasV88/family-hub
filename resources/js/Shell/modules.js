@@ -17,6 +17,12 @@ export const MANUAL_NAV = { key: 'manual', labelKey: 'nav.manual', titleKey: 'na
 // Frontend module key -> server module key (app/Access/Module.php).
 export const ACCESS_KEY = { tasks: 'todo', wishlist: 'wishlist', finances: 'finance', health: 'health', shopping: 'shopping' };
 
+// Phone bottom bar at 360 px fits 5 items at the normal size; 6 need the dense style, 7 or more the tight one.
+export function bottomNavDensity(count) {
+    if (count <= 5) return 'normal';
+    return count === 6 ? 'dense' : 'tight';
+}
+
 // Overview is always visible; a module needs any level other than 'none'. Missing access hides everything else.
 export function visibleModules(access) {
     return MODULES.filter((m) => {

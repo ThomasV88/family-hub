@@ -178,6 +178,10 @@ for (const locale of ['en', 'sk', 'pl'])
     for (const theme of ['light', 'dark'])
         for (const width of [390, 1280])
             for (const name of Object.keys(pages)) cases.push([name, locale, theme, width]);
+// Phone minimum width: the Shopping overview (bottom bar with six items, stacked rows).
+for (const locale of ['en', 'sk', 'pl'])
+    for (const theme of ['light', 'dark'])
+        for (const name of ['Shopping/Index', 'Shopping/Index (empty)']) cases.push([name, locale, theme, 360]);
 
 describe('accessibility sweep', () => {
     it.each(cases)('%s in %s, %s theme, %ipx has no axe violations', async (name, locale, theme, width) => {
@@ -188,7 +192,7 @@ describe('accessibility sweep', () => {
         await expectNoAxeViolations(wrapper.element);
     });
 
-    it.each([390, 1280])('AppShell with pseudo-long English text at %ipx has no axe violations', async (width) => {
+    it.each([360, 390, 1280])('AppShell with pseudo-long English text at %ipx has no axe violations', async (width) => {
         mockLocale = 'en';
         window.innerWidth = width;
         wrapper = mount(AppShell, {
