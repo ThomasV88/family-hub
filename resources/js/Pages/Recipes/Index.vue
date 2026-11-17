@@ -12,6 +12,9 @@ import UiField from '../../Components/ui/UiField.vue';
 import UiInput from '../../Components/ui/UiInput.vue';
 import UiSkeleton from '../../Components/ui/UiSkeleton.vue';
 import RecipeCard from '../../Components/Recipes/RecipeCard.vue';
+import ImportDraftAlerts from '../../Components/Recipes/ImportDraftAlerts.vue';
+import ImportFromUrlDialog from '../../Components/Recipes/ImportFromUrlDialog.vue';
+import NewRecipeDialog from '../../Components/Recipes/NewRecipeDialog.vue';
 import RecipeFilters from '../../Components/Recipes/RecipeFilters.vue';
 import { activeChips, activeCount, cleared, normaliseFilters, toQuery, withoutChip } from '../../Components/Recipes/recipeFilters.js';
 
@@ -23,6 +26,10 @@ const props = defineProps({
     filters: { type: Object, default: () => ({}) },
     filterOptions: { type: Object, default: () => ({ categories: [], authors: [] }) },
     canCreate: { type: Boolean, default: false },
+    // Reading recipes from a web page: { available (an AI agent is enabled), acknowledged (the notice was confirmed), providers }.
+    import: { type: Object, default: () => ({ available: false, acknowledged: false, providers: [] }) },
+    // The member's own import drafts: [{ id, status, host, reason }].
+    drafts: { type: Array, default: () => [] },
 });
 const { t } = useI18n();
 
@@ -126,9 +133,20 @@ function loadMore() {
     });
 }
 const retry = () => apply(filters.value);
+// New recipe: the choice dialog when reading web pages is available, the plain form otherwise.
+const importInfo = computed(() => props.import ?? { available: false, acknowledged: false, providers: [] });
+const newOpen = ref(false);
+const urlOpen = ref(false);
 function goNew(event) {
     event.preventDefault();
-    router.visit('/recipes/create');
+    if (importInfo.value.available) newOpen.value = true;
+    else router.visit('/recipes/create');
+}
+let reloadingDrafts = false;
+function reloadDrafts() {
+    if (reloadingDrafts) return;
+    reloadingDrafts = true;
+    router.reload({ only: ['drafts', 'import'], preserveScroll: true, preserveState: true, onFinish: () => { reloadingDrafts = false; } });
 }
 
 onBeforeUnmount(() => {
@@ -145,6 +163,8 @@ onBeforeUnmount(() => {
                 <h1 class="rec-index__title">{{ t('recipes.overview.title') }}</h1>
                 <UiButton v-if="canCreate" variant="primary" :icon="Plus" href="/recipes/create" class="rec-index__new" @click="goNew">{{ t('recipes.overview.new_recipe') }}</UiButton>
             </div>
+
+            <ImportDraftAlerts v-if="canCreate" :drafts="drafts" @changed="reloadDrafts" @retry="urlOpen = true" />
 
             <div class="rec-tools">
                 <div class="rec-tools__bar">
@@ -200,6 +220,9 @@ onBeforeUnmount(() => {
 
             <p class="visually-hidden" role="status" aria-live="polite" data-testid="recipes-announce">{{ announcement }}</p>
         </div>
+
+        <NewRecipeDialog v-if="canCreate && importInfo.available" v-model:open="newOpen" @url="urlOpen = true" />
+        <ImportFromUrlDialog v-if="canCreate && importInfo.available" v-model:open="urlOpen" :info="importInfo" @background="reloadDrafts" />
 
         <UiDialog v-model:open="sheetOpen" :title="t('recipes.filter.dialog_title')">
             <RecipeFilters :model-value="filters" :options="filterOptions" @update:model-value="onPanel" />

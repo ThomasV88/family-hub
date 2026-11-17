@@ -12,6 +12,7 @@ const props = defineProps({
     required: { type: Boolean, default: false },
     labelVisuallyHidden: { type: Boolean, default: false },
     // Contextual help topic (registry key): a small green "?" after the label. Ignored when the label is visually hidden.
+    // The `label-after` slot puts something (a tag) next to the label, also ignored when the label is visually hidden.
     help: { type: String, default: '' },
 });
 
@@ -30,11 +31,12 @@ provideField({ id: controlId, describedBy, invalid: computed(() => Boolean(props
 
 <template>
     <div class="ui-field">
-        <div v-if="help && !labelVisuallyHidden" class="ui-field__head">
+        <div v-if="(help || $slots['label-after']) && !labelVisuallyHidden" class="ui-field__head">
             <label :for="controlId" class="ui-field__label">
                 {{ label }}<span v-if="required" class="ui-field__required" aria-hidden="true"> *</span>
             </label>
-            <HelpTip :topic="help" :label="label" />
+            <HelpTip v-if="help" :topic="help" :label="label" />
+            <slot name="label-after" />
         </div>
         <label v-else :for="controlId" class="ui-field__label" :class="{ 'visually-hidden': labelVisuallyHidden }">
             {{ label }}<span v-if="required" class="ui-field__required" aria-hidden="true"> *</span>

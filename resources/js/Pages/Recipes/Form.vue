@@ -2,13 +2,14 @@
 import { computed, nextTick, onBeforeUnmount, reactive, ref } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { Lock, Users } from '@lucide/vue';
+import { ExternalLink, Lock, Sparkles, Users } from '@lucide/vue';
 import AppShell from '../../Layouts/AppShell.vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import UiConfirmDialog from '../../Components/ui/UiConfirmDialog.vue';
 import UiField from '../../Components/ui/UiField.vue';
 import UiInput from '../../Components/ui/UiInput.vue';
+import UiTag from '../../Components/ui/UiTag.vue';
 import UiRadio from '../../Components/ui/UiRadio.vue';
 import UiTextarea from '../../Components/ui/UiTextarea.vue';
 import HelpTip from '../../Components/ui/HelpTip.vue';
@@ -23,7 +24,7 @@ import { uploadQueue } from '../../Components/Recipes/recipePhotosApi.js';
 import { failureKey, firstMessage, isGone } from '../../Components/Recipes/recipeFailure.js';
 import { formatQuantityInput, parseQuantity, quantityForRequest } from '../../Components/Recipes/quantityInput.js';
 
-// Create and edit form of a recipe (review mode after an import is added by a later plan). Create sends JSON and then lands on
+// Create and edit form of a recipe, plus review mode after an import. Create sends JSON and then lands on
 // the detail; edit is an Inertia PUT that keeps the ids of the lines the member did not remove (so other members' ticks
 // survive). The server validates everything again; this form only gives instant answers and maps the server's errors onto the fields.
 const props = defineProps({
@@ -35,6 +36,10 @@ const props = defineProps({
     limits: { type: Object, default: () => ({}) },
     isShared: { type: Boolean, default: false },
     canAddToShopping: { type: Boolean, default: false },
+    // From an import: { title, description, servings, prep_minutes, cook_minutes, categories, ingredients, steps, aiFields, sourceUrl,
+    // sourceHost, textCut, importId }. With an importId the form is in review mode; with only a source (after "Type it in" on a
+    // failed import) just the Source field is filled. Nothing is saved until the member presses Save recipe.
+    prefill: { type: Object, default: null },
 });
 const { t, te, locale } = useI18n();
 const { show: showToast } = useToast();
@@ -46,32 +51,71 @@ const LIMITS = {
 };
 const limits = computed(() => ({ ...LIMITS, ...props.limits }));
 const editing = computed(() => props.recipe !== null);
+const review = computed(() => !editing.value && props.prefill?.importId != null && props.prefill.importId !== '');
+const pre = props.recipe === null && props.prefill ? props.prefill : null;
+const aiFields = new Set(review.value ? (pre?.aiFields ?? []) : []);
 
 let serial = 0;
 const newKey = (prefix) => `${prefix}${Date.now().toString(36)}-${serial++}`;
 const ingredientRow = (i) => ({
-    key: i ? `i${i.id}` : newKey('n'),
+    key: i?.id != null ? `i${i.id}` : newKey('n'),
     id: i?.id ?? null,
     quantity: i ? formatQuantityInput(i.quantity, locale.value) : '',
-    unitId: i?.unitId == null ? '' : String(i.unitId),
+    unitId: (i?.unitId ?? i?.unit_id) == null ? '' : String(i.unitId ?? i.unit_id),
     name: i?.name ?? '',
     note: i?.note ?? '',
+    // The line as written on the page (review mode only): shown as a hint, never sent.
+    original: i?.original ?? null,
 });
 const stepRow = (s) => ({ key: s ? `s${s.id}` : newKey('t'), id: s?.id ?? null, body: s?.body ?? '' });
 const text = (v) => (v === null || v === undefined ? '' : String(v));
 
+const preIngredients = pre?.ingredients?.length ? pre.ingredients : null;
+const preSteps = pre?.steps?.length ? pre.steps : null;
 const form = reactive({
-    title: text(props.recipe?.title),
-    description: text(props.recipe?.description),
-    servings: props.recipe ? text(props.recipe.servings) : text(props.defaults?.servings ?? 4),
-    prep: text(props.recipe?.prepMinutes),
-    cook: text(props.recipe?.cookMinutes),
-    categories: [...(props.recipe?.categories ?? [])],
-    ingredients: props.recipe?.ingredients?.length ? props.recipe.ingredients.map(ingredientRow) : [ingredientRow(null)],
-    steps: props.recipe?.steps?.length ? props.recipe.steps.map(stepRow) : [stepRow(null)],
-    sourceUrl: text(props.recipe?.sourceUrl),
+    title: text(props.recipe?.title ?? pre?.title),
+    description: text(props.recipe?.description ?? pre?.description),
+    // An import that did not find the servings leaves the field empty (the form saves "no servings") instead of guessing 4.
+    servings: props.recipe ? text(props.recipe.servings) : review.value ? text(pre?.servings) : text(props.defaults?.servings ?? 4),
+    prep: text(props.recipe?.prepMinutes ?? pre?.prep_minutes),
+    cook: text(props.recipe?.cookMinutes ?? pre?.cook_minutes),
+    categories: [...(props.recipe?.categories ?? pre?.categories ?? [])],
+    ingredients: props.recipe?.ingredients?.length ? props.recipe.ingredients.map(ingredientRow) : preIngredients ? preIngredients.map(ingredientRow) : [ingredientRow(null)],
+    steps: props.recipe?.steps?.length ? props.recipe.steps.map(stepRow) : preSteps ? preSteps.map(stepRow) : [stepRow(null)],
+    sourceUrl: text(props.recipe?.sourceUrl ?? pre?.sourceUrl),
     visibility: props.recipe?.visibility ?? props.defaults?.visibility ?? 'private',
 });
+
+// ---- Review mode: which fields came from the page, until the member changes them.
+const plainRows = (rows) => rows.map(({ key, original, ...rest }) => rest);
+const valueOf = {
+    title: () => form.title,
+    description: () => form.description,
+    servings: () => form.servings,
+    prep_minutes: () => form.prep,
+    cook_minutes: () => form.cook,
+    categories: () => form.categories,
+    ingredients: () => plainRows(form.ingredients),
+    steps: () => plainRows(form.steps),
+};
+const startValue = Object.fromEntries(Object.entries(valueOf).map(([k, get]) => [k, JSON.stringify(get())]));
+/** The field was filled in from the page and not touched since. */
+const fromPage = (field) => review.value && aiFields.has(field) && JSON.stringify(valueOf[field]()) === startValue[field];
+/** Review mode: the page had nothing for this field and it is still empty. */
+const notFound = (field) => {
+    if (!review.value || aiFields.has(field)) return false;
+    const v = valueOf[field]();
+
+    return Array.isArray(v) ? v.filter((r) => (typeof r === 'string' ? r.trim() !== '' : Object.values(r).some((x) => String(x ?? '').trim() !== ''))).length === 0 : String(v).trim() === '';
+};
+const hintFor = (field, normal = '') => (notFound(field) ? t('recipes.review.not_found') : normal);
+
+const sourceEditing = ref(false);
+const sourceHref = computed(() => (/^https?:\/\/\S+$/i.test(form.sourceUrl.trim()) ? form.sourceUrl.trim() : ''));
+const sourceHost = computed(() => {
+    try { return new URL(sourceHref.value).hostname; } catch { return pre?.sourceHost ?? ''; }
+});
+const showSourceLink = computed(() => review.value && sourceHref.value !== '' && !sourceEditing.value);
 
 // ---- Errors: field -> message; lines by row key.
 const errors = reactive({});
@@ -114,7 +158,8 @@ const snapshot = () => JSON.stringify({
 const initial = snapshot();
 // Photos waiting for the first save (create mode only).
 const photoQueue = ref([]);
-const dirty = computed(() => snapshot() !== initial || photoQueue.value.length > 0);
+// A reviewed draft is not saved yet, so leaving always asks.
+const dirty = computed(() => review.value || snapshot() !== initial || photoQueue.value.length > 0);
 let allowNext = false;
 const leaveOpen = ref(false);
 let pendingVisit = null;
@@ -229,6 +274,8 @@ function build() {
         ingredients: ingredientBody,
         steps: stepBody,
     };
+    // Saving a reviewed draft marks the import as used; the server ignores an id that is no longer usable.
+    if (review.value) data.import_id = pre.importId;
 
     return { data, ingredientKeys: ingredients.map((r) => r.key), stepKeys: steps.map((s) => s.key) };
 }
@@ -343,7 +390,7 @@ function sendEdit(built) {
     });
 }
 
-const pageTitle = computed(() => t(editing.value ? 'recipes.form.title_edit' : 'recipes.form.title_new'));
+const pageTitle = computed(() => t(editing.value ? 'recipes.form.title_edit' : review.value ? 'recipes.review.title' : 'recipes.form.title_new'));
 </script>
 
 <template>
@@ -352,6 +399,8 @@ const pageTitle = computed(() => t(editing.value ? 'recipes.form.title_edit' : '
         <div class="rec-form" data-testid="recipe-form-page">
             <h1 class="rec-form__title">{{ pageTitle }}</h1>
             <p v-if="sharedHint" class="rec-form__muted" data-testid="shared-hint">{{ t('recipes.form.shared_edit_hint') }}</p>
+            <UiAlert v-if="review" variant="info" data-testid="review-banner">{{ t('recipes.review.banner') }}</UiAlert>
+            <p v-if="review && pre?.textCut" class="rec-form__muted" data-testid="text-cut">{{ t('recipes.review.text_cut') }}</p>
             <div aria-live="polite">
                 <UiAlert v-if="alertText" variant="danger" data-testid="form-alert">{{ alertText }}</UiAlert>
             </div>
@@ -365,35 +414,51 @@ const pageTitle = computed(() => t(editing.value ? 'recipes.form.title_edit' : '
                             :max="limits.photosMax" :max-bytes="limits.photoMaxBytes" :disabled="saving" @gone="failed(404)"
                         />
                     </div>
-                    <UiField :label="t('recipes.form.title')" :error="errors.title ?? ''" required>
+                    <UiField :label="t('recipes.form.title')" :hint="hintFor('title')" :error="errors.title ?? ''" required>
+                        <template #label-after><UiTag v-if="fromPage('title')" :icon="Sparkles" data-testid="from-page-title">{{ t('recipes.review.from_page') }}</UiTag></template>
                         <UiInput :model-value="form.title" autocomplete="off" :maxlength="limits.titleMax" :disabled="saving" data-testid="title-input" @update:model-value="setField('title', $event)" />
                     </UiField>
-                    <UiField :label="t('recipes.form.description')" :hint="t('recipes.form.description_hint')" :error="errors.description ?? ''">
+                    <UiField :label="t('recipes.form.description')" :hint="hintFor('description', t('recipes.form.description_hint'))" :error="errors.description ?? ''">
+                        <template #label-after><UiTag v-if="fromPage('description')" :icon="Sparkles" data-testid="from-page-description">{{ t('recipes.review.from_page') }}</UiTag></template>
                         <UiTextarea :model-value="form.description" :rows="3" :maxlength="limits.descriptionMax" :disabled="saving" @update:model-value="setField('description', $event)" />
                     </UiField>
 
                     <div class="rec-form__basics">
-                        <UiField :label="t('recipes.form.servings')" :hint="t('recipes.form.servings_hint')" :error="errors.servings ?? ''" class="rec-form__servings">
+                        <UiField :label="t('recipes.form.servings')" :hint="hintFor('servings', t('recipes.form.servings_hint'))" :error="errors.servings ?? ''" class="rec-form__servings">
+                            <template #label-after><UiTag v-if="fromPage('servings')" :icon="Sparkles" data-testid="from-page-servings">{{ t('recipes.review.from_page') }}</UiTag></template>
                             <UiInput :model-value="form.servings" inputmode="numeric" autocomplete="off" :disabled="saving" @update:model-value="setField('servings', $event)" />
                         </UiField>
-                        <UiField :label="t('recipes.form.prep')" :error="errors.prep_minutes ?? ''">
+                        <UiField :label="t('recipes.form.prep')" :hint="hintFor('prep_minutes')" :error="errors.prep_minutes ?? ''">
+                            <template #label-after><UiTag v-if="fromPage('prep_minutes')" :icon="Sparkles" data-testid="from-page-prep">{{ t('recipes.review.from_page') }}</UiTag></template>
                             <UiInput :model-value="form.prep" inputmode="numeric" autocomplete="off" :disabled="saving" @update:model-value="setField('prep', $event, 'prep_minutes')" />
                         </UiField>
-                        <UiField :label="t('recipes.form.cook')" :error="errors.cook_minutes ?? ''">
+                        <UiField :label="t('recipes.form.cook')" :hint="hintFor('cook_minutes')" :error="errors.cook_minutes ?? ''">
+                            <template #label-after><UiTag v-if="fromPage('cook_minutes')" :icon="Sparkles" data-testid="from-page-cook">{{ t('recipes.review.from_page') }}</UiTag></template>
                             <UiInput :model-value="form.cook" inputmode="numeric" autocomplete="off" :disabled="saving" @update:model-value="setField('cook', $event, 'cook_minutes')" />
                         </UiField>
                     </div>
                     <p v-if="total > 0" class="rec-form__muted rec-form__total" data-testid="total-time">{{ t('recipes.form.total', { n: total }) }}</p>
 
                     <div class="rec-form__block">
-                        <span class="rec-form__label">{{ t('recipes.form.categories') }}</span>
+                        <span class="rec-form__label">{{ t('recipes.form.categories') }}<UiTag v-if="fromPage('categories')" :icon="Sparkles" class="rec-form__tag" data-testid="from-page-categories">{{ t('recipes.review.from_page') }}</UiTag></span>
                         <CategoryField
                             ref="categoryField" v-model="form.categories" :suggestions="categorySuggestions" :starter="starterCategories"
                             :max="limits.categoriesMax" :item-max="limits.categoryMax" :error="errors.categories ?? ''" :disabled="saving" @edit="clear('categories')"
                         />
+                        <p v-if="notFound('categories')" class="rec-form__muted">{{ t('recipes.review.not_found') }}</p>
                     </div>
 
-                    <UiField :label="t('recipes.form.source')" :hint="t('recipes.form.source_hint')" :error="errors.source_url ?? ''">
+                    <div v-if="showSourceLink" class="rec-form__block" data-testid="source-link-block">
+                        <span class="rec-form__label">{{ t('recipes.form.source') }}</span>
+                        <p class="rec-form__source">
+                            <a :href="sourceHref" target="_blank" rel="noopener noreferrer" class="rec-form__source-link" data-testid="source-link">
+                                <ExternalLink :size="16" :stroke-width="1.75" aria-hidden="true" />
+                                <span>{{ sourceHost }}</span>
+                            </a>
+                            <UiButton variant="ghost" size="sm" :disabled="saving" data-testid="source-edit" @click="sourceEditing = true">{{ t('recipes.review.source_edit') }}</UiButton>
+                        </p>
+                    </div>
+                    <UiField v-else :label="t('recipes.form.source')" :hint="t('recipes.form.source_hint')" :error="errors.source_url ?? ''">
                         <UiInput :model-value="form.sourceUrl" type="url" autocomplete="off" :maxlength="limits.sourceUrlMax" :disabled="saving" @update:model-value="setField('sourceUrl', $event, 'source_url')" />
                     </UiField>
 
@@ -414,14 +479,16 @@ const pageTitle = computed(() => t(editing.value ? 'recipes.form.title_edit' : '
 
                 <div class="rec-form__col">
                     <section class="rec-form__block" aria-labelledby="rec-h-ingredients">
-                        <h2 id="rec-h-ingredients" class="rec-form__h2">{{ t('recipes.form.ingredients') }}</h2>
+                        <h2 id="rec-h-ingredients" class="rec-form__h2">{{ t('recipes.form.ingredients') }}<UiTag v-if="fromPage('ingredients')" :icon="Sparkles" class="rec-form__tag" data-testid="from-page-ingredients">{{ t('recipes.review.from_page') }}</UiTag></h2>
+                        <p v-if="notFound('ingredients')" class="rec-form__muted">{{ t('recipes.review.not_found') }}</p>
                         <IngredientRows
                             v-model="form.ingredients" :units="units" :limits="limits" :errors="ingredientErrors" :list-error="errors.ingredients ?? ''"
                             :disabled="saving" @edit="onIngredientEdit"
                         />
                     </section>
                     <section class="rec-form__block" aria-labelledby="rec-h-steps">
-                        <h2 id="rec-h-steps" class="rec-form__h2">{{ t('recipes.form.steps') }}</h2>
+                        <h2 id="rec-h-steps" class="rec-form__h2">{{ t('recipes.form.steps') }}<UiTag v-if="fromPage('steps')" :icon="Sparkles" class="rec-form__tag" data-testid="from-page-steps">{{ t('recipes.review.from_page') }}</UiTag></h2>
+                        <p v-if="notFound('steps')" class="rec-form__muted">{{ t('recipes.review.not_found') }}</p>
                         <StepRows v-model="form.steps" :limits="limits" :errors="stepErrors" :list-error="errors.steps ?? ''" :disabled="saving" @edit="onStepEdit" />
                     </section>
                 </div>
@@ -468,7 +535,10 @@ const pageTitle = computed(() => t(editing.value ? 'recipes.form.title_edit' : '
 .rec-form__total { margin-block-end: var(--space-4); }
 .rec-form__block { margin-block-end: var(--space-4); }
 .rec-form__label { display: block; margin-block-end: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
-.rec-form__h2 { margin: 0 0 var(--space-3); font-size: var(--text-xl); }
+.rec-form__h2 { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-3); font-size: var(--text-xl); }
+.rec-form__tag { margin-inline-start: var(--space-2); font-weight: 600; }
+.rec-form__source { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0; min-width: 0; }
+.rec-form__source-link { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-primary); overflow-wrap: anywhere; }
 .rec-form__error { margin: 0; color: var(--color-danger); font-size: var(--text-sm); }
 .rec-form__visibility { border: 0; margin: 0 0 var(--space-4); padding: 0; display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
 .rec-form__legend { display: flex; align-items: center; gap: var(--space-2); padding: 0; margin-block-end: var(--space-2); font-size: var(--text-sm); font-weight: 600; }

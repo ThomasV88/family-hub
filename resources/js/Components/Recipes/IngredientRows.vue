@@ -195,6 +195,7 @@ function split() {
                             @update:model-value="update(index, 'note', $event)"
                         />
                     </UiField>
+                    <p v-if="row.original" class="rec-ing__original" data-testid="ingredient-original">{{ t('recipes.review.original', { line: row.original }) }}</p>
                 </div>
                 <div class="rec-ing__actions">
                     <UiMenu
@@ -227,6 +228,7 @@ function split() {
 .rec-ing__error { color: var(--color-danger); }
 .rec-ing__cap { color: var(--color-text-muted); }
 .rec-ing__offer { margin-block-end: var(--space-1); }
+.rec-ing__original { grid-column: 1 / -1; margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); overflow-wrap: anywhere; }
 /* One line per ingredient once the list has room: quantity, unit, name, note. */
 @container (min-width: 640px) {
     .rec-ing__row { align-items: flex-start; }

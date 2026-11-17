@@ -6,9 +6,11 @@ import { createAppI18n } from '../../../resources/js/i18n.js';
 import { loadMessages } from '../helpers/mount.js';
 
 let mockProps = {};
-const { routerMock } = vi.hoisted(() => ({
+const { routerMock, fetchMock } = vi.hoisted(() => ({
     routerMock: { get: vi.fn(), post: vi.fn(), put: vi.fn(), visit: vi.fn(), replace: vi.fn(), reload: vi.fn(), on: vi.fn() },
+    fetchMock: vi.fn(),
 }));
+vi.mock('../../../resources/js/Security/securityFetch.js', () => ({ securityFetch: fetchMock }));
 vi.mock('@inertiajs/vue3', async () => {
     const { h } = await import('vue');
     return {
@@ -53,7 +55,7 @@ function mountPage({ locale = 'en', messages = null, ...props } = {}) {
 const cards = () => current.findAll('[data-testid="recipe-card"]');
 const btn = (name) => current.findAll('button').find((b) => b.text() === name);
 
-beforeEach(() => { vi.useRealTimers(); Object.values(routerMock).forEach((f) => f.mockClear()); useToast().toasts.splice(0); });
+beforeEach(() => { vi.useRealTimers(); Object.values(routerMock).forEach((f) => f.mockClear()); fetchMock.mockReset(); useToast().toasts.splice(0); });
 afterEach(() => { current?.unmount(); current = null; document.body.innerHTML = ''; vi.useRealTimers(); });
 
 describe('Recipes overview cards', () => {
@@ -252,6 +254,172 @@ describe('Grid CSS', () => {
 describe('Overview accessibility', () => {
     it.each(['en', 'sk', 'pl'])('has no axe violations (%s)', async (locale) => {
         mountPage({ locale });
+        await expectNoAxeViolations(current.element);
+    });
+});
+
+describe('New recipe and import drafts', () => {
+    const IMPORT = { available: true, acknowledged: true, providers: ['codex'] };
+    const D1 = '44444444-4444-4444-8444-444444444441';
+    const D2 = '44444444-4444-4444-8444-444444444442';
+    const D3 = '44444444-4444-4444-8444-444444444443';
+    const body = (sel) => document.body.querySelector(sel);
+    const newButton = () => current.find('.rec-index__head a, .rec-index__head button');
+
+    it('opens the choice dialog only when reading pages is available', async () => {
+        mountPage({ import: IMPORT });
+        await newButton().trigger('click');
+        await flushPromises();
+        expect(routerMock.visit).not.toHaveBeenCalled();
+        expect(body('[data-testid="new-from-page"]')).not.toBeNull();
+        expect(body('[data-testid="new-type-it-in"]')).not.toBeNull();
+    });
+
+    it('goes straight to the form when no AI agent is enabled', async () => {
+        mountPage({ import: { available: false, acknowledged: false, providers: [] } });
+        await newButton().trigger('click');
+        await flushPromises();
+        expect(routerMock.visit).toHaveBeenCalledWith('/recipes/create');
+        expect(body('[data-testid="new-from-page"]')).toBeNull();
+    });
+
+    it('goes straight to the form when the overview has no import prop at all', async () => {
+        mountPage();
+        await newButton().trigger('click');
+        expect(routerMock.visit).toHaveBeenCalledWith('/recipes/create');
+    });
+
+    it('the empty state button opens the choice dialog too', async () => {
+        mountPage({ import: IMPORT, recipes: [] });
+        await current.find('.ui-empty a, .ui-empty button').trigger('click');
+        await flushPromises();
+        expect(body('[data-testid="new-from-page"]')).not.toBeNull();
+    });
+
+    it('Read from a web page continues in the URL step', async () => {
+        mountPage({ import: IMPORT });
+        await newButton().trigger('click');
+        await flushPromises();
+        body('[data-testid="new-from-page"] button').click();
+        await flushPromises();
+        expect(body('[data-testid="import-url"]')).not.toBeNull();
+        expect(body('[data-testid="new-from-page"]')).toBeNull();
+    });
+
+    it('renders no draft rows without drafts, and only for members who can create', () => {
+        mountPage({ import: IMPORT, drafts: [] });
+        expect(current.find('[data-testid="import-drafts"]').exists()).toBe(false);
+        current.unmount();
+        mountPage({ import: IMPORT, canCreate: false, drafts: [{ id: D1, status: 'ready', host: 'x.example', reason: null }] });
+        expect(current.find('[data-testid="import-drafts"]').exists()).toBe(false);
+    });
+
+    it('a ready draft says which site, links Review to the prefilled form and renders the site as text', () => {
+        mountPage({ import: IMPORT, drafts: [{ id: D1, status: 'ready', host: '<b>recepty.example</b>', reason: null }] });
+        const row = current.find('[data-testid="draft-ready"]');
+        expect(row.text()).toContain('Your recipe from <b>recepty.example</b> is ready to review.');
+        expect(row.find('b').exists()).toBe(false);
+        expect(row.find('[data-testid="draft-review"]').attributes('href')).toBe(`/recipes/create?import=${D1}`);
+    });
+
+    it('Discard asks first, then sends DELETE once and reloads the drafts', async () => {
+        fetchMock.mockResolvedValue({ ok: true, status: 204, data: {} });
+        mountPage({ import: IMPORT, drafts: [{ id: D1, status: 'ready', host: 'recepty.example', reason: null }] });
+        await current.find('[data-testid="draft-discard"]').trigger('click');
+        await flushPromises();
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(body('.ui-dialog__title').textContent).toBe('Discard this draft?');
+        const confirm = [...document.body.querySelectorAll('.ui-dialog button')].find((b) => b.textContent.trim() === 'Discard draft');
+        confirm.click();
+        confirm.click();
+        await flushPromises();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledWith(`/recipes/imports/${D1}`, { method: 'DELETE' });
+        expect(routerMock.reload).toHaveBeenCalledWith(expect.objectContaining({ only: ['drafts', 'import'] }));
+    });
+
+    it('Keep draft sends nothing', async () => {
+        mountPage({ import: IMPORT, drafts: [{ id: D1, status: 'ready', host: 'recepty.example', reason: null }] });
+        await current.find('[data-testid="draft-discard"]').trigger('click');
+        await flushPromises();
+        [...document.body.querySelectorAll('.ui-dialog button')].find((b) => b.textContent.trim() === 'Keep draft').click();
+        await flushPromises();
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it.each([[403, 'You are not allowed'], [419, 'Your session expired'], [429, 'Too many attempts'], [500, 'could not discard']])('a failed discard (HTTP %s) says so', async (status, expected) => {
+        fetchMock.mockResolvedValue({ ok: false, status, error: 'failed', data: {} });
+        mountPage({ import: IMPORT, drafts: [{ id: D1, status: 'ready', host: 'recepty.example', reason: null }] });
+        await current.find('[data-testid="draft-discard"]').trigger('click');
+        await flushPromises();
+        [...document.body.querySelectorAll('.ui-dialog button')].find((b) => b.textContent.trim() === 'Discard draft').click();
+        await flushPromises();
+        expect(useToast().toasts.map((t) => t.message).join(' ')).toContain(expected);
+        expect(routerMock.reload).not.toHaveBeenCalled();
+    });
+
+    it('a draft that is already gone (404) is simply reloaded away', async () => {
+        fetchMock.mockResolvedValue({ ok: false, status: 404, error: 'failed', data: {} });
+        mountPage({ import: IMPORT, drafts: [{ id: D1, status: 'failed', host: 'recepty.example', reason: 'fetch' }] });
+        await current.find('[data-testid="draft-dismiss"]').trigger('click');
+        await flushPromises();
+        expect(routerMock.reload).toHaveBeenCalled();
+        expect(useToast().toasts).toHaveLength(0);
+    });
+
+    it('a failed draft offers Try again (the URL step) and Type it in', async () => {
+        mountPage({ import: IMPORT, drafts: [{ id: D2, status: 'failed', host: 'recepty.example', reason: 'no_recipe' }] });
+        const row = current.find('[data-testid="draft-failed"]');
+        expect(row.text()).toContain('Reading recepty.example did not work.');
+        expect(row.find('[data-testid="draft-type"]').attributes('href')).toBe('/recipes/create');
+        await row.find('[data-testid="draft-retry"]').trigger('click');
+        await flushPromises();
+        expect(body('[data-testid="import-url"]')).not.toBeNull();
+    });
+
+    describe('active drafts', () => {
+        beforeEach(() => { vi.useFakeTimers(); });
+
+        it('are polled every 2 s, ask the overview for fresh drafts when they end, and stop polling after that', async () => {
+            fetchMock.mockResolvedValueOnce({ ok: true, status: 200, data: { id: D3, status: 'running', reason: null, host: 'recepty.example', textCut: false } })
+                .mockResolvedValueOnce({ ok: true, status: 200, data: { id: D3, status: 'ready', reason: null, host: 'recepty.example', textCut: false } });
+            mountPage({ import: IMPORT, drafts: [{ id: D3, status: 'running', host: 'recepty.example', reason: null }] });
+            expect(current.find('[data-testid="draft-active"]').text()).toContain('Reading recepty.example...');
+            await vi.advanceTimersByTimeAsync(2000);
+            expect(fetchMock).toHaveBeenCalledWith(`/recipes/imports/${D3}`);
+            expect(routerMock.reload).not.toHaveBeenCalled();
+            await vi.advanceTimersByTimeAsync(2000);
+            expect(routerMock.reload).toHaveBeenCalledTimes(1);
+            const calls = fetchMock.mock.calls.length;
+            await vi.advanceTimersByTimeAsync(20000);
+            expect(fetchMock.mock.calls.length).toBe(calls);
+        });
+
+        it('stop polling when the page unmounts', async () => {
+            fetchMock.mockResolvedValue({ ok: true, status: 200, data: { id: D3, status: 'running', reason: null, host: 'recepty.example', textCut: false } });
+            mountPage({ import: IMPORT, drafts: [{ id: D3, status: 'running', host: 'recepty.example', reason: null }] });
+            await vi.advanceTimersByTimeAsync(2000);
+            const calls = fetchMock.mock.calls.length;
+            current.unmount();
+            current = null;
+            await vi.advanceTimersByTimeAsync(20000);
+            expect(fetchMock.mock.calls.length).toBe(calls);
+        });
+
+        it('announce a draft that became ready in a live region', async () => {
+            mountPage({ import: IMPORT, drafts: [{ id: D3, status: 'running', host: 'recepty.example', reason: null }] });
+            await current.setProps({ drafts: [{ id: D3, status: 'ready', host: 'recepty.example', reason: null }] });
+            await vi.advanceTimersByTimeAsync(0);
+            expect(current.find('[data-testid="drafts-announce"]').text()).toBe('Your recipe from recepty.example is ready to review.');
+            expect(current.find('[data-testid="drafts-announce"]').attributes('aria-live')).toBe('polite');
+        });
+    });
+
+    it('has no axe violations with drafts of every kind and the choice dialog open', async () => {
+        mountPage({
+            import: IMPORT,
+            drafts: [{ id: D1, status: 'ready', host: 'a.example', reason: null }, { id: D2, status: 'failed', host: 'b.example', reason: 'fetch' }, { id: D3, status: 'running', host: 'c.example', reason: null }],
+        });
         await expectNoAxeViolations(current.element);
     });
 });
