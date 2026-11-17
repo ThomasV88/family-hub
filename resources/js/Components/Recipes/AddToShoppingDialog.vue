@@ -75,7 +75,7 @@ const numberFormat = computed(() => new Intl.NumberFormat(INTL_LOCALES[localeCod
 
 // A quantity text -> number, or null when it is empty, not a number or outside what Shopping accepts.
 function quantityOf(text) {
-    const { value, valid } = parseQuantity(text);
+    const { value, valid } = parseQuantity(text, locale.value);
 
     return valid && value !== null && value > 0 && value <= SHOPPING_MAX ? value : null;
 }

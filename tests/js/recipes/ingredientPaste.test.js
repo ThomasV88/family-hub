@@ -33,6 +33,19 @@ describe('parseIngredientLines', () => {
         expect(parse('2 szt. jajka', 'pl')).toEqual([{ quantity: 2, unitId: 1, name: 'jajka' }]);
     });
 
+    it('reads cl as centilitres (converted to ml), never as a teaspoon, and pl as nothing', () => {
+        expect(parse('4 cl rum')).toEqual([{ quantity: 40, unitId: 4, name: 'rum' }]);
+        expect(parse('0,5 cl lemon juice', 'sk')).toEqual([{ quantity: 5, unitId: 4, name: 'lemon juice' }]);
+        // The Slovak teaspoon abbreviation keeps its accent and stays a teaspoon.
+        expect(parse('2 čl soli', 'sk')).toEqual([{ quantity: 2, unitId: 9, name: 'soli' }]);
+        expect(parse('2 pl cukru', 'pl')).toEqual([{ quantity: 2, unitId: null, name: 'pl cukru' }]);
+    });
+
+    it('reads 1,000 by the language: a thousand in English, one in Slovak', () => {
+        expect(parse('1,000 g sugar')).toEqual([{ quantity: 1000, unitId: 2, name: 'sugar' }]);
+        expect(parse('1,000 g cukru', 'sk')).toEqual([{ quantity: 1, unitId: 2, name: 'cukru' }]);
+    });
+
     it('keeps unknown parts in the name', () => {
         expect(parse('3 eggs')).toEqual([{ quantity: 3, unitId: null, name: 'eggs' }]);
         expect(parse('soľ podľa chuti', 'sk')).toEqual([{ quantity: null, unitId: null, name: 'soľ podľa chuti' }]);

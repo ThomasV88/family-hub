@@ -262,13 +262,13 @@ function build() {
     const ingredientBody = ingredients.map((r) => {
         const lineErrors = {};
         if (r.name.trim() === '' || r.name.trim().length > limits.value.ingredientNameMax) lineErrors.name = t('recipes.error.ingredient_invalid');
-        const q = parseQuantity(r.quantity);
+        const q = parseQuantity(r.quantity, locale.value);
         if (!q.valid || (q.value !== null && q.value > limits.value.quantityMax)) lineErrors.quantity = t('recipes.error.quantity_invalid');
         if (r.note.trim().length > limits.value.ingredientNoteMax) lineErrors.note = t('recipes.error.ingredient_note_invalid');
         if (Object.keys(lineErrors).length > 0) ing[r.key] = lineErrors;
         const line = {
             name: r.name.trim(),
-            quantity: quantityForRequest(r.quantity),
+            quantity: quantityForRequest(r.quantity, locale.value),
             unit_id: r.unitId === '' ? null : Number(r.unitId),
             note: r.note.trim() === '' ? null : r.note.trim(),
         };

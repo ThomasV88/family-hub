@@ -1,6 +1,6 @@
 import { normalize } from '../../Shopping/catalogSearch.js';
 import { localeCode, unitLabel } from '../../Shopping/units.js';
-import { parseQuantity } from './quantityInput.js';
+import { parseQuantity, QUANTITY_MAX } from './quantityInput.js';
 
 // Best-effort split of pasted lines ("200 g flour", "2 ks vajcia", "1/2 tsp salt", "salt to taste") into
 // { quantity, unitId, name }. Whatever is not understood stays in the name.
@@ -16,9 +16,13 @@ const ALIASES = {
     l: ['l', 'liter', 'litre', 'litres', 'litrov', 'litr', 'litry', 'litrow'],
     pack: ['pack', 'packs', 'package', 'packet', 'balenie', 'balenia', 'baleni', 'opakowanie', 'opakowania', 'opakowan'],
     bunch: ['bunch', 'bunches', 'zvazok', 'zvazky', 'zvazkov', 'peczek', 'peczki', 'peczkow'],
-    tbsp: ['tbsp', 'tbs', 'tablespoon', 'tablespoons', 'pl', 'lyzica', 'lyzice', 'lyzic', 'lyzicu', 'lyzka', 'lyzki', 'lyzek'],
-    tsp: ['tsp', 'teaspoon', 'teaspoons', 'cl', 'lyzicka', 'lyzicky', 'lyzicok', 'lyzeczka', 'lyzeczki', 'lyzeczek'],
+    tbsp: ['tbsp', 'tbs', 'tablespoon', 'tablespoons', 'lyzica', 'lyzice', 'lyzic', 'lyzicu', 'lyzka', 'lyzki', 'lyzek'],
+    tsp: ['tsp', 'teaspoon', 'teaspoons', 'lyzicka', 'lyzicky', 'lyzicok', 'lyzeczka', 'lyzeczki', 'lyzeczek'],
 };
+
+// Words that stand for a built-in unit times a factor. "cl" is a centilitre (4 cl rum = 40 ml), never a teaspoon. "pl" is not an
+// alias of anything: it is the code of the Polish language and no recipe writes it for a spoon.
+const SCALED_ALIASES = { cl: { key: 'ml', factor: 10 } };
 
 const VULGAR_CLASS = '½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞';
 const QUANTITY_AT_START = new RegExp(
@@ -33,17 +37,19 @@ function unitIndex(units, t, locale) {
         const key = normalize(word).replace(/\.$/, '');
         if (key !== '' && !index.has(key)) index.set(key, id);
     };
+    const scaled = new Map();
     for (const unit of units) {
         if (unit.key) {
             add(unit.key, unit.id);
             for (const word of ALIASES[unit.key] ?? []) add(word, unit.id);
+            for (const [word, { key, factor }] of Object.entries(SCALED_ALIASES)) if (unit.key === key) scaled.set(word, { id: unit.id, factor });
         }
         // The labels of the current language (every plural form) and of custom units.
         for (const n of [1, 2, 5]) if (t) add(unitLabel(unit, n, t, locale), unit.id);
         for (const name of Object.values(unit.names ?? {})) if (name) add(name, unit.id);
     }
 
-    return index;
+    return { index, scaled };
 }
 
 /**
@@ -52,7 +58,7 @@ function unitIndex(units, t, locale) {
  * @returns {Array<{ quantity: number|null, unitId: number|null, name: string }>}
  */
 export function parseIngredientLines(text, { units = [], t = null, locale = 'en', nameMax = 120 } = {}) {
-    const index = unitIndex(units, t, localeCode(locale));
+    const { index, scaled } = unitIndex(units, t, localeCode(locale));
     const lines = String(text ?? '')
         .split(/\r\n|\r|\n/)
         .map((line) => line.replace(/^\s*(?:[-*•·–]|\[\s?\])\s*/, '').trim())
@@ -63,16 +69,28 @@ export function parseIngredientLines(text, { units = [], t = null, locale = 'en'
         const whole = { quantity: null, unitId: null, name: line.slice(0, nameMax) };
         const m = line.match(QUANTITY_AT_START);
         if (!m) return whole;
-        const { value, valid } = parseQuantity(m[1]);
+        const parsed = parseQuantity(m[1], locale);
+        const { valid } = parsed;
+        let { value } = parsed;
         if (!valid || value === null) return whole;
 
         let rest = m[2];
         let unitId = null;
         const word = rest.match(/^(\S+)(?:\s+(.*))?$/u);
         if (word) {
-            const id = index.get(normalize(word[1]).replace(/\.$/, ''));
+            const key = normalize(word[1]).replace(/\.$/, '');
+            // The raw spelling decides for "cl": plain "cl" is a centilitre, while the Slovak "čl" (teaspoon) loses its accent in
+            // `normalize` and would otherwise be taken for it.
+            const raw = word[1].toLowerCase().replace(/\.$/, '');
+            const id = scaled.has(raw) ? undefined : index.get(key);
             if (id !== undefined) {
                 unitId = id;
+                rest = word[2] ?? '';
+            } else if (scaled.has(raw)) {
+                const { id: scaledId, factor } = scaled.get(raw);
+                unitId = scaledId;
+                value = Math.round((value * factor + Number.EPSILON) * 100) / 100;
+                if (value > QUANTITY_MAX) return whole;
                 rest = word[2] ?? '';
             }
         }

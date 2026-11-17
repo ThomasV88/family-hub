@@ -19,14 +19,21 @@ const INVALID = Object.freeze({ value: null, valid: false });
 /**
  * { value, valid }: empty text is { value: null, valid: true } ("to taste"); a number is rounded to 2 decimals; anything
  * else (exponent, zero, negative, over 9999, 1/0, words) is { value: null, valid: false }. Never NaN.
+ *
+ * "1,000": a comma followed by exactly three digits is ambiguous. Quantities never exceed 9999, so it is read by the
+ * language of the reader: English uses the comma as a thousands separator ("1,000 g" = 1000 g, "9,999" = 9999), Slovak
+ * and Polish use it as the decimal comma ("1,000" = 1). Any other comma form ("0,5", "1,25", "1,5") is a decimal comma in
+ * every language. A dot is always a decimal point.
  */
-export function parseQuantity(text) {
+export function parseQuantity(text, locale = 'en') {
     const raw = String(text ?? '').trim().replace(/\s+/g, ' ');
     if (raw === '') return { value: null, valid: true };
 
     let n;
     let m;
-    if ((m = raw.match(/^(\d+)(?:[.,](\d+))?$/))) {
+    if (localeCode(locale) === 'en' && (m = raw.match(/^(\d{1,3}),(\d{3})$/))) {
+        n = Number(`${m[1]}${m[2]}`);
+    } else if ((m = raw.match(/^(\d+)(?:[.,](\d+))?$/))) {
         n = Number(`${m[1]}.${m[2] ?? '0'}`);
     } else if ((m = raw.match(/^(\d+)\/(\d+)$/))) {
         n = Number(m[2]) === 0 ? NaN : Number(m[1]) / Number(m[2]);
@@ -53,8 +60,8 @@ export function formatQuantityInput(value, locale) {
 }
 
 /** The value sent to the server: a plain dot decimal string, or null for an empty or invalid text. */
-export function quantityForRequest(text) {
-    const { value, valid } = parseQuantity(text);
+export function quantityForRequest(text, locale = 'en') {
+    const { value, valid } = parseQuantity(text, locale);
 
     return valid && value !== null ? String(value) : null;
 }

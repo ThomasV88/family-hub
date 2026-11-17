@@ -43,3 +43,27 @@ describe('quantityForRequest', () => {
         expect(quantityForRequest('x')).toBeNull();
     });
 });
+
+describe('parseQuantity: "1,000" by the language of the reader', () => {
+    it.each([['1,000', 1000], ['9,999', 9999], ['2,500', 2500], ['12,345', null]])('en %s -> %s (a thousands comma)', (text, value) => {
+        expect(parseQuantity(text, 'en')).toEqual(value === null ? { value: null, valid: false } : { value, valid: true });
+    });
+
+    it.each(['sk', 'pl'])('%s reads "1,000" as a decimal comma = 1, and "0,250" as 0.25', (locale) => {
+        expect(parseQuantity('1,000', locale)).toEqual({ value: 1, valid: true });
+        expect(parseQuantity('0,250', locale)).toEqual({ value: 0.25, valid: true });
+    });
+
+    it('keeps every other comma form a decimal comma in all languages and the dot a decimal point', () => {
+        for (const locale of ['en', 'sk', 'pl']) {
+            expect(parseQuantity('1,5', locale)).toEqual({ value: 1.5, valid: true });
+            expect(parseQuantity('1,25', locale)).toEqual({ value: 1.25, valid: true });
+            expect(parseQuantity('1.250', locale)).toEqual({ value: 1.25, valid: true });
+        }
+    });
+
+    it('sends 1000 for "1,000" typed in English', () => {
+        expect(quantityForRequest('1,000', 'en')).toBe('1000');
+        expect(quantityForRequest('1,000', 'sk')).toBe('1');
+    });
+});
