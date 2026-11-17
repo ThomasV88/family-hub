@@ -165,6 +165,17 @@ return [
         'stopped_after_hours' => 24,
     ],
 
+    // Recognised full text of medical documents (Phase 13). Off by default; the page batch size and page cap follow
+    // with the transcription step.
+    'ocr' => [
+        'enabled' => (bool) env('AI_OCR_ENABLED', false),
+        // reliable or uncertain; anything else reads as uncertain (config 'may contain errors' label).
+        'text_reliability' => env('AI_OCR_TEXT_RELIABILITY', 'uncertain'),
+        'text_version' => 1,
+        'max_page_chars' => 12000,
+        'max_total_chars' => 200000,
+    ],
+
     'login_stale_minutes' => 15,
     'call_retention_months' => 12,
     'queue' => 'ai',
