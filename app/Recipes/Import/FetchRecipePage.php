@@ -43,6 +43,9 @@ final class FetchRecipePage implements ShouldBeUnique, ShouldQueue
             return;
         }
 
+        // The reaper measures from here: a job that waited behind other jobs has not started a fetch yet.
+        DB::table('recipe_imports')->where('id', $this->importId)->where('status', 'fetching')->update(['fetch_started_at' => Carbon::now()]);
+
         try {
             $fetcher = app()->make(SafeFetcher::class, ['userAgent' => (string) config('recipes.import.user_agent')]);
             $page = $fetcher->get((string) $row->url, (int) config('recipes.import.html_max_bytes'), 'html');

@@ -238,13 +238,39 @@ class RecipeImportQuery
      * Ids of imports in $status whose $column (falling back to created_at) is older than the cutoff. Unscoped, ids only,
      * for the reaper.
      *
-     * @param  'created_at'|'queued_at'|'started_at'  $column
+     * @param  'queued'|'running'  $status
+     * @param  'queued_at'|'started_at'  $column
      * @return list<string>
      */
     public function idsStuck(string $status, string $column, int $minutes): array
     {
+        // The column is interpolated into SQL below: only these literals are ever allowed (fetching has its own method).
+        $column = match ($column) {
+            'queued_at', 'started_at' => $column,
+            default => throw new \InvalidArgumentException('Unsupported reaper column.'),
+        };
+
         return DB::table('recipe_imports')->where('status', $status)
             ->whereRaw("coalesce({$column}, created_at) < ?", [Carbon::now()->subMinutes($minutes)])
+            ->pluck('id')->map(fn ($id) => (string) $id)->all();
+    }
+
+    /**
+     * Fetching imports the reaper may close: a fetch that started more than $startedMinutes ago (the job has a 60 s
+     * timeout, so it is dead), or one that never started within $unstartedMinutes of creation (its dispatch was lost).
+     * A job still waiting behind others on the shared queue is inside the second, generous window.
+     *
+     * @return list<string>
+     */
+    public function idsFetchingStuck(int $startedMinutes, int $unstartedMinutes): array
+    {
+        $now = Carbon::now();
+
+        return DB::table('recipe_imports')->where('status', 'fetching')
+            ->where(function ($q) use ($now, $startedMinutes, $unstartedMinutes) {
+                $q->where('fetch_started_at', '<', $now->copy()->subMinutes($startedMinutes))
+                    ->orWhere(fn ($u) => $u->whereNull('fetch_started_at')->where('created_at', '<', $now->copy()->subMinutes($unstartedMinutes)));
+            })
             ->pluck('id')->map(fn ($id) => (string) $id)->all();
     }
 

@@ -48,11 +48,17 @@ it('reaps stuck imports, clears their text and closes the open call row', functi
     $freshRunning = $make('running', 14, 'running');
     $oldFetching = $make('fetching', 6);
     $freshFetching = $make('fetching', 4);
+    DB::table('recipe_imports')->where('id', $oldFetching->id)->update(['fetch_started_at' => now()->subMinutes(6)]);
+    DB::table('recipe_imports')->where('id', $freshFetching->id)->update(['fetch_started_at' => now()->subMinutes(4)]);
+    // Created long ago but still waiting behind other jobs on the shared queue: not a network error.
+    $waitingFetching = $make('fetching', 40);
+    // Never started and well past any plausible backlog: its dispatch was lost.
+    $lostFetching = $make('fetching', 61);
     $oldQueued = $make('queued', 31, 'queued');
     $freshQueued = $make('queued', 29, 'queued');
     $ready = $make('ready', 600);
 
-    expect(Artisan::call('recipes:reap-imports'))->toBe(0)->and(trim(Artisan::output()))->toBe('3');
+    expect(Artisan::call('recipes:reap-imports'))->toBe(0)->and(trim(Artisan::output()))->toBe('4');
 
     $row = imtRow($oldRunning);
     expect($row->status)->toBe('failed')->and($row->failure_code)->toBe('worker_lost')->and($row->source_text)->toBeNull()->and($row->finished_at)->not->toBeNull();
@@ -66,7 +72,9 @@ it('reaps stuck imports, clears their text and closes the open call row', functi
     expect($row->status)->toBe('failed')->and($row->failure_code)->toBe('worker_lost')->and($row->source_text)->toBeNull()
         ->and(DB::table('ai_calls')->where('extraction_id', $oldQueued->id)->value('status'))->toBe('failed');
 
-    foreach ([$freshRunning, $freshFetching, $freshQueued] as $untouched) {
+    expect(imtRow($lostFetching)->status)->toBe('failed')->and(imtRow($lostFetching)->fetch_reason)->toBe('network');
+
+    foreach ([$freshRunning, $freshFetching, $waitingFetching, $freshQueued] as $untouched) {
         expect(imtRow($untouched)->status)->toBe($untouched->status);
     }
     expect(DB::table('ai_calls')->where('extraction_id', $freshRunning->id)->value('status'))->toBe('running')
@@ -107,4 +115,9 @@ it('never touches medical tables', function () {
     Artisan::call('recipes:prune-imports');
 
     expect(DB::table('medical_ai_extractions')->count())->toBe($before);
+});
+
+it('refuses an unsupported column in the generic reaper query', function () {
+    expect(fn () => app(App\Recipes\Import\RecipeImportQuery::class)->idsStuck('queued', 'created_at; drop table users', 5))
+        ->toThrow(InvalidArgumentException::class);
 });

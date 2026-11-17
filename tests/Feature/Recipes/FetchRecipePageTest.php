@@ -40,7 +40,7 @@ it('fetches a json-ld page, stores the reduced text and queues the ai job with t
 
     $row = DB::table('recipe_imports')->where('id', $import->id)->first();
     expect($row->status)->toBe('queued')->and($row->source_kind)->toBe('json_ld')->and($row->text_cut)->toBeFalse()
-        ->and($row->source_text)->toContain('Pancakes')->and($row->queued_at)->not->toBeNull()
+        ->and($row->source_text)->toContain('Pancakes')->and($row->queued_at)->not->toBeNull()->and($row->fetch_started_at)->not->toBeNull()
         ->and($row->failure_code)->toBeNull();
     $call = DB::table('ai_calls')->where('extraction_id', $import->id)->first();
     expect($call->kind)->toBe('recipe')->and($call->status)->toBe('queued')->and($call->subject_id)->toBeNull()

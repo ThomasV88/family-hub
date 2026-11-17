@@ -47,7 +47,9 @@ return [
         'ready_ttl_hours' => 24,
         'retention_days' => 7,
         'user_agent' => 'FamilyHubRecipeFetcher/1.0',
+        // Minutes after a fetch STARTED; and after creation for a fetch whose job never started (a backlog on the shared queue).
         'reap_fetching_minutes' => 5,
+        'reap_fetch_unstarted_minutes' => 60,
         'reap_queued_minutes' => 30,
         'reap_running_minutes' => 15,
     ],

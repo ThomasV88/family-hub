@@ -15,7 +15,7 @@ class RecipesReapImports extends Command
     public function handle(RecipeImportQuery $imports): int
     {
         $count = 0;
-        foreach ($imports->idsStuck('fetching', 'created_at', (int) config('recipes.import.reap_fetching_minutes')) as $id) {
+        foreach ($imports->idsFetchingStuck((int) config('recipes.import.reap_fetching_minutes'), (int) config('recipes.import.reap_fetch_unstarted_minutes')) as $id) {
             $count += $imports->failFetching($id, 'network') ? 1 : 0;
         }
         foreach ($imports->idsStuck('queued', 'queued_at', (int) config('recipes.import.reap_queued_minutes')) as $id) {
