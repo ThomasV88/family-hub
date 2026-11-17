@@ -177,7 +177,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
         <AllergyPanel v-if="person" :open="allergyPanelOpen" :person-id="person.id" :allergy="activeAllergy" :can-edit="canAddVisit" @close="closePanel" />
         <MedicationPanel v-if="person" :open="medicationPanelOpen" :person-id="person.id" :medication="activeMedication" :can-edit="canAddVisit" @close="closePanel" />
         <VaccinationPanel v-if="person" :open="vaccinationPanelOpen" :person-id="person.id" :vaccination="activeVaccination" :can-edit="canAddVisit" @close="closePanel" />
-        <DocumentPanel v-if="person" :open="documentPanelOpen" :person-id="person.id" :document="activeDocument" :visits="visits" :limits="limits" :can-edit="canAddVisit" :initial-visit="panel?.visit ?? null" :ai="ai" :ai-status="aiStatuses" :consent-on="Boolean(person.aiConsent)" @close="closePanel" />
+        <DocumentPanel v-if="person" :open="documentPanelOpen" :person-id="person.id" :document="activeDocument" :visits="visits" :limits="limits" :can-edit="canAddVisit" :initial-visit="panel?.visit ?? null" :ai="ai" :ai-status="aiStatuses" :consent-on="Boolean(person.aiConsent)" :text-reliability="search.textReliability" @close="closePanel" />
         <ShellAdd :enabled="canAddVisit" :label="t('health.fab.add_visit')" @add="openNewVisit" />
     </AppShell>
 </template>

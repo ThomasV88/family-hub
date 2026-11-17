@@ -18,6 +18,7 @@ import DocumentUploader from './DocumentUploader.vue';
 import { documentUrl, visitLabel } from './documentFormat.js';
 import { handleHealthRefusal } from './healthRefusal.js';
 import RunAiControl from './Ai/RunAiControl.vue';
+import RecognisedText from './Text/RecognisedText.vue';
 
 // Create (uploader) and view/edit/read-only presentation of one document. Drafts, picked files and downloaded blobs
 // live in component memory only; an object URL is revoked as soon as the download was started. Titles are
@@ -34,6 +35,8 @@ const props = defineProps({
     ai: { type: Object, default: null },
     aiStatus: { type: Object, default: null },
     consentOn: { type: Boolean, default: false },
+    // 'uncertain' until the evaluation gate has shown the text reading to be reliable (page prop search.textReliability).
+    textReliability: { type: String, default: 'reliable' },
 });
 const emit = defineEmits(['close']);
 const removal = useRemoval('doc', () => props.document);
@@ -58,6 +61,8 @@ const visitOptions = computed(() => [
     { value: '', label: t('health.doc.no_visit') },
     ...[...props.visits].sort((a, b) => b.visitedOn.localeCompare(a.visitedOn)).map((v) => ({ value: v.id, label: visitLabel(v, t) })),
 ]);
+// A run for this document is on its way: the text section says so instead of showing nothing.
+const runActive = computed(() => ['queued', 'running', 'waiting'].includes(props.aiStatus?.statuses?.value?.[props.document?.id]?.status));
 const attachedVisit = computed(() => props.visits.find((v) => v.id === props.document?.visitId) ?? null);
 // Images open the inline derivative; everything else opens the file route.
 const openUrl = computed(() => (props.document ? documentUrl(props.personId, props.document.id, props.document.kind === 'image' ? 'preview/view' : 'file') : ''));
@@ -151,6 +156,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
                 :consent-on="consentOn"
                 @go-header="goToHeader"
             />
+            <RecognisedText :key="document.id" :person-id="personId" :document="document" :can-edit="canEdit" :reliability="textReliability" :run-active="runActive" />
 
             <form v-if="!readOnly" novalidate class="doc-panel__form" data-testid="document-form" @submit.prevent="save" @keydown.enter="onEnter">
                 <UiField :label="t('health.doc.title_field')" :error="errors.title">
