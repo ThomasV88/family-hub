@@ -46,6 +46,10 @@ function onInput(value) {
     status.value = 'idle';
     timer = setTimeout(flush, SAVE_DELAY_MS);
 }
+// A reload after a refused write brings fresh server text: take it unless the member has unsaved typing or a save is running.
+watch(() => props.modelValue, (value) => {
+    if (timer === null && status.value !== 'saving') text.value = value ?? '';
+});
 onBeforeUnmount(() => { if (timer !== null) { clearTimeout(timer); props.save(text.value.trim() === '' ? null : text.value); } });
 </script>
 

@@ -46,16 +46,42 @@ const recipeId = props.recipe?.id ?? 0;
 const unitById = computed(() => Object.fromEntries(props.units.map((u) => [u.id, u])));
 
 // A failed write: the shared recipe texts for 403, 404, 409, 419 and 429, the plain "Could not save" for anything else. A recipe
-// that vanished leaves the page; a refusal or a changed recipe reloads what the server now says.
-function failed(status, fallback = 'recipes.toast.state_failed') {
+// that vanished leaves the page; a refusal or a changed recipe reloads what the server now says and re-seeds the ticks, the servings
+// and the note from it. A 404 on one ingredient or step row (`scope` 'row': it was removed meanwhile) is only a changed recipe: the
+// page is unavailable only when a recipe-level endpoint (favourite, servings, note, progress, delete) says so, or the reload itself does.
+function failed(status, fallback = 'recipes.toast.state_failed', scope = 'recipe') {
+    if (status === 404 && scope === 'row') {
+        toast.show(t('recipes.error.changed'));
+        refresh();
+
+        return;
+    }
     toast.show(t(failureKey(status, fallback)));
     if (status === 404) gone.value = true;
-    else if (status === 403 || status === 409) router.reload({ preserveScroll: true });
+    else if (status === 403 || status === 409) refresh();
 }
+function refresh() {
+    router.reload({
+        preserveScroll: true,
+        onSuccess: resync,
+        onHttpException: (response) => {
+            if (response?.status === 404) {
+                gone.value = true;
+
+                return false;
+            }
+        },
+    });
+}
+function resync() {
+    queue.resync({ tickedIngredientIds: props.state?.tickedIngredientIds, doneStepIds: props.state?.doneStepIds, favourite: props.state?.favourite === true });
+    servings.value = clampServings(props.state?.servings ?? props.recipe?.servings ?? 1);
+}
+const clampServings = (value) => Math.min(99, Math.max(1, Number(value) || 1));
 const queue = useRecipeState({
     recipeId,
     initial: { tickedIngredientIds: props.state?.tickedIngredientIds, doneStepIds: props.state?.doneStepIds, favourite: props.state?.favourite === true },
-    onFail: (key, status) => failed(status),
+    onFail: (key, status) => failed(status, 'recipes.toast.state_failed', key === 'fav' ? 'recipe' : 'row'),
 });
 const sendState = (path, method, body) => queue.send(`/recipes/${recipeId}/${path}`, method, body);
 
@@ -65,7 +91,7 @@ const favourite = computed(() => queue.state('fav'));
 
 // Servings: the member's own chosen number (or the recipe's), shown by rescaling the quantities.
 const base = computed(() => props.recipe?.servings ?? null);
-const servings = ref(Math.min(99, Math.max(1, Number(props.state?.servings ?? props.recipe?.servings ?? 1))));
+const servings = ref(clampServings(props.state?.servings ?? props.recipe?.servings ?? 1));
 const rows = computed(() => (props.recipe?.ingredients ?? []).map((ingredient) => {
     const unit = unitById.value[ingredient.unitId] ?? null;
     if (ingredient.quantity === null || ingredient.quantity === undefined) return { ingredient, quantityText: '' };

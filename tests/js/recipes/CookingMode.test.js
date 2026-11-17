@@ -99,8 +99,8 @@ describe('Cooking mode on a phone', () => {
         mountPage();
         await flushPromises();
         await $('[data-testid="cooking-toggle-bar"]').trigger('click');
-        await current.find('input[aria-label="Prepared: Eggs"]').setValue(true);
-        await current.find('input[aria-label="Done: step 3"]').setValue(true);
+        await current.findAll('[data-testid="ingredient-row"]').find((r) => r.find('.ing-row__name').text() === 'Eggs').find('input').setValue(true);
+        await current.findAll('[data-testid="step-row"]')[2].find('input').setValue(true);
         expect($('[data-testid="cooking-progress"]').text()).toContain('Ingredients 2/2');
         expect($('[data-testid="cooking-progress"]').text()).toContain('Steps 3/3');
     });

@@ -1,5 +1,4 @@
 <script setup>
-import { useI18n } from 'vue-i18n';
 import UiCheckbox from '../ui/UiCheckbox.vue';
 
 // One ingredient of the detail with the member's own "prepared" tick. The whole row is the label, so the hit area is the row.
@@ -11,12 +10,11 @@ defineProps({
     cooking: { type: Boolean, default: false },
 });
 const emit = defineEmits(['toggle']);
-const { t } = useI18n();
 </script>
 
 <template>
     <li :class="['ing-row', { 'ing-row--on': checked, 'ing-row--cooking': cooking }]" data-testid="ingredient-row">
-        <UiCheckbox :model-value="checked" :aria-label="t('recipes.progress.prepared_label', { name: ingredient.name })" @update:model-value="(v) => emit('toggle', v)">
+        <UiCheckbox :model-value="checked" @update:model-value="(v) => emit('toggle', v)">
             <span class="ing-row__qty" data-testid="ingredient-quantity">{{ quantityText }}</span>
             <span class="ing-row__text">
                 <span class="ing-row__name">{{ ingredient.name }}</span>

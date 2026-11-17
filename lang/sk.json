@@ -3163,8 +3163,6 @@
         "progress": {
             "prepared": "{x} z {y} pripravených",
             "steps_done": "{x} z {y} krokov hotových",
-            "prepared_label": "Pripravené: {name}",
-            "done_label": "Hotovo: krok {n}",
             "all_done": "Všetky kroky sú hotové. Dobrú chuť.",
             "ingredients_bar": "Suroviny {x}/{y}",
             "steps_bar": "Postup {x}/{y}"

@@ -64,7 +64,13 @@ function mountPage({ locale = 'en', width = 1024, ...props } = {}) {
     return current;
 }
 const $ = (sel) => current.find(sel);
-const checkbox = (label) => current.find(`input[aria-label="${label}"]`);
+// Rows are named by their visible text now (no aria-label): 'Prepared: Name' picks an ingredient row, 'Done: step N' the Nth step.
+const checkbox = (label) => {
+    const ing = /^Prepared: (.+)$/.exec(label);
+    if (ing) return current.findAll('[data-testid="ingredient-row"]').find((r) => r.find('.ing-row__name').text() === ing[1]).find('input[type="checkbox"]');
+
+    return current.findAll('[data-testid="step-row"]')[Number(/(\d+)$/.exec(label)[1]) - 1].find('input[type="checkbox"]');
+};
 const quantities = () => current.findAll('[data-testid="ingredient-quantity"]').map((q) => q.text());
 const dialog = () => document.body.querySelector('[role="dialog"]');
 const dialogButton = (label) => [...dialog().querySelectorAll('button')].find((b) => b.textContent.trim() === label);
@@ -281,10 +287,48 @@ describe('Recipe detail: per-member ticks', () => {
         expect(routerMock.reload).toHaveBeenCalled();
     });
 
-    it('shows the unavailable state when a state write answers 404', async () => {
+    it('names each checkbox by its visible text (quantity and name, step text), not by a shorter aria-label', async () => {
+        mountPage();
+        const flour = checkbox('Prepared: Flour').element;
+        const step = checkbox('Done: step 1').element;
+        expect(flour.hasAttribute('aria-label')).toBe(false);
+        expect(flour.labels[0].textContent.replace(/\s+/g, ' ')).toContain('200 g');
+        expect(flour.labels[0].textContent).toContain('Flour');
+        expect(step.hasAttribute('aria-label')).toBe(false);
+        expect(step.labels[0].textContent).toContain('Boil <b>water</b>');
+    });
+
+    it('treats a 404 on one ingredient row as a changed recipe: reload and re-seed, not an unavailable page', async () => {
         fetchMock.mockResolvedValue({ ok: false, status: 404, data: {} });
         mountPage();
         await checkbox('Prepared: Flour').setValue(true);
+        await flushPromises();
+        expect($('[data-testid="recipe-unavailable"]').exists()).toBe(false);
+        expect(useToast().toasts.map((x) => x.message)).toEqual(['The recipe changed in the meantime. Reload the page and try again.']);
+        expect(routerMock.reload).toHaveBeenCalledTimes(1);
+        // The reload brought fresh state: the tick is shown from it, and the servings follow it.
+        await current.setProps({ state: { ...STATE, tickedIngredientIds: [102], servings: 6 } });
+        routerMock.reload.mock.calls[0][0].onSuccess();
+        await flushPromises();
+        expect(checkbox('Prepared: Eggs').element.checked).toBe(true);
+        expect(checkbox('Prepared: Flour').element.checked).toBe(false);
+        expect($('[data-testid="servings-input"]').element.value).toBe('6');
+    });
+
+    it('shows the unavailable state when the recipe itself is gone (favourite or the reload answers 404)', async () => {
+        fetchMock.mockResolvedValue({ ok: false, status: 404, data: {} });
+        mountPage();
+        await $('[data-testid="favourite"]').trigger('click');
+        await flushPromises();
+        expect($('[data-testid="recipe-unavailable"]').exists()).toBe(true);
+    });
+
+    it('shows the unavailable state when the reload after a row 404 finds the recipe gone', async () => {
+        fetchMock.mockResolvedValue({ ok: false, status: 404, data: {} });
+        mountPage();
+        await checkbox('Prepared: Flour').setValue(true);
+        await flushPromises();
+        expect(routerMock.reload.mock.calls[0][0].onHttpException({ status: 404 })).toBe(false);
         await flushPromises();
         expect($('[data-testid="recipe-unavailable"]').exists()).toBe(true);
     });

@@ -3163,8 +3163,6 @@
         "progress": {
             "prepared": "{x} of {y} prepared",
             "steps_done": "{x} of {y} steps done",
-            "prepared_label": "Prepared: {name}",
-            "done_label": "Done: step {n}",
             "all_done": "All steps done. Enjoy your meal.",
             "ingredients_bar": "Ingredients {x}/{y}",
             "steps_bar": "Steps {x}/{y}"
