@@ -261,6 +261,11 @@ for (const locale of ['en', 'sk', 'pl'])
     for (const theme of ['light', 'dark'])
         for (const name of ['Recipes/Index', 'Recipes/Show (author)', 'Recipes/Form (create)']) cases.push([name, locale, theme, 360]);
 
+// Recipe form in review mode (the "From the page" tags beside narrow labels) at phone and mid widths.
+for (const locale of ['en', 'sk', 'pl'])
+    for (const theme of ['light', 'dark'])
+        for (const width of [360, 800]) cases.push(['Recipes/Form (review)', locale, theme, width]);
+
 describe('accessibility sweep', () => {
     it.each(cases)('%s in %s, %s theme, %ipx has no axe violations', async (name, locale, theme, width) => {
         mockLocale = locale;

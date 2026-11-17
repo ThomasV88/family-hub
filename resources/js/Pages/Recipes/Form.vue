@@ -464,7 +464,7 @@ const pageTitle = computed(() => t(editing.value ? 'recipes.form.title_edit' : r
                     </UiField>
 
                     <div class="rec-form__basics">
-                        <UiField :label="t('recipes.form.servings')" :hint="hintFor('servings', t('recipes.form.servings_hint'))" :error="errors.servings ?? ''" class="rec-form__servings">
+                        <UiField :label="t('recipes.form.servings')" :hint="hintFor('servings', t('recipes.form.servings_hint'))" :error="errors.servings ?? ''">
                             <template #label-after><UiTag v-if="fromPage('servings')" :icon="Sparkles" data-testid="from-page-servings">{{ t('recipes.review.from_page') }}</UiTag></template>
                             <UiInput :model-value="form.servings" inputmode="numeric" autocomplete="off" :disabled="saving" @update:model-value="setField('servings', $event)" />
                         </UiField>
@@ -569,8 +569,8 @@ const pageTitle = computed(() => t(editing.value ? 'recipes.form.title_edit' : r
 .rec-form__title { margin: 0; font-size: var(--text-2xl); }
 .rec-form__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
 .rec-form__col { min-width: 0; }
-.rec-form__basics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--space-3); }
-.rec-form__servings { grid-column: 1 / -1; }
+/* Equal tracks that stack to one column when the container is narrow (a label and its tag need about 10rem). */
+.rec-form__basics { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr)); gap: 0 var(--space-3); }
 .rec-form__muted { margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
 .rec-form__total { margin-block-end: var(--space-4); }
 .rec-form__block { margin-block-end: var(--space-4); }
@@ -593,7 +593,5 @@ const pageTitle = computed(() => t(editing.value ? 'recipes.form.title_edit' : r
 }
 @container recform (min-width: 840px) {
     .rec-form__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); align-items: start; }
-    .rec-form__basics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .rec-form__servings { grid-column: auto; }
 }
 </style>

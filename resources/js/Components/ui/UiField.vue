@@ -52,8 +52,9 @@ provideField({ id: controlId, describedBy, invalid: computed(() => Boolean(props
 
 <style scoped>
 .ui-field { display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-4); }
-.ui-field__head { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
-.ui-field__label { font-size: var(--text-sm); font-weight: 600; line-height: 1.4; color: var(--color-text); }
+.ui-field__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); min-width: 0; }
+.ui-field__head > * { max-width: 100%; }
+.ui-field__label { min-width: 0; overflow-wrap: anywhere; font-size: var(--text-sm); font-weight: 600; line-height: 1.4; color: var(--color-text); }
 .ui-field__hint { margin: 0; font-size: var(--text-sm); font-weight: 400; line-height: 1.4; color: var(--color-text-muted); }
 .ui-field__error { display: flex; align-items: flex-start; gap: var(--space-1); margin: 0; font-size: var(--text-sm); font-weight: 400; line-height: 1.4; color: var(--color-danger); }
 .ui-field__error svg { flex: none; margin-top: 2px; }

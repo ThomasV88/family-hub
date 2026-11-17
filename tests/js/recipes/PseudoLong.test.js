@@ -142,4 +142,17 @@ describe('Recipes pages with pseudo-long text (+40 percent)', () => {
         expect(clamped(current.element)).toEqual([]);
         expect(noWrapButtons(current.element)).toBe(0);
     });
+
+    it.each([[360, 'en'], [360, 'sk'], [800, 'sk'], [800, 'pl']])('Form (review, all number fields tagged) at %ipx in %s: every tag stays with its field, no clamping', (width, locale) => {
+        const prefill = { ...PREFILL, servings: 4, cook_minutes: 30, aiFields: ['title', 'description', 'servings', 'prep_minutes', 'cook_minutes', 'categories', 'ingredients', 'steps'] };
+        mountPage(Form, { ...FORM_BASE, prefill }, locale, width);
+        for (const id of ['servings', 'prep', 'cook']) {
+            const tag = current.find(`[data-testid="from-page-${id}"]`);
+            expect(tag.exists()).toBe(true);
+            expect(tag.element.closest('.ui-field__head')).not.toBeNull();
+        }
+        expect(current.findAll('.ui-field__head').length).toBeGreaterThanOrEqual(5);
+        expect(clamped(current.element)).toEqual([]);
+        expect(noWrapButtons(current.element)).toBe(0);
+    });
 });
