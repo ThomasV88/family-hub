@@ -71,7 +71,8 @@ final class RecipeQuery
         $query->orderByDesc('recipes.created_at')->orderByDesc('recipes.id');
 
         $perPage = (int) config('recipes.per_page');
-        $page = max(1, $page);
+        // Bounded so a crafted page number cannot push the OFFSET out of bigint range (HTTP 500).
+        $page = min(1000, max(1, $page));
         $rows = $query->with(['author:id,name', 'categories', 'photos'])
             ->offset(($page - 1) * $perPage)->limit($perPage + 1)->get();
 

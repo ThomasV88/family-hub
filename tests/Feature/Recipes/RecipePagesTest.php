@@ -50,6 +50,16 @@ it('pages the overview 24 at a time and echoes the filters', function () {
         ->where('filters.show', 'mine')->where('filters.q', 'soup'));
 });
 
+it('refuses a page number that would overflow the offset instead of answering 500', function () {
+    $me = RecipeFixtures::member();
+    RecipeFixtures::sharedRecipe($me, [], 1, 1);
+
+    $this->actingAs($me)->get('/recipes?page=999999999999999999')->assertSessionHasErrors('page');
+    $this->actingAs($me)->get('/recipes?page=1001')->assertSessionHasErrors('page');
+    $this->actingAs($me)->get('/recipes?page=1000')->assertOk();
+    expect(app(App\Recipes\Queries\RecipeQuery::class)->index($me, [], PHP_INT_MAX)['items'])->toHaveCount(0);
+});
+
 it('filters by favourites, shows and refuses a bad show value', function () {
     $me = RecipeFixtures::member();
     $other = RecipeFixtures::member();
