@@ -77,6 +77,7 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
 (hook point for mail or push notification; none is configured in Phase 1).
 
 Profile photos (Phase 10) live in the `uploads` volume under `wish-images/profile-photos/<user id>/` and are covered by the existing uploads snapshot; a daily sweep removes files no member references.
+Shopping catalog pictures and store logos (Phase 11) live in the same `uploads` volume under `wish-images/shopping/{catalog,stores}/<id>/` and are covered by the existing backup; on staging the seed fills them with generated shapes and purges them on every reseed.
 
 ### Phase 7: medical files volume
 

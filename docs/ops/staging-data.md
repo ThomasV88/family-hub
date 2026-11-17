@@ -39,6 +39,17 @@ Predvolené oprávnenia (Rodič, Dieťa, Starý rodič, Hosť) zostávajú. Demo
 - **Darované:** "Robot kuchenny" v zozname starého rodiča je už označený ako dostaný (pred asi 12 dňami), rezervácia sa ešte drží, kým ju neprečistí denná údržba.
 - **Príležitosti:** narodeniny členov v rôznych vzdialenostiach (jedny o 20 dní, jedny pred 30 dňami), mená dní (slovenský a poľský kalendár), Vianoce a Silvester pre celú rodinu, jednorazové "Rodinný zraz" čoskoro a "Promócia" v minulosti.
 
+### Nákupné zoznamy (`/shopping`)
+Všetko vzniká cez produkčné služby (rovnaké pravidlá ako v aplikácii). Katalóg má 30 bežných vecí (Mlieko, Chlieb, Vajcia, Zemiaky, Jablká a ďalšie) s predvolenou jednotkou a vygenerovaným obrázkom, päť vymyslených obchodov ("Demo Market", "Zelený košík", "Potraviny Pri Dube", "Drogéria Lúka", "Mini Obchod Ráno") s vygenerovaným logom (farebné tvary, žiadny text ani skutočná značka) a jedna vlastná jednotka "plechovka" (en can, pl puszka). Zodpovedná osoba zoznamu je tá, ktorá ho vie zamknúť a uzavrieť.
+- **"Týždenný nákup"** (rodič `sk_sk.1` je zodpovedný, otvorený, obchod Demo Market): 9 položiek z katalógu aj voľným textom, desatinné množstvá (0,75 kg jabĺk s poznámkou), prispievatelia `sk_sk.2` a `pl_pl.3`, čitateľ hosť `pl_pl.4`, pripomienka zajtra o 18:00 (podľa časovej zóny rodiny, ešte neodoslaná).
+- **"Drobnosti z drogérie"** (rodič `en_gb.5`, otvorený): bez obchodu, tri položky voľným textom.
+- **"Sobotný trh"** (starý rodič `pl_pl.3`, **zamknutý, napoly označený**): kúpené, nedostupné aj čakajúce položky; prispievateľ `sk_sk.1`, čitateľ `sk_sk.2`.
+- **"Oslava narodenín"** (rodič `en_gb.5`, **zamknutý, všetko vyriešené**): vidno tlačidlo na ukončenie nákupu.
+- **"Nákup na víkend"** (rodič `sk_sk.1`, **ukončený**, bez prenosu): vidno ho v archíve; prispievateľ `sk_sk.2`.
+- **"Veľký nákup"** (rodič `en_gb.5`, **ukončený s nedostupnými položkami**) a jeho **prenesený** otvorený zoznam "Veľký nákup (nezakúpené)" (iba nedostupné položky, všetky čakajú).
+- **"Nákup na víkend (kópia)"** (**kópia** ukončeného zoznamu, rodič `sk_sk.1`, ľudia zachovaní).
+- Hosť `pl_pl.4` má Nákupy len na čítanie (vidí len zoznamy, kde je čitateľ). Pri ďalšom nasadení sa všetko vrátane obrázkov (`wish-images/shopping/`) zmaže a vytvorí nanovo; na produkcii sa katalóg ani obchody nevytvárajú, tam ho plní rodina.
+
 ### Financie (`/finance`)
 - **Päť účtov:** Spoločný účet (bežný), Súkromný účet rodiča, Úspory, Kreditná karta, Hotovosť v peňaženke. Všetko v eurách.
 - **Skrytý účet:** prihlás sa ako `sk_sk.2` a over, že vidí len Spoločný účet a Hotovosť. Súkromný účet, úspory a karta pre neho neexistujú. `sk_sk.1` vidí všetkých päť, `en_gb.5` štyri (bez súkromného účtu rodiča 1).
