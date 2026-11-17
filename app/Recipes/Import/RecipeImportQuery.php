@@ -53,6 +53,17 @@ class RecipeImportQuery
         });
     }
 
+    /** @return list<string> provider keys the member acknowledged in the recipe notice; empty when there is no row or no user */
+    public function ackedRecipeProviders(?int $userId): array
+    {
+        if ($userId === null) {
+            return [];
+        }
+        $value = DB::table('ai_notice_acks')->where('user_id', $userId)->value('recipe_providers');
+
+        return $value === null ? [] : array_values(array_filter(array_map('trim', explode(',', (string) $value)), fn ($p) => $p !== ''));
+    }
+
     /** 'user' when a cancel was requested or the row is gone, otherwise null. */
     public function abortReason(string $id): ?string
     {
