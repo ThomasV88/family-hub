@@ -807,7 +807,8 @@
             "profile_changed_name": "Changed the name of {name}",
             "profile_changed_other": "Changed the profile of {name}",
             "child_created": "Added the child {name}",
-            "child_converted": "Gave the child {name} a sign-in (invitation accepted)"
+            "child_converted": "Gave the child {name} a sign-in (invitation accepted)",
+            "shopping_list_mailed": "Shopping list e-mailed to {n} address | Shopping list e-mailed to {n} addresses"
         },
         "page": "Page {n} of {total}",
         "prev": "Previous",
@@ -1055,7 +1056,7 @@
     },
     "notifications": {
         "nav": "Notifications",
-        "intro": "Choose how you want to be reminded about tasks.",
+        "intro": "Choose how you want to be reminded about tasks and shopping lists.",
         "card_title": "Task reminders",
         "email": "Email reminders",
         "email_hint": "Sent to {email}.",
@@ -2678,7 +2679,11 @@
             "forbidden": "You are not allowed to do that on this list.",
             "note_too_long": "The note is too long.",
             "items_count": "Choose between 1 and 50 items.",
-            "catalog_unknown": "That catalog item no longer exists. Reload the page and try again."
+            "catalog_unknown": "That catalog item no longer exists. Reload the page and try again.",
+            "member_not_eligible": "That person cannot be added to this list.",
+            "member_overlap": "A person can be in only one role on a list.",
+            "reminder_past": "Choose a time in the future.",
+            "reminder_invalid": "Enter a valid date and time."
         },
         "overview": {
             "title": "Shopping",
@@ -2742,7 +2747,9 @@
             "quantity_updated": "Quantity of {name} updated",
             "item_saved": "Item saved",
             "item_removed": "Item removed",
-            "list_deleted": "List deleted"
+            "list_deleted": "List deleted",
+            "settings_saved": "Settings saved",
+            "responsible_changed": "{name} is now responsible"
         },
         "detail": {
             "add_items": "Add items",
@@ -2807,6 +2814,52 @@
             "empty_settings": "Add items in Shopping settings",
             "no_match": "No catalog item matches “{text}”.",
             "load_error": "We could not load the catalog. You can still type your own item."
+        },
+        "panel": {
+            "title": "List settings",
+            "name": "Name",
+            "store": "Store",
+            "store_none": "No store",
+            "responsible": "Responsible person",
+            "responsible_hint": "Only this person can lock the list and mark items.",
+            "contributors": "Can add and edit items",
+            "viewers": "Can only view",
+            "add_person": "Add person",
+            "add_person_to": "Add person: {role}",
+            "remove_person": "Remove {name}",
+            "nobody": "Nobody yet",
+            "child": "Child",
+            "moved_to_viewers": "{name} moved to viewers.",
+            "moved_to_contributors": "{name} moved to people who can add and edit items.",
+            "takeover": "You are now responsible for this list because {name} was removed.",
+            "takeover_unknown": "You are now responsible for this list because the previous person was removed.",
+            "read_only": "You can see who takes part in this list. Only the creator or the responsible person can change these settings.",
+            "save": "Save settings",
+            "cancel": "Cancel"
+        },
+        "reminder": {
+            "label": "Reminder",
+            "hint": "A push notification goes to the responsible person only.",
+            "remove": "Remove reminder",
+            "push_off": "{name} has no push notifications turned on, so the reminder may not reach them.",
+            "sent_note": "The reminder has been sent. Change the time to set a new one.",
+            "header_sent": "Reminder: {date} (sent)"
+        },
+        "mail": {
+            "title": "Send by e-mail",
+            "field": "E-mail addresses",
+            "placeholder": "Type or paste an address",
+            "preview": "The e-mail lists the items with quantities, the store and the responsible person.",
+            "hint_max": "You can send to at most 5 addresses at a time.",
+            "invalid_token": "“{text}” is not a valid e-mail address.",
+            "remove": "Remove {address}",
+            "send": "Send",
+            "cancel": "Cancel",
+            "failed": "The list could not be sent. Try again.",
+            "err_invalid": "Enter valid e-mail addresses.",
+            "err_too_many": "You can send to at most 5 addresses at a time.",
+            "err_limit": "You have sent too many lists today. Try again later.",
+            "toast_sent": "List sent to {count} address | List sent to {count} addresses"
         }
     }
 }

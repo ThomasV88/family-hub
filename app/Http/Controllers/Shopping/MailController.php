@@ -20,6 +20,7 @@ class MailController extends Controller
 
         $count = $mailer->send($user, $model, $request->validated()['addresses']);
 
-        return back(303)->with('toast', ['key' => 'shopping.mail.toast_sent'])->with('flash_data', ['mail_sent_count' => $count]);
+        // `count` selects the plural form of "List sent to {count} address(es)" in the toast.
+        return back(303)->with('toast', ['key' => 'shopping.mail.toast_sent', 'params' => ['count' => $count], 'count' => $count])->with('flash_data', ['mail_sent_count' => $count]);
     }
 }

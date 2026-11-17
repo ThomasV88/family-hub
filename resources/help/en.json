@@ -40,7 +40,9 @@
         "home": "Overview page",
         "profile_page": "Profile settings page",
         "members_child": "Members, child dialog and panel",
-        "shopping_settings": "Settings, Shopping"
+        "shopping_settings": "Settings, Shopping",
+        "shopping_list_panel": "Shopping list settings panel",
+        "shopping_email": "Shopping e-mail dialog"
     },
     "topics": {
         "tasks.visibility": {
@@ -290,6 +292,18 @@
         "shopping.units": {
             "title": "Units",
             "text": "Built-in units such as pcs, g, kg and l are shown in every language and cannot be changed. Administrators can add more units, each with an English, a Slovak and a Polish name. If you delete a unit that is in use, the items keep their quantity but show it without a unit."
+        },
+        "shopping.roles": {
+            "title": "Responsible person, contributors and viewers",
+            "text": "The responsible person is the only one who can lock and unlock the list, mark items and finish the shopping, and can be changed at any time. People who can add and edit items change the items. People who can only view see the list but change nothing. A person has one role at a time."
+        },
+        "shopping.reminder": {
+            "title": "Reminder",
+            "text": "A list has one reminder, a date and time in the family time zone. A push notification goes to the responsible person only, and only if they turned push notifications on for their device in Settings, Notifications. A time in the past is refused. Changing the time sets a new reminder."
+        },
+        "shopping.email": {
+            "title": "Sending a list by e-mail",
+            "text": "Type or paste up to 5 addresses; any address works. The e-mail is plain text with the items, quantities, store and responsible person, and has no link to the app. People who can only view cannot send. Daily limits apply, so a list cannot be sent over and over."
         }
     }
 }

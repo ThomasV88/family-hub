@@ -74,7 +74,7 @@
       "id": "notifications",
       "title": "Turning on reminders",
       "blocks": [
-        { "type": "p", "text": "You can get reminders about tasks and gift occasions by email and as short push alerts on your device." },
+        { "type": "p", "text": "You can get reminders about tasks, shopping lists and gift occasions by email and as short push alerts on your device." },
         { "type": "steps", "items": [
           "Open the account menu, choose **Settings**, then **Notifications**.",
           "Turn on **Email reminders**, **Push notifications**, or both.",
@@ -82,7 +82,7 @@
           "Press **Send test notification** to check that it works."
         ] },
         { "type": "warning", "text": "On iPhone and iPad, push only works after you add Family Hub to your Home Screen (see above) and open it from there." },
-        { "type": "p", "text": "Push alerts show only the task title, never your notes. If both switches are off you get no reminders. Each device needs its own **Enable push** step." }
+        { "type": "p", "text": "Push alerts show only a short title such as the task title, never your notes. If both switches are off you get no reminders. Each device needs its own **Enable push** step." }
       ]
     },
     {

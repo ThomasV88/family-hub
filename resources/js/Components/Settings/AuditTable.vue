@@ -161,6 +161,11 @@ function details(row) {
         case 'medical_subject_deleted':
         case 'medical_admin_self_added':
             return t(`audit.detail.${row.event}`);
+        case 'shopping_list_mailed': {
+            // Only the number of recipients is stored and shown, never an address.
+            const n = Number.isFinite(Number(meta.recipient_count)) ? Math.max(0, Math.trunc(Number(meta.recipient_count))) : 0;
+            return t('audit.detail.shopping_list_mailed', { n }, n);
+        }
         case 'ai_agent_setting_changed':
             return agentSettingDetail(meta);
         case 'ai_bulk_run_changed':

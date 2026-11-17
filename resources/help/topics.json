@@ -372,6 +372,24 @@
             "area": "shopping",
             "screen": "shopping_settings",
             "field": "units"
+        },
+        {
+            "key": "shopping.roles",
+            "area": "shopping",
+            "screen": "shopping_list_panel",
+            "field": "roles"
+        },
+        {
+            "key": "shopping.reminder",
+            "area": "shopping",
+            "screen": "shopping_list_panel",
+            "field": "reminder"
+        },
+        {
+            "key": "shopping.email",
+            "area": "shopping",
+            "screen": "shopping_email",
+            "field": "addresses"
         }
     ]
 }

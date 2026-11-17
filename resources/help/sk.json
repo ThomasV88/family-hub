@@ -40,7 +40,9 @@
         "home": "Stránka Prehľad",
         "profile_page": "Stránka Nastavenia profilu",
         "members_child": "Členovia, dialóg a panel dieťaťa",
-        "shopping_settings": "Nastavenia, Nákupy"
+        "shopping_settings": "Nastavenia, Nákupy",
+        "shopping_list_panel": "Panel nastavení nákupného zoznamu",
+        "shopping_email": "Dialóg odoslania nákupného zoznamu e-mailom"
     },
     "topics": {
         "tasks.visibility": {
@@ -290,6 +292,18 @@
         "shopping.units": {
             "title": "Jednotky",
             "text": "Vstavané jednotky ako ks, g, kg a l sa zobrazujú v každom jazyku a nedajú sa meniť. Správcovia môžu pridať ďalšie jednotky, každú s anglickým, slovenským a poľským názvom. Ak odstránite jednotku, ktorá sa používa, položky si ponechajú množstvo, no zobrazia ho bez jednotky."
+        },
+        "shopping.roles": {
+            "title": "Zodpovedná osoba, prispievatelia a čitatelia",
+            "text": "Zodpovedná osoba je jediná, ktorá môže zoznam uzamknúť a odomknúť, označovať položky a ukončiť nákup. Dá sa zmeniť kedykoľvek. Ľudia, ktorí môžu pridávať a upravovať položky, menia položky. Ľudia, ktorí môžu iba zobraziť, zoznam vidia, ale nič nemenia. Osoba má naraz jednu rolu."
+        },
+        "shopping.reminder": {
+            "title": "Pripomienka",
+            "text": "Zoznam má jednu pripomienku, dátum a čas v časovom pásme rodiny. Push upozornenie dostane iba zodpovedná osoba, a to len ak má na svojom zariadení zapnuté push upozornenia v Nastaveniach, Upozornenia. Čas v minulosti sa odmietne. Zmenou času sa nastaví nová pripomienka."
+        },
+        "shopping.email": {
+            "title": "Odoslanie zoznamu e-mailom",
+            "text": "Zadajte alebo vložte najviac 5 adries, funguje akákoľvek adresa. E-mail je čistý text s položkami, množstvami, obchodom a zodpovednou osobou a neobsahuje odkaz do aplikácie. Ľudia, ktorí môžu iba zobraziť, odosielať nemôžu. Platia denné limity, zoznam sa teda nedá posielať stále dokola."
         }
     }
 }

@@ -807,7 +807,8 @@
             "profile_changed_name": "Zmenené meno osoby {name}",
             "profile_changed_other": "Zmenený profil osoby {name}",
             "child_created": "Pridal(a) dieťa {name}",
-            "child_converted": "Dieťa {name} dostalo prihlásenie (pozvánka prijatá)"
+            "child_converted": "Dieťa {name} dostalo prihlásenie (pozvánka prijatá)",
+            "shopping_list_mailed": "Nákupný zoznam odoslaný e-mailom na {n} adresu | Nákupný zoznam odoslaný e-mailom na {n} adresy | Nákupný zoznam odoslaný e-mailom na {n} adries"
         },
         "page": "Strana {n} z {total}",
         "prev": "Predchádzajúca",
@@ -1055,7 +1056,7 @@
     },
     "notifications": {
         "nav": "Oznámenia",
-        "intro": "Vyberte, ako vám pripomíname úlohy.",
+        "intro": "Vyberte, ako vám pripomíname úlohy a nákupné zoznamy.",
         "card_title": "Pripomienky úloh",
         "email": "Pripomienky e-mailom",
         "email_hint": "Posielame na {email}.",
@@ -2678,7 +2679,11 @@
             "forbidden": "Na tomto zozname to nemôžete urobiť.",
             "note_too_long": "Poznámka je príliš dlhá.",
             "items_count": "Vyberte od 1 do 50 položiek.",
-            "catalog_unknown": "Táto položka katalógu už neexistuje. Obnovte stránku a skúste to znova."
+            "catalog_unknown": "Táto položka katalógu už neexistuje. Obnovte stránku a skúste to znova.",
+            "member_not_eligible": "Túto osobu nemožno pridať do zoznamu.",
+            "member_overlap": "Osoba môže mať v zozname iba jednu rolu.",
+            "reminder_past": "Vyberte čas v budúcnosti.",
+            "reminder_invalid": "Zadajte platný dátum a čas."
         },
         "overview": {
             "title": "Nákupy",
@@ -2742,7 +2747,9 @@
             "quantity_updated": "Množstvo položky {name} zmenené",
             "item_saved": "Položka uložená",
             "item_removed": "Položka odstránená",
-            "list_deleted": "Zoznam odstránený"
+            "list_deleted": "Zoznam odstránený",
+            "settings_saved": "Nastavenia uložené",
+            "responsible_changed": "Zodpovedná osoba je teraz {name}"
         },
         "detail": {
             "add_items": "Pridať položky",
@@ -2807,6 +2814,52 @@
             "empty_settings": "Pridajte položky v nastaveniach Nákupov",
             "no_match": "Žiadna položka katalógu nezodpovedá „{text}“.",
             "load_error": "Katalóg sa nepodarilo načítať. Vlastnú položku môžete stále zadať."
+        },
+        "panel": {
+            "title": "Nastavenia zoznamu",
+            "name": "Názov",
+            "store": "Obchod",
+            "store_none": "Bez obchodu",
+            "responsible": "Zodpovedná osoba",
+            "responsible_hint": "Iba táto osoba môže zoznam uzamknúť a označovať položky.",
+            "contributors": "Môže pridávať a upravovať položky",
+            "viewers": "Môže iba zobraziť",
+            "add_person": "Pridať osobu",
+            "add_person_to": "Pridať osobu: {role}",
+            "remove_person": "Odstrániť osobu {name}",
+            "nobody": "Zatiaľ nikto",
+            "child": "Dieťa",
+            "moved_to_viewers": "{name} sa presunul(a) medzi osoby, ktoré môžu iba zobraziť.",
+            "moved_to_contributors": "{name} sa presunul(a) medzi osoby, ktoré môžu pridávať a upravovať položky.",
+            "takeover": "Teraz zodpovedáte za tento zoznam, pretože {name} bol odstránený.",
+            "takeover_unknown": "Teraz zodpovedáte za tento zoznam, pretože predchádzajúca osoba bola odstránená.",
+            "read_only": "Vidíte, kto sa na tomto zozname podieľa. Tieto nastavenia môže meniť iba autor alebo zodpovedná osoba.",
+            "save": "Uložiť nastavenia",
+            "cancel": "Zrušiť"
+        },
+        "reminder": {
+            "label": "Pripomienka",
+            "hint": "Push upozornenie dostane iba zodpovedná osoba.",
+            "remove": "Odstrániť pripomienku",
+            "push_off": "{name} nemá zapnuté push upozornenia, takže pripomienka sa k nej nemusí dostať.",
+            "sent_note": "Pripomienka už bola odoslaná. Zmenou času nastavíte novú.",
+            "header_sent": "Pripomienka: {date} (odoslaná)"
+        },
+        "mail": {
+            "title": "Odoslať e-mailom",
+            "field": "E-mailové adresy",
+            "placeholder": "Zadajte alebo vložte adresu",
+            "preview": "E-mail obsahuje položky s množstvami, obchod a zodpovednú osobu.",
+            "hint_max": "Naraz možno odoslať najviac na 5 adries.",
+            "invalid_token": "„{text}“ nie je platná e-mailová adresa.",
+            "remove": "Odstrániť {address}",
+            "send": "Odoslať",
+            "cancel": "Zrušiť",
+            "failed": "Zoznam sa nepodarilo odoslať. Skúste to znova.",
+            "err_invalid": "Zadajte platné e-mailové adresy.",
+            "err_too_many": "Naraz možno odoslať najviac na 5 adries.",
+            "err_limit": "Dnes ste odoslali príliš veľa zoznamov. Skúste to neskôr.",
+            "toast_sent": "Zoznam odoslaný na {count} adresu | Zoznam odoslaný na {count} adresy | Zoznam odoslaný na {count} adries"
         }
     }
 }

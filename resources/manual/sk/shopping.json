@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 35,
   "title": "Nákupy",
-  "summary": "Spoločné nákupné zoznamy pre rodinu: prehľad, vytváranie a kopírovanie zoznamov, pridávanie a zmena položiek a katalóg položiek, obchody a jednotky, ktoré spravujete v Nastaveniach.",
+  "summary": "Spoločné nákupné zoznamy pre rodinu: prehľad, vytváranie a kopírovanie zoznamov, pridávanie a zmena položiek, kto čo smie na zozname, odoslanie zoznamu e-mailom, pripomienky a katalóg položiek, obchody a jednotky, ktoré spravujete v Nastaveniach.",
   "covers": ["module:shopping", "settings:shopping"],
   "sections": [
     {
@@ -55,6 +55,43 @@
       ]
     },
     {
+      "id": "people",
+      "title": "Ľudia a kto čo smie",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Každý zoznam má **autora**, jednu **zodpovednú osobu** a, ak chcete, ľudí, ktorí smú pridávať a upravovať položky, a ľudí, ktorí smú iba zobraziť. Otvorte zoznam, stlačte **Ďalšie akcie** a vyberte **Nastavenia zoznamu**, aby ste to videli a zmenili."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Zodpovedná osoba**: jediná osoba, ktorá môže zoznam uzamknúť a odomknúť, označovať položky ako zakúpené alebo nedostupné a ukončiť nákup. Zodpovednú osobu môžete zmeniť kedykoľvek, aj keď je zoznam uzamknutý.",
+            "**Môže pridávať a upravovať položky**: ľudia, ktorí smú pridávať, meniť a odstraňovať položky v otvorenom zozname.",
+            "**Môže iba zobraziť**: ľudia, ktorí zoznam vidia, ale nemôžu nič meniť.",
+            "Osoba má naraz jednu rolu. Ak vyberiete niekoho, kto je už v druhej skupine, presunie sa a poznámka vás o tom informuje.",
+            "Deti môžete pridať ako každého iného člena, majú štítok **Dieťa**."
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "Zmena toho, kto sa na zozname podieľa",
+          "items": [
+            "Otvorte zoznam, stlačte **Ďalšie akcie** a vyberte **Nastavenia zoznamu**.",
+            "Vyberte **Zodpovednú osobu** alebo stlačte **Pridať osobu** pod **Môže pridávať a upravovať položky** alebo **Môže iba zobraziť** a vyberte niekoho. Krížikom pri mene osobu odstránite.",
+            "Stlačte **Uložiť nastavenia**. Tlačidlo je dostupné až po zmene."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Autor a zodpovedná osoba môžu v otvorenom zozname v nastaveniach meniť všetko: názov, obchod, zodpovednú osobu, ľudí aj pripomienku. Keď je zoznam uzamknutý, zodpovednú osobu a pripomienku môže meniť iba zodpovedná osoba. Ostatní vidia nastavenia iba na čítanie, takže stále vidia, kto je kto."
+        },
+        {
+          "type": "tip",
+          "text": "Ak zodpovedná osoba opustí rodinu alebo stratí prístup k Nákupom, zodpovedným sa stane autor. Autor o tom vidí poznámku na začiatku zoznamu, kým sa znova neuloží zodpovedná osoba."
+        }
+      ]
+    },
+    {
       "id": "copy",
       "title": "Kopírovanie zoznamu",
       "blocks": [
@@ -67,6 +104,58 @@
         { "type": "p", "text": "Kópia má rovnaké položky s rovnakými množstvami a jednotkami a každá položka začína neoznačená (nekúpená, nedostupná). Nový zoznam je otvorený, neuzamknutý a bez pripomienky. Stávate sa jeho vlastníkom." },
         { "type": "p", "text": "Ak je **Zachovať obchod, zodpovednú osobu a prístup** začiarknuté, kópia si ponechá obchod, zodpovednú osobu a ľudí, ktorí smú pridávať položky alebo prezerať. Ak nie je začiarknuté, zodpovednou osobou ste vy a nikto ďalší nie je pridaný." },
         { "type": "tip", "text": "Skopírovať môžete každý zoznam, ktorý vidíte, aj vybavený. Je to rýchly spôsob, ako začať nákup na ďalší týždeň." }
+      ]
+    },
+    {
+      "id": "email",
+      "title": "Odoslanie zoznamu e-mailom",
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            "Otvorte zoznam, stlačte **Ďalšie akcie** a vyberte **Odoslať e-mailom**.",
+            "Zadajte adresu a stlačte Enter, čiarku alebo medzerník, alebo vložte naraz viac adries. Každá adresa sa zmení na malý štítok s krížikom na odstránenie. Pridať môžete najviac 5 adries, funguje akákoľvek adresa.",
+            "Stlačte **Odoslať**. Správa dole vám oznámi, na koľko adries sa zoznam odoslal."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Zoznam môže odoslať autor, zodpovedná osoba a ľudia, ktorí smú pridávať a upravovať položky, v ktoromkoľvek stave zoznamu. Ľudia, ktorí smú iba zobraziť, **Odoslať e-mailom** nevidia."
+        },
+        {
+          "type": "p",
+          "text": "E-mail je čistý text. Obsahuje položky s množstvami, obchod a zodpovednú osobu. Neobsahuje odkaz na Family Hub ani e-mailové adresy členov rodiny."
+        },
+        {
+          "type": "warning",
+          "text": "Proti zneužitiu platia limity: počet odoslaní za hodinu a za deň pre vás a niekoľko za deň pre každú adresu. Ak limit dosiahnete, okno napíše **Dnes ste odoslali príliš veľa zoznamov. Skúste to neskôr.**"
+        },
+        {
+          "type": "tip",
+          "text": "Správa po stlačení Odoslať znamená, že e-maily sa odosielajú. Zvyčajne dorazia do minúty. Protokol auditu zaznamenáva iba počet adries, na ktoré sa zoznam odoslal, nikdy adresy."
+        }
+      ]
+    },
+    {
+      "id": "reminder",
+      "title": "Pripomienka zoznamu",
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            "Otvorte zoznam, stlačte **Ďalšie akcie** a vyberte **Nastavenia zoznamu**.",
+            "V poli **Pripomienka** vyberte dátum a čas. Sú v časovom pásme rodiny, rovnakom, aké ukazuje hlavička zoznamu.",
+            "Stlačte **Uložiť nastavenia**. Hlavička ukáže **Pripomienka: dátum, čas**. Ak ju chcete zrušiť, stlačte **Odstrániť pripomienku** a uložte."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Zoznam má jednu pripomienku. Push upozornenie dostane iba zodpovedná osoba, nikto iný. Musí mať na svojom zariadení zapnuté push upozornenia v **Nastaveniach**, **Upozornenia**, inak sa k nej nemusí dostať; vtedy nastavenia ukážu poznámku s jej menom. Upozornenie hovorí iba **Čas na nákup** a otvorí zoznam, takže názov zoznamu sa na zamknutej obrazovke nezobrazí."
+        },
+        {
+          "type": "p",
+          "text": "Pripomienka v minulosti sa odmietne správou **Vyberte čas v budúcnosti.** Po odoslaní pripomienky hlavička doplní **(odoslaná)**. Zmenou času sa nastaví nová pripomienka, ktorá sa odošle znova v novom čase."
+        }
       ]
     },
     {

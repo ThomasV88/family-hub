@@ -221,20 +221,73 @@ describe('Shopping list page in plan mode', () => {
         expect(current.find('[data-testid="archived-banner"]').text()).toContain('This shopping is finished.');
     });
 
-    it('offers Copy and Delete in the overflow menu according to the abilities', async () => {
+    const menuLabels = () => [...document.body.querySelectorAll('[role="menu"][aria-label="More actions"] [role="menuitem"]')].map((b) => b.textContent.trim());
+
+    it('offers List settings, Send by e-mail, Copy and Delete in this order according to the abilities', async () => {
+        mountPage({ abilities: { ...ALL, mail: true } });
+        await moreButton().trigger('click');
+        await flushPromises();
+        expect(menuLabels()).toEqual(['List settings', 'Send by e-mail', 'Copy list', 'Delete list']);
+        current.unmount();
         mountPage();
         await moreButton().trigger('click');
         await flushPromises();
-        const labels = [...document.body.querySelectorAll('[role="menu"][aria-label="More actions"] [role="menuitem"]')].map((b) => b.textContent.trim());
-        expect(labels).toEqual(['Copy list', 'Delete list']);
+        expect(menuLabels()).toEqual(['List settings', 'Copy list', 'Delete list']);
         current.unmount();
         mountPage({ abilities: { ...ALL, delete: false } });
         await moreButton().trigger('click');
         await flushPromises();
-        expect([...document.body.querySelectorAll('[role="menu"][aria-label="More actions"] [role="menuitem"]')].map((b) => b.textContent.trim())).toEqual(['Copy list']);
+        expect(menuLabels()).toEqual(['List settings', 'Copy list']);
         current.unmount();
+        // Everyone with access can open the (read-only) settings, so the menu is never empty.
         mountPage({ abilities: NONE });
-        expect(moreButton().exists()).toBe(false);
+        await moreButton().trigger('click');
+        await flushPromises();
+        expect(menuLabels()).toEqual(['List settings']);
+    });
+
+    it('hides Send by e-mail from a viewer and shows it to a contributor on a finished list', async () => {
+        mountPage({ list: { ...LIST, status: 'done' }, abilities: { ...NONE, mail: false } });
+        await moreButton().trigger('click');
+        await flushPromises();
+        expect(menuLabels()).not.toContain('Send by e-mail');
+        current.unmount();
+        mountPage({ list: { ...LIST, status: 'done' }, abilities: { ...NONE, mail: true } });
+        await moreButton().trigger('click');
+        await flushPromises();
+        expect(menuLabels()).toContain('Send by e-mail');
+    });
+
+    it('opens the settings panel and the e-mail dialog from the menu', async () => {
+        mountPage({ abilities: { ...ALL, mail: true, editSettings: true, changeResponsible: true, setReminder: true, manageMembers: true } });
+        await moreButton().trigger('click');
+        await flushPromises();
+        [...document.body.querySelectorAll('[role="menu"][aria-label="More actions"] [role="menuitem"]')].find((b) => b.textContent.includes('List settings')).click();
+        await flushPromises();
+        expect(dialog().querySelector('h2').textContent).toBe('List settings');
+        dialog().querySelector('button[aria-label="Close"]').click();
+        await flushPromises();
+        await moreButton().trigger('click');
+        await flushPromises();
+        [...document.body.querySelectorAll('[role="menu"][aria-label="More actions"] [role="menuitem"]')].find((b) => b.textContent.includes('Send by e-mail')).click();
+        await flushPromises();
+        expect(dialog().querySelector('h2').textContent).toBe('Send by e-mail');
+    });
+
+    it('tells the creator why they became responsible, and nobody else', () => {
+        mountPage({ list: { ...LIST, responsibleFallback: { previousName: 'Jozef' } } });
+        expect(current.find('[data-testid="takeover-alert"]').text()).toBe('You are now responsible for this list because Jozef was removed.');
+        current.unmount();
+        mountPage({ list: { ...LIST, responsibleFallback: { previousName: null } } });
+        expect(current.find('[data-testid="takeover-alert"]').text()).toContain('because the previous person was removed');
+        current.unmount();
+        mountPage();
+        expect(current.find('[data-testid="takeover-alert"]').exists()).toBe(false);
+    });
+
+    it('marks a sent reminder in the header', () => {
+        mountPage({ list: { ...LIST, reminderSent: true } });
+        expect(current.find('[data-testid="header-reminder"]').text()).toContain('(sent)');
     });
 
     it('deletes the list after the danger confirmation', async () => {

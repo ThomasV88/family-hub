@@ -40,7 +40,9 @@
         "home": "Strona Przegląd",
         "profile_page": "Strona Ustawienia profilu",
         "members_child": "Członkowie, okno i panel dziecka",
-        "shopping_settings": "Ustawienia, Zakupy"
+        "shopping_settings": "Ustawienia, Zakupy",
+        "shopping_list_panel": "Panel ustawień listy zakupów",
+        "shopping_email": "Okno wysyłania listy zakupów e-mailem"
     },
     "topics": {
         "tasks.visibility": {
@@ -290,6 +292,18 @@
         "shopping.units": {
             "title": "Jednostki",
             "text": "Wbudowane jednostki, takie jak szt., g, kg i l, są pokazywane w każdym języku i nie można ich zmieniać. Administratorzy mogą dodać kolejne jednostki, każdą z angielską, słowacką i polską nazwą. Jeśli usuniesz jednostkę, która jest używana, produkty zachowają ilość, ale pokażą ją bez jednostki."
+        },
+        "shopping.roles": {
+            "title": "Osoba odpowiedzialna, współtwórcy i obserwatorzy",
+            "text": "Osoba odpowiedzialna jako jedyna może zablokować i odblokować listę, oznaczać produkty i zakończyć zakupy. Można ją zmienić w każdej chwili. Osoby, które mogą dodawać i edytować produkty, zmieniają produkty. Osoby, które mogą tylko przeglądać, widzą listę, ale niczego nie zmieniają. Osoba ma jednocześnie jedną rolę."
+        },
+        "shopping.reminder": {
+            "title": "Przypomnienie",
+            "text": "Lista ma jedno przypomnienie, datę i godzinę w strefie czasowej rodziny. Powiadomienie push otrzymuje tylko osoba odpowiedzialna, i tylko jeśli włączyła powiadomienia push na swoim urządzeniu w Ustawieniach, Powiadomienia. Czas z przeszłości zostanie odrzucony. Zmiana godziny ustawia nowe przypomnienie."
+        },
+        "shopping.email": {
+            "title": "Wysyłanie listy e-mailem",
+            "text": "Wpisz lub wklej do 5 adresów, działa każdy adres. E-mail to zwykły tekst z produktami, ilościami, sklepem i osobą odpowiedzialną, bez linku do aplikacji. Osoby, które mogą tylko przeglądać, nie mogą wysyłać. Obowiązują dzienne limity, więc listy nie da się wysyłać bez końca."
         }
     }
 }

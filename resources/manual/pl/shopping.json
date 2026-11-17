@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 35,
   "title": "Zakupy",
-  "summary": "Wspólne listy zakupów dla rodziny: przegląd, tworzenie i kopiowanie list, dodawanie i zmiana produktów oraz katalog produktów, sklepy i jednostki, którymi zarządzasz w Ustawieniach.",
+  "summary": "Wspólne listy zakupów dla rodziny: przegląd, tworzenie i kopiowanie list, dodawanie i zmiana produktów, kto co może na liście, wysyłanie listy e-mailem, przypomnienia oraz katalog produktów, sklepy i jednostki, którymi zarządzasz w Ustawieniach.",
   "covers": ["module:shopping", "settings:shopping"],
   "sections": [
     {
@@ -55,6 +55,43 @@
       ]
     },
     {
+      "id": "people",
+      "title": "Osoby i kto co może",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Każda lista ma **autora**, jedną **osobę odpowiedzialną** i, jeśli chcesz, osoby, które mogą dodawać i edytować produkty, oraz osoby, które mogą tylko przeglądać. Otwórz listę, naciśnij **Więcej akcji** i wybierz **Ustawienia listy**, aby to zobaczyć i zmienić."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Osoba odpowiedzialna**: jedyna osoba, która może zablokować i odblokować listę, oznaczać produkty jako kupione lub niedostępne i zakończyć zakupy. Osobę odpowiedzialną możesz zmienić w każdej chwili, także gdy lista jest zablokowana.",
+            "**Może dodawać i edytować produkty**: osoby, które mogą dodawać, zmieniać i usuwać produkty na otwartej liście.",
+            "**Może tylko przeglądać**: osoby, które widzą listę, ale niczego nie mogą zmieniać.",
+            "Osoba ma jednocześnie jedną rolę. Jeśli wybierzesz kogoś, kto jest już w drugiej grupie, zostanie przeniesiony, a uwaga o tym poinformuje.",
+            "Dzieci możesz dodać jak każdego innego członka, mają oznaczenie **Dziecko**."
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "Zmiana tego, kto bierze udział w liście",
+          "items": [
+            "Otwórz listę, naciśnij **Więcej akcji** i wybierz **Ustawienia listy**.",
+            "Wybierz **Osobę odpowiedzialną** albo naciśnij **Dodaj osobę** pod **Może dodawać i edytować produkty** lub **Może tylko przeglądać** i wybierz kogoś. Krzyżykiem przy nazwisku usuniesz osobę.",
+            "Naciśnij **Zapisz ustawienia**. Przycisk jest dostępny dopiero po zmianie."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Autor i osoba odpowiedzialna mogą na otwartej liście zmieniać w ustawieniach wszystko: nazwę, sklep, osobę odpowiedzialną, osoby i przypomnienie. Gdy lista jest zablokowana, osobę odpowiedzialną i przypomnienie może zmieniać tylko osoba odpowiedzialna. Pozostali widzą ustawienia tylko do odczytu, więc nadal widzą, kto jest kim."
+        },
+        {
+          "type": "tip",
+          "text": "Jeśli osoba odpowiedzialna opuści rodzinę lub straci dostęp do Zakupów, odpowiedzialnym zostaje autor. Autor widzi o tym uwagę na górze listy, dopóki osoba odpowiedzialna nie zostanie zapisana ponownie."
+        }
+      ]
+    },
+    {
       "id": "copy",
       "title": "Kopiowanie listy",
       "blocks": [
@@ -67,6 +104,58 @@
         { "type": "p", "text": "Kopia ma te same produkty z tymi samymi ilościami i jednostkami, a każdy produkt zaczyna jako nieoznaczony (niekupiony, niedostępny). Nowa lista jest otwarta, niezablokowana i bez przypomnienia. Zostajesz jej właścicielem." },
         { "type": "p", "text": "Jeśli **Zachowaj sklep, osobę odpowiedzialną i dostęp** jest zaznaczone, kopia zachowuje sklep, osobę odpowiedzialną oraz osoby, które mogą dodawać produkty lub przeglądać. Jeśli nie jest zaznaczone, osobą odpowiedzialną jesteś Ty i nikt inny nie jest dodany." },
         { "type": "tip", "text": "Skopiować możesz każdą listę, którą widzisz, także zakończoną. To szybki sposób na rozpoczęcie zakupów na kolejny tydzień." }
+      ]
+    },
+    {
+      "id": "email",
+      "title": "Wysyłanie listy e-mailem",
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            "Otwórz listę, naciśnij **Więcej akcji** i wybierz **Wyślij e-mailem**.",
+            "Wpisz adres i naciśnij Enter, przecinek lub spację albo wklej kilka adresów naraz. Każdy adres zmienia się w mały znacznik z krzyżykiem do usunięcia. Możesz dodać do 5 adresów, działa każdy adres.",
+            "Naciśnij **Wyślij**. Komunikat na dole mówi, na ile adresów wysłano listę."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Listę może wysłać autor, osoba odpowiedzialna i osoby, które mogą dodawać i edytować produkty, w każdym stanie listy. Osoby, które mogą tylko przeglądać, nie widzą **Wyślij e-mailem**."
+        },
+        {
+          "type": "p",
+          "text": "E-mail to zwykły tekst. Zawiera produkty z ilościami, sklep i osobę odpowiedzialną. Nie ma linku do Family Hub ani adresów e-mail członków rodziny."
+        },
+        {
+          "type": "warning",
+          "text": "Przed nadużyciami chronią limity: liczba wysyłek na godzinę i na dobę dla Ciebie oraz kilka na dobę dla każdego adresu. Gdy osiągniesz limit, okno wyświetli **Dziś wysłano zbyt wiele list. Spróbuj ponownie później.**"
+        },
+        {
+          "type": "tip",
+          "text": "Komunikat po naciśnięciu Wyślij oznacza, że e-maile są wysyłane. Zwykle docierają w ciągu minuty. Dziennik audytu zapisuje tylko liczbę adresów, na które wysłano listę, nigdy same adresy."
+        }
+      ]
+    },
+    {
+      "id": "reminder",
+      "title": "Przypomnienie listy",
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            "Otwórz listę, naciśnij **Więcej akcji** i wybierz **Ustawienia listy**.",
+            "W polu **Przypomnienie** wybierz datę i godzinę. Są w strefie czasowej rodziny, takiej samej jak w nagłówku listy.",
+            "Naciśnij **Zapisz ustawienia**. Nagłówek pokaże **Przypomnienie: data, godzina**. Aby je usunąć, naciśnij **Usuń przypomnienie** i zapisz."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Lista ma jedno przypomnienie. Powiadomienie push otrzymuje tylko osoba odpowiedzialna, nikt inny. Musi mieć na swoim urządzeniu włączone powiadomienia push w **Ustawieniach**, **Powiadomienia**, inaczej może do niej nie dotrzeć; wtedy ustawienia pokażą uwagę z jej imieniem. Powiadomienie mówi tylko **Czas na zakupy** i otwiera listę, więc nazwa listy nie pojawia się na zablokowanym ekranie."
+        },
+        {
+          "type": "p",
+          "text": "Przypomnienie z przeszłości zostanie odrzucone komunikatem **Wybierz czas w przyszłości.** Po wysłaniu przypomnienia nagłówek dodaje **(wysłane)**. Zmiana godziny ustawia nowe przypomnienie, które zostanie wysłane ponownie o nowej godzinie."
+        }
       ]
     },
     {

@@ -74,7 +74,7 @@
       "id": "notifications",
       "title": "Zapnutie pripomienok",
       "blocks": [
-        { "type": "p", "text": "Pripomienky na úlohy a darčekové príležitosti môžete dostávať e-mailom aj ako krátke push oznámenia na zariadení." },
+        { "type": "p", "text": "Pripomienky na úlohy, nákupné zoznamy a darčekové príležitosti môžete dostávať e-mailom aj ako krátke push oznámenia na zariadení." },
         { "type": "steps", "items": [
           "Otvorte ponuku účtu, vyberte **Nastavenia** a potom **Oznámenia**.",
           "Zapnite **Pripomienky e-mailom**, **Push oznámenia** alebo oboje.",
@@ -82,7 +82,7 @@
           "Stlačte **Poslať skúšobné oznámenie** a overte, že to funguje."
         ] },
         { "type": "warning", "text": "Na iPhone a iPade push funguje, až keď si Family Hub pridáte na plochu (pozrite vyššie) a otvoríte ho odtiaľ." },
-        { "type": "p", "text": "Push oznámenia ukazujú len názov úlohy, nikdy poznámky. Ak sú oba spínače vypnuté, nedostávate žiadne pripomienky. Každé zariadenie potrebuje vlastný krok **Zapnúť push**." }
+        { "type": "p", "text": "Push oznámenia ukazujú len krátky titulok, napríklad názov úlohy, nikdy poznámky. Ak sú oba spínače vypnuté, nedostávate žiadne pripomienky. Každé zariadenie potrebuje vlastný krok **Zapnúť push**." }
       ]
     },
     {

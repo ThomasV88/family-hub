@@ -807,7 +807,8 @@
             "profile_changed_name": "Zmieniono imię osoby {name}",
             "profile_changed_other": "Zmieniono profil osoby {name}",
             "child_created": "Dodano dziecko {name}",
-            "child_converted": "Dziecko {name} dostało logowanie (zaproszenie przyjęte)"
+            "child_converted": "Dziecko {name} dostało logowanie (zaproszenie przyjęte)",
+            "shopping_list_mailed": "Listę zakupów wysłano e-mailem na {n} adres | Listę zakupów wysłano e-mailem na {n} adresy | Listę zakupów wysłano e-mailem na {n} adresów"
         },
         "page": "Strona {n} z {total}",
         "prev": "Poprzednia",
@@ -1055,7 +1056,7 @@
     },
     "notifications": {
         "nav": "Powiadomienia",
-        "intro": "Wybierz, jak przypominać Ci o zadaniach.",
+        "intro": "Wybierz, jak przypominać Ci o zadaniach i listach zakupów.",
         "card_title": "Przypomnienia o zadaniach",
         "email": "Przypomnienia e-mailem",
         "email_hint": "Wysyłamy na {email}.",
@@ -2678,7 +2679,11 @@
             "forbidden": "Nie możesz tego zrobić na tej liście.",
             "note_too_long": "Notatka jest zbyt długa.",
             "items_count": "Wybierz od 1 do 50 produktów.",
-            "catalog_unknown": "Ten produkt z katalogu już nie istnieje. Odśwież stronę i spróbuj ponownie."
+            "catalog_unknown": "Ten produkt z katalogu już nie istnieje. Odśwież stronę i spróbuj ponownie.",
+            "member_not_eligible": "Tej osoby nie można dodać do listy.",
+            "member_overlap": "Osoba może mieć na liście tylko jedną rolę.",
+            "reminder_past": "Wybierz czas w przyszłości.",
+            "reminder_invalid": "Podaj prawidłową datę i godzinę."
         },
         "overview": {
             "title": "Zakupy",
@@ -2742,7 +2747,9 @@
             "quantity_updated": "Zmieniono ilość produktu {name}",
             "item_saved": "Produkt zapisany",
             "item_removed": "Produkt usunięty",
-            "list_deleted": "Lista usunięta"
+            "list_deleted": "Lista usunięta",
+            "settings_saved": "Ustawienia zapisane",
+            "responsible_changed": "Osobą odpowiedzialną jest teraz {name}"
         },
         "detail": {
             "add_items": "Dodaj produkty",
@@ -2807,6 +2814,52 @@
             "empty_settings": "Dodaj produkty w ustawieniach Zakupów",
             "no_match": "Żaden produkt z katalogu nie pasuje do „{text}”.",
             "load_error": "Nie udało się wczytać katalogu. Nadal możesz wpisać własny produkt."
+        },
+        "panel": {
+            "title": "Ustawienia listy",
+            "name": "Nazwa",
+            "store": "Sklep",
+            "store_none": "Bez sklepu",
+            "responsible": "Osoba odpowiedzialna",
+            "responsible_hint": "Tylko ta osoba może zablokować listę i oznaczać produkty.",
+            "contributors": "Może dodawać i edytować produkty",
+            "viewers": "Może tylko przeglądać",
+            "add_person": "Dodaj osobę",
+            "add_person_to": "Dodaj osobę: {role}",
+            "remove_person": "Usuń osobę {name}",
+            "nobody": "Na razie nikogo",
+            "child": "Dziecko",
+            "moved_to_viewers": "{name} przeniesiono do osób, które mogą tylko przeglądać.",
+            "moved_to_contributors": "{name} przeniesiono do osób, które mogą dodawać i edytować produkty.",
+            "takeover": "Jesteś teraz odpowiedzialny za tę listę, ponieważ {name} został usunięty.",
+            "takeover_unknown": "Jesteś teraz odpowiedzialny za tę listę, ponieważ poprzednia osoba została usunięta.",
+            "read_only": "Widzisz, kto bierze udział w tej liście. Te ustawienia może zmieniać tylko autor lub osoba odpowiedzialna.",
+            "save": "Zapisz ustawienia",
+            "cancel": "Anuluj"
+        },
+        "reminder": {
+            "label": "Przypomnienie",
+            "hint": "Powiadomienie push otrzyma tylko osoba odpowiedzialna.",
+            "remove": "Usuń przypomnienie",
+            "push_off": "{name} nie ma włączonych powiadomień push, więc przypomnienie może do niej nie dotrzeć.",
+            "sent_note": "Przypomnienie zostało już wysłane. Zmień godzinę, aby ustawić nowe.",
+            "header_sent": "Przypomnienie: {date} (wysłane)"
+        },
+        "mail": {
+            "title": "Wyślij e-mailem",
+            "field": "Adresy e-mail",
+            "placeholder": "Wpisz lub wklej adres",
+            "preview": "E-mail zawiera produkty z ilościami, sklep i osobę odpowiedzialną.",
+            "hint_max": "Jednorazowo można wysłać najwyżej na 5 adresów.",
+            "invalid_token": "„{text}” nie jest prawidłowym adresem e-mail.",
+            "remove": "Usuń {address}",
+            "send": "Wyślij",
+            "cancel": "Anuluj",
+            "failed": "Nie udało się wysłać listy. Spróbuj ponownie.",
+            "err_invalid": "Podaj prawidłowe adresy e-mail.",
+            "err_too_many": "Jednorazowo można wysłać najwyżej na 5 adresów.",
+            "err_limit": "Dziś wysłano zbyt wiele list. Spróbuj ponownie później.",
+            "toast_sent": "Listę wysłano na {count} adres | Listę wysłano na {count} adresy | Listę wysłano na {count} adresów"
         }
     }
 }

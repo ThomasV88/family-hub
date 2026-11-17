@@ -40,7 +40,7 @@ const storeName = computed(() => props.list.store?.name ?? props.list.storeName 
                     </span>
                     <span v-if="reminder" class="shop-head__meta-item" data-testid="header-reminder">
                         <Bell :size="18" :stroke-width="1.75" aria-hidden="true" />
-                        <span>{{ t('shopping.detail.reminder', { date: reminder }) }}</span>
+                        <span>{{ t(list.reminderSent === true ? 'shopping.reminder.header_sent' : 'shopping.detail.reminder', { date: reminder }) }}</span>
                     </span>
                 </div>
             </div>

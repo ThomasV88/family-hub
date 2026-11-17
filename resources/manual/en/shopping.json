@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 35,
   "title": "Shopping",
-  "summary": "Shared shopping lists for the family: the overview, creating and copying lists, adding and changing items, and the item catalog, stores and units that you manage in Settings.",
+  "summary": "Shared shopping lists for the family: the overview, creating and copying lists, adding and changing items, who may do what on a list, sending a list by e-mail, reminders, and the item catalog, stores and units that you manage in Settings.",
   "covers": ["module:shopping", "settings:shopping"],
   "sections": [
     {
@@ -55,6 +55,43 @@
       ]
     },
     {
+      "id": "people",
+      "title": "People and who can do what",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Every list has a **creator**, one **responsible person**, and, if you like, people who may add and edit items and people who may only view. Open the list, press **More actions** and choose **List settings** to see and change this."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Responsible person**: the only person who can lock and unlock the list, mark items as bought or unavailable and finish the shopping. You can change the responsible person at any time, even while the list is locked.",
+            "**Can add and edit items**: people who may add, change and remove items on an open list.",
+            "**Can only view**: people who see the list but cannot change anything.",
+            "A person has one role at a time. If you choose someone who is already in the other group, they are moved and a note says so.",
+            "Children can be added like any other member and carry the tag **Child**."
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "Changing who takes part",
+          "items": [
+            "Open the list, press **More actions** and choose **List settings**.",
+            "Pick the **Responsible person**, or press **Add person** under **Can add and edit items** or **Can only view** and choose someone. Press the cross on a name to remove that person.",
+            "Press **Save settings**. The button is available only after you change something."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The creator and the responsible person change everything in the settings while the list is open: the name, the store, the responsible person, the people and the reminder. While the list is locked, only the responsible person can change the responsible person and the reminder. Everyone else sees the settings read-only, so they can still tell who is who."
+        },
+        {
+          "type": "tip",
+          "text": "If the responsible person leaves the family or loses access to Shopping, the creator becomes responsible. The creator sees a note about it at the top of the list until a responsible person is saved again."
+        }
+      ]
+    },
+    {
       "id": "copy",
       "title": "Copying a list",
       "blocks": [
@@ -67,6 +104,58 @@
         { "type": "p", "text": "The copy has the same items with the same quantities and units, and every item starts unmarked (not bought, not unavailable). The new list is open, not locked, and has no reminder. You become its owner." },
         { "type": "p", "text": "If **Keep store, responsible person and access** is ticked, the copy keeps the store, the responsible person and the people who may add items or view. If it is not ticked, you are the responsible person and nobody else is added." },
         { "type": "tip", "text": "You can copy any list you can see, including finished ones. That is a quick way to start next week's shopping." }
+      ]
+    },
+    {
+      "id": "email",
+      "title": "Sending a list by e-mail",
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            "Open the list, press **More actions** and choose **Send by e-mail**.",
+            "Type an address and press Enter, a comma or the space bar, or paste several addresses at once. Each address becomes a small tag with a cross to remove it. You can add up to 5 addresses; any address works.",
+            "Press **Send**. A message at the bottom tells you how many addresses the list was sent to."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The creator, the responsible person and people who may add and edit items can send a list, in any state of the list. People who can only view do not see **Send by e-mail**."
+        },
+        {
+          "type": "p",
+          "text": "The e-mail is plain text. It lists the items with their quantities, the store and the responsible person. It has no link to Family Hub and no e-mail addresses of family members."
+        },
+        {
+          "type": "warning",
+          "text": "There are limits to stop misuse: a number of sends per hour and per day for you, and a few per day for each address. If you reach a limit, the window says **You have sent too many lists today. Try again later.**"
+        },
+        {
+          "type": "tip",
+          "text": "The message after pressing Send means the e-mails are being sent. They usually arrive within a minute. The audit log records only how many addresses a list was sent to, never the addresses."
+        }
+      ]
+    },
+    {
+      "id": "reminder",
+      "title": "Reminder for a list",
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            "Open the list, press **More actions** and choose **List settings**.",
+            "Under **Reminder**, choose a date and time. They are in the family time zone, the same one the list header shows.",
+            "Press **Save settings**. The header shows **Reminder: date, time**. To clear it, press **Remove reminder** and save."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "A list has one reminder. A push notification goes to the responsible person only, nobody else. They must have push notifications turned on for their device in **Settings**, **Notifications**, otherwise it may not reach them; if so, the settings show a note with their name. The notification says only **Time to shop** and opens the list, so the name of the list does not appear on a locked screen."
+        },
+        {
+          "type": "p",
+          "text": "A reminder in the past is refused with **Choose a time in the future.** Once the reminder has been sent, the header adds **(sent)**. Changing the time sets a new reminder, which is sent again at the new time."
+        }
       ]
     },
     {

@@ -15,7 +15,7 @@ function leaves(obj, prefix = '') {
 }
 
 const SUBTREES = ['shopping'];
-const KEYS = ['settings.section.shopping', 'permissions.module.shopping', 'nav.shopping', 'module.shopping'];
+const KEYS = ['settings.section.shopping', 'permissions.module.shopping', 'nav.shopping', 'module.shopping', 'notifications.intro', 'audit.detail.shopping_list_mailed'];
 
 describe('phase 11 locale parity (lang)', () => {
     for (const subtree of SUBTREES) {
@@ -65,8 +65,15 @@ describe('phase 11 locale parity (lang)', () => {
     });
 });
 
+describe('phase 11 notifications wording', () => {
+    it('no longer says reminders are only about tasks', () => {
+        expect(lang.en.notifications.intro).toBe('Choose how you want to be reminded about tasks and shopping lists.');
+        for (const locale of LOCALES) expect(lang[locale].notifications.intro.length).toBeGreaterThan(20);
+    });
+});
+
 describe('phase 11 help texts', () => {
-    for (const topic of ['shopping.catalog', 'shopping.store', 'shopping.units']) {
+    for (const topic of ['shopping.catalog', 'shopping.store', 'shopping.units', 'shopping.roles', 'shopping.reminder', 'shopping.email']) {
         it(`${topic} has a title and a text in en, sk and pl`, () => {
             for (const locale of LOCALES) {
                 const entry = help[locale].topics?.[topic];
@@ -79,6 +86,8 @@ describe('phase 11 help texts', () => {
         for (const locale of LOCALES) {
             expect(help[locale].areas.shopping?.trim()).toBeTruthy();
             expect(help[locale].screens.shopping_settings?.trim()).toBeTruthy();
+            expect(help[locale].screens.shopping_list_panel?.trim()).toBeTruthy();
+            expect(help[locale].screens.shopping_email?.trim()).toBeTruthy();
         }
     });
 });

@@ -152,6 +152,7 @@ it('flashes the toast and the count', function () {
     $list = mailFixtureList($user);
 
     postListMail($this, $user, $list->id, ['a@example.test'])->assertSessionHas('toast.key', 'shopping.mail.toast_sent')
+        ->assertSessionHas('toast.count', 1)->assertSessionHas('toast.params.count', 1)
         ->assertSessionHas('flash_data.mail_sent_count', 1);
 });
 

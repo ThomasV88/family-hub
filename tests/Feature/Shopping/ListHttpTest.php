@@ -43,8 +43,18 @@ it('updates the settings of an open list and answers 303 back', function () {
     $list = F::list($me);
 
     $this->actingAs($me)->from('/shopping/lists/'.$list->id)->put("/shopping/lists/{$list->id}", ['name' => 'Renamed'])
-        ->assertStatus(303)->assertRedirect('/shopping/lists/'.$list->id)->assertSessionHas('toast.key', 'shopping.toast.list_saved');
+        ->assertStatus(303)->assertRedirect('/shopping/lists/'.$list->id)->assertSessionHas('toast.key', 'shopping.toast.settings_saved');
     expect($list->fresh()->name)->toBe('Renamed');
+});
+
+it('names the new responsible person in the toast when only the responsible person changed', function () {
+    $me = F::user();
+    $other = F::user();
+    $list = F::list($me);
+
+    $this->actingAs($me)->from('/shopping/lists/'.$list->id)->put("/shopping/lists/{$list->id}", ['responsible_id' => $other->id])
+        ->assertStatus(303)->assertSessionHas('toast.key', 'shopping.toast.responsible_changed')
+        ->assertSessionHas('toast.params.name', $other->name);
 });
 
 it('syncs people and keeps untouched keys out of the update', function () {

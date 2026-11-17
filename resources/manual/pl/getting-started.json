@@ -74,7 +74,7 @@
       "id": "notifications",
       "title": "Włączanie przypomnień",
       "blocks": [
-        { "type": "p", "text": "Przypomnienia o zadaniach i okazjach do prezentów możesz dostawać e-mailem oraz jako krótkie powiadomienia push na urządzeniu." },
+        { "type": "p", "text": "Przypomnienia o zadaniach, listach zakupów i okazjach do prezentów możesz dostawać e-mailem oraz jako krótkie powiadomienia push na urządzeniu." },
         { "type": "steps", "items": [
           "Otwórz menu konta, wybierz **Ustawienia**, a potem **Powiadomienia**.",
           "Włącz **Przypomnienia e-mailem**, **Powiadomienia push** albo oba.",
@@ -82,7 +82,7 @@
           "Naciśnij **Wyślij powiadomienie testowe**, aby sprawdzić, czy działa."
         ] },
         { "type": "warning", "text": "Na iPhonie i iPadzie push działa dopiero po dodaniu Family Hub do ekranu początkowego (patrz wyżej) i otwarciu aplikacji stamtąd." },
-        { "type": "p", "text": "Powiadomienia push pokazują tylko tytuł zadania, nigdy notatki. Jeśli oba przełączniki są wyłączone, nie dostajesz żadnych przypomnień. Każde urządzenie wymaga osobnego kroku **Włącz push**." }
+        { "type": "p", "text": "Powiadomienia push pokazują tylko krótki tytuł, na przykład tytuł zadania, nigdy notatki. Jeśli oba przełączniki są wyłączone, nie dostajesz żadnych przypomnień. Każde urządzenie wymaga osobnego kroku **Włącz push**." }
       ]
     },
     {

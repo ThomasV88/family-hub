@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { Copy, Ellipsis, ListPlus, Plus, Trash2 } from '@lucide/vue';
+import { Copy, Ellipsis, ListPlus, Mail, Plus, Settings, Trash2 } from '@lucide/vue';
 import AppShell from '../../Layouts/AppShell.vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
@@ -11,9 +11,11 @@ import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
 import UiList from '../../Components/ui/UiList.vue';
 import UiMenu from '../../Components/ui/UiMenu.vue';
 import CopyListDialog from '../../Shopping/CopyListDialog.vue';
+import EmailListDialog from '../../Shopping/EmailListDialog.vue';
 import ItemEditDialog from '../../Shopping/ItemEditDialog.vue';
 import ItemPickerDialog from '../../Shopping/ItemPickerDialog.vue';
 import ListHeader from '../../Shopping/ListHeader.vue';
+import ListSettingsPanel from '../../Shopping/ListSettingsPanel.vue';
 import ShoppingItemRow from '../../Shopping/ShoppingItemRow.vue';
 
 // List detail. The server decides what a person may do (`abilities`); the page only renders controls that are allowed.
@@ -26,6 +28,8 @@ const props = defineProps({
     units: { type: Array, default: () => [] },
     stores: { type: Array, default: () => [] },
     catalog: { type: Array, default: null },
+    candidates: { type: Object, default: null },
+    responsiblePushEnabled: { type: Boolean, default: null },
 });
 const { t } = useI18n();
 const page = usePage();
@@ -40,6 +44,8 @@ const editOpen = ref(false);
 const editTarget = ref(null);
 const copyOpen = ref(false);
 const deleteOpen = ref(false);
+const settingsOpen = ref(false);
+const mailOpen = ref(false);
 
 // Catalog items already pending on the list (the server raises their quantity instead of adding a second row).
 const onListIds = computed(() => props.items.filter((i) => i.catalogItemId != null && i.state === 'pending').map((i) => i.catalogItemId));
@@ -55,8 +61,10 @@ function editItem(item) {
     editOpen.value = true;
 }
 
+const takeover = computed(() => (props.list.responsibleFallback?.previousName ? t('shopping.panel.takeover', { name: props.list.responsibleFallback?.previousName }) : t('shopping.panel.takeover_unknown')));
 const menuItems = computed(() => {
-    const entries = [];
+    const entries = [{ type: 'item', key: 'settings', label: t('shopping.panel.title'), icon: Settings }];
+    if (props.abilities.mail) entries.push({ type: 'item', key: 'mail', label: t('shopping.mail.title'), icon: Mail });
     if (props.abilities.copy) entries.push({ type: 'item', key: 'copy', label: t('shopping.overview.copy'), icon: Copy });
     if (props.abilities.delete) entries.push({ type: 'item', key: 'delete', label: t('shopping.detail.delete_list'), icon: Trash2 });
 
@@ -64,6 +72,8 @@ const menuItems = computed(() => {
 });
 
 function onMenu({ key }) {
+    if (key === 'settings') settingsOpen.value = true;
+    if (key === 'mail') mailOpen.value = true;
     if (key === 'copy') copyOpen.value = true;
     if (key === 'delete') deleteOpen.value = true;
 }
@@ -82,6 +92,7 @@ function deleteList() {
                 <UiMenu v-if="menuItems.length > 0" :label="t('shopping.detail.more')" :icon="Ellipsis" :items="menuItems" @select="onMenu" />
             </ListHeader>
 
+            <UiAlert v-if="list.responsibleFallback" variant="info" data-testid="takeover-alert">{{ takeover }}</UiAlert>
             <UiAlert v-if="archived" variant="info" data-testid="archived-banner">{{ t('shopping.detail.archived') }}</UiAlert>
             <UiAlert v-else-if="locked" variant="info" data-testid="locked-banner">{{ t('shopping.detail.locked_note') }}</UiAlert>
 
@@ -97,6 +108,8 @@ function deleteList() {
 
         <ItemPickerDialog v-if="canEdit" v-model:open="pickerOpen" :list-id="list.id" :catalog="catalog" :on-list-ids="onListIds" :units="units" :can-manage-catalog="abilities.manageCatalog === true" />
         <ItemEditDialog v-if="canEdit" v-model:open="editOpen" :list-id="list.id" :item="editTarget" :units="units" />
+        <ListSettingsPanel v-model:open="settingsOpen" :list="list" :abilities="abilities" :members="members" :stores="stores" :candidates="candidates" :responsible-push-enabled="responsiblePushEnabled" />
+        <EmailListDialog v-if="abilities.mail" v-model:open="mailOpen" :list="{ id: list.id, name: list.name }" />
         <CopyListDialog v-if="abilities.copy" v-model:open="copyOpen" :list="{ id: list.id, name: list.name }" />
         <UiConfirmDialog
             v-if="abilities.delete"

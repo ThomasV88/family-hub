@@ -8,6 +8,7 @@ use App\Http\Requests\Shopping\UpdateListRequest;
 use App\Shopping\ListService;
 use App\Shopping\Queries\ListPayload;
 use App\Shopping\Queries\ListQuery;
+use App\Shopping\ResponsiblePerson;
 use App\Shopping\ShoppingAccess;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,11 +46,17 @@ class ListController extends Controller
             ->with('toast', ['key' => 'shopping.toast.list_created']);
     }
 
-    public function update(UpdateListRequest $request, int $list, ListService $service): RedirectResponse
+    public function update(UpdateListRequest $request, int $list, ListService $service, ResponsiblePerson $responsible): RedirectResponse
     {
-        $service->updateSettings($request->user(), $list, $request->settings());
+        $settings = $request->settings();
+        $updated = $service->updateSettings($request->user(), $list, $settings);
 
-        return back(303)->with('toast', ['key' => 'shopping.toast.list_saved']);
+        // Changing only the responsible person says who took over; every other save says the settings were saved.
+        if (array_keys($settings) === ['responsible_id']) {
+            return back(303)->with('toast', ['key' => 'shopping.toast.responsible_changed', 'params' => ['name' => $responsible->effective($updated)->name]]);
+        }
+
+        return back(303)->with('toast', ['key' => 'shopping.toast.settings_saved']);
     }
 
     public function destroy(Request $request, int $list, ListService $service): RedirectResponse
