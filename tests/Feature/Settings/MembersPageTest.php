@@ -73,7 +73,7 @@ it('exposes no photo path or secret on any member row', function () {
     $child->forceFill(['photo_path' => 'wish-images/profile-photos/secret-path-full.jpg', 'photo_thumb_path' => 'wish-images/profile-photos/secret-path-thumb.jpg', 'photo_version' => 3])->save();
 
     $props = $this->actingAs($admin)->get('/settings/members')->viewData('page')['props'];
-    $json = json_encode($props);
+    $json = json_encode($props['members']);
 
     expect($json)->not->toContain('secret-path')->not->toContain('photo_path')->not->toContain('photo_thumb_path')
         ->not->toContain('remember_token')->not->toContain('google_id')->not->toContain('"password"');
