@@ -4,6 +4,7 @@ namespace App\Profile;
 
 use App\Models\User;
 use App\Wishlist\Catalog\ProcessedImage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -22,7 +23,6 @@ final class ProfilePhotoStore
         $dir = self::PREFIX.'/'.$user->id;
         $full = "{$dir}/{$name}-full.jpg";
         $thumb = "{$dir}/{$name}-thumb.jpg";
-        $oldPaths = array_filter([$user->photo_path, $user->photo_thumb_path]);
 
         // The disk is configured with throw=false, so a full disk returns false. Nothing is touched
         // (row, old files) unless both writes are confirmed.
@@ -36,24 +36,38 @@ final class ProfilePhotoStore
             throw new ProfilePhotoWriteFailed('profile photo write failed');
         }
 
-        $user->forceFill([
-            'photo_path' => $full,
-            'photo_thumb_path' => $thumb,
-            'photo_version' => (int) $user->photo_version + 1,
-        ])->save();
+        // The row is read again under a lock, so two concurrent writers each see the other's committed paths and
+        // version: the later one replaces (and deletes) the earlier pair, and the version only ever goes up.
+        $old = $this->swap($user, $full, $thumb);
 
-        $this->deleteFiles($oldPaths);
+        $this->deleteFiles($old);
     }
 
     public function remove(User $user): void
     {
-        $old = array_filter([$user->photo_path, $user->photo_thumb_path]);
-        $user->forceFill([
-            'photo_path' => null,
-            'photo_thumb_path' => null,
-            'photo_version' => (int) $user->photo_version + 1,
-        ])->save();
-        $this->deleteFiles($old);
+        $this->deleteFiles($this->swap($user, null, null));
+    }
+
+    /**
+     * Sets the photo columns under a row lock and returns the paths they replaced (deleted only after the commit).
+     *
+     * @return array<int, string>
+     */
+    private function swap(User $user, ?string $full, ?string $thumb): array
+    {
+        return DB::transaction(function () use ($user, $full, $thumb): array {
+            $locked = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $old = array_values(array_filter([$locked->photo_path, $locked->photo_thumb_path]));
+            $locked->forceFill([
+                'photo_path' => $full,
+                'photo_thumb_path' => $thumb,
+                'photo_version' => (int) $locked->photo_version + 1,
+            ])->save();
+            // Keep the caller's instance in step with the row.
+            $user->setRawAttributes($locked->getAttributes(), true);
+
+            return $old;
+        });
     }
 
     /** Deletes profile photo files that no user row references and that are older than the cutoff. */

@@ -6,6 +6,7 @@ use App\Profile\ProfilePhotoStore;
 use App\Profile\ProfilePhotoWriteFailed;
 use App\Wishlist\Catalog\ProcessedImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
@@ -86,4 +87,39 @@ it('wishlist:prune keeps a referenced profile photo, deletes an old unreferenced
 
     $disk->assertExists([$user->photo_path, $user->photo_thumb_path, 'wish-images/profile-photos/'.$user->id.'/orphan-new.jpg']);
     $disk->assertMissing(['wish-images/profile-photos/'.$user->id.'/orphan-old.jpg', 'wish-images/1/wish-orphan.jpg']);
+});
+
+it('works from the locked row, not from a stale instance, so a racing writer cannot orphan files or repeat a version', function () {
+    $user = User::factory()->create();
+    $stale = User::query()->findOrFail($user->id);
+
+    $this->store->put($user, $this->image);
+    $firstPair = [$user->photo_path, $user->photo_thumb_path];
+
+    // The second writer still holds the instance loaded before the first write (no photo, version 0).
+    $this->store->put($stale, $this->image);
+
+    $fresh = $user->fresh();
+    expect($fresh->photo_version)->toBe(2)->and($stale->photo_version)->toBe(2);
+    Storage::disk('local')->assertMissing($firstPair);
+    Storage::disk('local')->assertExists([$fresh->photo_path, $fresh->photo_thumb_path]);
+    expect(Storage::disk('local')->allFiles("wish-images/profile-photos/{$user->id}"))->toHaveCount(2);
+
+    // Same for remove on a stale instance: nothing referenced is left on disk.
+    $this->store->remove(User::query()->findOrFail($user->id));
+    $this->store->remove($stale);
+    expect($user->fresh()->photo_path)->toBeNull()->and($user->fresh()->photo_version)->toBe(4)
+        ->and(Storage::disk('local')->allFiles("wish-images/profile-photos/{$user->id}"))->toBe([]);
+});
+
+it('locks the user row for update inside a transaction when it writes the photo', function () {
+    $user = User::factory()->create();
+    $sql = [];
+    DB::listen(function ($query) use (&$sql) {
+        $sql[] = $query->sql;
+    });
+
+    $this->store->put($user, $this->image);
+
+    expect(collect($sql)->contains(fn ($q) => str_contains($q, 'from "users"') && str_contains($q, 'for update')))->toBeTrue();
 });
