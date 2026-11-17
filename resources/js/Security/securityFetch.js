@@ -4,6 +4,8 @@
 //   { ok: false, status, error: 'confirm_required' | 'reauth_required' | 'second_factor_required' | 'throttle'
 //                              | 'invalid' | 'network' | 'failed' | 'cancelled' | 'aborted', data, methods?, minutes?, errors? }
 // `signal` (an AbortSignal) lets a caller drop a request it no longer wants; that resolves as 'aborted', not 'network'.
+// `cache` ('no-store' for responses that must never be kept) is handed to fetch as it is. A 429 also carries `seconds`
+// (the server's Retry-After, or null) next to the rounded `minutes`.
 // `replay: true` (writes the member just submitted) opens "Confirm it's you" over the page when the gate refuses, and
 // sends the same request once more after a successful confirmation (see staleGate.js). 'cancelled' = the member
 // closed the dialog, nothing was sent. Without a mounted dialog host the refusal is returned as before.
@@ -17,10 +19,16 @@ import { runWithGate } from './staleGate.js';
 
 const REFUSALS = ['confirm_required', 'reauth_required', 'second_factor_required'];
 
+// Seconds the server asked to wait (Retry-After, retry_after or seconds), or null when it did not say.
+function waitSeconds(response, data) {
+    const seconds = Number(response.headers?.get?.('Retry-After') ?? data?.retry_after ?? data?.seconds);
+    return Number.isFinite(seconds) && seconds > 0 ? seconds : null;
+}
+
 // Minutes to wait, rounded up with a minimum of 1.
 function waitMinutes(response, data) {
-    const seconds = Number(response.headers?.get?.('Retry-After') ?? data?.retry_after ?? data?.seconds);
-    if (Number.isFinite(seconds) && seconds > 0) return Math.max(1, Math.ceil(seconds / 60));
+    const seconds = waitSeconds(response, data);
+    if (seconds !== null) return Math.max(1, Math.ceil(seconds / 60));
     const minutes = Number(data?.minutes);
     return Number.isFinite(minutes) && minutes > 0 ? Math.max(1, Math.ceil(minutes)) : 1;
 }
@@ -29,10 +37,10 @@ export function securityFetch(url, options = {}) {
     const { replay = false } = options;
     const attempt = () => send(url, options);
 
-    return replay ? runWithGate(attempt) : attempt();
+    return replay ? runWithGate(attempt, { signal: options.signal }) : attempt();
 }
 
-async function send(url, { method = 'GET', body, signal } = {}) {
+async function send(url, { method = 'GET', body, signal, cache } = {}) {
     // Same-origin relative paths only (T-06-11): never send cookies or the CSRF token to another origin.
     if (typeof url !== 'string' || !url.startsWith('/') || url.startsWith('//')) {
         return { ok: false, status: 0, error: 'failed', data: {} };
@@ -41,6 +49,7 @@ async function send(url, { method = 'GET', body, signal } = {}) {
     const headers = { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
     const init = { method: verb, credentials: 'same-origin', headers };
     if (signal) init.signal = signal;
+    if (cache) init.cache = cache;
     if (verb !== 'GET') {
         headers['Content-Type'] = 'application/json';
         headers['X-XSRF-TOKEN'] = xsrfToken();
@@ -61,7 +70,7 @@ async function send(url, { method = 'GET', body, signal } = {}) {
         const error = REFUSALS.includes(data?.error) ? data.error : 'confirm_required';
         return { ok: false, status, error, data, methods: data?.methods };
     }
-    if (status === 429) return { ok: false, status, error: 'throttle', minutes: waitMinutes(response, data), data };
+    if (status === 429) return { ok: false, status, error: 'throttle', minutes: waitMinutes(response, data), seconds: waitSeconds(response, data), data };
     if (status === 422) return { ok: false, status, error: 'invalid', errors: data?.errors ?? {}, data };
     return { ok: false, status, error: 'failed', data };
 }

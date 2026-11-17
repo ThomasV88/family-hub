@@ -24,6 +24,19 @@ describe('securityFetch', () => {
         expect(init.body).toBe('{"code":"123456"}');
     });
 
+    it('hands a cache mode to fetch only when asked, and reports the server Retry-After in seconds on a 429', async () => {
+        const f = reply(200);
+        vi.stubGlobal('fetch', f);
+        await securityFetch('/x', { cache: 'no-store' });
+        await securityFetch('/x');
+        expect(f.mock.calls[0][1].cache).toBe('no-store');
+        expect(f.mock.calls[1][1].cache).toBeUndefined();
+        vi.stubGlobal('fetch', reply(429, {}, { 'Retry-After': '7' }));
+        expect(await securityFetch('/x', { method: 'POST' })).toMatchObject({ error: 'throttle', minutes: 1, seconds: 7 });
+        vi.stubGlobal('fetch', reply(429, {}));
+        expect((await securityFetch('/x', { method: 'POST' })).seconds).toBeNull();
+    });
+
     it('does not send a CSRF token on GET', async () => {
         const f = reply(200);
         vi.stubGlobal('fetch', f);

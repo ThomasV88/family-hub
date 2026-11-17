@@ -55,6 +55,10 @@ watch(() => search.focusTick.value, async () => {
 });
 watch(() => search.loaded.value.tick, () => results.value?.focusRow(search.loaded.value.firstIndex));
 
+// The page tells us that recognised text was deleted or consent went off: the same query runs again at once, so no
+// snippet of deleted text stays on screen.
+defineExpose({ refresh: () => search.rescope(true) });
+
 function onClear() {
     search.clear();
     focusInput();
@@ -98,6 +102,7 @@ function onEscape() {
         <p class="doc-search__hint" aria-live="polite" data-testid="search-hint">
             <template v-if="search.state.value === 'too_short'">{{ t('health.search.too_short') }}</template>
         </p>
+        <p v-if="search.dropped.value > 0 && (search.state.value === 'results' || search.state.value === 'empty')" class="doc-search__hint" data-testid="search-dropped">{{ t('health.search.dropped_hint', { n: search.dropped.value }, search.dropped.value) }}</p>
         <p v-if="search.state.value === 'idle' || search.state.value === 'too_short'" class="doc-search__hint doc-search__hint--idle" data-testid="search-idle">
             {{ t('health.search.idle_hint') }}
             <HelpTip topic="health.search" :label="t('health.search.label')" />
@@ -110,7 +115,8 @@ function onEscape() {
             :items="search.items.value"
             :has-more="search.hasMore.value"
             :reliability="reliability"
-            :refreshing="search.refreshing.value"
+            :refreshing="search.refreshing.value || search.waitingRetry.value"
+            :waiting="search.waitingRetry.value"
             :loading-more="search.loadingMore.value"
             :more-error="search.moreError.value"
             :error-kind="search.errorKind.value"

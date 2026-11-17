@@ -26,6 +26,10 @@ export function useDocumentSearch({ scopePersonId = () => null } = {}) {
     // Set when Load more appended rows: the first new row gets focus and "{n} more documents loaded" is announced.
     const loaded = ref({ tick: 0, count: 0, firstIndex: 0 });
     const cooling = ref(false);
+    // A search is held back by the pause after "too many requests": the view shows it is waiting, not dead.
+    const waitingRetry = ref(false);
+    // Words of the last query the search did not use (one-letter words, words with no Latin letter or digit, words past the eighth).
+    const dropped = ref(0);
 
     let timer = null;
     let coolTimer = null;
@@ -61,20 +65,25 @@ export function useDocumentSearch({ scopePersonId = () => null } = {}) {
         moreError.value = null;
         lastBody = null;
         deferred = false;
+        waitingRetry.value = false;
+        dropped.value = 0;
         state.value = next;
     }
 
-    function startCooldown() {
+    // The pause follows the server's Retry-After when it sent one (at least a second, at most two minutes), else 5 seconds.
+    function startCooldown(seconds = null) {
         cooling.value = true;
         if (coolTimer !== null) clearTimeout(coolTimer);
+        const wait = Number.isFinite(seconds) && seconds > 0 ? Math.min(120000, Math.max(1000, Math.ceil(seconds * 1000))) : COOLDOWN_MS;
         coolTimer = setTimeout(() => {
             coolTimer = null;
             cooling.value = false;
+            waitingRetry.value = false;
             if (deferred) {
                 deferred = false;
                 if (trimmed.value.length >= MIN_LENGTH) run(false);
             }
-        }, COOLDOWN_MS);
+        }, wait);
     }
 
     function failureKind(result) {
@@ -83,18 +92,19 @@ export function useDocumentSearch({ scopePersonId = () => null } = {}) {
         return 'generic';
     }
 
-    async function run(withFocus) {
+    async function run(withFocus, force = false) {
         stopTimer();
         const q = trimmed.value;
         if (q.length < MIN_LENGTH) return;
         if (cooling.value) {
             deferred = true;
+            waitingRetry.value = true;
             return;
         }
         const person = scopePersonId();
         const body = { q, ...(person ? { person } : {}) };
         // The same search is already on its way (Enter or the button pressed again): no second request.
-        if (controller !== null && inflightKey === JSON.stringify(body)) {
+        if (!force && controller !== null && inflightKey === JSON.stringify(body)) {
             if (withFocus) pendingFocus = true;
             return;
         }
@@ -117,22 +127,30 @@ export function useDocumentSearch({ scopePersonId = () => null } = {}) {
         if (result.ok && Array.isArray(result.data?.items)) {
             items.value = result.data.items;
             hasMore.value = Boolean(result.data.hasMore);
+            dropped.value = Number.isInteger(result.data.dropped) && result.data.dropped > 0 ? result.data.dropped : 0;
             page.value = 1;
             state.value = items.value.length > 0 ? 'results' : 'empty';
             if (pendingFocus) focusTick.value += 1;
             return;
         }
         if (result.error === 'aborted') return;
+        if (result.status === 423 && result.error === 'cancelled') {
+            // "Confirm it's you" was closed: nothing was sent, the member stays where they are with the query and the results.
+            state.value = items.value.length > 0 ? 'results' : 'idle';
+            return;
+        }
         items.value = [];
         hasMore.value = false;
-        if (result.status === 423 && handleHealthRefusal(result.error)) {
-            reset('idle');
-            query.value = '';
-            return;
+        if (result.status === 423) {
+            if (handleHealthRefusal(result.error)) {
+                reset('idle');
+                query.value = '';
+                return;
+            }
         }
         if (result.status === 429) {
             state.value = 'throttled';
-            startCooldown();
+            startCooldown(result.seconds);
             return;
         }
         errorKind.value = result.ok ? 'generic' : failureKind(result);
@@ -141,6 +159,11 @@ export function useDocumentSearch({ scopePersonId = () => null } = {}) {
 
     async function loadMore() {
         if (loadingMore.value || state.value !== 'results' || !hasMore.value || lastBody === null || refreshing.value) return;
+        if (cooling.value) {
+            // Inside the pause after "too many requests": say so instead of sending another one.
+            moreError.value = 'throttled';
+            return;
+        }
         const mine = seq;
         loadingMore.value = true;
         moreError.value = null;
@@ -162,11 +185,14 @@ export function useDocumentSearch({ scopePersonId = () => null } = {}) {
             return;
         }
         if (result.error === 'aborted') return;
+        // Closed "Confirm it's you": the rows already shown stay, nothing else changes.
+        if (result.status === 423 && result.error === 'cancelled') return;
         if (result.status === 423 && handleHealthRefusal(result.error)) {
             reset('idle');
             query.value = '';
             return;
         }
+        if (result.status === 429) startCooldown(result.seconds);
         moreError.value = result.status === 429 ? 'throttled' : failureKind(result);
     }
 
@@ -192,8 +218,19 @@ export function useDocumentSearch({ scopePersonId = () => null } = {}) {
         return run(true);
     }
 
-    function rescope() {
-        if (trimmed.value.length >= MIN_LENGTH && active.value) run(false);
+    // Runs the same query again (another scope, or the text behind a result was deleted). force: even when the same
+    // search is already on its way, because that answer may still carry text that is gone now.
+    function rescope(force = false) {
+        if (trimmed.value.length < MIN_LENGTH || !active.value) return;
+        if (force) {
+            // No snippet of the old answer stays on screen while the new one is on its way.
+            abortAll();
+            items.value = [];
+            hasMore.value = false;
+            moreError.value = null;
+            state.value = 'loading';
+        }
+        run(false, force);
     }
 
     function retry() {
@@ -211,5 +248,5 @@ export function useDocumentSearch({ scopePersonId = () => null } = {}) {
         abortAll();
     });
 
-    return { query, state, items, hasMore, page, errorKind, refreshing, loadingMore, moreError, focusTick, loaded, cooling, active, setQuery, submit, rescope, retry, loadMore, clear };
+    return { query, state, items, hasMore, page, errorKind, refreshing, loadingMore, moreError, focusTick, loaded, cooling, waitingRetry, dropped, active, setQuery, submit, rescope, retry, loadMore, clear };
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { HeartPulse, Plus } from '@lucide/vue';
@@ -61,6 +61,7 @@ const aiStatuses = useAiStatus(() => props.person?.id ?? null, () => props.ai?.s
 const busy = ref(false);
 // True while the document search shows results: they take the place of the folder and timeline views.
 const searchActive = ref(false);
+const searchRef = ref(null);
 // The view and filter live in the URL; a panel change keeps them and an id-less query drops the panel.
 function go(params, only) {
     const query = {};
@@ -95,6 +96,23 @@ function openSearchResult(item) {
     }
     router.get(`/health/people/${item.personId}`, { panel: 'document', id: item.documentId }, { preserveState: true, preserveScroll: true });
 }
+
+// Whether this person has recognised text: the turn-off confirm names the deletion only then. When the document list does
+// not say (an older answer), the page falls back to the switch of the feature.
+const personHasText = computed(() => {
+    const known = props.documents.some((d) => typeof d.hasText === 'boolean');
+    return known ? props.documents.some((d) => d.hasText === true) : Boolean(props.search?.enabled);
+});
+// The search results are only ever as true as the text behind them: when this person's text was deleted (removal,
+// consent turned off) or a result's document turned out not to be openable, the same query runs again so no snippet of
+// deleted text stays on screen.
+const textSignature = computed(() => `${props.person?.id ?? ''}|${props.person?.aiConsent ? 1 : 0}|${props.documents.map((d) => (d.hasText ? d.id : '')).join(',')}`);
+watch(textSignature, (now, before) => {
+    if (before === undefined || now.split('|')[0] !== before.split('|')[0]) return;
+    searchRef.value?.refresh();
+});
+const missingPanelDocument = computed(() => props.panel?.kind === 'document' && Boolean(props.person) && props.documents.every((d) => d.id !== props.panel.id));
+watch(missingPanelDocument, (now) => { if (now) searchRef.value?.refresh(); });
 const setView = (view) => go({ view: view === 'folders' ? undefined : view, filter: undefined }, ['view', 'filter', 'timeline']);
 const setFilter = (filter) => go({ filter: filter === 'all' ? undefined : filter }, ['timeline', 'filter']);
 
@@ -123,7 +141,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
             <template v-if="person">
                 <PersonSwitcher :people="people" :current-id="person.id" :can-create="canCreate" @add="openNew" />
                 <ArchivedPeople :people="archive.people" />
-                <PersonHeader :person="person" :text-stored="Boolean(search.enabled)" @add-visit="openNewVisit" @add-document="openNewDocument" @edit-person="openEditPerson" @open-archive="openArchive" />
+                <PersonHeader :person="person" :text-stored="personHasText" @add-visit="openNewVisit" @add-document="openNewDocument" @edit-person="openEditPerson" @open-archive="openArchive" />
                 <UiAlert v-if="vaccinationAttention > 0" variant="warning" data-testid="vaccination-alert">
                     <strong>{{ t('health.vaccination.attention_title') }}</strong>
                     {{ t('health.vacc.attention', { n: vaccinationAttention }, vaccinationAttention) }}
@@ -136,7 +154,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                         <VaccinationList :vaccinations="vaccinations" :can-edit="canAddVisit" @add="openNewVaccination" @open="openVaccination" />
                     </div>
                     <section class="health-person__main" data-testid="person-main">
-                        <DocumentSearch v-if="search.enabled" :person="person" :people-count="people.length" :reliability="search.textReliability" @update:active="(v) => (searchActive = v)" @open="openSearchResult" />
+                        <DocumentSearch v-if="search.enabled" ref="searchRef" :person="person" :people-count="people.length" :reliability="search.textReliability" @update:active="(v) => (searchActive = v)" @open="openSearchResult" />
                         <template v-if="!(searchActive && search.enabled)">
                         <UiEmptyState v-if="visits.length === 0 && documents.length === 0" :title="t('health.visits.empty_title')" :body="t('health.visits.empty_body')" :icon="HeartPulse">
                             <template v-if="canAddVisit" #action>

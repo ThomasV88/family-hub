@@ -24,6 +24,15 @@ beforeEach(() => {
 afterEach(() => { resetStaleGate(); vi.unstubAllGlobals(); });
 
 describe('runWithGate', () => {
+    it('opens no dialog when the caller dropped the request while the gate refused it', async () => {
+        const controller = new AbortController();
+        const attempt = vi.fn().mockImplementation(async () => { controller.abort(); return stale; });
+        const out = await runWithGate(attempt, { signal: controller.signal });
+        expect(out).toMatchObject({ ok: false, error: 'aborted' });
+        expect(gate.open).toBe(false);
+        expect(attempt).toHaveBeenCalledTimes(1);
+    });
+
     it('passes a successful call through without opening anything', async () => {
         const attempt = vi.fn().mockResolvedValue(saved);
         expect(await runWithGate(attempt)).toBe(saved);

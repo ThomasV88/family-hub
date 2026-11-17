@@ -24,6 +24,8 @@ const props = defineProps({
     loadingMore: { type: Boolean, default: false },
     moreError: { type: String, default: null },
     errorKind: { type: String, default: 'generic' },
+    // A search is held back by the pause after "too many requests": show that it is waiting.
+    waiting: { type: Boolean, default: false },
 });
 const emit = defineEmits(['clear', 'retry', 'more', 'open']);
 const { t, locale } = useI18n();
@@ -49,6 +51,8 @@ function formatDate(value) {
 }
 const href = (item) => `/health/people/${item.personId}?panel=document&id=${item.documentId}`;
 function onNavigate(item, event) {
+    // Ctrl, Cmd, Shift, Alt or a non-primary button: the browser opens the address itself (a new tab or window).
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button > 0) return;
     event.preventDefault();
     emit('open', item);
 }
@@ -85,6 +89,7 @@ defineExpose({ focusHeading, focusRow });
 
         <div v-else-if="state === 'throttled'" data-testid="search-throttled">
             <UiAlert variant="warning" live>{{ t('health.search.throttled') }}</UiAlert>
+            <UiProgress v-if="waiting" indeterminate :label="t('health.search.searching')" data-testid="search-waiting" />
             <div class="search-results__back"><UiButton variant="ghost" data-testid="search-clear-throttled" @click="emit('clear')">{{ t('health.search.clear') }}</UiButton></div>
         </div>
 
