@@ -15,6 +15,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 beforeEach(function () {
     Route::middleware('web')->group(function () {
         Route::get('/test-probe/health', fn () => 'ok')->middleware('access:module,health,view')->name('test.probe.health');
+        Route::get('/test-probe/shopping', fn () => 'ok')->middleware('access:module,shopping,view')->name('test.probe.shopping');
         Route::post('/test-probe/todo', fn () => 'ok')->middleware('access:module,todo,edit')->name('test.probe.todo');
         Route::get('/test-probe/undeclared', fn () => 'ok')->name('test.probe.undeclared');
         Route::get('/test-probe/admin', fn () => 'ok')->middleware('access:admin')->name('test.probe.admin');
@@ -119,9 +120,21 @@ it('redirects signed-in users away from access:guest routes', function () {
 it('shares auth.access as levels for members and an empty object for guests', function () {
     $this->actingAs(User::factory()->withPreset(Preset::Child)->create())->get('/')
         ->assertInertia(fn (Assert $page) => $page->where('auth.access', [
-            'todo' => 'edit', 'wishlist' => 'edit', 'finance' => 'none', 'health' => 'none',
+            'todo' => 'edit', 'wishlist' => 'edit', 'finance' => 'none', 'health' => 'none', 'shopping' => 'edit',
         ]));
 
     auth()->logout();
     $this->get('/login')->assertInertia(fn (Assert $page) => $page->where('auth.access', []));
+});
+
+it('knows the shopping module: no row means none, the middleware accepts it, it is neither audited nor sensitive', function () {
+    $none = User::factory()->create();
+    $viewer = User::factory()->withGrant(Module::Shopping, AccessLevel::View)->create();
+
+    expect(app(AccessGate::class)->levels($none)['shopping'])->toBe('none')
+        ->and(Module::Shopping->audited())->toBeFalse()
+        ->and(Module::Shopping->sensitive())->toBeFalse();
+
+    $this->actingAs($none)->get('/test-probe/shopping')->assertForbidden();
+    $this->actingAs($viewer)->get('/test-probe/shopping')->assertOk();
 });

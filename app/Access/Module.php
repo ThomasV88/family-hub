@@ -8,6 +8,7 @@ enum Module: string
     case Wishlist = 'wishlist';
     case Finance = 'finance';
     case Health = 'health';
+    case Shopping = 'shopping';
 
     /** Modules whose denied access and changes are written to the audit log. */
     public function audited(): bool
