@@ -11,3 +11,9 @@ export function copyFormat(pages, pageLabel = (n) => `Page ${n}`) {
 
 // The language hint is passed to the text region only when it is one the app knows.
 export const textLang = (language) => (['sk', 'pl', 'en'].includes(language) ? language : undefined);
+
+// One page as paragraphs (blank lines separate them), so a long page is many small blocks instead of one huge text node.
+// Single line breaks stay inside a paragraph (the view keeps them with white-space: pre-wrap).
+export function paragraphs(text) {
+    return String(text ?? '').split(/\n{2,}/).filter((part) => part.trim() !== '');
+}

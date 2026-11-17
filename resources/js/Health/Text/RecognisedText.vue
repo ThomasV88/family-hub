@@ -12,7 +12,7 @@ import UiTag from '../../Components/ui/UiTag.vue';
 import { useToast } from '../../Components/ui/useToast.js';
 import { securityFetch } from '../../Security/securityFetch.js';
 import { handleHealthRefusal } from '../healthRefusal.js';
-import { copyFormat, textLang } from './recognisedText.js';
+import { copyFormat, paragraphs, textLang } from './recognisedText.js';
 
 // "Recognised text" of one document in its panel. The text is never in the page props: it is fetched when the section is
 // expanded (a no-store answer), kept in this component's memory and dropped when the section is collapsed, the document
@@ -73,6 +73,9 @@ watch(() => props.textSaved, (now, before) => {
         if (expanded.value) load();
     }
 });
+// The server no longer has a text for this document (a consent turn-off purge, a removal elsewhere, a bulk purge): the
+// copy in memory goes at once, and a text saved later is fetched again.
+watch(hasText, (now) => { if (!now) drop(); });
 // Another document: the text goes with the old one.
 watch(() => props.document.id, () => { drop(); gone.value = false; removed.value = false; confirmOpen.value = false; });
 
@@ -80,7 +83,7 @@ async function load() {
     const mine = ++seq;
     loading.value = true;
     loadError.value = null;
-    const result = await securityFetch(url.value, { method: 'GET', replay: true });
+    const result = await securityFetch(url.value, { method: 'GET', replay: true, cache: 'no-store' });
     if (mine !== seq) return;
     loading.value = false;
     if (result.ok && Array.isArray(result.data?.pages)) {
@@ -162,7 +165,7 @@ const textLabel = computed(() => t('health.document_text.region_aria', { title: 
                 <HelpTip topic="health.document_text" :label="t('health.document_text.title')" />
                 <span class="rtext__tags">
                     <UiTag v-if="uncertain" variant="warn" :icon="TriangleAlert" data-testid="rtext-tag-errors">{{ t('health.document_text.tag_errors') }}</UiTag>
-                    <UiTag v-if="partial" :icon="Layers" data-testid="rtext-tag-partial">{{ t('health.document_text.tag_partial', { n: pagesRead, total: pagesTotal }) }}</UiTag>
+                    <UiTag v-if="partial" :icon="Layers" data-testid="rtext-tag-partial">{{ t('health.document_text.tag_partial', { n: pagesRead, total: pagesTotal }, pagesRead) }}</UiTag>
                 </span>
             </div>
             <p v-if="rereading" class="rtext__muted" role="status" data-testid="rtext-rereading">{{ t('health.document_text.being_reread') }}</p>
@@ -178,12 +181,12 @@ const textLabel = computed(() => t('health.document_text.region_aria', { title: 
                     </UiAlert>
                     <template v-else-if="data">
                         <p class="rtext__muted rtext__info" data-testid="rtext-info"><Info :size="16" :stroke-width="1.75" aria-hidden="true" />{{ t('health.document_text.info') }}</p>
-                        <UiAlert v-if="partial" variant="info" data-testid="rtext-partial-alert">{{ t('health.document_text.partial_alert', { n: pagesRead, total: pagesTotal }) }}</UiAlert>
+                        <UiAlert v-if="partial" variant="info" data-testid="rtext-partial-alert">{{ t('health.document_text.partial_alert', { n: pagesRead, total: pagesTotal }, pagesRead) }}</UiAlert>
                         <div class="rtext__box" role="region" tabindex="0" :aria-label="textLabel" :lang="textLang(data.language)" data-testid="rtext-text">
                             <div v-for="page in pages" :key="page.page" class="rtext__page" data-testid="rtext-page">
                                 <p v-if="multiPage" class="rtext__pagelabel">{{ t('health.document_text.page', { n: page.page }) }}</p>
                                 <p v-if="String(page.text ?? '').trim() === ''" class="rtext__muted rtext__empty">{{ t('health.document_text.empty_page') }}</p>
-                                <p v-else class="rtext__text">{{ page.text }}</p>
+                                <template v-else><p v-for="(paragraph, index) in paragraphs(page.text)" :key="index" class="rtext__text">{{ paragraph }}</p></template>
                             </div>
                         </div>
                         <UiAlert v-if="removeError" variant="danger" live data-testid="rtext-remove-failed">{{ removeError === 'session' ? t('health.document_text.error_session') : t('health.document_text.remove_failed') }}</UiAlert>
@@ -229,6 +232,7 @@ const textLabel = computed(() => t('health.document_text.region_aria', { title: 
 .rtext__box:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .rtext__page + .rtext__page { margin-top: var(--space-4); }
 .rtext__pagelabel { margin: 0 0 var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--color-border); font-size: var(--text-sm); font-weight: 600; color: var(--color-text-muted); }
+.rtext__text + .rtext__text { margin-top: var(--space-3); }
 .rtext__text { margin: 0; max-width: 72ch; font-size: var(--text-base); font-weight: 400; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
 .rtext__empty { padding-block: var(--space-2); }
 .rtext__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
