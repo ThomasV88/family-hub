@@ -185,7 +185,7 @@
         },
         {
           "type": "p",
-          "text": "Zoznam má jednu pripomienku. Push upozornenie dostane iba zodpovedná osoba, nikto iný. Musí mať na svojom zariadení zapnuté push upozornenia v **Nastaveniach**, **Upozornenia**, inak sa k nej nemusí dostať; vtedy nastavenia ukážu poznámku s jej menom. Upozornenie hovorí iba **Čas na nákup** a otvorí zoznam, takže názov zoznamu sa na zamknutej obrazovke nezobrazí."
+          "text": "Zoznam má jednu pripomienku. Push upozornenie dostane iba zodpovedná osoba, nikto iný. Musí mať na svojom zariadení zapnuté push upozornenia v **Nastaveniach**, **Upozornenia**, inak sa k nej nemusí dostať; vtedy nastavenia ukážu poznámku s jej menom. Upozornenie hovorí iba **Čas na nákup** a otvorí zoznam, takže názov zoznamu sa na zamknutej obrazovke nezobrazí. Ak je push vypnutý alebo zariadenie nie je registrované, keď príde čas, pripomienka sa nestratí: odošle sa hneď, ako sa push zapne. Pripomienka s oneskorením viac ako 24 hodín sa už neodošle."
         },
         {
           "type": "p",

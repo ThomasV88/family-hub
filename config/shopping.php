@@ -30,5 +30,8 @@ return [
         'per_recipient_day' => 5,
     ],
 
+    // A reminder that is still unsent this long after its time is never fired (the scheduler was down, or push was off).
+    'reminder_max_age_hours' => 24,
+
     'archive_per_page' => 20,
 ];

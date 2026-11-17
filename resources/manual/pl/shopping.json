@@ -185,7 +185,7 @@
         },
         {
           "type": "p",
-          "text": "Lista ma jedno przypomnienie. Powiadomienie push otrzymuje tylko osoba odpowiedzialna, nikt inny. Musi mieć na swoim urządzeniu włączone powiadomienia push w **Ustawieniach**, **Powiadomienia**, inaczej może do niej nie dotrzeć; wtedy ustawienia pokażą uwagę z jej imieniem. Powiadomienie mówi tylko **Czas na zakupy** i otwiera listę, więc nazwa listy nie pojawia się na zablokowanym ekranie."
+          "text": "Lista ma jedno przypomnienie. Powiadomienie push otrzymuje tylko osoba odpowiedzialna, nikt inny. Musi mieć na swoim urządzeniu włączone powiadomienia push w **Ustawieniach**, **Powiadomienia**, inaczej może do niej nie dotrzeć; wtedy ustawienia pokażą uwagę z jej imieniem. Powiadomienie mówi tylko **Czas na zakupy** i otwiera listę, więc nazwa listy nie pojawia się na zablokowanym ekranie. Jeśli powiadomienia push są wyłączone lub urządzenie nie jest zarejestrowane, gdy nadejdzie czas, przypomnienie nie przepada: zostanie wysłane, gdy tylko włączysz push. Przypomnienie spóźnione o ponad 24 godziny nigdy nie zostanie wysłane."
         },
         {
           "type": "p",

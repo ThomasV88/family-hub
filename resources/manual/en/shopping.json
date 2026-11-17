@@ -185,7 +185,7 @@
         },
         {
           "type": "p",
-          "text": "A list has one reminder. A push notification goes to the responsible person only, nobody else. They must have push notifications turned on for their device in **Settings**, **Notifications**, otherwise it may not reach them; if so, the settings show a note with their name. The notification says only **Time to shop** and opens the list, so the name of the list does not appear on a locked screen."
+          "text": "A list has one reminder. A push notification goes to the responsible person only, nobody else. They must have push notifications turned on for their device in **Settings**, **Notifications**, otherwise it may not reach them; if so, the settings show a note with their name. The notification says only **Time to shop** and opens the list, so the name of the list does not appear on a locked screen. If push is off or the device is not registered when the time comes, the reminder is not lost: it is sent as soon as push is turned on. A reminder more than 24 hours late is never sent."
         },
         {
           "type": "p",

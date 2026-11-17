@@ -75,7 +75,7 @@ it('queues one push row for the responsible person only, once', function () {
         ->and($list->fresh()->reminder_enqueued_at)->not->toBeNull();
 });
 
-it('consumes the reminder without a row when push is off or there is no subscription', function () {
+it('keeps the reminder pending without a row when push is off or there is no subscription', function () {
     $off = F::user();
     app(NotificationPreferences::class)->set($off, 'push', true); // on, but no subscription
     $a = shoppingDueList($off);
@@ -87,8 +87,45 @@ it('consumes the reminder without a row when push is off or there is no subscrip
     runShoppingReminders();
 
     expect(OutboxItem::query()->count())->toBe(0)
-        ->and($a->fresh()->reminder_enqueued_at)->not->toBeNull()
-        ->and($c->fresh()->reminder_enqueued_at)->not->toBeNull();
+        ->and($a->fresh()->reminder_enqueued_at)->toBeNull()
+        ->and($c->fresh()->reminder_enqueued_at)->toBeNull();
+});
+
+it('sends a pending reminder once push is turned on before the cutoff', function () {
+    $resp = F::user();
+    $list = shoppingDueList(F::user(), $resp);
+
+    runShoppingReminders();
+    expect(OutboxItem::query()->count())->toBe(0);
+
+    Carbon::setTestNow(now()->addHours(3));
+    shoppingPushOn($resp);
+    runShoppingReminders();
+
+    expect(OutboxItem::query()->sole()->subject_id)->toBe($list->id)
+        ->and($list->fresh()->reminder_enqueued_at)->not->toBeNull();
+});
+
+it('never fires a reminder older than the cutoff and leaves it pending', function () {
+    $resp = shoppingPushOn(F::user());
+    $old = shoppingDueList(F::user(), $resp, ['remind_at' => now()->subHours(25)]);
+    $fresh = shoppingDueList(F::user(), $resp, ['remind_at' => now()->subHours(23)]);
+
+    runShoppingReminders();
+
+    expect(OutboxItem::query()->sole()->subject_id)->toBe($fresh->id)
+        ->and($old->fresh()->reminder_enqueued_at)->toBeNull();
+});
+
+it('drops a queued reminder at send time once it is older than the cutoff', function () {
+    $resp = shoppingPushOn(F::user());
+    shoppingDueList(F::user(), $resp);
+    $row = shoppingReminderRow();
+
+    Carbon::setTestNow(now()->addHours(25));
+    shoppingDeliver($row);
+
+    expect($row->fresh()->status->value)->toBe('skipped')->and($this->fake->sent)->toHaveCount(0);
 });
 
 it('gives the creator the reminder when the responsible person was removed, lost access or cannot sign in', function (string $how) {

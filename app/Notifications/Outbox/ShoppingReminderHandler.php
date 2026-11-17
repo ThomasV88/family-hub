@@ -34,6 +34,7 @@ class ShoppingReminderHandler implements OutboxHandler
             && $list->status !== ListStatus::Done
             && is_int($at)
             && $list->remind_at?->timestamp === $at
+            && $list->remind_at->gt(now()->subHours((int) config('shopping.reminder_max_age_hours')))
             && $this->responsible->effective($list)->id === $user->id
             && $user->canSignIn()
             && $this->gate->allows($user, Module::Shopping, AccessLevel::View);
