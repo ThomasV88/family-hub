@@ -46,7 +46,7 @@ final class DocumentTextsSeeder
             if (! isset($documents[$key])) {
                 return;
             }
-            $outcome = $store->save($documents[$key]['id'], $extractionId, $by, 'codex', 'default', $language, $pages, $total ?? count($pages), $complete);
+            $outcome = $store->saveStandalone($documents[$key]['id'], $by, 'codex', 'default', $language, $pages, $total ?? count($pages), $complete, $extractionId);
             if ($outcome === SaveOutcome::Saved) {
                 $counts['texts']++;
             }

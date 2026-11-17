@@ -84,7 +84,7 @@ it('cuts only the inline prompt, on a line boundary, within the byte limit', fun
 });
 
 it('is cut for a maximal text without breaking the limit', function () {
-    $task = new ExtractFromTextTask([str_repeat('a', 12000)]);
+    $task = new ExtractFromTextTask([str_repeat('a', 9900)]);
 
     expect(strlen($task->inlinePrompt(null)))->toBeLessThanOrEqual(90000);
     $big = new ExtractFromTextTask(array_fill(0, 16, str_repeat('abcdefghij ', 1090)));
@@ -104,4 +104,19 @@ it('uses the extraction schema and the unchanged validator', function () {
     foreach ($bad['issues'] as $code) {
         expect($code)->toMatch(PromptBuilder::ISSUE_PATTERN);
     }
+});
+
+it('counts the whole pages the inline prompt carries, and all of them when nothing is cut', function () {
+    $small = new ExtractFromTextTask(['One', 'Two', 'Three']);
+    $small->inlinePrompt(null);
+    expect($small->pagesIncluded())->toBe(3);
+
+    $pages = array_fill(0, 12, str_repeat('abcdefghij ', 1090));
+    $big = new ExtractFromTextTask($pages);
+    $inline = $big->inlinePrompt(null);
+    $included = $big->pagesIncluded();
+
+    expect($included)->toBeLessThan(12)->toBeGreaterThanOrEqual(1);
+    // Every counted page is whole in the prompt, the next one is not.
+    expect(substr_count($inline, trim($pages[0])))->toBe($included);
 });

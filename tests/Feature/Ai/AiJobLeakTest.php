@@ -90,7 +90,7 @@ beforeEach(function () {
     $this->scripts = [];
     $this->root = sys_get_temp_dir().'/lk-work-'.strtolower((string) Str::ulid());
     config([
-        'ai.work_dir' => $this->root, 'ai.codex.home' => $this->root, 'ai.codex.model' => null,
+        'ai.work_dir' => $this->root, 'ai.codex.home' => $this->root, 'ai.codex.model' => null, 'ai.ocr.enabled' => true,
         'ai.copilot.home' => $this->root.'-copilot', 'ai.copilot.cache' => $this->root.'-cache', 'ai.copilot.model' => null,
     ]);
 });
@@ -373,7 +373,7 @@ it('ends as the content-free worker_lost failure when the text write raises an e
 it('keeps the stored text out of every sink when step 2 of a reused text fails with output full of the canary', function () {
     $s = lkSetup();
     DB::table('medical_ai_extractions')->where('id', $s['run']->id)->update(['mode' => 'full']);
-    app(DocumentTextStore::class)->save($s['doc']->id, null, $s['user']->id, 'codex', 'gpt-test', 'sk', ['ZxCanaryOcr one', 'ZxCanaryOcr two'], 2, true);
+    app(DocumentTextStore::class)->saveStandalone($s['doc']->id, $s['user']->id, 'codex', 'gpt-test', 'sk', ['ZxCanaryOcr one', 'ZxCanaryOcr two'], 2, true);
     $this->scripts[] = $script = FakeCodex::echoing('ZxCanaryOcr');
     config(['ai.codex.binary' => $script]);
     $logs = lkLogSizes();

@@ -50,7 +50,7 @@ function twoStepSetup(string $mode = 'full', string $kind = 'image', int $pages 
 function twoStepStoreText(array $s, array $pages, int $total, bool $complete, int $version = 1): void
 {
     Storage::disk('medical')->put($s['doc']->path, 'garbage');
-    app(DocumentTextStore::class)->save($s['doc']->id, null, $s['user']->id, 'codex', 'gpt-test', 'sk', $pages, $total, $complete);
+    app(DocumentTextStore::class)->saveStandalone($s['doc']->id, $s['user']->id, 'codex', 'gpt-test', 'sk', $pages, $total, $complete);
     if ($version !== 1) {
         DB::table('medical_document_texts')->where('document_id', $s['doc']->id)->update(['text_version' => $version]);
     }
@@ -95,7 +95,7 @@ beforeEach(function () {
     $this->files = [];
     $this->root = sys_get_temp_dir().'/ts-work-'.strtolower((string) Str::ulid());
     config([
-        'ai.work_dir' => $this->root, 'ai.codex.home' => $this->root, 'ai.codex.model' => null,
+        'ai.work_dir' => $this->root, 'ai.codex.home' => $this->root, 'ai.codex.model' => null, 'ai.ocr.enabled' => true,
         'ai.timeouts.abort_check_seconds' => 0.2,
         'ai.copilot.home' => $this->root.'-copilot', 'ai.copilot.cache' => $this->root.'-cache', 'ai.copilot.model' => null,
     ]);
@@ -311,6 +311,31 @@ it('hands step 2 to Copilot through an inline prompt under the byte limit and re
         ->and(strlen($p1))->toBeLessThanOrEqual(90000)->and(strlen($p2))->toBeLessThanOrEqual(90000)
         ->and($p1)->toContain('=== PAGE 1 ===')->and($p1)->not->toContain('Problems:')
         ->and($p2)->toContain('Problems:')->not->toContain('ZxInjected');
+
+    // The prompt was cut: the run reports the pages that really were in it, and the stored text still has all twelve.
+    $markers = preg_match_all('/=== PAGE \d+ ===/', $p1);
+    $row = twoStepRow($s['run']);
+    expect((int) $row->pages_read)->toBeLessThan(12)->and((int) $row->pages_read)->toBeGreaterThanOrEqual($markers - 1)->and((int) $row->pages_read)->toBeLessThanOrEqual($markers)
+        ->and((int) $row->pages_total)->toBe(12)->and((int) twoStepText($s['doc'])->pages_read)->toBe(12);
+});
+
+it('reports every page read when the text fits the Copilot prompt', function () {
+    $s = twoStepSetup('full', 'pdf', 2);
+    twoStepStoreText($s, ['Short one', 'Short two'], 2, true);
+    AiAgentSetting::query()->toBase()->where('agent', 'copilot')->update(['enabled' => true]);
+    DB::table('ai_notice_acks')->where('user_id', $s['user']->id)->update(['providers' => 'codex,copilot']);
+    twoStepFake($this, ['x_fail_nth' => 1, 'x_fail_kind' => 'quota']);
+    $counter = sys_get_temp_dir().'/ts-cop-'.bin2hex(random_bytes(4));
+    $this->files[] = $counter;
+    $this->files[] = $script = FakeCopilot::sequence([json_encode(twoStepEntries())], $counter);
+    config(['ai.copilot.binary' => $script]);
+
+    twoStepRun($s['run']);
+
+    foreach (glob($counter.'*') ?: [] as $f) {
+        $this->files[] = $f;
+    }
+    expect(twoStepRow($s['run'])->agent)->toBe('copilot')->and((int) twoStepRow($s['run'])->pages_read)->toBe(2);
 });
 
 it('keeps document text from imitating the end marker in the prompt', function () {

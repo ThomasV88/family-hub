@@ -3,6 +3,7 @@
 use App\Access\AccessLevel;
 use App\Medical\Ai\RunExtractionJob;
 use App\Medical\Ai\Work\WorkDir;
+use App\Medical\Queries\DocumentTextStore;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Viewer;
 use App\Models\AiAgentSetting;
@@ -102,7 +103,7 @@ beforeEach(function () {
     $this->files = [];
     $this->root = sys_get_temp_dir().'/tx-work-'.strtolower((string) Str::ulid());
     config([
-        'ai.work_dir' => $this->root, 'ai.codex.home' => $this->root, 'ai.codex.model' => null,
+        'ai.work_dir' => $this->root, 'ai.codex.home' => $this->root, 'ai.codex.model' => null, 'ai.ocr.enabled' => true,
         'ai.timeouts.abort_check_seconds' => 0.2,
         'ai.copilot.home' => $this->root.'-copilot', 'ai.copilot.cache' => $this->root.'-cache', 'ai.copilot.model' => null,
     ]);
@@ -335,4 +336,72 @@ it('transcribes a converted HEIC photo as one page', function () {
     txStepRun($s['run']);
 
     expect(txStepCalls($log))->toBe(['T 1'])->and(txStepText($s['doc'])->body)->toBe('Page 1')->and(txStepRow($s['run'])->status)->toBe('text_saved');
+});
+
+it('stores nothing and reads no page while ai.ocr.enabled is off: a text run is cancelled, a full run is a plain entries run', function () {
+    config(['ai.ocr.enabled' => false]);
+    $text = txStepSetup('text');
+    $log = txStepFake($this);
+
+    txStepRun($text['run']);
+
+    expect(txStepCalls($log))->toBe([])->and(txStepRow($text['run'])->status)->toBe('cancelled')->and(txStepRow($text['run'])->cancel_reason)->toBe('user')
+        ->and(txStepText($text['doc']))->toBeNull();
+
+    $full = txStepSetup('full');
+    txStepRun($full['run']);
+
+    $row = txStepRow($full['run']);
+    expect(txStepCalls($log))->toBe(['X'])->and($row->status)->toBe('ready')->and($row->mode)->toBe('entries')->and((int) $row->prompt_version)->toBe(1)
+        ->and(txStepText($full['doc']))->toBeNull();
+});
+
+it('does not replace a complete earlier text with a partial one when the run fails after the first batch', function () {
+    $s = txStepSetup('text', 'pdf', 9);
+    DB::table('medical_subjects')->where('id', $s['doc']->subject_id)->update(['ai_consent' => true]);
+    app(DocumentTextStore::class)->saveStandalone((string) $s['doc']->id, $s['user']->id, 'codex', 'm', 'sk', array_map(fn ($n) => "Old $n", range(1, 9)), 9, true);
+    $before = txStepText($s['doc']);
+    $log = txStepFake($this, ['fail_nth' => 2]);
+
+    txStepRun($s['run']);
+
+    $after = txStepText($s['doc']);
+    expect(txStepCalls($log))->toBe(['T 4', 'T 4'])
+        ->and($after->body)->toBe($before->body)->and($after->complete)->toBeTrue()->and((int) $after->pages_read)->toBe(9)->and($after->extraction_id)->toBeNull()
+        ->and(txStepRow($s['run'])->status)->toBe('failed')->and(txStepRow($s['run'])->failure_code)->toBe('invalid_output');
+});
+
+it('does not replace a complete earlier text when the time budget ends the run after the first batch', function () {
+    config(['ai.ocr.seconds_per_page' => 1000]);
+    $s = txStepSetup('text', 'pdf', 9);
+    DB::table('medical_subjects')->where('id', $s['doc']->subject_id)->update(['ai_consent' => true]);
+    app(DocumentTextStore::class)->saveStandalone((string) $s['doc']->id, $s['user']->id, 'codex', 'm', 'sk', array_map(fn ($n) => "Old $n", range(1, 9)), 9, true);
+    $log = txStepFake($this);
+
+    txStepRun($s['run']);
+
+    expect(txStepCalls($log))->toBe(['T 4'])->and(txStepText($s['doc'])->body)->toStartWith('Old 1')->and((int) txStepText($s['doc'])->pages_read)->toBe(9)
+        ->and(txStepRow($s['run'])->status)->toBe('failed')->and(txStepRow($s['run'])->failure_code)->toBe('timeout');
+});
+
+it('replaces an earlier text once the new run completes it', function () {
+    $s = txStepSetup('text', 'pdf', 9);
+    DB::table('medical_subjects')->where('id', $s['doc']->subject_id)->update(['ai_consent' => true]);
+    app(DocumentTextStore::class)->saveStandalone((string) $s['doc']->id, $s['user']->id, 'codex', 'm', 'sk', array_map(fn ($n) => "Old $n", range(1, 9)), 9, true);
+    txStepFake($this);
+
+    txStepRun($s['run']);
+
+    expect(txStepText($s['doc'])->body)->toStartWith('Page 1')->and(txStepText($s['doc'])->extraction_id)->toBe($s['run']->id)
+        ->and(txStepRow($s['run'])->status)->toBe('text_saved');
+});
+
+it('fails an absurdly long PDF content-free as unsupported instead of tripping the page-count check', function () {
+    $s = txStepSetup('text', 'pdf', 10001);
+    $log = txStepFake($this);
+
+    txStepRun($s['run']);
+
+    expect(txStepCalls($log))->toBe([])->and(txStepRow($s['run'])->status)->toBe('failed')->and(txStepRow($s['run'])->failure_code)->toBe('unsupported_document')
+        ->and(txStepText($s['doc']))->toBeNull();
 });

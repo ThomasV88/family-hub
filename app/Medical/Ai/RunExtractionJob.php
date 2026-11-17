@@ -50,6 +50,9 @@ class RunExtractionJob implements ShouldQueue
     /** Seconds between the access re-checks inside the abort loop. */
     private const ACCESS_RECHECK_SECONDS = 10;
 
+    /** The most pages the stored text can record (medical_document_texts.pages_total CHECK). */
+    private const MAX_PAGES_TOTAL = 10000;
+
     private ?string $abortWhy = null;
 
     public function __construct(public string $extractionId)
@@ -123,6 +126,14 @@ class RunExtractionJob implements ShouldQueue
         $pagesRead = 1;
         $pagesTotal = 1;
         $mode = $claim['mode'] ?? 'entries';
+        if ($mode !== 'entries' && ! config('ai.ocr.enabled')) {
+            // Rollback of the feature while rows were queued or parked: nothing is read for the text, nothing is stored.
+            if ($mode === 'text') {
+                return $query->finishCancelled($id, 'user', $label, 0) ? 'cancelled' : null;
+            }
+            $mode = 'entries';
+            $query->downgradeToEntries($id);
+        }
 
         // A full run on a document whose stored text is current and read up to the page cap does not read the pages again.
         $reused = $mode === 'full' ? $this->reusableText($query, $id) : null;
@@ -131,8 +142,8 @@ class RunExtractionJob implements ShouldQueue
             $saved = app(DocumentTextStore::class)->save(
                 $claim['document_id'], $id, $claim['started_by'], $reused['agent'], $reused['model'], $reused['language'], $reused['pages'], $reused['pagesTotal'], $reused['complete'],
             );
-            if ($saved !== SaveOutcome::Saved) {
-                return $query->finishCancelled($id, $saved === SaveOutcome::ConsentOff ? 'consent' : 'access', $label, 0) ? 'cancelled' : null;
+            if ($saved !== SaveOutcome::Saved && $saved !== SaveOutcome::Kept) {
+                return $query->finishCancelled($id, $this->saveRefusal($query, $saved), $label, 0) ? 'cancelled' : null;
             }
         }
 
@@ -169,6 +180,10 @@ class RunExtractionJob implements ShouldQueue
             }
             $images = array_map('basename', $pages['written']);
             $pagesRead = count($images);
+            // The stored text keeps the page count in a column limited to 10000 pages: a longer file is refused content-free.
+            if ($pages['total'] > self::MAX_PAGES_TOTAL) {
+                return $query->finishFailed($id, FailureCode::UnsupportedDocument, $label, 0) ? 'failed' : null;
+            }
             $pagesTotal = $pages['total'];
         } else {
             return $query->finishFailed($id, FailureCode::UnsupportedDocument, $label, 0) ? 'failed' : null;
@@ -180,6 +195,7 @@ class RunExtractionJob implements ShouldQueue
 
         $textPages = null;
         $textTotal = null;
+        $step = null;
         if ($mode !== 'entries' && $reused === null) {
             // Step 1: the text of the pages, stored after every validated batch.
             $step = $this->transcribe($query, $registry, $health, $claim, $workDir, $images, $pagesTotal, $mode, $deadline);
@@ -194,6 +210,11 @@ class RunExtractionJob implements ShouldQueue
                     return 'succeeded';
                 }
 
+                if ($step['kept']) {
+                    // A better text of an earlier run stays; this run could not replace it, so it ends as what stopped it.
+                    return $query->finishFailed($id, $step['code'], $step['model'] ?? $label, $step['durationMs']) ? 'failed' : null;
+                }
+
                 return $query->finishCancelled($id, $query->abortReason($id) ?? 'user', $step['model'] ?? $label, $step['durationMs']) ? 'cancelled' : null;
             }
         }
@@ -201,7 +222,7 @@ class RunExtractionJob implements ShouldQueue
         $promptVersion = ExtractionSchema::PROMPT_VERSION;
         if ($mode === 'full') {
             // Step 2: the entries are read from the stored text (no image is sent). The text stays whatever happens here.
-            $text = $reused ?? $query->savedText($id);
+            $text = $reused ?? $query->savedText($id) ?? (($step['kept'] ?? false) ? $query->storedText($id) : null);
             $pages = $text['pages'] ?? [];
             if (count(array_filter($pages, fn (string $page) => trim($page) !== '')) === 0) {
                 return $query->finishFailed($id, FailureCode::UnreadableDocument, $label, 0) ? 'failed' : null;
@@ -209,7 +230,8 @@ class RunExtractionJob implements ShouldQueue
             $textPages = $text['pagesRead'];
             $textTotal = $text['pagesTotal'];
             $promptVersion = ExtractionSchema::TEXT_PROMPT_VERSION;
-            $r = $this->attempt($query, $registry, $health, $claim, $workDir, $images, [], new ExtractFromTextTask($pages), $deadline);
+            $task = new ExtractFromTextTask($pages);
+            $r = $this->attempt($query, $registry, $health, $claim, $workDir, $images, [], $task, $deadline);
         } else {
             // The image-to-entries call: the whole run in mode entries.
             $r = $this->attempt($query, $registry, $health, $claim, $workDir, $images, $images, null, $deadline);
@@ -223,6 +245,10 @@ class RunExtractionJob implements ShouldQueue
 
         $agent = $r['agent'];
         $outcome = $r['outcome'];
+        if (isset($task) && $textPages !== null && $agent->key() === 'copilot') {
+            // The Copilot prompt may have cut trailing pages (argv limit): the run reports the pages it really read.
+            $textPages = min($textPages, $task->pagesIncluded());
+        }
         $done = $query->finishReady($id, $outcome->payload, (int) $outcome->entryCount, $textPages ?? $pagesRead, $textTotal ?? $pagesTotal, $agent->key(), $outcome->model, $outcome->durationMs, $promptVersion);
         if ($done) {
             $this->safely(fn () => $health->recordSuccess($agent->key()));
@@ -267,12 +293,16 @@ class RunExtractionJob implements ShouldQueue
      *
      * @param  array{subject_id: string, document_id: string, started_by: int, bulk_run_id: ?string, mode?: string}  $claim
      * @param  list<string>  $images
-     * @return array{end: bool, status: ?string, agent: ?string, model: ?string, durationMs: int}
+     *                                'kept' is true when a batch was not stored because a better text of an earlier run stays; 'code' is what stopped the
+     *                                loop early (Timeout when the budget did).
+     * @return array{end: bool, status: ?string, agent: ?string, model: ?string, durationMs: int, kept: bool, code: FailureCode}
      */
     private function transcribe(AiJobQuery $query, AgentRegistry $registry, AgentHealth $health, array $claim, WorkDir $workDir, array $images, int $pagesTotal, string $mode, int $deadline): array
     {
         $id = $this->extractionId;
-        $last = ['end' => false, 'status' => null, 'agent' => null, 'model' => null, 'durationMs' => 0];
+        $last = ['end' => false, 'status' => null, 'agent' => null, 'model' => null, 'durationMs' => 0, 'kept' => false, 'code' => FailureCode::Timeout];
+        $kept = false;
+        $stop = FailureCode::Timeout;
 
         $text = $query->savedText($id);
         $pages = $text['pages'] ?? [];
@@ -300,6 +330,7 @@ class RunExtractionJob implements ShouldQueue
                 }
                 // Text is already stored: keep it, record the failed call and stop with a partial text.
                 $query->closeAttempt($id, 'failed', $r['code'], $r['model'], $r['durationMs']);
+                $stop = $r['code'];
                 break;
             }
 
@@ -315,19 +346,30 @@ class RunExtractionJob implements ShouldQueue
             $saved = app(DocumentTextStore::class)->save(
                 $claim['document_id'], $id, $claim['started_by'], $agent->key(), $outcome->model, $language, $pages, $pagesTotal, count($pages) === $pagesTotal,
             );
-            if ($saved !== SaveOutcome::Saved) {
-                $why = $saved === SaveOutcome::ConsentOff ? 'consent' : 'access';
-
-                return ['end' => true, 'status' => $query->finishCancelled($id, $why, $outcome->model, $outcome->durationMs) ? 'cancelled' : null] + $last;
+            if ($saved === SaveOutcome::Kept) {
+                $kept = true;
+            } elseif ($saved !== SaveOutcome::Saved) {
+                return ['end' => true, 'status' => $query->finishCancelled($id, $this->saveRefusal($query, $saved), $outcome->model, $outcome->durationMs) ? 'cancelled' : null] + $last;
             }
             $query->closeStep($id, $outcome->model, $outcome->durationMs);
             $this->safely(fn () => $health->recordSuccess($agent->key()));
 
-            $last = ['end' => false, 'status' => null, 'agent' => $agent->key(), 'model' => $outcome->model, 'durationMs' => $outcome->durationMs];
+            $last = ['end' => false, 'status' => null, 'agent' => $agent->key(), 'model' => $outcome->model, 'durationMs' => $outcome->durationMs, 'kept' => $kept, 'code' => $stop];
             $offset += $count;
         }
 
-        return $last;
+        return ['kept' => $kept, 'code' => $stop] + $last;
+    }
+
+    /** The cancel reason of a save the store refused: consent, a closed or cancel-requested row, the feature flag, or access (archived, gone). */
+    private function saveRefusal(AiJobQuery $query, SaveOutcome $saved): string
+    {
+        return match ($saved) {
+            SaveOutcome::ConsentOff => 'consent',
+            SaveOutcome::NotRunning => $query->abortReason($this->extractionId) ?? 'user',
+            SaveOutcome::Disabled => 'user',
+            default => 'access',
+        };
     }
 
     /**

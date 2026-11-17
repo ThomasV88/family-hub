@@ -5,6 +5,7 @@ use App\Medical\Documents\Text\SaveOutcome;
 use App\Medical\Queries\DocumentTextStore;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Viewer;
+use App\Models\MedicalAiExtraction;
 use App\Models\MedicalDocument;
 use App\Models\MedicalSubject;
 use App\Models\User;
@@ -30,7 +31,7 @@ function docTextStoreScene(AccessLevel $level = AccessLevel::Edit, bool $consent
 
 function docTextStoreSave(MedicalDocument $doc, array $pages = ['Žltačka'], int $total = 1, bool $complete = true): SaveOutcome
 {
-    return app(DocumentTextStore::class)->save((string) $doc->id, null, 1, 'codex', 'm', 'sk', $pages, $total, $complete);
+    return app(DocumentTextStore::class)->saveStandalone((string) $doc->id, 1, 'codex', 'm', 'sk', $pages, $total, $complete);
 }
 
 it('saves the normalised text with consent on', function () {
@@ -59,7 +60,7 @@ it('replaces the row on a second save', function () {
 
 it('whitelists the language and records a partial read honestly', function () {
     [, , $doc] = docTextStoreScene();
-    app(DocumentTextStore::class)->save((string) $doc->id, null, 1, null, null, 'de', ['a'], 3, true);
+    app(DocumentTextStore::class)->saveStandalone((string) $doc->id, 1, null, null, 'de', ['a'], 3, true);
 
     $row = DocumentTextFixtures::row($doc);
     expect($row->language)->toBeNull()->and($row->pages_read)->toBe(1)->and((bool) $row->complete)->toBeFalse();
@@ -87,8 +88,8 @@ it('answers Missing for an unknown or malformed document', function () {
     [, , $doc] = docTextStoreScene();
     $store = app(DocumentTextStore::class);
 
-    expect($store->save((string) Str::uuid(), null, 1, null, null, null, ['a'], 1, true))->toBe(SaveOutcome::Missing)
-        ->and($store->save('nope', null, 1, null, null, null, ['a'], 1, true))->toBe(SaveOutcome::Missing);
+    expect($store->saveStandalone((string) Str::uuid(), 1, null, null, null, ['a'], 1, true))->toBe(SaveOutcome::Missing)
+        ->and($store->saveStandalone('nope', 1, null, null, null, ['a'], 1, true))->toBe(SaveOutcome::Missing);
 });
 
 it('propagates a database error without writing or logging the text', function () {
@@ -96,7 +97,7 @@ it('propagates a database error without writing or logging the text', function (
     $logs = glob(storage_path('logs/*.log')) ?: [];
     $before = array_sum(array_map('filesize', $logs));
 
-    expect(fn () => app(DocumentTextStore::class)->save((string) $doc->id, null, 1, null, null, 'sk', [DocumentTextFixtures::CANARY], 0, false))
+    expect(fn () => app(DocumentTextStore::class)->saveStandalone((string) $doc->id, 1, null, null, 'sk', [DocumentTextFixtures::CANARY], 0, false))
         ->toThrow(QueryException::class);
 
     expect(DB::table('medical_document_texts')->count())->toBe(0);
@@ -192,4 +193,53 @@ it('loads the fixture helper and its sample text through the real store', functi
 
     expect(DocumentTextFixtures::save($doc, DocumentTextFixtures::samplePages()))->toBe(SaveOutcome::Saved)
         ->and(DocumentTextFixtures::row($doc)->body)->toContain(DocumentTextFixtures::CANARY)->toContain('Penicilín');
+});
+
+function docTextRunRow(MedicalDocument $doc, string $status = 'running', ?string $cancelAt = null): string
+{
+    $factory = MedicalAiExtraction::factory()->forDocument($doc);
+    $run = ($status === 'running' ? $factory->running() : $factory->failed())->create(['started_by' => User::factory()->create()->id, 'cancel_requested_at' => $cancelAt]);
+
+    return (string) $run->id;
+}
+
+it('writes for a running run only, and refuses a cancel-requested, closed or other-document run', function () {
+    config(['ai.ocr.enabled' => true]);
+    [, , $doc] = docTextStoreScene();
+    [, , $other] = docTextStoreScene();
+    $store = app(DocumentTextStore::class);
+
+    $running = docTextRunRow($doc);
+    expect($store->save((string) $doc->id, $running, 1, 'codex', 'm', 'sk', ['a'], 1, true))->toBe(SaveOutcome::Saved);
+    DB::table('medical_document_texts')->where('document_id', $doc->id)->delete();
+    DB::table('medical_ai_extractions')->where('id', $running)->delete();
+
+    expect($store->save((string) $doc->id, docTextRunRow($doc, 'running', now()->toDateTimeString()), 1, null, null, 'sk', ['a'], 1, true))->toBe(SaveOutcome::NotRunning)
+        ->and($store->save((string) $doc->id, docTextRunRow($doc, 'failed'), 1, null, null, 'sk', ['a'], 1, true))->toBe(SaveOutcome::NotRunning)
+        ->and($store->save((string) $doc->id, docTextRunRow($other), 1, null, null, 'sk', ['a'], 1, true))->toBe(SaveOutcome::NotRunning)
+        ->and($store->save((string) $doc->id, (string) Str::uuid(), 1, null, null, 'sk', ['a'], 1, true))->toBe(SaveOutcome::NotRunning)
+        ->and(DocumentTextFixtures::row($doc))->toBeNull();
+});
+
+it('refuses every save of a run while ai.ocr.enabled is off, but not the seed path', function () {
+    config(['ai.ocr.enabled' => false]);
+    [, , $doc] = docTextStoreScene();
+    $store = app(DocumentTextStore::class);
+
+    expect($store->save((string) $doc->id, docTextRunRow($doc), 1, null, null, 'sk', ['a'], 1, true))->toBe(SaveOutcome::Disabled)
+        ->and(DocumentTextFixtures::row($doc))->toBeNull()
+        ->and($store->saveStandalone((string) $doc->id, 1, null, null, 'sk', ['seed'], 1, true))->toBe(SaveOutcome::Saved);
+});
+
+it('keeps a text of another run that holds more pages than a partial batch, and replaces it with a longer or complete one', function () {
+    config(['ai.ocr.enabled' => true]);
+    [, , $doc] = docTextStoreScene();
+    $store = app(DocumentTextStore::class);
+    $store->saveStandalone((string) $doc->id, 1, 'codex', 'm', 'sk', ['o1', 'o2', 'o3', 'o4', 'o5', 'o6'], 6, true);
+    $run = docTextRunRow($doc);
+
+    expect($store->save((string) $doc->id, $run, 1, 'codex', 'm', 'sk', ['n1', 'n2', 'n3', 'n4'], 6, false))->toBe(SaveOutcome::Kept)
+        ->and(DocumentTextFixtures::row($doc)->body)->toStartWith('o1')
+        ->and($store->save((string) $doc->id, $run, 1, 'codex', 'm', 'sk', ['n1', 'n2', 'n3', 'n4', 'n5', 'n6'], 6, true))->toBe(SaveOutcome::Saved)
+        ->and(DocumentTextFixtures::row($doc)->body)->toStartWith('n1')->and(DocumentTextFixtures::row($doc)->extraction_id)->toBe($run);
 });

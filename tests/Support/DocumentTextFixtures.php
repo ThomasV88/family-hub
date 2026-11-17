@@ -37,7 +37,7 @@ final class DocumentTextFixtures
     {
         DB::table('medical_subjects')->where('id', $doc->subject_id)->update(['ai_consent' => true]);
 
-        return app(DocumentTextStore::class)->save((string) $doc->id, null, $startedBy, 'codex', 'test', $language, $pages, $pagesTotal ?? count($pages), $complete);
+        return app(DocumentTextStore::class)->saveStandalone((string) $doc->id, $startedBy, 'codex', 'test', $language, $pages, $pagesTotal ?? count($pages), $complete);
     }
 
     public static function row(MedicalDocument|string $doc): ?object

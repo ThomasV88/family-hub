@@ -61,6 +61,14 @@ class AiJobQuery
         });
     }
 
+    /** A two-step run that starts while ai.ocr.enabled is off becomes an ordinary one-call run (only while it is running). */
+    public function downgradeToEntries(string $id): void
+    {
+        if (Str::isUuid($id)) {
+            DB::table('medical_ai_extractions')->where('id', $id)->where('status', 'running')->update(['mode' => 'entries', 'updated_at' => Carbon::now()]);
+        }
+    }
+
     /**
      * The text already stored by this very run (resume after a quota park): only a text row whose extraction_id is the
      * run counts, so a text of an earlier run is never mistaken for progress. Pages split on U+000C.

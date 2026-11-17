@@ -20,6 +20,8 @@ final class ExtractFromTextTask implements AiTask
 
     private ?string $inlineBlock = null;
 
+    private ?string $inlineBody = null;
+
     /** @param  list<string>  $pages */
     public function __construct(private readonly array $pages)
     {
@@ -53,8 +55,29 @@ final class ExtractFromTextTask implements AiTask
         return (new ExtractionValidator)->inspect($json);
     }
 
-    /** The pages with their markers, `<<<` neutralised, one text for the whole document. */
-    private function body(): string
+    /**
+     * How many whole pages the inline (Copilot) prompt carries: the cut can drop trailing pages, and a page cut in the
+     * middle is not counted. At least 1 (the first page is always at least partly there). The Codex prompt carries all.
+     */
+    public function pagesIncluded(): int
+    {
+        $this->inline(new PromptBuilder);
+        $kept = strlen((string) $this->inlineBody);
+        $end = 0;
+        $whole = 0;
+        foreach ($this->blocks() as $i => $block) {
+            $end += strlen($block) + ($i === 0 ? 0 : 1);
+            if ($end > $kept) {
+                break;
+            }
+            $whole++;
+        }
+
+        return max(1, $whole);
+    }
+
+    /** @return list<string> one marked block per page */
+    private function blocks(): array
     {
         $out = [];
         foreach (array_values($this->pages) as $i => $page) {
@@ -62,7 +85,13 @@ final class ExtractFromTextTask implements AiTask
             $out[] = '=== PAGE '.($i + 1)." ===\n".($text === '' ? '[nothing legible]' : $text);
         }
 
-        return implode("\n", $out);
+        return $out;
+    }
+
+    /** The pages with their markers, `<<<` neutralised, one text for the whole document. */
+    private function body(): string
+    {
+        return implode("\n", $this->blocks());
     }
 
     private function block(string $body): string
@@ -86,6 +115,8 @@ final class ExtractFromTextTask implements AiTask
             $line = strrpos($cut, "\n");
             $body = $line !== false && $line > 0 ? substr($cut, 0, $line) : mb_strcut($body, 0, $budget);
         }
+
+        $this->inlineBody = $body;
 
         return $this->inlineBlock = $this->block($body);
     }
