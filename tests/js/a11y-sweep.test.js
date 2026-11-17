@@ -1,4 +1,5 @@
 import { describe, it, vi, afterEach } from 'vitest';
+import { flushPromises } from '@vue/test-utils';
 import { mountUi, loadMessages } from './helpers/mount.js';
 import { expectNoAxeViolations } from './helpers/axe.js';
 import { pseudoLong } from './helpers/pseudoLong.js';
@@ -13,7 +14,7 @@ vi.mock('@inertiajs/vue3', async () => {
             props: {
                 locale: mockLocale,
                 app: { name: 'Family Hub', env: 'local' },
-                auth: { user: { id: 1, name: 'Mira', isAdmin: true }, access: { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'edit', shopping: 'edit' } },
+                auth: { user: { id: 1, name: 'Mira', isAdmin: true }, access: { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'edit', shopping: 'edit', recipes: 'edit' } },
                 flash: { status: null, toast: null, data: null },
                 availableLocales: ['sk', 'pl', 'en'],
                 heartbeat: { last_recorded_at: '2026-11-13T10:00:00+00:00', last_source: 'schedule', count_24h: 3, expected_24h: 1440 },
@@ -36,6 +37,9 @@ import ProfileEdit from '../../resources/js/Pages/Profile/Edit.vue';
 import ShoppingIndex from '../../resources/js/Pages/Shopping/Index.vue';
 import ShoppingShow from '../../resources/js/Pages/Shopping/Show.vue';
 import SettingsShopping from '../../resources/js/Pages/Settings/Shopping.vue';
+import RecipesIndex from '../../resources/js/Pages/Recipes/Index.vue';
+import RecipesShow from '../../resources/js/Pages/Recipes/Show.vue';
+import RecipesForm from '../../resources/js/Pages/Recipes/Form.vue';
 import { helpAreas, helpRows } from './helpers/help.js';
 import AppShell from '../../resources/js/Layouts/AppShell.vue';
 
@@ -53,6 +57,9 @@ const pages = { StyleGuide, Home, 'Todo/Index': TodoIndex, 'Settings/AiCalls': A
     'Shopping/Index': ShoppingIndex, 'Shopping/Index (empty)': ShoppingIndex,
     'Shopping/Show (open)': ShoppingShow, 'Shopping/Show (locked)': ShoppingShow, 'Shopping/Show (done)': ShoppingShow,
     'Settings/Shopping': SettingsShopping,
+    'Recipes/Index': RecipesIndex, 'Recipes/Index (empty)': RecipesIndex, 'Recipes/Index (draft)': RecipesIndex,
+    'Recipes/Show (author)': RecipesShow, 'Recipes/Show (non-author)': RecipesShow,
+    'Recipes/Form (create)': RecipesForm, 'Recipes/Form (edit)': RecipesForm, 'Recipes/Form (review)': RecipesForm,
 };
 const ME = 1;
 const todoTask = (id, extra = {}) => ({
@@ -173,6 +180,65 @@ pageProps['Settings/Shopping'] = {
     ],
     canManageUnits: true,
 };
+const recUnits = [{ id: 1, key: 'pcs', names: null }, { id: 2, key: 'g', names: null }, { id: 9, key: 'tsp', names: null }];
+const recCard = (id, extra = {}) => ({
+    id, title: `Recipe ${id}`, mainPhoto: null, prepMinutes: 10, cookMinutes: 20, servings: 4, visibility: 'shared', categories: ['Soup', 'Vegetarian'],
+    author: { id: 1, name: 'Mira', isMe: true }, favourite: false, ...extra,
+});
+const recIndexBase = {
+    hasMore: false, page: 1, filters: {}, canCreate: true,
+    filterOptions: { categories: [{ name: 'Soup', key: 'soup' }], authors: [{ id: 1, name: 'Mira' }, { id: 5, name: 'Anna' }] },
+};
+pageProps['Recipes/Index'] = {
+    ...recIndexBase,
+    recipes: [recCard(1, { favourite: true }), recCard(2, { visibility: 'private', author: { id: 5, name: 'Anna', isMe: false }, categories: [], prepMinutes: null, cookMinutes: null, servings: null }), recCard(3)],
+};
+pageProps['Recipes/Index (empty)'] = { ...recIndexBase, recipes: [] };
+pageProps['Recipes/Index (draft)'] = {
+    ...recIndexBase, recipes: [recCard(1)],
+    import: { available: true, acknowledged: true, providers: ['codex'] },
+    drafts: [
+        { id: '33333333-3333-4333-8333-333333333333', status: 'ready', host: 'recepty.example', reason: null },
+        { id: '44444444-4444-4444-8444-444444444444', status: 'failed', host: 'blog.example', reason: 'no_recipe' },
+    ],
+};
+const recDetail = {
+    id: 12, title: 'Tomato soup', description: 'Warm and simple', servings: 4, prepMinutes: 10, cookMinutes: 30, visibility: 'shared',
+    sourceUrl: 'https://www.example.test/soup', sourceHost: 'www.example.test', createdVia: 'manual',
+    author: { id: 1, name: 'Mira', isMe: true }, categories: ['Soup'],
+    ingredients: [
+        { id: 101, name: 'Flour', quantity: '200', unitId: 2, note: 'sifted' },
+        { id: 102, name: 'Eggs', quantity: '2', unitId: 1, note: null },
+        { id: 103, name: 'Salt', quantity: null, unitId: null, note: 'to taste' },
+    ],
+    steps: [{ id: 201, body: 'Boil water' }, { id: 202, body: 'Serve' }],
+    photos: [{ id: 31, position: 1, isMain: true, version: 1, thumbUrl: '/recipes/12/photos/31/thumb?v=1', fullUrl: '/recipes/12/photos/31/full?v=1' }],
+};
+const recState = { favourite: true, note: 'Less salt', servings: null, tickedIngredientIds: [101], doneStepIds: [201] };
+pageProps['Recipes/Show (author)'] = { recipe: recDetail, state: recState, units: recUnits, abilities: { edit: true, delete: true, changeVisibility: true, addToShopping: true } };
+pageProps['Recipes/Show (non-author)'] = {
+    recipe: { ...recDetail, author: { id: 3, name: 'Anna', isMe: false } }, state: { ...recState, favourite: false, note: null },
+    units: recUnits, abilities: { edit: false, delete: false, changeVisibility: false, addToShopping: true },
+};
+const recLimits = {
+    titleMax: 120, descriptionMax: 1000, ingredientNameMax: 120, ingredientNoteMax: 80, stepMax: 1000, ingredientsMax: 80, stepsMax: 60,
+    categoriesMax: 3, categoryMax: 30, servingsMin: 1, servingsMax: 99, minutesMax: 1440, quantityMax: 9999, sourceUrlMax: 2000, photosMax: 10, photoMaxBytes: 5242880,
+};
+const recFormBase = {
+    recipe: null, defaults: { servings: 4, visibility: 'private' }, units: recUnits, categorySuggestions: ['Polievka'],
+    starterCategories: ['breakfast', 'soup', 'dessert'], limits: recLimits, isShared: false, canAddToShopping: true,
+};
+pageProps['Recipes/Form (create)'] = recFormBase;
+pageProps['Recipes/Form (edit)'] = { ...recFormBase, recipe: recDetail, isShared: true };
+pageProps['Recipes/Form (review)'] = {
+    ...recFormBase,
+    prefill: {
+        title: 'Palacinky', description: null, servings: null, prep_minutes: 10, cook_minutes: null, categories: ['Dessert'],
+        ingredients: [{ name: 'flour', quantity: '250', unit_id: 2, note: null, original: '250 g flour' }, { name: 'eggs', quantity: '2', unit_id: 1, note: null, original: '2 eggs' }],
+        steps: [{ body: 'Mix everything.' }], aiFields: ['title', 'ingredients', 'steps'],
+        sourceUrl: 'https://recepty.example/palacinky', sourceHost: 'recepty.example', textCut: false, importId: '33333333-3333-4333-8333-333333333333',
+    },
+};
 const cases = [];
 for (const locale of ['en', 'sk', 'pl'])
     for (const theme of ['light', 'dark'])
@@ -183,12 +249,28 @@ for (const locale of ['en', 'sk', 'pl'])
     for (const theme of ['light', 'dark'])
         for (const name of ['Shopping/Index', 'Shopping/Index (empty)']) cases.push([name, locale, theme, 360]);
 
+// Phone minimum width for the Recipes pages (seven-item bottom bar).
+for (const locale of ['en', 'sk', 'pl'])
+    for (const theme of ['light', 'dark'])
+        for (const name of ['Recipes/Index', 'Recipes/Show (author)', 'Recipes/Form (create)']) cases.push([name, locale, theme, 360]);
+
 describe('accessibility sweep', () => {
     it.each(cases)('%s in %s, %s theme, %ipx has no axe violations', async (name, locale, theme, width) => {
         mockLocale = locale;
         document.documentElement.dataset.theme = theme;
         window.innerWidth = width;
         wrapper = mountUi(pages[name], { locale, props: pageProps[name] ?? {} });
+        await expectNoAxeViolations(wrapper.element);
+    });
+
+    it.each([['en', 'light'], ['sk', 'dark'], ['pl', 'light']])('Recipes/Show in cooking mode in %s, %s theme, 390px has no axe violations', async (locale, theme) => {
+        mockLocale = locale;
+        document.documentElement.dataset.theme = theme;
+        window.innerWidth = 400;
+        wrapper = mountUi(RecipesShow, { locale, props: pageProps['Recipes/Show (author)'] });
+        await flushPromises();
+        await wrapper.find('[data-testid="cooking-toggle-bar"]').trigger('click');
+        await flushPromises();
         await expectNoAxeViolations(wrapper.element);
     });
 
