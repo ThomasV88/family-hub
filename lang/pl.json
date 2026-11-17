@@ -334,6 +334,32 @@
                 "save": "Zapisz opiekunów",
                 "saved": "Zapisano opiekunów listy",
                 "save_failed": "Nie udało się zapisać opiekunów. Nic nie zostało zmienione. Spróbuj ponownie."
+            },
+            "child": {
+                "add": "Dodaj dziecko",
+                "dialog_title": "Dodaj dziecko",
+                "name_label": "Imię",
+                "photo_label": "Zdjęcie (opcjonalne)",
+                "info": "Dziecko nie ma adresu e-mail i nie może się zalogować. Jego profilem i listą życzeń zarządza rodzic lub administrator.",
+                "parents_label": "Rodzice zarządzający listą życzeń",
+                "parents_hint": "Rodzice mogą zarządzać listą życzeń tego dziecka.",
+                "parents_self_hint": "Nie możesz zostać wybrany, bo nie masz prawa edycji Listy życzeń.",
+                "parents_none": "Nie można jeszcze nikogo wybrać. Rodzic potrzebuje logowania przez e-mail i prawa edycji Listy życzeń.",
+                "cancel": "Anuluj",
+                "submit": "Utwórz dziecko",
+                "toast_added": "Dziecko dodane",
+                "tag_child": "Dziecko",
+                "tag_no_signin": "Bez logowania",
+                "managed_by": "Zarządza {names}",
+                "managed_by_nobody": "Nie wybrano jeszcze rodzica",
+                "err_parent": "Wybierz członka, który może się zalogować i ma prawo edycji Listy życzeń.",
+                "err_parent_required": "Wybierz co najmniej jednego rodzica.",
+                "create_failed": "Dziecko nie zostało dodane. Sprawdź zaznaczone pola i spróbuj ponownie.",
+                "photo_failed": "Dziecko zostało dodane, ale zdjęcie nie zostało zapisane. Wybierz je ponownie poniżej.",
+                "tab_profile": "Profil",
+                "panel_info": "Bez adresu e-mail, nie może się zalogować.",
+                "signin_switch": "Bezpośrednie logowanie wyłączone",
+                "signin_hint": "Wyłącza się, gdy zaprosisz je przez e-mail."
             }
         },
         "role": {
@@ -763,7 +789,8 @@
             "help_text_changed": "Zmieniono tekst pomocy {key} ({locales})",
             "profile_changed_photo": "Zmieniono zdjęcie osoby {name}",
             "profile_changed_name": "Zmieniono imię osoby {name}",
-            "profile_changed_other": "Zmieniono profil osoby {name}"
+            "profile_changed_other": "Zmieniono profil osoby {name}",
+            "child_created": "Dodano dziecko {name}"
         },
         "page": "Strona {n} z {total}",
         "prev": "Poprzednia",
@@ -811,6 +838,14 @@
             "saved": "Profil zapisany",
             "photo_saved": "Zdjęcie zapisane",
             "photo_removed": "Zdjęcie usunięte"
+        },
+        "people": {
+            "title": "Profil dziecka",
+            "card_title": "Osoby, którymi zarządzasz",
+            "card_hint": "Dzieci, których listą życzeń zarządzasz. Możesz zmienić ich imię i zdjęcie.",
+            "edit": "Edytuj",
+            "edit_aria": "Edytuj: {name}",
+            "child_info": "Bez adresu e-mail, nie może się zalogować. Tym profilem zarządza rodzic lub administrator."
         }
     },
     "account": {

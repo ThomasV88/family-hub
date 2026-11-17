@@ -74,6 +74,20 @@
         { "type": "p", "text": "Dieťa alebo niekto, komu sa ťažko vedie zoznam, môže mať správcu zoznamu. Správcov vyberá správca rodiny (pozrite [Správcovia zoznamu želaní](admin#wishlist-managers))." },
         { "type": "p", "text": "Ak ste správcom zoznamu, tlačidlo dieťaťa je vo vašom rade a nad zoznamom je pruh s textom, že ho spravujete. Môžete pridávať a upravovať želania a zoznam vidíte presne tak ako dieťa: bez rezervácií. Tak ostane prekvapenie aj pre dieťa." }
       ]
+    },
+    {
+      "id": "child-list",
+      "title": "Zoznam dieťaťa",
+      "blocks": [
+        { "type": "p", "text": "Dieťa pridané správcom rodiny má zoznam ako každý člen. Zobrazuje sa medzi ľuďmi v hornej časti Zoznamu želaní pre každého, kto Zoznam želaní vidí." },
+        { "type": "p", "text": "Rodičia vybraní pri pridaní dieťaťa sú jeho správcovia. Pridávajú a upravujú želania v zozname dieťaťa a vidia ho tak ako dieťa (pozrite [Správcovia zoznamu želaní](admin#wishlist-managers))." },
+        { "type": "steps", "title": "Zmena mena alebo fotografie dieťaťa", "items": [
+          "Otvorte menu účtu a vyberte [Nastavenia profilu](/profile).",
+          "V časti **Ľudia, ktorých spravujete** stlačte **Upraviť** pri dieťati.",
+          "Zmeňte meno alebo fotografiu."
+        ] },
+        { "type": "p", "text": "To isté môže urobiť správca v časti Členovia a prístup. Nikto iný meno ani fotografiu dieťaťa meniť nemôže." }
+      ]
     }
   ]
 }

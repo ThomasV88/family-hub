@@ -37,7 +37,8 @@
         "members_permissions": "Członkowie, karta Uprawnienia",
         "ai_agents": "Agenci AI",
         "home": "Strona Przegląd",
-        "profile_page": "Strona Ustawienia profilu"
+        "profile_page": "Strona Ustawienia profilu",
+        "members_child": "Członkowie, okno Dodaj dziecko"
     },
     "topics": {
         "tasks.visibility": {
@@ -267,6 +268,10 @@
         "overview.system_status": {
             "title": "Stan systemu",
             "text": "Pokazuje, że działają kontrole w tle wysyłające przypomnienia. Jeśli pokrycie jest niskie lub żadna kontrola nie ruszyła, przypomnienia mogą się spóźniać; zapytaj osobę zarządzającą serwerem."
+        },
+        "members.child": {
+            "title": "Czym jest konto dziecka?",
+            "text": "Konto dziecka nie ma adresu e-mail, nie może się zalogować i nie dostaje e-maili ani powiadomień. Imieniem i zdjęciem zarządzają wybrani rodzice i administratorzy, a listą życzeń rodzice. Wybrać można tylko członków, którzy mogą się zalogować i mogą edytować Listę życzeń."
         }
     }
 }

@@ -35,7 +35,7 @@ it('creates a child with the Child grants, a manager and one audit row, without 
         ->and($child->locale)->toBe('pl')
         ->and($child->is_admin)->toBeFalse()
         ->and(Hash::check('', $child->password))->toBeFalse()
-        ->and(session('created_child_id'))->toBe($child->id);
+        ->and(session('flash_data.created_child_id'))->toBe($child->id);
 
     $invited = User::factory()->withPreset(Preset::Child)->create();
     $grants = fn (User $u) => ModulePermission::query()->where('user_id', $u->id)->orderBy('module')->get()

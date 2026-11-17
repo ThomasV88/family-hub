@@ -342,6 +342,12 @@
             "area": "overview",
             "screen": "home",
             "field": "system_status"
+        },
+        {
+            "key": "members.child",
+            "area": "settings",
+            "screen": "members_child",
+            "field": "child"
         }
     ]
 }

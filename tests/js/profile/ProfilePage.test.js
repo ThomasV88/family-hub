@@ -47,9 +47,9 @@ beforeEach(() => {
 });
 afterEach(() => { wrapper?.unmount(); wrapper = null; document.body.innerHTML = ''; });
 
-function mountPage({ locale = 'en', messages, subject = SUBJECT } = {}) {
+function mountPage({ locale = 'en', messages, subject = SUBJECT, managedPeople = [] } = {}) {
     wrapper = mount(Edit, {
-        props: { sections: SECTIONS, subject, nameMax: 60 },
+        props: { sections: SECTIONS, subject, nameMax: 60, managedPeople },
         attachTo: document.body,
         global: { plugins: [createAppI18n(locale, messages ?? loadMessages(locale))] },
     });
@@ -138,5 +138,56 @@ describe('Profile settings page', () => {
         await expectNoAxeViolations(wrapper.element);
         const button = wrapper.find('button[type="submit"]');
         expect(button.text().length).toBeGreaterThan('Save changes'.length);
+    });
+});
+
+describe('People you manage and a child subject', () => {
+    const PEOPLE = [{ id: 7, name: 'Ema', photoVersion: null }, { id: 8, name: 'Adam', photoVersion: 2 }];
+    const CHILD = { id: 7, name: 'Ema', email: null, photoVersion: null, isSelf: false, isChild: true };
+
+    it('lists managed children with an Edit button to their page', () => {
+        mountPage({ managedPeople: PEOPLE });
+        const card = wrapper.find('[data-testid=people-card]');
+        expect(card.text()).toContain('People you manage');
+        expect(card.text()).toContain('Ema');
+        const edit = card.find('[aria-label="Edit Ema"]');
+        expect(edit.attributes('href')).toBe('/profile/people/7');
+        expect(edit.text()).toBe('Edit');
+    });
+
+    it('hides the card when nobody is managed or when the page shows another person', () => {
+        mountPage();
+        expect(wrapper.find('[data-testid=people-card]').exists()).toBe(false);
+        wrapper.unmount();
+        mountPage({ subject: CHILD, managedPeople: PEOPLE });
+        expect(wrapper.find('[data-testid=people-card]').exists()).toBe(false);
+    });
+
+    it('shows the info alert instead of the e-mail field for a child', () => {
+        mountPage({ subject: CHILD });
+        expect(wrapper.find('h1').text()).toBe('Child profile');
+        expect(wrapper.find('[data-testid=child-info]').text()).toContain('No e-mail, cannot sign in.');
+        expect(wrapper.find('input[type="email"]').exists()).toBe(false);
+        expect(wrapper.find('input[autocomplete="name"]').element.value).toBe('Ema');
+    });
+
+    it.each(['en', 'sk', 'pl'])('has no axe violations in %s, light and dark', async (locale) => {
+        for (const theme of ['light', 'dark']) {
+            document.documentElement.dataset.theme = theme;
+            mountPage({ locale, managedPeople: PEOPLE });
+            await expectNoAxeViolations(wrapper.element);
+            wrapper.unmount();
+            mountPage({ locale, subject: CHILD });
+            await expectNoAxeViolations(wrapper.element);
+            wrapper.unmount();
+            wrapper = null;
+            document.body.innerHTML = '';
+        }
+        delete document.documentElement.dataset.theme;
+    });
+
+    it('holds with pseudo-long strings', async () => {
+        mountPage({ messages: pseudoLong(loadMessages('en')), managedPeople: PEOPLE });
+        await expectNoAxeViolations(wrapper.element);
     });
 });

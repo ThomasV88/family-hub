@@ -334,6 +334,32 @@
                 "save": "Save managers",
                 "saved": "Wishlist managers saved",
                 "save_failed": "We could not save the managers. Nothing was changed. Try again."
+            },
+            "child": {
+                "add": "Add child",
+                "dialog_title": "Add a child",
+                "name_label": "Name",
+                "photo_label": "Photo (optional)",
+                "info": "A child has no e-mail and cannot sign in. A parent or administrator manages their profile and wish list.",
+                "parents_label": "Parents who manage the wish list",
+                "parents_hint": "Parents can manage this child's wish list.",
+                "parents_self_hint": "You cannot be chosen because you do not hold Wishlist edit access.",
+                "parents_none": "No member can be chosen yet. A parent needs an e-mail sign-in and Wishlist edit access.",
+                "cancel": "Cancel",
+                "submit": "Create child",
+                "toast_added": "Child added",
+                "tag_child": "Child",
+                "tag_no_signin": "No sign-in",
+                "managed_by": "Managed by {names}",
+                "managed_by_nobody": "No parent chosen yet",
+                "err_parent": "Choose a member who can sign in and has Wishlist edit access.",
+                "err_parent_required": "Choose at least one parent.",
+                "create_failed": "The child was not added. Check the highlighted fields and try again.",
+                "photo_failed": "The child was added, but the photo was not saved. Choose a photo again below.",
+                "tab_profile": "Profile",
+                "panel_info": "No e-mail, cannot sign in.",
+                "signin_switch": "Direct sign-in disabled",
+                "signin_hint": "Turns off when you invite them with an e-mail."
             }
         },
         "role": {
@@ -763,7 +789,8 @@
             "help_text_changed": "Edited help text {key} ({locales})",
             "profile_changed_photo": "Changed the photo of {name}",
             "profile_changed_name": "Changed the name of {name}",
-            "profile_changed_other": "Changed the profile of {name}"
+            "profile_changed_other": "Changed the profile of {name}",
+            "child_created": "Added the child {name}"
         },
         "page": "Page {n} of {total}",
         "prev": "Previous",
@@ -811,6 +838,14 @@
             "saved": "Profile saved",
             "photo_saved": "Photo saved",
             "photo_removed": "Photo removed"
+        },
+        "people": {
+            "title": "Child profile",
+            "card_title": "People you manage",
+            "card_hint": "Children whose wish list you manage. You can change their name and photo.",
+            "edit": "Edit",
+            "edit_aria": "Edit {name}",
+            "child_info": "No e-mail, cannot sign in. A parent or administrator manages this profile."
         }
     },
     "account": {

@@ -34,6 +34,26 @@
       ]
     },
     {
+      "id": "children",
+      "title": "Children",
+      "blocks": [
+        { "type": "p", "text": "A child account is for someone who does not use the app alone, such as a young child. It has **no email**, **cannot sign in** and gets no email or notifications. It still appears in the lists, for example as a wishlist owner." },
+        { "type": "steps", "title": "Adding a child", "items": [
+          "Open [Settings > Members and access](/settings/members).",
+          "Press **Add child**.",
+          "Type the **Name** and, if you like, choose a **Photo**.",
+          "Choose at least one of the **Parents who manage the wish list**. Only members who can sign in and may edit the Wishlist are offered.",
+          "Press **Create child**."
+        ] },
+        { "type": "list", "items": [
+          "The child gets the Child starting access (To-do and Wishlist: Edit).",
+          "In the member list the child shows the tags **Child** and **No sign-in**, and **Managed by** the parents instead of an email.",
+          "Open the child with **Manage**. The **Profile** tab changes the name and photo. The chosen parents can do the same under **Profile settings > People you manage**.",
+          "Adding a child needs a recent confirmation of your identity, like sending an invitation."
+        ] }
+      ]
+    },
+    {
       "id": "permissions",
       "title": "Permissions for each module",
       "blocks": [
@@ -77,7 +97,7 @@
       "id": "wishlist-managers",
       "title": "Wishlist managers",
       "blocks": [
-        { "type": "p", "text": "Some people, such as young children, cannot keep their own list. Open **Manage** for that member and choose the **Wishlist** tab. Tick the members who may add and edit wishes on their list, and press **Save managers**. Managers see the list as the owner does, without reservations." }
+        { "type": "p", "text": "Some people, such as young children, cannot keep their own list. Open **Manage** for that member and choose the **Wishlist** tab. Tick the members who may add and edit wishes on their list, and press **Save managers**. Only members who can sign in and may edit the Wishlist are offered. Managers see the list as the owner does, without reservations." }
       ]
     },
     {

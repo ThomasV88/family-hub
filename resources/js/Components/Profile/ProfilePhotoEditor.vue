@@ -17,7 +17,13 @@ const props = defineProps({
     // Version of the stored photo, or null when there is none.
     photoVersion: { type: Number, default: null },
     compact: { type: Boolean, default: false },
+    // Deferred: keep the chosen file on the client (preview only) and hand it to the parent; nothing is uploaded here.
+    // Used while a child is being created and does not have an id yet.
+    deferred: { type: Boolean, default: false },
+    // An error from an upload the parent made (for example the photo after creating a child).
+    externalError: { type: String, default: '' },
 });
+const emit = defineEmits(['select', 'clear']);
 const { t } = useI18n();
 
 const form = useForm({ photo: null });
@@ -26,11 +32,11 @@ const preview = ref(null);
 const confirming = ref(false);
 const hintId = `photo-hint-${props.userId}`;
 
-const hasPhoto = computed(() => props.photoVersion !== null && props.photoVersion !== undefined);
+const hasPhoto = computed(() => (props.deferred ? preview.value !== null : props.photoVersion !== null && props.photoVersion !== undefined));
 const size = computed(() => (props.compact ? 40 : 96));
 const src = computed(() => preview.value ?? (hasPhoto.value ? `/people/${props.userId}/photo/${props.compact ? 'thumb' : 'full'}?v=${props.photoVersion}` : null));
 const error = computed(() => {
-    const key = form.errors?.photo;
+    const key = form.errors?.photo || props.externalError;
     if (!key) return '';
 
     return String(key).startsWith('profile.') ? t(key) : String(key);
@@ -52,6 +58,10 @@ function onFile(event) {
     revokePreview();
     preview.value = URL.createObjectURL(file);
     form.clearErrors?.();
+    if (props.deferred) {
+        emit('select', file);
+        return;
+    }
     form.photo = file;
     form.post(`/people/${props.userId}/photo`, {
         forceFormData: true,
@@ -65,6 +75,12 @@ function onFile(event) {
 }
 
 function remove() {
+    if (props.deferred) {
+        revokePreview();
+        if (input.value) input.value.value = '';
+        emit('clear');
+        return;
+    }
     router.delete(`/people/${props.userId}/photo`, { preserveScroll: true });
 }
 </script>
@@ -91,7 +107,7 @@ function remove() {
                 <UiButton variant="secondary" :icon="Camera" :disabled="form.processing" :aria-describedby="hintId" @click="choose">
                     {{ hasPhoto ? t('profile.photo.replace') : t('profile.photo.upload') }}
                 </UiButton>
-                <UiButton v-if="hasPhoto" variant="ghost" :icon="Trash2" :disabled="form.processing" @click="confirming = true">
+                <UiButton v-if="hasPhoto" variant="ghost" :icon="Trash2" :disabled="form.processing" @click="deferred ? remove() : (confirming = true)">
                     {{ t('profile.photo.remove') }}
                 </UiButton>
             </div>

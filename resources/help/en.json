@@ -37,7 +37,8 @@
         "members_permissions": "Members, Permissions tab",
         "ai_agents": "AI agents",
         "home": "Overview page",
-        "profile_page": "Profile settings page"
+        "profile_page": "Profile settings page",
+        "members_child": "Members, Add child dialog"
     },
     "topics": {
         "tasks.visibility": {
@@ -267,6 +268,10 @@
         "overview.system_status": {
             "title": "System status",
             "text": "Shows that the background checks which send reminders are running. If the coverage is low or no check has run, reminders may be late; ask whoever runs the server."
+        },
+        "members.child": {
+            "title": "What is a child account?",
+            "text": "A child account has no e-mail and cannot sign in, and it gets no mail or notifications. The parents you choose, and administrators, manage the name and photo, and the parents manage the wish list. Only members who can sign in and may edit the Wishlist can be chosen."
         }
     }
 }

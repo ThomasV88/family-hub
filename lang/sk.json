@@ -334,6 +334,32 @@
                 "save": "Uložiť správcov",
                 "saved": "Správcovia zoznamu uložení",
                 "save_failed": "Správcov sa nepodarilo uložiť. Nič sa nezmenilo. Skúste to znova."
+            },
+            "child": {
+                "add": "Pridať dieťa",
+                "dialog_title": "Pridať dieťa",
+                "name_label": "Meno",
+                "photo_label": "Fotografia (nepovinná)",
+                "info": "Dieťa nemá e-mail a nemôže sa prihlásiť. Jeho profil a zoznam želaní spravuje rodič alebo administrátor.",
+                "parents_label": "Rodičia, ktorí spravujú zoznam želaní",
+                "parents_hint": "Rodičia môžu spravovať zoznam želaní tohto dieťaťa.",
+                "parents_self_hint": "Vás nemožno vybrať, pretože nemáte právo upravovať Zoznam želaní.",
+                "parents_none": "Zatiaľ nemožno vybrať nikoho. Rodič potrebuje prihlásenie cez e-mail a právo upravovať Zoznam želaní.",
+                "cancel": "Zrušiť",
+                "submit": "Vytvoriť dieťa",
+                "toast_added": "Dieťa pridané",
+                "tag_child": "Dieťa",
+                "tag_no_signin": "Bez prihlásenia",
+                "managed_by": "Spravuje {names}",
+                "managed_by_nobody": "Zatiaľ nie je vybraný rodič",
+                "err_parent": "Vyberte člena, ktorý sa môže prihlásiť a môže upravovať Zoznam želaní.",
+                "err_parent_required": "Vyberte aspoň jedného rodiča.",
+                "create_failed": "Dieťa sa nepridalo. Skontrolujte zvýraznené polia a skúste to znova.",
+                "photo_failed": "Dieťa bolo pridané, ale fotografia sa neuložila. Vyberte ju znova nižšie.",
+                "tab_profile": "Profil",
+                "panel_info": "Bez e-mailu, nemôže sa prihlásiť.",
+                "signin_switch": "Priame prihlásenie vypnuté",
+                "signin_hint": "Vypne sa, keď ho pozvete cez e-mail."
             }
         },
         "role": {
@@ -763,7 +789,8 @@
             "help_text_changed": "Upravený text nápovedy {key} ({locales})",
             "profile_changed_photo": "Zmenená fotografia osoby {name}",
             "profile_changed_name": "Zmenené meno osoby {name}",
-            "profile_changed_other": "Zmenený profil osoby {name}"
+            "profile_changed_other": "Zmenený profil osoby {name}",
+            "child_created": "Pridal(a) dieťa {name}"
         },
         "page": "Strana {n} z {total}",
         "prev": "Predchádzajúca",
@@ -811,6 +838,14 @@
             "saved": "Profil uložený",
             "photo_saved": "Fotografia uložená",
             "photo_removed": "Fotografia odstránená"
+        },
+        "people": {
+            "title": "Profil dieťaťa",
+            "card_title": "Ľudia, ktorých spravujete",
+            "card_hint": "Deti, ktorých zoznam želaní spravujete. Môžete zmeniť ich meno a fotografiu.",
+            "edit": "Upraviť",
+            "edit_aria": "Upraviť {name}",
+            "child_info": "Bez e-mailu, nemôže sa prihlásiť. Tento profil spravuje rodič alebo administrátor."
         }
     },
     "account": {

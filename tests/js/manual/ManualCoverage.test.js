@@ -39,6 +39,13 @@ describe('manual covers the app', () => {
         }
     });
 
+    it('explains child accounts to administrators and a child list to everyone, with the same section ids in every language', () => {
+        for (const l of LOCALES) {
+            expect(manual[l].admin.sections.map((s) => s.id), `${l} admin`).toContain('children');
+            expect(manual[l].wishlist.sections.map((s) => s.id), `${l} wishlist`).toContain('child-list');
+        }
+    });
+
     it('has a topic for every module in the navigation', () => {
         const all = covered(false);
         for (const m of MODULES) expect(all.has(`module:${m.key}`), `no manual topic covers module "${m.key}"`).toBe(true);

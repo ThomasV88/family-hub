@@ -15,6 +15,6 @@ class ChildrenController extends Controller
 
         return redirect('/settings/members', 303)
             ->with('toast', ['key' => 'settings.members.child.toast_added'])
-            ->with('created_child_id', $child->id);
+            ->with('flash_data', ['created_child_id' => $child->id]);
     }
 }

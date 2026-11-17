@@ -34,6 +34,26 @@
       ]
     },
     {
+      "id": "children",
+      "title": "Deti",
+      "blocks": [
+        { "type": "p", "text": "Detský účet je pre toho, kto aplikáciu nepoužíva sám, napríklad malé dieťa. Nemá **e-mail**, **nemôže sa prihlásiť** a nedostáva e-maily ani upozornenia. V zoznamoch sa však zobrazuje, napríklad ako majiteľ zoznamu želaní." },
+        { "type": "steps", "title": "Pridanie dieťaťa", "items": [
+          "Otvorte [Nastavenia > Členovia a prístup](/settings/members).",
+          "Stlačte **Pridať dieťa**.",
+          "Napíšte **Meno** a ak chcete, vyberte **Fotografiu**.",
+          "Vyberte aspoň jedného z **Rodičov, ktorí spravujú zoznam želaní**. Ponúkajú sa len členovia, ktorí sa môžu prihlásiť a smú upravovať Zoznam želaní.",
+          "Stlačte **Vytvoriť dieťa**."
+        ] },
+        { "type": "list", "items": [
+          "Dieťa dostane východzí prístup Dieťa (Úlohy a Zoznam želaní: Úpravy).",
+          "V zozname členov má dieťa štítky **Dieťa** a **Bez prihlásenia** a namiesto e-mailu text **Spravuje** s menami rodičov.",
+          "Dieťa otvoríte cez **Spravovať**. Karta **Profil** mení meno a fotografiu. Vybraní rodičia to môžu urobiť v **Nastavenia profilu > Ľudia, ktorých spravujete**.",
+          "Pridanie dieťaťa vyžaduje nedávne potvrdenie vašej identity, rovnako ako poslanie pozvánky."
+        ] }
+      ]
+    },
+    {
       "id": "permissions",
       "title": "Oprávnenia pre jednotlivé moduly",
       "blocks": [
@@ -77,7 +97,7 @@
       "id": "wishlist-managers",
       "title": "Správcovia zoznamu želaní",
       "blocks": [
-        { "type": "p", "text": "Niektorí ľudia, napríklad malé deti, si nevedia viesť zoznam sami. Otvorte **Spravovať** pri tom členovi a vyberte kartu **Zoznam želaní**. Zaškrtnite členov, ktorí smú pridávať a upravovať želania v jeho zozname, a stlačte **Uložiť správcov**. Správcovia vidia zoznam tak ako majiteľ, bez rezervácií." }
+        { "type": "p", "text": "Niektorí ľudia, napríklad malé deti, si nevedia viesť zoznam sami. Otvorte **Spravovať** pri tom členovi a vyberte kartu **Zoznam želaní**. Zaškrtnite členov, ktorí smú pridávať a upravovať želania v jeho zozname, a stlačte **Uložiť správcov**. Ponúkajú sa len členovia, ktorí sa môžu prihlásiť a smú upravovať Zoznam želaní. Správcovia vidia zoznam tak ako majiteľ, bez rezervácií." }
       ]
     },
     {

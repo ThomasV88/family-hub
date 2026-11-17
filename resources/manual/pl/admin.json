@@ -34,6 +34,26 @@
       ]
     },
     {
+      "id": "children",
+      "title": "Dzieci",
+      "blocks": [
+        { "type": "p", "text": "Konto dziecka jest dla kogoś, kto nie korzysta z aplikacji samodzielnie, na przykład małego dziecka. Nie ma **adresu e-mail**, **nie może się zalogować** i nie dostaje e-maili ani powiadomień. Mimo to widać je na listach, na przykład jako właściciela listy życzeń." },
+        { "type": "steps", "title": "Dodawanie dziecka", "items": [
+          "Otwórz [Ustawienia > Członkowie i dostęp](/settings/members).",
+          "Naciśnij **Dodaj dziecko**.",
+          "Wpisz **Imię** i, jeśli chcesz, wybierz **Zdjęcie**.",
+          "Wybierz co najmniej jednego z **Rodziców zarządzających listą życzeń**. Do wyboru są tylko członkowie, którzy mogą się zalogować i mogą edytować Listę życzeń.",
+          "Naciśnij **Utwórz dziecko**."
+        ] },
+        { "type": "list", "items": [
+          "Dziecko dostaje początkowy dostęp Dziecko (Zadania i Lista życzeń: Edycja).",
+          "Na liście członków dziecko ma znaczniki **Dziecko** i **Bez logowania** oraz zamiast e-maila tekst **Zarządza** z imionami rodziców.",
+          "Dziecko otworzysz przez **Zarządzaj**. Zakładka **Profil** zmienia imię i zdjęcie. Wybrani rodzice mogą to zrobić w **Ustawienia profilu > Osoby, którymi zarządzasz**.",
+          "Dodanie dziecka wymaga niedawnego potwierdzenia tożsamości, tak jak wysłanie zaproszenia."
+        ] }
+      ]
+    },
+    {
       "id": "permissions",
       "title": "Uprawnienia dla poszczególnych modułów",
       "blocks": [
@@ -77,7 +97,7 @@
       "id": "wishlist-managers",
       "title": "Opiekunowie listy życzeń",
       "blocks": [
-        { "type": "p", "text": "Niektórzy, na przykład małe dzieci, nie potrafią prowadzić własnej listy. Otwórz **Zarządzaj** przy tym członku i wybierz zakładkę **Lista życzeń**. Zaznacz członków, którzy mogą dodawać i edytować życzenia na jego liście, i naciśnij **Zapisz opiekunów**. Opiekunowie widzą listę tak jak właściciel, bez rezerwacji." }
+        { "type": "p", "text": "Niektórzy, na przykład małe dzieci, nie potrafią prowadzić własnej listy. Otwórz **Zarządzaj** przy tym członku i wybierz zakładkę **Lista życzeń**. Zaznacz członków, którzy mogą dodawać i edytować życzenia na jego liście, i naciśnij **Zapisz opiekunów**. Do wyboru są tylko członkowie, którzy mogą się zalogować i mogą edytować Listę życzeń. Opiekunowie widzą listę tak jak właściciel, bez rezerwacji." }
       ]
     },
     {

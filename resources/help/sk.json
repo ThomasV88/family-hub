@@ -37,7 +37,8 @@
         "members_permissions": "Členovia, karta Oprávnenia",
         "ai_agents": "AI agenti",
         "home": "Stránka Prehľad",
-        "profile_page": "Stránka Nastavenia profilu"
+        "profile_page": "Stránka Nastavenia profilu",
+        "members_child": "Členovia, dialóg Pridať dieťa"
     },
     "topics": {
         "tasks.visibility": {
@@ -267,6 +268,10 @@
         "overview.system_status": {
             "title": "Stav systému",
             "text": "Ukazuje, že bežia kontroly na pozadí, ktoré posielajú pripomienky. Ak je pokrytie nízke alebo nebežala žiadna kontrola, pripomienky môžu meškať; opýtajte sa toho, kto spravuje server."
+        },
+        "members.child": {
+            "title": "Čo je detský účet?",
+            "text": "Detský účet nemá e-mail, nemôže sa prihlásiť a nedostáva e-maily ani upozornenia. Meno a fotografiu spravujú vybraní rodičia a administrátori, zoznam želaní spravujú rodičia. Vybrať možno len členov, ktorí sa môžu prihlásiť a smú upravovať Zoznam želaní."
         }
     }
 }
