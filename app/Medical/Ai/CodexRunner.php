@@ -72,9 +72,10 @@ final class CodexRunner
         $auth = $timedOut = $idleTimedOut = $aborted = $capped = false;
         $quota = null;
         $model = null;
+        $usage = null;
         $lastCheck = null;
 
-        $scan = function () use ($p, &$out, &$err, &$errWindow, &$outLine, &$auth, &$model, &$quota): void {
+        $scan = function () use ($p, &$out, &$err, &$errWindow, &$outLine, &$auth, &$model, &$quota, &$usage): void {
             $o = $p->getIncrementalOutput();
             $e = $p->getIncrementalErrorOutput();
             $out += strlen($o);
@@ -104,6 +105,8 @@ final class CodexRunner
                     if ($model === null && isset($j['model']) && is_string($j['model'])) {
                         $model = $this->validModel($j['model']);
                     }
+                    // Counters only (integers); the last turn.completed wins.
+                    $usage = TokenUsage::fromEvent($j) ?? $usage;
                     if (in_array($j['type'] ?? null, ['error', 'turn.failed'], true)) {
                         $auth = $auth || $this->matchesAuth(substr($line, -self::WINDOW));
                         $quota ??= QuotaSignatures::match('codex', substr($line, -self::WINDOW), CarbonImmutable::now());
@@ -154,6 +157,7 @@ final class CodexRunner
             quotaSignature: $quota !== null,
             quotaMinutes: $quota['minutes'] ?? null,
             quotaResetAt: $quota['resetAt'] ?? null,
+            usage: $usage,
         );
     }
 

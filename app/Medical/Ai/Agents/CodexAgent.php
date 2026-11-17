@@ -61,10 +61,10 @@ final class CodexAgent implements Agent
         // With a configured model the recorded name is that one: text the CLI echoes can never choose the label.
         $model = $this->configuredModel() ?? $result->reportedModel ?? $this->modelLabel();
 
-        $fail = fn (FailureCode $code) => new AgentOutcome(false, null, null, $code, false, $result->durationMs, $model);
+        $fail = fn (FailureCode $code) => new AgentOutcome(false, null, null, $code, false, $result->durationMs, $model, usage: $result->usage);
 
         if ($result->aborted) {
-            return new AgentOutcome(false, null, null, null, true, $result->durationMs, $model);
+            return new AgentOutcome(false, null, null, null, true, $result->durationMs, $model, usage: $result->usage);
         }
         if ($result->timedOut) {
             return $fail(FailureCode::Timeout);
@@ -78,10 +78,10 @@ final class CodexAgent implements Agent
 
         $outcome = $task->validateFile($resultPath);
         if ($outcome->ok) {
-            return new AgentOutcome(true, $outcome->payload, $outcome->entryCount, null, false, $result->durationMs, $model);
+            return new AgentOutcome(true, $outcome->payload, $outcome->entryCount, null, false, $result->durationMs, $model, usage: $result->usage);
         }
         if ($result->quotaSignature && $result->exitCode !== null && $result->exitCode !== 0) {
-            return new AgentOutcome(false, null, null, FailureCode::QuotaExhausted, false, $result->durationMs, $model, $result->quotaResetAt, $result->quotaMinutes);
+            return new AgentOutcome(false, null, null, FailureCode::QuotaExhausted, false, $result->durationMs, $model, $result->quotaResetAt, $result->quotaMinutes, $result->usage);
         }
         if ($result->authSignature) {
             return $fail(FailureCode::Auth);

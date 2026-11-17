@@ -45,7 +45,7 @@ function ocrDecArm(float $gain, array $cleanOver = [], array $over = []): array
 
 it('keeps a step that clearly helps the degraded set', function () {
     $v = EvalDecision::stepVerdict(ocrDecBase(), ocrDecArm(0.02, [], ['pre_ms' => 800, 'peak_mb' => 70]), 0.002);
-    expect($v)->toBe(['keep' => true, 'reasons' => []]);
+    expect($v)->toBe(['keep' => true, 'reasons' => [], 'notes' => []]);
 });
 
 it('drops a step that worsens clean CER by 0.3 pp', function () {
@@ -86,7 +86,7 @@ it('drops a step that lowers search recall', function () {
 
 it('needs degraded rows', function () {
     $clean = array_values(array_filter(ocrDecBase(), fn ($r) => $r['condition'] === 'clean'));
-    expect(EvalDecision::stepVerdict($clean, $clean, 0.0))->toBe(['keep' => false, 'reasons' => ['no_degraded_rows']]);
+    expect(EvalDecision::stepVerdict($clean, $clean, 0.0))->toBe(['keep' => false, 'reasons' => ['no_degraded_rows'], 'notes' => []]);
 });
 
 it('builds the chain in the order A1, A2, A4, A3 and stops at the first failure', function () {
@@ -114,4 +114,18 @@ it('picks the combined pipeline when the two-call F1 is 3 pp lower', function ()
     expect(EvalDecision::pipeline([['f1' => 0.90]], [['f1' => 0.87]]))->toBe('combined')
         ->and(EvalDecision::pipeline([['f1' => 0.90]], [['f1' => 0.885]]))->toBe('two_call')
         ->and(EvalDecision::pipeline(['f1' => 0.9], ['f1' => 0.95]))->toBe('two_call');
+});
+
+it('notes when clean rows were not measured instead of passing rule 2 silently', function () {
+    $degraded = array_values(array_filter(ocrDecBase(), fn ($r) => ! in_array($r['condition'], ['clean', 'jpeg'], true)));
+    $arm = array_map(fn ($r) => array_merge($r, ['cer' => $r['cer'] - 0.02]), $degraded);
+
+    $v = EvalDecision::stepVerdict($degraded, $arm, 0.002);
+    expect($v['keep'])->toBeTrue()->and($v['notes'])->toBe(['clean_not_measured']);
+});
+
+it('exposes the margin of the rule', function () {
+    expect(EvalDecision::margin(0.02, 0.001))->toBe(0.005)
+        ->and(EvalDecision::margin(0.20, 0.001))->toEqualWithDelta(0.03, 1e-12)
+        ->and(EvalDecision::margin(0.02, 0.01))->toBe(0.02);
 });

@@ -32,7 +32,7 @@ final class EvalDecision
     /**
      * @param  list<array<string, mixed>>  $baselineRows
      * @param  list<array<string, mixed>>  $armRows
-     * @return array{keep: bool, reasons: list<string>}
+     * @return array{keep: bool, reasons: list<string>, notes: list<string>} notes: rules that could not be checked
      */
     public static function stepVerdict(array $baselineRows, array $armRows, float $noiseSd): array
     {
@@ -45,14 +45,14 @@ final class EvalDecision
 
         $reasons = [];
         if ($degraded === []) {
-            return ['keep' => false, 'reasons' => ['no_degraded_rows']];
+            return ['keep' => false, 'reasons' => ['no_degraded_rows'], 'notes' => []];
         }
 
         // 1. gain on the degraded conditions
         $diffs = array_map(fn ($i) => (float) $base[$i]['cer'] - (float) $arm[$i]['cer'], $degraded);
         $baseMean = Stats::mean(array_map(fn ($i) => (float) $base[$i]['cer'], $degraded));
         $gain = Stats::mean($diffs);
-        $margin = max(self::MIN_GAIN, self::REL_GAIN * $baseMean, 2 * $noiseSd);
+        $margin = self::margin($baseMean, $noiseSd);
         if ($gain < $margin) {
             $reasons[] = 'gain_below_margin';
         }
@@ -61,7 +61,10 @@ final class EvalDecision
         }
 
         // 2. clean and jpeg must not get worse
-        if ($clean !== []) {
+        $notes = [];
+        if ($clean === []) {
+            $notes[] = 'clean_not_measured';
+        } else {
             $cerWorse = Stats::mean(array_map(fn ($i) => (float) $arm[$i]['cer'] - (float) $base[$i]['cer'], $clean));
             $diaWorse = Stats::mean(array_map(fn ($i) => (float) $base[$i]['diacritics'] - (float) $arm[$i]['diacritics'], $clean));
             $numWorse = Stats::mean(array_map(fn ($i) => (float) $base[$i]['numeric'] - (float) $arm[$i]['numeric'], $clean));
@@ -87,7 +90,13 @@ final class EvalDecision
             $reasons[] = 'too_much_memory';
         }
 
-        return ['keep' => $reasons === [], 'reasons' => $reasons];
+        return ['keep' => $reasons === [], 'reasons' => $reasons, 'notes' => $notes];
+    }
+
+    /** The smallest CER gain that counts: 0.5 pp absolute, 15 percent relative or twice the run-to-run noise. */
+    public static function margin(float $baseMean, float $noiseSd): float
+    {
+        return max(self::MIN_GAIN, self::REL_GAIN * $baseMean, 2 * $noiseSd);
     }
 
     /**

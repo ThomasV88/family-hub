@@ -186,6 +186,10 @@ convert "$OUT/probe.4000.png" -quality 90 "$OUT/probe.4000.jpg"
 add_item probe-png probe clean probe probe.4000.png
 add_item probe-jpg probe clean probe probe.4000.jpg
 
+# The AI image has no tests/ folder: ship the ground truth next to the images, listed (with sha256) in the manifest.
+mkdir -p "$OUT/truth"
+cp "$FIX"/*.txt "$FIX"/*.expected.json "$OUT/truth/"
+
 GEN_HASH="$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)"
 python3 -I - "$OUT" "$ITEMS" "$GEN_HASH" <<'PY'
 import hashlib, json, os, sys
@@ -195,7 +199,10 @@ for line in open(items, encoding="utf-8"):
     i, doc, cond, kind, f = line.rstrip("\n").split("\t")
     h = hashlib.sha256(open(os.path.join(out, f), "rb").read()).hexdigest()
     rows.append({"id": i, "doc": doc, "condition": cond, "kind": kind, "file": f, "sha256": h})
-json.dump({"synthetic": True, "generator": "scripts/ocr-eval/generate.sh@" + gen, "items": rows},
+truth = []
+for f in sorted(os.listdir(os.path.join(out, "truth"))):
+    truth.append({"file": f, "sha256": hashlib.sha256(open(os.path.join(out, "truth", f), "rb").read()).hexdigest()})
+json.dump({"synthetic": True, "generator": "scripts/ocr-eval/generate.sh@" + gen, "items": rows, "truth": truth},
           open(os.path.join(out, "MANIFEST.json"), "w", encoding="utf-8"), indent=2)
 PY
 echo "generated $(wc -l <"$ITEMS") items, $(du -sk "$OUT" | cut -f1) KB in $OUT"
