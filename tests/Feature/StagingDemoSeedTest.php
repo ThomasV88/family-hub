@@ -22,10 +22,17 @@ use App\Medical\Viewer as MedicalViewer;
 use App\Models\FinanceTransaction;
 use App\Models\MedicalAiExtraction;
 use App\Models\MedicalSubject;
+use App\Models\ShoppingCatalogItem;
+use App\Models\ShoppingItem;
+use App\Models\ShoppingList;
+use App\Models\ShoppingStore;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Wish;
 use App\Models\WishReservation;
+use App\Shopping\ItemState;
+use App\Shopping\ListStatus;
+use App\Shopping\SourceKind;
 use App\Tasks\TaskStatus;
 use App\Tasks\TaskVisibility;
 use Carbon\CarbonImmutable;
@@ -37,6 +44,7 @@ beforeEach(function () {
     $this->originalEnv = app()->environment();
     app()['env'] = 'staging';
     Storage::fake('medical');
+    Storage::fake('local');
 });
 
 afterEach(function () {
@@ -70,7 +78,8 @@ function demoCounts(): array
         'finance_accounts', 'finance_account_members', 'finance_transactions', 'finance_recurring', 'finance_recurring_matches', 'finance_budgets',
         'finance_import_profiles', 'finance_import_batches', 'finance_import_rows', 'medical_subjects', 'medical_subject_members', 'medical_visits',
         'medical_medications', 'medical_allergies', 'medical_vaccinations', 'medical_contacts', 'medical_documents', 'medical_ai_extractions',
-        'medical_ai_decisions', 'module_permissions', 'users'];
+        'medical_ai_decisions', 'shopping_lists', 'shopping_items', 'shopping_list_members', 'shopping_catalog_items', 'shopping_stores',
+        'shopping_units', 'module_permissions', 'users'];
 
     return collect($tables)->mapWithKeys(fn (string $t) => [$t => DB::table($t)->count()])->all();
 }
@@ -94,6 +103,10 @@ it('fills every module within the expected ranges and measures the run', functio
         ->and($c['medical_visits'])->toBeBetween(40, 80)
         ->and($c['medical_documents'])->toBe(7)
         ->and($c['medical_ai_extractions'])->toBe(3)
+        ->and($c['shopping_lists'])->toBe(8)
+        ->and($c['shopping_catalog_items'])->toBeBetween(25, 35)
+        ->and($c['shopping_stores'])->toBe(5)
+        ->and($c['shopping_units'])->toBe(10)
         ->and($seconds)->toBeLessThan(60);
 });
 
@@ -475,5 +488,56 @@ it('seeds one synthetic child with a photo, demo wishes and a managing parent, a
     expect($files)->toHaveCount(2);
     foreach ($files as $f) {
         expect(str_starts_with($f, "wish-images/profile-photos/{$child->id}/"))->toBeTrue();
+    }
+});
+
+it('seeds the Shopping demo through the services: every list state, carry-over, copy, reminder and pictures, no orphan file on reseed', function () {
+    demoSeed();
+    demoSeed();
+
+    $lists = ShoppingList::query()->get();
+    expect($lists->where('status', ListStatus::Open)->count())->toBeGreaterThanOrEqual(2)
+        ->and($lists->where('status', ListStatus::Locked)->count())->toBe(2)
+        ->and($lists->where('status', ListStatus::Done)->count())->toBe(2)
+        ->and($lists->where('source_kind', SourceKind::Carry)->count())->toBe(1)
+        ->and($lists->where('source_kind', SourceKind::Copy)->count())->toBe(1);
+
+    $carry = $lists->firstWhere('source_kind', SourceKind::Carry);
+    $source = ShoppingList::find($carry->source_list_id);
+    expect($source->status)->toBe(ListStatus::Done)
+        ->and($carry->name)->toBe($source->name.' (nezakúpené)')
+        ->and(ShoppingItem::where('list_id', $carry->id)->where('state', '!=', ItemState::Pending->value)->count())->toBe(0)
+        ->and(ShoppingItem::where('list_id', $carry->id)->count())->toBeGreaterThan(0);
+
+    $reminder = $lists->firstWhere('name', 'Týždenný nákup');
+    expect($reminder->remind_at->isFuture())->toBeTrue()
+        ->and($reminder->reminder_enqueued_at)->toBeNull();
+
+    $resolvedLocked = $lists->where('name', 'Oslava narodenín')->first();
+    expect(ShoppingItem::where('list_id', $resolvedLocked->id)->where('state', ItemState::Pending->value)->count())->toBe(0);
+    $half = $lists->where('name', 'Sobotný trh')->first();
+    expect(ShoppingItem::where('list_id', $half->id)->pluck('state')->map(fn ($s) => $s->value)->unique()->sort()->values()->all())
+        ->toBe(['bought', 'pending', 'unavailable']);
+
+    $disk = Storage::disk('local');
+    $referenced = [];
+    foreach (ShoppingCatalogItem::all() as $row) {
+        $disk->assertExists($row->image_path);
+        $disk->assertExists($row->thumb_path);
+        array_push($referenced, $row->image_path, $row->thumb_path);
+    }
+    foreach (ShoppingStore::all() as $row) {
+        $disk->assertExists($row->logo_path);
+        $disk->assertExists($row->logo_thumb_path);
+        array_push($referenced, $row->logo_path, $row->logo_thumb_path);
+    }
+    expect(collect($disk->allFiles('wish-images/shopping'))->sort()->values()->all())->toBe(collect($referenced)->sort()->values()->all());
+
+    expect(DB::table('shopping_catalog_items')->selectRaw('count(distinct name_key) as n')->value('n'))->toBe(ShoppingCatalogItem::count());
+    $gate = app(AccessGate::class);
+    foreach ($lists as $list) {
+        $responsible = User::find($list->responsible_id);
+        expect($responsible->email)->not->toBeNull()
+            ->and($gate->allows($responsible, Module::Shopping, AccessLevel::Edit))->toBeTrue();
     }
 });

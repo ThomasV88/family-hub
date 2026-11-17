@@ -11,6 +11,7 @@ use App\Audit\AuditLogger;
 use App\Medical\Documents\MedicalDocumentStore;
 use App\Models\User;
 use App\Profile\ProfilePhotoStore;
+use App\Shopping\Images\ShoppingImageStore;
 use App\Support\SyntheticChild;
 use App\Wishlist\Catalog\ImageProcessor;
 use App\Wishlist\WishlistManagerSync;
@@ -18,6 +19,7 @@ use Database\Seeders\Staging\AiProposalsSeeder;
 use Database\Seeders\Staging\DocumentsSeeder;
 use Database\Seeders\Staging\FinanceSeeder;
 use Database\Seeders\Staging\HealthSeeder;
+use Database\Seeders\Staging\ShoppingSeeder;
 use Database\Seeders\Staging\StagingContext;
 use Database\Seeders\Staging\TasksSeeder;
 use Database\Seeders\Staging\WishlistSeeder;
@@ -143,6 +145,7 @@ class StagingSeeder extends Seeder
         $documents = (new DocumentsSeeder)->seed($ctx, $health['subjects']);
         $this->summary['documents'] = count($documents);
         $this->summary['ai'] = (new AiProposalsSeeder)->seed($ctx, $health['subjects'], $documents);
+        $this->summary['shopping'] = (new ShoppingSeeder)->seed($ctx);
         $this->summary['seconds'] = round(microtime(true) - $started, 2);
 
         return $created;
@@ -205,6 +208,29 @@ class StagingSeeder extends Seeder
 
         // Todo: tasks.creator_id is RESTRICT. task_members cascade.
         DB::table('tasks')->whereIn('creator_id', $ids)->delete();
+
+        // Shopping: shopping_lists.creator_id is RESTRICT (items and members cascade). Catalog items, stores and custom
+        // units made by a synthetic user go too; their picture folders are removed after the commit.
+        DB::table('shopping_lists')->whereIn('creator_id', $ids)->delete();
+        $catalogIds = DB::table('shopping_catalog_items')->whereIn('created_by', $ids)->pluck('id')->all();
+        $storeIds = DB::table('shopping_stores')->whereIn('created_by', $ids)->pluck('id')->all();
+        DB::table('shopping_catalog_items')->whereIn('id', $catalogIds)->delete();
+        DB::table('shopping_stores')->whereIn('id', $storeIds)->delete();
+        DB::table('shopping_units')->whereIn('created_by', $ids)->delete();
+        if ($catalogIds !== [] || $storeIds !== []) {
+            DB::afterCommit(function () use ($catalogIds, $storeIds) {
+                $images = app(ShoppingImageStore::class);
+                foreach ([ShoppingImageStore::KIND_CATALOG => $catalogIds, ShoppingImageStore::KIND_STORES => $storeIds] as $kind => $kindIds) {
+                    foreach ($kindIds as $id) {
+                        try {
+                            $images->deleteDirectory($kind, (int) $id);
+                        } catch (\Throwable $e) {
+                            Log::warning('staging seed: could not remove shopping pictures of a reseeded row', ['reason' => $e::class]);
+                        }
+                    }
+                }
+            });
+        }
 
         // Wishlist: wishes.owner_id is RESTRICT. urls, reservations and contributions cascade. Family-wide occasions
         // (no owner) made by a synthetic user are removed too; an occasion owned by a real user stays.

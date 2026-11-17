@@ -6,6 +6,11 @@ use App\Models\MedicalAiExtraction;
 use App\Models\MedicalDocument;
 use App\Models\MedicalSubject;
 use App\Models\ModulePermission;
+use App\Models\ShoppingCatalogItem;
+use App\Models\ShoppingItem;
+use App\Models\ShoppingList;
+use App\Models\ShoppingStore;
+use App\Models\ShoppingUnit;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Wish;
@@ -15,6 +20,7 @@ beforeEach(function () {
     $this->originalEnv = app()->environment();
     // The demo seed stores a few synthetic documents; keep them off the real medical volume.
     Storage::fake('medical');
+    Storage::fake('local');
 });
 
 afterEach(function () {
@@ -192,6 +198,14 @@ function synthRows(User $user): void
         'started_by' => $user->id, 'agent' => 'codex', 'attempt' => 1, 'status' => 'failed', 'queued_at' => now()]);
     Task::factory()->create(['creator_id' => $user->id]);
     Wish::factory()->create(['owner_id' => $user->id]);
+    $list = ShoppingList::factory()->create(['creator_id' => $user->id]);
+    ShoppingItem::factory()->create(['list_id' => $list->id, 'created_by' => $user->id]);
+    $catalog = new ShoppingCatalogItem(['name' => "Tester item {$user->id}"]);
+    $catalog->forceFill(['created_by' => $user->id])->save();
+    $store = new ShoppingStore(['name' => "Tester store {$user->id}"]);
+    $store->forceFill(['created_by' => $user->id])->save();
+    $unit = ShoppingUnit::factory()->create();
+    $unit->forceFill(['created_by' => $user->id])->save();
 }
 
 it('reseeds and audits cleanly after the synthetic admin produced audit rows (live staging failure)', function () {
@@ -222,7 +236,8 @@ function seededCounts(): array
         'finance_accounts', 'finance_account_members', 'finance_transactions', 'finance_recurring', 'finance_recurring_matches', 'finance_budgets',
         'finance_import_profiles', 'finance_import_batches', 'finance_import_rows', 'medical_subjects', 'medical_subject_members', 'medical_visits',
         'medical_medications', 'medical_allergies', 'medical_vaccinations', 'medical_contacts', 'medical_documents', 'medical_ai_extractions',
-        'medical_ai_decisions', 'module_permissions', 'users'];
+        'medical_ai_decisions', 'shopping_lists', 'shopping_items', 'shopping_list_members', 'shopping_catalog_items', 'shopping_stores',
+        'shopping_units', 'module_permissions', 'users'];
 
     return collect($tables)->mapWithKeys(fn (string $t) => [$t => DB::table($t)->count()])->all();
 }
