@@ -16,7 +16,7 @@ uses(RefreshDatabase::class);
 
 function payload(array $over = []): array
 {
-    return array_merge(['todo' => 'edit', 'wishlist' => 'edit', 'finance' => 'none', 'health' => 'none'], $over);
+    return array_merge(['todo' => 'edit', 'wishlist' => 'edit', 'finance' => 'none', 'health' => 'none', 'shopping' => 'edit'], $over);
 }
 
 function auditRows(): array
@@ -60,7 +60,7 @@ it('creates missing grant rows for a member without grants', function () {
 
     $this->actingAs($admin)->put("/settings/members/{$member->id}/permissions", payload(['finance' => 'view']))->assertRedirect();
 
-    expect(auditRows())->toHaveCount(3);
+    expect(auditRows())->toHaveCount(4);
     expect(ModulePermission::where('user_id', $member->id)->where('module', 'finance')->first()->level)->toBe(AccessLevel::View);
 });
 
@@ -74,10 +74,22 @@ it('rejects a missing module, an unknown level and extra keys without changing a
     expect(ModulePermission::where('user_id', $child->id)->where('module', 'wishlist')->first()->level)->toBe(AccessLevel::Edit);
 })->with([
     'missing module' => [['todo' => 'edit', 'wishlist' => 'view', 'finance' => 'none']],
-    'unknown level' => [['todo' => 'edit', 'wishlist' => 'admin', 'finance' => 'none', 'health' => 'none']],
-    'extra settings key' => [['todo' => 'edit', 'wishlist' => 'view', 'finance' => 'none', 'health' => 'none', 'settings' => 'edit']],
-    'extra is_admin key' => [['todo' => 'edit', 'wishlist' => 'view', 'finance' => 'none', 'health' => 'none', 'is_admin' => true]],
+    'old four-module payload without shopping' => [['todo' => 'edit', 'wishlist' => 'edit', 'finance' => 'none', 'health' => 'none']],
+    'unknown level' => [['todo' => 'edit', 'wishlist' => 'admin', 'finance' => 'none', 'health' => 'none', 'shopping' => 'edit']],
+    'extra settings key' => [['todo' => 'edit', 'wishlist' => 'view', 'finance' => 'none', 'health' => 'none', 'shopping' => 'edit', 'settings' => 'edit']],
+    'extra is_admin key' => [['todo' => 'edit', 'wishlist' => 'view', 'finance' => 'none', 'health' => 'none', 'shopping' => 'edit', 'is_admin' => true]],
 ]);
+
+it('saves a shopping level and audits the change like any module', function () {
+    $admin = User::factory()->admin()->create();
+    $child = User::factory()->withPreset(Preset::Child)->create();
+
+    $this->actingAs($admin)->put("/settings/members/{$child->id}/permissions", payload(['shopping' => 'view']))->assertRedirect();
+
+    expect(ModulePermission::where('user_id', $child->id)->where('module', 'shopping')->first()->level)->toBe(AccessLevel::View);
+    $rows = auditRows();
+    expect($rows)->toHaveCount(1)->and($rows[0]->module)->toBe('shopping');
+});
 
 it('rolls the grant back when the audit write fails', function () {
     $admin = User::factory()->admin()->create();
@@ -113,7 +125,7 @@ it('lets the admin grant themselves health view and audits it', function () {
 
     $this->actingAs($admin)->put("/settings/members/{$admin->id}/permissions", payload(['health' => 'view']))->assertRedirect();
 
-    expect(auditRows())->toHaveCount(3); // todo, wishlist (payload) and health
+    expect(auditRows())->toHaveCount(4); // todo, wishlist, shopping (payload) and health
     expect($admin->fresh()->is_admin)->toBeTrue();
 });
 

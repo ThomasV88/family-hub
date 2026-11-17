@@ -26,23 +26,23 @@ const SECTIONS = [
     { key: 'appearance', href: '/settings/appearance', labelKey: 'settings.section.appearance', icon: 'palette' },
 ];
 const PRESETS = {
-    parent: { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'none' },
-    child: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none' },
-    grandparent: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none' },
-    guest: { todo: 'view', wishlist: 'none', finance: 'none', health: 'none' },
+    parent: { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'none', shopping: 'edit' },
+    child: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none', shopping: 'edit' },
+    grandparent: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none', shopping: 'edit' },
+    guest: { todo: 'view', wishlist: 'none', finance: 'none', health: 'none', shopping: 'view' },
 };
 const MEMBERS = [
-    { id: 1, name: 'Anna', email: 'anna@example.test', isAdmin: true, isSelf: true, access: { todo: 'none', wishlist: 'none', finance: 'none', health: 'none' } },
-    { id: 2, name: 'Bob', email: 'bob@example.test', isAdmin: false, isSelf: false, access: { todo: 'edit', wishlist: 'view', finance: 'none', health: 'none' } },
+    { id: 1, name: 'Anna', email: 'anna@example.test', isAdmin: true, isSelf: true, access: { todo: 'none', wishlist: 'none', finance: 'none', health: 'none', shopping: 'none' } },
+    { id: 2, name: 'Bob', email: 'bob@example.test', isAdmin: false, isSelf: false, access: { todo: 'edit', wishlist: 'view', finance: 'none', health: 'none', shopping: 'edit' } },
 ];
 
-const CHILD = { id: 3, name: 'Ema', email: null, isAdmin: false, isSelf: false, isChild: true, signInDisabled: true, photoVersion: null, managerNames: ['Anna', 'Bob'], wishlistManagerIds: [1, 2], access: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none' } };
+const CHILD = { id: 3, name: 'Ema', email: null, isAdmin: false, isSelf: false, isChild: true, signInDisabled: true, photoVersion: null, managerNames: ['Anna', 'Bob'], wishlistManagerIds: [1, 2], access: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none', shopping: 'edit' } };
 
 let current;
 function mountPage({ locale = 'en', messages, ...props } = {}) {
     mockProps = {
         locale, flash: { status: null, toast: null, data: null }, availableLocales: ['sk', 'pl', 'en'],
-        auth: { user: { id: 1, name: 'Anna', email: 'anna@example.test', isAdmin: true }, access: { todo: 'none', wishlist: 'none', finance: 'none', health: 'none' } },
+        auth: { user: { id: 1, name: 'Anna', email: 'anna@example.test', isAdmin: true }, access: { todo: 'none', wishlist: 'none', finance: 'none', health: 'none', shopping: 'none' } },
         app: { env: 'local', styleGuide: false },
     };
     window.matchMedia = (query) => ({ matches: false, media: query, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
@@ -78,7 +78,7 @@ describe('Members page', () => {
         expect(panel.textContent).toContain('Bob');
         expect(panel.textContent).toContain('bob@example.test');
         expect(panel.querySelector('[role=tab][aria-selected=true]').textContent.trim()).toBe('Permissions');
-        expect(panel.querySelectorAll('select')).toHaveLength(5);
+        expect(panel.querySelectorAll('select')).toHaveLength(6);
     });
 
     it('opens the panel straight from the openMember prop', () => {
@@ -91,7 +91,7 @@ describe('Members page', () => {
         await current.findAll('[role=tab]').find((t) => t.text() === 'Permission matrix').trigger('click');
         const table = current.find('table');
         expect(table.find('caption').text()).toBe('Permission matrix');
-        expect(table.findAll('th').map((h) => h.text())).toEqual(['Members', 'To-do', 'Wishlist', 'Finances', 'Health', 'Settings']);
+        expect(table.findAll('th').map((h) => h.text())).toEqual(['Members', 'To-do', 'Wishlist', 'Finances', 'Health', 'Shopping', 'Settings']);
         expect(table.findAll('select, input')).toHaveLength(0);
         const bobRow = table.findAll('tbody tr')[1];
         expect(bobRow.text()).toContain('Edit');

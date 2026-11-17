@@ -78,17 +78,17 @@
       "id": "permissions",
       "title": "Uprawnienia dla poszczególnych modułów",
       "blocks": [
-        { "type": "p", "text": "Każdy członek ma poziom dla każdego modułu (Zadania, Wishlist, Finanse i Zdrowie): **Brak** (nie widzi go), **Odczyt** (może czytać) albo **Edycja** (może czytać i zmieniać). Serwer wymusza to na każdej stronie." },
+        { "type": "p", "text": "Każdy członek ma poziom dla każdego modułu (Zadania, Wishlist, Finanse, Zdrowie i Zakupy): **Brak** (nie widzi go), **Odczyt** (może czytać) albo **Edycja** (może czytać i zmieniać). Serwer wymusza to na każdej stronie." },
         { "type": "steps", "title": "Gdzie kliknąć", "items": [
           "W **Członkowie i dostęp** naciśnij **Zarządzaj** przy członku.",
           "W zakładce **Uprawnienia** wybierz **Ustawienie wstępne** i naciśnij **Zastosuj** albo ustaw każdy moduł samodzielnie.",
           "Naciśnij **Zapisz uprawnienia**."
         ] },
         { "type": "list", "items": [
-          "**Rodzic**: Zadania, Wishlist i Finanse: edycja. Zdrowie: brak.",
-          "**Dziecko**: Zadania i Wishlist: edycja. Finanse i Zdrowie: brak.",
-          "**Dziadek lub babcia**: Zadania i Wishlist: edycja. Finanse i Zdrowie: brak.",
-          "**Gość**: Zadania: tylko odczyt. Wszystko inne: brak."
+          "**Rodzic**: Zadania, Wishlist, Finanse i Zakupy: edycja. Zdrowie: brak.",
+          "**Dziecko**: Zadania, Wishlist i Zakupy: edycja. Finanse i Zdrowie: brak.",
+          "**Dziadek lub babcia**: Zadania, Wishlist i Zakupy: edycja. Finanse i Zdrowie: brak.",
+          "**Gość**: Zadania i Zakupy: tylko odczyt. Wszystko inne: brak."
         ] },
         { "type": "p", "text": "Zakładka **Macierz uprawnień** pokazuje wszystkich członków i moduły w jednej tabeli, więc możesz sprawdzić wszystkich naraz. Zdrowie i Finanse są domyślnie ograniczone. Ustawienia są tylko dla administratorów." }
       ]

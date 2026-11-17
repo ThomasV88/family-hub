@@ -20,12 +20,12 @@ import PermissionsTab from '../../../resources/js/Components/Settings/Permission
 import MemberPanel from '../../../resources/js/Components/Settings/MemberPanel.vue';
 
 const PRESETS = {
-    parent: { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'none' },
-    child: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none' },
-    grandparent: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none' },
-    guest: { todo: 'view', wishlist: 'none', finance: 'none', health: 'none' },
+    parent: { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'none', shopping: 'edit' },
+    child: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none', shopping: 'edit' },
+    grandparent: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none', shopping: 'edit' },
+    guest: { todo: 'view', wishlist: 'none', finance: 'none', health: 'none', shopping: 'view' },
 };
-const MEMBER = { id: 7, name: 'Bob', email: 'bob@example.test', isAdmin: false, isSelf: false, access: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none' } };
+const MEMBER = { id: 7, name: 'Bob', email: 'bob@example.test', isAdmin: false, isSelf: false, access: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none', shopping: 'edit' } };
 
 let current;
 function mountTab({ locale = 'en', member = MEMBER, messages } = {}) {
@@ -42,11 +42,11 @@ const button = (text) => current.findAll('button').find((b) => b.text() === text
 const selects = () => current.findAll('select').slice(1); // first is the preset select
 
 describe('PermissionsTab', () => {
-    it('shows four module selects with member-specific aria labels and a static settings row', () => {
+    it('shows five module selects with member-specific aria labels and a static settings row', () => {
         mountTab();
-        expect(selects()).toHaveLength(4);
+        expect(selects()).toHaveLength(5);
         expect(selects()[2].attributes('aria-label')).toBe('Bob: Finances');
-        expect(selects().map((s) => s.element.value)).toEqual(['edit', 'edit', 'none', 'none']);
+        expect(selects().map((s) => s.element.value)).toEqual(['edit', 'edit', 'none', 'none', 'edit']);
         expect(current.text()).toContain('Admins only');
         expect(current.text().match(/Restricted by default/g)).toHaveLength(2);
     });
@@ -72,9 +72,9 @@ describe('PermissionsTab', () => {
     it('applies a preset into the selects without saving, then lets the admin adjust', async () => {
         mountTab();
         await current.findAll('select')[0].setValue('guest');
-        expect(current.text()).toContain('To-do: view only. Everything else: none.');
+        expect(current.text()).toContain('To-do and Shopping: view only. Everything else: none.');
         await button('Apply preset').trigger('click');
-        expect(selects().map((s) => s.element.value)).toEqual(['view', 'none', 'none', 'none']);
+        expect(selects().map((s) => s.element.value)).toEqual(['view', 'none', 'none', 'none', 'view']);
         expect(put).not.toHaveBeenCalled();
         expect(current.text()).toContain('Preset applied. Adjust anything, then save.');
         await selects()[1].setValue('edit');
@@ -88,7 +88,7 @@ describe('PermissionsTab', () => {
         expect(put).toHaveBeenCalledTimes(1);
         const [form, url] = put.mock.calls[0];
         expect(url).toBe('/settings/members/7/permissions');
-        expect({ todo: form.todo, wishlist: form.wishlist, finance: form.finance, health: form.health }).toEqual({ todo: 'edit', wishlist: 'edit', finance: 'view', health: 'none' });
+        expect({ todo: form.todo, wishlist: form.wishlist, finance: form.finance, health: form.health, shopping: form.shopping }).toEqual({ todo: 'edit', wishlist: 'edit', finance: 'view', health: 'none', shopping: 'edit' });
     });
 
     it('shows a danger alert on server error and keeps the selections', async () => {

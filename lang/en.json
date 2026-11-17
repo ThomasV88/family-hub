@@ -624,10 +624,10 @@
             "child": "Child",
             "grandparent": "Grandparent",
             "guest": "Guest",
-            "parent_hint": "To-do, Wishlist and Finances: edit. Health: none.",
-            "child_hint": "To-do and Wishlist: edit. Finances and Health: none.",
-            "grandparent_hint": "To-do and Wishlist: edit. Finances and Health: none.",
-            "guest_hint": "To-do: view only. Everything else: none."
+            "parent_hint": "To-do, Wishlist, Finances and Shopping: edit. Health: none.",
+            "child_hint": "To-do, Wishlist and Shopping: edit. Finances and Health: none.",
+            "grandparent_hint": "To-do, Wishlist and Shopping: edit. Finances and Health: none.",
+            "guest_hint": "To-do and Shopping: view only. Everything else: none."
         },
         "apply_label": "Apply preset",
         "apply": "Apply",
@@ -642,6 +642,7 @@
             "wishlist": "Wishlist",
             "finance": "Finances",
             "health": "Health",
+            "shopping": "Shopping",
             "settings": "Settings"
         },
         "restricted": "Restricted by default",

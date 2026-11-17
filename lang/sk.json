@@ -624,10 +624,10 @@
             "child": "Dieťa",
             "grandparent": "Starý rodič",
             "guest": "Hosť",
-            "parent_hint": "Úlohy, Wishlist a Financie: úpravy. Zdravie: žiadny.",
-            "child_hint": "Úlohy a Wishlist: úpravy. Financie a Zdravie: žiadny.",
-            "grandparent_hint": "Úlohy a Wishlist: úpravy. Financie a Zdravie: žiadny.",
-            "guest_hint": "Úlohy: iba čítanie. Všetko ostatné: žiadny."
+            "parent_hint": "Úlohy, Wishlist, Financie a Nákupy: úpravy. Zdravie: žiadny.",
+            "child_hint": "Úlohy, Wishlist a Nákupy: úpravy. Financie a Zdravie: žiadny.",
+            "grandparent_hint": "Úlohy, Wishlist a Nákupy: úpravy. Financie a Zdravie: žiadny.",
+            "guest_hint": "Úlohy a Nákupy: iba čítanie. Všetko ostatné: žiadny."
         },
         "apply_label": "Použiť predvoľbu",
         "apply": "Použiť",
@@ -642,6 +642,7 @@
             "wishlist": "Wishlist",
             "finance": "Financie",
             "health": "Zdravie",
+            "shopping": "Nákupy",
             "settings": "Nastavenia"
         },
         "restricted": "Predvolene obmedzené",

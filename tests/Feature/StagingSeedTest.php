@@ -64,7 +64,7 @@ it('gives members preset grants (plus the demo health and finance grants) and th
     $admin = User::where('is_admin', true)->first();
     expect($admin->modulePermissions()->count())->toBe(0);
     foreach (User::where('is_admin', false)->get() as $member) {
-        expect($member->modulePermissions()->count())->toBe(4);
+        expect($member->modulePermissions()->count())->toBe(5);
     }
     // Health is restricted by default; the demo family grants it to exactly four members (the admin and Guest never).
     $health = fn (string $email) => DB::table('module_permissions')->where('module', 'health')->where('user_id', User::where('email', $email)->value('id'))->value('level');

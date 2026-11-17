@@ -12,7 +12,7 @@ return [
         'method' => 'PUT',
         'uri' => '/settings/members/{id}/permissions',
         'params' => fn (array $users) => ['id' => $users['child']->id],
-        'data' => ['todo' => 'edit', 'wishlist' => 'edit', 'finance' => 'none', 'health' => 'none'],
+        'data' => ['todo' => 'edit', 'wishlist' => 'edit', 'finance' => 'none', 'health' => 'none', 'shopping' => 'edit'],
         'expect' => $adminOnly(302),
     ],
 ];

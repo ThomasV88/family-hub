@@ -78,17 +78,17 @@
       "id": "permissions",
       "title": "Permissions for each module",
       "blocks": [
-        { "type": "p", "text": "Each member has a level for each module (To-do, Wishlist, Finances and Health): **None** (cannot see it), **View** (can read) or **Edit** (can read and change). The server enforces this on every page." },
+        { "type": "p", "text": "Each member has a level for each module (To-do, Wishlist, Finances, Health and Shopping): **None** (cannot see it), **View** (can read) or **Edit** (can read and change). The server enforces this on every page." },
         { "type": "steps", "title": "Where to click", "items": [
           "In **Members and access**, press **Manage** next to a member.",
           "On the **Permissions** tab, choose a **Preset** and press **Apply**, or set each module yourself.",
           "Press **Save permissions**."
         ] },
         { "type": "list", "items": [
-          "**Parent**: To-do, Wishlist and Finances: edit. Health: none.",
-          "**Child**: To-do and Wishlist: edit. Finances and Health: none.",
-          "**Grandparent**: To-do and Wishlist: edit. Finances and Health: none.",
-          "**Guest**: To-do: view only. Everything else: none."
+          "**Parent**: To-do, Wishlist, Finances and Shopping: edit. Health: none.",
+          "**Child**: To-do, Wishlist and Shopping: edit. Finances and Health: none.",
+          "**Grandparent**: To-do, Wishlist and Shopping: edit. Finances and Health: none.",
+          "**Guest**: To-do and Shopping: view only. Everything else: none."
         ] },
         { "type": "p", "text": "The **Permission matrix** tab shows all members and modules in one table, so you can check everyone at a glance. Health and Finances are restricted by default. Settings are for administrators only." }
       ]
