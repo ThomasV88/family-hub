@@ -173,7 +173,9 @@ return [
         // reliable or uncertain; anything else reads as uncertain (config 'may contain errors' label).
         'text_reliability' => env('AI_OCR_TEXT_RELIABILITY', 'reliable'),
         'text_version' => 1,
-        'max_page_chars' => 12000,
+        // max_pages * max_page_chars plus the page separators must not exceed max_total_chars (and the 200000 CHECK of the body column), so every
+        // page that is read also fits the stored body; a test pins it.
+        'max_page_chars' => 9900,
         'max_total_chars' => 200000,
         // Pages per transcription call, pages read at most, and the measured seconds one page takes.
         'pages_per_call' => 4,

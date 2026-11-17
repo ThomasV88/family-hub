@@ -35,3 +35,17 @@ it('matches a folded word that starts with any alternative', function () {
         ->and(SearchTerms::matches(['paracetamol'], 'aspirin'))->toBeFalse()
         ->and(SearchTerms::matches([], 'x'))->toBeFalse();
 });
+
+it('reads a pasted query without zero-width characters like the stored text', function () {
+    expect(SearchTerms::parse("met\u{200B}formin 500"))->toBe(SearchTerms::parse('metformin 500'));
+});
+
+it('counts the words the search does not use', function () {
+    expect(SearchTerms::dropped('vitamin C'))->toBe(1)
+        ->and(SearchTerms::dropped('vitamin D3'))->toBe(0)
+        ->and(SearchTerms::dropped('血压 metformin'))->toBe(1)
+        ->and(SearchTerms::dropped('aa bb cc dd ee ff gg hh ii jj'))->toBe(2)
+        ->and(SearchTerms::dropped('metformin'))->toBe(0)
+        ->and(SearchTerms::dropped('x'))->toBe(1)
+        ->and(SearchTerms::dropped(''))->toBe(0);
+});

@@ -51,19 +51,19 @@ it('refuses a wrong page set or structure with an issue code', function (string 
 ]);
 
 it('limits one page and the whole text', function () {
-    $long = str_repeat('ž', 12001);
+    $long = str_repeat('ž', 9901);
     $r = txValInspect(txValReply([txValPage(1), txValPage(2, $long), txValPage(3), txValPage(4)]));
     expect($r['issues'])->toBe(['pages[1].text:too_long']);
 
-    $page = str_repeat('a', 12000);
+    $page = str_repeat('a', 9900);
     $pages = [];
-    for ($i = 1; $i <= 17; $i++) {
+    for ($i = 1; $i <= 21; $i++) {
         $pages[] = txValPage($i, $page);
     }
-    $r = txValInspect(txValReply($pages), 17);
+    $r = txValInspect(txValReply($pages), 21);
     expect($r['issues'])->toBe(['pages:too_long']);
 
-    expect(txValInspect(txValReply([txValPage(1, str_repeat('ž', 12000))]), 1)['outcome']->ok)->toBeTrue();
+    expect(txValInspect(txValReply([txValPage(1, str_repeat('ž', 9900))]), 1)['outcome']->ok)->toBeTrue();
 });
 
 it('empties an unreadable page of only whitespace and keeps text it was given', function () {

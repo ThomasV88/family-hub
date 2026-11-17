@@ -11,9 +11,21 @@ final class TextNormalizer
     /** Form feed: separates the pages inside the stored body. */
     public const PAGE_SEPARATOR = "\x0c";
 
+    /** Zero-width characters (ZWSP, ZWNJ, ZWJ, word joiner, BOM): invisible, but they split a word for the search index. */
+    private const ZERO_WIDTH = '/[\x{200B}-\x{200D}\x{2060}\x{FEFF}]/u';
+
+    /** Strips the zero-width characters and turns the Unicode line and paragraph separators into LF. */
+    public static function stripInvisible(string $text): string
+    {
+        $text = preg_replace(self::ZERO_WIDTH, '', $text) ?? $text;
+
+        return str_replace(["\u{2028}", "\u{2029}"], "\n", $text);
+    }
+
     public static function page(string $text): string
     {
         $text = mb_scrub($text, 'UTF-8');
+        $text = self::stripInvisible($text);
         $text = str_replace(["\r\n", "\r"], "\n", $text);
         // Form feed (our separator), C0 controls except LF and TAB, DEL, C1 controls, bidi and direction marks.
         $text = preg_replace('/[\x00-\x08\x0B-\x1F\x7F\x{0080}-\x{009F}\x{200E}\x{200F}\x{061C}\x{202A}-\x{202E}\x{2066}-\x{2069}]/u', '', $text) ?? '';

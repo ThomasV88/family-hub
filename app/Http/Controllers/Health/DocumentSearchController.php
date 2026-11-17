@@ -20,13 +20,14 @@ class DocumentSearchController extends Controller
         $viewer = Viewer::for($request->user());
         $person = $request->validated('person');
         $terms = SearchTerms::parse((string) $request->validated('q'));
+        $dropped = SearchTerms::dropped((string) $request->validated('q'));
 
         if ($terms === []) {
-            return response()->json(['items' => [], 'hasMore' => false, 'page' => 1]);
+            return response()->json(['items' => [], 'hasMore' => false, 'page' => 1, 'dropped' => $dropped]);
         }
         $page = (int) ($request->validated('page') ?? 1);
         $result = $search->search($viewer, $terms, is_string($person) ? $person : null, $page);
 
-        return response()->json(['items' => $result['items'], 'hasMore' => $result['hasMore'], 'page' => $page]);
+        return response()->json(['items' => $result['items'], 'hasMore' => $result['hasMore'], 'page' => $page, 'dropped' => $dropped]);
     }
 }

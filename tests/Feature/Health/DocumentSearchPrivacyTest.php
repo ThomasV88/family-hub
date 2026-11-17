@@ -106,7 +106,7 @@ it('answers a hidden, archived or foreign document byte for byte like a family w
 
     // The answer carries neither the hidden title nor a count of any kind.
     $body = json_decode(substr($with[0], strpos($with[0], '{')), true);
-    expect(array_keys($body))->toBe(['items', 'hasMore', 'page'])
+    expect(array_keys($body))->toBe(['items', 'hasMore', 'page', 'dropped'])
         ->and(array_column($body['items'], 'documentId'))->toHaveCount(1)
         ->and($with[0])->not->toContain('Hidden')->not->toContain('Archived')->not->toContain('Own off');
 })->with(fn () => array_keys(docSearchPrivHiddenCases()));

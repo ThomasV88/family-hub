@@ -146,7 +146,7 @@ it('pages by twenty with a has-more flag and no total', function () {
 
     expect($first->json('items'))->toHaveCount(20)->and($first->json('hasMore'))->toBeTrue()->and($first->json('page'))->toBe(1)
         ->and($second->json('items'))->toHaveCount(5)->and($second->json('hasMore'))->toBeFalse()->and($second->json('page'))->toBe(2)
-        ->and(array_keys($first->json()))->toBe(['items', 'hasMore', 'page'])
+        ->and(array_keys($first->json()))->toBe(['items', 'hasMore', 'page', 'dropped'])
         ->and(array_intersect(docSearchIds($first), docSearchIds($second)))->toBe([]);
 });
 
@@ -165,7 +165,7 @@ it('limits to one person and treats a malformed filter as an empty result withou
     $medical = array_filter(array_column(DB::getQueryLog(), 'query'), fn (string $sql) => str_contains($sql, 'medical_'));
     DB::disableQueryLog();
 
-    expect($response->json())->toBe(['items' => [], 'hasMore' => false, 'page' => 1])->and($medical)->toBe([]);
+    expect($response->json())->toBe(['items' => [], 'hasMore' => false, 'page' => 1, 'dropped' => 0])->and($medical)->toBe([]);
 });
 
 it('answers a query without a usable word with an empty page, and operator characters are only text', function () {

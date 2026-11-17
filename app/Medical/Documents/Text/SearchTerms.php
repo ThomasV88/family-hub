@@ -23,7 +23,8 @@ final class SearchTerms
      */
     public static function parse(string $q): array
     {
-        $q = trim($q);
+        // Same invisible characters as the stored text loses (TextNormalizer): a pasted query matches the same words.
+        $q = trim(TextNormalizer::stripInvisible($q));
         $normalised = \Normalizer::normalize($q, \Normalizer::FORM_C);
         $q = mb_substr($normalised === false ? $q : $normalised, 0, self::MAX_CHARS);
 
@@ -43,6 +44,43 @@ final class SearchTerms
         }
 
         return $out;
+    }
+
+    /**
+     * How many words of the query the search does not use: words of one character, words past the token limit and
+     * words the ASCII search index cannot hold (no Latin letter or digit after the fold). The UI shows a hint for it.
+     */
+    public static function dropped(string $q): int
+    {
+        $used = 0;
+        foreach (self::parse($q) as $alternatives) {
+            foreach ($alternatives as $alt) {
+                if (preg_match('/^[a-z0-9]+$/', self::fold($alt)) === 1) {
+                    $used++;
+
+                    break;
+                }
+            }
+        }
+
+        return max(0, count(self::words($q)) - $used);
+    }
+
+    /**
+     * Every word of the (cut, composed, lower case) query: letters and digits only.
+     *
+     * @return list<string>
+     */
+    private static function words(string $q): array
+    {
+        // Same invisible characters as the stored text loses (TextNormalizer): a pasted query matches the same words.
+        $q = trim(TextNormalizer::stripInvisible($q));
+        $normalised = \Normalizer::normalize($q, \Normalizer::FORM_C);
+        $q = mb_substr($normalised === false ? $q : $normalised, 0, self::MAX_CHARS);
+
+        preg_match_all('/[\p{L}\p{N}]+/u', mb_strtolower($q), $m);
+
+        return $m[0];
     }
 
     /** The PHP side of the fold: ASCII transliteration, then lower case. (The SQL side is unaccent, added with the search.) */

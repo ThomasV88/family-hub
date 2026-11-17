@@ -19,6 +19,8 @@ final class Snippets
     public static function build(string $body, array $terms, int $max = 2, int $radius = 80): array
     {
         $none = ['snippets' => [], 'page' => null];
+        // Rows written before the normaliser dropped zero-width characters: the words are read as the index sees them now.
+        $body = TextNormalizer::stripInvisible($body);
         if ($body === '' || $terms === [] || $max < 1) {
             return $none;
         }
