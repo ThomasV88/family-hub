@@ -3008,8 +3008,8 @@
             "total": "Razem: {n} min",
             "categories": "Kategorie",
             "category_add": "Dodaj kategorię",
-            "categories_hint": "Najwyżej {n} kategorie. Dodasz je klawiszem Enter lub przecinkiem.",
-            "categories_max": "Możesz dodać najwyżej {n} kategorie.",
+            "categories_hint": "Najwyżej {n} kategoria. Dodasz je klawiszem Enter lub przecinkiem. | Najwyżej {n} kategorie. Dodasz je klawiszem Enter lub przecinkiem. | Najwyżej {n} kategorii. Dodasz je klawiszem Enter lub przecinkiem. | Najwyżej {n} kategorii. Dodasz je klawiszem Enter lub przecinkiem.",
+            "categories_max": "Możesz dodać najwyżej {n} kategorię. | Możesz dodać najwyżej {n} kategorie. | Możesz dodać najwyżej {n} kategorii. | Możesz dodać najwyżej {n} kategorii.",
             "category_duplicate": "\"{name}\" została już dodana.",
             "category_too_long": "Kategoria może mieć najwyżej {n} znaków.",
             "category_remove": "Usuń kategorię {name}",
@@ -3043,7 +3043,7 @@
             "actions": "Działania dla składnika {n}",
             "move_up": "Przesuń wyżej",
             "move_down": "Przesuń niżej",
-            "split_offer": "Podziel na {n} składników",
+            "split_offer": "Podziel na {n} składnik | Podziel na {n} składniki | Podziel na {n} składników | Podziel na {n} składników",
             "split": "Podziel",
             "split_dismiss": "Zostaw jako jeden",
             "cap": "Możesz dodać najwyżej {n} składników."
@@ -3070,7 +3070,7 @@
         "photos": {
             "title": "Zdjęcia",
             "add": "Dodaj zdjęcia",
-            "hint": "Najwyżej {n} zdjęć, JPG, PNG lub WebP, każde do {mb} MB.",
+            "hint": "Najwyżej {n} zdjęcie, JPG, PNG lub WebP, każde do {mb} MB. | Najwyżej {n} zdjęcia, JPG, PNG lub WebP, każde do {mb} MB. | Najwyżej {n} zdjęć, JPG, PNG lub WebP, każde do {mb} MB. | Najwyżej {n} zdjęć, JPG, PNG lub WebP, każde do {mb} MB.",
             "main": "Główne",
             "make_main": "Ustaw jako główne",
             "move_earlier": "Przesuń wcześniej",
@@ -3082,7 +3082,7 @@
             "remove_body": "Zdjęcie zostanie usunięte z przepisu.",
             "remove_confirm": "Usuń zdjęcie",
             "remove_cancel": "Zostaw zdjęcie",
-            "cap": "Możesz dodać najwyżej {n} zdjęć.",
+            "cap": "Możesz dodać najwyżej {n} zdjęcie. | Możesz dodać najwyżej {n} zdjęcia. | Możesz dodać najwyżej {n} zdjęć. | Możesz dodać najwyżej {n} zdjęć.",
             "uploading": "Przesyłam zdjęcie",
             "some_failed": "Przepis został zapisany, ale nie udało się dodać {n} zdjęcia. Możesz dodać je ponownie w edycji. | Przepis został zapisany, ale nie udało się dodać {n} zdjęć. Możesz dodać je ponownie w edycji. | Przepis został zapisany, ale nie udało się dodać {n} zdjęć. Możesz dodać je ponownie w edycji. | Przepis został zapisany, ale nie udało się dodać {n} zdjęcia. Możesz dodać je ponownie w edycji.",
             "main_failed": "Przepis został zapisany, ale nie udało się ustawić wybranego zdjęcia głównego. Możesz wybrać je ponownie w edycji."
@@ -3159,7 +3159,8 @@
             "input": "Liczba porcji",
             "scaled": "Przeliczone",
             "reset": "Przywróć {n}",
-            "updated": "Ilości zmienione dla {n} porcji."
+            "updated": "Ilości zmienione dla {n} porcji. | Ilości zmienione dla {n} porcji. | Ilości zmienione dla {n} porcji. | Ilości zmienione dla {n} porcji.",
+            "clamped": "Liczba porcji może wynosić od {min} do {max}."
         },
         "progress": {
             "prepared": "{x} z {y} przygotowanych",

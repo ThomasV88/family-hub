@@ -77,7 +77,8 @@ function resync() {
     queue.resync({ tickedIngredientIds: props.state?.tickedIngredientIds, doneStepIds: props.state?.doneStepIds, favourite: props.state?.favourite === true });
     servings.value = clampServings(props.state?.servings ?? props.recipe?.servings ?? 1);
 }
-const clampServings = (value) => Math.min(99, Math.max(1, Number(value) || 1));
+// 99 is the usual ceiling; a recipe whose own servings are higher keeps them reachable (see ServingsControl).
+const clampServings = (value) => Math.min(Math.max(99, Number(props.recipe?.servings) || 0), Math.max(1, Number(value) || 1));
 const queue = useRecipeState({
     recipeId,
     initial: { tickedIngredientIds: props.state?.tickedIngredientIds, doneStepIds: props.state?.doneStepIds, favourite: props.state?.favourite === true },

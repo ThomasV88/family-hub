@@ -93,7 +93,7 @@ async function onFiles(event) {
         if (problem) { error.value = problem; continue; }
         accepted.push(file);
     }
-    if (accepted.length > room) error.value = t('recipes.photos.cap', { n: props.max });
+    if (accepted.length > room) error.value = t('recipes.photos.cap', { n: props.max }, props.max);
     const taking = accepted.slice(0, Math.max(room, 0));
     if (taking.length === 0) return;
 
@@ -212,7 +212,7 @@ function onMenu(index, { key }) {
             ref="input" type="file" class="visually-hidden" multiple accept="image/jpeg,image/png,image/webp" tabindex="-1"
             :aria-label="t('recipes.photos.add')" :aria-describedby="hintId" :disabled="locked" data-testid="photo-input" @change="onFiles"
         />
-        <p :id="hintId" class="rec-photos__hint">{{ atCap ? t('recipes.photos.cap', { n: max }) : t('recipes.photos.hint', { n: max, mb }) }}</p>
+        <p :id="hintId" class="rec-photos__hint">{{ atCap ? t('recipes.photos.cap', { n: max }, max) : t('recipes.photos.hint', { n: max, mb }, max) }}</p>
         <p v-if="uploading > 0" class="visually-hidden" role="status">{{ t('recipes.photos.uploading') }}</p>
         <div aria-live="polite">
             <UiAlert v-if="error" variant="danger" data-testid="photo-error">{{ error }}</UiAlert>

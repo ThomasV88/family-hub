@@ -55,7 +55,7 @@ function commitOne(raw) {
     if (name === '') return true;
     if (name.length > props.itemMax) { message.value = t('recipes.form.category_too_long', { n: props.itemMax }); return false; }
     if (props.modelValue.some((c) => normalize(c) === normalize(name))) { message.value = t('recipes.form.category_duplicate', { name }); return false; }
-    if (props.modelValue.length >= props.max) { message.value = t('recipes.form.categories_max', { n: props.max }); return false; }
+    if (props.modelValue.length >= props.max) { message.value = t('recipes.form.categories_max', { n: props.max }, props.max); return false; }
     message.value = '';
     emit('update:modelValue', [...props.modelValue, name]);
     emit('edit');
@@ -114,7 +114,7 @@ defineExpose({ commitPending });
                 <UiButton variant="ghost" size="sm" icon-only :icon="X" :label="t('recipes.form.category_remove', { name })" :disabled="disabled" @click="remove(name)" />
             </li>
         </ul>
-        <UiField :label="t('recipes.form.category_add')" :error="error" :hint="atMax ? t('recipes.form.categories_max', { n: max }) : t('recipes.form.categories_hint', { n: max })">
+        <UiField :label="t('recipes.form.category_add')" :error="error" :hint="atMax ? t('recipes.form.categories_max', { n: max }, max) : t('recipes.form.categories_hint', { n: max }, max)">
             <UiInput
                 ref="input" :model-value="text" autocomplete="off" :maxlength="itemMax + 1" :disabled="disabled || atMax" data-testid="category-input"
                 @update:model-value="onInput" @keydown.enter="onEnter"

@@ -3008,8 +3008,8 @@
             "total": "Spolu: {n} min",
             "categories": "Kategórie",
             "category_add": "Pridať kategóriu",
-            "categories_hint": "Najviac {n} kategórie. Pridáte ich klávesom Enter alebo čiarkou.",
-            "categories_max": "Môžete pridať najviac {n} kategórie.",
+            "categories_hint": "Najviac {n} kategória. Pridáte ich klávesom Enter alebo čiarkou. | Najviac {n} kategórie. Pridáte ich klávesom Enter alebo čiarkou. | Najviac {n} kategórie. Pridáte ich klávesom Enter alebo čiarkou. | Najviac {n} kategórií. Pridáte ich klávesom Enter alebo čiarkou.",
+            "categories_max": "Môžete pridať najviac {n} kategóriu. | Môžete pridať najviac {n} kategórie. | Môžete pridať najviac {n} kategórie. | Môžete pridať najviac {n} kategórií.",
             "category_duplicate": "\"{name}\" je už pridaná.",
             "category_too_long": "Kategória môže mať najviac {n} znakov.",
             "category_remove": "Odstrániť kategóriu {name}",
@@ -3043,7 +3043,7 @@
             "actions": "Akcie pre surovinu {n}",
             "move_up": "Posunúť vyššie",
             "move_down": "Posunúť nižšie",
-            "split_offer": "Rozdeliť na {n} surovín",
+            "split_offer": "Rozdeliť na {n} surovinu | Rozdeliť na {n} suroviny | Rozdeliť na {n} suroviny | Rozdeliť na {n} surovín",
             "split": "Rozdeliť",
             "split_dismiss": "Ponechať ako jednu",
             "cap": "Môžete pridať najviac {n} surovín."
@@ -3070,7 +3070,7 @@
         "photos": {
             "title": "Fotky",
             "add": "Pridať fotky",
-            "hint": "Najviac {n} fotiek, JPG, PNG alebo WebP, každá do {mb} MB.",
+            "hint": "Najviac {n} fotka, JPG, PNG alebo WebP, každá do {mb} MB. | Najviac {n} fotky, JPG, PNG alebo WebP, každá do {mb} MB. | Najviac {n} fotky, JPG, PNG alebo WebP, každá do {mb} MB. | Najviac {n} fotiek, JPG, PNG alebo WebP, každá do {mb} MB.",
             "main": "Hlavná",
             "make_main": "Nastaviť ako hlavnú",
             "move_earlier": "Posunúť dopredu",
@@ -3082,7 +3082,7 @@
             "remove_body": "Fotka sa z receptu odstráni.",
             "remove_confirm": "Odstrániť fotku",
             "remove_cancel": "Ponechať fotku",
-            "cap": "Môžete pridať najviac {n} fotiek.",
+            "cap": "Môžete pridať najviac {n} fotku. | Môžete pridať najviac {n} fotky. | Môžete pridať najviac {n} fotky. | Môžete pridať najviac {n} fotiek.",
             "uploading": "Nahrávam fotku",
             "some_failed": "Recept sa uložil, ale {n} fotku sa nepodarilo pridať. Môžete ju pridať znova pri úprave. | Recept sa uložil, ale {n} fotky sa nepodarilo pridať. Môžete ich pridať znova pri úprave. | Recept sa uložil, ale {n} fotiek sa nepodarilo pridať. Môžete ich pridať znova pri úprave. | Recept sa uložil, ale {n} fotiek sa nepodarilo pridať. Môžete ich pridať znova pri úprave.",
             "main_failed": "Recept sa uložil, ale vybranú hlavnú fotku sa nepodarilo nastaviť. Môžete ju vybrať znova pri úprave."
@@ -3159,7 +3159,8 @@
             "input": "Počet porcií",
             "scaled": "Prepočítané",
             "reset": "Vrátiť na {n}",
-            "updated": "Množstvá upravené pre {n} porcií."
+            "updated": "Množstvá upravené pre {n} porciu. | Množstvá upravené pre {n} porcie. | Množstvá upravené pre {n} porcie. | Množstvá upravené pre {n} porcií.",
+            "clamped": "Počet porcií môže byť od {min} do {max}."
         },
         "progress": {
             "prepared": "{x} z {y} pripravených",

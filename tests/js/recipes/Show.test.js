@@ -405,9 +405,34 @@ describe('Recipe detail: servings', () => {
         await input.setValue('500');
         await input.trigger('blur');
         expect($('[data-testid="servings-input"]').element.value).toBe('99');
+        // The pulled-in number is explained on screen, not only changed.
+        expect($('[data-testid="servings-clamped"]').text()).toBe('Servings can be from 1 to 99.');
+        await $('[data-testid="servings-minus"]').trigger('click');
+        expect($('[data-testid="servings-clamped"]').exists()).toBe(false);
         await $('[data-testid="servings-reset"]').trigger('click');
         await wait(700);
         expect(fetchMock).toHaveBeenLastCalledWith('/recipes/12/servings', { method: 'PUT', body: { servings: null } });
+    });
+
+    it('says "1 porciu" and "2 porcie" in Slovak (plural forms, not a fixed noun)', async () => {
+        mountPage({ locale: 'sk' });
+        const input = $('[data-testid="servings-input"]');
+        await input.setValue('1');
+        expect(current.text()).toContain('Množstvá upravené pre 1 porciu.');
+        await input.setValue('2');
+        expect(current.text()).toContain('Množstvá upravené pre 2 porcie.');
+        await input.setValue('5');
+        expect(current.text()).toContain('Množstvá upravené pre 5 porcií.');
+    });
+
+    it('keeps a recipe with more than 99 servings reachable with the stepper', async () => {
+        mountPage({ recipe: { ...RECIPE, servings: 120 }, state: { ...STATE, servings: null } });
+        expect($('[data-testid="servings-input"]').element.value).toBe('120');
+        expect($('[data-testid="servings-plus"]').element.disabled).toBe(true);
+        await $('[data-testid="servings-minus"]').trigger('click');
+        await $('[data-testid="servings-plus"]').trigger('click');
+        expect($('[data-testid="servings-input"]').element.value).toBe('120');
+        expect($('[data-testid="servings-scaled"]').exists()).toBe(false);
     });
 
     it('starts from the servings the member chose earlier', () => {

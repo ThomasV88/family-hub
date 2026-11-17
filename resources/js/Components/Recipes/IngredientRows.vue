@@ -159,7 +159,7 @@ function split() {
     <div ref="root" class="rec-ing">
         <div v-if="offer" aria-live="polite">
             <UiAlert variant="info" class="rec-ing__offer" data-testid="split-offer">
-                {{ t('recipes.ingredient.split_offer', { n: offer.parsed.length }) }}
+                {{ t('recipes.ingredient.split_offer', { n: offer.parsed.length }, offer.parsed.length) }}
                 <template #actions>
                     <UiButton variant="secondary" size="sm" data-testid="split-button" @click="split">{{ t('recipes.ingredient.split') }}</UiButton>
                     <UiButton variant="ghost" size="sm" @click="offer = null">{{ t('recipes.ingredient.split_dismiss') }}</UiButton>
