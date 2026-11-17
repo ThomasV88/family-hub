@@ -146,7 +146,7 @@
       "id": "ai-agents",
       "title": "Agenci AI i lista wywołań AI",
       "blocks": [
-        { "type": "p", "text": "Otwórz [Ustawienia > Agenci AI](/settings/ai-agents). Tu wybierasz, które narzędzia AI mogą czytać dokumenty w Zdrowiu i w jakiej kolejności. Jeśli pierwsze osiągnęło limit użycia, próbowane jest następne. Każde narzędzie ma przełącznik, pozycję i opcjonalny model." },
+        { "type": "p", "text": "Otwórz [Ustawienia > Agenci AI](/settings/ai-agents). Tu wybierasz, które narzędzia AI mogą czytać dokumenty w Zdrowiu i strony z przepisami w Receptarzu oraz w jakiej kolejności. Jeśli pierwsze osiągnęło limit użycia, próbowane jest następne. Każde narzędzie ma przełącznik, pozycję i opcjonalny model." },
         { "type": "list", "items": [
           "Co najmniej jedno narzędzie musi pozostać włączone, inaczej nikt nie uruchomi AI.",
           "Narzędzie musi być zalogowane na serwerze. Nie da się tego zrobić na tej stronie: zapytaj osobę, która prowadzi serwer. Strona pokazuje stan logowania i **Sprawdź ponownie**.",
@@ -154,6 +154,7 @@
           "**Masowe przetwarzanie** odczytuje stare dokumenty ponownie. Najpierw naciśnij **Sprawdź, co zostałoby przetworzone**, potem **Rozpocznij masowe przetwarzanie**. Możesz je wstrzymać lub anulować. Nic, co człowiek już zaakceptował, nigdy się nie zmienia."
         ] },
         { "type": "p", "text": "Za każdym razem, gdy AI czyta dokument, jest to wpisane w [Ustawienia > Wywołania AI](/settings/ai-calls): kto to uruchomił i kiedy, nigdy co było w dokumencie. Wywołania starsze niż 12 miesięcy są usuwane automatycznie." },
+        { "type": "p", "text": "Importy przepisów działają tak samo. Gdy członek wczytuje przepis ze strony internetowej, tekst tej strony jest wysyłany do pierwszego włączonego narzędzia, z tymi samymi ustawieniami, tym samym dziennym limitem i tym samym limitem użycia co dokumenty. Import przepisu pojawia się w tabeli wywołań AI jako **Import przepisu**, z członkiem, który go uruchomił, i czasem, nigdy z adresem strony ani przepisem. Członkowie raz potwierdzają informację, że tekst strony trafia do dostawcy AI; dla przepisów nie ma przełącznika dla poszczególnych osób. Jeśli żadne narzędzie nie jest włączone, opcja **Wczytaj ze strony internetowej** nie jest pokazywana w Receptarzu." },
         { "type": "warning", "text": "Gdy używana jest AI, dokumenty medyczne opuszczają serwer. Zanim włączysz narzędzie, upewnij się, że rodzina się zgadza i że odpowiadają Ci warunki tej firmy." }
       ]
     },

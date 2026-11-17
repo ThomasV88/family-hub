@@ -44,7 +44,7 @@
           "type": "steps",
           "title": "Dodawanie przepisu ręcznie",
           "items": [
-            "Na stronie Receptarz naciśnij **Nowy przepis**.",
+            "Na stronie Receptarz naciśnij **Nowy przepis**. Jeśli pojawi się okno wyboru, wybierz **Wpisz ręcznie** (druga opcja jest opisana w części Wczytywanie przepisu ze strony internetowej).",
             "Jeśli chcesz, dodaj zdjęcia (zobacz Zdjęcia poniżej).",
             "Wpisz **Tytuł**. Jest wymagany. Możesz też dodać krótki **Opis**.",
             "Ustaw **Porcje** (1 do 99): ilości, które wpiszesz, dotyczą tej liczby porcji. Jeśli chcesz, wpisz **Czas przygotowania** i **Czas gotowania** w minutach; suma pokaże się pod nimi.",
@@ -78,6 +78,45 @@
         {
           "type": "p",
           "text": "**Edycja.** Przepis edytuje tylko jego autor. Otwórz go i naciśnij **Edytuj**; formularz jest ten sam. Składniki i kroki, które zostawisz, pozostają tymi samymi wierszami, więc odhaczenia, które inni członkowie zrobili podczas gotowania, zostają dla nich na miejscu; odhaczenia tracą tylko usunięte wiersze. Jeśli opuścisz formularz z niezapisanymi zmianami, najpierw o to zapyta."
+        }
+      ]
+    },
+    {
+      "id": "import-from-link",
+      "title": "Wczytywanie przepisu ze strony internetowej",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Jeśli administrator włączył w Ustawieniach agenta AI, **Nowy przepis** najpierw pyta, jak chcesz dodać przepis. **Wczytaj ze strony internetowej** pozwala aplikacji przeczytać stronę, którą wkleisz, i wypełnić formularz do sprawdzenia. Bez agenta AI ta opcja się nie pojawia, a **Nowy przepis** od razu otwiera pusty formularz."
+        },
+        {
+          "type": "steps",
+          "title": "Wczytywanie przepisu ze strony internetowej",
+          "items": [
+            "Na stronie Receptarz naciśnij **Nowy przepis** i wybierz **Wczytaj ze strony internetowej**.",
+            "Za pierwszym razem pojawi się informacja, że tekst strony jest wysyłany do dostawcy AI włączonego przez administratora i że nic więcej z twojego konta nie jest wysyłane. Naciśnij **Rozumiem**. Potem przypomina o tym krótki wiersz pod polem.",
+            "Wklej **Adres strony internetowej** (musi zaczynać się od http:// lub https://) i naciśnij **Wczytaj przepis**.",
+            "Poczekaj, aż strona zostanie przeczytana, zwykle krócej niż minutę. Przyciskiem **Anuluj** zatrzymasz czytanie. Możesz też zamknąć okno: czytanie trwa dalej, a nad przepisami pojawi się wiersz „Twój przepis ze strony ... jest gotowy do sprawdzenia” z przyciskami **Sprawdź** i **Odrzuć**.",
+            "Formularz otwiera się z tytułem **Sprawdź przepis**. Pola wypełnione przez aplikację mają etykietę **Ze strony**, dopóki ich nie zmienisz. To, czego nie znalazła, ma napis **Nie znaleziono na stronie**, a każdy składnik pokazuje wiersz tak, jak jest na stronie. Popraw wszystko, co się nie zgadza.",
+            "Naciśnij **Zapisz przepis**. Wcześniej nic nie jest zapisywane. Adres strony zostaje w **Źródle** i jest pokazany jako link przy przepisie."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "Zawsze sprawdź wynik przed zapisaniem: aplikacja może źle odczytać ilość lub coś pominąć.",
+            "Naraz mogą być czytane 2 strony, a dziennie możesz wczytać 20 stron. Powyżej tego zobaczysz „Dziś wczytano zbyt wiele stron”.",
+            "Jeśli czytanie się nie uda, okno mówi, co poszło nie tak. Naciśnij **Spróbuj ponownie** lub **Zmień adres**, albo **Wpisz ręcznie**: otworzy się pusty formularz z adresem strony już w **Źródle**.",
+            "Szkic, którego nie otworzysz, jest usuwany po dobie. **Odrzuć** usuwa go od razu."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Co nie działa.** Nie da się czytać stron, które pokazują przepis dopiero po uruchomieniu skryptu, stron blokujących automatyczne czytniki, stron wymagających logowania ani stron dostępnych tylko przez IPv6. Bardzo długa strona jest czytana tylko od początku, o czym informuje formularz. Zdjęcie ze strony nie jest przejmowane: dodaj własne zdjęcia. Nie ma gwarancji, że działa każda strona; gdy nie działa, wpisz przepis ręcznie."
+        },
+        {
+          "type": "warning",
+          "text": "Tekst strony jest wysyłany do dostawcy AI poza tym serwerem. Nic z twojego konta nie jest wysyłane: ani imię, ani e-mail, ani twoje inne przepisy. Administratorzy widzą na liście wywołań AI, że import przepisu się odbył, ale nigdy adresu ani przepisu."
         }
       ]
     },

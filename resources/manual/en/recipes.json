@@ -44,7 +44,7 @@
           "type": "steps",
           "title": "Adding a recipe by hand",
           "items": [
-            "On the Recipes page press **New recipe**.",
+            "On the Recipes page press **New recipe**. If a window asks how, choose **Type it in** (the other choice is described in Reading a recipe from a web page).",
             "Optionally add photos (see Photos below).",
             "Type the **Title**. It is required. You can also add a short **Description**.",
             "Set the **Servings** (1 to 99): the quantities you enter are for this number of portions. Enter the **Preparation time** and **Cooking time** in minutes if you want; the total is shown under them.",
@@ -78,6 +78,45 @@
         {
           "type": "p",
           "text": "**Editing.** Only the author edits a recipe. Open it and press **Edit**; the form is the same. The ingredients and steps you keep stay the same lines, so ticks that other members made while cooking stay in place for them; only the lines you remove lose their ticks. If you leave the form with changes that are not saved, you are asked first."
+        }
+      ]
+    },
+    {
+      "id": "import-from-link",
+      "title": "Reading a recipe from a web page",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "If your administrator turned an AI agent on in Settings, **New recipe** first asks how you want to add the recipe. **Read from a web page** lets the app read a page you link and fill in the form for you to check. Without an AI agent the option does not appear and **New recipe** opens the empty form straight away."
+        },
+        {
+          "type": "steps",
+          "title": "Reading a recipe from a web page",
+          "items": [
+            "On the Recipes page press **New recipe** and choose **Read from a web page**.",
+            "The first time, a notice says that the text of the page is sent to the AI provider your administrator turned on, and that nothing else from your account is sent. Press **Got it**. Afterwards a short line under the field reminds you.",
+            "Paste the **Web page address** (it must start with http:// or https://) and press **Read recipe**.",
+            "Wait while the page is read, usually under a minute. Press **Cancel** to stop it. You can also close the window: the reading goes on, and above the recipes a line \"Your recipe from ... is ready to review\" appears with **Review** and **Discard**.",
+            "The form opens with the title **Check the recipe**. Fields the app filled in carry the tag **From the page** until you change them. What it did not find says **Not found on the page**, and each ingredient shows the line as written on the page. Correct whatever is wrong.",
+            "Press **Save recipe**. Nothing is saved before that. The address of the page is kept in **Source** and shown as a link on the recipe."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "Always check the result before saving: the app can misread a quantity or leave something out.",
+            "You can have 2 pages being read at a time and read 20 pages a day. Above that you see \"You have read too many pages today\".",
+            "If reading fails, the window says what went wrong. Press **Try again** or **Change address**, or **Type it in**: the empty form opens with the web address already in **Source**.",
+            "A draft you do not open is removed after a day. **Discard** removes it at once."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**What does not work.** Pages that show the recipe only after a script runs, sites that block automatic readers, pages that need a sign-in and sites that can be reached only over IPv6 cannot be read. A very long page is read only from the beginning, and the form tells you so. The photo on the page is not taken over: add your own photos. There is no promise that every page works; when one does not, type the recipe in."
+        },
+        {
+          "type": "warning",
+          "text": "The text of the page is sent to an AI provider outside this server. Nothing from your account is sent: not your name, your email or your other recipes. Administrators see in the AI calls log that a recipe import happened, never the address or the recipe."
         }
       ]
     },

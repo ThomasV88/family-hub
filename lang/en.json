@@ -413,7 +413,7 @@
         },
         "ai_calls": {
             "title": "AI calls",
-            "intro": "Every time AI reads a document, it is listed here. The list shows who started it and when, never what was in the document.",
+            "intro": "Every time AI reads a document or a recipe page, it is listed here. The list shows who started it and when, never what was in the document or on the page.",
             "filter_label": "Filter AI calls",
             "person": "Person",
             "member": "Member",
@@ -448,7 +448,8 @@
             "status_quota": "Usage limit reached",
             "filter_quota": "Usage limit reached",
             "agents_pointer": "Agent order and login status are in AI agents.",
-            "person_bulk": "Not shown (bulk run)"
+            "person_bulk": "Not shown (bulk run)",
+            "kind_recipe": "Recipe import"
         },
         "ai_login": {
             "title": "Codex login",
@@ -465,7 +466,7 @@
             "agent_line": "AI documents are read by OpenAI Codex."
         },
         "ai_agents": {
-            "intro": "Choose which AI tools read documents and in which order. If the first tool has reached its usage limit, the next one is tried. Nothing here stores a password or a key.",
+            "intro": "Choose which AI tools read documents and recipe pages and in which order. If the first tool has reached its usage limit, the next one is tried. Nothing here stores a password or a key.",
             "list_label": "AI agents in order",
             "switch_label": "Use {agent}",
             "switch_helper": "When off, this tool is never used.",
@@ -3239,6 +3240,66 @@
             "err_target": "Choose a new list or an open list.",
             "err_list": "Choose a list.",
             "err_items": "Choose at least one ingredient."
+        },
+        "new": {
+            "title": "New recipe",
+            "type_it_in": "Type it in",
+            "type_it_in_hint": "Fill in a blank form.",
+            "from_page": "Read from a web page",
+            "from_page_hint": "Paste a link and the app fills in the form for you to check."
+        },
+        "import": {
+            "title": "Read from a web page",
+            "field": "Web page address",
+            "field_hint": "Works with most recipe pages.",
+            "err_url": "Enter a web address that starts with http:// or https://.",
+            "notice_title": "The page text is sent to the AI provider",
+            "notice_body": "To read the recipe, the text of the page is sent to the AI provider your administrator has turned on. Nothing else from your account is sent.",
+            "notice_confirm": "Got it",
+            "notice_changed": "The AI settings changed in the meantime. Read the notice again and confirm it.",
+            "notice_failed": "We could not save your confirmation. Try again.",
+            "hint": "The text of the page is sent to the AI provider.",
+            "read": "Read recipe",
+            "cancel": "Cancel",
+            "loading": "Reading the page. This can take a minute.",
+            "progress_label": "Reading the page",
+            "ready_open": "The recipe is ready. Opening it for you to check.",
+            "err_fetch": "We could not open that page. Check the address, or type the recipe in yourself.",
+            "err_no_recipe": "We could not find a recipe on that page. Try the page with the full recipe, or type it in yourself.",
+            "err_unavailable": "Reading pages is not available right now. You can type the recipe in yourself.",
+            "err_limit": "You have read too many pages today. Try again later.",
+            "err_generic": "Reading the page took too long or did not work. Try again, or type the recipe in yourself.",
+            "err_start": "We could not start reading the page. Try again, or type the recipe in yourself.",
+            "cancel_failed": "We could not stop the reading. Try again.",
+            "try_again": "Try again",
+            "change_address": "Change address",
+            "type_it_in": "Type it in"
+        },
+        "review": {
+            "title": "Check the recipe",
+            "banner": "Check everything the app filled in from the page. Nothing is saved until you press Save recipe.",
+            "from_page": "From the page",
+            "not_found": "Not found on the page.",
+            "text_cut": "The page was long, only the beginning was read.",
+            "original": "On the page: {line}",
+            "source_edit": "Edit"
+        },
+        "drafts": {
+            "region": "Recipes read from web pages",
+            "unknown_site": "a web page",
+            "reading": "Reading {site}...",
+            "ready": "Your recipe from {site} is ready to review.",
+            "failed": "Reading {site} did not work.",
+            "review": "Review",
+            "discard": "Discard",
+            "try_again": "Try again",
+            "type_it_in": "Type it in",
+            "dismiss": "Dismiss",
+            "discard_title": "Discard this draft?",
+            "discard_body": "The recipe read from the page is thrown away. Nothing was saved.",
+            "discard_yes": "Discard draft",
+            "discard_no": "Keep draft",
+            "discard_failed": "We could not discard the draft. Try again."
         }
     }
 }

@@ -21,6 +21,8 @@ const SUBTREES = [
     'recipes.detail', 'recipes.gallery', 'recipes.servings', 'recipes.progress', 'recipes.cooking', 'recipes.notes', 'recipes.delete', 'recipes.reset', 'recipes.unavailable',
     // 12-10: add to shopping
     'recipes.shopping',
+    // 12-15: import UI
+    'recipes.new', 'recipes.import', 'recipes.review', 'recipes.drafts',
 ];
 const KEYS = ['nav.recipes', 'module.recipes'];
 // Strings that are plural in en: the number of forms per locale (en 2, sk 4, pl 4).
@@ -91,7 +93,8 @@ describe('phase 12 manual and help (12-08)', () => {
     it('has the adding, photos and sharing sections in the same order in every language', () => {
         for (const locale of LOCALES) {
             const ids = manual[locale].sections.map((s) => s.id);
-            expect({ locale, order: ['overview', 'adding', 'photos', 'sharing'].map((id) => ids.indexOf(id)) }).toEqual({ locale, order: [0, 1, 2, 3] });
+            // 12-15 inserted import-from-link right after adding.
+            expect({ locale, order: ['overview', 'adding', 'import-from-link', 'photos', 'sharing'].map((id) => ids.indexOf(id)) }).toEqual({ locale, order: [0, 1, 2, 3, 4] });
         }
         for (const id of ['adding', 'photos', 'sharing']) {
             const counts = LOCALES.map((l) => manual[l].sections.find((s) => s.id === id).blocks.map((b) => b.type).join(','));
@@ -130,6 +133,43 @@ describe('phase 12 manual and help (12-10)', () => {
             const help = JSON.parse(readFileSync(`${root}/resources/help/${locale}.json`, 'utf8'));
             expect(help.screens.recipe_shopping?.trim()).toBeTruthy();
             expect([...help.topics['recipes.shopping'].text].length).toBeLessThanOrEqual(400);
+        }
+    });
+});
+
+describe('phase 12 import UI strings, help and manual (12-15)', () => {
+    const manual = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(readFileSync(`${root}/resources/manual/${l}/recipes.json`, 'utf8'))]));
+    const admin = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(readFileSync(`${root}/resources/manual/${l}/admin.json`, 'utf8'))]));
+
+    it('has the admin label for recipe runs in every language', () => {
+        for (const locale of LOCALES) expect({ locale, v: get(lang[locale], 'settings.ai_calls.kind_recipe')?.trim() }).toEqual({ locale, v: expect.any(String) });
+        expect(get(lang.en, 'settings.ai_calls.kind_recipe')).toBe('Recipe import');
+    });
+
+    it('states in every language that the page text goes to the AI provider', () => {
+        for (const locale of LOCALES) {
+            expect(get(lang[locale], 'recipes.import.notice_body'), locale).toBeTruthy();
+            expect(get(lang[locale], 'recipes.import.hint'), locale).toBeTruthy();
+        }
+        expect(get(lang.en, 'recipes.import.notice_body')).toContain('text of the page is sent to the AI provider');
+    });
+
+    it('has import-from-link with the same block types in every language, and the admin guide a recipe import paragraph', () => {
+        const types = LOCALES.map((l) => manual[l].sections.find((s) => s.id === 'import-from-link').blocks.map((b) => b.type).join(','));
+        expect(new Set(types).size).toBe(1);
+        for (const locale of LOCALES) {
+            const section = admin[locale].sections.find((s) => s.id === 'ai-agents');
+            expect({ locale, ok: JSON.stringify(section).includes('/settings/ai-calls') }).toEqual({ locale, ok: true });
+        }
+    });
+
+    it('registers the import help tip on its own screen with a text in every language', () => {
+        const topics = JSON.parse(readFileSync(`${root}/resources/help/topics.json`, 'utf8')).topics;
+        expect(topics.find((t) => t.key === 'recipes.import')).toEqual({ key: 'recipes.import', area: 'recipes', screen: 'recipe_import', field: 'url_step' });
+        for (const locale of LOCALES) {
+            const help = JSON.parse(readFileSync(`${root}/resources/help/${locale}.json`, 'utf8'));
+            expect(help.screens.recipe_import?.trim()).toBeTruthy();
+            expect([...help.topics['recipes.import'].text].length).toBeLessThanOrEqual(400);
         }
     });
 });

@@ -48,7 +48,8 @@
         "shopping_finish": "Finish shopping dialog",
         "recipe_form": "Recipe form",
         "recipe_detail": "Recipe detail",
-        "recipe_shopping": "Add to shopping"
+        "recipe_shopping": "Add to shopping",
+        "recipe_import": "Reading a recipe from a web page"
     },
     "topics": {
         "tasks.visibility": {
@@ -318,6 +319,10 @@
         "shopping.carry_over": {
             "title": "Items that could not be bought",
             "text": "Items you mark Unavailable can go into a new open list named after this one with \"(unbought)\", with the same store, responsible person and access, and without the reminder. The finished list moves to the Archive either way and stays read-only."
+        },
+        "recipes.import": {
+            "title": "Reading a recipe from a web page",
+            "text": "The app reads the web page you paste and fills in the recipe form for you. The text of the page is sent to the AI provider your administrator turned on, and nothing else from your account. It works with most recipe pages, not all. Check everything before saving: nothing is saved until you press Save recipe."
         },
         "recipes.sharing": {
             "title": "Who can see this recipe",

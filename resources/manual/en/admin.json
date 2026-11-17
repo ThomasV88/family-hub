@@ -146,7 +146,7 @@
       "id": "ai-agents",
       "title": "AI agents and the AI call log",
       "blocks": [
-        { "type": "p", "text": "Open [Settings > AI agents](/settings/ai-agents). Here you choose which AI tools may read documents in Health and in which order. If the first has reached its usage limit, the next is tried. Each tool has a switch, a position and an optional model." },
+        { "type": "p", "text": "Open [Settings > AI agents](/settings/ai-agents). Here you choose which AI tools may read documents in Health and recipe pages in Recipes, and in which order. If the first has reached its usage limit, the next is tried. Each tool has a switch, a position and an optional model." },
         { "type": "list", "items": [
           "At least one tool must stay on, or nobody can run AI.",
           "A tool must be signed in on the server. This cannot be done on this page: ask whoever runs the server. The page shows the login status and **Check again**.",
@@ -154,6 +154,7 @@
           "**Bulk re-generation** reads past documents again. First press **Check what would run**, then **Start bulk run**. You can pause or cancel it. Anything a person already accepted is never changed."
         ] },
         { "type": "p", "text": "Every time AI reads a document, it is listed under [Settings > AI calls](/settings/ai-calls): who started it and when, never what was in the document. Calls older than 12 months are removed automatically." },
+        { "type": "p", "text": "Recipe imports work the same way. When a member reads a recipe from a web page, the text of that page is sent to the first enabled tool, under the same settings, the same daily ceiling and the same usage limit as documents. A recipe import appears in the AI calls table as **Recipe import**, with the member who started it and the time, never with the address of the page or the recipe. Members confirm a one-time notice that the page text goes to the AI provider; there is no per-person switch for recipes. If no tool is on, the option **Read from a web page** is not shown in Recipes." },
         { "type": "warning", "text": "Medical documents leave the server when AI is used. Before you turn a tool on, make sure the family agrees and that you are comfortable with the company's terms." }
       ]
     },

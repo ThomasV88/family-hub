@@ -44,7 +44,7 @@
           "type": "steps",
           "title": "Pridanie receptu ručne",
           "items": [
-            "Na stránke Receptár stlačte **Nový recept**.",
+            "Na stránke Receptár stlačte **Nový recept**. Ak sa zobrazí okno s výberom, vyberte **Zadať ručne** (druhá možnosť je popísaná v časti Načítanie receptu z webovej stránky).",
             "Podľa potreby pridajte fotky (pozrite Fotky nižšie).",
             "Napíšte **Názov**. Je povinný. Môžete pridať aj krátky **Popis**.",
             "Nastavte **Porcie** (1 až 99): množstvá, ktoré zadáte, platia pre tento počet porcií. Ak chcete, zadajte **Čas prípravy** a **Čas varenia** v minútach; súčet sa zobrazí pod nimi.",
@@ -78,6 +78,45 @@
         {
           "type": "p",
           "text": "**Úprava.** Recept upravuje iba jeho autor. Otvorte ho a stlačte **Upraviť**; formulár je rovnaký. Suroviny a kroky, ktoré ponecháte, ostanú tými istými riadkami, takže odškrtnutia, ktoré urobili ostatní členovia pri varení, im ostanú; odškrtnutia stratia iba riadky, ktoré odstránite. Ak formulár opustíte s neuloženými zmenami, najprv sa vás opýta."
+        }
+      ]
+    },
+    {
+      "id": "import-from-link",
+      "title": "Načítanie receptu z webovej stránky",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Ak administrátor v Nastaveniach zapol agenta AI, **Nový recept** sa najprv opýta, ako chcete recept pridať. **Načítať z webovej stránky** nechá aplikáciu prečítať stránku, ktorú vložíte, a vyplniť formulár, ktorý si skontrolujete. Bez agenta AI sa táto možnosť nezobrazí a **Nový recept** hneď otvorí prázdny formulár."
+        },
+        {
+          "type": "steps",
+          "title": "Načítanie receptu z webovej stránky",
+          "items": [
+            "Na stránke Receptár stlačte **Nový recept** a vyberte **Načítať z webovej stránky**.",
+            "Prvýkrát sa zobrazí upozornenie, že text stránky sa odošle poskytovateľovi AI, ktorého zapol váš administrátor, a že sa neodosiela nič iné z vášho účtu. Stlačte **Rozumiem**. Potom vám to pripomenie krátky riadok pod poľom.",
+            "Vložte **Adresu webovej stránky** (musí začínať http:// alebo https://) a stlačte **Načítať recept**.",
+            "Počkajte, kým sa stránka prečíta, zvyčajne necelú minútu. Tlačidlom **Zrušiť** čítanie zastavíte. Okno môžete aj zavrieť: čítanie pokračuje a nad receptami sa objaví riadok „Váš recept zo stránky ... je pripravený na kontrolu“ s tlačidlami **Skontrolovať** a **Zahodiť**.",
+            "Formulár sa otvorí s nadpisom **Skontrolujte recept**. Polia, ktoré aplikácia vyplnila, majú štítok **Zo stránky**, kým ich nezmeníte. Čo nenašla, hlási **Na stránke sa nenašlo** a každá surovina ukazuje riadok tak, ako je na stránke. Opravte všetko, čo nesedí.",
+            "Stlačte **Uložiť recept**. Dovtedy sa nič neuloží. Adresa stránky ostane v **Zdroji** a pri recepte sa zobrazí ako odkaz."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "Výsledok pred uložením vždy skontrolujte: aplikácia môže zle prečítať množstvo alebo niečo vynechať.",
+            "Naraz sa môžu čítať 2 stránky a za deň môžete načítať 20 stránok. Nad to sa zobrazí „Dnes ste načítali príliš veľa stránok“.",
+            "Ak čítanie zlyhá, okno povie, čo sa stalo. Stlačte **Skúsiť znova** alebo **Zmeniť adresu**, prípadne **Zadať ručne**: otvorí sa prázdny formulár s webovou adresou už v **Zdroji**.",
+            "Návrh, ktorý neotvoríte, sa po dni odstráni. **Zahodiť** ho odstráni hneď."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Čo nefunguje.** Nedajú sa čítať stránky, ktoré recept zobrazia až po spustení skriptu, stránky blokujúce automatické čítače, stránky vyžadujúce prihlásenie a stránky dostupné iba cez IPv6. Veľmi dlhá stránka sa prečíta iba od začiatku a formulár vám to povie. Fotka zo stránky sa neprevezme: pridajte vlastné fotky. Nie je zaručené, že funguje každá stránka; keď nefunguje, recept zadajte ručne."
+        },
+        {
+          "type": "warning",
+          "text": "Text stránky sa odošle poskytovateľovi AI mimo tohto servera. Z vášho účtu sa neodosiela nič: ani meno, ani e-mail, ani vaše ďalšie recepty. Administrátori vidia v zozname volaní AI, že import receptu prebehol, nikdy však adresu ani recept."
         }
       ]
     },

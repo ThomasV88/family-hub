@@ -413,7 +413,7 @@
         },
         "ai_calls": {
             "title": "Volania AI",
-            "intro": "Pri každom prečítaní dokumentu pomocou AI sa tu zobrazí záznam. Zoznam ukazuje, kto volanie spustil a kedy, nikdy nie obsah dokumentu.",
+            "intro": "Pri každom prečítaní dokumentu alebo stránky s receptom pomocou AI sa tu zobrazí záznam. Zoznam ukazuje, kto volanie spustil a kedy, nikdy nie obsah dokumentu ani stránky.",
             "filter_label": "Filtrovať volania AI",
             "person": "Osoba",
             "member": "Člen",
@@ -448,7 +448,8 @@
             "status_quota": "Limit používania dosiahnutý",
             "filter_quota": "Limit používania dosiahnutý",
             "agents_pointer": "Poradie agentov a stav prihlásenia sú v sekcii Agenti AI.",
-            "person_bulk": "Nezobrazuje sa (hromadné spracovanie)"
+            "person_bulk": "Nezobrazuje sa (hromadné spracovanie)",
+            "kind_recipe": "Import receptu"
         },
         "ai_login": {
             "title": "Prihlásenie Codex",
@@ -465,7 +466,7 @@
             "agent_line": "Dokumenty číta AI od OpenAI Codex."
         },
         "ai_agents": {
-            "intro": "Vyberte, ktoré nástroje AI čítajú dokumenty a v akom poradí. Ak prvý nástroj dosiahol limit používania, skúsi sa ďalší. Nič tu neukladá heslo ani kľúč.",
+            "intro": "Vyberte, ktoré nástroje AI čítajú dokumenty a stránky s receptami a v akom poradí. Ak prvý nástroj dosiahol limit používania, skúsi sa ďalší. Nič tu neukladá heslo ani kľúč.",
             "list_label": "Agenti AI v poradí",
             "switch_label": "Používať {agent}",
             "switch_helper": "Keď je vypnutý, nástroj sa nikdy nepoužije.",
@@ -3239,6 +3240,66 @@
             "err_target": "Vyberte nový alebo otvorený zoznam.",
             "err_list": "Vyberte zoznam.",
             "err_items": "Vyberte aspoň jednu surovinu."
+        },
+        "new": {
+            "title": "Nový recept",
+            "type_it_in": "Zadať ručne",
+            "type_it_in_hint": "Vyplniť prázdny formulár.",
+            "from_page": "Načítať z webovej stránky",
+            "from_page_hint": "Vložte odkaz a aplikácia vyplní formulár, ktorý si skontrolujete."
+        },
+        "import": {
+            "title": "Načítať z webovej stránky",
+            "field": "Adresa webovej stránky",
+            "field_hint": "Funguje s väčšinou stránok s receptami.",
+            "err_url": "Zadajte webovú adresu, ktorá začína http:// alebo https://.",
+            "notice_title": "Text stránky sa odošle poskytovateľovi AI",
+            "notice_body": "Na prečítanie receptu sa text stránky odošle poskytovateľovi AI, ktorého zapol váš administrátor. Z vášho účtu sa neodosiela nič iné.",
+            "notice_confirm": "Rozumiem",
+            "notice_changed": "Nastavenia AI sa medzitým zmenili. Prečítajte si upozornenie znova a potvrďte ho.",
+            "notice_failed": "Vaše potvrdenie sa nepodarilo uložiť. Skúste to znova.",
+            "hint": "Text stránky sa odošle poskytovateľovi AI.",
+            "read": "Načítať recept",
+            "cancel": "Zrušiť",
+            "loading": "Čítam stránku. Môže to trvať minútu.",
+            "progress_label": "Čítanie stránky",
+            "ready_open": "Recept je pripravený. Otváram ho na kontrolu.",
+            "err_fetch": "Túto stránku sa nepodarilo otvoriť. Skontrolujte adresu alebo recept zadajte ručne.",
+            "err_no_recipe": "Na tej stránke sa recept nenašiel. Skúste stránku s celým receptom alebo ho zadajte ručne.",
+            "err_unavailable": "Čítanie stránok momentálne nie je dostupné. Recept môžete zadať ručne.",
+            "err_limit": "Dnes ste načítali príliš veľa stránok. Skúste to neskôr.",
+            "err_generic": "Čítanie stránky trvalo príliš dlho alebo sa nepodarilo. Skúste to znova alebo recept zadajte ručne.",
+            "err_start": "Čítanie stránky sa nepodarilo spustiť. Skúste to znova alebo recept zadajte ručne.",
+            "cancel_failed": "Čítanie sa nepodarilo zastaviť. Skúste to znova.",
+            "try_again": "Skúsiť znova",
+            "change_address": "Zmeniť adresu",
+            "type_it_in": "Zadať ručne"
+        },
+        "review": {
+            "title": "Skontrolujte recept",
+            "banner": "Skontrolujte všetko, čo aplikácia vyplnila zo stránky. Nič sa neuloží, kým nestlačíte Uložiť recept.",
+            "from_page": "Zo stránky",
+            "not_found": "Na stránke sa nenašlo.",
+            "text_cut": "Stránka bola dlhá, prečítal sa iba jej začiatok.",
+            "original": "Na stránke: {line}",
+            "source_edit": "Upraviť"
+        },
+        "drafts": {
+            "region": "Recepty načítané z webových stránok",
+            "unknown_site": "webovej stránky",
+            "reading": "Čítam stránku {site}...",
+            "ready": "Váš recept zo stránky {site} je pripravený na kontrolu.",
+            "failed": "Načítanie stránky {site} sa nepodarilo.",
+            "review": "Skontrolovať",
+            "discard": "Zahodiť",
+            "try_again": "Skúsiť znova",
+            "type_it_in": "Zadať ručne",
+            "dismiss": "Skryť",
+            "discard_title": "Zahodiť tento návrh?",
+            "discard_body": "Recept načítaný zo stránky sa zahodí. Nič sa neuložilo.",
+            "discard_yes": "Zahodiť návrh",
+            "discard_no": "Ponechať návrh",
+            "discard_failed": "Návrh sa nepodarilo zahodiť. Skúste to znova."
         }
     }
 }

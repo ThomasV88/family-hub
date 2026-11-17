@@ -48,7 +48,8 @@
         "shopping_finish": "Okno kończenia zakupów",
         "recipe_form": "Formularz przepisu",
         "recipe_detail": "Szczegóły przepisu",
-        "recipe_shopping": "Dodawanie do zakupów"
+        "recipe_shopping": "Dodawanie do zakupów",
+        "recipe_import": "Wczytywanie przepisu ze strony"
     },
     "topics": {
         "tasks.visibility": {
@@ -318,6 +319,10 @@
         "shopping.carry_over": {
             "title": "Produkty, których nie udało się kupić",
             "text": "Produkty oznaczone jako Niedostępne mogą trafić na nową otwartą listę o nazwie z dopiskiem „(niekupione)”, z tym samym sklepem, osobą odpowiedzialną i dostępem, bez przypomnienia. Zakończona lista w obu przypadkach trafia do archiwum i jest tylko do odczytu."
+        },
+        "recipes.import": {
+            "title": "Wczytywanie przepisu ze strony internetowej",
+            "text": "Aplikacja czyta wklejoną stronę internetową i wypełnia formularz przepisu. Tekst strony jest wysyłany do dostawcy AI włączonego przez administratora, a nic więcej z twojego konta. Działa z większością stron z przepisami, nie ze wszystkimi. Przed zapisaniem wszystko sprawdź: nic nie zostanie zapisane, dopóki nie klikniesz Zapisz przepis."
         },
         "recipes.sharing": {
             "title": "Kto może zobaczyć ten przepis",

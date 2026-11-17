@@ -413,7 +413,7 @@
         },
         "ai_calls": {
             "title": "Wywołania AI",
-            "intro": "Każde odczytanie dokumentu przez AI jest tu wypisane. Lista pokazuje, kto je uruchomił i kiedy, nigdy zawartość dokumentu.",
+            "intro": "Każde odczytanie dokumentu lub strony z przepisem przez AI jest tu wypisane. Lista pokazuje, kto je uruchomił i kiedy, nigdy zawartość dokumentu ani strony.",
             "filter_label": "Filtruj wywołania AI",
             "person": "Osoba",
             "member": "Członek",
@@ -448,7 +448,8 @@
             "status_quota": "Osiągnięto limit użycia",
             "filter_quota": "Osiągnięto limit użycia",
             "agents_pointer": "Kolejność agentów i stan logowania są w sekcji Agenci AI.",
-            "person_bulk": "Nie pokazano (masowe przetwarzanie)"
+            "person_bulk": "Nie pokazano (masowe przetwarzanie)",
+            "kind_recipe": "Import przepisu"
         },
         "ai_login": {
             "title": "Logowanie Codex",
@@ -465,7 +466,7 @@
             "agent_line": "Dokumenty czyta AI od OpenAI Codex."
         },
         "ai_agents": {
-            "intro": "Wybierz, które narzędzia AI czytają dokumenty i w jakiej kolejności. Jeśli pierwsze narzędzie osiągnęło limit użycia, próbowane jest następne. Nic tu nie przechowuje hasła ani klucza.",
+            "intro": "Wybierz, które narzędzia AI czytają dokumenty i strony z przepisami oraz w jakiej kolejności. Jeśli pierwsze narzędzie osiągnęło limit użycia, próbowane jest następne. Nic tu nie przechowuje hasła ani klucza.",
             "list_label": "Agenci AI w kolejności",
             "switch_label": "Używaj {agent}",
             "switch_helper": "Gdy wyłączone, narzędzie nigdy nie jest używane.",
@@ -3239,6 +3240,66 @@
             "err_target": "Wybierz nową lub otwartą listę.",
             "err_list": "Wybierz listę.",
             "err_items": "Wybierz co najmniej jeden składnik."
+        },
+        "new": {
+            "title": "Nowy przepis",
+            "type_it_in": "Wpisz ręcznie",
+            "type_it_in_hint": "Wypełnij pusty formularz.",
+            "from_page": "Wczytaj ze strony internetowej",
+            "from_page_hint": "Wklej link, a aplikacja wypełni formularz do sprawdzenia."
+        },
+        "import": {
+            "title": "Wczytaj ze strony internetowej",
+            "field": "Adres strony internetowej",
+            "field_hint": "Działa z większością stron z przepisami.",
+            "err_url": "Podaj adres strony zaczynający się od http:// lub https://.",
+            "notice_title": "Tekst strony jest wysyłany do dostawcy AI",
+            "notice_body": "Aby odczytać przepis, tekst strony jest wysyłany do dostawcy AI włączonego przez administratora. Nic więcej z twojego konta nie jest wysyłane.",
+            "notice_confirm": "Rozumiem",
+            "notice_changed": "Ustawienia AI zmieniły się w międzyczasie. Przeczytaj informację jeszcze raz i potwierdź ją.",
+            "notice_failed": "Nie udało się zapisać twojego potwierdzenia. Spróbuj ponownie.",
+            "hint": "Tekst strony jest wysyłany do dostawcy AI.",
+            "read": "Wczytaj przepis",
+            "cancel": "Anuluj",
+            "loading": "Czytam stronę. Może to potrwać minutę.",
+            "progress_label": "Czytanie strony",
+            "ready_open": "Przepis jest gotowy. Otwieram go do sprawdzenia.",
+            "err_fetch": "Nie udało się otworzyć tej strony. Sprawdź adres lub wpisz przepis ręcznie.",
+            "err_no_recipe": "Na tej stronie nie znaleziono przepisu. Spróbuj strony z pełnym przepisem lub wpisz go ręcznie.",
+            "err_unavailable": "Wczytywanie stron jest teraz niedostępne. Możesz wpisać przepis ręcznie.",
+            "err_limit": "Dziś wczytano zbyt wiele stron. Spróbuj ponownie później.",
+            "err_generic": "Czytanie strony trwało zbyt długo lub się nie udało. Spróbuj ponownie lub wpisz przepis ręcznie.",
+            "err_start": "Nie udało się rozpocząć czytania strony. Spróbuj ponownie lub wpisz przepis ręcznie.",
+            "cancel_failed": "Nie udało się zatrzymać czytania. Spróbuj ponownie.",
+            "try_again": "Spróbuj ponownie",
+            "change_address": "Zmień adres",
+            "type_it_in": "Wpisz ręcznie"
+        },
+        "review": {
+            "title": "Sprawdź przepis",
+            "banner": "Sprawdź wszystko, co aplikacja wypełniła ze strony. Nic nie zostanie zapisane, dopóki nie klikniesz Zapisz przepis.",
+            "from_page": "Ze strony",
+            "not_found": "Nie znaleziono na stronie.",
+            "text_cut": "Strona była długa, przeczytano tylko jej początek.",
+            "original": "Na stronie: {line}",
+            "source_edit": "Edytuj"
+        },
+        "drafts": {
+            "region": "Przepisy wczytane ze stron internetowych",
+            "unknown_site": "strony internetowej",
+            "reading": "Czytam stronę {site}...",
+            "ready": "Twój przepis ze strony {site} jest gotowy do sprawdzenia.",
+            "failed": "Wczytanie strony {site} nie powiodło się.",
+            "review": "Sprawdź",
+            "discard": "Odrzuć",
+            "try_again": "Spróbuj ponownie",
+            "type_it_in": "Wpisz ręcznie",
+            "dismiss": "Ukryj",
+            "discard_title": "Odrzucić ten szkic?",
+            "discard_body": "Przepis wczytany ze strony zostanie odrzucony. Nic nie zostało zapisane.",
+            "discard_yes": "Odrzuć szkic",
+            "discard_no": "Zachowaj szkic",
+            "discard_failed": "Nie udało się odrzucić szkicu. Spróbuj ponownie."
         }
     }
 }

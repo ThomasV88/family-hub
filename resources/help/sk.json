@@ -48,7 +48,8 @@
         "shopping_finish": "Dialóg ukončenia nákupu",
         "recipe_form": "Formulár receptu",
         "recipe_detail": "Detail receptu",
-        "recipe_shopping": "Pridanie do nákupu"
+        "recipe_shopping": "Pridanie do nákupu",
+        "recipe_import": "Načítanie receptu z webovej stránky"
     },
     "topics": {
         "tasks.visibility": {
@@ -318,6 +319,10 @@
         "shopping.carry_over": {
             "title": "Položky, ktoré sa nepodarilo zakúpiť",
             "text": "Položky označené ako Nedostupné môžu ísť do nového otvoreného zoznamu s názvom pôvodného a dodatkom „(nezakúpené)“, s rovnakým obchodom, zodpovednou osobou a prístupom a bez pripomienky. Ukončený zoznam sa tak či tak presunie do archívu a ostane iba na čítanie."
+        },
+        "recipes.import": {
+            "title": "Načítanie receptu z webovej stránky",
+            "text": "Aplikácia prečíta webovú stránku, ktorú vložíte, a vyplní formulár receptu. Text stránky sa odošle poskytovateľovi AI, ktorého zapol váš administrátor, a nič iné z vášho účtu. Funguje s väčšinou stránok s receptami, nie so všetkými. Pred uložením všetko skontrolujte: nič sa neuloží, kým nestlačíte Uložiť recept."
         },
         "recipes.sharing": {
             "title": "Kto môže tento recept vidieť",

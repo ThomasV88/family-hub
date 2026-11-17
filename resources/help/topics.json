@@ -404,6 +404,12 @@
             "field": "carry_over"
         },
         {
+            "key": "recipes.import",
+            "area": "recipes",
+            "screen": "recipe_import",
+            "field": "url_step"
+        },
+        {
             "key": "recipes.sharing",
             "area": "recipes",
             "screen": "recipe_form",
