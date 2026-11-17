@@ -354,7 +354,9 @@ final class RecipeService
         $parts = parse_url($url);
         $scheme = strtolower((string) ($parts['scheme'] ?? ''));
         $host = strtolower((string) ($parts['host'] ?? ''));
-        if (mb_strlen($url) > (int) config('recipes.source_url_max') || ! in_array($scheme, ['http', 'https'], true) || $host === '') {
+        // Credentials in the address (https://trusted.example@evil.example/) are refused, like on the import path.
+        if (mb_strlen($url) > (int) config('recipes.source_url_max') || ! in_array($scheme, ['http', 'https'], true) || $host === ''
+            || isset($parts['user']) || isset($parts['pass'])) {
             $this->fail('source_url', 'source_url_invalid');
         }
 

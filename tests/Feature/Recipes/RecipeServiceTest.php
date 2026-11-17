@@ -51,7 +51,7 @@ function rcpErrorKey(callable $fn): string
 it('creates a recipe with ordered lines, derived host, deduped categories and search keys', function () {
     $a = RecipeFixtures::member();
     $r = app(RecipeService::class)->create($a, rcpData([
-        'source_url' => 'HTTPS://User:pw@Example.COM:8080/x?y=1',
+        'source_url' => 'HTTPS://Example.COM:8080/x?y=1',
         'categories' => ['Polievka', ' polievka ', 'Dezert'],
         'description' => 'Sladké',
     ]));
@@ -222,3 +222,9 @@ it('finds a recipe by its long CJK category and title after the keys were cut', 
     $byTitle = app(RecipeQuery::class)->index($a, ['q' => str_repeat('寿司', 30)]);
     expect($byCategory['items'])->toHaveCount(1)->and($byTitle['items'])->toHaveCount(1);
 });
+
+it('refuses credentials in a source address', function (string $url) {
+    $a = RecipeFixtures::member();
+
+    expect(rcpErrorKey(fn () => app(RecipeService::class)->create($a, rcpData(['source_url' => $url]))))->toBe('recipes.error.source_url_invalid');
+})->with(['user and password' => 'https://user:pw@example.com/x', 'user only' => 'https://trusted.example@evil.example/']);

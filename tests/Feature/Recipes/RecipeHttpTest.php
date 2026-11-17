@@ -157,3 +157,10 @@ it('refuses a non-author on update, delete and visibility with 403', function ()
     $this->actingAs($other)->putJson("/recipes/{$recipe->id}/visibility", ['visibility' => 'private'])->assertForbidden();
     expect($recipe->fresh()->title)->not->toBe('Tomato soup');
 });
+
+it('answers 422 on the source address field for credentials in the address', function () {
+    $a = RecipeFixtures::member();
+
+    $this->actingAs($a)->postJson('/recipes', rcpBody(['source_url' => 'https://trusted.example@evil.example/']))
+        ->assertStatus(422)->assertJsonValidationErrors('source_url');
+});

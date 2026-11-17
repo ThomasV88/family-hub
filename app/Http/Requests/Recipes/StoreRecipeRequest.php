@@ -145,7 +145,7 @@ class StoreRecipeRequest extends FormRequest
         }
         $parts = parse_url((string) $value);
         $scheme = is_array($parts) ? strtolower((string) ($parts['scheme'] ?? '')) : '';
-        if (! in_array($scheme, ['http', 'https'], true) || ($parts['host'] ?? '') === '') {
+        if (! in_array($scheme, ['http', 'https'], true) || ($parts['host'] ?? '') === '' || isset($parts['user']) || isset($parts['pass'])) {
             $fail('recipes.error.source_url');
         }
     }
