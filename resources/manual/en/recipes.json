@@ -23,7 +23,7 @@
             "**Search recipes** finds recipes by title or by an ingredient. It ignores capital letters and accents, so \"vajce\" finds \"Vajcia\".",
             "**Filters** narrow the list by category, author and ingredient, and by **All**, **Mine** or **Shared with me**. The filters you use are shown as chips under the search box. Press a chip to remove it, or **Clear filters** to remove all of them. The filters stay in the address, so **Back** returns to the same view.",
             "The heart on a card marks the recipe as your favourite. **Favourites** next to the search box shows only the recipes you marked. Favourites are yours alone; nobody else sees them.",
-            "The list shows 24 recipes at a time. Press **Load more** to see the next ones."
+            "The list shows 24 recipes at a time. Press **Load more** to see the next ones. After **Back** or a reload, all the recipes you had loaded are still there."
           ]
         },
         {
@@ -51,7 +51,7 @@
             "Add up to 3 **Categories**. Start typing or pick a suggestion, then press Enter or type a comma. Suggestions are a ready-made set (Breakfast, Soup, Dessert and so on) and the categories the family already uses. The same category twice is refused, whatever the capital letters or accents.",
             "Under **Ingredients** fill in **Quantity**, **Unit**, **Name** and, if you like, a **Note** such as \"chopped\". Press **Add ingredient**, or Enter in the name, for the next line.",
             "Under **Steps** write one step per box and press **Add step** for the next.",
-            "Optionally add the **Source** (a web address) and choose **Who can see this recipe** (see Who can see a recipe).",
+            "Optionally add the **Source** (a web address) and choose **Who can see this recipe** (see Who can see a recipe). Addresses with a user name or password in them are refused.",
             "Press **Save recipe**. You land on the recipe and see \"Recipe saved\"."
           ]
         },
@@ -65,11 +65,11 @@
         },
         {
           "type": "p",
-          "text": "**Quantities** accept a decimal comma or dot (\"0,5\"), fractions (\"1/2\", \"1 1/2\") and the signs ½ ¼ ¾ ⅓ ⅔. A quantity must be above 0 and at most 9999, with up to two decimals. Leave it empty for something \"to taste\"."
+          "text": "**Quantities** accept a decimal comma or dot (\"0,5\"), fractions (\"1/2\", \"1 1/2\") and the signs ½ ¼ ¾ ⅓ ⅔. A quantity must be above 0 and at most 9999, with up to two decimals. Leave it empty for something \"to taste\". In English a comma followed by exactly three digits is a thousands separator (\"1,000\" is 1000); in Slovak and Polish it is a decimal comma (\"1,000\" is 1)."
         },
         {
           "type": "p",
-          "text": "**Pasting a list.** If you paste several lines into the name of an ingredient, for example a list copied from a web page, the form offers **Split into n ingredients**. It reads quantity, unit and name from each line (\"200 g flour\", \"2 ks eggs\", \"1/2 tsp salt\"). What it cannot read stays in the name, so check the new lines. Choose **Keep as one** to leave it as typed."
+          "text": "**Pasting a list.** If you paste several lines into the name of an ingredient, for example a list copied from a web page, the form offers **Split into n ingredients**. It reads quantity, unit and name from each line (\"200 g flour\", \"2 ks eggs\", \"1/2 tsp salt\"). What it cannot read stays in the name, so check the new lines. Choose **Keep as one** to leave it as typed. \"cl\" is read as centilitres and converted to millilitres (4 cl becomes 40 ml)."
         },
         {
           "type": "p",
@@ -77,7 +77,7 @@
         },
         {
           "type": "p",
-          "text": "**Editing.** Only the author edits a recipe. Open it and press **Edit**; the form is the same. The ingredients and steps you keep stay the same lines, so ticks that other members made while cooking stay in place for them; only the lines you remove lose their ticks. If you leave the form with changes that are not saved, you are asked first."
+          "text": "**Editing.** Only the author edits a recipe. Open it and press **Edit**; the form is the same. The ingredients and steps you keep stay the same lines, so ticks that other members made while cooking stay in place for them; only the lines you remove lose their ticks. If you leave the form with changes that are not saved, you are asked first. The same question appears when you press **Back** in the browser or swipe back on a phone. If the connection drops while you save and you press **Save recipe** again, you get one recipe, not two."
         }
       ]
     },
@@ -95,8 +95,8 @@
           "items": [
             "On the Recipes page press **New recipe** and choose **Read from a web page**.",
             "The first time, a notice says that the text of the page is sent to the AI provider your administrator turned on, and that nothing else from your account is sent. Press **Got it**. Afterwards a short line under the field reminds you.",
-            "Paste the **Web page address** (it must start with http:// or https://) and press **Read recipe**.",
-            "Wait while the page is read, usually under a minute. Press **Cancel** to stop it. You can also close the window: the reading goes on, and above the recipes a line \"Your recipe from ... is ready to review\" appears with **Review** and **Discard**.",
+            "Paste the **Web page address** (it must start with http:// or https://) and press **Read recipe**. Addresses with a user name or password in them, with a port other than the usual one, or that point at a computer on your own network are refused at once.",
+            "Wait while the page is read, usually under a minute. Press **Cancel** to stop it. You can also close the window: the reading goes on, and above the recipes a line \"Your recipe from ... is ready to review\" appears with **Review** and **Discard**. If reading takes more than three minutes the window says so: **Cancel** and **Try again** stop the first attempt before anything new starts, and closing the window leaves it above the recipes, where a recipe that is still being read has its own **Cancel**.",
             "The form opens with the title **Check the recipe**. Fields the app filled in carry the tag **From the page** until you change them. What it did not find says **Not found on the page**, and each ingredient shows the line as written on the page. Correct whatever is wrong.",
             "Press **Save recipe**. Nothing is saved before that. The address of the page is kept in **Source** and shown as a link on the recipe."
           ]
@@ -156,7 +156,7 @@
           "items": [
             "**Only me**: only you see the recipe. Nobody else does, not even an administrator.",
             "**Everyone in the family who uses Recipes**: other members who have access to Recipes can read it, cook from it and add it to a shopping list.",
-            "Only the author edits a recipe, changes its photos and visibility, or deletes it. Others cannot edit it."
+            "Only the author edits a recipe, changes its photos and visibility, or deletes it. Others cannot edit it. If the author's account no longer exists, the recipe says so and nobody can edit it."
           ]
         },
         {
@@ -182,7 +182,7 @@
           "items": [
             "Tick an **ingredient** when it is prepared and a **step** when it is done. Your ticks are saved at once and are yours: they are stored per person, other members never see them and you never see theirs. A ticked row only changes colour and never moves.",
             "**Reset my progress** (in the menu with the three dots) clears only your own ticks on that recipe, after you confirm.",
-            "Change the **Servings** with the minus and plus buttons or by typing a number from 1 to 99. The quantities are recalculated on screen and the tag **Scaled** appears, with **Reset to {n}** to go back. Common fractions are shown as fractions (\"1/2 tsp\"), pieces keep their decimals (\"1,5 pcs\").",
+            "Change the **Servings** with the minus and plus buttons or by typing a number from 1 to 99. The quantities are recalculated on screen and the tag **Scaled** appears, with **Reset to {n}** to go back. Common fractions are shown as fractions (\"1/2 tsp\"), pieces keep their decimals (\"1,5 pcs\"). A result close to a whole number is shown as that number (a third of a spoon times three is \"1 tsp\"), and thirds, sixths and eighths are shown as fractions too. A number outside the range is moved into it, and a line under the buttons says so.",
             "Your chosen number of servings is remembered for you on that recipe. The recipe itself is never changed by it."
           ]
         },
@@ -242,7 +242,7 @@
             "Choose **New list** (the name is the recipe title, you can change it, and you can pick a store) or **Open list** and choose one of your open lists. Locked and finished lists are not offered, and neither are lists you may only read. If you have no open list you can add to, only a new list is possible.",
             "**Quantities for** shows the servings you chose on the recipe. Change them here to recalculate the quantities for the shopping; the recipe itself is not changed.",
             "Every ingredient is a row. Untick the ones you already have, and change the name, quantity or unit if you want. A row without an amount in the recipe comes in as 1 piece with the note \"No amount in the recipe.\"",
-            "A row tagged **Matched** was found in the shopping catalog and is added with its picture; **Suggested** means the match is only likely, so check it. **Change** lets you pick another catalog item or **Add as typed item**. A row tagged **Not in catalog** is added as a typed item with the name you see.",
+            "A row tagged **Matched** was found in the shopping catalog and is added with its picture; **Suggested** means the match is only likely, so check it. **Change** lets you pick another catalog item or **Add as typed item**. A row tagged **Not in catalog** is added as a typed item with the name you see. While a row is matched its name cannot be edited: the list gets the catalog name. Choose **Add as typed item** to use your own name.",
             "If the chosen list already has the same catalog item that is not yet bought, the row says **Already on the list** and the quantities are added up (grams and kilograms, millilitres and litres are converted when this loses nothing). With a different unit it is **kept as a separate line**.",
             "Press **Add {n} items** (or **Create list and add {n} items**). A message tells you how many items were added, with **Open list** to go to the shopping list. You stay on the recipe."
           ]

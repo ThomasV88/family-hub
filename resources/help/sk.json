@@ -346,7 +346,7 @@
         },
         "recipes.shopping": {
             "title": "Pridanie do nákupného zoznamu",
-            "text": "Vyberte nový zoznam alebo jeden zo svojich otvorených zoznamov. Pred pridaním skontrolujte každú surovinu: odškrtnite, čo už máte, a upravte názov, množstvo alebo jednotku. Suroviny nájdené v katalógu sa priradia a dostanú obrázok, ostatné sa pridajú ako vlastné položky. Pridá sa všetko naraz, alebo nič. Poznámky k surovinám sa neprenášajú."
+            "text": "Vyberte nový zoznam alebo jeden zo svojich otvorených zoznamov. Pred pridaním skontrolujte každú surovinu: odškrtnite, čo už máte, a upravte množstvo alebo jednotku. Priradené suroviny si ponechajú názov z katalógu a dostanú obrázok (vlastný názov: Pridať ako vlastnú položku). Pridá sa všetko naraz, alebo nič. Poznámky k surovinám sa neprenášajú."
         }
     }
 }

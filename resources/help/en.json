@@ -346,7 +346,7 @@
         },
         "recipes.shopping": {
             "title": "Add to shopping list",
-            "text": "Choose a new list or one of your open lists. Check every ingredient before adding: untick what you already have and change the name, amount or unit. Ingredients found in the catalog are matched and get their picture; the others are added as typed items. Everything is added together or nothing is. Ingredient notes are not copied."
+            "text": "Choose a new list or one of your open lists. Check every ingredient before adding: untick what you already have and change the amount or unit. Matched ingredients keep the catalog name and get their picture (choose Add as typed item to use your own name). Everything is added together or nothing is. Ingredient notes are not copied."
         }
     }
 }

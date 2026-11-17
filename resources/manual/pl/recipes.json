@@ -23,7 +23,7 @@
             "**Szukaj przepisów** znajduje przepisy po tytule lub składniku. Nie rozróżnia wielkich liter ani znaków diakrytycznych, więc \"jajko\" znajdzie \"Jajka\".",
             "**Filtry** zawężają listę według kategorii, autora i składnika oraz według **Wszystkie**, **Moje** lub **Udostępnione mi**. Używane filtry widać jako znaczniki pod polem wyszukiwania. Znacznik usuniesz, naciskając go, wszystkie naraz przyciskiem **Wyczyść filtry**. Filtry zostają w adresie, więc **Wstecz** wraca do tego samego widoku.",
             "Serce na karcie oznacza przepis jako ulubiony. **Ulubione** obok pola wyszukiwania pokazuje tylko przepisy, które oznaczyłeś. Ulubione są tylko twoje, nikt inny ich nie widzi.",
-            "Lista pokazuje 24 przepisy naraz. Kolejne zobaczysz przyciskiem **Wczytaj więcej**."
+            "Lista pokazuje 24 przepisy naraz. Kolejne zobaczysz przyciskiem **Wczytaj więcej**. Po **Wstecz** lub odświeżeniu strony wszystkie wczytane przepisy nadal tam są."
           ]
         },
         {
@@ -51,7 +51,7 @@
             "Dodaj najwyżej 3 **Kategorie**. Zacznij pisać albo wybierz podpowiedź, a potem naciśnij Enter lub wpisz przecinek. Podpowiedzi to gotowy zestaw (Śniadanie, Zupa, Deser i tak dalej) oraz kategorie, których rodzina już używa. Tej samej kategorii nie dodasz dwa razy, niezależnie od wielkości liter i znaków diakrytycznych.",
             "W części **Składniki** wpisz **Ilość**, **Jednostkę**, **Nazwę** i w razie potrzeby **Notatkę**, na przykład „posiekane”. Kolejny wiersz dodasz przyciskiem **Dodaj składnik** albo klawiszem Enter w nazwie.",
             "W części **Kroki** wpisz jeden krok w jednym polu, a następny dodaj przyciskiem **Dodaj krok**.",
-            "Jeśli chcesz, dodaj **Źródło** (adres strony) i wybierz, **Kto może zobaczyć ten przepis** (zobacz Kto widzi przepis).",
+            "Jeśli chcesz, dodaj **Źródło** (adres strony) i wybierz, **Kto może zobaczyć ten przepis** (zobacz Kto widzi przepis). Adresy z nazwą użytkownika lub hasłem są odrzucane.",
             "Naciśnij **Zapisz przepis**. Otworzy się przepis i zobaczysz „Przepis zapisany”."
           ]
         },
@@ -65,11 +65,11 @@
         },
         {
           "type": "p",
-          "text": "**Ilości** możesz wpisać z przecinkiem lub kropką dziesiętną („0,5”), jako ułamki („1/2”, „1 1/2”) i znakami ½ ¼ ¾ ⅓ ⅔. Ilość musi być większa niż 0 i najwyżej 9999, z najwyżej dwoma miejscami po przecinku. Przy rzeczach „do smaku” zostaw pole puste."
+          "text": "**Ilości** możesz wpisać z przecinkiem lub kropką dziesiętną („0,5”), jako ułamki („1/2”, „1 1/2”) i znakami ½ ¼ ¾ ⅓ ⅔. Ilość musi być większa niż 0 i najwyżej 9999, z najwyżej dwoma miejscami po przecinku. Przy rzeczach „do smaku” zostaw pole puste. W języku angielskim przecinek z dokładnie trzema cyframi po nim jest separatorem tysięcy (\"1,000\" to 1000); po słowacku i polsku to przecinek dziesiętny (\"1,000\" to 1)."
         },
         {
           "type": "p",
-          "text": "**Wklejanie listy.** Jeśli wkleisz kilka wierszy do nazwy składnika, na przykład listę skopiowaną ze strony internetowej, formularz zaproponuje **Podziel na n składników**. Z każdego wiersza odczyta ilość, jednostkę i nazwę („200 g mąki”, „2 szt. jajka”, „1/2 łyżeczki soli”). To, czego nie odczyta, zostaje w nazwie, więc sprawdź nowe wiersze. Wybierz **Zostaw jako jeden**, aby zostawić tekst tak, jak go wkleiłeś."
+          "text": "**Wklejanie listy.** Jeśli wkleisz kilka wierszy do nazwy składnika, na przykład listę skopiowaną ze strony internetowej, formularz zaproponuje **Podziel na n składników**. Z każdego wiersza odczyta ilość, jednostkę i nazwę („200 g mąki”, „2 szt. jajka”, „1/2 łyżeczki soli”). To, czego nie odczyta, zostaje w nazwie, więc sprawdź nowe wiersze. Wybierz **Zostaw jako jeden**, aby zostawić tekst tak, jak go wkleiłeś. \"cl\" jest czytane jako centylitry i przeliczane na mililitry (4 cl to 40 ml)."
         },
         {
           "type": "p",
@@ -77,7 +77,7 @@
         },
         {
           "type": "p",
-          "text": "**Edycja.** Przepis edytuje tylko jego autor. Otwórz go i naciśnij **Edytuj**; formularz jest ten sam. Składniki i kroki, które zostawisz, pozostają tymi samymi wierszami, więc odhaczenia, które inni członkowie zrobili podczas gotowania, zostają dla nich na miejscu; odhaczenia tracą tylko usunięte wiersze. Jeśli opuścisz formularz z niezapisanymi zmianami, najpierw o to zapyta."
+          "text": "**Edycja.** Przepis edytuje tylko jego autor. Otwórz go i naciśnij **Edytuj**; formularz jest ten sam. Składniki i kroki, które zostawisz, pozostają tymi samymi wierszami, więc odhaczenia, które inni członkowie zrobili podczas gotowania, zostają dla nich na miejscu; odhaczenia tracą tylko usunięte wiersze. Jeśli opuścisz formularz z niezapisanymi zmianami, najpierw o to zapyta. To samo pytanie pojawia się, gdy w przeglądarce naciśniesz **Wstecz** albo na telefonie przesuniesz palcem wstecz. Jeśli połączenie przerwie się podczas zapisu i ponownie naciśniesz **Zapisz przepis**, powstanie jeden przepis, nie dwa."
         }
       ]
     },
@@ -95,8 +95,8 @@
           "items": [
             "Na stronie Receptarz naciśnij **Nowy przepis** i wybierz **Wczytaj ze strony internetowej**.",
             "Za pierwszym razem pojawi się informacja, że tekst strony jest wysyłany do dostawcy AI włączonego przez administratora i że nic więcej z twojego konta nie jest wysyłane. Naciśnij **Rozumiem**. Potem przypomina o tym krótki wiersz pod polem.",
-            "Wklej **Adres strony internetowej** (musi zaczynać się od http:// lub https://) i naciśnij **Wczytaj przepis**.",
-            "Poczekaj, aż strona zostanie przeczytana, zwykle krócej niż minutę. Przyciskiem **Anuluj** zatrzymasz czytanie. Możesz też zamknąć okno: czytanie trwa dalej, a nad przepisami pojawi się wiersz „Twój przepis ze strony ... jest gotowy do sprawdzenia” z przyciskami **Sprawdź** i **Odrzuć**.",
+            "Wklej **Adres strony internetowej** (musi zaczynać się od http:// lub https://) i naciśnij **Wczytaj przepis**. Adresy z nazwą użytkownika lub hasłem, z innym portem niż zwykły albo wskazujące komputer w Twojej własnej sieci są odrzucane od razu.",
+            "Poczekaj, aż strona zostanie przeczytana, zwykle krócej niż minutę. Przyciskiem **Anuluj** zatrzymasz czytanie. Możesz też zamknąć okno: czytanie trwa dalej, a nad przepisami pojawi się wiersz „Twój przepis ze strony ... jest gotowy do sprawdzenia” z przyciskami **Sprawdź** i **Odrzuć**. Jeśli odczyt trwa dłużej niż trzy minuty, okno to mówi: **Anuluj** i **Spróbuj ponownie** zatrzymują pierwszą próbę, zanim zacznie się nowa, a zamknięcie okna zostawia próbę nad przepisami, gdzie przepis, który jest jeszcze czytany, ma własne **Anuluj**.",
             "Formularz otwiera się z tytułem **Sprawdź przepis**. Pola wypełnione przez aplikację mają etykietę **Ze strony**, dopóki ich nie zmienisz. To, czego nie znalazła, ma napis **Nie znaleziono na stronie**, a każdy składnik pokazuje wiersz tak, jak jest na stronie. Popraw wszystko, co się nie zgadza.",
             "Naciśnij **Zapisz przepis**. Wcześniej nic nie jest zapisywane. Adres strony zostaje w **Źródle** i jest pokazany jako link przy przepisie."
           ]
@@ -156,7 +156,7 @@
           "items": [
             "**Tylko ja**: przepis widzisz tylko ty. Nikt inny, nawet administrator.",
             "**Wszyscy w rodzinie korzystający z Receptarza**: pozostali członkowie, którzy mają dostęp do Receptarza, mogą go czytać, gotować według niego i dodawać do listy zakupów.",
-            "Tylko autor edytuje przepis, zmienia jego zdjęcia i widoczność lub go usuwa. Inni nie mogą go edytować."
+            "Tylko autor edytuje przepis, zmienia jego zdjęcia i widoczność lub go usuwa. Inni nie mogą go edytować. Jeśli konto autora już nie istnieje, przepis to mówi i nikt nie może go edytować."
           ]
         },
         {
@@ -182,7 +182,7 @@
           "items": [
             "Odhacz **składnik**, gdy jest przygotowany, i **krok**, gdy jest gotowy. Twoje odhaczenia zapisują się od razu i należą do ciebie: są przechowywane osobno dla każdej osoby, inni członkowie nigdy ich nie widzą, a ty nie widzisz cudzych. Odhaczony wiersz tylko zmienia kolor i nigdy się nie przesuwa.",
             "**Zresetuj mój postęp** (w menu z trzema kropkami) po potwierdzeniu czyści tylko twoje odhaczenia przy tym przepisie.",
-            "**Porcje** zmienisz przyciskami minus i plus albo wpisując liczbę od 1 do 99. Ilości są przeliczane na ekranie i pojawia się znacznik **Przeliczone** z przyciskiem **Przywróć {n}**. Typowe ułamki są pokazywane jako ułamki (\"1/2 tsp\"), sztuki zachowują miejsca dziesiętne (\"1,5 szt.\").",
+            "**Porcje** zmienisz przyciskami minus i plus albo wpisując liczbę od 1 do 99. Ilości są przeliczane na ekranie i pojawia się znacznik **Przeliczone** z przyciskiem **Przywróć {n}**. Typowe ułamki są pokazywane jako ułamki (\"1/2 tsp\"), sztuki zachowują miejsca dziesiętne (\"1,5 szt.\"). Wynik bliski liczbie całkowitej jest pokazywany jako ta liczba (jedna trzecia łyżki razy trzy to \"1 tsp\"), a trzecie, szóste i ósme części są też pokazywane jako ułamki. Liczba spoza zakresu jest przesuwana do zakresu, a wiersz pod przyciskami o tym informuje.",
             "Wybrana liczba porcji jest zapamiętana dla ciebie przy tym przepisie. Sam przepis nigdy się przez to nie zmienia."
           ]
         },
@@ -242,7 +242,7 @@
             "Wybierz **Nowa lista** (nazwa to tytuł przepisu, możesz ją zmienić i wybrać sklep) albo **Otwarta lista** i wskaż jedną ze swoich otwartych list. Listy zablokowane i zakończone nie są proponowane, tak samo jak listy, które możesz tylko czytać. Jeśli nie masz otwartej listy, do której możesz dodawać, możliwa jest tylko nowa lista.",
             "**Ilości dla** pokazuje liczbę porcji wybraną przy przepisie. Zmiana tutaj przelicza ilości do zakupów, sam przepis się nie zmienia.",
             "Każdy składnik to jeden wiersz. Odznacz te, które już masz, i w razie potrzeby zmień nazwę, ilość lub jednostkę. Wiersz bez ilości w przepisie trafia jako 1 sztuka z uwagą \"W przepisie nie podano ilości.\"",
-            "Wiersz z etykietą **Dopasowano** został znaleziony w katalogu zakupów i jest dodawany z obrazem; **Propozycja** oznacza, że dopasowanie jest tylko prawdopodobne, więc sprawdź je. Przyciskiem **Zmień** wybierzesz inną pozycję katalogu lub **Dodaj jako wpisany produkt**. Wiersz z etykietą **Nie ma w katalogu** jest dodawany jako wpisany produkt z widoczną nazwą.",
+            "Wiersz z etykietą **Dopasowano** został znaleziony w katalogu zakupów i jest dodawany z obrazem; **Propozycja** oznacza, że dopasowanie jest tylko prawdopodobne, więc sprawdź je. Przyciskiem **Zmień** wybierzesz inną pozycję katalogu lub **Dodaj jako wpisany produkt**. Wiersz z etykietą **Nie ma w katalogu** jest dodawany jako wpisany produkt z widoczną nazwą. Dopóki wiersz jest dopasowany, jego nazwy nie można edytować: lista dostanie nazwę z katalogu. Aby użyć własnej nazwy, wybierz **Dodaj jako wpisany produkt**.",
             "Jeśli wybrana lista ma już tę samą pozycję katalogu, która nie jest jeszcze kupiona, wiersz pokazuje **Już jest na liście** i ilości są dodawane (gramy i kilogramy, mililitry i litry są przeliczane, gdy nic się przez to nie traci). Przy innej jednostce zostaje **osobna pozycja**.",
             "Naciśnij **Dodaj {n} produktów** (albo **Utwórz listę i dodaj {n} produktów**). Komunikat powie, ile produktów dodano, z przyciskiem **Otwarta lista**, który przenosi do listy zakupów. Zostajesz przy przepisie."
           ]

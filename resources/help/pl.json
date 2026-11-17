@@ -346,7 +346,7 @@
         },
         "recipes.shopping": {
             "title": "Dodawanie do listy zakupów",
-            "text": "Wybierz nową listę albo jedną ze swoich otwartych list. Przed dodaniem sprawdź każdy składnik: odznacz to, co już masz, i zmień nazwę, ilość lub jednostkę. Składniki znalezione w katalogu są dopasowywane i dostają obraz, pozostałe trafiają jako wpisane produkty. Dodaje się wszystko naraz albo nic. Notatki do składników nie są kopiowane."
+            "text": "Wybierz nową listę albo jedną ze swoich otwartych list. Przed dodaniem sprawdź każdy składnik: odznacz to, co już masz, i zmień ilość lub jednostkę. Dopasowane składniki zachowują nazwę z katalogu i dostają obraz (własna nazwa: Dodaj jako wpisany produkt). Dodaje się wszystko naraz albo nic. Notatki do składników nie są kopiowane."
         }
     }
 }
