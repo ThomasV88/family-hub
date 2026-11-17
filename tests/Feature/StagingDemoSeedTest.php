@@ -81,7 +81,7 @@ it('fills every module within the expected ranges and measures the run', functio
     $seconds = microtime(true) - $started;
 
     $c = demoCounts();
-    expect($c['users'])->toBe(7)
+    expect($c['users'])->toBe(8)
         ->and($c['tasks'])->toBeBetween(60, 120)
         ->and($c['wishes'])->toBeBetween(30, 60)
         ->and($c['wish_occasions'])->toBeBetween(6, 14)
@@ -451,4 +451,29 @@ it('seeds records older than the delete window and an archive demo (one visit, o
     $a = demoSubject($parent->name);
     expect(app(VisitQuery::class)->forSubject($viewer, $a)->pluck('diagnosis')->all())->not->toContain('Archivovaná návšteva (demo)')
         ->and(collect(app(ArchiveQuery::class)->forSubject($viewer, $a))->pluck('type')->sort()->values()->all())->toBe(['document', 'visit']);
+});
+
+it('seeds one synthetic child with a photo, demo wishes and a managing parent, and reseeding leaves no orphan photo', function () {
+    Storage::fake('local');
+    demoSeed();
+    demoSeed();
+
+    $children = User::whereNull('email')->get();
+    expect($children)->toHaveCount(1);
+    $child = $children->first();
+    $parent = demoUser('sk_sk.1');
+    expect($child->name)->toEndWith(' (demo)')
+        ->and($child->sign_in_disabled)->toBeTrue()
+        ->and($child->photo_path)->not->toBeNull()
+        ->and(Wish::where('owner_id', $child->id)->count())->toBeGreaterThanOrEqual(2)
+        ->and(DB::table('wishlist_managers')->where('owner_id', $child->id)->pluck('manager_id')->all())->toBe([$parent->id])
+        ->and(app(AccessGate::class)->level($parent, Module::Wishlist))->toBe(AccessLevel::Edit);
+    Storage::disk('local')->assertExists($child->photo_path);
+    Storage::disk('local')->assertExists($child->photo_thumb_path);
+
+    $files = Storage::disk('local')->allFiles('wish-images/profile-photos');
+    expect($files)->toHaveCount(2);
+    foreach ($files as $f) {
+        expect(str_starts_with($f, "wish-images/profile-photos/{$child->id}/"))->toBeTrue();
+    }
 });

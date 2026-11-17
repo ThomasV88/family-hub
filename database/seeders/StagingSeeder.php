@@ -5,8 +5,14 @@ namespace Database\Seeders;
 use App\Access\AccessLevel;
 use App\Access\Module;
 use App\Access\Preset;
+use App\Actions\Profile\CreateChild;
+use App\Audit\AuditEvent;
+use App\Audit\AuditLogger;
 use App\Medical\Documents\MedicalDocumentStore;
 use App\Models\User;
+use App\Profile\ProfilePhotoStore;
+use App\Wishlist\Catalog\ImageProcessor;
+use App\Wishlist\WishlistManagerSync;
 use Database\Seeders\Staging\AiProposalsSeeder;
 use Database\Seeders\Staging\DocumentsSeeder;
 use Database\Seeders\Staging\FinanceSeeder;
@@ -120,9 +126,14 @@ class StagingSeeder extends Seeder
         // (and shows that the Guest cannot reserve).
         $grant('guest', Module::Wishlist, AccessLevel::View);
 
+        // One synthetic child, created through the production path (CreateChild) and managed by the first parent. The
+        // seed writes no audit rows by hand, so the audit logger is a silent subclass here.
+        $child = $this->seedChild($admin, $users['parent1']);
+
         $ctx = new StagingContext($today, $users);
         $this->summary['tasks'] = (new TasksSeeder)->seed($ctx);
         $this->summary['wishlist'] = (new WishlistSeeder)->seed($ctx);
+        $this->summary['child_wishes'] = (new WishlistSeeder)->seedChild($child, $today);
         $this->summary['finance'] = (new FinanceSeeder)->seed($ctx);
         $health = (new HealthSeeder)->seed($ctx);
         $this->summary['health'] = $health['counts'];
@@ -132,6 +143,42 @@ class StagingSeeder extends Seeder
         $this->summary['seconds'] = round(microtime(true) - $started, 2);
 
         return $created;
+    }
+
+    /** A synthetic child (no e-mail, cannot sign in) with a generated photo. Name ends in " (demo)" so a reseed purges it. */
+    private function seedChild(User $admin, User $parent): User
+    {
+        $silent = new class extends AuditLogger
+        {
+            public function record(AuditEvent $event, ?User $actor, array $meta = [], ?User $target = null, ?Module $module = null): void {}
+        };
+        $child = (new CreateChild(new WishlistManagerSync, $silent))->handle($admin, 'Maťko Demo (demo)', [$parent->id]);
+        $child->forceFill(['locale' => 'sk'])->save();
+
+        app(ProfilePhotoStore::class)->put($child, app(ImageProcessor::class)->process(
+            $this->demoPhoto(),
+            (int) config('profile.photo_max_bytes'),
+            (int) config('profile.photo_full_px'),
+            (int) config('profile.photo_thumb_px'),
+        ));
+
+        return $child;
+    }
+
+    /** Coloured shapes only: no face, no text, no network. Drawn in memory with GD. */
+    private function demoPhoto(): string
+    {
+        $img = imagecreatetruecolor(400, 400);
+        imagefilledrectangle($img, 0, 0, 400, 400, imagecolorallocate($img, 250, 214, 120));
+        imagefilledellipse($img, 200, 230, 260, 260, imagecolorallocate($img, 70, 130, 200));
+        imagefilledrectangle($img, 90, 60, 190, 160, imagecolorallocate($img, 220, 80, 80));
+        imagefilledpolygon($img, [260, 160, 340, 60, 340, 160], imagecolorallocate($img, 60, 170, 110));
+        ob_start();
+        imagepng($img);
+        $bytes = (string) ob_get_clean();
+        imagedestroy($img);
+
+        return $bytes;
     }
 
     /**

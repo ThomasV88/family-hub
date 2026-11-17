@@ -76,6 +76,8 @@ is older than 26 h it prints `BACKUP STALE` to `logs/cron.log`, appends to `logs
 if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script with the message as its argument
 (hook point for mail or push notification; none is configured in Phase 1).
 
+Profile photos (Phase 10) live in the `uploads` volume under `wish-images/profile-photos/<user id>/` and are covered by the existing uploads snapshot; a daily sweep removes files no member references.
+
 ### Phase 7: medical files volume
 
 - Volume `medical` (compose.server.yaml, one per stack because each stack has its own project name; `medical-dev` locally), mounted at

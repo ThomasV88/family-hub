@@ -60,3 +60,13 @@ it('purges synthetic children and their photo folders on reseed but never a real
     Storage::disk('local')->assertMissing("wish-images/profile-photos/{$demo->id}/photo.jpg");
     Storage::disk('local')->assertExists("wish-images/profile-photos/{$real->id}/photo.jpg");
 });
+
+it('passes on the seeded data including its child and fails once a real child is added', function () {
+    Storage::fake('local');
+    Storage::fake('medical');
+    (new StagingSeeder)->run();
+    $this->artisan('staging:audit')->assertExitCode(0);
+
+    User::factory()->child()->create(['name' => 'Real Kid']);
+    $this->artisan('staging:audit')->expectsOutputToContain('non-synthetic users')->assertExitCode(1);
+});

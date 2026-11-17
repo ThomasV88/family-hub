@@ -44,13 +44,14 @@ it('requires --force to seed', function () {
     expect(User::count())->toBe(0);
 });
 
-it('seeds six synthetic members and one synthetic admin on staging', function () {
+it('seeds six synthetic members, one synthetic admin and one synthetic child on staging', function () {
     setEnv('staging');
 
     $this->artisan('staging:seed --force')->assertExitCode(0);
 
-    expect(User::count())->toBe(7)
-        ->and(User::where('email', 'not like', '%@example.test')->count())->toBe(0)
+    expect(User::count())->toBe(8)
+        ->and(User::whereNotNull('email')->where('email', 'not like', '%@example.test')->count())->toBe(0)
+        ->and(User::whereNull('email')->where('name', 'not like', '% (demo)')->count())->toBe(0)
         ->and(User::where('is_admin', true)->count())->toBe(1)
         ->and(User::where('is_admin', true)->first()->email)->toBe('admin@example.test');
 });
@@ -85,7 +86,7 @@ it('is idempotent', function () {
     $this->artisan('staging:seed --force')->assertExitCode(0);
     $this->artisan('staging:seed --force')->assertExitCode(0);
 
-    expect(User::count())->toBe(7);
+    expect(User::count())->toBe(8);
 });
 
 it('audit passes when all users are synthetic', function () {
@@ -144,7 +145,8 @@ it('gives every synthetic account the shared staging password when one is config
 
     $this->artisan('staging:seed --force')->assertExitCode(0);
 
-    foreach (User::all() as $user) {
+    // the synthetic child cannot sign in and keeps a random unusable password
+    foreach (User::whereNotNull('email')->get() as $user) {
         expect(Hash::check('a-shared-staging-pass-1', $user->password))->toBeTrue()
             ->and($user->password_set)->toBeTrue();
     }
@@ -234,7 +236,7 @@ it('reseeds and audits cleanly after synthetic users created finance, medical, A
         synthRows($user);
     }
     $calls = DB::table('ai_calls')->count();
-    expect($calls)->toBe($demoCalls + 7);
+    expect($calls)->toBe($demoCalls + User::count());
 
     $this->artisan('staging:seed --force')->assertExitCode(0);
 

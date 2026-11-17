@@ -16,6 +16,7 @@ Heslo: všetky účty majú rovnaké heslo zo servera (`STAGING_SEED_PASSWORD` v
 | `en_gb.6@example.test` | Dieťa (12 rokov) | Úlohy a priania. Financie a zdravie nevidí vôbec. Jeho zoznam prianí spravuje rodič `en_gb.5`. |
 | `pl_pl.3@example.test` | Starý rodič | Úlohy a priania môže meniť. Zdravie len na čítanie (vlastný záznam, Peter Kováč a Miško). Financie nevidí. |
 | `pl_pl.4@example.test` | Hosť | Úlohy a zoznamy prianí len na čítanie (nemôže rezervovať). Financie a zdravie nevidí vôbec. |
+| Maťko Demo (demo) | Dieťa bez prihlásenia | Detský účet bez e-mailu a bez hesla: **nemôže sa prihlásiť**, nemá reláciu ani prístupový kľúč. Má vygenerovanú syntetickú fotku (farebné tvary) a tri prianá. Jeho zoznam prianí a profil spravuje rodič `sk_sk.1` (z `/profile` časť "People you manage"). Pri každom nasadení sa zmaže aj s fotkou a vytvorí nanovo. |
 | `admin@example.test` | Správca | Len nastavenia (členovia, oprávnenia, audit). Nemá žiadne financie ani zdravie, nikomu nič nepatrí. |
 
 Predvolené oprávnenia (Rodič, Dieťa, Starý rodič, Hosť) zostávajú. Demo ich dopĺňa troma vecami, aby sa dali skúšať obe strany súkromia: zdravie pre oboch rodičov (zmena) a pre `sk_sk.2` a `pl_pl.3` (čítanie), financie na čítanie pre `sk_sk.2` a zoznamy prianí na čítanie pre hosťa (inak by jeho zoznam nikto nevidel).
