@@ -3268,6 +3268,7 @@
             "err_unavailable": "Wczytywanie stron jest teraz niedostępne. Możesz wpisać przepis ręcznie.",
             "err_limit": "Dziś wczytano zbyt wiele stron. Spróbuj ponownie później.",
             "err_generic": "Czytanie strony trwało zbyt długo lub się nie udało. Spróbuj ponownie lub wpisz przepis ręcznie.",
+            "err_slow": "Odczyt trwa dłużej niż zwykle. Jeśli spróbujesz ponownie, najpierw zostanie zatrzymana pierwsza próba. Możesz też zamknąć to okno: jeśli strona jest nadal czytana, pojawi się nad przepisami.",
             "err_start": "Nie udało się rozpocząć czytania strony. Spróbuj ponownie lub wpisz przepis ręcznie.",
             "cancel_failed": "Nie udało się zatrzymać czytania. Spróbuj ponownie.",
             "try_again": "Spróbuj ponownie",

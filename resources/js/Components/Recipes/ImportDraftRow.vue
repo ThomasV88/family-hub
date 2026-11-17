@@ -19,6 +19,14 @@ const active = computed(() => ACTIVE.includes(props.draft.status));
 const poll = useImportStatus(computed(() => (active.value ? props.draft.id : null)));
 // A terminal answer (or a poll that cannot continue) asks the overview to reload its drafts once.
 watch(() => poll.terminal.value, (done) => { if (done && active.value) emit('changed'); });
+// The fresh copy of the drafts (after that reload) can still say "reading": the poll gave up after 3 minutes or on a flaky
+// connection while the server goes on. Poll again, so the row never stays on "Reading..." for good. A 403, 404 or 419 means the
+// draft is gone or the session ended: the reload removes the row or the app signs out, so nothing is restarted for those.
+watch(() => props.draft, () => {
+    if (!active.value || !poll.terminal.value) return;
+    if ([403, 404, 419].includes(poll.error.value)) return;
+    poll.start(props.draft.id);
+});
 
 const site = computed(() => props.draft.host || t('recipes.drafts.unknown_site'));
 </script>
@@ -26,6 +34,9 @@ const site = computed(() => props.draft.host || t('recipes.drafts.unknown_site')
 <template>
     <UiAlert v-if="active" variant="info" data-testid="draft-active" :data-draft="draft.id">
         {{ t('recipes.drafts.reading', { site }) }}
+        <template #actions>
+            <UiButton variant="ghost" size="sm" :disabled="busy" data-testid="draft-cancel" @click="emit('dismiss', draft)">{{ t('recipes.import.cancel') }}</UiButton>
+        </template>
     </UiAlert>
     <UiAlert v-else-if="draft.status === 'ready'" variant="info" data-testid="draft-ready" :data-draft="draft.id">
         {{ t('recipes.drafts.ready', { site }) }}

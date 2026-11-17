@@ -430,6 +430,30 @@ describe('New recipe and import drafts', () => {
             expect(fetchMock.mock.calls.length).toBe(calls);
         });
 
+        it('offer Cancel on a reading draft, which sends the discard request and asks for fresh drafts', async () => {
+            fetchMock.mockResolvedValue({ ok: true, status: 204, data: {} });
+            mountPage({ import: IMPORT, drafts: [{ id: D3, status: 'running', host: 'recepty.example', reason: null }] });
+            await current.find('[data-testid="draft-cancel"]').trigger('click');
+            await vi.advanceTimersByTimeAsync(0);
+            expect(fetchMock).toHaveBeenCalledWith(`/recipes/imports/${D3}`, { method: 'DELETE' });
+            expect(routerMock.reload).toHaveBeenCalledTimes(1);
+        });
+
+        it('poll again after the give-up when the reloaded drafts still say reading', async () => {
+            fetchMock.mockResolvedValue({ ok: true, status: 200, data: { id: D3, status: 'running', reason: null, host: 'recepty.example', textCut: false } });
+            const draft = () => ({ id: D3, status: 'running', host: 'recepty.example', reason: null });
+            mountPage({ import: IMPORT, drafts: [draft()] });
+            await vi.advanceTimersByTimeAsync(3 * 60 * 1000 + 6000);
+            expect(routerMock.reload).toHaveBeenCalledTimes(1);
+            const stopped = fetchMock.mock.calls.length;
+            await vi.advanceTimersByTimeAsync(10000);
+            expect(fetchMock.mock.calls.length).toBe(stopped);
+            // The overview's reload brings a fresh copy that is still "running": the row polls again.
+            await current.setProps({ drafts: [draft()] });
+            await vi.advanceTimersByTimeAsync(2000);
+            expect(fetchMock.mock.calls.length).toBeGreaterThan(stopped);
+        });
+
         it('stop polling when the page unmounts', async () => {
             fetchMock.mockResolvedValue({ ok: true, status: 200, data: { id: D3, status: 'running', reason: null, host: 'recepty.example', textCut: false } });
             mountPage({ import: IMPORT, drafts: [{ id: D3, status: 'running', host: 'recepty.example', reason: null }] });

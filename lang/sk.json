@@ -3268,6 +3268,7 @@
             "err_unavailable": "Čítanie stránok momentálne nie je dostupné. Recept môžete zadať ručne.",
             "err_limit": "Dnes ste načítali príliš veľa stránok. Skúste to neskôr.",
             "err_generic": "Čítanie stránky trvalo príliš dlho alebo sa nepodarilo. Skúste to znova alebo recept zadajte ručne.",
+            "err_slow": "Čítanie trvá dlhšie ako zvyčajne. Ak to skúsite znova, najprv sa zastaví prvý pokus. Okno môžete aj zavrieť: ak sa stránka ešte číta, objaví sa nad receptami.",
             "err_start": "Čítanie stránky sa nepodarilo spustiť. Skúste to znova alebo recept zadajte ručne.",
             "cancel_failed": "Čítanie sa nepodarilo zastaviť. Skúste to znova.",
             "try_again": "Skúsiť znova",

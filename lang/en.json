@@ -3268,6 +3268,7 @@
             "err_unavailable": "Reading pages is not available right now. You can type the recipe in yourself.",
             "err_limit": "You have read too many pages today. Try again later.",
             "err_generic": "Reading the page took too long or did not work. Try again, or type the recipe in yourself.",
+            "err_slow": "Reading is taking longer than usual. If you try again, the first attempt is stopped first. You can also close this window: if the page is still being read, it appears above the recipes.",
             "err_start": "We could not start reading the page. Try again, or type the recipe in yourself.",
             "cancel_failed": "We could not stop the reading. Try again.",
             "try_again": "Try again",

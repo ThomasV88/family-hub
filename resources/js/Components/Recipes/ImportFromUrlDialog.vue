@@ -72,10 +72,14 @@ const failureText = computed(() => {
         case 'forbidden': return t('recipes.error.forbidden');
         case 'session': return t('recipes.error.session_expired');
         case 'start': return t('recipes.import.err_start');
+        case 'slow': return t('recipes.import.err_slow');
         default: return t('recipes.import.err_generic');
     }
 });
-const failureVariant = computed(() => (['unavailable', 'limit'].includes(failure.value) ? 'warning' : 'danger'));
+const failureVariant = computed(() => (['unavailable', 'limit', 'slow'].includes(failure.value) ? 'warning' : 'danger'));
+// The first import may still be running on the server (3 minutes passed, or the status could not be read): Cancel and Try again
+// stop it first, and closing the window leaves it as a draft row, so a second import is never started next to a live one.
+const mayStillRun = computed(() => phase.value === 'loading' || (phase.value === 'failed' && failure.value === 'slow' && importId.value !== null));
 // An address problem is fixed by changing the address; the other failures may pass by themselves.
 const changeAddress = computed(() => ['fetch', 'no_recipe'].includes(failure.value));
 const canRetry = computed(() => failure.value !== 'limit');
@@ -213,19 +217,19 @@ watch(() => [poll.timedOut.value, poll.error.value], ([timedOut, error]) => {
     if (error === 403) toFailure('forbidden');
     else if (error === 419) toFailure('session');
     else if (error === 404) emit('update:open', false);
-    else if (timedOut || error !== null) toFailure('generic');
+    else if (timedOut || error !== null) toFailure('slow');
 });
 
 function dismiss(value) {
     if (value) return;
     if (busy.value) return;
-    if (phase.value === 'loading') emit('background');
+    if (mayStillRun.value) emit('background');
     emit('update:open', false);
 }
 
 // Footer Cancel: while reading it stops the import on the server and closes; otherwise it only closes.
 async function cancel() {
-    if (phase.value !== 'loading') {
+    if (!mayStillRun.value) {
         emit('update:open', false);
 
         return;
@@ -245,11 +249,27 @@ async function cancel() {
         : result.status === 419 ? t('recipes.error.session_expired') : t('recipes.import.cancel_failed');
 }
 
-function again() {
+async function again() {
+    if (cancelling.value) return;
+    if (importId.value !== null && failure.value === 'slow') {
+        // Stop the first import before a second one can start. A 404 means it is already gone.
+        cancelling.value = true;
+        cancelProblem.value = '';
+        const result = await securityFetch(`/recipes/imports/${encodeURIComponent(importId.value)}/cancel`, { method: 'POST' });
+        cancelling.value = false;
+        if (!result.ok && result.status !== 404) {
+            cancelProblem.value = result.status === 403 ? t('recipes.error.forbidden')
+                : result.status === 419 ? t('recipes.error.session_expired') : t('recipes.import.cancel_failed');
+
+            return;
+        }
+        emit('background');
+    }
     poll.stop();
     importId.value = null;
     phase.value = 'input';
     failure.value = '';
+    cancelProblem.value = '';
     serverUrlError.value = false;
     focusSoon('[data-testid="import-url"]');
 }

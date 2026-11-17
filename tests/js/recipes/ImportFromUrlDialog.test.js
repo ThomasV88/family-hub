@@ -246,14 +246,58 @@ describe('ImportFromUrlDialog: reading', () => {
         expect($('[data-testid="import-read"]').disabled).toBe(false);
     });
 
-    it('gives up after three minutes with a generic failure', async () => {
+    it('after three minutes says it is slow, keeps the first import cancellable and closes into a draft row', async () => {
         fetchMock.mockResolvedValueOnce(ok({ outcome: 'started', id: ID }, 202)).mockResolvedValue(STATUS('running'));
-        mountDialog();
+        const wrapper = mountDialog();
         await open();
         await type('https://recepty.example/a');
         await read();
         await advance(3 * 60 * 1000 + 5000);
-        expect($('[data-testid="import-failure"]').textContent).toContain('took too long');
+        expect($('[data-testid="import-failure"]').textContent).toContain('taking longer than usual');
+
+        // Footer Cancel stops the import that may still run, then closes.
+        fetchMock.mockResolvedValueOnce(ok({}, 204));
+        $('[data-testid="import-cancel"]').click();
+        await flushPromises();
+        expect(fetchMock).toHaveBeenLastCalledWith(`/recipes/imports/${ID}/cancel`, { method: 'POST' });
+        expect(wrapper.emitted('update:open').at(-1)).toEqual([false]);
+    });
+
+    it('Try again cancels the first import before a second one can start, and refuses to go on when the cancel fails', async () => {
+        fetchMock.mockResolvedValueOnce(ok({ outcome: 'started', id: ID }, 202)).mockResolvedValue(STATUS('running'));
+        const wrapper = mountDialog();
+        await open();
+        await type('https://recepty.example/a');
+        await read();
+        await advance(3 * 60 * 1000 + 5000);
+
+        fetchMock.mockResolvedValueOnce(bad(500));
+        $('[data-testid="import-again"]').click();
+        await flushPromises();
+        expect($('[data-testid="import-cancel-problem"]')).not.toBeNull();
+        expect($('[data-testid="import-failure"]')).not.toBeNull();
+        expect($('[data-testid="import-read"]')).toBeNull();
+
+        fetchMock.mockResolvedValueOnce(ok({}, 204));
+        $('[data-testid="import-again"]').click();
+        await flushPromises();
+        expect(fetchMock).toHaveBeenLastCalledWith(`/recipes/imports/${ID}/cancel`, { method: 'POST' });
+        expect($('[data-testid="import-read"]')).not.toBeNull();
+        expect(wrapper.emitted('background')).toBeTruthy();
+        const starts = fetchMock.mock.calls.filter(([url]) => url === '/recipes/imports');
+        expect(starts).toHaveLength(1);
+    });
+
+    it('closing the window after the give-up leaves the import as a draft row (background)', async () => {
+        fetchMock.mockResolvedValueOnce(ok({ outcome: 'started', id: ID }, 202)).mockResolvedValue(STATUS('running'));
+        const wrapper = mountDialog();
+        await open();
+        await type('https://recepty.example/a');
+        await read();
+        await advance(3 * 60 * 1000 + 5000);
+        wrapper.findComponent({ name: 'UiDialog' }).vm.$emit('update:open', false);
+        await flushPromises();
+        expect(wrapper.emitted('background')).toBeTruthy();
     });
 
     it.each([
