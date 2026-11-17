@@ -3,9 +3,52 @@
   "category": "modules",
   "order": 35,
   "title": "Zakupy",
-  "summary": "Wspólne listy zakupów dla rodziny z katalogiem produktów, sklepami i jednostkami, którymi zarządzasz w Ustawieniach.",
-  "covers": ["settings:shopping"],
+  "summary": "Wspólne listy zakupów dla rodziny: przegląd, tworzenie i kopiowanie list oraz katalog produktów, sklepy i jednostki, którymi zarządzasz w Ustawieniach.",
+  "covers": ["module:shopping", "settings:shopping"],
   "sections": [
+    {
+      "id": "overview",
+      "title": "Strona Zakupy",
+      "blocks": [
+        { "type": "p", "text": "**Zakupy** są w menu po lewej (w telefonie na pasku na dole), jeśli administrator dał Ci do nich dostęp. Strona pokazuje listy zakupów, które możesz widzieć, na dwóch kartach: **Otwarte** i **Archiwum**." },
+        { "type": "list", "items": [
+          "**Otwarte** pokazuje listy, które jeszcze planujesz albo z których robisz zakupy, uporządkowane według czasu przypomnienia (listy bez przypomnienia na końcu), potem od najnowszej. Lista, z której robi się zakupy, ma znacznik **Zablokowana** i pasek pokazujący, ile produktów już kupiono.",
+          "Każdy wiersz pokazuje logo sklepu, nazwę listy, sklep, osobę odpowiedzialną i czas przypomnienia. Znacznik **Przypomnienie minęło** pojawia się, gdy czas przypomnienia minął, a lista nie jest zakończona.",
+          "**Archiwum** pokazuje zakończone listy od najnowszej, z datą zakończenia. Długie archiwum jest podzielone na strony.",
+          "Gdy otwartych list jest więcej niż 10, nad nimi pojawia się pole wyszukiwania. Nie rozróżnia wielkich liter ani znaków diakrytycznych."
+        ] },
+        { "type": "p", "text": "Widzisz listę, jeśli ją utworzyłeś, jeśli jesteś jej osobą odpowiedzialną albo jeśli zostałeś do niej dodany, jako osoba, która może dodawać i edytować produkty, albo jako osoba, która może tylko przeglądać. Listy, których nie możesz widzieć, nie są pokazywane w ogóle. Listę znajdziesz w tabeli [kto co widzi](who-sees-what#table)." }
+      ]
+    },
+    {
+      "id": "create-list",
+      "title": "Tworzenie listy",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Otwórz **Zakupy** i naciśnij **Nowa lista**. Przycisk jest widoczny tylko wtedy, gdy możesz zmieniać Zakupy.",
+          "Wpisz **Nazwę** listy, na przykład \"Cotygodniowe zakupy\".",
+          "Jeśli chcesz, wybierz **Sklep**. Pierwszy wybór, **Bez sklepu**, zostawia go pustym.",
+          "Wybierz **Osobę odpowiedzialną**. To Ty, dopóki nie wybierzesz kogoś innego.",
+          "Naciśnij **Utwórz listę**. Nowa lista otwiera się pusta, a razem z nią okno dodawania produktów."
+        ] },
+        { "type": "tip", "text": "To, kto jeszcze może dodawać produkty, kto może tylko przeglądać, oraz przypomnienie ustawisz później w ustawieniach listy." }
+      ]
+    },
+    {
+      "id": "copy",
+      "title": "Kopiowanie listy",
+      "blocks": [
+        { "type": "steps", "items": [
+          "W przeglądzie naciśnij przycisk kopiowania na końcu wiersza (**Kopiuj listę**). Kopiować możesz też z samej listy.",
+          "Sprawdź **Nazwę nowej listy**. Na początku jest to stara nazwa z dopiskiem \"(kopia)\".",
+          "Zostaw zaznaczone **Zachowaj sklep, osobę odpowiedzialną i dostęp**, aby je zachować, albo odznacz, aby zacząć od zera.",
+          "Naciśnij **Kopiuj listę**. Nowa lista się otworzy."
+        ] },
+        { "type": "p", "text": "Kopia ma te same produkty z tymi samymi ilościami i jednostkami, a każdy produkt zaczyna jako nieoznaczony (niekupiony, niedostępny). Nowa lista jest otwarta, niezablokowana i bez przypomnienia. Zostajesz jej właścicielem." },
+        { "type": "p", "text": "Jeśli **Zachowaj sklep, osobę odpowiedzialną i dostęp** jest zaznaczone, kopia zachowuje sklep, osobę odpowiedzialną oraz osoby, które mogą dodawać produkty lub przeglądać. Jeśli nie jest zaznaczone, osobą odpowiedzialną jesteś Ty i nikt inny nie jest dodany." },
+        { "type": "tip", "text": "Skopiować możesz każdą listę, którą widzisz, także zakończoną. To szybki sposób na rozpoczęcie zakupów na kolejny tydzień." }
+      ]
+    },
     {
       "id": "stores-catalog",
       "title": "Katalog produktów i sklepy",

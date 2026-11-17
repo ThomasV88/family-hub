@@ -15,7 +15,7 @@ function leaves(obj, prefix = '') {
 }
 
 const SUBTREES = ['shopping'];
-const KEYS = ['settings.section.shopping', 'permissions.module.shopping'];
+const KEYS = ['settings.section.shopping', 'permissions.module.shopping', 'nav.shopping', 'module.shopping'];
 
 describe('phase 11 locale parity (lang)', () => {
     for (const subtree of SUBTREES) {

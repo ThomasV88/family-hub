@@ -3,9 +3,52 @@
   "category": "modules",
   "order": 35,
   "title": "Nákupy",
-  "summary": "Spoločné nákupné zoznamy pre rodinu s katalógom položiek, obchodmi a jednotkami, ktoré spravujete v Nastaveniach.",
-  "covers": ["settings:shopping"],
+  "summary": "Spoločné nákupné zoznamy pre rodinu: prehľad, vytváranie a kopírovanie zoznamov a katalóg položiek, obchody a jednotky, ktoré spravujete v Nastaveniach.",
+  "covers": ["module:shopping", "settings:shopping"],
   "sections": [
+    {
+      "id": "overview",
+      "title": "Stránka Nákupy",
+      "blocks": [
+        { "type": "p", "text": "**Nákupy** sú v ponuke vľavo (v telefóne v lište dole), ak vám k nim správca dal prístup. Stránka zobrazuje nákupné zoznamy, ktoré smiete vidieť, na dvoch záložkách: **Otvorené** a **Archív**." },
+        { "type": "list", "items": [
+          "**Otvorené** zobrazuje zoznamy, ktoré ešte plánujete alebo podľa ktorých nakupujete, zoradené podľa času pripomienky (zoznamy bez pripomienky sú na konci), potom od najnovšieho. Zoznam, podľa ktorého sa nakupuje, má štítok **Uzamknutý** a lištu, ktorá ukazuje, koľko položiek je už kúpených.",
+          "Každý riadok ukazuje logo obchodu, názov zoznamu, obchod, zodpovednú osobu a čas pripomienky. Štítok **Pripomienka už prešla** sa zobrazí, keď čas pripomienky uplynul, ale zoznam nie je vybavený.",
+          "**Archív** zobrazuje vybavené zoznamy od najnovšieho s dátumom, kedy boli vybavené. Dlhý archív je rozdelený na strany.",
+          "Keď je otvorených zoznamov viac ako 10, nad nimi sa zobrazí pole na hľadanie. Nerozlišuje veľké písmená ani diakritiku."
+        ] },
+        { "type": "p", "text": "Zoznam vidíte, ak ste ho vytvorili, ak ste jeho zodpovedná osoba, alebo ak ste do neho boli pridaní, buď ako osoba, ktorá smie pridávať a upravovať položky, alebo ako osoba, ktorá smie iba prezerať. Zoznamy, ktoré nevidíte, sa nezobrazujú vôbec. Zoznam nájdete v tabuľke [kto čo vidí](who-sees-what#table)." }
+      ]
+    },
+    {
+      "id": "create-list",
+      "title": "Vytvorenie zoznamu",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Otvorte **Nákupy** a stlačte **Nový zoznam**. Tlačidlo sa zobrazí, iba ak smiete meniť Nákupy.",
+          "Zadajte **Názov** zoznamu, napríklad \"Týždenný nákup\".",
+          "Ak chcete, vyberte **Obchod**. Prvá možnosť, **Bez obchodu**, ho nechá prázdny.",
+          "Vyberte **Zodpovednú osobu**. Ste to vy, kým nevyberiete niekoho iného.",
+          "Stlačte **Vytvoriť zoznam**. Nový zoznam sa otvorí prázdny a spolu s ním okno na pridávanie položiek."
+        ] },
+        { "type": "tip", "text": "Kto ďalší smie pridávať položky, kto smie iba prezerať, a pripomienku nastavíte neskôr v nastaveniach zoznamu." }
+      ]
+    },
+    {
+      "id": "copy",
+      "title": "Kopírovanie zoznamu",
+      "blocks": [
+        { "type": "steps", "items": [
+          "V prehľade stlačte tlačidlo kopírovania na konci riadka (**Kopírovať zoznam**). Kopírovať môžete aj zo samotného zoznamu.",
+          "Skontrolujte **Názov nového zoznamu**. Na začiatku je to pôvodný názov a za ním \"(kópia)\".",
+          "Nechajte začiarknuté **Zachovať obchod, zodpovednú osobu a prístup**, ak ich chcete zachovať, alebo políčko zrušte a začnite odznova.",
+          "Stlačte **Kopírovať zoznam**. Nový zoznam sa otvorí."
+        ] },
+        { "type": "p", "text": "Kópia má rovnaké položky s rovnakými množstvami a jednotkami a každá položka začína neoznačená (nekúpená, nedostupná). Nový zoznam je otvorený, neuzamknutý a bez pripomienky. Stávate sa jeho vlastníkom." },
+        { "type": "p", "text": "Ak je **Zachovať obchod, zodpovednú osobu a prístup** začiarknuté, kópia si ponechá obchod, zodpovednú osobu a ľudí, ktorí smú pridávať položky alebo prezerať. Ak nie je začiarknuté, zodpovednou osobou ste vy a nikto ďalší nie je pridaný." },
+        { "type": "tip", "text": "Skopírovať môžete každý zoznam, ktorý vidíte, aj vybavený. Je to rýchly spôsob, ako začať nákup na ďalší týždeň." }
+      ]
+    },
     {
       "id": "stores-catalog",
       "title": "Katalóg položiek a obchody",

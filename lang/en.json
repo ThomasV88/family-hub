@@ -57,13 +57,15 @@
         "skip": "Skip to main content",
         "add_task": "Add task",
         "style_guide": "Style guide",
-        "manual": "Manual"
+        "manual": "Manual",
+        "shopping": "Shopping"
     },
     "module": {
         "tasks": "To-do",
         "wishlist": "Wishlist",
         "finances": "Finances",
-        "health": "Health"
+        "health": "Health",
+        "shopping": "Shopping"
     },
     "dashboard": {
         "title": "Overview",
@@ -2667,7 +2669,69 @@
         },
         "error": {
             "name_invalid": "Enter a name that is not empty and not too long.",
-            "unit_unknown": "That unit no longer exists. Reload the page and try again."
+            "unit_unknown": "That unit no longer exists. Reload the page and try again.",
+            "store_unknown": "That store no longer exists. Reload the page and try again.",
+            "responsible_not_eligible": "That person cannot be responsible for a list.",
+            "copy_invalid": "Choose whether to keep the store, responsible person and access."
+        },
+        "overview": {
+            "title": "Shopping",
+            "new_list": "New list",
+            "tabs_label": "Shopping lists",
+            "tab_open": "Open",
+            "tab_archive": "Archive",
+            "tab_count": "{label} ({n})",
+            "search_label": "Search lists",
+            "search_none": "No list matches your search.",
+            "empty_open_title": "No shopping lists yet",
+            "empty_open_body": "Create a list, add items from the catalog and share it with the family.",
+            "empty_archive_title": "Nothing finished yet",
+            "empty_archive_body": "Lists you finish shopping appear here. You can copy them into a new list.",
+            "items": "{n} item | {n} items",
+            "bought": "{n} bought",
+            "progress": "Bought {bought} of {total}",
+            "reminder": "Reminder {date}",
+            "finished": "Finished {date}",
+            "no_store": "No store",
+            "copy": "Copy list",
+            "copy_named": "Copy list {name}",
+            "responsible": "Responsible: {name}",
+            "prev": "Previous",
+            "next": "Next",
+            "page": "Page {n} of {total}",
+            "pager_label": "Archive pages",
+            "error_title": "We could not load the shopping lists.",
+            "error_body": "Check your connection and try again.",
+            "retry": "Try again",
+            "loading": "Loading shopping lists"
+        },
+        "create": {
+            "title": "New shopping list",
+            "name": "Name",
+            "name_placeholder": "Weekly shopping",
+            "store": "Store",
+            "store_none": "No store",
+            "responsible": "Responsible person",
+            "submit": "Create list",
+            "cancel": "Cancel"
+        },
+        "copy": {
+            "title": "Copy list",
+            "name": "Name of the new list",
+            "keep": "Keep store, responsible person and access",
+            "default_name": "{name} (copy)",
+            "submit": "Copy list",
+            "cancel": "Cancel"
+        },
+        "status": {
+            "open": "Open",
+            "locked": "Locked",
+            "finished": "Finished",
+            "reminder_passed": "Reminder passed"
+        },
+        "toast": {
+            "list_created": "List created",
+            "copied": "List copied"
         }
     }
 }

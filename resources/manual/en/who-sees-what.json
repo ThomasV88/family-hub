@@ -18,10 +18,11 @@
           ["Who reserved a wish", "Everyone except the owner of the list", "The person who reserved it"],
           ["A finance account and its transactions", "Only the members it is shared with", "Those members, if they have Edit on Finances"],
           ["A health record of one person", "Members with Health access and access to that person", "Members with Can change on that person"],
+          ["A shopping list", "Its creator, responsible person and the people added to it", "The creator and the responsible person (settings), people who may add items (items)"],
           ["Settings, members, permissions, audit log, AI tools", "Administrators", "Administrators"],
           ["This manual", "Every signed-in member (the administrator guide only for administrators)", "Nobody in the app: it is part of the app"]
         ] },
-        { "type": "p", "text": "Learn more in [Tasks](tasks#who-sees), [Wishlist](wishlist#surprise), [Finance](finance#accounts), [Health](health#people-access) and the [Administrator guide](admin#permissions)." }
+        { "type": "p", "text": "Learn more in [Tasks](tasks#who-sees), [Wishlist](wishlist#surprise), [Finance](finance#accounts), [Shopping](shopping#overview), [Health](health#people-access) and the [Administrator guide](admin#permissions)." }
       ]
     },
     {

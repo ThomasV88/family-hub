@@ -57,13 +57,15 @@
         "skip": "Przejdź do głównej treści",
         "add_task": "Dodaj zadanie",
         "style_guide": "Przewodnik stylu",
-        "manual": "Instrukcja"
+        "manual": "Instrukcja",
+        "shopping": "Zakupy"
     },
     "module": {
         "tasks": "Zadania",
         "wishlist": "Wishlist",
         "finances": "Finanse",
-        "health": "Zdrowie"
+        "health": "Zdrowie",
+        "shopping": "Zakupy"
     },
     "dashboard": {
         "title": "Przegląd",
@@ -2667,7 +2669,69 @@
         },
         "error": {
             "name_invalid": "Podaj nazwę, która nie jest pusta ani zbyt długa.",
-            "unit_unknown": "Ta jednostka już nie istnieje. Odśwież stronę i spróbuj ponownie."
+            "unit_unknown": "Ta jednostka już nie istnieje. Odśwież stronę i spróbuj ponownie.",
+            "store_unknown": "Ten sklep już nie istnieje. Odśwież stronę i spróbuj ponownie.",
+            "responsible_not_eligible": "Ta osoba nie może odpowiadać za listę.",
+            "copy_invalid": "Wybierz, czy zachować sklep, osobę odpowiedzialną i dostęp."
+        },
+        "overview": {
+            "title": "Zakupy",
+            "new_list": "Nowa lista",
+            "tabs_label": "Listy zakupów",
+            "tab_open": "Otwarte",
+            "tab_archive": "Archiwum",
+            "tab_count": "{label} ({n})",
+            "search_label": "Szukaj list",
+            "search_none": "Żadna lista nie pasuje do wyszukiwania.",
+            "empty_open_title": "Brak list zakupów",
+            "empty_open_body": "Utwórz listę, dodaj produkty z katalogu i udostępnij ją rodzinie.",
+            "empty_archive_title": "Nic jeszcze nie zakończono",
+            "empty_archive_body": "Tutaj pojawią się listy, które zakończysz. Możesz je skopiować do nowej listy.",
+            "items": "{n} produkt | {n} produkty | {n} produktów",
+            "bought": "kupiono {n}",
+            "progress": "Kupiono {bought} z {total}",
+            "reminder": "Przypomnienie {date}",
+            "finished": "Zakończono {date}",
+            "no_store": "Bez sklepu",
+            "copy": "Kopiuj listę",
+            "copy_named": "Kopiuj listę {name}",
+            "responsible": "Odpowiedzialna osoba: {name}",
+            "prev": "Poprzednia",
+            "next": "Następna",
+            "page": "Strona {n} z {total}",
+            "pager_label": "Strony archiwum",
+            "error_title": "Nie udało się wczytać list zakupów.",
+            "error_body": "Sprawdź połączenie i spróbuj ponownie.",
+            "retry": "Spróbuj ponownie",
+            "loading": "Wczytywanie list zakupów"
+        },
+        "create": {
+            "title": "Nowa lista zakupów",
+            "name": "Nazwa",
+            "name_placeholder": "Cotygodniowe zakupy",
+            "store": "Sklep",
+            "store_none": "Bez sklepu",
+            "responsible": "Osoba odpowiedzialna",
+            "submit": "Utwórz listę",
+            "cancel": "Anuluj"
+        },
+        "copy": {
+            "title": "Kopiuj listę",
+            "name": "Nazwa nowej listy",
+            "keep": "Zachowaj sklep, osobę odpowiedzialną i dostęp",
+            "default_name": "{name} (kopia)",
+            "submit": "Kopiuj listę",
+            "cancel": "Anuluj"
+        },
+        "status": {
+            "open": "Otwarta",
+            "locked": "Zablokowana",
+            "finished": "Zakończona",
+            "reminder_passed": "Przypomnienie minęło"
+        },
+        "toast": {
+            "list_created": "Lista została utworzona",
+            "copied": "Lista została skopiowana"
         }
     }
 }

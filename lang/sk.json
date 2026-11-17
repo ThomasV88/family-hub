@@ -57,13 +57,15 @@
         "skip": "Preskočiť na hlavný obsah",
         "add_task": "Pridať úlohu",
         "style_guide": "Sprievodca štýlom",
-        "manual": "Manuál"
+        "manual": "Manuál",
+        "shopping": "Nákupy"
     },
     "module": {
         "tasks": "Úlohy",
         "wishlist": "Wishlist",
         "finances": "Financie",
-        "health": "Zdravie"
+        "health": "Zdravie",
+        "shopping": "Nákupy"
     },
     "dashboard": {
         "title": "Prehľad",
@@ -2667,7 +2669,69 @@
         },
         "error": {
             "name_invalid": "Zadajte názov, ktorý nie je prázdny ani príliš dlhý.",
-            "unit_unknown": "Táto jednotka už neexistuje. Obnovte stránku a skúste to znova."
+            "unit_unknown": "Táto jednotka už neexistuje. Obnovte stránku a skúste to znova.",
+            "store_unknown": "Tento obchod už neexistuje. Obnovte stránku a skúste to znova.",
+            "responsible_not_eligible": "Táto osoba nemôže byť zodpovedná za zoznam.",
+            "copy_invalid": "Vyberte, či sa majú zachovať obchod, zodpovedná osoba a prístup."
+        },
+        "overview": {
+            "title": "Nákupy",
+            "new_list": "Nový zoznam",
+            "tabs_label": "Nákupné zoznamy",
+            "tab_open": "Otvorené",
+            "tab_archive": "Archív",
+            "tab_count": "{label} ({n})",
+            "search_label": "Hľadať zoznamy",
+            "search_none": "Vášmu hľadaniu nezodpovedá žiadny zoznam.",
+            "empty_open_title": "Zatiaľ žiadne nákupné zoznamy",
+            "empty_open_body": "Vytvorte zoznam, pridajte položky z katalógu a zdieľajte ho s rodinou.",
+            "empty_archive_title": "Zatiaľ nič vybavené",
+            "empty_archive_body": "Tu sa zobrazia zoznamy, ktoré ste vybavili. Môžete ich kopírovať do nového zoznamu.",
+            "items": "{n} položka | {n} položky | {n} položiek",
+            "bought": "{n} kúpených",
+            "progress": "Kúpené {bought} z {total}",
+            "reminder": "Pripomienka {date}",
+            "finished": "Vybavené {date}",
+            "no_store": "Bez obchodu",
+            "copy": "Kopírovať zoznam",
+            "copy_named": "Kopírovať zoznam {name}",
+            "responsible": "Zodpovedná osoba: {name}",
+            "prev": "Predchádzajúca",
+            "next": "Ďalšia",
+            "page": "Strana {n} z {total}",
+            "pager_label": "Strany archívu",
+            "error_title": "Nepodarilo sa načítať nákupné zoznamy.",
+            "error_body": "Skontrolujte pripojenie a skúste to znova.",
+            "retry": "Skúsiť znova",
+            "loading": "Načítavam nákupné zoznamy"
+        },
+        "create": {
+            "title": "Nový nákupný zoznam",
+            "name": "Názov",
+            "name_placeholder": "Týždenný nákup",
+            "store": "Obchod",
+            "store_none": "Bez obchodu",
+            "responsible": "Zodpovedná osoba",
+            "submit": "Vytvoriť zoznam",
+            "cancel": "Zrušiť"
+        },
+        "copy": {
+            "title": "Kopírovať zoznam",
+            "name": "Názov nového zoznamu",
+            "keep": "Zachovať obchod, zodpovednú osobu a prístup",
+            "default_name": "{name} (kópia)",
+            "submit": "Kopírovať zoznam",
+            "cancel": "Zrušiť"
+        },
+        "status": {
+            "open": "Otvorený",
+            "locked": "Uzamknutý",
+            "finished": "Vybavený",
+            "reminder_passed": "Pripomienka už prešla"
+        },
+        "toast": {
+            "list_created": "Zoznam bol vytvorený",
+            "copied": "Zoznam bol skopírovaný"
         }
     }
 }

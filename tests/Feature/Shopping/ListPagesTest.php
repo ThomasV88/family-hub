@@ -34,7 +34,7 @@ it('lists only the visible lists with counts, ordered by reminder then newest', 
     F::item($soon);
 
     $this->actingAs($me)->get('/shopping')->assertOk()->assertInertia(fn (Assert $p) => $p
-        ->component('Shopping/Index', false)
+        ->component('Shopping/Index')
         ->where('lists.0.id', $soon->id)
         ->where('lists.0.itemsCount', 3)
         ->where('lists.0.boughtCount', 1)
@@ -58,7 +58,7 @@ it('paginates the archive of done lists, newest first', function () {
     }
 
     $this->actingAs($me)->get('/shopping?tab=archive')->assertInertia(fn (Assert $p) => $p
-        ->component('Shopping/Index', false)
+        ->component('Shopping/Index')
         ->where('tab', 'archive')
         ->has('archive.data', 20)
         ->where('archive.total', 23)

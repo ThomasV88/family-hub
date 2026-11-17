@@ -3,9 +3,52 @@
   "category": "modules",
   "order": 35,
   "title": "Shopping",
-  "summary": "Shared shopping lists for the family, with an item catalog, stores and units that you manage in Settings.",
-  "covers": ["settings:shopping"],
+  "summary": "Shared shopping lists for the family: the overview, creating and copying lists, and the item catalog, stores and units that you manage in Settings.",
+  "covers": ["module:shopping", "settings:shopping"],
   "sections": [
+    {
+      "id": "overview",
+      "title": "The Shopping page",
+      "blocks": [
+        { "type": "p", "text": "**Shopping** is in the menu on the left (on a phone, in the bar at the bottom) if your administrator gave you access to it. The page lists the shopping lists you may see, on two tabs: **Open** and **Archive**." },
+        { "type": "list", "items": [
+          "**Open** shows the lists you are still planning or shopping from, ordered by reminder time (lists without a reminder come last), then newest first. A list that is being shopped from has a **Locked** tag and a bar that shows how many of its items are bought.",
+          "Each row shows the store logo, the name of the list, the store, the person responsible and the reminder time. The tag **Reminder passed** appears when the reminder time has gone but the list is not finished.",
+          "**Archive** shows finished lists, newest first, with the date they were finished. A long archive is split into pages.",
+          "When there are more than 10 open lists, a search box appears above them. It ignores capital letters and accents."
+        ] },
+        { "type": "p", "text": "You see a list if you created it, if you are its responsible person, or if you were added to it, either as a person who may add and edit items or as a person who may only view. Lists you cannot see are not shown at all. A list shows in the table in [who can see what](who-sees-what#table)." }
+      ]
+    },
+    {
+      "id": "create-list",
+      "title": "Creating a list",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Open **Shopping** and press **New list**. The button is shown only if you are allowed to change Shopping.",
+          "Type the **Name** of the list, for example \"Weekly shopping\".",
+          "If you like, choose a **Store**. The first choice, **No store**, leaves it empty.",
+          "Choose the **Responsible person**. It is you unless you pick someone else.",
+          "Press **Create list**. The new list opens, empty, and the window for adding items opens with it."
+        ] },
+        { "type": "tip", "text": "Who else may add items, who may only view, and a reminder are set afterwards in the settings of the list." }
+      ]
+    },
+    {
+      "id": "copy",
+      "title": "Copying a list",
+      "blocks": [
+        { "type": "steps", "items": [
+          "In the overview, press the copy button at the end of the row (**Copy list**). You can also copy from the list itself.",
+          "Check the **Name of the new list**. It starts as the old name followed by \"(copy)\".",
+          "Leave **Keep store, responsible person and access** ticked to keep them, or untick it to start fresh.",
+          "Press **Copy list**. The new list opens."
+        ] },
+        { "type": "p", "text": "The copy has the same items with the same quantities and units, and every item starts unmarked (not bought, not unavailable). The new list is open, not locked, and has no reminder. You become its owner." },
+        { "type": "p", "text": "If **Keep store, responsible person and access** is ticked, the copy keeps the store, the responsible person and the people who may add items or view. If it is not ticked, you are the responsible person and nobody else is added." },
+        { "type": "tip", "text": "You can copy any list you can see, including finished ones. That is a quick way to start next week's shopping." }
+      ]
+    },
     {
       "id": "stores-catalog",
       "title": "Item catalog and stores",
