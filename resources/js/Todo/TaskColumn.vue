@@ -36,7 +36,7 @@ const doneShown = computed(() => props.done.slice(0, 20));
 <template>
     <section class="column" :aria-labelledby="headingId" data-testid="task-column">
         <header class="column__header">
-            <UiAvatar v-if="!unassigned" :name="name" :tint="tint" :size="32" decorative />
+            <UiAvatar v-if="!unassigned" :name="name" :tint="tint" :size="32" :user-id="personId" decorative />
             <h2 :id="headingId" class="column__name">
                 <button v-if="collapsible" type="button" class="column__toggle" :aria-expanded="expanded ? 'true' : 'false'" :aria-controls="bodyId" @click="$emit('toggle')">
                     <span>{{ name }}</span>

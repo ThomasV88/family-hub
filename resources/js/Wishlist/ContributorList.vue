@@ -23,7 +23,7 @@ const label = computed(() => t('wishlist.res.pledged', { sum: money(props.reserv
     <div class="contributors">
         <ul class="contributors__list" data-testid="contributors">
             <li v-for="c in contributors" :key="c.id" class="contributors__row">
-                <UiAvatar :name="c.name" :size="32" decorative class="contributors__avatar" />
+                <UiAvatar :name="c.name" :size="32" :user-id="c.id ?? null" decorative class="contributors__avatar" />
                 <span class="contributors__name">{{ c.name }}<span v-if="c.is_organizer" class="contributors__muted"> {{ t('wishlist.res.organizer') }}</span></span>
                 <span v-if="c.amount !== null && c.amount !== undefined" class="contributors__amount">{{ money(c.amount) }}</span>
                 <span v-else class="contributors__muted">{{ t('wishlist.res.no_amount') }}</span>

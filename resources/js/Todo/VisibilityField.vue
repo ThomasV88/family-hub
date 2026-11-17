@@ -60,7 +60,7 @@ function toggle(id, on) {
                 :aria-invalid="error ? 'true' : undefined"
                 @update:model-value="(on) => toggle(m.id, on)"
             >
-                <UiAvatar :name="m.name" :size="32" decorative />
+                <UiAvatar :name="m.name" :size="32" :user-id="m.id" decorative />
                 {{ m.name }}
             </UiCheckbox>
         </fieldset>

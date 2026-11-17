@@ -26,7 +26,7 @@ const tint = (index) => (index % 6) + 1;
         <UiEmptyState v-if="!people.length" :title="t('health.access.empty_title')" :body="t('health.access.empty_body')" />
         <UiList v-else>
             <UiListRow v-for="(person, index) in people" :key="person.id" :selected="person.id === selectedId">
-                <template #leading><UiAvatar :name="person.name" :tint="tint(index)" decorative /></template>
+                <template #leading><UiAvatar :name="person.name" :tint="tint(index)" :user-id="person.linkedUserId ?? null" decorative /></template>
                 <span class="health-access__name">{{ person.name }}</span>
                 <template #meta>
                     <UiTag v-if="!person.hasAccount">{{ t('health.person.no_account') }}</UiTag>

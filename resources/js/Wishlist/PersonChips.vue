@@ -22,7 +22,7 @@ function choose(member) {
 <template>
     <div class="person-chips" role="group" :aria-label="t('wishlist.chips.label')">
         <UiChip v-for="(member, index) in members" :key="member.id" :model-value="member.id === selectedId" @update:model-value="choose(member)">
-            <UiAvatar :name="member.name" :tint="(index % 6) + 1" :size="32" decorative class="person-chips__avatar" />
+            <UiAvatar :name="member.name" :tint="(index % 6) + 1" :size="32" :user-id="member.id" decorative class="person-chips__avatar" />
             {{ member.is_viewer ? t('wishlist.chips.you', { name: member.name }) : member.name }}
         </UiChip>
     </div>
