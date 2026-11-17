@@ -238,3 +238,11 @@ it('answers the hand-over redirect for the previous responsible person with the 
     $this->actingAs($b)->put("/shopping/lists/{$list->id}", ['responsible_id' => $c->id])->assertRedirect();
     $this->actingAs($b)->get("/shopping/lists/{$list->id}")->assertOk();
 });
+
+it('refuses more than 50 ids per role on the list settings', function (string $field) {
+    $creator = F::user();
+    $list = F::list($creator);
+
+    $this->actingAs($creator)->put("/shopping/lists/{$list->id}", [$field => range(1, 51)])
+        ->assertSessionHasErrors([$field => 'shopping.error.members_count']);
+})->with(['contributor_ids', 'viewer_ids']);

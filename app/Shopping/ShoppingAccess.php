@@ -42,7 +42,10 @@ final class ShoppingAccess
             return self::RESPONSIBLE;
         }
 
-        $member = ShoppingListMember::query()->where('list_id', $list->id)->where('user_id', $user->id)->first();
+        // The overview preloads only the viewer's own member row, which is all this lookup needs.
+        $member = $list->relationLoaded('members')
+            ? $list->members->firstWhere('user_id', $user->id)
+            : ShoppingListMember::query()->where('list_id', $list->id)->where('user_id', $user->id)->first();
         if ($member !== null) {
             // A member without Shopping edit acts as a viewer whatever role they were given.
             return $member->role === MemberRole::Contributor && $this->hasEdit($user) ? self::CONTRIBUTOR : self::VIEWER;

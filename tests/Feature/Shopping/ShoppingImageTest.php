@@ -3,6 +3,8 @@
 use App\Access\AccessLevel;
 use App\Models\ShoppingCatalogItem;
 use App\Models\ShoppingStore;
+use App\Shopping\Images\ShoppingImageStore;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -102,4 +104,15 @@ it('refuses writes to a view-only member and a 404 for an unknown id', function 
     $this->actingAs($this->viewer)->delete("/shopping/catalog/{$item->id}/image")->assertForbidden();
     $this->actingAs($this->editor)->post('/shopping/catalog/999999/image', [])->assertNotFound();
     $this->actingAs($this->editor)->delete('/shopping/stores/999999/image')->assertNotFound();
+});
+
+it('removes the freshly written files when the row disappears before the swap', function () {
+    $item = ShoppingCatalogItem::factory()->create();
+    $ghost = ShoppingCatalogItem::query()->find($item->id);
+    $item->delete();
+
+    expect(fn () => app(ShoppingImageStore::class)->storeCatalogImage($ghost, ImageFixtures::jpeg()))
+        ->toThrow(ModelNotFoundException::class);
+
+    expect(Storage::disk('local')->allFiles('wish-images/shopping'))->toBe([]);
 });

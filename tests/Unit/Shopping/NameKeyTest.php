@@ -13,3 +13,9 @@ it('keeps punctuation', function () {
 it('keeps an empty string empty', function () {
     expect(NameKey::from(''))->toBe('');
 });
+
+it('does not collapse names without a transliterable letter', function () {
+    expect(NameKey::from('🍎'))->not->toBe('')
+        ->and(NameKey::from('🍎'))->not->toBe(NameKey::from('🥛'))
+        ->and(NameKey::from('🥛 '))->toBe(NameKey::from('🥛'));
+});

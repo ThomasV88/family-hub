@@ -39,7 +39,7 @@ final class ListPayload
     {
         $open = ListQuery::visibleTo($user)
             ->whereIn('shopping_lists.status', [ListStatus::Open->value, ListStatus::Locked->value])
-            ->with(['store', 'responsible', 'creator'])
+            ->with(['store', 'responsible', 'creator', 'members' => fn ($q) => $q->where('user_id', $user->id)])
             ->withCount([
                 'items as items_count',
                 'items as bought_count' => fn ($q) => $q->where('state', ItemState::Bought->value),
@@ -52,7 +52,7 @@ final class ListPayload
 
         $archive = ListQuery::visibleTo($user)
             ->where('shopping_lists.status', ListStatus::Done->value)
-            ->with('store')
+            ->with(['store', 'responsible', 'creator', 'members' => fn ($q) => $q->where('user_id', $user->id)])
             ->orderByDesc('shopping_lists.done_at')
             ->orderByDesc('shopping_lists.id')
             ->paginate((int) config('shopping.archive_per_page'), ['shopping_lists.*'], 'page', max(1, $page));

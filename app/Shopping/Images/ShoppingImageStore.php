@@ -111,7 +111,14 @@ final class ShoppingImageStore
             throw new WishImageWriteFailed('shopping image write failed');
         }
 
-        $this->deleteFiles($this->swap($model, $full, $thumb, $fullCol, $thumbCol));
+        try {
+            $replaced = $this->swap($model, $full, $thumb, $fullCol, $thumbCol);
+        } catch (\Throwable $e) {
+            // The row vanished (or the update failed) after the files were written: do not leave them for the sweeper.
+            $disk->delete([$full, $thumb]);
+            throw $e;
+        }
+        $this->deleteFiles($replaced);
     }
 
     private function clear(Model $model, string $fullCol, string $thumbCol): void
