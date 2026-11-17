@@ -22,6 +22,7 @@ import SpecialtyFolder from '../../Health/SpecialtyFolder.vue';
 import TimelineList from '../../Health/TimelineList.vue';
 import VaccinationList from '../../Health/VaccinationList.vue';
 import VaccinationPanel from '../../Health/VaccinationPanel.vue';
+import DocumentSearch from '../../Health/Search/DocumentSearch.vue';
 import ViewSwitch from '../../Health/ViewSwitch.vue';
 import VisitPanel from '../../Health/VisitPanel.vue';
 import ShellAdd from '../../Wishlist/ShellAdd.vue';
@@ -50,6 +51,7 @@ const props = defineProps({
     limits: { type: Object, default: () => ({ maxMb: 10, filesAtOnce: 10 }) },
     ai: { type: Object, default: () => ({ canRun: false, available: false, noticeAcknowledged: false, statuses: {} }) },
     archive: { type: Object, default: () => ({ items: [], people: [] }) },
+    search: { type: Object, default: () => ({ enabled: false, textReliability: 'reliable' }) },
 });
 const { t } = useI18n();
 
@@ -57,6 +59,8 @@ const { t } = useI18n();
 const aiStatuses = useAiStatus(() => props.person?.id ?? null, () => props.ai?.statuses ?? {});
 
 const busy = ref(false);
+// True while the document search shows results: they take the place of the folder and timeline views.
+const searchActive = ref(false);
 // The view and filter live in the URL; a panel change keeps them and an id-less query drops the panel.
 function go(params, only) {
     const query = {};
@@ -82,6 +86,15 @@ const openVaccination = (id) => go({ panel: 'vaccination', id }, ['panel']);
 const openNewDocument = (visit) => go({ panel: 'new-document', ...(typeof visit === 'string' ? { visit } : {}) }, ['panel']);
 const openDocument = (id) => go({ panel: 'document', id }, ['panel']);
 const closePanel = () => go({}, ['panel']);
+// A search result opens its document panel. The query is not part of the address; another person's result keeps the
+// search (same page component, state preserved) so Back to the list is one close away.
+function openSearchResult(item) {
+    if (item.personId === props.person?.id) {
+        openDocument(item.documentId);
+        return;
+    }
+    router.get(`/health/people/${item.personId}`, { panel: 'document', id: item.documentId }, { preserveState: true, preserveScroll: true });
+}
 const setView = (view) => go({ view: view === 'folders' ? undefined : view, filter: undefined }, ['view', 'filter', 'timeline']);
 const setFilter = (filter) => go({ filter: filter === 'all' ? undefined : filter }, ['timeline', 'filter']);
 
@@ -123,6 +136,8 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                         <VaccinationList :vaccinations="vaccinations" :can-edit="canAddVisit" @add="openNewVaccination" @open="openVaccination" />
                     </div>
                     <section class="health-person__main" data-testid="person-main">
+                        <DocumentSearch v-if="search.enabled" :person="person" :people-count="people.length" :reliability="search.textReliability" @update:active="(v) => (searchActive = v)" @open="openSearchResult" />
+                        <template v-if="!(searchActive && search.enabled)">
                         <UiEmptyState v-if="visits.length === 0 && documents.length === 0" :title="t('health.visits.empty_title')" :body="t('health.visits.empty_body')" :icon="HeartPulse">
                             <template v-if="canAddVisit" #action>
                                 <UiButton variant="primary" :icon="Plus" data-testid="empty-add-visit" @click="openNewVisit">{{ t('health.visit.add') }}</UiButton>
@@ -142,6 +157,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                                 <SpecialtyFolder v-if="unattachedDocuments.length > 0" :documents="unattachedDocuments" :default-open="folders.length === 0" :ai-statuses="aiStatuses.statuses.value" @open-document="openDocument" />
                             </div>
                             <TimelineList v-else :entries="timeline" :visits="visits" :vaccinations="vaccinations" :documents="documents" :filters="timelineFilters" :filter="filter" :busy="busy" :ai-statuses="aiStatuses.statuses.value" @open="openVisit" @open-vaccination="openVaccination" @open-document="openDocument" @filter="setFilter" />
+                        </template>
                         </template>
                     </section>
                 </div>
