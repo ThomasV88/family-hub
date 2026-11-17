@@ -11,6 +11,7 @@ use App\Audit\AuditLogger;
 use App\Medical\Documents\MedicalDocumentStore;
 use App\Models\User;
 use App\Profile\ProfilePhotoStore;
+use App\Recipes\Images\RecipeImageStore;
 use App\Shopping\Images\ShoppingImageStore;
 use App\Support\SyntheticChild;
 use App\Wishlist\Catalog\ImageProcessor;
@@ -19,6 +20,7 @@ use Database\Seeders\Staging\AiProposalsSeeder;
 use Database\Seeders\Staging\DocumentsSeeder;
 use Database\Seeders\Staging\FinanceSeeder;
 use Database\Seeders\Staging\HealthSeeder;
+use Database\Seeders\Staging\RecipesSeeder;
 use Database\Seeders\Staging\ShoppingSeeder;
 use Database\Seeders\Staging\StagingContext;
 use Database\Seeders\Staging\TasksSeeder;
@@ -146,6 +148,7 @@ class StagingSeeder extends Seeder
         $this->summary['documents'] = count($documents);
         $this->summary['ai'] = (new AiProposalsSeeder)->seed($ctx, $health['subjects'], $documents);
         $this->summary['shopping'] = (new ShoppingSeeder)->seed($ctx);
+        $this->summary['recipes'] = (new RecipesSeeder)->seed($ctx);
         $this->summary['seconds'] = round(microtime(true) - $started, 2);
 
         return $created;
@@ -227,6 +230,29 @@ class StagingSeeder extends Seeder
                         } catch (\Throwable $e) {
                             Log::warning('staging seed: could not remove shopping pictures of a reseeded row', ['reason' => $e::class]);
                         }
+                    }
+                }
+            });
+        }
+
+        // Recipes: recipes.author_id is RESTRICT (photos, lines, categories, member states, ticks and done marks cascade).
+        // Imports have no foreign key to users, so they go by user id. A synthetic member's own state, ticks and done marks
+        // on a recipe of a real author go too (they cascade with the user, but the audit sees them until then). The photo
+        // folders of the removed recipes are deleted after the commit.
+        $recipeIds = DB::table('recipes')->whereIn('author_id', $ids)->pluck('id')->all();
+        DB::table('recipes')->whereIn('id', $recipeIds)->delete();
+        DB::table('recipe_imports')->whereIn('user_id', $ids)->delete();
+        DB::table('recipe_member_states')->whereIn('user_id', $ids)->delete();
+        DB::table('recipe_ingredient_ticks')->whereIn('user_id', $ids)->delete();
+        DB::table('recipe_step_done')->whereIn('user_id', $ids)->delete();
+        if ($recipeIds !== []) {
+            DB::afterCommit(function () use ($recipeIds) {
+                $images = app(RecipeImageStore::class);
+                foreach ($recipeIds as $id) {
+                    try {
+                        $images->deleteDirectory((int) $id);
+                    } catch (\Throwable $e) {
+                        Log::warning('staging seed: could not remove recipe photos of a reseeded recipe', ['reason' => $e::class]);
                     }
                 }
             });

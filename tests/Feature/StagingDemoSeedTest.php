@@ -22,6 +22,8 @@ use App\Medical\Viewer as MedicalViewer;
 use App\Models\FinanceTransaction;
 use App\Models\MedicalAiExtraction;
 use App\Models\MedicalSubject;
+use App\Models\Recipe;
+use App\Models\RecipePhoto;
 use App\Models\ShoppingCatalogItem;
 use App\Models\ShoppingItem;
 use App\Models\ShoppingList;
@@ -79,7 +81,8 @@ function demoCounts(): array
         'finance_import_profiles', 'finance_import_batches', 'finance_import_rows', 'medical_subjects', 'medical_subject_members', 'medical_visits',
         'medical_medications', 'medical_allergies', 'medical_vaccinations', 'medical_contacts', 'medical_documents', 'medical_ai_extractions',
         'medical_ai_decisions', 'shopping_lists', 'shopping_items', 'shopping_list_members', 'shopping_catalog_items', 'shopping_stores',
-        'shopping_units', 'module_permissions', 'users'];
+        'shopping_units', 'recipes', 'recipe_photos', 'recipe_ingredients', 'recipe_steps', 'recipe_member_states', 'recipe_ingredient_ticks',
+        'recipe_step_done', 'recipe_categories', 'recipe_imports', 'module_permissions', 'users'];
 
     return collect($tables)->mapWithKeys(fn (string $t) => [$t => DB::table($t)->count()])->all();
 }
@@ -107,6 +110,8 @@ it('fills every module within the expected ranges and measures the run', functio
         ->and($c['shopping_catalog_items'])->toBeBetween(25, 35)
         ->and($c['shopping_stores'])->toBe(5)
         ->and($c['shopping_units'])->toBe(10)
+        ->and($c['recipes'])->toBe(12)
+        ->and($c['recipe_imports'])->toBe(0)
         ->and($seconds)->toBeLessThan(60);
 });
 
@@ -540,4 +545,50 @@ it('seeds the Shopping demo through the services: every list state, carry-over, 
         expect($responsible->email)->not->toBeNull()
             ->and($gate->allows($responsible, Module::Shopping, AccessLevel::Edit))->toBeTrue();
     }
+});
+
+it('seeds the Recipes demo through the services: every starter category, both visibilities, progress, one shopping run, no orphan photo on reseed', function () {
+    demoSeed();
+    $first = demoCounts();
+    demoSeed();
+    expect(demoCounts())->toBe($first);
+
+    $recipes = Recipe::query()->get();
+    expect($recipes)->toHaveCount(12)
+        ->and($recipes->where('visibility', 'shared')->count())->toBeGreaterThanOrEqual(5)
+        ->and($recipes->where('visibility', 'private')->count())->toBeGreaterThanOrEqual(3)
+        ->and($recipes->whereNull('servings')->count())->toBe(1)
+        ->and($recipes->where('created_via', 'url')->count())->toBe(1)
+        ->and($recipes->where('created_via', 'url')->first()->source_host)->toBe('recepty.example')
+        ->and($recipes->max(fn ($r) => mb_strlen($r->title)))->toBeGreaterThan(80)
+        ->and($recipes->pluck('author_id')->unique()->count())->toBeGreaterThanOrEqual(3);
+
+    $starter = ['Raňajky', 'Obed', 'Večera', 'Polievka', 'Šalát', 'Dezert', 'Pečenie', 'Desiata', 'Nápoj', 'Vegetariánske'];
+    expect(DB::table('recipe_categories')->whereIn('name', $starter)->distinct()->pluck('name')->sort()->values()->all())->toBe(collect($starter)->sort()->values()->all());
+
+    $perRecipe = DB::table('recipe_photos')->selectRaw('recipe_id, count(*) as n')->groupBy('recipe_id')->pluck('n')->all();
+    expect(max($perRecipe))->toBe(10);
+
+    // two members keep ticks and done marks on the same shared recipe; favourites for two members; one note
+    $shared = DB::table('recipe_ingredient_ticks as t')->join('recipe_ingredients as i', 'i.id', '=', 't.ingredient_id')
+        ->selectRaw('i.recipe_id, count(distinct t.user_id) as u')->groupBy('i.recipe_id')->pluck('u', 'recipe_id');
+    expect($shared->max())->toBeGreaterThanOrEqual(2)
+        ->and(DB::table('recipe_step_done')->distinct()->count('user_id'))->toBeGreaterThanOrEqual(2)
+        ->and(DB::table('recipe_member_states')->where('favourite', true)->distinct()->count('user_id'))->toBeGreaterThanOrEqual(2)
+        ->and(DB::table('recipe_member_states')->whereNotNull('note')->count())->toBe(1);
+
+    // the Add-to-shopping run landed in the open weekly list, with a catalog match
+    $list = ShoppingList::where('name', 'Týždenný nákup')->firstOrFail();
+    expect(ShoppingItem::where('list_id', $list->id)->where('name', 'Džem')->exists())->toBeTrue()
+        ->and(ShoppingItem::where('list_id', $list->id)->whereNotNull('catalog_item_id')->where('name', 'Múka')->exists())->toBeTrue();
+
+    // files under wish-images/recipes are exactly the referenced ones
+    $disk = Storage::disk('local');
+    $referenced = [];
+    foreach (RecipePhoto::all() as $row) {
+        $disk->assertExists($row->path);
+        $disk->assertExists($row->thumb_path);
+        array_push($referenced, $row->path, $row->thumb_path);
+    }
+    expect(collect($disk->allFiles('wish-images/recipes'))->sort()->values()->all())->toBe(collect($referenced)->sort()->values()->all());
 });
