@@ -115,7 +115,7 @@
           "Text sa zmaže spolu s dokumentom. Skrytý je spolu s archivovanými dokumentmi a archivovanými osobami.",
           "Ak sa AI pre osobu vypne, zmaže sa aj rozpoznaný text dokumentov tejto osoby. Dokumenty sa potom dajú nájsť len podľa názvov."
         ] },
-        { "type": "p", "text": "Kým AI dokument číta znova, môžete čítať predchádzajúci text a riadok vám povie, že prebieha nové čítanie. Pozri aj [Pomoc od AI a váš súhlas](health#ai)." }
+        { "type": "p", "text": "Kým AI dokument číta znova, môžete čítať predchádzajúci text a riadok vám povie, že prebieha nové čítanie. Hneď ako nové čítanie uloží prvé strany, sekcia ukáže tento text; dlhý dokument sa ukladá po niekoľkých stranách a poznámka povie, keď sa prečítali len prvé strany. Pozri aj [Pomoc od AI a váš súhlas](health#ai)." }
       ]
     },
     {
@@ -158,13 +158,17 @@
       "blocks": [
         { "type": "p", "text": "AI vie prečítať dokument a navrhnúť návštevy, lieky, alergie a očkovania, takže píšete menej. Je to voliteľné." },
         { "type": "warning", "text": "AI je vypnutá, kým ju správca nenastaví a nezapne, a pre každú osobu je vypnutá, kým ju člen nezapne. Keď sa AI použije, dokument opustí tento server a pošle sa externej spoločnosti (OpenAI, alebo GitHub, ak OpenAI nie je dostupná). Tá ho môže uchovať podľa vlastných podmienok." },
+        { "type": "p", "text": "Tam, kde je zapnuté čítanie celého textu (oznámenie, ktoré uvidíte, to hovorí), AI číta dokument v dvoch krokoch. Najprv sa odošlú obrázky až 20 strán a AI prečíta všetok text. Potom sa odošle aj prečítaný text a AI z neho pripraví návrhy. Oboje ide spoločnosti uvedenej v oznámení. Text sa uloží do databázy tejto aplikácie a zobrazí sa pod **Rozpoznaný text** v paneli dokumentu. Môže v ňom hľadať každý člen, ktorý môže dokument otvoriť. Ostane, kým sa dokument nezmaže alebo text neodstráni, a v zálohách ostane, kým nevypršia." },
         { "type": "list", "items": [
           "Každá osoba má spínač **Povoliť AI čítať dokumenty tejto osoby**. Predvolene je vypnutý. Rozhoduje člen, ktorý môže túto osobu meniť, a pred zapnutím uvidí jasnú otázku. Kedykoľvek ho môžete vypnúť.",
           "AI sa nikdy nespustí sama od seba. Niekto stlačí **Spustiť AI** a uvidí oznámenie, ktoré uvádza spoločnosť, ktorej sa dokument pošle.",
           "AI číta PDF súbory do ich prvých 20 strán a fotografie vrátane fotografií HEIC z iPhonu. Fotografia HEIC sa na serveri premení na bežný obrázok iba pre beh AI; uložený originál sa nemení a údaje o mieste a fotoaparáte sa neposielajú.",
           "Keď sú návrhy hotové, stlačte **Skontrolovať návrhy**. Nič sa neuloží, kým pri položke nestlačíte **Prijať**. Môžete ju **Upraviť** alebo **Odmietnuť**.",
           "Všetko, čo AI navrhla, je označené **Neoverené**, kým človek nestlačí **Označiť ako overené**. AI sa môže mýliť, preto vždy porovnajte s dokumentom.",
-          "Ak je AI pre osobu vypnutá, nezačne nový beh a behy, ktoré čakali, sa zastavia."
+          "Pri prvom spustení AI po zapnutí tejto funkcie sa ešte raz zobrazí nové oznámenie a pred odoslaním dokumentu ho potvrdíte. Hovorí, že text sa ukladá sem. Správca potvrdí rovnaké oznámenie pred spustením hromadného behu.",
+          "Ak má dokument už úplný rozpoznaný text, **Spustiť AI** z neho pripraví návrhy a strany neposiela znova. Ak chcete dokument prečítať znova, najprv text odstráňte (pozri [Rozpoznaný text dokumentu](health#recognised-text)).",
+          "Beh, ktorý len číta text, napríklad hromadný beh pre dokumenty bez rozpoznaného textu, ukáže štítok **Text uložený**. Nevytvorí návrhy a nezobrazí tlačidlo **Skontrolovať návrhy**. Pre návrhy stlačte **Spustiť AI**.",
+          "Ak je AI pre osobu vypnutá, nezačne nový beh, behy, ktoré čakali, sa zastavia a dostanete upozornenie, že rozpoznaný text dokumentov tejto osoby sa odstráni. Dokumenty sa potom nájdu len podľa názvu."
         ] },
         { "type": "p", "text": "Ak AI nie je dostupná, uvidíte krátku správu a údaje môžete vždy doplniť sami. Správca vidí zoznam volaní AI, ale nikdy nie to, čo bolo v dokumente." }
       ]

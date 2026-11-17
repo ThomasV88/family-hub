@@ -115,7 +115,7 @@
           "Tekst jest usuwany razem z dokumentem. Jest ukryty razem z zarchiwizowanymi dokumentami i zarchiwizowanymi osobami.",
           "Jeśli AI zostanie wyłączona dla osoby, rozpoznany tekst dokumentów tej osoby też zostanie usunięty. Dokumenty będzie można wtedy znaleźć tylko po nazwach."
         ] },
-        { "type": "p", "text": "Gdy AI czyta dokument ponownie, nadal możesz czytać wcześniejszy tekst, a wiersz informuje, że trwa nowy odczyt. Zobacz też [Pomoc AI i Twoja zgoda](health#ai)." }
+        { "type": "p", "text": "Gdy AI czyta dokument ponownie, nadal możesz czytać wcześniejszy tekst, a wiersz informuje, że trwa nowy odczyt. Gdy nowy odczyt zapisze pierwsze strony, sekcja pokazuje już ten tekst; długi dokument jest zapisywany po kilka stron, a uwaga mówi, kiedy odczytano tylko pierwsze strony. Zobacz też [Pomoc AI i Twoja zgoda](health#ai)." }
       ]
     },
     {
@@ -158,13 +158,17 @@
       "blocks": [
         { "type": "p", "text": "AI potrafi przeczytać dokument i zasugerować wizyty, leki, alergie i szczepienia, dzięki czemu piszesz mniej. To opcjonalne." },
         { "type": "warning", "text": "AI jest wyłączona, dopóki administrator jej nie skonfiguruje i nie włączy, a dla każdej osoby jest wyłączona, dopóki członek jej nie włączy. Gdy AI jest używana, dokument opuszcza ten serwer i trafia do zewnętrznej firmy (OpenAI albo GitHub, jeśli OpenAI jest niedostępne). Firma ta może go przechowywać zgodnie z własnymi warunkami." },
+        { "type": "p", "text": "Tam, gdzie włączono odczyt pełnego tekstu (mówi o tym powiadomienie, które widzisz), AI czyta dokument w dwóch krokach. Najpierw wysyłane są obrazy do 20 stron, a AI odczytuje cały tekst. Potem wysyłany jest także odczytany tekst, a AI przygotowuje na jego podstawie sugestie. Oba kroki trafiają do firmy wskazanej w powiadomieniu. Tekst jest zapisywany w bazie danych tej aplikacji i pokazywany w panelu dokumentu w sekcji **Rozpoznany tekst**. Może w nim szukać każdy członek, który może otworzyć dokument. Pozostaje do usunięcia dokumentu lub tekstu, a w kopiach zapasowych do ich wygaśnięcia." },
         { "type": "list", "items": [
           "Każda osoba ma przełącznik **Zezwól AI na czytanie dokumentów tej osoby**. Domyślnie jest wyłączony. Decyduje członek, który może zmieniać tę osobę, i przed włączeniem widzi wyraźne pytanie. Możesz go wyłączyć w każdej chwili.",
           "AI nigdy nie uruchamia się sama na dokumencie. Ktoś naciska **Uruchom AI** i widzi komunikat z nazwą firmy, do której dokument zostanie wysłany.",
           "AI odczytuje pliki PDF do ich pierwszych 20 stron oraz zdjęcia, w tym zdjęcia HEIC z iPhone'a. Zdjęcie HEIC jest zamieniane na serwerze na zwykły obraz tylko na potrzeby uruchomienia AI; zapisany oryginał nie jest zmieniany, a dane o miejscu i aparacie nie są wysyłane.",
           "Gdy sugestie są gotowe, naciśnij **Sprawdź sugestie**. Nic nie jest zapisywane, dopóki nie naciśniesz **Zaakceptuj** przy wpisie. Możesz go **Edytuj** albo **Odrzuć**.",
           "Wszystko, co zasugerowała AI, jest oznaczone jako **Niezweryfikowane**, dopóki człowiek nie naciśnie **Oznacz jako zweryfikowane**. AI może się mylić, więc zawsze porównuj z dokumentem.",
-          "Jeśli AI jest wyłączona dla osoby, nowe uruchomienie się nie rozpocznie, a oczekujące uruchomienia zostaną zatrzymane."
+          "Przy pierwszym uruchomieniu AI po włączeniu tej funkcji ponownie pojawia się nowe powiadomienie i potwierdzasz je przed wysłaniem dokumentu. Mówi ono, że tekst jest zapisywany tutaj. Administrator potwierdza to samo powiadomienie przed uruchomieniem przetwarzania zbiorczego.",
+          "Jeśli dokument ma już pełny rozpoznany tekst, **Uruchom AI** przygotowuje z niego sugestie i nie wysyła stron ponownie. Aby dokument został odczytany jeszcze raz, najpierw usuń tekst (zobacz [Rozpoznany tekst dokumentu](health#recognised-text)).",
+          "Uruchomienie, które tylko czyta tekst, na przykład zbiorcze dla dokumentów bez rozpoznanego tekstu, pokazuje etykietę **Tekst zapisany**. Nie tworzy sugestii i nie pokazuje przycisku **Sprawdź sugestie**. Aby dostać sugestie, naciśnij **Uruchom AI**.",
+          "Jeśli AI jest wyłączona dla osoby, nowe uruchomienie się nie rozpocznie, oczekujące uruchomienia zostaną zatrzymane, a zobaczysz informację, że rozpoznany tekst dokumentów tej osoby zostanie usunięty. Dokumenty będą wtedy znajdowane tylko po nazwie."
         ] },
         { "type": "p", "text": "Jeśli AI jest niedostępna, zobaczysz krótki komunikat, a dane zawsze możesz dodać sam. Administrator widzi listę wywołań AI, ale nigdy tego, co było w dokumencie." }
       ]

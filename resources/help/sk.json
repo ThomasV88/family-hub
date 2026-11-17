@@ -212,7 +212,7 @@
         },
         "health.ai_run": {
             "title": "Spustiť AI",
-            "text": "Pošle tento jeden dokument externej AI firme, aby ho prečítala a navrhla záznamy. PDF sa číta do prvých 20 strán; fotografia HEIC sa premení na bežný obrázok iba pre AI. Nič sa neuloží, kým návrhy neskontrolujete a neprijmete."
+            "text": "Pošle tento jeden dokument externej AI firme, aby ho prečítala a navrhla záznamy. Tam, kde je zapnuté čítanie celého textu, AI najprv prečíta všetok text a uloží ho sem, aby v ňom mohli hľadať členovia, ktorí môžu dokument otvoriť, a potom z neho navrhne záznamy (úplný uložený text sa použije znova). PDF sa číta do prvých 20 strán. Nič sa nedostane do záznamu, kým ho neprijmete."
         },
         "health.export_format": {
             "title": "Formát exportu",
@@ -276,7 +276,7 @@
         },
         "settings.ai_bulk": {
             "title": "Hromadné opätovné spracovanie",
-            "text": "Znova prečíta staršie dokumenty pomocou AI, niekoľko denne. Najprv skontrolujte, čo by sa spustilo, potom spustite. Návrhy, ktoré ste už prijali, sa nikdy nezmenia. Vidíte len počty."
+            "text": "Znova prečíta staršie dokumenty pomocou AI, niekoľko denne. Najprv skontrolujte, čo by sa spustilo, potom spustite. Návrhy, ktoré ste už prijali, sa nikdy nezmenia. Rozsah „Dokumenty bez rozpoznaného textu“ (zobrazí sa pri zapnutom čítaní celého textu) len prečíta a uloží text a nevytvára návrhy. Vidíte len počty."
         },
         "overview.system_status": {
             "title": "Stav systému",

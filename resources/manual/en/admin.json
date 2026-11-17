@@ -182,7 +182,7 @@
       "id": "backups",
       "title": "Backups",
       "blocks": [
-        { "type": "p", "text": "The server makes encrypted backups every night, and keeps them on the same server: a copy of the database, uploaded files and settings. They protect against mistakes and damage, but not against losing the whole server. A deleted record can stay in older backups until they expire. Backups, the delete window for Health records and other server settings are managed by the person who runs the server, not in this app." }
+        { "type": "p", "text": "The server makes encrypted backups every night, and keeps them on the same server: a copy of the database, uploaded files and settings. They protect against mistakes and damage, but not against losing the whole server. A deleted record can stay in older backups until they expire. Backups also contain the recognised text of documents (the text AI read from them): after it is removed in the app, it stays in older backups until they expire. Backups, the delete window for Health records and other server settings are managed by the person who runs the server, not in this app." }
       ]
     }
   ]

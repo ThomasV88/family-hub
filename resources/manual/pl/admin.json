@@ -182,7 +182,7 @@
       "id": "backups",
       "title": "Kopie zapasowe",
       "blocks": [
-        { "type": "p", "text": "Serwer co noc tworzy zaszyfrowane kopie zapasowe i przechowuje je na tym samym serwerze: kopię bazy danych, wgranych plików i ustawień. Chronią przed pomyłkami i uszkodzeniami, ale nie przed utratą całego serwera. Usunięty wpis może pozostać w starszych kopiach, dopóki nie minie czas ich przechowywania. Kopie zapasowe, czas na usunięcie wpisów zdrowotnych i inne ustawienia serwera prowadzi osoba, która obsługuje serwer, a nie ta aplikacja." }
+        { "type": "p", "text": "Serwer co noc tworzy zaszyfrowane kopie zapasowe i przechowuje je na tym samym serwerze: kopię bazy danych, wgranych plików i ustawień. Chronią przed pomyłkami i uszkodzeniami, ale nie przed utratą całego serwera. Usunięty wpis może pozostać w starszych kopiach, dopóki nie minie czas ich przechowywania. Kopie zawierają także rozpoznany tekst dokumentów (tekst odczytany z nich przez AI): po usunięciu go w aplikacji pozostaje w starszych kopiach, dopóki nie wygasną. Kopie zapasowe, czas na usunięcie wpisów zdrowotnych i inne ustawienia serwera prowadzi osoba, która obsługuje serwer, a nie ta aplikacja." }
       ]
     }
   ]

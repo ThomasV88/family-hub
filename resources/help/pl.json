@@ -212,7 +212,7 @@
         },
         "health.ai_run": {
             "title": "Uruchom AI",
-            "text": "Wysyła ten jeden dokument do zewnętrznej firmy AI, aby go odczytała i zaproponowała wpisy. PDF jest czytany do pierwszych 20 stron; zdjęcie HEIC jest zamieniane na zwykły obraz tylko dla AI. Nic nie zostanie zapisane, dopóki nie sprawdzisz i nie zaakceptujesz propozycji."
+            "text": "Wysyła ten jeden dokument do zewnętrznej firmy AI. Tam, gdzie włączono odczyt pełnego tekstu, AI najpierw czyta cały tekst i zapisuje go tutaj, aby mogli w nim szukać członkowie, którzy mogą otworzyć dokument, a potem proponuje wpisy na jego podstawie (pełny zapisany tekst jest używany ponownie). PDF jest czytany do 20 stron. Nic nie trafia do rekordu bez Twojej akceptacji."
         },
         "health.export_format": {
             "title": "Format eksportu",
@@ -276,7 +276,7 @@
         },
         "settings.ai_bulk": {
             "title": "Zbiorcze ponowne przetwarzanie",
-            "text": "Ponownie czyta starsze dokumenty z pomocą AI, kilka dziennie. Najpierw sprawdź, co by się uruchomiło, potem rozpocznij. Zaakceptowane już propozycje nigdy się nie zmieniają. Widzisz tylko liczby."
+            "text": "Ponownie czyta starsze dokumenty z pomocą AI, kilka dziennie. Najpierw sprawdź, co by się uruchomiło, potem rozpocznij. Zaakceptowane już propozycje nigdy się nie zmieniają. Zakres „Dokumenty bez rozpoznanego tekstu” (widoczny przy włączonym odczycie pełnego tekstu) tylko czyta i zapisuje tekst i nie tworzy sugestii. Widzisz tylko liczby."
         },
         "overview.system_status": {
             "title": "Stan systemu",

@@ -182,7 +182,7 @@
       "id": "backups",
       "title": "Zálohy",
       "blocks": [
-        { "type": "p", "text": "Server každú noc vytvára šifrované zálohy a uchováva ich na tom istom serveri: kópiu databázy, nahraných súborov a nastavení. Chránia pred chybami a poškodením, ale nie pred stratou celého servera. Zmazaný záznam môže zostať v starších zálohách, kým nevyprší ich doba uchovávania. Zálohy, lehotu na zmazanie zdravotných záznamov a ďalšie nastavenia servera spravuje ten, kto server prevádzkuje, nie táto aplikácia." }
+        { "type": "p", "text": "Server každú noc vytvára šifrované zálohy a uchováva ich na tom istom serveri: kópiu databázy, nahraných súborov a nastavení. Chránia pred chybami a poškodením, ale nie pred stratou celého servera. Zmazaný záznam môže zostať v starších zálohách, kým nevyprší ich doba uchovávania. Zálohy obsahujú aj rozpoznaný text dokumentov (text, ktorý z nich AI prečítala): po jeho odstránení v aplikácii ostáva v starších zálohách, kým nevypršia. Zálohy, lehotu na zmazanie zdravotných záznamov a ďalšie nastavenia servera spravuje ten, kto server prevádzkuje, nie táto aplikácia." }
       ]
     }
   ]

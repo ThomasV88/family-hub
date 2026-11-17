@@ -212,7 +212,7 @@
         },
         "health.ai_run": {
             "title": "Run AI",
-            "text": "Sends this one document to the outside AI company to read it and suggest entries. A PDF is read up to its first 20 pages; a HEIC photo is converted to a plain picture for AI only. Nothing is saved until you review and accept the suggestions."
+            "text": "Sends this one document to the outside AI company to read it and suggest entries. Where full-text reading is on, AI first reads all the text and saves it here, so members who may open the document can search it, then suggests entries from that text (a complete saved text is reused). A PDF is read up to its first 20 pages. Nothing goes into the record until you accept it."
         },
         "health.export_format": {
             "title": "Export format",
@@ -276,7 +276,7 @@
         },
         "settings.ai_bulk": {
             "title": "Bulk re-generation",
-            "text": "Reads older documents with AI again, a few per day. First check what would run, then start. Suggestions you already accepted are never changed. You see counts only."
+            "text": "Reads older documents with AI again, a few per day. First check what would run, then start. Suggestions you already accepted are never changed. The scope \"Documents without recognised text\" (shown when full-text reading is on) only reads and saves the text and makes no suggestions. You see counts only."
         },
         "overview.system_status": {
             "title": "System status",

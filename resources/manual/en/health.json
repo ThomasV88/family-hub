@@ -115,7 +115,7 @@
           "The text is deleted with the document. It is hidden together with archived documents and archived people.",
           "If AI is turned off for a person, the recognised text of that person's documents is deleted too. The documents can then be found by their names only."
         ] },
-        { "type": "p", "text": "While AI is reading a document again, you can still read the earlier text, and a line tells you that a new reading is in progress. See also [AI help and your consent](health#ai)." }
+        { "type": "p", "text": "While AI is reading a document again, you can still read the earlier text, and a line tells you that a new reading is in progress. As soon as the new reading has saved its first pages, the section shows that text instead; a long document is saved a few pages at a time, and a note says when only the first pages were read. See also [AI help and your consent](health#ai)." }
       ]
     },
     {
@@ -158,13 +158,17 @@
       "blocks": [
         { "type": "p", "text": "AI can read a document and suggest visits, medications, allergies and vaccinations, so you type less. It is optional." },
         { "type": "warning", "text": "AI is off until the administrator has set it up and turned it on, and it is off for every person until a member switches it on. When AI is used, the document leaves this server and is sent to an outside company (OpenAI, or GitHub if OpenAI is not available). That company may keep it under its own terms." },
+        { "type": "p", "text": "Where full-text reading is turned on (the notice you see says so), AI reads a document in two steps. First the pictures of up to 20 pages are sent and AI reads all the text. Then the text that was read is sent as well and AI makes suggestions from it. Both go to the company named in the notice. The text is saved in this app's database and shown under **Recognised text** in the document panel. Every member who may open the document can search it. It is kept until the document is deleted or the text is removed, and it stays in backups until they expire." },
         { "type": "list", "items": [
           "Each person has a switch **Allow AI to read documents of this person**. It is off by default. A member who can change that person decides, and sees a clear question before turning it on. Turn it off at any time.",
           "AI never runs by itself on a document. Someone presses **Run AI** and sees a notice that names the company the document will be sent to.",
           "AI reads PDF files up to their first 20 pages and photos, including HEIC photos from an iPhone. A HEIC photo is turned into an ordinary picture on the server only for the AI run; the stored original is not changed and the place and camera details are not sent.",
           "When the suggestions are ready, press **Review suggestions**. Nothing is saved until you press **Accept** on an entry. You can **Edit** or **Reject** it.",
           "Everything AI suggested is marked **Unverified** until a person presses **Mark as verified**. AI can be wrong, so always compare it with the document.",
-          "If AI is switched off for a person, no new run starts and runs that were waiting are stopped."
+          "The first time you run AI after this was turned on, a new notice is shown once more, and you confirm it before the document is sent. It says that the text is saved here. An administrator confirms the same notice before starting a bulk run.",
+          "If the document already has complete recognised text, **Run AI** makes suggestions from it and does not send the pages again. To have the document read again, remove the text first (see [Recognised text of a document](health#recognised-text)).",
+          "A run that only reads the text, such as a bulk run for documents without recognised text, shows the tag **Text saved**. It makes no suggestions and shows no **Review suggestions** button. Press **Run AI** to get suggestions.",
+          "If AI is switched off for a person, no new run starts, runs that were waiting are stopped, and you are told that the recognised text of that person's documents is deleted. The documents are then found by their names only."
         ] },
         { "type": "p", "text": "If AI is not available, you will see a short message, and you can always add the details yourself. The administrator can see a list of AI calls, but never what was in a document." }
       ]
