@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "document_date": "2026-02-09",
+  "specialty_key": "general_practice",
+  "visits": [
+    {
+      "visited_on": "2026-02-03",
+      "doctor": "MUDr. Ján Šťastný (demo)",
+      "specialty_key": "general_practice",
+      "specialty_other": null,
+      "diagnosis": "bolesť chrbta",
+      "notes": null
+    },
+    {
+      "visited_on": "2026-02-05",
+      "doctor": "lek. Anna Różycka (demo)",
+      "specialty_key": "general_practice",
+      "specialty_other": null,
+      "diagnosis": "zapalenie zatok",
+      "notes": null
+    },
+    {
+      "visited_on": "2026-02-09",
+      "doctor": "Dr. Sarah Quinn (demo)",
+      "specialty_key": "general_practice",
+      "specialty_other": null,
+      "diagnosis": "mild asthma",
+      "notes": null
+    }
+  ],
+  "medications": [
+    {
+      "name": "Augmentin",
+      "dose": "875 mg",
+      "schedule": "2 razy dziennie przez 7 dni",
+      "started_on": "2026-02-05",
+      "ended_on": null,
+      "notes": null
+    },
+    {
+      "name": "Salbutamol",
+      "dose": "100 mcg",
+      "schedule": "two puffs when needed",
+      "started_on": "2026-02-09",
+      "ended_on": null,
+      "notes": null
+    },
+    {
+      "name": "Paralen",
+      "dose": "500 mg",
+      "schedule": null,
+      "started_on": null,
+      "ended_on": null,
+      "notes": null
+    }
+  ],
+  "allergies": [
+    {
+      "substance": "Peľ vŕby",
+      "reaction": null,
+      "severity": null
+    },
+    {
+      "substance": "Penicylina",
+      "reaction": "ciężka",
+      "severity": "severe"
+    },
+    {
+      "substance": "Peanuts",
+      "reaction": "severe",
+      "severity": "severe"
+    }
+  ],
+  "vaccinations": [
+    {
+      "vaccine": "Tetanus",
+      "given_on": "2022-05-12",
+      "next_due_on": null,
+      "notes": null
+    },
+    {
+      "vaccine": "Influenza",
+      "given_on": "2025-10-11",
+      "next_due_on": null,
+      "notes": null
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "document_date": "2026-03-15",
+  "specialty_key": "general_practice",
+  "visits": [
+    {
+      "visited_on": "2026-03-15",
+      "doctor": "lek. Ewa Dąbrowska (demo)",
+      "specialty_key": "general_practice",
+      "specialty_other": null,
+      "diagnosis": "Zapalenie gardła i migdałków",
+      "notes": null
+    }
+  ],
+  "medications": [
+    {
+      "name": "Amoksycylina",
+      "dose": "500 mg",
+      "schedule": "3 razy dziennie przez 7 dni",
+      "started_on": "2026-03-15",
+      "ended_on": null,
+      "notes": null
+    },
+    {
+      "name": "Ibuprofen",
+      "dose": "400 mg",
+      "schedule": "w razie bólu, maks. 3 razy dziennie",
+      "started_on": "2026-03-15",
+      "ended_on": null,
+      "notes": null
+    },
+    {
+      "name": "Pantoprazol",
+      "dose": "20 mg",
+      "schedule": "raz dziennie rano",
+      "started_on": "2026-03-15",
+      "ended_on": null,
+      "notes": null
+    }
+  ],
+  "allergies": [
+    {
+      "substance": "Pyłki traw",
+      "reaction": "łagodna",
+      "severity": "mild"
+    }
+  ],
+  "vaccinations": [
+    {
+      "vaccine": "Grypa",
+      "given_on": "2025-10-10",
+      "next_due_on": null,
+      "notes": null
+    }
+  ]
+}

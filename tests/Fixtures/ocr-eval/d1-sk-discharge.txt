@@ -1,0 +1,28 @@
+Nemocnica Svätého Cyrila (demo)
+Oddelenie vnútorného lekárstva
+Prepúšťacia správa
+
+Pacient: Ľubomír Žitňanský (demo), narodený 14.03.1968
+Dátum prijatia: 02.03.2026
+Dátum prepustenia: 09.03.2026
+
+Diagnóza pri prepustení: Akútna žltačka, podozrenie na ochorenie
+žlčníka. Pacient bol prijatý pre bolesti v pravom podbrušku,
+nevoľnosť a zožltnutie kože. Bolesti sa objavili pôvodne v noci
+a trvali dlhšie než týždeň. Pečeň bola zväčšená. Ťažká dehydratácia
+sa upravila infúziami. Ľadviny boli bez patologického nálezu.
+Dĺžka hospitalizácie bola sedem dní.
+
+Alergie: Penicilín, reakcia vyrážka, stredne ťažká.
+
+Liečba pri prepustení:
+Ursosan 250 mg, jedna kapsula ráno a večer, od 09.03.2026.
+Paralen 500 mg, pri bolesti, najviac štyrikrát denne.
+
+Očkovanie: Tetanus, naposledy podaný 12.05.2022.
+
+Kontrola u gastroenterológa 23.03.2026 o 9:30 hod.
+V prípade zhoršenia stavu sa ihneď obráťte na lekára.
+
+MUDr. Mária Kováčová (demo), primárka oddelenia
+Dátum správy: 09.03.2026

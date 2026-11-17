@@ -1,0 +1,12 @@
+Skúšobný text (demo) číslo jedna: žltačka a ľadviny
+Próbka tekstu (demo) numer dwa: zażółć gęślą jaźń
+Test line three (demo): amoxicillin 500 mg, 12.03.2026
+Dávka 250 mg ráno a večer, kontrola 23.03.2026
+Dawka 400 mg w razie bólu, kontrola 22.03.2026
+Lot A123B, B456C, C789D (demo), 10.05.2022
+Ťažká dehydratácia, nevoľnosť, bolesť brucha
+Kołatanie serca, ból gardła, gorączka 38,5
+Hemoglobin 13.4 g/dL, glucose 5.4 mmol/L
+Očkovanie: tetanus, chrípka, MMR, hexavakcína
+Poznámka: dĺžka liečby štrnásť dní, vŕba, mäkké tkanivá
+Notes: follow-up in two weeks (demo)
