@@ -9,6 +9,7 @@ use App\Models\ShoppingUnit;
 use App\Models\User;
 use App\Shopping\ItemState;
 use App\Shopping\ListStatus;
+use App\Shopping\Mail\ShoppingListMailer;
 use App\Shopping\Mail\ShoppingListText;
 use App\Shopping\MemberRole;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -179,7 +180,55 @@ it('answers 422 err_invalid for malformed addresses and header injection', funct
     'crlf' => [["x@y.com\r\nBcc: z@z.z"]],
     'empty' => [[]],
     'too long' => [[str_repeat('a', 250).'@x.test']],
+    'folded quoted local part' => [["\"a\r\n b\"@example.com"]],
+    'quoted local part' => [['"a b"@example.com']],
+    'lone LF' => [["a@example.com\nBcc: z@z.z"]],
+    'comment' => [['a@example.com(comment)']],
+    'no dot in host' => [['a@localhost']],
+    'single label host' => [['a@b']],
+    'angle brackets' => [['<a@example.com>']],
+    'space' => [['a b@example.com']],
 ]);
+
+it('refuses a plain good address next to a bad one without queueing anything', function () {
+    $user = F::user();
+    $list = mailFixtureList($user);
+
+    postListMail($this, $user, $list->id, ['good@example.com', 'a@localhost'])->assertStatus(422);
+
+    Mail::assertNothingQueued();
+    expect(RateLimiter::attempts('shopping-mail-to:'.sha1('good@example.com')))->toBe(0);
+});
+
+it('counts +tag variants and case against one per-address cap', function (string $variant) {
+    $list = mailFixtureList();
+    $creator = User::query()->find($list->creator_id);
+    $senders = [$creator];
+    for ($i = 0; $i < 5; $i++) {
+        $senders[] = F::user();
+    }
+    foreach ($senders as $s) {
+        F::member($list, $s, MemberRole::Contributor);
+    }
+
+    $variants = ['x@example.test', 'x+1@example.test', 'X+two@Example.test', 'x+3@example.test', 'x+4@example.test'];
+    foreach ($variants as $i => $v) {
+        postListMail($this, $senders[$i], $list->id, [$v])->assertStatus(303);
+    }
+    Mail::assertQueued(ShoppingListMail::class, 5);
+
+    postListMail($this, $senders[5], $list->id, [$variant])->assertStatus(429)->assertJsonPath('error', 'shopping.mail.err_limit');
+    Mail::assertQueued(ShoppingListMail::class, 5);
+})->with(['plain' => ['x@example.test'], 'new tag' => ['x+99@example.test'], 'upper' => ['X@EXAMPLE.test']]);
+
+it('accepts ordinary addresses with a +tag, dots and a subdomain', function () {
+    $user = F::user();
+    $list = mailFixtureList($user);
+
+    postListMail($this, $user, $list->id, ['first.last+shop@mail.example.co.uk'])->assertStatus(303);
+
+    Mail::assertQueued(ShoppingListMail::class, 1);
+});
 
 it('collapses duplicates and is case-insensitive', function () {
     $user = F::user();
@@ -264,4 +313,14 @@ it('refuses the whole send when one address is over its daily cap', function () 
     expect(AuditEntry::query()->where('event', AuditEvent::ShoppingListMailed->value)->count())->toBe(5);
     // the fresh address was not counted by the refused send
     expect(RateLimiter::attempts('shopping-mail-to:'.sha1('fresh@example.test')))->toBe(0);
+});
+
+it('refuses an unsendable address inside the mailer before spending any rate-limit slot', function () {
+    $user = F::user();
+    $list = mailFixtureList($user);
+
+    expect(F::errors(fn () => app(ShoppingListMailer::class)->send($user, $list, ['ok@example.com', "x\r\n@example.com"])))->toHaveKey('addresses');
+
+    Mail::assertNothingQueued();
+    expect(RateLimiter::attempts('shopping-mail-to:'.sha1('ok@example.com')))->toBe(0);
 });

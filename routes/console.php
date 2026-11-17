@@ -17,6 +17,8 @@ Schedule::command('outbox:dispatch')->everyMinute()->name('outbox-dispatch')->wi
 Schedule::command('outbox:prune')->daily()->name('outbox-prune');
 Schedule::command('occasions:enqueue')->hourly()->name('occasions-enqueue')->withoutOverlapping();
 Schedule::command('wishlist:prune')->daily()->name('wishlist-prune');
+// Failed jobs keep a serialised mail (with its recipient address): drop them after three days.
+Schedule::command('queue:prune-failed --hours=72')->daily()->name('queue-prune-failed');
 Schedule::command('finance:prune-imports')->daily()->name('finance-prune-imports');
 Schedule::command('medical:prune-orphans')->daily()->name('medical-prune-orphans');
 Schedule::command('medical:enqueue-reminders')->hourly()->withoutOverlapping()->name('medical-enqueue-reminders');

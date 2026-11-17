@@ -149,7 +149,7 @@
           "type": "steps",
           "items": [
             "Open the list, press **More actions** and choose **Send by e-mail**.",
-            "Type an address and press Enter, a comma or the space bar, or paste several addresses at once. Each address becomes a small tag with a cross to remove it. You can add up to 5 addresses; any address works.",
+            "Type an address and press Enter, a comma or the space bar, or paste several addresses at once. Each address becomes a small tag with a cross to remove it. You can add up to 5 addresses; use an ordinary address such as name@example.com: a single line, no quotes, no brackets and a host with a dot. Variants with a plus sign, such as name+shop@example.com, count as the same address for the daily limit.",
             "Press **Send**. A message at the bottom tells you how many addresses the list was sent to."
           ]
         },

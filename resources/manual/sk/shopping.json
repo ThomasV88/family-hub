@@ -149,7 +149,7 @@
           "type": "steps",
           "items": [
             "Otvorte zoznam, stlačte **Ďalšie akcie** a vyberte **Odoslať e-mailom**.",
-            "Zadajte adresu a stlačte Enter, čiarku alebo medzerník, alebo vložte naraz viac adries. Každá adresa sa zmení na malý štítok s krížikom na odstránenie. Pridať môžete najviac 5 adries, funguje akákoľvek adresa.",
+            "Zadajte adresu a stlačte Enter, čiarku alebo medzerník, alebo vložte naraz viac adries. Každá adresa sa zmení na malý štítok s krížikom na odstránenie. Pridať môžete najviac 5 adries, používajte obyčajnú adresu, napríklad meno@example.com: jeden riadok, bez úvodzoviek a zátvoriek a s doménou obsahujúcou bodku. Varianty so znakom plus, napríklad meno+nakup@example.com, sa v dennom limite počítajú ako tá istá adresa.",
             "Stlačte **Odoslať**. Správa dole vám oznámi, na koľko adries sa zoznam odoslal."
           ]
         },

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Shopping;
 
+use App\Shopping\Mail\MailAddress;
 use Illuminate\Foundation\Http\FormRequest;
 
 class MailListRequest extends FormRequest
@@ -33,7 +34,7 @@ class MailListRequest extends FormRequest
     {
         return [
             'addresses' => ['required', 'array', 'min:1', 'max:'.(int) config('shopping.mail.per_send')],
-            'addresses.*' => ['required', 'string', 'email:rfc', 'max:254'],
+            'addresses.*' => ['required', 'string', 'max:254', 'email:rfc,strict', fn (string $attribute, mixed $value, \Closure $fail) => MailAddress::acceptable($value) ?: $fail('shopping.mail.err_invalid')],
         ];
     }
 

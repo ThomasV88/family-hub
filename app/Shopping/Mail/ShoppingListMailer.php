@@ -11,6 +11,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 
 /** Queues one text e-mail per address, enforces the per-address daily cap and writes an address-free audit row. */
 final class ShoppingListMailer
@@ -29,8 +30,15 @@ final class ShoppingListMailer
      */
     public function send(User $sender, ShoppingList $list, array $addresses): int
     {
+        // Validate everything first: nothing is counted or queued for an address that could fail inside the queued job.
+        foreach ($addresses as $address) {
+            if (! MailAddress::acceptable($address)) {
+                throw ValidationException::withMessages(['addresses' => 'shopping.mail.err_invalid']);
+            }
+        }
+
         $cap = (int) config('shopping.mail.per_recipient_day');
-        $keys = array_map(fn (string $a) => 'shopping-mail-to:'.sha1($a), $addresses);
+        $keys = array_map(fn (string $a) => 'shopping-mail-to:'.sha1(MailAddress::capKey($a)), $addresses);
 
         // All or nothing: one address over its cap refuses the whole send before anything is counted or queued.
         foreach ($keys as $key) {

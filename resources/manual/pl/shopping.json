@@ -149,7 +149,7 @@
           "type": "steps",
           "items": [
             "Otwórz listę, naciśnij **Więcej akcji** i wybierz **Wyślij e-mailem**.",
-            "Wpisz adres i naciśnij Enter, przecinek lub spację albo wklej kilka adresów naraz. Każdy adres zmienia się w mały znacznik z krzyżykiem do usunięcia. Możesz dodać do 5 adresów, działa każdy adres.",
+            "Wpisz adres i naciśnij Enter, przecinek lub spację albo wklej kilka adresów naraz. Każdy adres zmienia się w mały znacznik z krzyżykiem do usunięcia. Możesz dodać do 5 adresów, używaj zwykłego adresu, jak imie@example.com: jedna linia, bez cudzysłowów i nawiasów, z domeną zawierającą kropkę. Warianty ze znakiem plus, jak imie+zakupy@example.com, liczą się jako ten sam adres w dziennym limicie.",
             "Naciśnij **Wyślij**. Komunikat na dole mówi, na ile adresów wysłano listę."
           ]
         },
