@@ -29,3 +29,7 @@ Schedule::command('ai:reap-stuck')->everyFiveMinutes()->withoutOverlapping()->na
 Schedule::command('ai:resume-waiting')->everyMinute()->withoutOverlapping()->name('ai-resume-waiting');
 Schedule::command('ai:bulk-tick')->everyFiveMinutes()->withoutOverlapping()->name('ai-bulk-tick');
 Schedule::command('ai:prune-calls')->daily()->name('ai-prune-calls');
+
+// Recipe import maintenance (12-14): stuck imports, abandoned drafts, row retention.
+Schedule::command('recipes:reap-imports')->everyFiveMinutes()->withoutOverlapping()->name('recipes-reap-imports');
+Schedule::command('recipes:prune-imports')->daily()->name('recipes-prune-imports');

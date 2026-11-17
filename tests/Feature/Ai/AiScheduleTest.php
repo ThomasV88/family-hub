@@ -54,3 +54,11 @@ it('runs the scheduled login check on the ai-control queue of the database conne
 
     Queue::assertPushed(CheckLoginJob::class, fn (CheckLoginJob $j) => $j->connection === 'database' && $j->queue === 'ai-control');
 });
+
+it('schedules the recipe import reaper every five minutes without overlapping and the prune daily', function () {
+    $reap = aiScheduled('recipes-reap-imports');
+    $prune = aiScheduled('recipes-prune-imports');
+
+    expect($reap->expression)->toBe('*/5 * * * *')->and($reap->command)->toContain('recipes:reap-imports')->and($reap->withoutOverlapping)->toBeTrue()
+        ->and($prune->expression)->toBe('0 0 * * *')->and($prune->command)->toContain('recipes:prune-imports');
+});

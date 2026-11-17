@@ -234,6 +234,44 @@ class RecipeImportQuery
             ->where('created_at', '<', Carbon::now()->subMinutes($minutes))->pluck('id')->map(fn ($id) => (string) $id)->all();
     }
 
+    /**
+     * Ids of imports in $status whose $column (falling back to created_at) is older than the cutoff. Unscoped, ids only,
+     * for the reaper.
+     *
+     * @param  'created_at'|'queued_at'|'started_at'  $column
+     * @return list<string>
+     */
+    public function idsStuck(string $status, string $column, int $minutes): array
+    {
+        return DB::table('recipe_imports')->where('status', $status)
+            ->whereRaw("coalesce({$column}, created_at) < ?", [Carbon::now()->subMinutes($minutes)])
+            ->pluck('id')->map(fn ($id) => (string) $id)->all();
+    }
+
+    /** Milliseconds since the run started, or 0 when unknown. */
+    public function runDurationMs(string $id): int
+    {
+        $started = DB::table('recipe_imports')->where('id', $id)->value('started_at');
+
+        return $started === null ? 0 : max(0, (int) round((Carbon::now()->getTimestamp() - Carbon::parse($started)->getTimestamp()) * 1000));
+    }
+
+    /** Ready drafts nobody opened in time lose their payload and become cancelled. @return int rows changed */
+    public function expireReady(int $hours): int
+    {
+        $now = Carbon::now();
+
+        return DB::table('recipe_imports')->where('status', 'ready')->where('created_at', '<', $now->copy()->subHours($hours))
+            ->update(['status' => 'cancelled', 'payload' => null, 'finished_at' => $now, 'updated_at' => $now]);
+    }
+
+    /** Deletes every finished import row older than the retention. ai_calls is not touched. @return int rows deleted */
+    public function deleteFinishedOlderThan(int $days): int
+    {
+        return DB::table('recipe_imports')->whereNotIn('status', ImportStatus::active())
+            ->where('created_at', '<', Carbon::now()->subDays($days))->delete();
+    }
+
     /** @return list<array<string, mixed>> */
     public function activeFor(User $user): array
     {
