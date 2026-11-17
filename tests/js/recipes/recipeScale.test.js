@@ -66,7 +66,8 @@ describe('friendly fractions after scaling (thirds, sixths, eighths snap to what
         [0.83, 1, 6, null, '5'],
         [0.13, 1, 2, 'tsp', '1/4 tsp'], // 1/8 x 2
         [0.38, 1, 2, 'tbsp', '3/4 tbsp'], // 3/8 x 2
-        [0.88, 1, 1, 'tsp', '7/8 tsp'],
+        [0.88, 1, 1, 'tsp', '0.88 tsp'], // the recipe's own servings: exactly what the author wrote
+        [0.88, 2, 4, 'tsp', '1 3/4 tsp'], // 7/8 x 2
         [0.33, 1, 3, 'pcs', '1 pcs'], // no fractions for pieces, but the whole number still snaps
         [0.33, 1, 3, 'g', '1 g'],
     ])('%s x %s -> %s %s = "%s"', (stored, base, target, key, expected) => {

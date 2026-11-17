@@ -43,6 +43,8 @@ export function scaleQuantity(quantity, base, target) {
     const b = Number(base);
     const t = Number(target);
     if (base === null || base === undefined || !Number.isFinite(b) || b <= 0 || !Number.isFinite(t)) return q;
+    // The recipe's own servings show the author's number untouched.
+    if (t === b) return q;
 
     return (exactStored(q) * t) / b;
 }
