@@ -813,8 +813,12 @@ describe('Bulk panel: acknowledgment of the stored-text notice (13-09)', () => {
         await startBtn().trigger('click');
         await flushPromises();
         const notice = dialog().querySelector('[data-testid="bulk-confirm-notice"]');
-        expect(notice.textContent).toContain('two steps');
+        // Its own bulk wording: nothing about "this document", suggestions to check or a notice that is "once" for one document.
+        expect(notice.textContent).toContain('These documents will leave this server');
         expect(notice.textContent).toContain("saved in this app's database");
+        expect(notice.textContent).not.toContain('this document');
+        expect(notice.textContent).not.toContain('every suggestion');
+        expect(notice.textContent).not.toContain('two steps');
         fetchMock.mockResolvedValueOnce({ ok: true, status: 201, data: { panel: onPanel({ textNoticeAcknowledged: true, active: RUN() }) } });
         dialogButton('Start bulk run').click();
         await flushPromises();

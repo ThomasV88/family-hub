@@ -143,8 +143,9 @@ const needsTextNotice = computed(() => ocrEnabled.value && !(textAckLocal.value 
 const shownTextNotice = ref(false);
 const textNoticeKey = computed(() => {
     const keys = shownProviders.value;
-    if (keys.includes('codex') && keys.includes('copilot')) return 'health.ai.notice.multi_text_body';
-    return keys.includes('copilot') ? 'health.ai.notice.github_text_body' : 'health.ai.run.notice_text_body';
+    // Their own bodies: the per-document notice promises suggestions and speaks of "this document".
+    if (keys.includes('codex') && keys.includes('copilot')) return 'settings.ai_bulk.text_notice_multi';
+    return keys.includes('copilot') ? 'settings.ai_bulk.text_notice_github' : 'settings.ai_bulk.text_notice_codex';
 });
 const providerWords = computed(() => {
     const keys = effectiveProviders.value;
