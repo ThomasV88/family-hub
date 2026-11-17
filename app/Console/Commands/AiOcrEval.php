@@ -6,12 +6,12 @@ use App\Medical\Ai\Agents\CodexAgent;
 use App\Medical\Ai\Agents\CopilotAgent;
 use App\Medical\Ai\Eval\Corpus;
 use App\Medical\Ai\Eval\CorpusRejected;
-use App\Medical\Ai\Eval\EvalGuards;
 use App\Medical\Ai\Eval\EvalReport;
 use App\Medical\Ai\Eval\EvalRunner;
 use App\Medical\Ai\LoginState;
 use App\Medical\Ai\Preflight;
 use App\Medical\Queries\AiAgentSettingsQuery;
+use App\Medical\Queries\EvalGuardQuery;
 use Illuminate\Console\Command;
 use Throwable;
 
@@ -72,7 +72,7 @@ class AiOcrEval extends Command
             return 0;
         }
 
-        $busy = EvalGuards::busyReason();
+        $busy = EvalGuardQuery::busyReason();
         if ($busy !== null) {
             return $this->refuse('AI worker is not free ('.$busy.')');
         }

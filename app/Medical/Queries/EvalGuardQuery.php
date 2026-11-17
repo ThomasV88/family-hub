@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Medical\Ai\Eval;
+namespace App\Medical\Queries;
 
 use Illuminate\Support\Facades\DB;
 
 /** The "is the AI worker free?" check of the evaluation. Reads queue and status columns only, writes nothing. */
-final class EvalGuards
+final class EvalGuardQuery
 {
     /** @return string|null a fixed reason code when family AI work could collide with the evaluation, else null */
     public static function busyReason(): ?string

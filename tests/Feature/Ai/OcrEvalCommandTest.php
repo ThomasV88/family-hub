@@ -6,7 +6,6 @@ use App\Medical\Queries\AiAgentSettingsQuery;
 use App\Models\AiBulkRun;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\Support\FakeCodex;
 use Tests\Support\MedicalFileFixtures;
@@ -185,7 +184,7 @@ it('refuses a folder that is not a proven synthetic corpus', function (string $c
 ]);
 
 it('refuses a folder inside the medical disk', function () {
-    $medical = Storage::disk('medical')->path('');
+    $medical = (string) config('filesystems.disks.medical.root').'/';
     @mkdir($medical, 0700, true);
     $inside = rtrim($medical, '/').'/ocr-eval-guard-'.bin2hex(random_bytes(4));
     mkdir($inside, 0700);
@@ -193,7 +192,7 @@ it('refuses a folder inside the medical disk', function () {
     try {
         // The folder is under the allowed root here, so only the medical disk rule can refuse it.
         expect(fn () => Corpus::load($inside, rtrim($medical, '/')))
-            ->toThrow(CorpusRejected::class, 'inside_medical_disk');
+            ->toThrow(CorpusRejected::class, 'inside_private_documents');
     } finally {
         @unlink($inside.'/MANIFEST.json');
         @rmdir($inside);

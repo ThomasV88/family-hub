@@ -2,8 +2,6 @@
 
 namespace App\Medical\Ai\Eval;
 
-use Illuminate\Support\Facades\Storage;
-
 /**
  * A synthetic evaluation folder, accepted only when it proves itself: it lives under the AI work dir (eval/), not in the
  * medical disk, holds a MANIFEST.json with "synthetic": true, every listed file is a regular, unlinked file whose sha256
@@ -48,9 +46,10 @@ final class Corpus
         if ($rootReal === false || ! str_starts_with($real.'/', rtrim($rootReal, '/').'/')) {
             throw new CorpusRejected('outside_eval_root');
         }
-        $medical = realpath(Storage::disk('medical')->path(''));
+        $configured = config('filesystems.disks.medical.root');
+        $medical = is_string($configured) && $configured !== '' ? realpath($configured) : false;
         if ($medical !== false && (str_starts_with($real.'/', rtrim($medical, '/').'/') || str_starts_with(rtrim($medical, '/').'/', $real.'/'))) {
-            throw new CorpusRejected('inside_medical_disk');
+            throw new CorpusRejected('inside_private_documents');
         }
 
         $manifestPath = $real.'/MANIFEST.json';
