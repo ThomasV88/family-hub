@@ -50,7 +50,7 @@ class RunExtractionJob implements ShouldQueue
     /** Seconds between the access re-checks inside the abort loop. */
     private const ACCESS_RECHECK_SECONDS = 10;
 
-    /** The most pages the stored text can record (medical_document_texts.pages_total CHECK). */
+    /** The most pages the stored text can record (the page-total column of the text table is limited to this). */
     private const MAX_PAGES_TOTAL = 10000;
 
     private ?string $abortWhy = null;
