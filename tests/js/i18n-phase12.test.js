@@ -17,6 +17,8 @@ const SUBTREES = [
     'recipes.overview', 'recipes.card', 'recipes.filter', 'recipes.visibility', 'recipes.toast',
     // 12-08: form
     'recipes.form', 'recipes.ingredient', 'recipes.step', 'recipes.category_starter', 'recipes.photos', 'recipes.image', 'recipes.error',
+    // 12-09: detail
+    'recipes.detail', 'recipes.gallery', 'recipes.servings', 'recipes.progress', 'recipes.cooking', 'recipes.notes', 'recipes.delete', 'recipes.reset', 'recipes.unavailable',
 ];
 const KEYS = ['nav.recipes', 'module.recipes'];
 // Strings that are plural in en: the number of forms per locale (en 2, sk 4, pl 4).

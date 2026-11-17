@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 36,
   "title": "Recipes",
-  "summary": "The family recipe book: adding and editing recipes with photos, who can see a recipe, browsing and searching the recipes you may see, the filters and favourites.",
+  "summary": "The family recipe book: adding and editing recipes with photos, who can see a recipe, browsing and searching the recipes you may see, the filters and favourites, cooking from a recipe with your own ticks, servings and notes, and deleting.",
   "covers": [
     "module:recipes"
   ],
@@ -127,6 +127,79 @@
         {
           "type": "warning",
           "text": "If you make a shared recipe **private** again, you are asked first. Other members no longer see it. Their notes, ticks and favourites on it are kept but hidden, and they come back if you share the recipe again."
+        }
+      ]
+    },
+    {
+      "id": "ingredients-servings",
+      "title": "Ingredients, steps and servings",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Open a recipe to see its photos, times, categories, the **Source** (the web address host, opening in a new tab), the ingredients and the steps. On a phone the ingredients, steps and your notes are three tabs; on a wide screen the ingredients are on the left and the steps and notes on the right."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Tick an **ingredient** when it is prepared and a **step** when it is done. Your ticks are saved at once and are yours: they are stored per person, other members never see them and you never see theirs. A ticked row only changes colour and never moves.",
+            "**Reset my progress** (in the menu with the three dots) clears only your own ticks on that recipe, after you confirm.",
+            "Change the **Servings** with the minus and plus buttons or by typing a number from 1 to 99. The quantities are recalculated on screen and the tag **Scaled** appears, with **Reset to {n}** to go back. Common fractions are shown as fractions (\"1/2 tsp\"), pieces keep their decimals (\"1,5 pcs\").",
+            "Your chosen number of servings is remembered for you on that recipe. The recipe itself is never changed by it."
+          ]
+        },
+        {
+          "type": "warning",
+          "text": "Only the quantities are recalculated. Rows without an amount (for example \"salt, to taste\"), baking times and pan sizes are not, so check them yourself when you cook a very different amount. If a recipe has no servings, there is nothing to recalculate and the control is not shown."
+        }
+      ]
+    },
+    {
+      "id": "cooking",
+      "title": "Cooking mode",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Press **Cooking mode** (on a phone, in the bar at the bottom) to cook from the recipe. The rows get larger, the description and the photo strip are hidden and the ingredients and the steps follow each other on one page. On a phone two buttons under the title jump to **Ingredients** and **Steps**, and the bar at the bottom shows how many ingredients are prepared and how many steps are done. Press **Leave cooking mode** to return."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where your browser supports it, the **screen stays on** while cooking mode is on. If it does not, nothing changes and no message is shown.",
+            "Cooking mode is only on this device and is off again the next time you open a recipe.",
+            "Ticking works the same as outside cooking mode. **Reset my progress** is in the menu with the three dots, and when every step is done it is also offered next to the message \"All steps done. Enjoy your meal.\"."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notes-favourites",
+      "title": "Notes and favourites",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Below the steps (on a phone, in the **Notes** tab) you find **My notes**. Write what you want to remember, for example to use less salt next time. Notes are saved by themselves a moment after you stop typing, and you see **Saving...** and then **Saved**. If saving fails you can press **Try again**."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Your notes are personal: only you see them, other members never do, and that includes the author of the recipe. You can write notes on your own recipes too.",
+            "A notes text can have up to 2000 characters.",
+            "Press the **heart** next to the title to mark a recipe as a favourite. The heart is yours: other members have their own. On the Recipes page, **Favourites** shows only the recipes you marked."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deleting",
+      "title": "Deleting a recipe",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Only the author can delete a recipe: open the menu with the three dots and choose **Delete recipe**. You are asked first, and you can still choose **Keep recipe**."
+        },
+        {
+          "type": "warning",
+          "text": "Deleting a recipe removes the recipe, its photos and everyone's notes and ticks, and it cannot be undone. Shopping lists you already made from the recipe are not changed. After deleting you return to the Recipes page."
         }
       ]
     }

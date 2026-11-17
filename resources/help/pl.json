@@ -46,7 +46,8 @@
         "shopping_email": "Okno wysyłania listy zakupów e-mailem",
         "shopping_list": "Strona listy zakupów",
         "shopping_finish": "Okno kończenia zakupów",
-        "recipe_form": "Formularz przepisu"
+        "recipe_form": "Formularz przepisu",
+        "recipe_detail": "Szczegóły przepisu"
     },
     "topics": {
         "tasks.visibility": {
@@ -320,6 +321,22 @@
         "recipes.sharing": {
             "title": "Kto może zobaczyć ten przepis",
             "text": "Wybierz Tylko ja, aby zostawić przepis dla siebie. Wybierz Wszyscy w rodzinie korzystający z Receptarza, aby inni mogli go czytać, gotować według niego i dodawać do zakupów. Edytować go możesz zawsze tylko ty jako autor. Jeśli udostępniony przepis znów ustawisz jako prywatny, notatki, odhaczenia i ulubione innych przy nim zostaną zachowane, ale ukryte."
+        },
+        "recipes.servings": {
+            "title": "Porcje",
+            "text": "Zmiana liczby porcji przelicza ilości tylko na ekranie. Sam przepis się nie zmienia, a wiersze bez ilości, czasy pieczenia i rozmiary form nie są przeliczane. Wybrana liczba jest zapamiętana dla ciebie przy tym przepisie. Przycisk Przywróć wraca do porcji z przepisu."
+        },
+        "recipes.progress": {
+            "title": "Twój postęp",
+            "text": "Odhacz składnik, gdy jest przygotowany, i krok, gdy jest gotowy. Odhaczenia zapisują się od razu i są przechowywane osobno dla każdej osoby: nikt inny ich nie widzi, a ty nie widzisz cudzych. Opcja Zresetuj mój postęp w menu czyści tylko twoje odhaczenia przy tym przepisie."
+        },
+        "recipes.notes": {
+            "title": "Osobiste notatki",
+            "text": "Zapisz to, co chcesz zapamiętać, na przykład żeby następnym razem dać mniej soli. Notatki zapisują się same chwilę po zakończeniu pisania. Widzisz je tylko ty, inni członkowie nigdy, także autor przepisu. Są widoczne również przy twoich własnych przepisach."
+        },
+        "recipes.cooking": {
+            "title": "Tryb gotowania",
+            "text": "Tryb gotowania powiększa wiersze i trzyma składniki oraz kroki na jednej długiej stronie, żeby można było czytać nawet brudnymi rękami. Na telefonach dolny pasek pokazuje, jak daleko jesteś. Jeśli przeglądarka na to pozwala, ekran pozostaje włączony przy aktywnym trybie. Nic nie jest zapisywane: następnym razem tryb jest znów wyłączony."
         }
     }
 }

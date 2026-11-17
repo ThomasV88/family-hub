@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 36,
   "title": "Receptár",
-  "summary": "Rodinný receptár: pridávanie a úprava receptov s fotkami, kto recept vidí, prezeranie a hľadanie receptov, ktoré smiete vidieť, filtre a obľúbené.",
+  "summary": "Rodinný receptár: pridávanie a úprava receptov s fotkami, kto recept vidí, prehliadanie a hľadanie receptov, ktoré smiete vidieť, filtre a obľúbené, varenie podľa receptu s vlastnými odškrtnutiami, porciami a poznámkami a odstránenie.",
   "covers": [
     "module:recipes"
   ],
@@ -127,6 +127,79 @@
         {
           "type": "warning",
           "text": "Ak zdieľaný recept znova nastavíte ako **súkromný**, najprv sa vás opýta. Ostatní členovia ho už neuvidia. Ich poznámky, odškrtnutia a obľúbené pri ňom ostanú zachované, ale skryté, a vrátia sa, ak recept znova zdieľate."
+        }
+      ]
+    },
+    {
+      "id": "ingredients-servings",
+      "title": "Suroviny, postup a porcie",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Otvorte recept a uvidíte jeho fotky, časy, kategórie, **Zdroj** (názov webovej adresy, otvorí sa v novej karte), suroviny a postup. Na telefóne sú suroviny, postup a vaše poznámky na troch kartách; na širokej obrazovke sú vľavo suroviny a vpravo postup a poznámky."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Surovinu** odškrtnite, keď je pripravená, a **krok**, keď je hotový. Vaše odškrtnutia sa ukladajú hneď a patria vám: evidujú sa pre každého osobitne, ostatní členovia ich nikdy nevidia a vy nevidíte ich. Odškrtnutý riadok sa len zafarbí a nikdy sa nepresúva.",
+            "**Obnoviť môj postup** (v ponuke s tromi bodkami) zruší po potvrdení iba vaše odškrtnutia pri tomto recepte.",
+            "**Porcie** zmeníte tlačidlami mínus a plus alebo zadaním čísla od 1 do 99. Množstvá sa prepočítajú na obrazovke a objaví sa štítok **Prepočítané** s tlačidlom **Vrátiť na {n}**. Bežné zlomky sa zobrazujú ako zlomky (\"1/2 tsp\"), kusy si ponechajú desatinné miesta (\"1,5 ks\").",
+            "Zvolený počet porcií si Receptár pri tomto recepte pamätá pre vás. Samotný recept sa tým nikdy nezmení."
+          ]
+        },
+        {
+          "type": "warning",
+          "text": "Prepočítavajú sa iba množstvá. Riadky bez množstva (napríklad „soľ podľa chuti“), časy pečenia a veľkosti foriem nie, preto ich pri veľmi inom množstve skontrolujte sami. Ak recept nemá porcie, nie je čo prepočítať a ovládanie sa nezobrazí."
+        }
+      ]
+    },
+    {
+      "id": "cooking",
+      "title": "Režim varenia",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Stlačením **Režim varenia** (na telefóne v lište dole) môžete variť podľa receptu. Riadky sa zväčšia, popis a pás fotiek sa skryjú a suroviny s postupom idú za sebou na jednej stránke. Na telefóne dve tlačidlá pod názvom skočia na **Suroviny** a **Postup** a dolná lišta ukazuje, koľko surovín je pripravených a koľko krokov hotových. Tlačidlom **Opustiť režim varenia** sa vrátite."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Ak to váš prehliadač podporuje, **obrazovka ostane zapnutá**, kým je režim varenia zapnutý. Ak nie, nič sa nezmení a nezobrazí sa žiadna správa.",
+            "Režim varenia platí iba na tomto zariadení a pri ďalšom otvorení receptu je opäť vypnutý.",
+            "Odškrtávanie funguje rovnako ako mimo režimu varenia. **Obnoviť môj postup** nájdete v ponuke s tromi bodkami a keď sú všetky kroky hotové, ponúka sa aj pri správe „Všetky kroky sú hotové. Dobrú chuť.“."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notes-favourites",
+      "title": "Poznámky a obľúbené",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Pod postupom (na telefóne na karte **Poznámky**) nájdete **Moje poznámky**. Napíšte si, čo si chcete zapamätať, napríklad dať nabudúce menej soli. Poznámky sa uložia samy chvíľu po tom, čo prestanete písať, a uvidíte **Ukladá sa...** a potom **Uložené**. Ak sa uloženie nepodarí, môžete stlačiť **Skúsiť znova**."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Vaše poznámky sú osobné: vidíte ich iba vy, ostatní členovia nikdy, ani autor receptu. Poznámky môžete písať aj pri vlastných receptoch.",
+            "Text poznámok môže mať najviac 2000 znakov.",
+            "**Srdiečkom** vedľa názvu označíte recept ako obľúbený. Srdiečko je vaše: ostatní členovia majú vlastné. Na stránke Receptár zobrazí **Obľúbené** iba recepty, ktoré ste označili."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deleting",
+      "title": "Odstránenie receptu",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Recept môže odstrániť iba autor: otvorte ponuku s tromi bodkami a vyberte **Odstrániť recept**. Najprv sa vás opýtame a stále môžete zvoliť **Ponechať recept**."
+        },
+        {
+          "type": "warning",
+          "text": "Odstránením sa zmaže recept, jeho fotky a poznámky i odškrtnutia všetkých a nedá sa to vrátiť. Nákupné zoznamy, ktoré ste z receptu už vytvorili, sa nezmenia. Po odstránení sa vrátite na stránku Receptár."
         }
       ]
     }

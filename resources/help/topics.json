@@ -408,6 +408,30 @@
             "area": "recipes",
             "screen": "recipe_form",
             "field": "visibility"
+        },
+        {
+            "key": "recipes.servings",
+            "area": "recipes",
+            "screen": "recipe_detail",
+            "field": "servings"
+        },
+        {
+            "key": "recipes.progress",
+            "area": "recipes",
+            "screen": "recipe_detail",
+            "field": "ingredients"
+        },
+        {
+            "key": "recipes.notes",
+            "area": "recipes",
+            "screen": "recipe_detail",
+            "field": "notes"
+        },
+        {
+            "key": "recipes.cooking",
+            "area": "recipes",
+            "screen": "recipe_detail",
+            "field": "cooking_mode"
         }
     ]
 }

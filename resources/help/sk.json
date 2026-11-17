@@ -46,7 +46,8 @@
         "shopping_email": "Dialóg odoslania nákupného zoznamu e-mailom",
         "shopping_list": "Stránka nákupného zoznamu",
         "shopping_finish": "Dialóg ukončenia nákupu",
-        "recipe_form": "Formulár receptu"
+        "recipe_form": "Formulár receptu",
+        "recipe_detail": "Detail receptu"
     },
     "topics": {
         "tasks.visibility": {
@@ -320,6 +321,22 @@
         "recipes.sharing": {
             "title": "Kto môže tento recept vidieť",
             "text": "Voľbou Iba ja si recept necháte len pre seba. Voľbou Všetci v rodine, ktorí používajú Receptár, umožníte ostatným členom recept čítať, variť podľa neho a pridať ho do nákupu. Upravovať ho môžete vždy iba vy ako autor. Ak zdieľaný recept znova nastavíte ako súkromný, poznámky, odškrtnutia a obľúbené ostatných pri ňom ostanú zachované, ale skryté."
+        },
+        "recipes.servings": {
+            "title": "Porcie",
+            "text": "Zmenou počtu porcií sa množstvá prepočítajú iba na obrazovke. Samotný recept sa nemení a riadky bez množstva, časy pečenia ani veľkosti foriem sa neprepočítavajú. Zvolený počet si Receptár pri tomto recepte pamätá pre vás. Tlačidlom Vrátiť sa vrátite na porcie z receptu."
+        },
+        "recipes.progress": {
+            "title": "Váš postup",
+            "text": "Surovinu odškrtnite, keď je pripravená, a krok, keď je hotový. Odškrtnutia sa ukladajú hneď a evidujú sa pre každého osobitne: nikto iný ich nevidí a vy nevidíte jeho. Voľba Obnoviť môj postup v ponuke zruší iba vaše odškrtnutia pri tomto recepte."
+        },
+        "recipes.notes": {
+            "title": "Osobné poznámky",
+            "text": "Napíšte si, čo si chcete zapamätať, napríklad dať nabudúce menej soli. Poznámky sa uložia samy chvíľu po tom, čo prestanete písať. Vidíte ich iba vy, ostatní členovia nikdy, ani autor receptu. Zobrazujú sa aj pri vašich vlastných receptoch."
+        },
+        "recipes.cooking": {
+            "title": "Režim varenia",
+            "text": "Režim varenia zväčší riadky a necháva suroviny a postup na jednej dlhej stránke, aby ste sa mohli orientovať aj s ušpinenými rukami. Na telefóne dolná lišta ukazuje, ako ďaleko ste. Ak to prehliadač dovolí, obrazovka počas režimu ostane zapnutá. Nič sa neukladá: nabudúce je režim opäť vypnutý."
         }
     }
 }

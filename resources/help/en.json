@@ -46,7 +46,8 @@
         "shopping_email": "Shopping e-mail dialog",
         "shopping_list": "Shopping list page",
         "shopping_finish": "Finish shopping dialog",
-        "recipe_form": "Recipe form"
+        "recipe_form": "Recipe form",
+        "recipe_detail": "Recipe detail"
     },
     "topics": {
         "tasks.visibility": {
@@ -320,6 +321,22 @@
         "recipes.sharing": {
             "title": "Who can see this recipe",
             "text": "Choose Only me to keep the recipe to yourself. Choose Everyone in the family who uses Recipes to let other members read it, cook from it and add it to shopping. In both cases only you, as the author, can edit it. If you make a shared recipe private again, other members' notes, ticks and favourites on it are kept but hidden, and they return if you share it again."
+        },
+        "recipes.servings": {
+            "title": "Servings",
+            "text": "Change the number of servings to rescale the quantities on screen. Only what you see changes: the recipe itself is not touched, and rows without an amount, baking times and pan sizes are not recalculated. The number you choose is remembered for you on this recipe. Reset returns to the recipe's own servings."
+        },
+        "recipes.progress": {
+            "title": "Your progress",
+            "text": "Tick an ingredient when it is prepared and a step when it is done. Your ticks are saved at once and stored per person: nobody else sees them, and you do not see theirs. Reset my progress in the menu clears only your own ticks on this recipe."
+        },
+        "recipes.notes": {
+            "title": "Personal notes",
+            "text": "Write what you want to remember, for example to use less salt next time. Notes save by themselves a moment after you stop typing. Only you can see them, other members never do, and that includes the author of the recipe. They are shown on your own recipes too."
+        },
+        "recipes.cooking": {
+            "title": "Cooking mode",
+            "text": "Cooking mode makes the rows larger and keeps ingredients and steps in one long page, so you can follow along with floury hands. On phones a bar at the bottom shows how far you are. Where your browser allows it the screen stays on while the mode is active. Nothing is stored: it is off again next time."
         }
     }
 }

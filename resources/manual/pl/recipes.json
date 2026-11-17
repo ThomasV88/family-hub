@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 36,
   "title": "Receptarz",
-  "summary": "Rodzinny receptarz: dodawanie i edycja przepisów ze zdjęciami, kto widzi przepis, przeglądanie i wyszukiwanie przepisów, które możesz widzieć, filtry i ulubione.",
+  "summary": "Rodzinna książka kucharska: dodawanie i edycja przepisów ze zdjęciami, kto widzi przepis, przeglądanie i szukanie przepisów, które możesz widzieć, filtry i ulubione, gotowanie według przepisu z własnymi odhaczeniami, porcjami i notatkami oraz usuwanie.",
   "covers": [
     "module:recipes"
   ],
@@ -127,6 +127,79 @@
         {
           "type": "warning",
           "text": "Jeśli udostępniony przepis ponownie ustawisz jako **prywatny**, najpierw o to zapyta. Pozostali członkowie go nie zobaczą. Ich notatki, odhaczenia i ulubione przy nim zostaną zachowane, ale ukryte, i wrócą, jeśli znów udostępnisz przepis."
+        }
+      ]
+    },
+    {
+      "id": "ingredients-servings",
+      "title": "Składniki, kroki i porcje",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Otwórz przepis, aby zobaczyć jego zdjęcia, czasy, kategorie, **Źródło** (nazwa hosta adresu internetowego, otwiera się w nowej karcie), składniki i kroki. Na telefonie składniki, kroki i twoje notatki są w trzech kartach; na szerokim ekranie po lewej są składniki, a po prawej kroki i notatki."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Odhacz **składnik**, gdy jest przygotowany, i **krok**, gdy jest gotowy. Twoje odhaczenia zapisują się od razu i należą do ciebie: są przechowywane osobno dla każdej osoby, inni członkowie nigdy ich nie widzą, a ty nie widzisz cudzych. Odhaczony wiersz tylko zmienia kolor i nigdy się nie przesuwa.",
+            "**Zresetuj mój postęp** (w menu z trzema kropkami) po potwierdzeniu czyści tylko twoje odhaczenia przy tym przepisie.",
+            "**Porcje** zmienisz przyciskami minus i plus albo wpisując liczbę od 1 do 99. Ilości są przeliczane na ekranie i pojawia się znacznik **Przeliczone** z przyciskiem **Przywróć {n}**. Typowe ułamki są pokazywane jako ułamki (\"1/2 tsp\"), sztuki zachowują miejsca dziesiętne (\"1,5 szt.\").",
+            "Wybrana liczba porcji jest zapamiętana dla ciebie przy tym przepisie. Sam przepis nigdy się przez to nie zmienia."
+          ]
+        },
+        {
+          "type": "warning",
+          "text": "Przeliczane są tylko ilości. Wiersze bez ilości (na przykład „sól do smaku”), czasy pieczenia i rozmiary form nie są przeliczane, więc przy bardzo innej ilości sprawdź je sam. Jeśli przepis nie ma porcji, nie ma czego przeliczać i element sterujący nie jest widoczny."
+        }
+      ]
+    },
+    {
+      "id": "cooking",
+      "title": "Tryb gotowania",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Naciśnij **Tryb gotowania** (na telefonie na dolnym pasku), aby gotować według przepisu. Wiersze robią się większe, opis i pasek zdjęć są ukryte, a składniki i kroki idą jedne za drugimi na jednej stronie. Na telefonie dwa przyciski pod tytułem przechodzą do **Składniki** i **Kroki**, a dolny pasek pokazuje, ile składników jest przygotowanych i ile kroków gotowych. Przyciskiem **Wyłącz tryb gotowania** wrócisz."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Jeśli twoja przeglądarka to obsługuje, **ekran pozostaje włączony**, gdy tryb gotowania jest aktywny. Jeśli nie, nic się nie zmienia i nie pojawia się żaden komunikat.",
+            "Tryb gotowania działa tylko na tym urządzeniu i przy następnym otwarciu przepisu jest znów wyłączony.",
+            "Odhaczanie działa tak samo jak poza trybem gotowania. **Zresetuj mój postęp** jest w menu z trzema kropkami, a gdy wszystkie kroki są gotowe, jest też obok komunikatu „Wszystkie kroki gotowe. Smacznego.”."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notes-favourites",
+      "title": "Notatki i ulubione",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Pod krokami (na telefonie w karcie **Notatki**) znajdziesz **Moje notatki**. Zapisz to, co chcesz zapamiętać, na przykład żeby następnym razem dać mniej soli. Notatki zapisują się same chwilę po zakończeniu pisania i widzisz **Zapisywanie...**, a potem **Zapisano**. Jeśli zapis się nie uda, możesz nacisnąć **Spróbuj ponownie**."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Twoje notatki są osobiste: widzisz je tylko ty, inni członkowie nigdy, także autor przepisu. Notatki możesz pisać również przy własnych przepisach.",
+            "Tekst notatek może mieć najwyżej 2000 znaków.",
+            "**Serduszkiem** obok tytułu oznaczysz przepis jako ulubiony. Serduszko jest twoje: inni członkowie mają własne. Na stronie Przepisy opcja **Ulubione** pokazuje tylko przepisy, które oznaczyłeś."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deleting",
+      "title": "Usuwanie przepisu",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Przepis może usunąć tylko autor: otwórz menu z trzema kropkami i wybierz **Usuń przepis**. Najpierw zostaniesz zapytany i nadal możesz wybrać **Zachowaj przepis**."
+        },
+        {
+          "type": "warning",
+          "text": "Usunięcie kasuje przepis, jego zdjęcia oraz notatki i odhaczenia wszystkich i nie można tego cofnąć. Listy zakupów już utworzone z przepisu nie zostaną zmienione. Po usunięciu wracasz na stronę Przepisy."
         }
       ]
     }
