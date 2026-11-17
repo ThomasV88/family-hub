@@ -63,3 +63,15 @@ changed by the owner later.
   other devices" shortcut.
 - Child accounts: birthday as an occasion in Wishlist, age shown, one-click convert to normal account.
 - AI and documents: the stored recognised text could also drive a "documents mentioning this drug" view.
+
+## Phase 13 defaults decided by Claude on 2026-11-17 (owner can flip any of them)
+
+These resolve the open questions of `13-RESEARCH.md` so work can continue autonomously. Nothing in Phase 13 is released to production without the owner's PR approval, and AI stays off per person until the owner turns consent on.
+
+- **Consent withdrawal:** when AI consent for a person is withdrawn, the stored recognised text of that person's documents is purged (most privacy-protective). Search then no longer finds those documents by content. A per-document "remove recognised text" action also exists.
+- **Evidence field / grounding tag in the entries schema:** not added (keep the schema simple).
+- **Who sees the recognised text:** exactly the members who may see the document itself (view-only members included, read-only). No separate permission.
+- **Page cap and timeouts:** the transcription page cap comes from the measured seconds per page (evaluation report); job and process timeouts are NOT raised without the owner. Longer PDFs are transcribed up to the cap and marked as partial.
+- **Go/no-go for storing text:** the thresholds proposed in the research are used by the evaluation gate. If the typical synthetic set fails the gate, the feature ships with an "may contain errors" label on the text view and search results (no Tesseract, no dropping of the feature); the result is recorded in `13-EVALUATION.md` and in the PR body so the owner can decide.
+- **Evaluation budget:** at most 150 real Codex calls on staging, one at a time, stopped at the first usage-limit message, synthetic documents only.
+- **Backfill:** only through the guarded bulk run with a new scope `no_text`; never automatic.
