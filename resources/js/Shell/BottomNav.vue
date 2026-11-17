@@ -37,8 +37,9 @@ const density = computed(() => bottomNavDensity(modules.value.length));
 .bottom-nav--tight .bottom-nav__list { gap: 0; }
 .bottom-nav__list > :deep(li) { display: flex; min-width: 0; }
 .bottom-nav__list > :deep(li > *) { flex: 1; min-width: 0; }
-/* 7+ items: equal flex items of at least 44 px; the current one grows to its whole label, the rest are icon-only. */
+/* 7+ items: equal flex items of at least 40 px (44 px targets would overflow a 320 px bar next to the current label; NavItem
+   extends each icon-only target to 44 px with an invisible hit area); the current one grows to its whole label. */
 .bottom-nav--tight .bottom-nav__list { display: flex; }
-.bottom-nav--tight .bottom-nav__list > :deep(li) { flex: 1 1 0; min-width: 44px; }
+.bottom-nav--tight .bottom-nav__list > :deep(li) { flex: 1 1 0; min-width: 40px; }
 .bottom-nav--tight .bottom-nav__list > :deep(li.nav-item--current) { flex: 1 0 auto; }
 </style>

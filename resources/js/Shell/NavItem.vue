@@ -34,11 +34,12 @@ function open(event) {
             :type="module.href ? undefined : 'button'"
             :aria-current="current ? 'page' : undefined"
             :aria-label="iconOnly ? t(module.labelKey) : undefined"
+            :title="variant === 'bottom' ? t(module.labelKey) : undefined"
             :class="['nav-item__link', `nav-item__link--${variant}`, { 'is-current': current, 'is-soon': !module.href, 'is-rail': rail, 'is-dense': dense, 'is-tight': tight }]"
             @click="module.href ? undefined : open($event)"
         >
             <component :is="module.icon" :size="dense ? 20 : 24" :stroke-width="1.75" aria-hidden="true" class="nav-item__icon" />
-            <span :class="['nav-item__label', { 'visually-hidden': rail || iconOnly }]" :title="variant === 'bottom' ? t(module.labelKey) : undefined">{{ t(module.labelKey) }}</span>
+            <span :class="['nav-item__label', { 'visually-hidden': rail || iconOnly }]">{{ t(module.labelKey) }}</span>
             <span v-if="rail" class="nav-item__tip" aria-hidden="true">{{ t(module.labelKey) }}</span>
         </component>
     </li>
@@ -106,6 +107,8 @@ function open(event) {
 .nav-item__link--bottom.is-dense .nav-item__label { font-size: 0.6875rem; letter-spacing: -0.02em; }
 .nav-item__link--bottom.is-tight { padding-inline: 2px; }
 .nav-item__link--bottom.is-tight .nav-item__label { font-size: 0.6875rem; letter-spacing: -0.02em; }
+/* 7+ items are only 40 px wide: an invisible strip on each side keeps the touch target at 44 px. */
+.nav-item__link--bottom.is-tight:not(.is-current)::before { content: ''; position: absolute; inset-block: 0; inset-inline: -2px; }
 /* Current item at 7+: the whole label, never ellipsised. */
 .nav-item--current > .nav-item__link--bottom.is-tight .nav-item__label { overflow: visible; text-overflow: clip; }
 

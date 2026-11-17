@@ -93,7 +93,9 @@ describe('BottomNav with seven items', () => {
             const link = li.find('a');
             const label = li.find('.nav-item__label');
             expect(label.text()).toBe(name);
-            expect(label.attributes('title')).toBe(name);
+            // The tooltip sits on the link (a visually hidden span never shows one).
+            expect(link.attributes('title')).toBe(name);
+            expect(label.attributes('title')).toBeUndefined();
             if (KEYS7[i] === 'recipes') {
                 expect(label.classes()).not.toContain('visually-hidden');
                 expect(link.attributes('aria-label')).toBeUndefined();
@@ -139,8 +141,8 @@ describe('BottomNav labels', () => {
         expect(labels).toHaveLength(6);
         labels.forEach((l) => {
             expect(l.text().length).toBeGreaterThan(0);
-            expect(l.attributes('title')).toBe(l.text());
         });
+        wrapper.findAll('.nav-item__link').forEach((link) => expect(link.attributes('title')).toBe(link.find('.nav-item__label').text()));
         expect(labels.map((l) => l.text())).toEqual(['overview', 'tasks', 'wishlist', 'finances', 'health', 'shopping'].map((k) => m.nav[k]));
     });
 });
@@ -163,17 +165,17 @@ describe('Bottom bar layout rules (CSS source; jsdom does no layout)', () => {
         expect(item).toMatch(/\.nav-item__link--bottom\.is-tight \{ padding-inline: 2px/);
     });
 
-    it('gives 7 items 44 px minimum each and lets only the current one grow to its whole label', () => {
-        expect(nav).toMatch(/\.bottom-nav--tight \.bottom-nav__list > :deep\(li\) \{[^}]*flex: 1 1 0[^}]*min-width: 44px/);
+    it('gives 7 items 40 px minimum each (44 px hit area) and lets only the current one grow to its whole label', () => {
+        expect(nav).toMatch(/\.bottom-nav--tight \.bottom-nav__list > :deep\(li\) \{[^}]*flex: 1 1 0[^}]*min-width: 40px/);
+        expect(item).toMatch(/\.is-tight:not\(\.is-current\)::before \{[^}]*inset-inline: -2px/);
         expect(nav).toMatch(/li\.nav-item--current\) \{[^}]*flex: 1 0 auto/);
         expect(item).toMatch(/\.nav-item--current > \.nav-item__link--bottom\.is-tight \.nav-item__label \{[^}]*overflow: visible[^}]*text-overflow: clip/);
         expect(item).toMatch(/\.nav-item__link \{[^}]*min-height: 44px/);
     });
 
-    it('fits seven items in 360 px: six 44 px icon targets leave room for the current label', () => {
-        const viewport = 360;
+    it.each([360, 320])('fits seven items in %i px: six 40 px icon items leave room for the current label', (viewport) => {
         const barPadding = 2 * 2;
-        const room = viewport - barPadding - 6 * 44;
+        const room = viewport - barPadding - 6 * 40;
         // The longest label at 11 px bold is about 8 glyphs of at most 7 px, plus 2 x 2 px padding.
         expect(room).toBeGreaterThanOrEqual(8 * 7 + 4);
     });
