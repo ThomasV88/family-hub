@@ -109,8 +109,21 @@ Not drafts to translate: `docs/ops/*.md` (operator notes, Slovak, owner-facing).
 
 Open points and backlog: check real documents by eye before relying on the text; a 2048 px derivative for the AI path (evaluation note); trigram fuzzy search; a "documents mentioning this drug" view (owner suggestion); a cheaper model for transcription; reword the "Nothing was saved" family of detail lines (see above); `ai_bulk_run_items` retention.
 
-## Task 3 (pending the orchestrator)
-Steps 0 to 16 of the plan: push `develop`, wait for the staging deploy, reseed (the deploy does it), then verify with the demo accounts. Seed words for the steps: `zltacka`, `zazolc`, `lukasz`, `paracetamolu` (visible); `betaloc` (archived, expected not found); `warfarin` (hidden person: found by `sk_sk.1`, not by `sk_sk.2`). Staging step 0 turns `AI_OCR_ENABLED=true` on; the seeded text rows exist regardless of the flag.
+## Task 3 (staging verification, done by the orchestrator on 2026-11-17)
+Staging had `AI_OCR_ENABLED=true` in BOTH `app.env` and `ai-worker.env` (backups `*.pre-ocr`), real Codex login, synthetic data only.
+
+| Step | Result |
+|---|---|
+| 1 search | "zltacka" finds the seeded blood-test document, accent-insensitive, highlighted snippet |
+| 4-5 real two-step run | Synthetic 2-page Slovak PDF: mode full, status ready, pages 2/2, two AI calls (7.5 s + 8.8 s), job 17 s; text exact incl. diacritics; "demoxinal" found on page 2 |
+| 8 purge on consent withdrawal (step 9 of the plan) | Confirmation dialog contains the purge sentence; after "Turn AI off" the search for "demoxinal" finds nothing; consent switched back on afterwards |
+| search while typing | Results appear after typing without Enter (debounce works) |
+| 12 at 360 px (sk) | Health page: no horizontal overflow, 7-item bottom bar fits, search box and results wrap |
+| 13-16 server checks | Counts consistent (extractions entries/full/text, texts 7 of which 6 complete, ai_calls medical 32 succeeded, 14 failed from earlier tests); leak counts for the unique drug name all 0 in ai_calls, audit_logs, jobs, failed_jobs, app and worker logs, `/ai-work` empty, Codex home 0 matches; `staging:audit` OK; production env has no `AI_OCR_ENABLED=true` |
+
+Defect found and fixed: the hint under the AI consent switch still said that turning AI off deletes nothing (commit 2381483, en/sk/pl).
+
+NOT verified in the browser (the shared demo password is a server secret and was deliberately not read into the conversation, so there was no admin session): Settings > AI calls (step 6), second run reuse (step 7), Settings > AI agents bulk panel dry run (step 11), archive and restore of a document with text (step 10), 360 px in pl and in dark mode, manual and "?" tips. These are covered by Pest and Vitest tests and the code review, not by a live look. The owner should glance at them once on staging.
 
 ## Known stubs
 None.
