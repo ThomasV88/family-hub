@@ -74,6 +74,51 @@
       ]
     },
     {
+      "id": "search",
+      "title": "Hľadanie v dokumentoch",
+      "blocks": [
+        { "type": "p", "text": "Na stránke Zdravie, nad priečinkami a časovou osou, je pole **Hľadať v dokumentoch**. Nájde dokumenty podľa ich názvu a podľa slov v nich. Pole sa zobrazí, keď je čo hľadať, a nie je na stránke, keď sa nezobrazuje žiadna osoba." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Do poľa napíšte aspoň dve písmená. Jedno písmeno nestačí a kým nie sú dve, nič sa nehľadá.",
+          "Chvíľu počkajte, alebo stlačte Enter či **Hľadať**, a uvidíte výsledky.",
+          "Cez **Hľadať v** vyberte, či hľadať u **Všetci ľudia**, alebo len u osoby, ktorú máte otvorenú. Táto voľba sa zobrazí, len keď vidíte viac než jednu osobu.",
+          "Stlačením výsledku otvoríte daný dokument. Stlačením **Zrušiť hľadanie** (alebo Escape v poli) sa vrátite k priečinkom a časovej osi."
+        ] },
+        { "type": "list", "items": [
+          "Výsledok ukazuje názov dokumentu, osobu, dátum pridania, návštevu, ku ktorej patrí, a stranu, na ktorej sa slová našli, so zvýraznenými zhodnými slovami.",
+          "Diakritika a koncovky slov nehrajú veľkú rolu: slovo napísané bez diakritiky alebo v trochu inom tvare sa tiež nájde.",
+          "AI číta dokument len vtedy, keď o to niekto požiadal. Dokument, ktorý AI nikdy neprečítala, sa nájde len podľa názvu. Dokumenty, ktoré AI prečítala, sa nájdu aj podľa slov v nich.",
+          "Vždy vidíte len dokumenty, ktoré môžete otvoriť. Dokument osoby, ktorú nevidíte, alebo archivovaný dokument sa nikdy nenájde a dostanete rovnaké „Nenašli sa žiadne dokumenty“ ako pri slove, ktoré tam jednoducho nie je.",
+          "Ak výsledok uvádza **Prehľadávajú sa len prvé strany**, AI prečítala len začiatok dlhého dokumentu, takže slová ďalej sa nenájdu."
+        ] },
+        { "type": "warning", "text": "Text prečítala AI a môže obsahovať chyby. Slovo sa nemusí nájsť, ak sa nesprávne prečítalo. Keď to stránka uvádza, zobrazí poznámku nad výsledkami. Ak hľadanie nič nenájde, pozrite sa na samotný dokument." },
+        { "type": "p", "text": "Slová, ktoré napíšete, sa používajú len na toto hľadanie. Neukladajú sa, nedávajú sa do adresy stránky a po odchode zo stránky sa nepamätajú." }
+      ]
+    },
+    {
+      "id": "recognised-text",
+      "title": "Rozpoznaný text dokumentu",
+      "blocks": [
+        { "type": "p", "text": "Keď AI prečíta dokument, prečítaný text sa uloží a zobrazí v paneli dokumentu pod **Rozpoznaný text**. Vďaka nemu sa dá dokument hľadať podľa slov." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Otvorte dokument. Sekcia **Rozpoznaný text** je spočiatku zatvorená.",
+          "Stlačením **Rozpoznaný text** ju otvoríte. Text sa načíta až teraz a číta sa po stranách.",
+          "Stlačením **Kopírovať text** skopírujete všetko. Pri dokumente s viacerými stranami každá strana po prvej začína prázdnym riadkom a označením strany.",
+          "Opätovným stlačením **Rozpoznaný text** sekciu zatvoríte. Text sa v prehliadači neuchováva."
+        ] },
+        { "type": "list", "items": [
+          "Rozpoznaný text môže čítať a kopírovať každý, kto môže dokument otvoriť. Člen, ktorý osobu môže len zobraziť, ho tiež vidí, ale nemôže ho odstrániť.",
+          "Môže obsahovať chyby: poznámka „Môže obsahovať chyby“ sa zobrazuje, kým to platí, a text uvádza, že ho prečítala AI. Keď na tom záleží, skontrolujte samotný dokument.",
+          "Ak AI prečítala len prvé strany dlhého dokumentu, poznámka uvádza napríklad „Prvé 3 z 8 strán“. Prehľadať sa dajú len tie strany.",
+          "Člen, ktorý môže osobu meniť, môže stlačiť **Odstrániť rozpoznaný text** a potvrdiť. Text sa z aplikácie odstráni. Dokument a návrhy, ktoré ste už prijali, ostanú a dokument sa už nenájde podľa slov v ňom. Neskôr môžete znova spustiť AI a text prečítať.",
+          "Kópie v zálohách sa odstránia, keď zálohy vypršia.",
+          "Text sa zmaže spolu s dokumentom. Skrytý je spolu s archivovanými dokumentmi a archivovanými osobami.",
+          "Ak sa AI pre osobu vypne, zmaže sa aj rozpoznaný text dokumentov tejto osoby. Dokumenty sa potom dajú nájsť len podľa názvov."
+        ] },
+        { "type": "p", "text": "Kým AI dokument číta znova, môžete čítať predchádzajúci text a riadok vám povie, že prebieha nové čítanie. Pozri aj [Pomoc od AI a váš súhlas](health#ai)." }
+      ]
+    },
+    {
       "id": "exports",
       "title": "Tlač a exporty pre lekára",
       "blocks": [

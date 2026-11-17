@@ -444,6 +444,18 @@
             "area": "recipes",
             "screen": "recipe_shopping",
             "field": "dialog_title"
+        },
+        {
+            "key": "health.search",
+            "area": "health",
+            "screen": "document_search",
+            "field": "search"
+        },
+        {
+            "key": "health.document_text",
+            "area": "health",
+            "screen": "document_text",
+            "field": "recognised_text"
         }
     ]
 }

@@ -118,9 +118,10 @@ describe('Phase 7 copy parity', () => {
         }
     });
 
+    // health.search.* (Phase 13) has its plural form checked in i18n-phase13.test.js.
     it('detects exactly the ten plural keys among health.* strings', () => {
         const pipes = Object.entries(en)
-            .filter(([k, v]) => k.startsWith('health.') && !k.startsWith('health.ai.') && v.includes('|'))
+            .filter(([k, v]) => k.startsWith('health.') && !k.startsWith('health.ai.') && !k.startsWith('health.search.') && v.includes('|'))
             .map(([k]) => k);
         expect(pipes.sort()).toEqual([...PLURALS].sort());
     });

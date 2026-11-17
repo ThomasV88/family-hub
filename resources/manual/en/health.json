@@ -74,6 +74,51 @@
       ]
     },
     {
+      "id": "search",
+      "title": "Searching documents",
+      "blocks": [
+        { "type": "p", "text": "On the Health page, above the folders and the timeline, there is a box **Search documents**. It finds documents by their name and by the words inside them. The box appears when there is something to search, and it is not on the page when no person is shown." },
+        { "type": "steps", "title": "Where to click", "items": [
+          "Type at least two letters in the box. One letter is not enough, and nothing is searched until there are two.",
+          "Wait a moment, or press Enter or **Search**, to see the results.",
+          "Choose **Search in** to look in **All people** or only in the person you have open. This choice appears only when you can see more than one person.",
+          "Press a result to open that document. Press **Clear search** (or Escape in the box) to go back to the folders and the timeline."
+        ] },
+        { "type": "list", "items": [
+          "A result shows the document name, the person, the date it was added, the visit it belongs to and the page where the words were found, with the matching words highlighted.",
+          "Accents and word endings do not matter much: typing a word without accents, or in a slightly different form, still finds it.",
+          "AI reads a document only when someone asked it to. A document AI never read is found by its name only. Documents AI did read are also found by the words inside them.",
+          "You only ever see documents you may open. A document of a person you cannot see, or an archived document, is never found, and you get the same \"No documents found\" as for a word that is simply not there.",
+          "If a result says **Only the first pages are searched**, AI read only the beginning of a long document, so words further on are not found."
+        ] },
+        { "type": "warning", "text": "The text was read by AI and may contain mistakes. A word can be missed if it was misread. When the page says so, it shows a note above the results. If a search finds nothing, look at the document itself." },
+        { "type": "p", "text": "The words you type are used only for this search. They are not saved, not kept in the address of the page and not remembered after you leave the page." }
+      ]
+    },
+    {
+      "id": "recognised-text",
+      "title": "Recognised text of a document",
+      "blocks": [
+        { "type": "p", "text": "When AI has read a document, the text it read is saved and shown in the panel of the document under **Recognised text**. It is what makes the document searchable by its words." },
+        { "type": "steps", "title": "Where to click", "items": [
+          "Open the document. The **Recognised text** section is closed at first.",
+          "Press **Recognised text** to open it. The text is loaded only now and is read page by page.",
+          "Press **Copy text** to copy all of it. For a document with more pages, each page after the first starts with a blank line and its page label.",
+          "Press **Recognised text** again to close it. The text is not kept in the browser."
+        ] },
+        { "type": "list", "items": [
+          "Everyone who may open the document can read and copy its recognised text. A member who can only view the person sees it too, but cannot remove it.",
+          "It can contain mistakes: a note says \"May contain errors\" while that is the case, and the text says it was read by AI. Check the document itself when it matters.",
+          "If AI read only the first pages of a long document, a note says \"First 3 of 8 pages\", for example. Only those pages are searchable.",
+          "A member who can change the person can press **Remove recognised text** and confirm. The text is deleted from the app. The document and the suggestions you already accepted stay, and the document is no longer found by the words inside it. You can run AI again to read it later.",
+          "Copies in backups are removed when the backups expire.",
+          "The text is deleted with the document. It is hidden together with archived documents and archived people.",
+          "If AI is turned off for a person, the recognised text of that person's documents is deleted too. The documents can then be found by their names only."
+        ] },
+        { "type": "p", "text": "While AI is reading a document again, you can still read the earlier text, and a line tells you that a new reading is in progress. See also [AI help and your consent](health#ai)." }
+      ]
+    },
+    {
       "id": "exports",
       "title": "Printing and exports for a doctor",
       "blocks": [

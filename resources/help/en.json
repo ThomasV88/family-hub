@@ -49,7 +49,9 @@
         "recipe_form": "Recipe form",
         "recipe_detail": "Recipe detail",
         "recipe_shopping": "Add to shopping",
-        "recipe_import": "Reading a recipe from a web page"
+        "recipe_import": "Reading a recipe from a web page",
+        "document_search": "Document search",
+        "document_text": "Recognised text of a document"
     },
     "topics": {
         "tasks.visibility": {
@@ -347,6 +349,14 @@
         "recipes.shopping": {
             "title": "Add to shopping list",
             "text": "Choose a new list or one of your open lists. Check every ingredient before adding: untick what you already have and change the amount or unit. Matched ingredients keep the catalog name and get their picture (choose Add as typed item to use your own name). Everything is added together or nothing is. Ingredient notes are not copied."
+        },
+        "health.search": {
+            "title": "Search documents",
+            "text": "Searches the names of documents and the text AI read from them. Only documents you may open are searched, so a document you cannot see is never found. Documents AI never read are found by name only. The words you type are not saved and are not put in the address bar."
+        },
+        "health.document_text": {
+            "title": "Recognised text",
+            "text": "The text AI read from this document. Everyone who may open the document can read and copy it. It can contain errors, so check the document itself when it matters. Editors can remove it. Backups keep a copy until they expire."
         }
     }
 }

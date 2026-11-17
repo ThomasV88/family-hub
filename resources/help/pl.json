@@ -49,7 +49,9 @@
         "recipe_form": "Formularz przepisu",
         "recipe_detail": "Szczegóły przepisu",
         "recipe_shopping": "Dodawanie do zakupów",
-        "recipe_import": "Wczytywanie przepisu ze strony"
+        "recipe_import": "Wczytywanie przepisu ze strony",
+        "document_search": "Wyszukiwanie w dokumentach",
+        "document_text": "Rozpoznany tekst dokumentu"
     },
     "topics": {
         "tasks.visibility": {
@@ -347,6 +349,14 @@
         "recipes.shopping": {
             "title": "Dodawanie do listy zakupów",
             "text": "Wybierz nową listę albo jedną ze swoich otwartych list. Przed dodaniem sprawdź każdy składnik: odznacz to, co już masz, i zmień ilość lub jednostkę. Dopasowane składniki zachowują nazwę z katalogu i dostają obraz (własna nazwa: Dodaj jako wpisany produkt). Dodaje się wszystko naraz albo nic. Notatki do składników nie są kopiowane."
+        },
+        "health.search": {
+            "title": "Szukaj w dokumentach",
+            "text": "Przeszukuje nazwy dokumentów i tekst odczytany z nich przez AI. Przeszukiwane są tylko dokumenty, które możesz otworzyć, więc dokument, którego nie widzisz, nigdy się nie znajdzie. Dokumenty, których AI nigdy nie czytała, są znajdowane tylko po nazwie. Wpisane słowa nie są zapisywane ani umieszczane w adresie."
+        },
+        "health.document_text": {
+            "title": "Rozpoznany tekst",
+            "text": "Tekst odczytany przez AI z tego dokumentu. Może go czytać i kopiować każdy, kto może otworzyć dokument. Może zawierać błędy, dlatego gdy to ważne, sprawdź sam dokument. Usunąć go mogą tylko osoby z prawem edycji. Kopie zapasowe przechowują kopię do czasu wygaśnięcia."
         }
     }
 }

@@ -49,7 +49,9 @@
         "recipe_form": "Formulár receptu",
         "recipe_detail": "Detail receptu",
         "recipe_shopping": "Pridanie do nákupu",
-        "recipe_import": "Načítanie receptu z webovej stránky"
+        "recipe_import": "Načítanie receptu z webovej stránky",
+        "document_search": "Hľadanie v dokumentoch",
+        "document_text": "Rozpoznaný text dokumentu"
     },
     "topics": {
         "tasks.visibility": {
@@ -347,6 +349,14 @@
         "recipes.shopping": {
             "title": "Pridanie do nákupného zoznamu",
             "text": "Vyberte nový zoznam alebo jeden zo svojich otvorených zoznamov. Pred pridaním skontrolujte každú surovinu: odškrtnite, čo už máte, a upravte množstvo alebo jednotku. Priradené suroviny si ponechajú názov z katalógu a dostanú obrázok (vlastný názov: Pridať ako vlastnú položku). Pridá sa všetko naraz, alebo nič. Poznámky k surovinám sa neprenášajú."
+        },
+        "health.search": {
+            "title": "Hľadať v dokumentoch",
+            "text": "Hľadá v názvoch dokumentov a v texte, ktorý z nich AI prečítala. Hľadajú sa len dokumenty, ktoré môžete otvoriť, takže dokument, ktorý nevidíte, sa nikdy nenájde. Dokumenty, ktoré AI nikdy neprečítala, sa nájdu len podľa názvu. Slová, ktoré napíšete, sa neukladajú a nedávajú sa do adresy."
+        },
+        "health.document_text": {
+            "title": "Rozpoznaný text",
+            "text": "Text, ktorý AI prečítala z tohto dokumentu. Môže ho čítať a kopírovať každý, kto môže dokument otvoriť. Môže obsahovať chyby, preto keď na tom záleží, skontrolujte samotný dokument. Odstrániť ho môžu len tí, ktorí môžu upravovať. Zálohy uchovávajú kópiu, kým nevypršia."
         }
     }
 }

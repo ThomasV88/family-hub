@@ -1,0 +1,140 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync, readdirSync } from 'node:fs';
+
+const root = process.cwd();
+const LOCALES = ['en', 'sk', 'pl'];
+const read = (path) => JSON.parse(readFileSync(`${root}/${path}`, 'utf8'));
+const lang = Object.fromEntries(LOCALES.map((l) => [l, read(`lang/${l}.json`)]));
+const get = (obj, path) => path.split('.').reduce((o, k) => (o && typeof o === 'object' ? o[k] : undefined), obj);
+const leaves = (obj, prefix = '') => Object.entries(obj).flatMap(([k, v]) => (v !== null && typeof v === 'object' ? leaves(v, `${prefix}${k}.`) : [`${prefix}${k}`]));
+
+// Later Phase 13 UI plans append their subtrees here.
+const SUBTREES = ['health.search', 'health.document_text'];
+// Strings that are plural in en: the number of forms per locale (en 2, sk 4, pl 4).
+const FORMS = { en: 2, sk: 4, pl: 4 };
+const PLURALS = ['health.search.heading'];
+const placeholders = (s) => [...new Set([...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]))].sort();
+
+describe('phase 13 locale parity (lang)', () => {
+    for (const subtree of SUBTREES) {
+        it(`${subtree}: every key exists and is non-empty in en, sk and pl, and sk and pl add nothing`, () => {
+            const keys = leaves(get(lang.en, subtree)).map((k) => `${subtree}.${k}`);
+            expect(keys.length).toBeGreaterThan(0);
+            for (const locale of LOCALES) {
+                const missing = keys.filter((k) => { const v = get(lang[locale], k); return typeof v !== 'string' || v.trim() === ''; });
+                expect({ locale, missing }).toEqual({ locale, missing: [] });
+            }
+            const en = new Set(leaves(get(lang.en, subtree)));
+            for (const locale of ['sk', 'pl']) {
+                expect({ locale, extra: leaves(get(lang[locale], subtree) ?? {}).filter((k) => !en.has(k)) }).toEqual({ locale, extra: [] });
+            }
+        });
+
+        it(`${subtree}: placeholders match in every language`, () => {
+            for (const key of leaves(get(lang.en, subtree)).map((k) => `${subtree}.${k}`)) {
+                const base = placeholders(get(lang.en, key));
+                for (const locale of ['sk', 'pl']) expect({ locale, key, p: placeholders(get(lang[locale], key)) }).toEqual({ locale, key, p: base });
+            }
+        });
+    }
+
+    it.each(PLURALS)('%s has the locale number of plural forms', (key) => {
+        for (const locale of LOCALES) expect({ locale, forms: get(lang[locale], key).split(' | ').length }).toEqual({ locale, forms: FORMS[locale] });
+    });
+
+    it('carries the placeholders the components pass ({n}, {total}, {title})', () => {
+        expect(placeholders(get(lang.en, 'health.search.heading'))).toEqual(['n']);
+        expect(placeholders(get(lang.en, 'health.document_text.tag_partial'))).toEqual(['n', 'total']);
+        expect(placeholders(get(lang.en, 'health.document_text.partial_alert'))).toEqual(['n', 'total']);
+        expect(placeholders(get(lang.en, 'health.document_text.region_aria'))).toEqual(['title']);
+    });
+
+    it('has no leftover English in the sk and pl search and text copy', () => {
+        for (const locale of ['sk', 'pl']) {
+            for (const subtree of SUBTREES) {
+                for (const key of leaves(get(lang.en, subtree)).map((k) => `${subtree}.${k}`)) {
+                    if (['health.search.submit', 'health.search.page'].includes(key)) continue;
+                    expect({ locale, key, same: get(lang[locale], key) === get(lang.en, key) }).toEqual({ locale, key, same: false });
+                }
+            }
+        }
+    });
+});
+
+describe('phase 13 help tips (13-05)', () => {
+    const topics = read('resources/help/topics.json').topics;
+    const files = Object.fromEntries(LOCALES.map((l) => [l, read(`resources/help/${l}.json`)]));
+
+    it('registers health.search and health.document_text on their own screens', () => {
+        expect(topics.find((t) => t.key === 'health.search')).toEqual({ key: 'health.search', area: 'health', screen: 'document_search', field: 'search' });
+        expect(topics.find((t) => t.key === 'health.document_text')).toEqual({ key: 'health.document_text', area: 'health', screen: 'document_text', field: 'recognised_text' });
+    });
+
+    it('has a screen label and a text of at most 400 characters in every language', () => {
+        for (const locale of LOCALES) {
+            for (const screen of ['document_search', 'document_text']) expect(files[locale].screens[screen]?.trim(), `${locale} ${screen}`).toBeTruthy();
+            for (const key of ['health.search', 'health.document_text']) {
+                const text = files[locale].topics[key]?.text ?? '';
+                expect({ locale, key, ok: text.trim() !== '' && [...text].length <= 400 }).toEqual({ locale, key, ok: true });
+                expect(files[locale].topics[key].title.trim()).not.toBe('');
+            }
+        }
+    });
+
+    it('is placed in the components: next to the idle hint and next to the Recognised text title', () => {
+        expect(readFileSync(`${root}/resources/js/Health/Search/DocumentSearch.vue`, 'utf8')).toMatch(/<HelpTip topic="health\.search"/);
+        expect(readFileSync(`${root}/resources/js/Health/Text/RecognisedText.vue`, 'utf8')).toMatch(/<HelpTip topic="health\.document_text"/);
+    });
+
+    it('says in every language where the typed words go and who can read the text', () => {
+        expect(files.en.topics['health.search'].text).toContain('not saved');
+        expect(files.en.topics['health.document_text'].text).toContain('Everyone who may open the document');
+    });
+});
+
+describe('phase 13 manual (13-05)', () => {
+    const manual = Object.fromEntries(LOCALES.map((l) => [l, read(`resources/manual/${l}/health.json`)]));
+    const ids = (l) => manual[l].sections.map((s) => s.id);
+    const links = (l, id) => [...JSON.stringify(manual[l].sections.find((s) => s.id === id)).matchAll(/\]\(([^)]+)\)/g)].map((m) => m[1]);
+    const shape = (l, id) => manual[l].sections.find((s) => s.id === id).blocks.map((b) => `${b.type}${b.items ? b.items.length : ''}`).join(',');
+
+    it('has the same section ids in the same order in every language, with search and recognised-text right after documents', () => {
+        for (const locale of LOCALES) {
+            expect(ids(locale)).toEqual(ids('en'));
+            const at = ids(locale).indexOf('documents');
+            expect({ locale, next: ids(locale).slice(at + 1, at + 3) }).toEqual({ locale, next: ['search', 'recognised-text'] });
+        }
+    });
+
+    it('keeps the same block shapes and the same links in every language', () => {
+        for (const id of ['search', 'recognised-text']) {
+            expect(new Set(LOCALES.map((l) => shape(l, id))).size, `${id} block shapes differ`).toBe(1);
+            for (const l of ['sk', 'pl']) expect(links(l, id), `${l} ${id} links`).toEqual(links('en', id));
+        }
+        expect(links('en', 'recognised-text')).toEqual(['health#ai']);
+    });
+
+    it('covers the facts the plan lists in the English source', () => {
+        const search = JSON.stringify(manual.en.sections.find((s) => s.id === 'search'));
+        for (const fact of ['at least two letters', 'All people', 'name only', 'may open', 'may contain mistakes', 'Only the first pages are searched', 'not saved']) expect(search, fact).toContain(fact);
+        const text = JSON.stringify(manual.en.sections.find((s) => s.id === 'recognised-text'));
+        for (const fact of ['Copy text', 'Remove recognised text', 'Copies in backups', 'deleted with the document', 'archived', 'turned off for a person', 'First 3 of 8 pages']) expect(text, fact).toContain(fact);
+    });
+
+    it('keeps the existing sections (including ai) untouched in id', () => {
+        expect(ids('en')).toEqual(expect.arrayContaining(['people-access', 'visits', 'medications', 'allergies', 'vaccinations', 'documents', 'exports', 'emergency-card', 'archive-delete', 'ai']));
+    });
+});
+
+describe('phase 13 sources (13-05)', () => {
+    it('uses no raw health.search or health.document_text key that the language files lack', () => {
+        for (const dir of ['resources/js/Health/Search', 'resources/js/Health/Text']) {
+            for (const file of readdirSync(`${root}/${dir}`)) {
+                const src = readFileSync(`${root}/${dir}/${file}`, 'utf8');
+                for (const m of src.matchAll(/t\('(health\.(?:search|document_text)\.[a-z_]+)'/g)) {
+                    for (const locale of LOCALES) expect({ file, key: m[1], locale, ok: typeof get(lang[locale], m[1]) === 'string' }).toEqual({ file, key: m[1], locale, ok: true });
+                }
+            }
+        }
+    });
+});
