@@ -627,10 +627,10 @@
             "child": "Dziecko",
             "grandparent": "Dziadek lub babcia",
             "guest": "Gość",
-            "parent_hint": "Zadania, Wishlist, Finanse i Zakupy: edycja. Zdrowie: brak.",
-            "child_hint": "Zadania, Wishlist i Zakupy: edycja. Finanse i Zdrowie: brak.",
-            "grandparent_hint": "Zadania, Wishlist i Zakupy: edycja. Finanse i Zdrowie: brak.",
-            "guest_hint": "Zadania i Zakupy: tylko odczyt. Wszystko inne: brak."
+            "parent_hint": "Zadania, Wishlist, Finanse, Zakupy i Receptarz: edycja. Zdrowie: brak.",
+            "child_hint": "Zadania, Wishlist, Zakupy i Receptarz: edycja. Finanse i Zdrowie: brak.",
+            "grandparent_hint": "Zadania, Wishlist, Zakupy i Receptarz: edycja. Finanse i Zdrowie: brak.",
+            "guest_hint": "Zadania, Zakupy i Receptarz: tylko odczyt. Wszystko inne: brak."
         },
         "apply_label": "Zastosuj ustawienie wstępne",
         "apply": "Zastosuj",
@@ -646,6 +646,7 @@
             "finance": "Finanse",
             "health": "Zdrowie",
             "shopping": "Zakupy",
+            "recipes": "Receptarz",
             "settings": "Ustawienia"
         },
         "restricted": "Domyślnie ograniczone",

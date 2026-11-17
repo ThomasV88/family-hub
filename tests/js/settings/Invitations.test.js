@@ -35,12 +35,12 @@ import { useToast } from '../../../resources/js/Components/ui/useToast.js';
 
 const SECTIONS = [{ key: 'members', href: '/settings/members', labelKey: 'settings.section.members', icon: 'users' }];
 const PRESETS = {
-    parent: { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'none', shopping: 'edit' },
-    child: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none', shopping: 'edit' },
-    grandparent: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none', shopping: 'edit' },
-    guest: { todo: 'view', wishlist: 'none', finance: 'none', health: 'none', shopping: 'view' },
+    parent: { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'none', shopping: 'edit', recipes: 'edit' },
+    child: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none', shopping: 'edit', recipes: 'edit' },
+    grandparent: { todo: 'edit', wishlist: 'edit', finance: 'none', health: 'none', shopping: 'edit', recipes: 'edit' },
+    guest: { todo: 'view', wishlist: 'none', finance: 'none', health: 'none', shopping: 'view', recipes: 'view' },
 };
-const MEMBERS = [{ id: 1, name: 'Anna', email: 'anna@example.test', isAdmin: true, isSelf: true, access: { todo: 'none', wishlist: 'none', finance: 'none', health: 'none', shopping: 'none' } }];
+const MEMBERS = [{ id: 1, name: 'Anna', email: 'anna@example.test', isAdmin: true, isSelf: true, access: { todo: 'none', wishlist: 'none', finance: 'none', health: 'none', shopping: 'none', recipes: 'none' } }];
 const future = new Date(Date.now() + 5 * 864e5).toISOString();
 const INVITATIONS = [
     { id: 11, email: 'eva@example.test', preset: 'child', locale: 'sk', state: 'valid', expiresAt: future, mailFailed: true },
@@ -114,7 +114,7 @@ describe('Invite dialog', () => {
         expect(d.querySelectorAll('select')[0].options).toHaveLength(4);
         expect(d.textContent).toContain('The invite works for 7 days and can be used once.');
         expect(d.textContent).toContain('Starting access');
-        expect(d.textContent).toContain('To-do, Wishlist and Shopping: edit. Finances and Health: none.');
+        expect(d.textContent).toContain('To-do, Wishlist, Shopping and Recipes: edit. Finances and Health: none.');
         expect(btn(d, 'Send invite')).toBeTruthy();
         expect(document.activeElement).toBe(d.querySelector('input[type=email]'));
     });

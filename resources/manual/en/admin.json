@@ -78,19 +78,19 @@
       "id": "permissions",
       "title": "Permissions for each module",
       "blocks": [
-        { "type": "p", "text": "Each member has a level for each module (To-do, Wishlist, Finances, Health and Shopping): **None** (cannot see it), **View** (can read) or **Edit** (can read and change). The server enforces this on every page." },
+        { "type": "p", "text": "Each member has a level for each module (To-do, Wishlist, Finances, Health, Shopping and Recipes): **None** (cannot see it), **View** (can read) or **Edit** (can read and change). The server enforces this on every page." },
         { "type": "steps", "title": "Where to click", "items": [
           "In **Members and access**, press **Manage** next to a member.",
           "On the **Permissions** tab, choose a **Preset** and press **Apply**, or set each module yourself.",
           "Press **Save permissions**."
         ] },
         { "type": "list", "items": [
-          "**Parent**: To-do, Wishlist, Finances and Shopping: edit. Health: none.",
-          "**Child**: To-do, Wishlist and Shopping: edit. Finances and Health: none.",
-          "**Grandparent**: To-do, Wishlist and Shopping: edit. Finances and Health: none.",
-          "**Guest**: To-do and Shopping: view only. Everything else: none."
+          "**Parent**: To-do, Wishlist, Finances, Shopping and Recipes: edit. Health: none.",
+          "**Child**: To-do, Wishlist, Shopping and Recipes: edit. Finances and Health: none.",
+          "**Grandparent**: To-do, Wishlist, Shopping and Recipes: edit. Finances and Health: none.",
+          "**Guest**: To-do, Shopping and Recipes: view only. Everything else: none."
         ] },
-        { "type": "p", "text": "The **Permission matrix** tab shows all members and modules in one table, so you can check everyone at a glance. Health and Finances are restricted by default. Settings are for administrators only." }
+        { "type": "p", "text": "The **Permission matrix** tab shows all members and modules in one table, so you can check everyone at a glance. Health and Finances are restricted by default. Settings are for administrators only. Recipes are private or shared by their author, and there is no administrator bypass: an administrator sees a recipe only when its author shared it." }
       ]
     },
     {

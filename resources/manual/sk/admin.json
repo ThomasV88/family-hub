@@ -78,19 +78,19 @@
       "id": "permissions",
       "title": "Oprávnenia pre jednotlivé moduly",
       "blocks": [
-        { "type": "p", "text": "Každý člen má úroveň pre každý modul (Úlohy, Wishlist, Financie, Zdravie a Nákupy): **Žiadny** (nevidí ho), **Čítanie** (môže čítať) alebo **Úpravy** (môže čítať aj meniť). Server to vynucuje na každej stránke." },
+        { "type": "p", "text": "Každý člen má úroveň pre každý modul (Úlohy, Wishlist, Financie, Zdravie, Nákupy a Receptár): **Žiadny** (nevidí ho), **Čítanie** (môže čítať) alebo **Úpravy** (môže čítať aj meniť). Server to vynucuje na každej stránke." },
         { "type": "steps", "title": "Kam kliknúť", "items": [
           "V **Členovia a prístup** stlačte **Spravovať** pri členovi.",
           "Na karte **Oprávnenia** vyberte **Predvoľba** a stlačte **Použiť**, alebo nastavte každý modul sami.",
           "Stlačte **Uložiť oprávnenia**."
         ] },
         { "type": "list", "items": [
-          "**Rodič**: Úlohy, Wishlist, Financie a Nákupy: úpravy. Zdravie: žiadny.",
-          "**Dieťa**: Úlohy, Wishlist a Nákupy: úpravy. Financie a Zdravie: žiadny.",
-          "**Starý rodič**: Úlohy, Wishlist a Nákupy: úpravy. Financie a Zdravie: žiadny.",
-          "**Hosť**: Úlohy a Nákupy: len čítanie. Všetko ostatné: žiadny."
+          "**Rodič**: Úlohy, Wishlist, Financie, Nákupy a Receptár: úpravy. Zdravie: žiadny.",
+          "**Dieťa**: Úlohy, Wishlist, Nákupy a Receptár: úpravy. Financie a Zdravie: žiadny.",
+          "**Starý rodič**: Úlohy, Wishlist, Nákupy a Receptár: úpravy. Financie a Zdravie: žiadny.",
+          "**Hosť**: Úlohy, Nákupy a Receptár: len čítanie. Všetko ostatné: žiadny."
         ] },
-        { "type": "p", "text": "Karta **Matica oprávnení** ukazuje všetkých členov a moduly v jednej tabuľke, takže môžete skontrolovať všetkých naraz. Zdravie a Financie sú predvolene obmedzené. Nastavenia sú len pre správcov." }
+        { "type": "p", "text": "Karta **Matica oprávnení** ukazuje všetkých členov a moduly v jednej tabuľke, takže môžete skontrolovať všetkých naraz. Zdravie a Financie sú predvolene obmedzené. Nastavenia sú len pre správcov. Recepty sú súkromné alebo zdieľané ich autorom a správca nemá výnimku: správca vidí recept len vtedy, keď ho autor zdieľal." }
       ]
     },
     {
