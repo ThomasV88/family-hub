@@ -3084,7 +3084,8 @@
             "remove_cancel": "Zostaw zdjęcie",
             "cap": "Możesz dodać najwyżej {n} zdjęć.",
             "uploading": "Przesyłam zdjęcie",
-            "some_failed": "Przepis został zapisany, ale nie udało się dodać {n} zdjęcia. Możesz dodać je ponownie w edycji. | Przepis został zapisany, ale nie udało się dodać {n} zdjęć. Możesz dodać je ponownie w edycji. | Przepis został zapisany, ale nie udało się dodać {n} zdjęć. Możesz dodać je ponownie w edycji. | Przepis został zapisany, ale nie udało się dodać {n} zdjęcia. Możesz dodać je ponownie w edycji."
+            "some_failed": "Przepis został zapisany, ale nie udało się dodać {n} zdjęcia. Możesz dodać je ponownie w edycji. | Przepis został zapisany, ale nie udało się dodać {n} zdjęć. Możesz dodać je ponownie w edycji. | Przepis został zapisany, ale nie udało się dodać {n} zdjęć. Możesz dodać je ponownie w edycji. | Przepis został zapisany, ale nie udało się dodać {n} zdjęcia. Możesz dodać je ponownie w edycji.",
+            "main_failed": "Przepis został zapisany, ale nie udało się ustawić wybranego zdjęcia głównego. Możesz wybrać je ponownie w edycji."
         },
         "image": {
             "err_type": "Nie udało się użyć tego obrazu. Wybierz JPG, PNG lub WebP i spróbuj ponownie.",

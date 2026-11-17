@@ -3084,7 +3084,8 @@
             "remove_cancel": "Ponechať fotku",
             "cap": "Môžete pridať najviac {n} fotiek.",
             "uploading": "Nahrávam fotku",
-            "some_failed": "Recept sa uložil, ale {n} fotku sa nepodarilo pridať. Môžete ju pridať znova pri úprave. | Recept sa uložil, ale {n} fotky sa nepodarilo pridať. Môžete ich pridať znova pri úprave. | Recept sa uložil, ale {n} fotiek sa nepodarilo pridať. Môžete ich pridať znova pri úprave. | Recept sa uložil, ale {n} fotiek sa nepodarilo pridať. Môžete ich pridať znova pri úprave."
+            "some_failed": "Recept sa uložil, ale {n} fotku sa nepodarilo pridať. Môžete ju pridať znova pri úprave. | Recept sa uložil, ale {n} fotky sa nepodarilo pridať. Môžete ich pridať znova pri úprave. | Recept sa uložil, ale {n} fotiek sa nepodarilo pridať. Môžete ich pridať znova pri úprave. | Recept sa uložil, ale {n} fotiek sa nepodarilo pridať. Môžete ich pridať znova pri úprave.",
+            "main_failed": "Recept sa uložil, ale vybranú hlavnú fotku sa nepodarilo nastaviť. Môžete ju vybrať znova pri úprave."
         },
         "image": {
             "err_type": "Tento obrázok sa nepodarilo použiť. Vyberte JPG, PNG alebo WebP a skúste to znova.",

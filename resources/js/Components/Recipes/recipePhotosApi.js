@@ -60,7 +60,8 @@ export const removePhoto = (recipeId, photoId) => call(`${base(recipeId)}/${Numb
 /**
  * Uploads queued files one by one in order (create flow, after the recipe exists), then makes `mainKey` main when it is not the
  * first stored photo. A failure of one file does not stop the others, except when the server refuses everything
- * (403, 404, 429), which counts the rest as failed. Resolves { failed } (number of files not stored).
+ * (403, 404, 429), which counts the rest as failed. Resolves { failed, mainFailed }: the number of files not stored, and whether
+ * the member's chosen main photo could not be made main although every file was stored (the first stored photo is main then).
  */
 export async function uploadQueue(recipeId, queue, mainKey) {
     const stored = [];
@@ -78,7 +79,11 @@ export async function uploadQueue(recipeId, queue, mainKey) {
         }
     }
     const chosen = stored.find((s) => s.key === mainKey);
-    if (chosen && stored[0] && chosen.key !== stored[0].key && chosen.id) await makeMain(recipeId, chosen.id);
+    let mainFailed = false;
+    if (chosen && stored[0] && chosen.key !== stored[0].key && chosen.id) {
+        const result = await makeMain(recipeId, chosen.id);
+        mainFailed = !result?.ok;
+    }
 
-    return { failed };
+    return { failed, mainFailed };
 }

@@ -235,7 +235,7 @@ describe('recipePhotosApi', () => {
         secureMock.mockResolvedValue({ ok: true, status: 200, data: { photos: [] } });
         const queue = [{ key: 'a', file: file('a.jpg') }, { key: 'b', file: file('b.jpg') }, { key: 'c', file: file('c.jpg') }];
         const result = await uploadQueue(9, queue, 'c');
-        expect(result).toEqual({ failed: 0 });
+        expect(result).toEqual({ failed: 0, mainFailed: false });
         expect(fetchMock.mock.calls.map((c) => c[1].body.get('image').name)).toEqual(['a.jpg', 'b.jpg', 'c.jpg']);
         expect(secureMock).toHaveBeenCalledTimes(1);
         expect(secureMock.mock.calls[0][0]).toBe('/recipes/9/photos/13/main');
@@ -244,12 +244,19 @@ describe('recipePhotosApi', () => {
     it('uploadQueue does not call main when the first is main, counts failures and stops on 429', async () => {
         fetchMock.mockResolvedValueOnce(json(201, { photo: stored(1), photos: [] })).mockResolvedValueOnce(json(500, {})).mockResolvedValueOnce(json(201, { photo: stored(3), photos: [] }));
         const queue = ['a', 'b', 'c'].map((key) => ({ key, file: file(`${key}.jpg`) }));
-        expect(await uploadQueue(9, queue, 'a')).toEqual({ failed: 1 });
+        expect(await uploadQueue(9, queue, 'a')).toEqual({ failed: 1, mainFailed: false });
         expect(secureMock).not.toHaveBeenCalled();
         fetchMock.mockReset();
         fetchMock.mockResolvedValueOnce(json(201, { photo: stored(1), photos: [] })).mockResolvedValueOnce(json(429, {}));
-        expect(await uploadQueue(9, queue, 'a')).toEqual({ failed: 2 });
+        expect(await uploadQueue(9, queue, 'a')).toEqual({ failed: 2, mainFailed: false });
         expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('uploadQueue reports mainFailed when the chosen main photo could not be set', async () => {
+        fetchMock.mockImplementation(async () => json(201, { photo: stored(fetchMock.mock.calls.length + 10), photos: [] }));
+        secureMock.mockResolvedValue({ ok: false, status: 500, data: {} });
+        const queue = [{ key: 'a', file: file('a.jpg') }, { key: 'b', file: file('b.jpg') }];
+        expect(await uploadQueue(9, queue, 'b')).toEqual({ failed: 0, mainFailed: true });
     });
 
     it('uploadPhoto never throws and sends the XSRF header', async () => {

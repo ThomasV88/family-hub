@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, reactive, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { ExternalLink, Lock, Sparkles, Users } from '@lucide/vue';
@@ -21,6 +21,7 @@ import IngredientRows from '../../Components/Recipes/IngredientRows.vue';
 import RecipePhotosField from '../../Components/Recipes/RecipePhotosField.vue';
 import StepRows from '../../Components/Recipes/StepRows.vue';
 import { uploadQueue } from '../../Components/Recipes/recipePhotosApi.js';
+import { useBackGuard } from '../../Components/Recipes/useBackGuard.js';
 import { failureKey, firstMessage, isGone } from '../../Components/Recipes/recipeFailure.js';
 import { formatQuantityInput, parseQuantity, quantityForRequest } from '../../Components/Recipes/quantityInput.js';
 
@@ -149,6 +150,11 @@ const onIngredientEdit = ({ key, field }) => {
 };
 const onStepEdit = ({ key }) => { delete stepErrors[key]; clear('steps'); };
 
+// ---- Idempotency of "create": one random token for the life of this form.
+const clientToken = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`).replace(/[^A-Za-z0-9_-]/g, '');
+
 // ---- Dirty tracking and the leave guard.
 const snapshot = () => JSON.stringify({
     ...form,
@@ -163,12 +169,14 @@ const dirty = computed(() => review.value || snapshot() !== initial || photoQueu
 let allowNext = false;
 const leaveOpen = ref(false);
 let pendingVisit = null;
+let pendingBack = false;
 
 const offBefore = router.on?.('before', (event) => {
     if (allowNext) { allowNext = false; return undefined; }
     if (!dirty.value) return undefined;
     const visit = event?.detail?.visit;
     pendingVisit = visit ? { url: String(visit.url?.href ?? visit.url), method: visit.method, data: visit.data } : null;
+    pendingBack = false;
     leaveOpen.value = true;
 
     return false;
@@ -179,19 +187,41 @@ function onBeforeUnload(event) {
     event.returnValue = '';
 }
 window.addEventListener('beforeunload', onBeforeUnload);
+
+// Browser Back and the iOS swipe-back are history steps, not Inertia visits (see useBackGuard for what that covers).
+const backGuard = useBackGuard({
+    active: () => dirty.value && !allowNext,
+    onBlock: () => {
+        pendingVisit = null;
+        pendingBack = true;
+        leaveOpen.value = true;
+    },
+});
+watch(dirty, (isDirty) => { if (isDirty) backGuard.arm(); }, { immediate: true });
 onBeforeUnmount(() => {
     offBefore?.();
     window.removeEventListener('beforeunload', onBeforeUnload);
+    backGuard.dispose();
 });
+
+/** Visit options that swallow the guard's sentinel entry, so Back after saving does not land on this form twice. */
+function visitOptions(extra = {}) {
+    return { ...extra, replace: backGuard.armed() };
+}
 
 function leave() {
     const visit = pendingVisit;
+    const back = pendingBack;
     pendingVisit = null;
+    pendingBack = false;
     allowNext = true;
-    if (visit) router.visit(visit.url, { method: visit.method ?? 'get', data: visit.method && visit.method !== 'get' ? visit.data : undefined });
+    if (back) backGuard.leave();
+    else if (visit) router.visit(visit.url, visitOptions({ method: visit.method ?? 'get', data: visit.method && visit.method !== 'get' ? visit.data : undefined }));
 }
 function stay() {
     pendingVisit = null;
+    if (pendingBack) backGuard.stay();
+    pendingBack = false;
 }
 
 const backUrl = computed(() => (editing.value ? `/recipes/${props.recipe.id}` : '/recipes'));
@@ -276,6 +306,8 @@ function build() {
     };
     // Saving a reviewed draft marks the import as used; the server ignores an id that is no longer usable.
     if (review.value) data.import_id = pre.importId;
+    // One token per form session: a retry after a lost answer returns the recipe the first request created (no duplicate).
+    if (!editing.value) data.client_token = clientToken;
 
     return { data, ingredientKeys: ingredients.map((r) => r.key), stepKeys: steps.map((s) => s.key) };
 }
@@ -327,7 +359,7 @@ function failed(status) {
     if (isGone(status)) {
         showToast(t('recipes.error.not_found'));
         allowNext = true;
-        router.visit('/recipes');
+        router.visit('/recipes', visitOptions());
 
         return;
     }
@@ -369,25 +401,33 @@ async function send(built) {
         return;
     }
     const id = response.data?.id;
+    if (id === undefined || id === null || id === '') {
+        // An answer without the id: never visit /recipes/undefined. The token makes the retry return the recipe if it exists.
+        failed(0);
+
+        return;
+    }
     // The recipe exists now. Photos that fail do not lose it: the member is told and can add them again in Edit.
     const queue = photoQueue.value;
     const main = queue.find((q) => q.isMain)?.key ?? queue[0]?.key;
-    const { failed: failedPhotos } = queue.length > 0 ? await uploadQueue(id, queue, main) : { failed: 0 };
-    showToast(failedPhotos > 0 ? t('recipes.photos.some_failed', { n: failedPhotos }, failedPhotos) : t('recipes.toast.saved'));
+    const { failed: failedPhotos, mainFailed } = queue.length > 0 ? await uploadQueue(id, queue, main) : { failed: 0, mainFailed: false };
+    showToast(failedPhotos > 0
+        ? t('recipes.photos.some_failed', { n: failedPhotos }, failedPhotos)
+        : mainFailed ? t('recipes.photos.main_failed') : t('recipes.toast.saved'));
     photoQueue.value = [];
     allowNext = true;
-    router.visit(`/recipes/${id}`, { onFinish: () => { saving.value = false; } });
+    router.visit(`/recipes/${id}`, visitOptions({ onFinish: () => { saving.value = false; } }));
 }
 
 function sendEdit(built) {
     allowNext = true;
-    router.put(`/recipes/${props.recipe.id}`, built.data, {
+    router.put(`/recipes/${props.recipe.id}`, built.data, visitOptions({
         preserveScroll: true,
         onError: (bag) => applyServerErrors(bag, built),
         onHttpException: (response) => { failed(response?.status); return false; },
         onNetworkError: () => failed(0),
         onFinish: () => { saving.value = false; allowNext = false; },
-    });
+    }));
 }
 
 const pageTitle = computed(() => t(editing.value ? 'recipes.form.title_edit' : review.value ? 'recipes.review.title' : 'recipes.form.title_new'));

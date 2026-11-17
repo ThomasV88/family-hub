@@ -122,6 +122,54 @@ describe('Recipe form: create', () => {
         expect(useToast().toasts.map((t) => t.message)).toContain('Recipe saved');
     });
 
+    it('sends one client token per form session, the same on a retry after a failure', async () => {
+        fetchMock.mockResolvedValueOnce({ ok: false, status: 0, error: 'failed', data: {} });
+        fetchMock.mockResolvedValueOnce({ ok: true, status: 201, data: { id: 9 } });
+        mountForm();
+        await fillValid();
+        await save();
+        await save();
+        const tokens = fetchMock.mock.calls.map(([, o]) => o.body.client_token);
+        expect(tokens[0]).toMatch(/^[A-Za-z0-9_-]{16,64}$/);
+        expect(tokens[1]).toBe(tokens[0]);
+        current.unmount();
+        fetchMock.mockResolvedValueOnce({ ok: true, status: 201, data: { id: 10 } });
+        mountForm();
+        await fillValid();
+        await save();
+        expect(fetchMock.mock.calls[2][1].body.client_token).not.toBe(tokens[0]);
+    });
+
+    it('never visits /recipes/undefined when the answer has no id', async () => {
+        fetchMock.mockResolvedValue({ ok: true, status: 201, data: {} });
+        mountForm();
+        await fillValid();
+        await save();
+        expect(routerMock.visit).not.toHaveBeenCalled();
+        expect($('[data-testid="form-alert"]').exists()).toBe(true);
+        expect($('[data-testid="save"]').attributes('disabled')).toBeUndefined();
+    });
+
+    it('tells the member when the chosen main photo could not be set after the recipe was saved', async () => {
+        const photoOk = (id) => ({ ok: true, status: 201, json: async () => ({ photo: { id }, photos: [] }) });
+        const realFetch = globalThis.fetch;
+        globalThis.fetch = vi.fn().mockResolvedValueOnce(photoOk(31)).mockResolvedValueOnce(photoOk(32));
+        fetchMock.mockImplementation(async (url) => (url === '/recipes'
+            ? { ok: true, status: 201, data: { id: 9 } }
+            : { ok: false, status: 500, data: {} }));
+        try {
+            mountForm();
+            await fillValid();
+            const file = (n) => new File(['x'], n, { type: 'image/png' });
+            current.findComponent({ name: 'RecipePhotosField' }).vm.$emit('update:queue', [{ key: 'a', file: file('a.png'), isMain: false }, { key: 'b', file: file('b.png'), isMain: true }]);
+            await flushPromises();
+            await save();
+            expect(useToast().toasts.map((x) => x.message)).toEqual(['The recipe was saved, but your chosen main photo could not be set. You can choose it again in Edit.']);
+        } finally {
+            globalThis.fetch = realFetch;
+        }
+    });
+
     it('drops blank rows from the request and ignores a second click while saving', async () => {
         let resolve;
         fetchMock.mockReturnValue(new Promise((r) => { resolve = r; }));
@@ -176,7 +224,7 @@ describe('Recipe form: create', () => {
         mountForm();
         await fillValid();
         await save();
-        expect(routerMock.visit).toHaveBeenCalledWith('/recipes');
+        expect(routerMock.visit).toHaveBeenCalledWith('/recipes', expect.any(Object));
         expect(useToast().toasts.map((t) => t.message).join(' ')).toContain('not available');
     });
 
@@ -431,6 +479,67 @@ describe('Recipe form: leaving', () => {
         mountForm({ recipe: EXISTING });
         await click($('[data-testid="cancel"]').element);
         expect(routerMock.visit).toHaveBeenCalledWith('/recipes/12');
+    });
+
+    describe('browser Back', () => {
+        let pushState;
+        let go;
+        beforeEach(() => {
+            pushState = vi.spyOn(window.history, 'pushState');
+            go = vi.spyOn(window.history, 'go').mockImplementation(() => {});
+        });
+        afterEach(() => { pushState.mockRestore(); go.mockRestore(); });
+        const back = () => window.dispatchEvent(new PopStateEvent('popstate'));
+
+        it('puts no sentinel on a clean form and lets Back through', async () => {
+            mountForm();
+            expect(pushState).not.toHaveBeenCalled();
+            back();
+            expect(document.body.textContent).not.toContain('Leave without saving?');
+        });
+
+        it('asks on Back once the form is dirty, and Keep editing re-arms the guard', async () => {
+            mountForm();
+            await $('[data-testid="title-input"]').setValue('Draft');
+            expect(pushState).toHaveBeenCalledTimes(1);
+            back();
+            await flushPromises();
+            expect(document.body.textContent).toContain('Leave without saving?');
+            expect(go).not.toHaveBeenCalled();
+            await click(body('Keep editing'));
+            expect(pushState).toHaveBeenCalledTimes(2);
+            back();
+            await flushPromises();
+            expect(document.body.textContent).toContain('Leave without saving?');
+        });
+
+        it('goes one more step back on Leave and lets that step through', async () => {
+            mountForm();
+            await $('[data-testid="title-input"]').setValue('Draft');
+            back();
+            await flushPromises();
+            await click(body('Leave'));
+            expect(go).toHaveBeenCalledWith(-1);
+            back();
+            await flushPromises();
+            expect(go).toHaveBeenCalledTimes(1);
+        });
+
+        it('guards an unsaved import draft from the start', async () => {
+            mountForm({ prefill: { importId: 'abc', title: 'Soup', ingredients: [{ name: 'x' }], steps: [{ body: 'y' }], aiFields: ['title'], sourceUrl: 'https://a.example/b', sourceHost: 'a.example' } });
+            expect(pushState).toHaveBeenCalledTimes(1);
+            back();
+            await flushPromises();
+            expect(document.body.textContent).toContain('Leave without saving?');
+        });
+
+        it('replaces the sentinel entry when saving so Back does not land on the form twice', async () => {
+            fetchMock.mockResolvedValue({ ok: true, status: 201, data: { id: 9 } });
+            mountForm();
+            await fillValid();
+            await save();
+            expect(routerMock.visit).toHaveBeenCalledWith('/recipes/9', expect.objectContaining({ replace: true }));
+        });
     });
 
     it('sets beforeunload only while dirty', async () => {

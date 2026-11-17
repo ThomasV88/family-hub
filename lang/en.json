@@ -3084,7 +3084,8 @@
             "remove_cancel": "Keep photo",
             "cap": "You can add up to {n} photos.",
             "uploading": "Uploading photo",
-            "some_failed": "The recipe was saved, but {n} photo could not be added. You can add it again in Edit. | The recipe was saved, but {n} photos could not be added. You can add them again in Edit."
+            "some_failed": "The recipe was saved, but {n} photo could not be added. You can add it again in Edit. | The recipe was saved, but {n} photos could not be added. You can add them again in Edit.",
+            "main_failed": "The recipe was saved, but your chosen main photo could not be set. You can choose it again in Edit."
         },
         "image": {
             "err_type": "We could not use that picture. Choose a JPG, PNG or WebP image and try again.",
