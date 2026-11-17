@@ -7,6 +7,7 @@ use App\Models\ShoppingUnit;
 use App\Models\User;
 use App\Recipes\Images\RecipeImageStore;
 use App\Recipes\Queries\RecipeQuery;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -24,19 +25,53 @@ final class RecipeService
         private readonly RecipeImageStore $images,
     ) {}
 
-    /** @param array<string, mixed> $data */
+    /**
+     * @param  array<string, mixed>  $data  may carry `client_token`: a retry with the same token returns the recipe the first
+     *                                      request created (also when two requests race) instead of creating a second one
+     */
     public function create(User $actor, array $data, ?string $importId = null): Recipe
     {
         abort_unless($this->access->hasEdit($actor), 403);
         $clean = $this->normalise($data);
+        $token = isset($data['client_token']) && is_string($data['client_token']) && $data['client_token'] !== '' ? $data['client_token'] : null;
+        if ($token !== null) {
+            $existing = $this->byToken($actor, $token);
+            if ($existing !== null) {
+                return $existing;
+            }
+        }
 
-        return DB::transaction(function () use ($actor, $clean, $data, $importId): Recipe {
+        try {
+            return $this->createNew($actor, $clean, $data, $importId, $token);
+        } catch (UniqueConstraintViolationException $e) {
+            // Two requests with the same token raced: the other one won.
+            $winner = $token === null ? null : $this->byToken($actor, $token);
+            if ($winner === null) {
+                throw $e;
+            }
+
+            return $winner;
+        }
+    }
+
+    private function byToken(User $actor, string $token): ?Recipe
+    {
+        return Recipe::query()->where('author_id', $actor->id)->where('client_token', $token)->first();
+    }
+
+    /**
+     * @param  array<string, mixed>  $clean
+     * @param  array<string, mixed>  $data
+     */
+    private function createNew(User $actor, array $clean, array $data, ?string $importId, ?string $token): Recipe
+    {
+        return DB::transaction(function () use ($actor, $clean, $data, $importId, $token): Recipe {
             // A ready draft of this member is consumed by the save; a pruned, foreign or unknown one just means "manual".
             $import = $importId !== null && Str::isUuid($importId)
                 ? DB::table('recipe_imports')->where('id', $importId)->where('user_id', $actor->id)->where('status', 'ready')->lockForUpdate()->value('id')
                 : null;
             $recipe = new Recipe;
-            $recipe->forceFill(['author_id' => $actor->id, 'created_via' => $import !== null || ($data['created_via'] ?? 'manual') === 'url' ? 'url' : 'manual']);
+            $recipe->forceFill(['author_id' => $actor->id, 'client_token' => $token, 'created_via' => $import !== null || ($data['created_via'] ?? 'manual') === 'url' ? 'url' : 'manual']);
             $this->fillHeader($recipe, $clean);
             $recipe->save();
 

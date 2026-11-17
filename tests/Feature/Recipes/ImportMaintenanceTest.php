@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\RecipeImport;
+use App\Recipes\Import\RecipeImportQuery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -118,6 +119,6 @@ it('never touches medical tables', function () {
 });
 
 it('refuses an unsupported column in the generic reaper query', function () {
-    expect(fn () => app(App\Recipes\Import\RecipeImportQuery::class)->idsStuck('queued', 'created_at; drop table users', 5))
+    expect(fn () => app(RecipeImportQuery::class)->idsStuck('queued', 'created_at; drop table users', 5))
         ->toThrow(InvalidArgumentException::class);
 });

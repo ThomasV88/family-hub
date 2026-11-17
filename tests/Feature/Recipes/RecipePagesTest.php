@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\RecipePhoto;
+use App\Recipes\Queries\RecipeQuery;
 use App\Recipes\RecipeStateService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -57,7 +58,7 @@ it('refuses a page number that would overflow the offset instead of answering 50
     $this->actingAs($me)->get('/recipes?page=999999999999999999')->assertSessionHasErrors('page');
     $this->actingAs($me)->get('/recipes?page=1001')->assertSessionHasErrors('page');
     $this->actingAs($me)->get('/recipes?page=1000')->assertOk();
-    expect(app(App\Recipes\Queries\RecipeQuery::class)->index($me, [], PHP_INT_MAX)['items'])->toHaveCount(0);
+    expect(app(RecipeQuery::class)->index($me, [], PHP_INT_MAX)['items'])->toHaveCount(0);
 });
 
 it('filters by favourites, shows and refuses a bad show value', function () {

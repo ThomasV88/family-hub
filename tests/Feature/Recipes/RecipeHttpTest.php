@@ -2,8 +2,10 @@
 
 use App\Models\Recipe;
 use App\Models\ShoppingUnit;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Support\RecipeFixtures;
 
 uses(RefreshDatabase::class);
@@ -163,4 +165,43 @@ it('answers 422 on the source address field for credentials in the address', fun
 
     $this->actingAs($a)->postJson('/recipes', rcpBody(['source_url' => 'https://trusted.example@evil.example/']))
         ->assertStatus(422)->assertJsonValidationErrors('source_url');
+});
+
+it('answers a retry with the same client token by the recipe the first request created', function () {
+    $me = RecipeFixtures::member();
+    $token = 'tok-'.str_repeat('a1', 12);
+
+    $first = $this->actingAs($me)->postJson('/recipes', rcpBody(['client_token' => $token]))->assertCreated()->json('id');
+    $second = $this->actingAs($me)->postJson('/recipes', rcpBody(['client_token' => $token, 'title' => 'Changed on retry']))->assertCreated()->json('id');
+
+    expect($second)->toBe($first)->and(Recipe::query()->count())->toBe(1)
+        ->and(Recipe::query()->value('title'))->toBe('Tomato soup');
+});
+
+it('keeps the client token per author and refuses a malformed one', function () {
+    $a = RecipeFixtures::member();
+    $b = RecipeFixtures::member();
+    $token = 'tok-'.str_repeat('b2', 12);
+
+    $one = $this->actingAs($a)->postJson('/recipes', rcpBody(['client_token' => $token]))->json('id');
+    $two = $this->actingAs($b)->postJson('/recipes', rcpBody(['client_token' => $token]))->json('id');
+    expect($one)->not->toBe($two)->and(Recipe::query()->count())->toBe(2);
+
+    $this->actingAs($a)->postJson('/recipes', rcpBody(['client_token' => 'short']))->assertJsonValidationErrors('client_token');
+    $this->actingAs($a)->postJson('/recipes', rcpBody(['client_token' => str_repeat('x', 65)]))->assertJsonValidationErrors('client_token');
+    expect(Recipe::query()->count())->toBe(2);
+});
+
+it('creates two recipes when no token is sent (older clients) and enforces uniqueness in the database', function () {
+    $me = RecipeFixtures::member();
+
+    $this->actingAs($me)->postJson('/recipes', rcpBody())->assertCreated();
+    $this->actingAs($me)->postJson('/recipes', rcpBody())->assertCreated();
+    expect(Recipe::query()->count())->toBe(2);
+
+    $token = 'tok-'.str_repeat('c3', 12);
+    Recipe::query()->limit(2)->get()->each(fn ($r) => DB::table('recipes')->where('id', $r->id)->update(['client_token' => null]));
+    DB::table('recipes')->where('id', Recipe::query()->value('id'))->update(['client_token' => $token]);
+    expect(fn () => DB::table('recipes')->where('id', Recipe::query()->orderByDesc('id')->value('id'))->update(['client_token' => $token]))
+        ->toThrow(UniqueConstraintViolationException::class);
 });

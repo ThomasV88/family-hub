@@ -78,6 +78,7 @@ class StoreRecipeRequest extends FormRequest
             'visibility' => ['required', Rule::in(['private', 'shared'])],
             // A draft id from the import review; anything unusable simply saves the recipe as manual.
             'import_id' => ['nullable', 'string', 'max:64'],
+            'client_token' => ['nullable', 'string', 'regex:/^[A-Za-z0-9_-]{16,64}$/'],
             'categories' => ['nullable', 'array', 'max:'.(int) config('recipes.categories_max')],
             'categories.*' => ['nullable', 'string', 'max:'.(int) config('recipes.category_max')],
             'ingredients' => ['required', 'array', 'min:1', 'max:'.(int) config('recipes.ingredients_max')],
