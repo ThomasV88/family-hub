@@ -2991,7 +2991,8 @@
             "undo": "Cofnij",
             "deleted": "Przepis usunięty",
             "progress_reset": "Postęp zresetowany",
-            "state_failed": "Nie udało się zapisać. Spróbuj ponownie."
+            "state_failed": "Nie udało się zapisać. Spróbuj ponownie.",
+            "items_added": "Dodano {count} produkt do {list} | Dodano {count} produkty do {list} | Dodano {count} produktów do {list} | Dodano {count} produktu do {list}"
         },
         "form": {
             "title_new": "Nowy przepis",
@@ -3197,6 +3198,47 @@
             "title": "Ten przepis jest niedostępny",
             "body": "Mógł zostać usunięty lub ustawiony jako prywatny.",
             "back": "Wróć do przepisów"
+        },
+        "shopping": {
+            "title": "Dodaj do listy zakupów",
+            "button": "Dodaj do listy zakupów",
+            "target": "Gdzie dodać składniki",
+            "new_list": "Nowa lista",
+            "list_name": "Nazwa nowej listy",
+            "open_list": "Otwarta lista",
+            "choose_list": "Wybierz listę",
+            "no_open_list": "Nie masz otwartej listy, do której możesz dodawać.",
+            "quantities_for": "Ilości dla {n} porcji | Ilości dla {n} porcji | Ilości dla {n} porcji | Ilości dla {n} porcji",
+            "quantities_for_label": "Liczba porcji dla ilości na liście zakupów",
+            "rows": "Składniki do dodania",
+            "review_hint": "Produkty znalezione w katalogu dostaną obraz. Pozostałe zostaną dodane jako wpisane.",
+            "include": "Uwzględnij {name}",
+            "name_of": "Nazwa: {name}",
+            "quantity_of": "Ilość: {name}",
+            "unit_of": "Jednostka: {name}",
+            "matched": "Dopasowano",
+            "suggested": "Propozycja: {name}",
+            "not_in_catalog": "Nie ma w katalogu",
+            "change": "Zmień",
+            "change_of": "Zmień pozycję katalogu dla {name}",
+            "search_catalog": "Szukaj w katalogu",
+            "catalog_item_for": "Pozycja katalogu: {name}",
+            "as_typed": "Dodaj jako wpisany produkt",
+            "no_amount": "W przepisie nie podano ilości.",
+            "already_on_list": "Już jest na liście: {qty}. Zostanie dodane do tej ilości.",
+            "different_unit": "Inna jednostka: zostanie jako osobna pozycja.",
+            "loading": "Sprawdzam katalog i Twoje listy",
+            "catalog_failed": "Nie udało się sprawdzić katalogu. Produkty zostaną dodane jako wpisane.",
+            "cancel": "Anuluj",
+            "add_n": "Dodaj {n} produkt | Dodaj {n} produkty | Dodaj {n} produktów | Dodaj {n} produktu",
+            "create_add_n": "Utwórz listę i dodaj {n} produkt | Utwórz listę i dodaj {n} produkty | Utwórz listę i dodaj {n} produktów | Utwórz listę i dodaj {n} produktu",
+            "add_failed": "Nie udało się dodać produktów. Nic nie zostało dodane. Spróbuj ponownie.",
+            "list_locked": "Ta lista została w międzyczasie zablokowana. Wybierz inną listę.",
+            "list_gone": "Ta lista nie jest już dostępna. Wybierz inną listę lub utwórz nową.",
+            "too_many": "Naraz możesz dodać najwyżej {max} składników.",
+            "err_target": "Wybierz nową lub otwartą listę.",
+            "err_list": "Wybierz listę.",
+            "err_items": "Wybierz co najmniej jeden składnik."
         }
     }
 }

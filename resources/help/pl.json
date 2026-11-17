@@ -47,7 +47,8 @@
         "shopping_list": "Strona listy zakupów",
         "shopping_finish": "Okno kończenia zakupów",
         "recipe_form": "Formularz przepisu",
-        "recipe_detail": "Szczegóły przepisu"
+        "recipe_detail": "Szczegóły przepisu",
+        "recipe_shopping": "Dodawanie do zakupów"
     },
     "topics": {
         "tasks.visibility": {
@@ -337,6 +338,10 @@
         "recipes.cooking": {
             "title": "Tryb gotowania",
             "text": "Tryb gotowania powiększa wiersze i trzyma składniki oraz kroki na jednej długiej stronie, żeby można było czytać nawet brudnymi rękami. Na telefonach dolny pasek pokazuje, jak daleko jesteś. Jeśli przeglądarka na to pozwala, ekran pozostaje włączony przy aktywnym trybie. Nic nie jest zapisywane: następnym razem tryb jest znów wyłączony."
+        },
+        "recipes.shopping": {
+            "title": "Dodawanie do listy zakupów",
+            "text": "Wybierz nową listę albo jedną ze swoich otwartych list. Przed dodaniem sprawdź każdy składnik: odznacz to, co już masz, i zmień nazwę, ilość lub jednostkę. Składniki znalezione w katalogu są dopasowywane i dostają obraz, pozostałe trafiają jako wpisane produkty. Dodaje się wszystko naraz albo nic. Notatki do składników nie są kopiowane."
         }
     }
 }

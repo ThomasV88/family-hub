@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 36,
   "title": "Receptár",
-  "summary": "Rodinný receptár: pridávanie a úprava receptov s fotkami, kto recept vidí, prehliadanie a hľadanie receptov, ktoré smiete vidieť, filtre a obľúbené, varenie podľa receptu s vlastnými odškrtnutiami, porciami a poznámkami a odstránenie.",
+  "summary": "Rodinný receptár: pridávanie a úprava receptov s fotkami, kto recept vidí, prehliadanie a hľadanie receptov, ktoré smiete vidieť, filtre a obľúbené, varenie podľa receptu s vlastnými odškrtnutiami, porciami a poznámkami pridanie surovín do nákupného zoznamu a odstránenie.",
   "covers": [
     "module:recipes"
   ],
@@ -186,6 +186,31 @@
             "Text poznámok môže mať najviac 2000 znakov.",
             "**Srdiečkom** vedľa názvu označíte recept ako obľúbený. Srdiečko je vaše: ostatní členovia majú vlastné. Na stránke Receptár zobrazí **Obľúbené** iba recepty, ktoré ste označili."
           ]
+        }
+      ]
+    },
+    {
+      "id": "shopping",
+      "title": "Pridanie do nákupného zoznamu",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Stlačte **Pridať do nákupného zoznamu** pri recepte (na telefóne je tlačidlo v lište dole). Zobrazí sa len vtedy, ak môžete používať Receptár aj Nákupy: v Nákupoch potrebujete právo upravovať. Pred pridaním sa otvorí okno na kontrolu."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Vyberte **Nový zoznam** (názov je názov receptu, môžete ho zmeniť a vybrať obchod) alebo **Otvorený zoznam** a vyberte jeden zo svojich otvorených zoznamov. Uzamknuté a dokončené zoznamy sa neponúkajú, ani zoznamy, ktoré môžete len čítať. Ak nemáte otvorený zoznam, do ktorého môžete pridávať, je možný len nový zoznam.",
+            "**Množstvá pre** ukazuje počet porcií, ktorý ste zvolili pri recepte. Zmenou tu sa množstvá do nákupu prepočítajú, samotný recept sa nemení.",
+            "Každá surovina je jeden riadok. Odškrtnite tie, ktoré už máte, a podľa potreby upravte názov, množstvo alebo jednotku. Riadok bez množstva v recepte sa pridá ako 1 kus s poznámkou \"V recepte nie je uvedené množstvo.\"",
+            "Riadok so štítkom **Priradené** sa našiel v nákupnom katalógu a pridá sa s obrázkom; **Návrh** znamená, že zhoda je len pravdepodobná, preto ju skontrolujte. Tlačidlom **Zmeniť** vyberiete inú položku katalógu alebo **Pridať ako vlastnú položku**. Riadok so štítkom **Nie je v katalógu** sa pridá ako vlastná položka s názvom, ktorý vidíte.",
+            "Ak už vybraný zoznam obsahuje rovnakú položku katalógu, ktorá ešte nie je kúpená, riadok uvedie **Už je v zozname** a množstvá sa pripočítajú (gramy a kilogramy, mililitre a litre sa prepočítajú, ak sa tým nič nestratí). Pri inej jednotke ostane **samostatný riadok**.",
+            "Stlačte **Pridať {n} položiek** (alebo **Vytvoriť zoznam a pridať {n} položiek**). Správa vám povie, koľko položiek sa pridalo, s tlačidlom **Otvorený zoznam** na prechod do nákupného zoznamu. Zostanete pri recepte."
+          ]
+        },
+        {
+          "type": "warning",
+          "text": "Pridá sa všetko naraz, alebo nič: ak sa niečo nepodarí, uvidíte \"Položky sa nepodarilo pridať. Nič sa nepridalo.\" a vaše riadky ostanú, ako ste ich nechali. Ak sa zoznam medzitým uzamkol, vyberte iný zoznam. Poznámky k surovinám sa do zoznamu neprenášajú."
         }
       ]
     },

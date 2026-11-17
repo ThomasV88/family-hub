@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { ChefHat, ChevronLeft, Clock, Ellipsis, ExternalLink, Flame, Heart, Lock, Pencil, RotateCcw, Trash2, UtensilsCrossed, Users } from '@lucide/vue';
+import { ChefHat, ChevronLeft, Clock, Ellipsis, ExternalLink, Flame, Heart, Lock, Pencil, RotateCcw, ShoppingCart, Trash2, UtensilsCrossed, Users } from '@lucide/vue';
 import AppShell from '../../Layouts/AppShell.vue';
 import UiAvatar from '../../Components/ui/UiAvatar.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
@@ -15,6 +15,7 @@ import UiTabs from '../../Components/ui/UiTabs.vue';
 import UiTag from '../../Components/ui/UiTag.vue';
 import HelpTip from '../../Components/ui/HelpTip.vue';
 import { useToast } from '../../Components/ui/useToast.js';
+import AddToShoppingDialog from '../../Components/Recipes/AddToShoppingDialog.vue';
 import PhoneProbe from '../../Components/Recipes/PhoneProbe.vue';
 import RecipeIngredients from '../../Components/Recipes/RecipeIngredients.vue';
 import RecipeNotes from '../../Components/Recipes/RecipeNotes.vue';
@@ -91,6 +92,8 @@ const mine = computed(() => props.recipe?.author?.isMe === true);
 const canEdit = computed(() => props.abilities.edit === true);
 const canDelete = computed(() => props.abilities.delete === true);
 const canChangeVisibility = computed(() => props.abilities.changeVisibility === true);
+const canAddToShopping = computed(() => props.abilities.addToShopping === true);
+const shoppingOpen = ref(false);
 const shared = computed(() => props.recipe?.visibility === 'shared');
 const sourceLink = computed(() => (/^https?:\/\//i.test(props.recipe?.sourceUrl ?? '') ? props.recipe.sourceUrl : null));
 const sourceHost = computed(() => props.recipe?.sourceHost ?? '');
@@ -267,8 +270,9 @@ function onMenu({ key }) {
                 </p>
 
                 <div class="rec-head__actions">
-                    <!-- Slot of plan 12-10: the "Add to shopping list" button and its dialog. Nothing is rendered here yet. -->
-                    <span class="rec-head__shopping-slot" data-slot="add-to-shopping" />
+                    <span class="rec-head__shopping-slot" data-slot="add-to-shopping">
+                        <UiButton v-if="canAddToShopping && !phone" variant="primary" :icon="ShoppingCart" data-testid="add-to-shopping" @click="shoppingOpen = true">{{ t('recipes.shopping.button') }}</UiButton>
+                    </span>
                     <UiButton v-if="canEdit" variant="secondary" :icon="Pencil" :href="`/recipes/${recipe.id}/edit`" data-testid="edit-recipe" @click="(e) => onOpen(e, `/recipes/${recipe.id}/edit`)">{{ t('recipes.detail.edit') }}</UiButton>
                     <template v-if="!phone">
                         <UiButton variant="secondary" :icon="UtensilsCrossed" :aria-pressed="cooking ? 'true' : 'false'" data-testid="cooking-toggle" @click="cooking = !cooking">{{ t('recipes.cooking.toggle') }}</UiButton>
@@ -324,14 +328,25 @@ function onMenu({ key }) {
                     <UiButton variant="ghost" data-testid="cooking-leave" @click="cooking = false">{{ t('recipes.cooking.leave') }}</UiButton>
                 </template>
                 <template v-else>
-                    <!-- Slot of plan 12-10: the primary "Add to shopping list" button of the phone bar. Nothing is rendered here yet. -->
-                    <span class="rec-bar__shopping-slot" data-slot="add-to-shopping-bar" />
+                    <span class="rec-bar__shopping-slot" data-slot="add-to-shopping-bar">
+                        <UiButton v-if="canAddToShopping" variant="primary" :icon="ShoppingCart" data-testid="add-to-shopping-bar" @click="shoppingOpen = true">{{ t('recipes.shopping.button') }}</UiButton>
+                    </span>
                     <UiButton variant="secondary" :icon="UtensilsCrossed" aria-pressed="false" data-testid="cooking-toggle-bar" @click="cooking = true">{{ t('recipes.cooking.toggle') }}</UiButton>
                     <HelpTip topic="recipes.cooking" :label="t('recipes.cooking.toggle')" />
                 </template>
             </div>
         </div>
 
+        <AddToShoppingDialog
+            v-if="!unavailable && canAddToShopping"
+            v-model:open="shoppingOpen"
+            :recipe-id="recipeId"
+            :recipe="recipe"
+            :base-servings="base"
+            :servings="servings"
+            :units="units"
+            @failed="(status) => failed(status, 'recipes.shopping.add_failed')"
+        />
         <UiDialog v-if="!unavailable" :open="resetOpen" :title="t('recipes.reset.title')" :dismissable="!resetBusy" @update:open="(v) => (resetOpen = v)">
             <p class="rec-show__dialog-body">{{ t('recipes.reset.body') }}</p>
             <template #footer>

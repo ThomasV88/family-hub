@@ -47,7 +47,8 @@
         "shopping_list": "Stránka nákupného zoznamu",
         "shopping_finish": "Dialóg ukončenia nákupu",
         "recipe_form": "Formulár receptu",
-        "recipe_detail": "Detail receptu"
+        "recipe_detail": "Detail receptu",
+        "recipe_shopping": "Pridanie do nákupu"
     },
     "topics": {
         "tasks.visibility": {
@@ -337,6 +338,10 @@
         "recipes.cooking": {
             "title": "Režim varenia",
             "text": "Režim varenia zväčší riadky a necháva suroviny a postup na jednej dlhej stránke, aby ste sa mohli orientovať aj s ušpinenými rukami. Na telefóne dolná lišta ukazuje, ako ďaleko ste. Ak to prehliadač dovolí, obrazovka počas režimu ostane zapnutá. Nič sa neukladá: nabudúce je režim opäť vypnutý."
+        },
+        "recipes.shopping": {
+            "title": "Pridanie do nákupného zoznamu",
+            "text": "Vyberte nový zoznam alebo jeden zo svojich otvorených zoznamov. Pred pridaním skontrolujte každú surovinu: odškrtnite, čo už máte, a upravte názov, množstvo alebo jednotku. Suroviny nájdené v katalógu sa priradia a dostanú obrázok, ostatné sa pridajú ako vlastné položky. Pridá sa všetko naraz, alebo nič. Poznámky k surovinám sa neprenášajú."
         }
     }
 }

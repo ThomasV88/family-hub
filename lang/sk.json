@@ -2991,7 +2991,8 @@
             "undo": "Vrátiť späť",
             "deleted": "Recept odstránený",
             "progress_reset": "Postup obnovený",
-            "state_failed": "Nepodarilo sa uložiť. Skúste znova."
+            "state_failed": "Nepodarilo sa uložiť. Skúste znova.",
+            "items_added": "Pridaná {count} položka do {list} | Pridané {count} položky do {list} | Pridané {count} položky do {list} | Pridaných {count} položiek do {list}"
         },
         "form": {
             "title_new": "Nový recept",
@@ -3197,6 +3198,47 @@
             "title": "Tento recept nie je dostupný",
             "body": "Možno bol odstránený alebo nastavený ako súkromný.",
             "back": "Späť na recepty"
+        },
+        "shopping": {
+            "title": "Pridať do nákupného zoznamu",
+            "button": "Pridať do nákupného zoznamu",
+            "target": "Kam pridať suroviny",
+            "new_list": "Nový zoznam",
+            "list_name": "Názov nového zoznamu",
+            "open_list": "Otvorený zoznam",
+            "choose_list": "Vyberte zoznam",
+            "no_open_list": "Nemáte žiadny otvorený zoznam, do ktorého môžete pridávať.",
+            "quantities_for": "Množstvá pre {n} porciu | Množstvá pre {n} porcie | Množstvá pre {n} porcie | Množstvá pre {n} porcií",
+            "quantities_for_label": "Počet porcií pre množstvá v nákupe",
+            "rows": "Suroviny na pridanie",
+            "review_hint": "Položky nájdené v katalógu dostanú obrázok. Ostatné sa pridajú ako vlastné.",
+            "include": "Zahrnúť {name}",
+            "name_of": "Názov: {name}",
+            "quantity_of": "Množstvo: {name}",
+            "unit_of": "Jednotka: {name}",
+            "matched": "Priradené",
+            "suggested": "Návrh: {name}",
+            "not_in_catalog": "Nie je v katalógu",
+            "change": "Zmeniť",
+            "change_of": "Zmeniť položku katalógu pre {name}",
+            "search_catalog": "Hľadať v katalógu",
+            "catalog_item_for": "Položka katalógu: {name}",
+            "as_typed": "Pridať ako vlastnú položku",
+            "no_amount": "V recepte nie je uvedené množstvo.",
+            "already_on_list": "Už je v zozname: {qty}. Pripočíta sa.",
+            "different_unit": "Iná jednotka: ostane ako samostatný riadok.",
+            "loading": "Kontrolujem katalóg a vaše zoznamy",
+            "catalog_failed": "Katalóg sa nepodarilo skontrolovať. Položky sa pridajú ako vlastné.",
+            "cancel": "Zrušiť",
+            "add_n": "Pridať {n} položku | Pridať {n} položky | Pridať {n} položky | Pridať {n} položiek",
+            "create_add_n": "Vytvoriť zoznam a pridať {n} položku | Vytvoriť zoznam a pridať {n} položky | Vytvoriť zoznam a pridať {n} položky | Vytvoriť zoznam a pridať {n} položiek",
+            "add_failed": "Položky sa nepodarilo pridať. Nič sa nepridalo. Skúste to znova.",
+            "list_locked": "Tento zoznam sa medzitým uzamkol. Vyberte iný zoznam.",
+            "list_gone": "Tento zoznam už nie je dostupný. Vyberte iný zoznam alebo vytvorte nový.",
+            "too_many": "Naraz môžete pridať najviac {max} surovín.",
+            "err_target": "Vyberte nový alebo otvorený zoznam.",
+            "err_list": "Vyberte zoznam.",
+            "err_items": "Vyberte aspoň jednu surovinu."
         }
     }
 }

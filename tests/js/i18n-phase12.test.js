@@ -19,11 +19,14 @@ const SUBTREES = [
     'recipes.form', 'recipes.ingredient', 'recipes.step', 'recipes.category_starter', 'recipes.photos', 'recipes.image', 'recipes.error',
     // 12-09: detail
     'recipes.detail', 'recipes.gallery', 'recipes.servings', 'recipes.progress', 'recipes.cooking', 'recipes.notes', 'recipes.delete', 'recipes.reset', 'recipes.unavailable',
+    // 12-10: add to shopping
+    'recipes.shopping',
 ];
 const KEYS = ['nav.recipes', 'module.recipes'];
 // Strings that are plural in en: the number of forms per locale (en 2, sk 4, pl 4).
 const FORMS = { en: 2, sk: 4, pl: 4 };
-const PLURALS = ['recipes.overview.loaded_more', 'recipes.card.servings', 'recipes.photos.some_failed'];
+const PLURALS = ['recipes.overview.loaded_more', 'recipes.card.servings', 'recipes.photos.some_failed',
+    'recipes.shopping.quantities_for', 'recipes.shopping.add_n', 'recipes.shopping.create_add_n', 'recipes.toast.items_added'];
 
 describe('phase 12 locale parity (lang)', () => {
     for (const subtree of SUBTREES) {
@@ -104,6 +107,29 @@ describe('phase 12 manual and help (12-08)', () => {
             expect(help.areas.recipes?.trim()).toBeTruthy();
             expect(help.screens.recipe_form?.trim()).toBeTruthy();
             expect([...help.topics['recipes.sharing'].text].length).toBeLessThanOrEqual(400);
+        }
+    });
+});
+
+describe('phase 12 manual and help (12-10)', () => {
+    const manual = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(readFileSync(`${root}/resources/manual/${l}/recipes.json`, 'utf8'))]));
+
+    it('has the shopping section before deleting, with the same block types in every language', () => {
+        for (const locale of LOCALES) {
+            const ids = manual[locale].sections.map((s) => s.id);
+            expect({ locale, ok: ids.indexOf('shopping') > ids.indexOf('notes-favourites') && ids.indexOf('shopping') < ids.indexOf('deleting') }).toEqual({ locale, ok: true });
+        }
+        const shapes = LOCALES.map((l) => manual[l].sections.find((s) => s.id === 'shopping').blocks.map((b) => `${b.type}${b.items ? b.items.length : ''}`).join(','));
+        expect(new Set(shapes).size, 'shopping blocks differ between languages').toBe(1);
+    });
+
+    it('registers the shopping help tip on its own screen with a text in every language', () => {
+        const topics = JSON.parse(readFileSync(`${root}/resources/help/topics.json`, 'utf8')).topics;
+        expect(topics.find((t) => t.key === 'recipes.shopping')).toEqual({ key: 'recipes.shopping', area: 'recipes', screen: 'recipe_shopping', field: 'dialog_title' });
+        for (const locale of LOCALES) {
+            const help = JSON.parse(readFileSync(`${root}/resources/help/${locale}.json`, 'utf8'));
+            expect(help.screens.recipe_shopping?.trim()).toBeTruthy();
+            expect([...help.topics['recipes.shopping'].text].length).toBeLessThanOrEqual(400);
         }
     });
 });

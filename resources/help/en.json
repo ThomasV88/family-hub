@@ -47,7 +47,8 @@
         "shopping_list": "Shopping list page",
         "shopping_finish": "Finish shopping dialog",
         "recipe_form": "Recipe form",
-        "recipe_detail": "Recipe detail"
+        "recipe_detail": "Recipe detail",
+        "recipe_shopping": "Add to shopping"
     },
     "topics": {
         "tasks.visibility": {
@@ -337,6 +338,10 @@
         "recipes.cooking": {
             "title": "Cooking mode",
             "text": "Cooking mode makes the rows larger and keeps ingredients and steps in one long page, so you can follow along with floury hands. On phones a bar at the bottom shows how far you are. Where your browser allows it the screen stays on while the mode is active. Nothing is stored: it is off again next time."
+        },
+        "recipes.shopping": {
+            "title": "Add to shopping list",
+            "text": "Choose a new list or one of your open lists. Check every ingredient before adding: untick what you already have and change the name, amount or unit. Ingredients found in the catalog are matched and get their picture; the others are added as typed items. Everything is added together or nothing is. Ingredient notes are not copied."
         }
     }
 }

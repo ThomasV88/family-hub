@@ -432,6 +432,12 @@
             "area": "recipes",
             "screen": "recipe_detail",
             "field": "cooking_mode"
+        },
+        {
+            "key": "recipes.shopping",
+            "area": "recipes",
+            "screen": "recipe_shopping",
+            "field": "dialog_title"
         }
     ]
 }

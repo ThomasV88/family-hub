@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 36,
   "title": "Receptarz",
-  "summary": "Rodzinna książka kucharska: dodawanie i edycja przepisów ze zdjęciami, kto widzi przepis, przeglądanie i szukanie przepisów, które możesz widzieć, filtry i ulubione, gotowanie według przepisu z własnymi odhaczeniami, porcjami i notatkami oraz usuwanie.",
+  "summary": "Rodzinna książka kucharska: dodawanie i edycja przepisów ze zdjęciami, kto widzi przepis, przeglądanie i szukanie przepisów, które możesz widzieć, filtry i ulubione, gotowanie według przepisu z własnymi odhaczeniami, porcjami i notatkami dodawanie składników do listy zakupów oraz usuwanie.",
   "covers": [
     "module:recipes"
   ],
@@ -186,6 +186,31 @@
             "Tekst notatek może mieć najwyżej 2000 znaków.",
             "**Serduszkiem** obok tytułu oznaczysz przepis jako ulubiony. Serduszko jest twoje: inni członkowie mają własne. Na stronie Przepisy opcja **Ulubione** pokazuje tylko przepisy, które oznaczyłeś."
           ]
+        }
+      ]
+    },
+    {
+      "id": "shopping",
+      "title": "Dodawanie do listy zakupów",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Naciśnij **Dodaj do listy zakupów** przy przepisie (na telefonie przycisk jest w pasku na dole). Pokazuje się tylko wtedy, gdy możesz korzystać z Przepisów i Zakupów: w Zakupach potrzebujesz uprawnienia do edycji. Przed dodaniem otwiera się okno do sprawdzenia."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Wybierz **Nowa lista** (nazwa to tytuł przepisu, możesz ją zmienić i wybrać sklep) albo **Otwarta lista** i wskaż jedną ze swoich otwartych list. Listy zablokowane i zakończone nie są proponowane, tak samo jak listy, które możesz tylko czytać. Jeśli nie masz otwartej listy, do której możesz dodawać, możliwa jest tylko nowa lista.",
+            "**Ilości dla** pokazuje liczbę porcji wybraną przy przepisie. Zmiana tutaj przelicza ilości do zakupów, sam przepis się nie zmienia.",
+            "Każdy składnik to jeden wiersz. Odznacz te, które już masz, i w razie potrzeby zmień nazwę, ilość lub jednostkę. Wiersz bez ilości w przepisie trafia jako 1 sztuka z uwagą \"W przepisie nie podano ilości.\"",
+            "Wiersz z etykietą **Dopasowano** został znaleziony w katalogu zakupów i jest dodawany z obrazem; **Propozycja** oznacza, że dopasowanie jest tylko prawdopodobne, więc sprawdź je. Przyciskiem **Zmień** wybierzesz inną pozycję katalogu lub **Dodaj jako wpisany produkt**. Wiersz z etykietą **Nie ma w katalogu** jest dodawany jako wpisany produkt z widoczną nazwą.",
+            "Jeśli wybrana lista ma już tę samą pozycję katalogu, która nie jest jeszcze kupiona, wiersz pokazuje **Już jest na liście** i ilości są dodawane (gramy i kilogramy, mililitry i litry są przeliczane, gdy nic się przez to nie traci). Przy innej jednostce zostaje **osobna pozycja**.",
+            "Naciśnij **Dodaj {n} produktów** (albo **Utwórz listę i dodaj {n} produktów**). Komunikat powie, ile produktów dodano, z przyciskiem **Otwarta lista**, który przenosi do listy zakupów. Zostajesz przy przepisie."
+          ]
+        },
+        {
+          "type": "warning",
+          "text": "Dodaje się wszystko naraz albo nic: jeśli coś się nie uda, zobaczysz \"Nie udało się dodać produktów. Nic nie zostało dodane.\", a Twoje wiersze zostają bez zmian. Jeśli lista została w międzyczasie zablokowana, wybierz inną. Notatki do składników nie są kopiowane na listę."
         }
       ]
     },

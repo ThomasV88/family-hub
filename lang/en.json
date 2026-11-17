@@ -2991,7 +2991,8 @@
             "undo": "Undo",
             "deleted": "Recipe deleted",
             "progress_reset": "Progress reset",
-            "state_failed": "Could not save. Try again."
+            "state_failed": "Could not save. Try again.",
+            "items_added": "{count} item added to {list} | {count} items added to {list}"
         },
         "form": {
             "title_new": "New recipe",
@@ -3197,6 +3198,47 @@
             "title": "This recipe is not available",
             "body": "It may have been deleted or made private.",
             "back": "Back to recipes"
+        },
+        "shopping": {
+            "title": "Add to shopping list",
+            "button": "Add to shopping list",
+            "target": "Where to add the ingredients",
+            "new_list": "New list",
+            "list_name": "Name of the new list",
+            "open_list": "Open list",
+            "choose_list": "Choose a list",
+            "no_open_list": "You have no open list you can add to.",
+            "quantities_for": "Quantities for {n} serving | Quantities for {n} servings",
+            "quantities_for_label": "Servings for the shopping quantities",
+            "rows": "Ingredients to add",
+            "review_hint": "Items found in the catalog get their picture. The others are added as typed items.",
+            "include": "Include {name}",
+            "name_of": "Name of {name}",
+            "quantity_of": "Quantity of {name}",
+            "unit_of": "Unit of {name}",
+            "matched": "Matched",
+            "suggested": "Suggested: {name}",
+            "not_in_catalog": "Not in catalog",
+            "change": "Change",
+            "change_of": "Change the catalog item for {name}",
+            "search_catalog": "Search the catalog",
+            "catalog_item_for": "Catalog item for {name}",
+            "as_typed": "Add as typed item",
+            "no_amount": "No amount in the recipe.",
+            "already_on_list": "Already on the list: {qty}. It will be added up.",
+            "different_unit": "Different unit: kept as a separate line.",
+            "loading": "Checking the catalog and your lists",
+            "catalog_failed": "We could not check the catalog. The items will be added as typed items.",
+            "cancel": "Cancel",
+            "add_n": "Add {n} item | Add {n} items",
+            "create_add_n": "Create list and add {n} item | Create list and add {n} items",
+            "add_failed": "We could not add the items. Nothing was added. Try again.",
+            "list_locked": "This list was locked in the meantime. Choose another list.",
+            "list_gone": "That list is no longer available. Choose another list or create a new one.",
+            "too_many": "You can add at most {max} ingredients at once.",
+            "err_target": "Choose a new list or an open list.",
+            "err_list": "Choose a list.",
+            "err_items": "Choose at least one ingredient."
         }
     }
 }

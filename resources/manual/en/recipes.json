@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 36,
   "title": "Recipes",
-  "summary": "The family recipe book: adding and editing recipes with photos, who can see a recipe, browsing and searching the recipes you may see, the filters and favourites, cooking from a recipe with your own ticks, servings and notes, and deleting.",
+  "summary": "The family recipe book: adding and editing recipes with photos, who can see a recipe, browsing and searching the recipes you may see, the filters and favourites, cooking from a recipe with your own ticks, servings and notes, adding the ingredients to a shopping list, and deleting.",
   "covers": [
     "module:recipes"
   ],
@@ -186,6 +186,31 @@
             "A notes text can have up to 2000 characters.",
             "Press the **heart** next to the title to mark a recipe as a favourite. The heart is yours: other members have their own. On the Recipes page, **Favourites** shows only the recipes you marked."
           ]
+        }
+      ]
+    },
+    {
+      "id": "shopping",
+      "title": "Adding to the shopping list",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Press **Add to shopping list** on a recipe (on a phone the button is in the bar at the bottom). It is shown only if you may use both Recipes and Shopping: you need permission to edit in Shopping. A review window opens before anything is added."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Choose **New list** (the name is the recipe title, you can change it, and you can pick a store) or **Open list** and choose one of your open lists. Locked and finished lists are not offered, and neither are lists you may only read. If you have no open list you can add to, only a new list is possible.",
+            "**Quantities for** shows the servings you chose on the recipe. Change them here to recalculate the quantities for the shopping; the recipe itself is not changed.",
+            "Every ingredient is a row. Untick the ones you already have, and change the name, quantity or unit if you want. A row without an amount in the recipe comes in as 1 piece with the note \"No amount in the recipe.\"",
+            "A row tagged **Matched** was found in the shopping catalog and is added with its picture; **Suggested** means the match is only likely, so check it. **Change** lets you pick another catalog item or **Add as typed item**. A row tagged **Not in catalog** is added as a typed item with the name you see.",
+            "If the chosen list already has the same catalog item that is not yet bought, the row says **Already on the list** and the quantities are added up (grams and kilograms, millilitres and litres are converted when this loses nothing). With a different unit it is **kept as a separate line**.",
+            "Press **Add {n} items** (or **Create list and add {n} items**). A message tells you how many items were added, with **Open list** to go to the shopping list. You stay on the recipe."
+          ]
+        },
+        {
+          "type": "warning",
+          "text": "Everything is added together or nothing is: if anything fails you see \"We could not add the items. Nothing was added.\" and your rows stay as they are. If the list was locked in the meantime, choose another list. The notes of the ingredients are not copied to the list."
         }
       ]
     },

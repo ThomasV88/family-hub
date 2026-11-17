@@ -464,3 +464,47 @@ describe('Recipe detail: accessibility', () => {
         await expectNoAxeViolations(current.element);
     });
 });
+
+describe('Recipe detail: add to shopping list', () => {
+    it('shows the button in the header on a wide page and opens the review dialog, which asks for the preview', async () => {
+        mountPage();
+        await flushPromises();
+        expect($('[data-testid="add-to-shopping"]').text()).toBe('Add to shopping list');
+        expect($('[data-testid="add-to-shopping-bar"]').exists()).toBe(false);
+        await $('[data-testid="add-to-shopping"]').trigger('click');
+        await flushPromises();
+        expect(fetchMock).toHaveBeenCalledWith('/recipes/12/shopping');
+        expect(dialog().querySelector('[data-testid="shopping-dialog"]')).not.toBeNull();
+    });
+
+    it('shows the button in the bottom bar on a phone, not in the header, and not while cooking', async () => {
+        mountPage({ width: 400 });
+        await flushPromises();
+        expect($('[data-testid="add-to-shopping-bar"]').exists()).toBe(true);
+        expect($('[data-testid="add-to-shopping"]').exists()).toBe(false);
+        await $('[data-testid="cooking-toggle-bar"]').trigger('click');
+        expect($('[data-testid="add-to-shopping-bar"]').exists()).toBe(false);
+    });
+
+    it('hides the button and the dialog from a member who may not add to Shopping', async () => {
+        mountPage({ abilities: { ...READER, addToShopping: false } });
+        await flushPromises();
+        expect($('[data-testid="add-to-shopping"]').exists()).toBe(false);
+        mountPage({ width: 400, abilities: { ...READER, addToShopping: false } });
+        await flushPromises();
+        expect($('[data-testid="add-to-shopping-bar"]').exists()).toBe(false);
+    });
+
+    it('shows the button to a reader who may add to Shopping', async () => {
+        mountPage({ recipe: OTHER, abilities: READER });
+        expect($('[data-testid="add-to-shopping"]').exists()).toBe(true);
+    });
+
+    it('leaves the page when the preview says the recipe is gone', async () => {
+        mountPage();
+        fetchMock.mockResolvedValue({ ok: false, status: 404, error: 'failed', data: {} });
+        await $('[data-testid="add-to-shopping"]').trigger('click');
+        await flushPromises();
+        expect($('[data-testid="recipe-unavailable"]').exists()).toBe(true);
+    });
+});
