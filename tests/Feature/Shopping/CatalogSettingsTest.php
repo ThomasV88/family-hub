@@ -107,3 +107,10 @@ it('refuses every catalog and store write to a view-only member', function () {
     $this->actingAs($viewer)->delete("/settings/shopping/stores/{$store->id}")->assertForbidden();
     expect(ShoppingCatalogItem::query()->count())->toBe(1)->and(ShoppingStore::query()->count())->toBe(1);
 });
+
+it('returns the id of a created catalog item or store in the flash data', function () {
+    $this->actingAs($this->editor)->post('/settings/shopping/catalog', ['name' => 'Čaj'])
+        ->assertStatus(303)->assertSessionHas('flash_data.created_id', ShoppingCatalogItem::query()->where('name', 'Čaj')->value('id'));
+    $this->actingAs($this->editor)->post('/settings/shopping/stores', ['name' => 'Billa'])
+        ->assertStatus(303)->assertSessionHas('flash_data.created_id', ShoppingStore::query()->where('name', 'Billa')->value('id'));
+});

@@ -75,8 +75,18 @@ it('does not let a guest preset create but shows lists where they are viewer', f
 
     $this->actingAs($viewer)->get('/shopping')->assertInertia(fn (Assert $p) => $p
         ->where('canCreate', false)
+        ->where('stores', [])
+        ->where('responsibleCandidates', [])
         ->where('lists.0.id', $list->id)
         ->where('lists.0.abilities.copy', false));
+});
+
+it('sends the stores and the responsible candidates only to people who can create a list', function () {
+    $owner = F::user();
+    ShoppingStore::query()->create(['name' => 'Tesco']);
+
+    $this->actingAs($owner)->get('/shopping')->assertInertia(fn (Assert $p) => $p
+        ->where('canCreate', true)->has('stores', 1)->has('responsibleCandidates', 1));
 });
 
 it('builds the detail props for the responsible person', function () {

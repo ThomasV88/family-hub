@@ -14,9 +14,10 @@ class ShoppingCatalogController extends Controller
 
     public function store(CatalogItemRequest $request): RedirectResponse
     {
-        $this->catalog->create($request->user(), $request->validated('name'), $request->validated('default_unit_id'));
+        $item = $this->catalog->create($request->user(), $request->validated('name'), $request->validated('default_unit_id'));
 
-        return back(303)->with('toast', ['key' => 'shopping.settings.toast.catalog_saved']);
+        // The id lets the page attach a picture to the row it just created without guessing it from the name.
+        return back(303)->with('toast', ['key' => 'shopping.settings.toast.catalog_saved'])->with('flash_data', ['created_id' => $item->id]);
     }
 
     public function update(CatalogItemRequest $request, int $item): RedirectResponse

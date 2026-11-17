@@ -14,9 +14,10 @@ class ShoppingStoresController extends Controller
 
     public function store(StoreRequest $request): RedirectResponse
     {
-        $this->stores->create($request->user(), $request->validated('name'));
+        $store = $this->stores->create($request->user(), $request->validated('name'));
 
-        return back(303)->with('toast', ['key' => 'shopping.settings.toast.store_saved']);
+        // The id lets the page attach a logo to the row it just created without guessing it from the name.
+        return back(303)->with('toast', ['key' => 'shopping.settings.toast.store_saved'])->with('flash_data', ['created_id' => $store->id]);
     }
 
     public function update(StoreRequest $request, int $store): RedirectResponse

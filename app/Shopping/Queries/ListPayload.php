@@ -37,6 +37,7 @@ final class ListPayload
     /** @return array<string, mixed> */
     public function index(User $user, string $tab, int $page): array
     {
+        $canCreate = $this->gate->allows($user, Module::Shopping, AccessLevel::Edit);
         $open = ListQuery::visibleTo($user)
             ->whereIn('shopping_lists.status', [ListStatus::Open->value, ListStatus::Locked->value])
             ->with(['store', 'responsible', 'creator', 'members' => fn ($q) => $q->where('user_id', $user->id)])
@@ -89,9 +90,10 @@ final class ListPayload
                 'open' => $open->count(),
                 'archive' => $archive->total(),
             ],
-            'stores' => $this->stores(),
-            'responsibleCandidates' => $this->responsibleCandidates(),
-            'canCreate' => $this->gate->allows($user, Module::Shopping, AccessLevel::Edit),
+            // Only people who can create a list need the stores and the names of the people who may be responsible.
+            'stores' => $canCreate ? $this->stores() : [],
+            'responsibleCandidates' => $canCreate ? $this->responsibleCandidates() : [],
+            'canCreate' => $canCreate,
         ];
     }
 
