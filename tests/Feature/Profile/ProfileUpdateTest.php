@@ -20,7 +20,7 @@ beforeEach(function () {
 it('shows the own profile with only the listed subject fields', function () {
     $this->actingAs($this->parent)->get('/profile')
         ->assertInertia(fn (Assert $page) => $page
-            ->component('Profile/Edit', false)
+            ->component('Profile/Edit')
             ->where('subject.id', $this->parent->id)
             ->where('subject.name', 'Anna Nova')
             ->where('subject.email', 'anna@example.test')

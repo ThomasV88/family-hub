@@ -35,6 +35,13 @@
         ] },
         { "type": "tip", "text": "Nie wiesz, co możesz robić? Otwórz część aplikacji. Jeśli możesz ją tylko przeglądać, krótki komunikat na górze o tym informuje." }
       ]
+    },
+    {
+      "id": "profile-photo",
+      "title": "Kto widzi Twoje zdjęcie",
+      "blocks": [
+        { "type": "p", "text": "Zdjęcie profilowe każdego członka widzi przy imieniu każdy zalogowany członek, który może otworzyć dowolną część aplikacji. Widzi je też administrator. Zalogowane konto bez żadnego dostępu go nie widzi. Zdjęcia są przechowywane prywatnie i nigdy pod publicznym adresem: otworzyć je może tylko zalogowany członek. Ty decydujesz: usuń zdjęcie w [Ustawieniach profilu](/profile), a zamiast niego pojawi się inicjał." }
+      ]
     }
   ]
 }

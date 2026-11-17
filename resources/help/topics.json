@@ -272,6 +272,18 @@
             "field": "recovery_codes"
         },
         {
+            "key": "profile.photo",
+            "area": "account",
+            "screen": "profile_page",
+            "field": "photo"
+        },
+        {
+            "key": "profile.name",
+            "area": "account",
+            "screen": "profile_page",
+            "field": "name"
+        },
+        {
             "key": "settings.security_requirement",
             "area": "settings",
             "screen": "members_security",

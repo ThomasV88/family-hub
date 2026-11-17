@@ -36,7 +36,8 @@
         "invite_dialog": "Invite dialog",
         "members_permissions": "Members, Permissions tab",
         "ai_agents": "AI agents",
-        "home": "Overview page"
+        "home": "Overview page",
+        "profile_page": "Profile settings page"
     },
     "topics": {
         "tasks.visibility": {
@@ -218,6 +219,14 @@
         "security.recovery_codes": {
             "title": "Recovery codes",
             "text": "One-time codes that let you sign in if you lose your phone. Each works once. Keep them somewhere safe; creating new codes makes the old ones stop working."
+        },
+        "profile.photo": {
+            "title": "Your photo",
+            "text": "Everyone in the family who can open any part of the app can see your photo, next to your name. It is stored privately, never on a public address, and hidden details such as the place it was taken are removed."
+        },
+        "profile.name": {
+            "title": "Display name",
+            "text": "This is the name shown on tasks, wishes and lists. You can change it any time. Your e-mail address is used to sign in and cannot be changed here yet."
         },
         "settings.security_requirement": {
             "title": "Require two-step verification",

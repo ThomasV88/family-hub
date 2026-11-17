@@ -7,7 +7,7 @@ import { createAppI18n } from '../../resources/js/i18n.js';
 
 let mockLocale = 'en';
 vi.mock('@inertiajs/vue3', async () => {
-    const { h } = await import('vue');
+    const { h, reactive } = await import('vue');
     return {
         usePage: () => ({
             props: {
@@ -17,7 +17,8 @@ vi.mock('@inertiajs/vue3', async () => {
                 heartbeat: { last_recorded_at: '2026-11-13T10:00:00+00:00', last_source: 'schedule', count_24h: 3, expected_24h: 1440 },
             },
         }),
-        router: { post: vi.fn(), get: vi.fn(), visit: vi.fn(), on: vi.fn(), reload: vi.fn() },
+        router: { post: vi.fn(), get: vi.fn(), visit: vi.fn(), on: vi.fn(), reload: vi.fn(), delete: vi.fn() },
+        useForm: (data) => reactive({ ...data, processing: false, errors: {}, put: vi.fn(), post: vi.fn(), clearErrors: vi.fn() }),
         Head: { render: () => null },
         Link: { props: ['href'], render() { return h('a', { href: this.href }, this.$slots.default?.()); } },
     };
@@ -29,6 +30,7 @@ import TodoIndex from '../../resources/js/Pages/Todo/Index.vue';
 import AiCalls from '../../resources/js/Pages/Settings/AiCalls.vue';
 import AiAgents from '../../resources/js/Pages/Settings/AiAgents.vue';
 import HelpSettings from '../../resources/js/Pages/Settings/Help.vue';
+import ProfileEdit from '../../resources/js/Pages/Profile/Edit.vue';
 import { helpAreas, helpRows } from './helpers/help.js';
 import AppShell from '../../resources/js/Layouts/AppShell.vue';
 
@@ -41,7 +43,7 @@ afterEach(() => {
     window.innerWidth = originalWidth;
 });
 
-const pages = { StyleGuide, Home, 'Todo/Index': TodoIndex, 'Settings/AiCalls': AiCalls, 'Settings/AiAgents': AiAgents, 'Settings/Help': HelpSettings };
+const pages = { StyleGuide, Home, 'Todo/Index': TodoIndex, 'Settings/AiCalls': AiCalls, 'Settings/AiAgents': AiAgents, 'Settings/Help': HelpSettings, 'Profile/Edit': ProfileEdit };
 const ME = 1;
 const todoTask = (id, extra = {}) => ({
     id, title: `Task ${id}`, notes: null, status: 'todo', visibility: 'family', creatorId: ME, assigneeId: ME,
@@ -100,6 +102,11 @@ pageProps['Settings/Help'] = {
     locales: ['sk', 'pl', 'en'],
     maxLength: 400,
     error: false,
+};
+pageProps['Profile/Edit'] = {
+    sections: [{ key: 'appearance', href: '/settings/appearance', labelKey: 'settings.section.appearance', icon: 'palette' }],
+    subject: { id: 1, name: 'Mira', email: 'mira@example.test', photoVersion: 2, isSelf: true, isChild: false },
+    nameMax: 60,
 };
 const cases = [];
 for (const locale of ['en', 'sk', 'pl'])

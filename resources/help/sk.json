@@ -36,7 +36,8 @@
         "invite_dialog": "Dialóg pozvánky",
         "members_permissions": "Členovia, karta Oprávnenia",
         "ai_agents": "AI agenti",
-        "home": "Stránka Prehľad"
+        "home": "Stránka Prehľad",
+        "profile_page": "Stránka Nastavenia profilu"
     },
     "topics": {
         "tasks.visibility": {
@@ -218,6 +219,14 @@
         "security.recovery_codes": {
             "title": "Záložné kódy",
             "text": "Jednorazové kódy, ktorými sa prihlásite, ak stratíte telefón. Každý funguje raz. Uložte ich na bezpečné miesto; vytvorením nových prestanú staré fungovať."
+        },
+        "profile.photo": {
+            "title": "Vaša fotografia",
+            "text": "Vašu fotografiu vidí každý člen rodiny, ktorý môže otvoriť niektorú časť aplikácie, pri vašom mene. Je uložená súkromne, nie na verejnej adrese, a skryté údaje, napríklad miesto snímky, sa odstránia."
+        },
+        "profile.name": {
+            "title": "Zobrazované meno",
+            "text": "Toto meno sa zobrazuje pri úlohách, želaniach a zoznamoch. Môžete ho kedykoľvek zmeniť. E-mail slúži na prihlásenie a zatiaľ sa tu nedá zmeniť."
         },
         "settings.security_requirement": {
             "title": "Vyžadovať dvojkrokové overenie",

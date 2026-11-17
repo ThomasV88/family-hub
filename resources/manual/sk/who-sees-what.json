@@ -35,6 +35,13 @@
         ] },
         { "type": "tip", "text": "Neviete, čo môžete robiť? Otvorte časť aplikácie. Ak ju môžete len zobraziť, krátka správa hore to povie." }
       ]
+    },
+    {
+      "id": "profile-photo",
+      "title": "Kto vidí vašu fotografiu",
+      "blocks": [
+        { "type": "p", "text": "Profilovú fotografiu každého člena pri jeho mene vidí každý prihlásený člen, ktorý môže otvoriť niektorú časť aplikácie. Vidí ju aj administrátor. Prihlásený účet bez akéhokoľvek prístupu ju nevidí. Fotografie sú uložené súkromne a nikdy nie na verejnej adrese: otvoriť ich môže len prihlásený člen. Rozhodujete vy: fotografiu odstránite v [Nastaveniach profilu](/profile) a namiesto nej sa zobrazí iniciála." }
+      ]
     }
   ]
 }

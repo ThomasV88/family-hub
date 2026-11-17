@@ -35,6 +35,13 @@
         ] },
         { "type": "tip", "text": "Not sure what you can do? Open a part of the app. If you can only view it, a short message at the top says so." }
       ]
+    },
+    {
+      "id": "profile-photo",
+      "title": "Who can see your photo",
+      "blocks": [
+        { "type": "p", "text": "Every signed-in member who can open any part of the app can see every member's profile photo, next to the name. The administrator sees it too. A signed-in account with no access at all does not. Photos are stored privately and are never on a public address: they can only be opened by a signed-in member. You decide what to show: remove your photo in [Profile settings](/profile) and your initial is shown instead." }
+      ]
     }
   ]
 }

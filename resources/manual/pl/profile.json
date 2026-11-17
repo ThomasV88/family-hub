@@ -1,0 +1,58 @@
+{
+  "id": "profile",
+  "category": "account",
+  "order": 65,
+  "title": "Twój profil",
+  "summary": "Twoja nazwa i zdjęcie: jak otworzyć Ustawienia profilu, zmienić wyświetlaną nazwę, dodać, zmienić lub usunąć zdjęcie i do czego służy Twój e-mail.",
+  "covers": ["feature:profile"],
+  "sections": [
+    {
+      "id": "open-profile",
+      "title": "Otwieranie Ustawień profilu",
+      "blocks": [
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Otwórz menu konta u góry. Pokazuje Twoje zdjęcie albo pierwszą literę imienia, jeśli nie masz jeszcze zdjęcia.",
+          "Wybierz **Ustawienia profilu**. Jest tuż nad pozycją **Ustawienia**.",
+          "Możesz też otworzyć [Ustawienia profilu](/profile) bezpośrednio."
+        ] },
+        { "type": "p", "text": "Strona ma dwie części: **Zdjęcie** i **Dane**." }
+      ]
+    },
+    {
+      "id": "change-name",
+      "title": "Zmiana wyświetlanej nazwy",
+      "blocks": [
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "W części **Dane** zmień **Wyświetlaną nazwę**.",
+          "Naciśnij **Zapisz zmiany**. Przycisk jest aktywny tylko wtedy, gdy coś zmieniłeś.",
+          "Krótki komunikat potwierdzi **Profil zapisany**."
+        ] },
+        { "type": "p", "text": "Twoja nazwa jest widoczna przy zadaniach, życzeniach i listach. Może mieć do 60 znaków. Nadmiarowe spacje są usuwane, a niewidoczne lub sterujące znaki są niedozwolone." }
+      ]
+    },
+    {
+      "id": "photo",
+      "title": "Dodawanie, zmiana lub usuwanie zdjęcia",
+      "blocks": [
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "W części **Zdjęcie** naciśnij **Prześlij zdjęcie**. Jeśli masz już zdjęcie, przycisk nazywa się **Zmień zdjęcie**.",
+          "Wybierz obraz. Zostanie przesłany od razu i pojawi się w menu bez przeładowania strony.",
+          "Aby wrócić do inicjału, naciśnij **Usuń zdjęcie** i potwierdź przyciskiem **Usuń zdjęcie**."
+        ] },
+        { "type": "list", "items": [
+          "Dozwolone formaty: JPG, PNG lub WebP, do 5 MB.",
+          "Najlepiej wygląda kwadratowy obraz, bo zdjęcie jest pokazywane w kółku.",
+          "Ukryte dane w obrazie, na przykład miejsce wykonania zdjęcia, są usuwane przy zapisie."
+        ] },
+        { "type": "tip", "text": "Jeśli obraz zostanie odrzucony, strona podaje powód, na przykład że jest za duży albo nie jest obrazem JPG, PNG lub WebP. W takim przypadku nic się nie zmienia." }
+      ]
+    },
+    {
+      "id": "email",
+      "title": "Twój adres e-mail",
+      "blocks": [
+        { "type": "p", "text": "Adres e-mail jest pokazany na stronie, ale na razie nie można go tam zmienić. To adres, którym się logujesz i na który dostajesz wiadomości. Jeśli trzeba go zmienić, poproś administratora." }
+      ]
+    }
+  ]
+}

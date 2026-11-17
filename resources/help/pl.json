@@ -36,7 +36,8 @@
         "invite_dialog": "Okno zaproszenia",
         "members_permissions": "Członkowie, karta Uprawnienia",
         "ai_agents": "Agenci AI",
-        "home": "Strona Przegląd"
+        "home": "Strona Przegląd",
+        "profile_page": "Strona Ustawienia profilu"
     },
     "topics": {
         "tasks.visibility": {
@@ -218,6 +219,14 @@
         "security.recovery_codes": {
             "title": "Kody odzyskiwania",
             "text": "Jednorazowe kody, którymi zalogujesz się po utracie telefonu. Każdy działa raz. Przechowuj je w bezpiecznym miejscu; utworzenie nowych unieważnia stare."
+        },
+        "profile.photo": {
+            "title": "Twoje zdjęcie",
+            "text": "Twoje zdjęcie widzi przy imieniu każda osoba z rodziny, która może otworzyć dowolną część aplikacji. Jest przechowywane prywatnie, nie pod publicznym adresem, a ukryte dane, na przykład miejsce wykonania zdjęcia, są usuwane."
+        },
+        "profile.name": {
+            "title": "Wyświetlana nazwa",
+            "text": "Ta nazwa jest widoczna przy zadaniach, życzeniach i listach. Możesz ją zmienić w każdej chwili. Adres e-mail służy do logowania i na razie nie można go tu zmienić."
         },
         "settings.security_requirement": {
             "title": "Wymagaj weryfikacji dwuetapowej",
