@@ -7,7 +7,7 @@ import { pseudoLong } from '../helpers/pseudoLong.js';
 
 let mockProps = {};
 const { routerMock, forms } = vi.hoisted(() => ({
-    routerMock: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn(), visit: vi.fn(), on: vi.fn() },
+    routerMock: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn(), visit: vi.fn(), replace: vi.fn(), reload: vi.fn(), on: vi.fn() },
     forms: [],
 }));
 vi.mock('@inertiajs/vue3', async () => {
@@ -216,6 +216,135 @@ describe('marking while shopping', () => {
     it('does not render mark buttons on an open list', () => {
         mountPage({ list: { ...LIST, status: 'open' }, abilities: PLAN });
         expect(current.find('[data-testid="mark-buttons"]').exists()).toBe(false);
+    });
+});
+
+describe('the mark queue (several quick taps)', () => {
+    const tick = () => new Promise((resolve) => { setTimeout(resolve, 5); });
+    const tap = (index, which) => rows()[index].find(`[data-testid="mark-${which}"]`).trigger('click');
+    const sent = () => routerMock.put.mock.calls.map((c) => [c[0], c[1].state]);
+    // Settles the request that is in flight (what Inertia does when the response has arrived), then lets the queue move on.
+    const settle = async (callIndex, { fail = false } = {}) => {
+        const opts = routerMock.put.mock.calls[callIndex][2];
+        if (fail) opts.onHttpException({ status: 500 });
+        opts.onFinish();
+        await tick();
+        await flushPromises();
+    };
+
+    it('sends every tap, one request at a time and in tap order, and loses none', async () => {
+        mountPage();
+        await tap(0, 'bought');
+        await tap(1, 'unavailable');
+        await tap(2, 'bought');
+        // only the first request is on the wire: a second visit would abort it
+        expect(sent()).toEqual([['/shopping/lists/5/items/1/state', 'bought']]);
+        expect([pressed(rows()[0], 'bought'), pressed(rows()[1], 'unavailable'), pressed(rows()[2], 'bought')]).toEqual(['true', 'true', 'true']);
+
+        await settle(0);
+        expect(sent()).toEqual([['/shopping/lists/5/items/1/state', 'bought'], ['/shopping/lists/5/items/2/state', 'unavailable']]);
+        // the first request has settled, the other two taps still show their mark
+        expect([pressed(rows()[1], 'unavailable'), pressed(rows()[2], 'bought')]).toEqual(['true', 'true']);
+
+        await settle(1);
+        expect(sent()).toEqual([
+            ['/shopping/lists/5/items/1/state', 'bought'],
+            ['/shopping/lists/5/items/2/state', 'unavailable'],
+            ['/shopping/lists/5/items/3/state', 'bought'],
+        ]);
+        expect(pressed(rows()[2], 'bought')).toBe('true');
+        await settle(2);
+        expect(routerMock.put).toHaveBeenCalledTimes(3);
+        expect(useToast().toasts).toHaveLength(0);
+    });
+
+    it('never aborts the first request: no second request starts before the first has finished', async () => {
+        mountPage();
+        await tap(0, 'bought');
+        await tap(1, 'bought');
+        await tick();
+        expect(routerMock.put).toHaveBeenCalledTimes(1);
+        await settle(0);
+        expect(routerMock.put).toHaveBeenCalledTimes(2);
+    });
+
+    it('rolls back only the item whose request failed and shows one toast', async () => {
+        mountPage();
+        await tap(0, 'bought');
+        await tap(1, 'bought');
+        await tap(2, 'unavailable');
+        await settle(0, { fail: true });
+        // item 1 is rolled back at once, the other two taps are still pending and keep their mark
+        expect(pressed(rows()[0], 'bought')).toBe('false');
+        expect(pressed(rows()[1], 'bought')).toBe('true');
+        expect(pressed(rows()[2], 'unavailable')).toBe('true');
+        expect(useToast().toasts.map((x) => x.message)).toEqual(['Could not save. Try again.']);
+        // the queue goes on after a failure: the later taps are still sent
+        expect(sent().map((x) => x[0])).toEqual(['/shopping/lists/5/items/1/state', '/shopping/lists/5/items/2/state']);
+        await settle(1);
+        await tick();
+        expect(sent().map((x) => x[0])).toContain('/shopping/lists/5/items/3/state');
+        expect(useToast().toasts).toHaveLength(1);
+    });
+
+    it('rolls back the second item only when the second request fails', async () => {
+        mountPage();
+        await tap(0, 'bought');
+        await tap(1, 'bought');
+        await settle(0);
+        await settle(1, { fail: true });
+        expect(pressed(rows()[1], 'bought')).toBe('false');
+        expect(useToast().toasts).toHaveLength(1);
+    });
+
+    it('says forbidden and reloads the page after a 403, and explains a changed list after a 409', async () => {
+        mountPage();
+        await tap(0, 'bought');
+        lastPut()[2].onHttpException({ status: 403 });
+        lastPut()[2].onFinish();
+        await flushPromises();
+        expect(useToast().toasts.map((x) => x.message)).toEqual(['You are not allowed to do that on this list.']);
+        expect(routerMock.reload).toHaveBeenCalledTimes(1);
+        await tick();
+        await tap(1, 'bought');
+        lastPut()[2].onHttpException({ status: 409 });
+        lastPut()[2].onFinish();
+        await flushPromises();
+        expect(useToast().toasts.at(-1).message).toBe('The list was changed by someone else. It has been reloaded.');
+        expect(routerMock.reload).toHaveBeenCalledTimes(2);
+    });
+
+    it('disables Unlock and Finish while a mark is in flight and enables them when it has settled', async () => {
+        mountPage({ items: [item(1, { state: 'bought' }), item(2)] });
+        expect(button('Unlock list').attributes('disabled')).toBeUndefined();
+        await tap(1, 'bought');
+        expect(button('Unlock list').attributes('disabled')).toBeDefined();
+        expect(current.find('[data-testid="finish-shopping"]').attributes('disabled')).toBeDefined();
+        // the response carries the new state of the list, then the request finishes
+        await current.setProps({ items: [item(1, { state: 'bought' }), item(2, { state: 'bought' })] });
+        await settle(0);
+        expect(button('Unlock list').attributes('disabled')).toBeUndefined();
+        expect(current.find('[data-testid="finish-shopping"]').attributes('disabled')).toBeUndefined();
+    });
+
+    it('announces politely that everything is marked', async () => {
+        mountPage({ items: [item(1, { state: 'bought' }), item(2)] });
+        const live = () => current.find('[data-testid="all-done-live"]');
+        expect(live().attributes('aria-live')).toBe('polite');
+        expect(live().text()).toBe('');
+        await tap(1, 'unavailable');
+        expect(live().text()).toBe('Everything is marked');
+    });
+
+    it('shows the pressed state with a different icon and not by colour alone', async () => {
+        mountPage();
+        const row = () => rows()[0];
+        expect(row().find('[data-testid="mark-bought-on"]').exists()).toBe(false);
+        await tap(0, 'bought');
+        expect(row().find('[data-testid="mark-bought-on"]').exists()).toBe(true);
+        expect(row().find('[data-testid="mark-unavailable-on"]').exists()).toBe(false);
+        await tap(1, 'unavailable');
+        expect(rows()[1].find('[data-testid="mark-unavailable-on"]').exists()).toBe(true);
     });
 });
 

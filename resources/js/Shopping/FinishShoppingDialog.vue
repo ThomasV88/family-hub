@@ -6,6 +6,9 @@ import UiAlert from '../Components/ui/UiAlert.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiDialog from '../Components/ui/UiDialog.vue';
 import HelpTip from '../Components/ui/HelpTip.vue';
+import { useToast } from '../Components/ui/useToast.js';
+import { httpHandlers } from './failure.js';
+import { NAME_MAX, charLength, clip } from './limits.js';
 import { formatQuantity } from './units.js';
 
 // Finish shopping. Without unavailable items a plain confirmation (carry_name null). With unavailable items the owner's question
@@ -17,7 +20,9 @@ const props = defineProps({
     list: { type: Object, default: null },
     unavailable: { type: Array, default: () => [] },
     units: { type: Array, default: () => [] },
-    nameMax: { type: Number, default: 80 },
+    nameMax: { type: Number, default: NAME_MAX },
+    // Resolves when every mark of the list has been sent; the request waits for it so Finish never races a mark.
+    wait: { type: Function, default: null },
 });
 const emit = defineEmits(['update:open']);
 const { t, locale } = useI18n();
@@ -25,6 +30,8 @@ const { t, locale } = useI18n();
 const VISIBLE = 5;
 const form = useForm({ carry_name: null });
 const failed = ref(false);
+const failedKey = ref('shopping.finish.failed');
+const toast = useToast();
 const safe = ref(null);
 const initialFocus = () => safe.value?.$el ?? null;
 const carry = computed(() => props.unavailable.length > 0);
@@ -33,30 +40,52 @@ const shown = computed(() => props.unavailable.slice(0, VISIBLE));
 const more = computed(() => Math.max(0, props.unavailable.length - VISIBLE));
 const lineQuantity = (item) => formatQuantity(item.quantity, unitById.value[item.unitId] ?? null, t, locale.value);
 
-// "{name} (unbought)" in the interface language, the list name cut so the whole stays within the list name limit.
+// "{name} (unbought)" in the interface language, the list name cut (by characters, never inside an emoji) so the whole stays
+// within the list name limit.
 function carryName() {
     const name = props.list?.name ?? '';
     const full = t('shopping.finish.carry_name', { name });
-    if (full.length <= props.nameMax) return full;
-    const room = props.nameMax - (full.length - name.length);
+    if (charLength(full) <= props.nameMax) return full;
+    const room = props.nameMax - (charLength(full) - charLength(name));
 
-    return t('shopping.finish.carry_name', { name: name.slice(0, Math.max(1, room)).trimEnd() });
+    return t('shopping.finish.carry_name', { name: clip(name, Math.max(1, room)).trimEnd() });
 }
 
-watch(() => props.open, (open) => { if (open) failed.value = false; });
+watch(() => props.open, (open) => { if (open) { failed.value = false; failedKey.value = 'shopping.finish.failed'; } });
 
 const close = () => emit('update:open', false);
 
-function send(name) {
-    if (!props.list || form.processing) return;
+const sending = ref(false);
+async function send(name) {
+    if (!props.list || form.processing || sending.value) return;
+    sending.value = true;
     failed.value = false;
+    failedKey.value = 'shopping.finish.failed';
+    if (props.wait) {
+        try {
+            await props.wait();
+        } finally {
+            sending.value = false;
+        }
+    } else {
+        sending.value = false;
+    }
     form.carry_name = name;
     form.post(`/shopping/lists/${props.list.id}/finish`, {
         preserveScroll: true,
         onSuccess: close,
         onError: () => { failed.value = true; },
-        onHttpException: () => { failed.value = true; return false; },
-        onNetworkError: () => { failed.value = true; },
+        ...httpHandlers((key, response) => {
+            if ([403, 404, 409].includes(response?.status)) {
+                // The list is not what this page shows any more: the page reloads, so say why and close.
+                toast.show(t(key));
+                close();
+
+                return;
+            }
+            failedKey.value = key === 'shopping.error.save_failed' ? 'shopping.finish.failed' : key;
+            failed.value = true;
+        }, 'shopping.finish.failed'),
     });
 }
 </script>
@@ -65,7 +94,7 @@ function send(name) {
     <UiDialog :open="open" :title="carry ? t('shopping.finish.carry_title') : t('shopping.finish.title')" :initial-focus="initialFocus" :dismissable="!form.processing" @update:open="emit('update:open', $event)">
         <div class="finish" data-testid="finish-dialog">
             <div aria-live="polite">
-                <UiAlert v-if="failed" variant="danger" data-testid="finish-failed">{{ t('shopping.finish.failed') }}</UiAlert>
+                <UiAlert v-if="failed" variant="danger" data-testid="finish-failed">{{ t(failedKey) }}</UiAlert>
             </div>
             <template v-if="carry">
                 <p class="finish__lead">
@@ -86,14 +115,14 @@ function send(name) {
         <template #footer>
             <template v-if="carry">
                 <div class="finish__footer">
-                    <UiButton variant="primary" :loading="form.processing" :disabled="form.processing" data-testid="finish-create" @click="send(carryName())">{{ t('shopping.finish.create') }}</UiButton>
-                    <UiButton variant="secondary" :disabled="form.processing" data-testid="finish-only" @click="send(null)">{{ t('shopping.finish.just_finish') }}</UiButton>
+                    <UiButton variant="primary" :loading="form.processing || sending" :disabled="form.processing || sending" data-testid="finish-create" @click="send(carryName())">{{ t('shopping.finish.create') }}</UiButton>
+                    <UiButton variant="secondary" :disabled="form.processing || sending" data-testid="finish-only" @click="send(null)">{{ t('shopping.finish.just_finish') }}</UiButton>
                     <UiButton ref="safe" variant="ghost" :disabled="form.processing" data-testid="finish-cancel" @click="close">{{ t('shopping.finish.cancel') }}</UiButton>
                 </div>
             </template>
             <template v-else>
                 <UiButton ref="safe" variant="secondary" :disabled="form.processing" data-testid="finish-cancel" @click="close">{{ t('shopping.finish.not_yet') }}</UiButton>
-                <UiButton variant="primary" :loading="form.processing" :disabled="form.processing" data-testid="finish-confirm" @click="send(null)">{{ t('shopping.finish.button') }}</UiButton>
+                <UiButton variant="primary" :loading="form.processing || sending" :disabled="form.processing || sending" data-testid="finish-confirm" @click="send(null)">{{ t('shopping.finish.button') }}</UiButton>
             </template>
         </template>
     </UiDialog>

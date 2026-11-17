@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { CircleCheck, Copy, Ellipsis, ListPlus, Lock, LockOpen, Mail, Plus, Settings, Trash2 } from '@lucide/vue';
@@ -23,6 +23,8 @@ import ListSettingsPanel from '../../Shopping/ListSettingsPanel.vue';
 import ShoppingItemRow from '../../Shopping/ShoppingItemRow.vue';
 import ShoppingProgress from '../../Shopping/ShoppingProgress.vue';
 import StickyActionBar from '../../Shopping/StickyActionBar.vue';
+import { failureKey, httpHandlers, reconcile } from '../../Shopping/failure.js';
+import { useMarkQueue } from '../../Shopping/useMarkQueue.js';
 
 // List detail. The server decides what a person may do (`abilities`); the page only renders controls that are allowed.
 // Plan mode (open list): items can be added, edited and removed. Locked mode (shopping): the responsible person marks items Bought or
@@ -56,10 +58,15 @@ const settingsOpen = ref(false);
 const mailOpen = ref(false);
 const finishOpen = ref(false);
 
-// Shopping mode. Marks are shown at once (an override per item) and sent as an absolute target state; a failure drops the override,
-// which restores the saved state, and shows a toast. A second tap on the same item waits for the first request.
-const overrides = reactive({});
-const inflight = reactive({});
+// Shopping mode. Marks are shown at once (an override per item) and sent as an absolute target state, one request at a time in
+// tap order (see useMarkQueue: a second tap must never abort the first). An item shows its mark until its own request settles; a
+// failure rolls back that item only and shows a toast. Unlock and Finish wait until every mark has been sent.
+function markFailed(itemId, response) {
+    toast.show(t(failureKey(response, 'shopping.error.mark_failed')));
+    reconcile(response);
+}
+const marks = useMarkQueue({ url: (itemId) => `/shopping/lists/${props.list.id}/items/${itemId}/state`, onFail: markFailed });
+const overrides = marks.overrides;
 const shownItems = computed(() => props.items.map((i) => (overrides[i.id] ? { ...i, state: overrides[i.id] } : i)));
 const count = (state) => shownItems.value.filter((i) => i.state === state).length;
 const bought = computed(() => count('bought'));
@@ -69,26 +76,12 @@ const unavailableItems = computed(() => shownItems.value.filter((i) => i.state =
 const markable = computed(() => locked.value && props.abilities.mark === true);
 const canFinish = computed(() => locked.value && props.abilities.finish === true);
 const hasBar = computed(() => canFinish.value && shownItems.value.length > 0);
-
-function markFailed() {
-    toast.show(t('shopping.error.mark_failed'));
-}
+const marking = computed(() => marks.busy.value);
+// Announced politely when the last item gets marked, so Finish becoming available is not silent.
+const allDone = computed(() => markable.value && shownItems.value.length > 0 && left.value === 0);
 
 function mark(item, target) {
-    if (inflight[item.id]) return;
-    inflight[item.id] = true;
-    overrides[item.id] = target;
-    router.put(`/shopping/lists/${props.list.id}/items/${item.id}/state`, { state: target }, {
-        preserveScroll: true,
-        preserveState: true,
-        onError: markFailed,
-        onHttpException: () => { markFailed(); return false; },
-        onNetworkError: markFailed,
-        onFinish: () => {
-            delete overrides[item.id];
-            delete inflight[item.id];
-        },
-    });
+    marks.mark(item.id, target);
 }
 
 // Lock and unlock, each behind a confirmation (not destructive, so the accent button).
@@ -114,8 +107,7 @@ function submitLock() {
         preserveScroll: true,
         onSuccess: () => { lockDialog.value = null; },
         onError: (errors) => { lockError.value = String(errors?.list ?? '').startsWith('shopping.') ? t(errors.list) : t('shopping.error.mark_failed'); },
-        onHttpException: () => { lockError.value = t('shopping.error.mark_failed'); return false; },
-        onNetworkError: () => { lockError.value = t('shopping.error.mark_failed'); },
+        ...httpHandlers((key) => { lockError.value = t(key); }, 'shopping.error.mark_failed'),
         onFinish: () => { lockBusy.value = false; },
     });
 }
@@ -151,8 +143,14 @@ function onMenu({ key }) {
     if (key === 'delete') deleteOpen.value = true;
 }
 
+const deleting = ref(false);
 function deleteList() {
-    router.delete(`/shopping/lists/${props.list.id}`);
+    if (deleting.value) return;
+    deleting.value = true;
+    router.delete(`/shopping/lists/${props.list.id}`, {
+        ...httpHandlers((key) => toast.show(t(key)), 'shopping.error.save_failed'),
+        onFinish: () => { deleting.value = false; },
+    });
 }
 </script>
 
@@ -163,7 +161,7 @@ function deleteList() {
             <ListHeader :list="list">
                 <UiButton v-if="canEdit" variant="primary" :icon="Plus" data-testid="add-items" @click="pickerOpen = true">{{ t('shopping.detail.add_items') }}</UiButton>
                 <UiButton v-if="abilities.lock" variant="secondary" :icon="Lock" :disabled="items.length === 0" :aria-describedby="lockHint ? 'lock-hint' : undefined" data-testid="lock-list" @click="askLock('lock')">{{ t('shopping.lock.button') }}</UiButton>
-                <UiButton v-if="abilities.unlock" variant="secondary" :icon="LockOpen" data-testid="unlock-list" @click="askLock('unlock')">{{ t('shopping.lock.unlock_button') }}</UiButton>
+                <UiButton v-if="abilities.unlock" variant="secondary" :icon="LockOpen" :disabled="marking" data-testid="unlock-list" @click="askLock('unlock')">{{ t('shopping.lock.unlock_button') }}</UiButton>
                 <UiMenu v-if="menuItems.length > 0" :label="t('shopping.detail.more')" :icon="Ellipsis" :items="menuItems" @select="onMenu" />
             </ListHeader>
 
@@ -184,6 +182,7 @@ function deleteList() {
             <UiAlert v-else-if="locked" variant="info" data-testid="locked-banner">{{ t('shopping.detail.locked_note') }}</UiAlert>
 
             <ShoppingProgress v-if="locked && items.length > 0" :bought="bought" :unavailable="unavailable" :left="left" />
+            <p v-if="markable" class="visually-hidden" role="status" aria-live="polite" data-testid="all-done-live">{{ allDone ? t('shopping.progress.all_done') : '' }}</p>
 
             <UiEmptyState v-if="items.length === 0" :heading-level="2" :icon="ListPlus" :title="t('shopping.detail.empty_title')" :body="canEdit ? t('shopping.detail.empty_body') : ''">
                 <template v-if="canEdit" #action>
@@ -191,10 +190,10 @@ function deleteList() {
                 </template>
             </UiEmptyState>
             <UiList v-else :aria-label="t('shopping.detail.items_label')">
-                <ShoppingItemRow v-for="item in shownItems" :key="item.id" :item="item" :unit="unitById[item.unitId] ?? null" :interactive="canEdit" :markable="markable" :busy="Boolean(inflight[item.id])" @edit="editItem" @mark="mark" />
+                <ShoppingItemRow v-for="item in shownItems" :key="item.id" :item="item" :unit="unitById[item.unitId] ?? null" :interactive="canEdit" :markable="markable" :busy="Boolean(marks.pending[item.id])" @edit="editItem" @mark="mark" />
             </UiList>
             <StickyActionBar v-if="hasBar" :left="left">
-                <UiButton variant="primary" :icon="CircleCheck" data-testid="finish-shopping" @click="finishOpen = true">{{ t('shopping.finish.button') }}</UiButton>
+                <UiButton variant="primary" :icon="CircleCheck" :disabled="marking" data-testid="finish-shopping" @click="finishOpen = true">{{ t('shopping.finish.button') }}</UiButton>
             </StickyActionBar>
         </div>
 
@@ -210,7 +209,7 @@ function deleteList() {
                 <UiButton variant="primary" :loading="lockBusy" :disabled="lockBusy" data-testid="lock-confirm" @click="submitLock">{{ lockCopy.confirm }}</UiButton>
             </template>
         </UiDialog>
-        <FinishShoppingDialog v-if="canFinish" v-model:open="finishOpen" :list="{ id: list.id, name: list.name }" :unavailable="unavailableItems" :units="units" />
+        <FinishShoppingDialog v-if="canFinish" v-model:open="finishOpen" :list="{ id: list.id, name: list.name }" :unavailable="unavailableItems" :units="units" :wait="marks.drained" />
         <ItemPickerDialog v-if="canEdit" v-model:open="pickerOpen" :list-id="list.id" :catalog="catalog" :on-list-ids="onListIds" :units="units" :can-manage-catalog="abilities.manageCatalog === true" />
         <ItemEditDialog v-if="canEdit" v-model:open="editOpen" :list-id="list.id" :item="editTarget" :units="units" />
         <ListSettingsPanel v-model:open="settingsOpen" :list="list" :abilities="abilities" :members="members" :stores="stores" :candidates="candidates" :responsible-push-enabled="responsiblePushEnabled" />

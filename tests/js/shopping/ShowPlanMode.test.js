@@ -7,7 +7,7 @@ import { pseudoLong } from '../helpers/pseudoLong.js';
 
 let mockProps = {};
 const { routerMock, forms } = vi.hoisted(() => ({
-    routerMock: { get: vi.fn(), post: vi.fn(), delete: vi.fn(), visit: vi.fn(), on: vi.fn() },
+    routerMock: { get: vi.fn(), post: vi.fn(), delete: vi.fn(), visit: vi.fn(), replace: vi.fn(), reload: vi.fn(), on: vi.fn() },
     forms: [],
 }));
 vi.mock('@inertiajs/vue3', async () => {
@@ -196,16 +196,16 @@ describe('Shopping list page in plan mode', () => {
         dialogButton('Remove item').click();
         await flushPromises();
         expect(dialog().textContent).toContain('Remove Mlieko from this list?');
-        expect(form.delete).not.toHaveBeenCalled();
+        expect(routerMock.delete).not.toHaveBeenCalled();
         dialogButton('Keep item').click();
         await flushPromises();
-        expect(form.delete).not.toHaveBeenCalled();
+        expect(routerMock.delete).not.toHaveBeenCalled();
         expect(dialog().textContent).toContain('Edit item');
         dialogButton('Remove item').click();
         await flushPromises();
         dialogButton('Remove item').click();
         await flushPromises();
-        expect(form.delete).toHaveBeenCalledWith('/shopping/lists/5/items/1', expect.any(Object));
+        expect(routerMock.delete).toHaveBeenCalledWith('/shopping/lists/5/items/1', expect.any(Object));
     });
 
     it('renders locked and finished lists read-only with Bought and Unavailable states', () => {
@@ -301,7 +301,7 @@ describe('Shopping list page in plan mode', () => {
         expect(routerMock.delete).not.toHaveBeenCalled();
         dialogButton('Delete list').click();
         await flushPromises();
-        expect(routerMock.delete).toHaveBeenCalledWith('/shopping/lists/5');
+        expect(routerMock.delete).toHaveBeenCalledWith('/shopping/lists/5', expect.any(Object));
     });
 
     it('opens the copy dialog from the menu', async () => {

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useShell } from '../Shell/shellState.js';
 
@@ -10,6 +10,14 @@ const props = defineProps({ left: { type: Number, default: 0 } });
 const { t } = useI18n();
 const shell = useShell();
 const phone = computed(() => Boolean(shell?.isPhone?.value));
+
+// The bar is 64 px high and sits where toasts appear: lift the toasts above it while it is shown.
+const LIFT = '--fh-bar-lift';
+watch(phone, (on) => {
+    if (on) document.documentElement.style.setProperty(LIFT, '64px');
+    else document.documentElement.style.removeProperty(LIFT);
+}, { immediate: true });
+onBeforeUnmount(() => document.documentElement.style.removeProperty(LIFT));
 </script>
 
 <template>
