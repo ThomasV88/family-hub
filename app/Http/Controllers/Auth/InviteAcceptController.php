@@ -43,7 +43,11 @@ class InviteAcceptController extends Controller
         try {
             $user = $invites->accept($invitation, ['name' => $request->validated('name'), 'password' => $request->validated('password')]);
         } catch (InvalidInviteException) {
-            return $this->page($invitation->refresh(), $token);
+            // A link that is still "valid" but could not be accepted (account gone or converted meanwhile) is
+            // dead; never re-render the form for it, which would invite the same failing submit again.
+            $fresh = $invitation->refresh();
+
+            return $this->page($fresh->state() === 'valid' ? null : $fresh, $token);
         }
 
         Auth::login($user);

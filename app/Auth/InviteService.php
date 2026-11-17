@@ -46,6 +46,15 @@ class InviteService
             }
 
             if ($childUserId !== null) {
+                // Serialise conversions per child: lock the child row and re-check its state inside the transaction,
+                // so two concurrent creates (or a create racing an accept) cannot leave two open invitations or
+                // invite a child that was converted in the meantime. The loser sees the generic failure banner.
+                DB::select('select pg_advisory_xact_lock(hashtext(?))', ['child-invite:'.$childUserId]);
+                $child = User::query()->whereKey($childUserId)->lockForUpdate()->first();
+                if ($child === null || $child->email !== null || ! $child->sign_in_disabled) {
+                    throw ValidationException::withMessages(['child' => 'settings.members.convert.failed']);
+                }
+
                 // One open conversion per child: an older invitation for another address is replaced.
                 $older = Invitation::query()->where('user_id', $childUserId)
                     ->whereNull('accepted_at')->whereNull('revoked_at')->lockForUpdate()->get();

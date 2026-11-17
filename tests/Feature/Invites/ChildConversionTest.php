@@ -17,6 +17,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\ValidationException;
 
 uses(RefreshDatabase::class);
 
@@ -204,4 +205,49 @@ it('shows the open conversion invitation on the child row only', function () {
     $this->actingAs($this->admin)->delete("/settings/invitations/{$invitation->id}");
     $this->actingAs($this->admin)->get('/settings/members')->assertInertia(fn ($page) => $page
         ->where('members', fn ($members) => collect($members)->firstWhere('id', $this->child->id)['invitation'] === null));
+});
+
+it('removes an open conversion invitation together with the child instead of turning it into a plain invite', function () {
+    $invitation = convertChild($this->admin, $this->child);
+
+    // The staging reseed removes a child's own rows first (wishes and tasks restrict the delete), then the child.
+    $this->wish->delete();
+    $this->task->delete();
+    DB::table('wishlist_managers')->where('owner_id', $this->child->id)->delete();
+    DB::table('module_permissions')->where('user_id', $this->child->id)->delete();
+    DB::table('users')->where('id', $this->child->id)->delete();
+
+    expect(Invitation::query()->whereKey($invitation->id)->exists())->toBeFalse();
+});
+
+it('refuses to invite a child that was converted in the meantime, with the generic failure, and creates nothing', function () {
+    $this->child->forceFill(['email' => 'else@example.test', 'sign_in_disabled' => false])->save();
+
+    expect(fn () => app(InviteService::class)->create($this->admin, 'late@example.test', Preset::Child, 'en', $this->child->id))
+        ->toThrow(ValidationException::class);
+    expect(Invitation::query()->count())->toBe(0);
+});
+
+it('takes the per-child lock and the child row lock when it creates a conversion invitation', function () {
+    $sql = [];
+    DB::listen(function ($query) use (&$sql) {
+        $sql[] = $query->sql;
+    });
+
+    app(InviteService::class)->create($this->admin, 'late@example.test', Preset::Child, 'en', $this->child->id);
+
+    expect(collect($sql)->contains(fn ($q) => str_contains($q, 'pg_advisory_xact_lock')))->toBeTrue()
+        ->and(collect($sql)->contains(fn ($q) => str_contains($q, 'from "users"') && str_contains($q, 'for update')))->toBeTrue();
+});
+
+it('never shows the accept form again for a link that is valid but cannot be accepted', function () {
+    $invitation = convertChild($this->admin, $this->child);
+    $token = 'convert-token-456';
+    $invitation->forceFill(['token_hash' => hash('sha256', $token)])->save();
+    $this->child->forceFill(['email' => 'else@example.test', 'sign_in_disabled' => false])->save();
+    $this->app['auth']->forgetGuards();
+    $this->flushSession();
+
+    $this->post("/invite/{$token}", ['name' => 'Ema', 'password' => 'correct horse battery staple', 'password_confirmation' => 'correct horse battery staple'])
+        ->assertInertia(fn ($page) => $page->where('state', 'revoked')->where('email', null)->where('token', null));
 });
