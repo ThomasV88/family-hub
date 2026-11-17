@@ -1,13 +1,16 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue';
+import { computed, h, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue';
 import { Check } from '@lucide/vue';
+import UiAvatar from './UiAvatar.vue';
 import UiButton from './UiButton.vue';
 
 const props = defineProps({
     label: { type: String, required: true },
     icon: { type: [Object, Function], default: null },
+    // { name, userId }: shown in the trigger instead of the icon (the icon stays the fallback).
+    avatar: { type: Object, default: null },
     // { type: 'item', key, label, icon? } | { type: 'radio-group', key, label, value, options: [{ value, label }] }
-    // | { type: 'header', key, label, sublabel? } (non-interactive) | { type: 'separator', key }
+    // | { type: 'header', key, label, sublabel?, leading?: { name, userId } } (non-interactive) | { type: 'separator', key }
     items: { type: Array, required: true },
 });
 const emit = defineEmits(['select']);
@@ -17,6 +20,14 @@ const root = ref(null);
 const trigger = ref(null);
 const active = ref(0);
 const els = ref([]);
+
+// The trigger button reserves a 20px icon slot; the avatar is drawn at 24px so the button keeps its height.
+const triggerIcon = computed(() => {
+    if (!props.avatar) return props.icon;
+    const { name, userId } = props.avatar;
+
+    return () => h(UiAvatar, { name, userId, size: 32, decorative: true, class: 'ui-menu__trigger-avatar', style: { '--ui-avatar-size': '24px' } });
+});
 
 // Flat list of actionable entries; radio groups contribute one entry per option.
 const flat = computed(() => {
@@ -79,7 +90,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick));
         <UiButton
             ref="trigger"
             variant="secondary"
-            :icon="icon"
+            :icon="triggerIcon"
             aria-haspopup="menu"
             :aria-expanded="open ? 'true' : 'false'"
             :aria-controls="open ? `${uid}-menu` : undefined"
@@ -92,8 +103,11 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick));
             <template v-for="(item, i) in items" :key="item.key">
                 <div v-if="item.type === 'separator' || (i > 0 && items[i - 1].type !== 'separator')" class="ui-menu__separator" role="separator"></div>
                 <div v-if="item.type === 'header'" class="ui-menu__header" data-testid="menu-header">
-                    <span class="ui-menu__header-name">{{ item.label }}</span>
-                    <span v-if="item.sublabel" class="ui-menu__header-sub">{{ item.sublabel }}</span>
+                    <UiAvatar v-if="item.leading" :name="item.leading.name" :user-id="item.leading.userId" :size="32" decorative />
+                    <span class="ui-menu__header-text">
+                        <span class="ui-menu__header-name">{{ item.label }}</span>
+                        <span v-if="item.sublabel" class="ui-menu__header-sub">{{ item.sublabel }}</span>
+                    </span>
                 </div>
                 <button
                     v-else-if="item.type === 'item'"
@@ -165,7 +179,8 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick));
 .ui-menu__item:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
 .ui-menu__check { display: inline-flex; width: 20px; height: 20px; }
 .ui-menu__group-label { padding: var(--space-2) var(--space-3) var(--space-1); color: var(--color-text-muted); font-size: var(--text-sm); font-weight: 600; }
-.ui-menu__header { display: flex; flex-direction: column; padding: var(--space-2) var(--space-3); min-width: 0; }
+.ui-menu__header { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); min-width: 0; }
+.ui-menu__header-text { display: flex; flex-direction: column; min-width: 0; }
 .ui-menu__header-name { font-size: var(--text-base); font-weight: 600; overflow-wrap: anywhere; }
 .ui-menu__header-sub { font-size: var(--text-sm); font-weight: 400; color: var(--color-text-muted); overflow-wrap: anywhere; }
 .ui-menu__separator { height: 1px; margin-block: var(--space-1); background: var(--color-border); }

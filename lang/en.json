@@ -776,14 +776,39 @@
         }
     },
     "profile": {
+        "menu": "Profile settings",
+        "title": "Profile settings",
         "photo": {
+            "card_title": "Photo",
+            "upload": "Upload photo",
+            "replace": "Replace photo",
+            "remove": "Remove photo",
+            "hint": "JPG, PNG or WebP, up to 5 MB. Square crops look best.",
+            "uploading": "Uploading photo",
+            "remove_title": "Remove photo",
+            "remove_body": "Remove your photo? Your initial will be shown instead.",
+            "remove_confirm": "Remove photo",
+            "remove_cancel": "Keep photo",
             "err_type": "Choose a JPG, PNG or WebP image.",
             "err_size": "The picture is larger than 5 MB. Choose a smaller one.",
             "err_pixels": "The picture has too many pixels. Choose a smaller one.",
             "err_decode": "We could not use that picture. Choose a JPG, PNG or WebP image up to 5 MB and try again.",
             "err_write": "We could not save the picture. Nothing was changed. Try again."
         },
+        "details": {
+            "card_title": "Details",
+            "name_label": "Display name",
+            "email_label": "E-mail",
+            "email_hint": "You cannot change your e-mail yet."
+        },
+        "save": "Save changes",
+        "save_failed": "Your changes were not saved. Check the highlighted fields and try again.",
+        "err_name_required": "Enter a name.",
+        "err_name_max": "The name can have at most 60 characters.",
+        "err_name_chars": "The name contains characters that are not allowed.",
+        "err_email_locked": "The e-mail cannot be changed here.",
         "toast": {
+            "saved": "Profile saved",
             "photo_saved": "Photo saved",
             "photo_removed": "Photo removed"
         }

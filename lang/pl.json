@@ -776,14 +776,39 @@
         }
     },
     "profile": {
+        "menu": "Ustawienia profilu",
+        "title": "Ustawienia profilu",
         "photo": {
+            "card_title": "Zdjęcie",
+            "upload": "Prześlij zdjęcie",
+            "replace": "Zmień zdjęcie",
+            "remove": "Usuń zdjęcie",
+            "hint": "JPG, PNG lub WebP, do 5 MB. Najlepiej wyglądają kwadratowe kadry.",
+            "uploading": "Przesyłanie zdjęcia",
+            "remove_title": "Usuń zdjęcie",
+            "remove_body": "Usunąć zdjęcie? Zamiast niego pojawi się inicjał.",
+            "remove_confirm": "Usuń zdjęcie",
+            "remove_cancel": "Zachowaj",
             "err_type": "Wybierz obraz JPG, PNG lub WebP.",
             "err_size": "Obraz jest większy niż 5 MB. Wybierz mniejszy.",
             "err_pixels": "Obraz ma zbyt wiele pikseli. Wybierz mniejszy.",
             "err_decode": "Nie udało się użyć tego obrazu. Wybierz JPG, PNG lub WebP do 5 MB i spróbuj ponownie.",
             "err_write": "Nie udało się zapisać obrazu. Nic nie zostało zmienione. Spróbuj ponownie."
         },
+        "details": {
+            "card_title": "Dane",
+            "name_label": "Wyświetlana nazwa",
+            "email_label": "E-mail",
+            "email_hint": "Adresu e-mail na razie nie można zmienić."
+        },
+        "save": "Zapisz zmiany",
+        "save_failed": "Zmiany nie zostały zapisane. Sprawdź zaznaczone pola i spróbuj ponownie.",
+        "err_name_required": "Podaj nazwę.",
+        "err_name_max": "Nazwa może mieć najwyżej 60 znaków.",
+        "err_name_chars": "Nazwa zawiera niedozwolone znaki.",
+        "err_email_locked": "Adresu e-mail nie można tu zmienić.",
         "toast": {
+            "saved": "Profil zapisany",
             "photo_saved": "Zdjęcie zapisane",
             "photo_removed": "Zdjęcie usunięte"
         }

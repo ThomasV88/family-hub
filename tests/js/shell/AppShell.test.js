@@ -71,6 +71,18 @@ describe('AppShell desktop', () => {
         expect(wrapper.find('[aria-haspopup="menu"]').text()).toContain(en.nav.account);
     });
 
+    it('shows the signed-in member avatar (photo or initial) in the account menu trigger', () => {
+        setWidth(1280);
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, avatars: { 7: 2 }, auth: { user: { id: 7, name: 'Zuzana', email: 'z@example.test' } } };
+        mountShell();
+        expect(wrapper.find('[aria-haspopup="menu"] img').attributes('src')).toBe('/people/7/photo/thumb?v=2');
+        wrapper.unmount();
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, avatars: {}, auth: { user: { id: 7, name: 'Zuzana', email: 'z@example.test' } } };
+        mountShell();
+        expect(wrapper.find('[aria-haspopup="menu"] img').exists()).toBe(false);
+        expect(wrapper.find('[aria-haspopup="menu"]').text()).toContain('Z');
+    });
+
     it('toggles and remembers the sidebar', async () => {
         setWidth(1280);
         mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' } };

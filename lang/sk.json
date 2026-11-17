@@ -776,14 +776,39 @@
         }
     },
     "profile": {
+        "menu": "Nastavenia profilu",
+        "title": "Nastavenia profilu",
         "photo": {
+            "card_title": "Fotografia",
+            "upload": "Nahrať fotografiu",
+            "replace": "Zmeniť fotografiu",
+            "remove": "Odstrániť fotografiu",
+            "hint": "JPG, PNG alebo WebP, najviac 5 MB. Najlepšie vyzerajú štvorcové zábery.",
+            "uploading": "Nahráva sa fotografia",
+            "remove_title": "Odstrániť fotografiu",
+            "remove_body": "Odstrániť fotografiu? Namiesto nej sa zobrazí iniciála.",
+            "remove_confirm": "Odstrániť fotografiu",
+            "remove_cancel": "Ponechať",
             "err_type": "Vyberte obrázok JPG, PNG alebo WebP.",
             "err_size": "Obrázok je väčší ako 5 MB. Vyberte menší.",
             "err_pixels": "Obrázok má príliš veľa pixelov. Vyberte menší.",
             "err_decode": "Tento obrázok sa nepodarilo použiť. Vyberte JPG, PNG alebo WebP do 5 MB a skúste to znova.",
             "err_write": "Obrázok sa nepodarilo uložiť. Nič sa nezmenilo. Skúste to znova."
         },
+        "details": {
+            "card_title": "Údaje",
+            "name_label": "Zobrazované meno",
+            "email_label": "E-mail",
+            "email_hint": "E-mail zatiaľ nemožno zmeniť."
+        },
+        "save": "Uložiť zmeny",
+        "save_failed": "Zmeny sa neuložili. Skontrolujte zvýraznené polia a skúste to znova.",
+        "err_name_required": "Zadajte meno.",
+        "err_name_max": "Meno môže mať najviac 60 znakov.",
+        "err_name_chars": "Meno obsahuje nepovolené znaky.",
+        "err_email_locked": "E-mail tu nemožno zmeniť.",
         "toast": {
+            "saved": "Profil uložený",
             "photo_saved": "Fotografia uložená",
             "photo_removed": "Fotografia odstránená"
         }
