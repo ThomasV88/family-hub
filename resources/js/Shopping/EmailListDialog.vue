@@ -9,6 +9,7 @@ import UiDialog from '../Components/ui/UiDialog.vue';
 import UiField from '../Components/ui/UiField.vue';
 import UiInput from '../Components/ui/UiInput.vue';
 import HelpTip from '../Components/ui/HelpTip.vue';
+import { failureKey, reconcile } from './failure.js';
 
 // Send a shopping list by e-mail (plain text) to up to 5 typed addresses. Posts { addresses } to /shopping/lists/{id}/mail; the
 // server answers 303 with the toast "List sent to {n} address(es)", 422 with per-address errors, or 429 when a limit is reached.
@@ -29,6 +30,8 @@ const draftError = ref('');
 const serverErrors = ref({ list: '', items: {} });
 const limited = ref(false);
 const failed = ref(false);
+const failedText = ref('');
+const overflowed = ref(false);
 const sending = ref(false);
 const full = computed(() => tokens.value.length >= MAX);
 const input = ref(null);
@@ -44,7 +47,10 @@ watch(
         serverErrors.value = { list: '', items: {} };
         limited.value = false;
         failed.value = false;
-        sending.value = false;
+        failedText.value = '';
+        overflowed.value = false;
+        // `sending` is not reset here: a request that is still running keeps the button locked until it finishes,
+        // so closing and reopening the dialog cannot send the mail twice.
         form.clearErrors();
     },
     { immediate: true },
@@ -57,18 +63,22 @@ const has = (value) => tokens.value.some((v) => v.toLowerCase() === value.toLowe
 function commit(text) {
     const parts = String(text).split(/[\s,;]+/).filter(Boolean);
     const rejected = [];
+    let overflow = false;
     for (const part of parts) {
         if (!isValid(part)) {
             rejected.push(part);
-        } else if (!has(part) && tokens.value.length < MAX) {
-            tokens.value = [...tokens.value, part];
+        } else if (!has(part)) {
+            if (tokens.value.length < MAX) tokens.value = [...tokens.value, part];
+            else overflow = true;
         }
     }
     serverErrors.value = { list: '', items: {} };
     limited.value = false;
     failed.value = false;
     draft.value = rejected.join(' ');
+    // More than 5 addresses (for example a pasted list) are never dropped silently.
     draftError.value = rejected.length > 0 ? t('shopping.mail.invalid_token', { text: rejected[0] }) : '';
+    overflowed.value = overflow;
 }
 
 function onKeydown(event) {
@@ -91,6 +101,7 @@ function onBlur() {
 }
 function removeToken(index) {
     tokens.value = tokens.value.filter((_, i) => i !== index);
+    overflowed.value = false;
     serverErrors.value = { list: '', items: {} };
     limited.value = false;
 }
@@ -98,7 +109,7 @@ function removeToken(index) {
 const draftValid = computed(() => draft.value.trim() !== '' && draft.value.trim().split(/[\s,;]+/).every(isValid));
 const canSend = computed(() => (tokens.value.length > 0 || draftValid.value) && !sending.value);
 const translate = (message, params = {}) => (String(message).startsWith('shopping.') ? t(message, params) : String(message));
-const fieldError = computed(() => draftError.value || serverErrors.value.list);
+const fieldError = computed(() => draftError.value || (overflowed.value ? t('shopping.mail.err_too_many') : '') || serverErrors.value.list);
 const hint = computed(() => (full.value ? t('shopping.mail.hint_max') : ''));
 const close = () => emit('update:open', false);
 
@@ -123,6 +134,7 @@ function submit() {
     sending.value = true;
     limited.value = false;
     failed.value = false;
+    failedText.value = '';
     form.addresses = [...tokens.value];
     form.post(`/shopping/lists/${props.list.id}/mail`, {
         preserveScroll: true,
@@ -130,12 +142,17 @@ function submit() {
         onError: readErrors,
         onHttpException: (response) => {
             // The send limit answers 429 JSON, not a page: show the message in the dialog instead of Inertia's error window.
-            if (response?.status === 429) limited.value = true;
-            else failed.value = true;
+            if (response?.status === 429) {
+                limited.value = true;
+            } else {
+                failed.value = true;
+                failedText.value = failureKey(response, 'shopping.mail.failed');
+                reconcile(response);
+            }
 
             return false;
         },
-        onNetworkError: () => { failed.value = true; },
+        onNetworkError: () => { failed.value = true; failedText.value = 'shopping.mail.failed'; },
         onFinish: () => { sending.value = false; },
     });
 }
@@ -150,7 +167,7 @@ function submit() {
             </p>
             <div aria-live="polite">
                 <UiAlert v-if="limited" variant="warning" data-testid="mail-limited">{{ t('shopping.mail.err_limit') }}</UiAlert>
-                <UiAlert v-else-if="failed" variant="danger" data-testid="mail-failed">{{ t('shopping.mail.failed') }}</UiAlert>
+                <UiAlert v-else-if="failed" variant="danger" data-testid="mail-failed">{{ t(failedText || 'shopping.mail.failed') }}</UiAlert>
             </div>
             <UiField :label="t('shopping.mail.field')" :hint="hint" :error="fieldError">
                 <ul v-if="tokens.length > 0" class="mail__chips" :aria-label="t('shopping.mail.field')" data-testid="mail-chips">

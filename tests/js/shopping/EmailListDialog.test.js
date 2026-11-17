@@ -12,6 +12,7 @@ const { forms, behaviour } = vi.hoisted(() => ({ forms: [], behaviour: { next: n
 vi.mock('@inertiajs/vue3', async () => {
     const { reactive } = await import('vue');
     return {
+        router: { reload: vi.fn(), visit: vi.fn() },
         useForm: (data) => {
             const form = reactive({
                 ...data,
@@ -101,6 +102,23 @@ describe('EmailListDialog', () => {
         expect(dialog().textContent).toContain('You can send to at most 5 addresses at a time.');
     });
 
+    it('says so when a paste has more than 5 addresses instead of dropping the rest silently', async () => {
+        mountDialog();
+        await paste('a@example.test b@example.test c@example.test d@example.test e@example.test f@example.test');
+        expect(chips()).toHaveLength(5);
+        expect(dialog().querySelector('.ui-field__error').textContent).toContain('You can send to at most 5 addresses at a time.');
+        dialog().querySelector('.mail__remove').click();
+        await nextTick();
+        expect(dialog().querySelector('.ui-field__error')).toBeNull();
+    });
+
+    it('shows no too-many error for exactly 5 addresses', async () => {
+        mountDialog();
+        await paste('a@example.test b@example.test c@example.test d@example.test e@example.test');
+        expect(chips()).toHaveLength(5);
+        expect(dialog().querySelector('.ui-field__error')).toBeNull();
+    });
+
     it('keeps an invalid address in the field with an error', async () => {
         mountDialog();
         await type('foo', 'Enter');
@@ -159,6 +177,32 @@ describe('EmailListDialog', () => {
         behaviour.next = (opts) => opts.onHttpException({ status: 500, data: '' });
         await submit();
         expect(dialog().querySelector('[data-testid="mail-failed"]')).not.toBeNull();
+    });
+
+    it('names the refusal after a 403 or 409 instead of the generic failure', async () => {
+        mountDialog();
+        await paste('a@example.test');
+        behaviour.next = (opts) => opts.onHttpException({ status: 403, data: '' });
+        await submit();
+        expect(dialog().querySelector('[data-testid="mail-failed"]').textContent).toBe('You are not allowed to do that on this list.');
+    });
+
+    it('keeps the send button locked while a request runs, even after closing and reopening', async () => {
+        mountDialog();
+        await paste('a@example.test');
+        let finish;
+        behaviour.next = (opts) => { finish = opts.onFinish; opts.onFinish = undefined; };
+        await submit();
+        await current.setProps({ open: false });
+        await current.setProps({ open: true });
+        await flushPromises();
+        await paste('b@example.test');
+        expect(send().disabled).toBe(true);
+        await submit();
+        expect(forms[0].post).toHaveBeenCalledTimes(1);
+        finish();
+        await flushPromises();
+        expect(send().disabled).toBe(false);
     });
 
     it('shows the list-level server errors translated', async () => {

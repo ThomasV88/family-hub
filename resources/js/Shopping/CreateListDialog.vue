@@ -9,6 +9,8 @@ import UiField from '../Components/ui/UiField.vue';
 import UiInput from '../Components/ui/UiInput.vue';
 import UiSelect from '../Components/ui/UiSelect.vue';
 import CatalogImage from './CatalogImage.vue';
+import { httpHandlers } from './failure.js';
+import { NAME_MAX } from './limits.js';
 
 // New shopping list: name, store, responsible person. Posts to /shopping/lists; the server opens the new (empty) list.
 const props = defineProps({
@@ -17,7 +19,7 @@ const props = defineProps({
     stores: { type: Array, default: () => [] },
     // [{ id, name, isChild }]
     candidates: { type: Array, default: () => [] },
-    nameMax: { type: Number, default: 80 },
+    nameMax: { type: Number, default: NAME_MAX },
 });
 const emit = defineEmits(['update:open']);
 const { t } = useI18n();
@@ -25,6 +27,7 @@ const page = usePage();
 
 const form = useForm({ name: '', store_id: '', responsible_id: '' });
 const nameInput = ref(null);
+const httpError = ref('');
 const initialFocus = () => nameInput.value?.$el?.querySelector?.('input') ?? null;
 
 const me = computed(() => page.props.auth?.user?.id ?? null);
@@ -36,6 +39,7 @@ watch(
     (open) => {
         if (!open) return;
         form.clearErrors();
+        httpError.value = '';
         form.name = '';
         form.store_id = '';
         form.responsible_id = defaultResponsible();
@@ -45,18 +49,23 @@ watch(
 
 const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
 const errorOf = (key) => (form.errors?.[key] ? translate(form.errors[key]) : '');
-const failed = computed(() => Boolean(errorOf('name') || errorOf('store_id') || errorOf('responsible_id')));
+const failed = computed(() => Boolean(errorOf('name') || errorOf('store_id') || errorOf('responsible_id') || httpError.value));
 const close = () => emit('update:open', false);
 
 function submit() {
     if (form.name.trim() === '' || form.processing) return;
+    httpError.value = '';
     form
         .transform((data) => ({
             name: data.name.trim(),
             store_id: data.store_id === '' ? null : Number(data.store_id),
             responsible_id: data.responsible_id === '' ? null : Number(data.responsible_id),
         }))
-        .post('/shopping/lists', { onSuccess: close, onError: () => initialFocus()?.focus() });
+        .post('/shopping/lists', {
+            onSuccess: close,
+            onError: () => initialFocus()?.focus(),
+            ...httpHandlers((key) => { httpError.value = t(key); }),
+        });
 }
 </script>
 
@@ -64,7 +73,7 @@ function submit() {
     <UiDialog :open="open" :title="t('shopping.create.title')" :initial-focus="initialFocus" @update:open="emit('update:open', $event)">
         <form id="create-list-form" class="shop-create" novalidate @submit.prevent="submit">
             <div aria-live="polite">
-                <UiAlert v-if="failed" variant="danger" data-testid="create-failed">{{ errorOf('name') || errorOf('store_id') || errorOf('responsible_id') }}</UiAlert>
+                <UiAlert v-if="failed" variant="danger" data-testid="create-failed">{{ errorOf('name') || errorOf('store_id') || errorOf('responsible_id') || httpError }}</UiAlert>
             </div>
             <UiField :label="t('shopping.create.name')" :error="errorOf('name')" required>
                 <UiInput ref="nameInput" v-model="form.name" autocomplete="off" :maxlength="nameMax" :placeholder="t('shopping.create.name_placeholder')" :disabled="form.processing" />

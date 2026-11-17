@@ -13,6 +13,7 @@ import UiList from '../../Components/ui/UiList.vue';
 import UiListRow from '../../Components/ui/UiListRow.vue';
 import UiTag from '../../Components/ui/UiTag.vue';
 import HelpTip from '../../Components/ui/HelpTip.vue';
+import { httpHandlers } from '../failure.js';
 import { unitLabel } from '../units.js';
 
 // Settings > Shopping, tab "Units": the built-in units are read-only; administrators add their own, named in three languages.
@@ -39,12 +40,14 @@ const initialFocus = () => firstInput.value?.$el?.querySelector?.('input') ?? nu
 
 const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
 const err = (field) => (form.errors?.[field] ? translate(form.errors[field]) : '');
-const failed = computed(() => Boolean(err('name_en') || err('name_sk') || err('name_pl') || err('unit')));
+const saveError = ref('');
+const failed = computed(() => Boolean(err('name_en') || err('name_sk') || err('name_pl') || err('unit') || saveError.value));
 const ready = computed(() => ['name_en', 'name_sk', 'name_pl'].every((k) => form[k].trim() !== ''));
 
 function openDialog(unit = null) {
     editing.value = unit;
     form.clearErrors();
+    saveError.value = '';
     form.name_en = unit?.names?.en ?? '';
     form.name_sk = unit?.names?.sk ?? '';
     form.name_pl = unit?.names?.pl ?? '';
@@ -54,7 +57,13 @@ const close = () => { open.value = false; };
 
 function submit() {
     if (!ready.value || form.processing) return;
-    const opts = { preserveScroll: true, onSuccess: close, onError: () => nextTick(() => initialFocus()?.focus()) };
+    saveError.value = '';
+    const opts = {
+        preserveScroll: true,
+        onSuccess: close,
+        onError: () => nextTick(() => initialFocus()?.focus()),
+        ...httpHandlers((key) => { saveError.value = t(key); }),
+    };
     if (editing.value) form.put(`/settings/shopping/units/${editing.value.id}`, opts);
     else form.post('/settings/shopping/units', opts);
 }
@@ -70,6 +79,7 @@ function doDelete() {
     router.delete(`/settings/shopping/units/${unit.id}`, {
         preserveScroll: true,
         onError: () => { deleteFailed.value = true; },
+        ...httpHandlers(() => { deleteFailed.value = true; }),
     });
 }
 </script>
@@ -106,7 +116,7 @@ function doDelete() {
         <UiDialog :open="open" :title="editing ? t('shopping.settings.units.edit_title') : t('shopping.settings.units.add_title')" :initial-focus="initialFocus" @update:open="open = $event">
             <form id="unit-form" class="shop-form" novalidate @submit.prevent="submit">
                 <div aria-live="polite">
-                    <UiAlert v-if="failed" variant="danger" data-testid="save-failed">{{ err('unit') || t('shopping.settings.save_failed') }}</UiAlert>
+                    <UiAlert v-if="failed" variant="danger" data-testid="save-failed">{{ err('unit') || saveError || t('shopping.settings.save_failed') }}</UiAlert>
                 </div>
                 <UiField :label="t('shopping.settings.units.name_en')" :hint="t('shopping.settings.units.name_hint')" :error="err('name_en')" required>
                     <UiInput ref="firstInput" v-model="form.name_en" autocomplete="off" :maxlength="nameMax" :disabled="form.processing" />

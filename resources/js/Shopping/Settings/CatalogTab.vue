@@ -1,6 +1,6 @@
 <script setup>
 import { computed, nextTick, ref } from 'vue';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { Pencil, Plus, Trash2 } from '@lucide/vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
@@ -16,6 +16,8 @@ import UiSelect from '../../Components/ui/UiSelect.vue';
 import HelpTip from '../../Components/ui/HelpTip.vue';
 import CatalogImage from '../CatalogImage.vue';
 import ImageUploadField from '../ImageUploadField.vue';
+import { httpHandlers } from '../failure.js';
+import { NAME_MAX } from '../limits.js';
 import { unitLabel } from '../units.js';
 
 // Settings > Shopping, tab "Item catalog": the shared list of things the family buys, with a picture and a default unit.
@@ -24,8 +26,9 @@ const props = defineProps({
     items: { type: Array, default: () => [] },
     // [{ id, key|null, names|null, builtIn, usedOn }]
     units: { type: Array, default: () => [] },
-    nameMax: { type: Number, default: 80 },
+    nameMax: { type: Number, default: NAME_MAX },
 });
+const page = usePage();
 const { t, locale } = useI18n();
 
 const search = ref('');
@@ -40,6 +43,7 @@ const toDelete = ref(null);
 const confirmOpen = ref(false);
 const deleteFailed = ref(false);
 const nameInput = ref(null);
+const saveError = ref('');
 const form = useForm({ name: '', default_unit_id: '' });
 
 const initialFocus = () => nameInput.value?.$el?.querySelector?.('input') ?? null;
@@ -62,7 +66,7 @@ const defaultUnitText = (item) => {
 const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
 const nameError = computed(() => (form.errors?.name ? translate(form.errors.name) : ''));
 const unitError = computed(() => (form.errors?.default_unit_id ? translate(form.errors.default_unit_id) : ''));
-const failed = computed(() => Boolean(nameError.value || unitError.value));
+const failed = computed(() => Boolean(nameError.value || unitError.value || saveError.value));
 const targetId = computed(() => editing.value?.id ?? savedId.value);
 const shownVersion = computed(() => (editing.value ? editing.value.imageVersion : null));
 
@@ -72,6 +76,7 @@ function openDialog(item = null) {
     file.value = null;
     removeImage.value = false;
     imageError.value = '';
+    saveError.value = '';
     form.clearErrors();
     form.name = item?.name ?? '';
     form.default_unit_id = item?.defaultUnitId ? String(item.defaultUnitId) : '';
@@ -80,7 +85,15 @@ function openDialog(item = null) {
 const close = () => { open.value = false; };
 
 function imageRequest(id) {
-    const base = { preserveScroll: true, onError: (errors) => { imageError.value = translate(errors?.image ?? 'shopping.image.err_write'); savedId.value = id; }, onFinish: () => { uploading.value = false; } };
+    // Every way a picture request can fail (422, 413, 5xx, no connection) ends in a message inside the dialog; the saved row's
+    // id is kept so a retry repeats only the picture.
+    const fail = (message) => { imageError.value = message; savedId.value = id; };
+    const base = {
+        preserveScroll: true,
+        onError: (errors) => fail(translate(errors?.image ?? 'shopping.image.err_write')),
+        ...httpHandlers((key, response) => fail(t(response?.status === 413 ? 'shopping.image.err_size' : (key === 'shopping.error.save_failed' ? 'shopping.image.err_write' : key))), 'shopping.image.err_write'),
+        onFinish: () => { uploading.value = false; },
+    };
     uploading.value = true;
     if (file.value) {
         router.post(`/shopping/catalog/${id}/image`, { image: file.value }, { ...base, forceFormData: true, onSuccess: close });
@@ -91,8 +104,8 @@ function imageRequest(id) {
 
 async function afterSave() {
     await nextTick();
-    const clean = form.name.trim().replace(/\s+/g, ' ');
-    const id = targetId.value ?? props.items.find((i) => i.name === clean)?.id ?? null;
+    // The server returns the id of the row it just created (flash data); the name is never used to look it up.
+    const id = targetId.value ?? page.props.flash?.data?.created_id ?? null;
     if (id !== null && (file.value || (removeImage.value && editing.value))) imageRequest(id);
     else close();
 }
@@ -109,7 +122,9 @@ function submit() {
         preserveScroll: true,
         onSuccess: afterSave,
         onError: () => nextTick(() => initialFocus()?.focus()),
+        ...httpHandlers((key) => { saveError.value = t(key); }),
     };
+    saveError.value = '';
     form.transform((d) => ({ name: d.name, default_unit_id: d.default_unit_id === '' ? null : Number(d.default_unit_id) }));
     if (editing.value) form.put(`/settings/shopping/catalog/${editing.value.id}`, opts);
     else form.post('/settings/shopping/catalog', opts);
@@ -126,6 +141,7 @@ function doDelete() {
     router.delete(`/settings/shopping/catalog/${item.id}`, {
         preserveScroll: true,
         onError: () => { deleteFailed.value = true; },
+        ...httpHandlers(() => { deleteFailed.value = true; }),
     });
 }
 </script>
@@ -172,7 +188,7 @@ function doDelete() {
         <UiDialog :open="open" :title="editing ? t('shopping.settings.catalog.edit_title') : t('shopping.settings.catalog.add_title')" :initial-focus="initialFocus" @update:open="open = $event">
             <form id="catalog-form" class="shop-form" novalidate @submit.prevent="submit">
                 <div aria-live="polite">
-                    <UiAlert v-if="failed" variant="danger" data-testid="save-failed">{{ t('shopping.settings.save_failed') }}</UiAlert>
+                    <UiAlert v-if="failed" variant="danger" data-testid="save-failed">{{ saveError || t('shopping.settings.save_failed') }}</UiAlert>
                 </div>
                 <ImageUploadField
                     v-model:file="file"

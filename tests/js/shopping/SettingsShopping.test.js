@@ -9,7 +9,7 @@ import { resetHelp } from '../../../resources/js/Help/helpStore.js';
 
 let mockProps = {};
 const { routerMock, forms } = vi.hoisted(() => ({
-    routerMock: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn(), visit: vi.fn(), on: vi.fn() },
+    routerMock: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn(), visit: vi.fn(), replace: vi.fn(), reload: vi.fn(), on: vi.fn() },
     forms: [],
 }));
 vi.mock('@inertiajs/vue3', async () => {
@@ -137,6 +137,65 @@ describe('Settings > Shopping page', () => {
         await flushPromises();
         expect(forms[0].put).toHaveBeenCalledWith('/settings/shopping/catalog/2', expect.any(Object));
         expect(routerMock.post).toHaveBeenCalledWith('/shopping/catalog/2/image', { image: file }, expect.objectContaining({ forceFormData: true }));
+    });
+
+    it('uploads the picture of a new item to the id the server returned, not to a row found by name', async () => {
+        mountPage();
+        await button('Add item').trigger('click');
+        await flushPromises();
+        const file = new File(['x'], 'a.png', { type: 'image/png' });
+        const input = document.body.querySelector('[data-testid="image-input"]');
+        Object.defineProperty(input, 'files', { value: [file] });
+        input.dispatchEvent(new Event('change'));
+        await flushPromises();
+        // the name the server stores differs from the typed one (for example a different Unicode form); the id is what counts
+        document.body.querySelector('[data-testid="catalog-name"], input[autocomplete="off"]').value = 'Nový  Čaj';
+        forms[0].name = 'Nový  Čaj';
+        mockProps.flash = { status: null, toast: null, data: { created_id: 77 } };
+        document.body.querySelector('form#catalog-form').dispatchEvent(new Event('submit'));
+        await flushPromises();
+        expect(routerMock.post).toHaveBeenCalledWith('/shopping/catalog/77/image', { image: file }, expect.objectContaining({ forceFormData: true }));
+    });
+
+    it('shows a failed picture upload (413 or 500) inside the dialog and keeps the dialog open', async () => {
+        mountPage();
+        await button('Edit Apple').trigger('click');
+        await flushPromises();
+        const file = new File(['x'], 'a.png', { type: 'image/png' });
+        const input = document.body.querySelector('[data-testid="image-input"]');
+        Object.defineProperty(input, 'files', { value: [file] });
+        input.dispatchEvent(new Event('change'));
+        await flushPromises();
+        document.body.querySelector('form#catalog-form').dispatchEvent(new Event('submit'));
+        await flushPromises();
+        const opts = routerMock.post.mock.calls.at(-1)[2];
+        expect(opts.onHttpException({ status: 413 })).toBe(false);
+        opts.onFinish();
+        await flushPromises();
+        expect(document.body.querySelector('[data-testid="image-error"]').textContent).toContain('That picture is too large');
+        expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
+        // the retry only repeats the picture
+        document.body.querySelector('form#catalog-form').dispatchEvent(new Event('submit'));
+        await flushPromises();
+        expect(forms[0].put).toHaveBeenCalledTimes(1);
+        expect(routerMock.post).toHaveBeenCalledTimes(2);
+        routerMock.post.mock.calls.at(-1)[2].onHttpException({ status: 500 });
+        routerMock.post.mock.calls.at(-1)[2].onFinish();
+        await flushPromises();
+        expect(document.body.querySelector('[data-testid="image-error"]').textContent).toContain('We could not save the picture');
+    });
+
+    it('shows a failed delete as the save-failed alert and names a refusal', async () => {
+        mountPage();
+        await button('Delete Mliéko').trigger('click');
+        await flushPromises();
+        [...document.body.querySelectorAll('button')].find((b) => b.textContent.includes('Delete item')).click();
+        await flushPromises();
+        const opts = routerMock.delete.mock.calls.at(-1)[1];
+        expect(opts.onHttpException({ status: 404 })).toBe(false);
+        await flushPromises();
+        expect(current.text()).toContain('Your changes were not saved.');
+        expect(routerMock.reload).toHaveBeenCalled();
     });
 
     it('rejects a wrong file type and an oversized file on the client', async () => {

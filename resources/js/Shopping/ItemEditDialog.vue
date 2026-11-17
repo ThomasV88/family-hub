@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { Trash2 } from '@lucide/vue';
 import UiAlert from '../Components/ui/UiAlert.vue';
@@ -11,6 +11,8 @@ import UiField from '../Components/ui/UiField.vue';
 import UiInput from '../Components/ui/UiInput.vue';
 import UiSelect from '../Components/ui/UiSelect.vue';
 import UiTag from '../Components/ui/UiTag.vue';
+import { httpHandlers } from './failure.js';
+import { NAME_MAX, NOTE_MAX } from './limits.js';
 import { localeCode, unitLabel } from './units.js';
 
 // Edit or remove one item of an open list. item: { id, name, quantity, unitId, note, catalogItemId }; units: [{ id, key, names }].
@@ -21,8 +23,8 @@ const props = defineProps({
     listId: { type: Number, required: true },
     item: { type: Object, default: null },
     units: { type: Array, default: () => [] },
-    nameMax: { type: Number, default: 80 },
-    noteMax: { type: Number, default: 200 },
+    nameMax: { type: Number, default: NAME_MAX },
+    noteMax: { type: Number, default: NOTE_MAX },
 });
 const emit = defineEmits(['update:open']);
 const { t, locale } = useI18n();
@@ -30,6 +32,7 @@ const { t, locale } = useI18n();
 const form = useForm({ name: '', quantity: '', unit_id: '', note: '' });
 const confirmOpen = ref(false);
 const removing = ref(false);
+const httpError = ref('');
 const freeText = computed(() => props.item?.catalogItemId == null);
 
 // "0.50" -> "0,5" (comma in Slovak and Polish), "2.00" -> "2".
@@ -46,6 +49,7 @@ watch(
     ([open]) => {
         if (!open || !props.item) return;
         form.clearErrors();
+        httpError.value = '';
         form.name = props.item.name;
         form.quantity = shown(props.item.quantity);
         form.unit_id = props.item.unitId == null ? '' : String(props.item.unitId);
@@ -59,14 +63,15 @@ watch(
 const unitOptions = computed(() => props.units.map((u) => ({ value: String(u.id), label: unitLabel(u, 1, t, locale.value) })));
 const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
 const errorOf = (key) => (form.errors?.[key] ? translate(form.errors[key]) : '');
-const failed = computed(() => Object.keys(form.errors ?? {}).length > 0);
+const failed = computed(() => Object.keys(form.errors ?? {}).length > 0 || httpError.value !== '');
 const close = () => emit('update:open', false);
 const url = computed(() => `/shopping/lists/${props.listId}/items/${props.item?.id}`);
 const quantityInput = ref(null);
 const initialFocus = () => quantityInput.value?.$el?.querySelector?.('input') ?? null;
 
 function submit() {
-    if (!props.item || form.processing) return;
+    if (!props.item || form.processing || removing.value) return;
+    httpError.value = '';
     form
         .transform((data) => {
             const body = {
@@ -78,15 +83,20 @@ function submit() {
 
             return body;
         })
-        .put(url.value, { preserveScroll: true, onSuccess: close });
+        .put(url.value, { preserveScroll: true, onSuccess: close, ...httpHandlers((key) => { httpError.value = t(key); }) });
 }
 
 function remove() {
+    // A double tap must not send two DELETEs (the second would answer 404).
+    if (removing.value || form.processing) return;
     removing.value = true;
-    form.delete(url.value, {
+    httpError.value = '';
+    // Not form.delete: the form's transform from submit() would put a stale body on the DELETE.
+    router.delete(url.value, {
         preserveScroll: true,
         onSuccess: () => { confirmOpen.value = false; close(); },
         onError: () => { confirmOpen.value = false; },
+        ...httpHandlers((key) => { confirmOpen.value = false; httpError.value = t(key); }),
         onFinish: () => { removing.value = false; },
     });
 }
@@ -96,7 +106,7 @@ function remove() {
     <UiDialog :open="open && !confirmOpen && !removing" :title="t('shopping.item.edit_title')" :initial-focus="initialFocus" @update:open="emit('update:open', $event)">
         <form v-if="item" id="item-edit-form" class="shop-edit" novalidate @submit.prevent="submit">
             <div aria-live="polite">
-                <UiAlert v-if="failed" variant="danger" data-testid="item-edit-failed">{{ t('shopping.error.save_failed') }}</UiAlert>
+                <UiAlert v-if="failed" variant="danger" data-testid="item-edit-failed">{{ httpError || t('shopping.error.save_failed') }}</UiAlert>
             </div>
             <UiField v-if="freeText" :label="t('shopping.item.name')" :error="errorOf('name')" required>
                 <UiInput v-model="form.name" autocomplete="off" :maxlength="nameMax" :disabled="form.processing" />

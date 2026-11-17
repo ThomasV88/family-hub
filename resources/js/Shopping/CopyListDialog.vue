@@ -8,27 +8,30 @@ import UiCheckbox from '../Components/ui/UiCheckbox.vue';
 import UiDialog from '../Components/ui/UiDialog.vue';
 import UiField from '../Components/ui/UiField.vue';
 import UiInput from '../Components/ui/UiInput.vue';
+import { httpHandlers } from './failure.js';
+import { NAME_MAX, charLength, clip } from './limits.js';
 
 // Copy a list (overview row, and the list page in 11-11). Posts { name, keep } to /shopping/lists/{id}/copy; the server redirects to
 // the new list with the toast "List copied". list: { id, name }.
 const props = defineProps({
     open: { type: Boolean, default: false },
     list: { type: Object, default: null },
-    nameMax: { type: Number, default: 80 },
+    nameMax: { type: Number, default: NAME_MAX },
 });
 const emit = defineEmits(['update:open']);
 const { t } = useI18n();
 
 const form = useForm({ name: '', keep: true });
 const nameInput = ref(null);
+const httpError = ref('');
 const initialFocus = () => nameInput.value?.$el?.querySelector?.('input') ?? null;
 
 function defaultName(name) {
     const full = t('shopping.copy.default_name', { name });
-    if (full.length <= props.nameMax) return full;
-    const room = props.nameMax - (full.length - name.length);
+    if (charLength(full) <= props.nameMax) return full;
+    const room = props.nameMax - (charLength(full) - charLength(name));
 
-    return t('shopping.copy.default_name', { name: name.slice(0, Math.max(0, room)).trimEnd() });
+    return t('shopping.copy.default_name', { name: clip(name, Math.max(0, room)).trimEnd() });
 }
 
 watch(
@@ -36,6 +39,7 @@ watch(
     (open) => {
         if (!open) return;
         form.clearErrors();
+        httpError.value = '';
         form.name = defaultName(props.list?.name ?? '');
         form.keep = true;
     },
@@ -44,13 +48,18 @@ watch(
 
 const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
 const nameError = computed(() => (form.errors?.name ? translate(form.errors.name) : ''));
-const failed = computed(() => Boolean(nameError.value || form.errors?.keep));
+const failed = computed(() => Boolean(nameError.value || form.errors?.keep || httpError.value));
 const keepError = computed(() => (form.errors?.keep ? translate(form.errors.keep) : ''));
 const close = () => emit('update:open', false);
 
 function submit() {
     if (!props.list || form.name.trim() === '' || form.processing) return;
-    form.post(`/shopping/lists/${props.list.id}/copy`, { preserveScroll: true, onSuccess: close });
+    httpError.value = '';
+    form.post(`/shopping/lists/${props.list.id}/copy`, {
+        preserveScroll: true,
+        onSuccess: close,
+        ...httpHandlers((key) => { httpError.value = t(key); }),
+    });
 }
 </script>
 
@@ -58,7 +67,7 @@ function submit() {
     <UiDialog :open="open" :title="t('shopping.copy.title')" :initial-focus="initialFocus" @update:open="emit('update:open', $event)">
         <form id="copy-list-form" class="shop-copy" novalidate @submit.prevent="submit">
             <div aria-live="polite">
-                <UiAlert v-if="failed" variant="danger" data-testid="copy-failed">{{ keepError || nameError }}</UiAlert>
+                <UiAlert v-if="failed" variant="danger" data-testid="copy-failed">{{ keepError || nameError || httpError }}</UiAlert>
             </div>
             <UiField :label="t('shopping.copy.name')" :error="nameError" required>
                 <UiInput ref="nameInput" v-model="form.name" autocomplete="off" :maxlength="nameMax" :disabled="form.processing" />

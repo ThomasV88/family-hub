@@ -10,6 +10,8 @@ import UiInput from '../Components/ui/UiInput.vue';
 import UiSelect from '../Components/ui/UiSelect.vue';
 import ListReminderField from './ListReminderField.vue';
 import PeopleField from './PeopleField.vue';
+import { httpHandlers } from './failure.js';
+import { NAME_MAX } from './limits.js';
 
 // List settings: name, store, responsible person, who may add and edit items, who may only view, and the reminder.
 // The server decides what a person may change (`abilities`); other fields render read-only and are never sent.
@@ -41,12 +43,14 @@ const snapshot = () => ({
 const form = useForm(snapshot());
 const initial = ref(snapshot());
 const hint = ref('');
+const httpError = ref('');
 
 function reset() {
     initial.value = snapshot();
     Object.assign(form, snapshot());
     form.clearErrors();
     hint.value = '';
+    httpError.value = '';
 }
 watch(() => props.open, (open) => open && reset(), { immediate: true });
 
@@ -117,7 +121,7 @@ const translate = (message) => (String(message).startsWith('shopping.') ? t(mess
 const err = (key) => (form.errors?.[key] ? translate(form.errors[key]) : '');
 const reminderError = computed(() => err('remind_at'));
 const peopleError = computed(() => err('contributor_ids') || err('contributors') || err('viewer_ids') || err('viewers'));
-const failed = computed(() => Object.keys(form.errors ?? {}).length > 0);
+const failed = computed(() => Object.keys(form.errors ?? {}).length > 0 || httpError.value !== '');
 const close = () => emit('update:open', false);
 
 function save() {
@@ -136,9 +140,11 @@ function save() {
 
         return body;
     });
+    httpError.value = '';
     form.put(`/shopping/lists/${props.list.id}`, {
         preserveScroll: true,
         onSuccess: close,
+        ...httpHandlers((key) => { httpError.value = t(key); }),
     });
 }
 </script>
@@ -147,12 +153,12 @@ function save() {
     <UiDetailPanel :open="open" :title="t('shopping.panel.title')" @update:open="emit('update:open', $event)">
         <form id="list-settings-form" class="panel" novalidate @submit.prevent="save">
             <div aria-live="polite">
-                <UiAlert v-if="failed" variant="danger" data-testid="panel-failed">{{ t('shopping.error.save_failed') }}</UiAlert>
+                <UiAlert v-if="failed" variant="danger" data-testid="panel-failed">{{ httpError || t('shopping.error.save_failed') }}</UiAlert>
             </div>
             <p v-if="!editable" class="panel__readonly" data-testid="panel-readonly">{{ t('shopping.panel.read_only') }}</p>
 
             <UiField :label="t('shopping.panel.name')" :error="err('name')">
-                <UiInput v-model="form.name" autocomplete="off" :readonly="!canName" :maxlength="80" />
+                <UiInput v-model="form.name" autocomplete="off" :readonly="!canName" :maxlength="NAME_MAX" />
             </UiField>
             <UiField :label="t('shopping.panel.store')" :error="err('store_id')">
                 <UiSelect v-model="form.store_id" :disabled="!canName">
