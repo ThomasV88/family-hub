@@ -160,6 +160,9 @@ SESSION_SAME_SITE=lax
 SESSION_HTTP_ONLY=true
 CACHE_STORE=database
 QUEUE_CONNECTION=database
+# Full-text reading (Phase 13): off by default. Keep AI_OCR_ENABLED equal in ai-worker.env (docs/ops/server.md)
+AI_OCR_ENABLED=false
+AI_OCR_TEXT_RELIABILITY=reliable
 # Mail: log driver until go-live (nothing is sent); switch to smtp per ops/env/app.env.example
 MAIL_MAILER=log
 # Google sign-in (empty = hidden)
@@ -212,6 +215,8 @@ QUEUE_CONNECTION=database
 DB_QUEUE_RETRY_AFTER=900
 AI_CODEX_MODEL=
 AI_WORK_DIR=/ai-work
+# Must equal AI_OCR_ENABLED in app.env: the job re-checks it inside the ai-worker (docs/ops/server.md)
+AI_OCR_ENABLED=false
 EOF
   unset DB_APP_PW
 else

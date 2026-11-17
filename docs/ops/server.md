@@ -184,8 +184,13 @@ reports "login expired" once the health check exists). Never set `OPENAI_API_KEY
   - **Interactive latency (IN-07).** One worker with no preemption: an interactive run can wait behind one running bulk job for up to the job budget (11 minutes). Queue order `ai-control,ai,ai-bulk` only decides what starts next.
   - **Retention (IN-06).** `ai_bulk_run_items` (document ids) and `ai_bulk_runs` are not pruned by `ai:prune-calls`; they are kept until a retention rule is decided (see DEFERRED.md).
   - **Copilot `--available-tools` (IN-02).** It is passed without a value to mean "no tools"; the fake CLI cannot prove that. Verify it live on every Copilot version bump (the version is pinned in `config/ai.php` and the Dockerfile).
-- Full-text reading (Phase 13) env keys, both in `app.env` of the stack (never in `ai-worker.env`; a change needs the `app`, `worker` and
-  `scheduler` services recreated, no other stack restarted):
+- Full-text reading (Phase 13) env keys. `AI_OCR_ENABLED` must carry the SAME value in `app.env` AND `ai-worker.env` of the stack:
+  the app decides the run mode when a run is queued, and `RunExtractionJob` re-reads the flag inside the ai-worker (whose environment
+  is `ai-worker.env`, never `app.env`) and `DocumentTextStore::save` refuses while it is off. With the flag on only in `app.env`, runs
+  are queued in text mode but no text is saved. `AI_OCR_TEXT_RELIABILITY` is read by the web app only (`app.env` only). A change needs
+  the `app`, `worker`, `scheduler` and `ai-worker` services recreated, no other stack restarted. **Existing servers:** `server-provision.sh`
+  never overwrites env files, so add the line `AI_OCR_ENABLED=false` (or the value `app.env` has) to the existing `ai-worker.env` by hand
+  (mode 600, do not print the file); a missing key means `false` through the config default, so existing deployments keep working unchanged.
   - `AI_OCR_ENABLED` (default `false`). Off: Run AI works as before (one call, entries only), no text is stored, the search box finds titles only.
     Production stays off until the owner enables it; staging may enable it for the check. Turning it on does not touch existing data.
   - `AI_OCR_TEXT_RELIABILITY` (`reliable` or `uncertain`, default `reliable`). `uncertain` shows the "may contain errors" label on the

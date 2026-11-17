@@ -48,6 +48,10 @@ for env in staging production; do
   check_keys ops/env/app.env.example "$D/app.env"
   check_keys ops/env/migrate.env.example "$D/migrate.env"
   check_keys ops/env/ai-worker.env.example "$D/ai-worker.env"
+  # AI_OCR_ENABLED must default off and stay equal in app.env and ai-worker.env (the job re-checks it in the ai-worker)
+  grep -qx "AI_OCR_ENABLED=false" "$D/app.env" || fail "app.env AI_OCR_ENABLED default"
+  grep -qx "AI_OCR_ENABLED=false" "$D/ai-worker.env" || fail "ai-worker.env AI_OCR_ENABLED default"
+  grep -qx "AI_OCR_TEXT_RELIABILITY=reliable" "$D/app.env" || fail "app.env AI_OCR_TEXT_RELIABILITY default"
 
   # An existing ai-worker.env is never overwritten (an empty placeholder from deploy.sh is filled)
   echo "AI_CODEX_MODEL=keep-me" > "$D/ai-worker.env"
