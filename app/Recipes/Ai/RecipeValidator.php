@@ -4,6 +4,7 @@ namespace App\Recipes\Ai;
 
 use App\Medical\Ai\ExtractionOutcome;
 use App\Medical\Ai\FailureCode;
+use App\Recipes\PlainText;
 use App\Shopping\NameKey;
 use JsonException;
 
@@ -239,6 +240,11 @@ final class RecipeValidator
             // Issue codes name the list, not the root: steps[1], ingredients[0].name.
             $itemPath = preg_replace('/^root\./', '', $path).'['.$i.']';
             if ($of === 'ingredient') {
+                // A row without a usable name (a section header such as "For the sauce:", or a bare quantity) is
+                // dropped like a blank step; the reply only fails when nothing usable remains (ingredients:empty).
+                if ($this->isBlankNamedIngredient($item)) {
+                    continue;
+                }
                 $clean = is_array($item) ? $this->object($item, 'ingredient', $itemPath, $issues) : null;
                 if ($clean === null) {
                     if (! is_array($item)) {
@@ -268,6 +274,14 @@ final class RecipeValidator
             return false;
         }
 
+        // Ingredients and steps are never cut silently: too many is a structural error (the Copilot repair pass can ask
+        // for fewer). Categories are a few labels with duplicates removed, so keeping the first ones is the contract.
+        if ($of !== 'category' && count($items) > (int) $spec['maxItems']) {
+            $issues[] = preg_replace('/^root\./', '', $path).':too_many';
+
+            return false;
+        }
+
         if ($of === 'category') {
             $seen = [];
             $items = array_values(array_filter($items, function (string $t) use (&$seen) {
@@ -278,6 +292,24 @@ final class RecipeValidator
         }
 
         return [array_slice($items, 0, (int) $spec['maxItems'])];
+    }
+
+    /** True for a well-formed ingredient object whose name is missing, null or blank once cleaned. */
+    private function isBlankNamedIngredient(mixed $item): bool
+    {
+        if (! is_array($item) || array_is_list($item)) {
+            return false;
+        }
+        $rules = self::ruleTable()['ingredient'];
+        if (array_diff_key($item, $rules) !== [] || array_diff_key($rules, $item) !== []) {
+            return false;
+        }
+        $name = $item['name'];
+        if ($name !== null && ! is_string($name)) {
+            return false;
+        }
+
+        return $this->text((string) $name, (int) $rules['name']['max'], true) === '';
     }
 
     /**
@@ -303,12 +335,12 @@ final class RecipeValidator
     }
 
     /**
-     * Tags stripped; control characters (newline kept unless single line), zero-width and bidi characters removed;
+     * Markup removed (never strip_tags, see PlainText: a literal "<180" must survive) and entities decoded; control characters (newline kept unless single line), zero-width and bidi characters removed;
      * whitespace collapsed; cut to $max characters.
      */
     private function text(string $value, int $max, bool $singleLine): string
     {
-        $text = strip_tags($value);
+        $text = PlainText::strip($value);
         $text = str_replace(["\r\n", "\r"], "\n", $text);
         $text = str_replace(["\t", "\u{00A0}"], ' ', $text);
         if ($singleLine) {

@@ -155,3 +155,48 @@ it('reads a result file and refuses a missing or empty one', function () {
     expect((new RecipeValidator)->fromFile($path)->ok)->toBeTrue();
     @unlink($path);
 });
+
+it('keeps a literal less-than sign in step and ingredient text (never strip_tags)', function () {
+    $o = rvRun(rvPayload([
+        'title' => 'Roast <b>chicken</b>',
+        'steps' => ['Bake <180 °C until golden, then reduce to <160 °C.', 'Rest < 5 min <br> then serve', 'Heat to <b>200</b> °C'],
+        'ingredients' => [['name' => 'Oil <1 tbsp', 'quantity' => null, 'unit' => null, 'note' => '<script>alert(1)</script>fresh', 'original' => null]],
+    ]));
+
+    expect($o->ok)->toBeTrue()
+        ->and($o->payload['title'])->toBe('Roast chicken')
+        ->and($o->payload['steps'])->toBe(['Bake <180 °C until golden, then reduce to <160 °C.', 'Rest < 5 min then serve', 'Heat to 200 °C'])
+        ->and($o->payload['ingredients'][0]['name'])->toBe('Oil <1 tbsp')
+        ->and($o->payload['ingredients'][0]['note'])->toBe('fresh');
+});
+
+it('decodes entities but never lets them bring a tag back', function () {
+    $o = rvRun(rvPayload(['title' => 'Tom &amp; Jerry &lt;script&gt;x&lt;/script&gt; soup', 'steps' => ['Mix &lt;180 &deg;C']]));
+
+    expect($o->payload['title'])->toBe('Tom & Jerry soup')->and($o->payload['steps'])->toBe(['Mix <180 °C']);
+});
+
+it('drops an ingredient row without a name and fails only when nothing usable remains', function () {
+    $row = fn (?string $name) => ['name' => $name, 'quantity' => null, 'unit' => null, 'note' => null, 'original' => null];
+    $ok = rvRun(rvPayload(['ingredients' => [$row('For the sauce:'), $row('  '), $row(null), $row('Tomatoes')]]));
+
+    expect($ok->ok)->toBeTrue()->and($ok->entryCount)->toBe(2)
+        ->and(array_column($ok->payload['ingredients'], 'name'))->toBe(['For the sauce:', 'Tomatoes']);
+
+    $none = (new RecipeValidator)->inspect(json_encode(rvPayload(['ingredients' => [$row(' '), $row('<br>')]])));
+    expect($none['outcome']->ok)->toBeFalse()->and($none['issues'])->toBe(['ingredients:empty']);
+});
+
+it('rejects too many ingredients or steps instead of cutting them silently', function () {
+    $many = array_fill(0, (int) config('recipes.steps_max') + 1, 'Stir.');
+    $r = (new RecipeValidator)->inspect(json_encode(rvPayload(['steps' => $many])));
+
+    expect($r['outcome']->ok)->toBeFalse()->and($r['issues'])->toContain('steps:too_many');
+
+    $ing = array_fill(0, (int) config('recipes.ingredients_max') + 1, ['name' => 'x', 'quantity' => null, 'unit' => null, 'note' => null, 'original' => null]);
+    $r = (new RecipeValidator)->inspect(json_encode(rvPayload(['ingredients' => $ing])));
+    expect($r['issues'])->toContain('ingredients:too_many');
+
+    $exact = array_fill(0, (int) config('recipes.steps_max'), 'Stir.');
+    expect(rvRun(rvPayload(['steps' => $exact]))->ok)->toBeTrue();
+});

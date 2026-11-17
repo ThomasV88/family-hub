@@ -2,6 +2,7 @@
 
 namespace App\Recipes\Import;
 
+use App\Recipes\PlainText;
 use App\Wishlist\Fetch\FetchResult;
 use DateInterval;
 use DOMComment;
@@ -305,7 +306,7 @@ final class RecipePageReducer
         if (! is_string($value)) {
             return '';
         }
-        $text = trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML5, 'UTF-8')) ?? '');
+        $text = trim(preg_replace('/\s+/u', ' ', PlainText::strip($value)) ?? '');
         if (mb_strlen($text) > $max) {
             $text = mb_substr($text, 0, $max);
             $this->cut = $this->cut || $flagCut;

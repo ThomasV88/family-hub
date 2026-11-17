@@ -146,3 +146,15 @@ it('does not touch the network or leave libxml in a changed state', function () 
 
     expect(libxml_use_internal_errors())->toBe($before)->and($page->text)->not->toContain('127.0.0.1');
 });
+
+it('keeps a literal less-than sign in JSON-LD steps and removes real markup', function () {
+    $json = json_encode([
+        '@context' => 'https://schema.org', '@type' => 'Recipe', 'name' => 'Roast',
+        'recipeIngredient' => ['1 chicken', '2 tbsp <b>oil</b>'],
+        'recipeInstructions' => ['Bake <180 °C until golden, then reduce to <160 °C.', 'Serve at 70 &deg;C <i>now</i> (&lt;5 min)'],
+    ], JSON_UNESCAPED_UNICODE);
+    $page = rprReduce('<html><head><script type="application/ld+json">'.$json.'</script></head><body></body></html>');
+
+    expect($page->text)->toContain('Bake <180 °C until golden, then reduce to <160 °C.')
+        ->toContain('2 tbsp oil')->toContain('Serve at 70 °C now (<5 min)')->not->toContain('<b>');
+});
