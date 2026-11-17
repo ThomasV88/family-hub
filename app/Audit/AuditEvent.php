@@ -52,6 +52,7 @@ enum AuditEvent: string
     case AiAgentSettingChanged = 'ai_agent_setting_changed';
     case AiBulkRunChanged = 'ai_bulk_run_changed';
     case HelpTextChanged = 'help_text_changed';
+    case ProfileChangedByOther = 'profile_changed_by_other';
 
     /** UI filter groups, in display order. */
     public const GROUPS = ['login', 'login_failed', 'invite', 'permission', 'session_revoked', 'health', 'finance', 'account', 'security'];
@@ -93,6 +94,8 @@ enum AuditEvent: string
             self::AiBulkRunChanged => ['action', 'scope', 'count'],
             // The help key and the locale codes that changed; never the text itself.
             self::HelpTextChanged => ['key', 'locales'],
+            // Which part of a child's profile someone else changed (photo or name); never the name text.
+            self::ProfileChangedByOther => ['field'],
             default => [],
         };
     }
@@ -114,7 +117,7 @@ enum AuditEvent: string
             self::AiAgentSettingChanged, self::AiBulkRunChanged => 'health',
             self::FinanceRead, self::FinanceWrite, self::FinanceVisibilityChanged, self::FinanceAdminSelfAdded, self::FinanceCategoryChanged => 'finance',
             self::AccessDenied => $module === 'finance' ? 'finance' : 'health',
-            self::PasswordReset, self::AdminCreated, self::GoogleLinked, self::HelpTextChanged => 'account',
+            self::PasswordReset, self::AdminCreated, self::GoogleLinked, self::HelpTextChanged, self::ProfileChangedByOther => 'account',
             self::TwoFactorEnabled, self::TwoFactorDisabled, self::RecoveryCodesRegenerated, self::RecoveryCodeUsed,
             self::PasskeyAdded, self::PasskeyRenamed, self::PasskeyRemoved, self::SecondFactorFailed,
             self::ReauthConfirmed, self::SecondFactorReset, self::SecurityPolicyChanged => 'security',

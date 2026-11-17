@@ -18,7 +18,7 @@ class NoStoreDynamicResponses
 
         // The private image route keeps its own "private, no-cache" + ETag so unchanged images revalidate with a 304.
         // Same for health document image previews (200 and 304 only; every other health response stays no-store).
-        if (in_array($request->route()?->getName(), ['wishlist.images.show', 'health.documents.preview'], true) && in_array($response->getStatusCode(), [200, 304], true)) {
+        if (in_array($request->route()?->getName(), ['wishlist.images.show', 'health.documents.preview', 'profile.photo.show'], true) && in_array($response->getStatusCode(), [200, 304], true)) {
             return $response;
         }
 

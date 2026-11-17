@@ -82,3 +82,16 @@ it('keeps private, no-cache on health image previews (200 and 304) and no-store 
         ->and((string) $file->headers->get('Cache-Control'))->toContain('no-store')->toContain('private')
         ->and((string) $imageFile->headers->get('Cache-Control'))->toContain('no-store');
 });
+
+it('keeps private, no-cache on the profile photo route (200) and no-store on its 404', function () {
+    Storage::fake('local');
+    $user = User::factory()->withPreset(Preset::Parent)->create();
+    $user->forceFill(['photo_path' => "wish-images/profile-photos/{$user->id}/a-full.jpg", 'photo_thumb_path' => "wish-images/profile-photos/{$user->id}/a-thumb.jpg"])->save();
+    Storage::disk('local')->put($user->photo_thumb_path, ImageFixtures::jpeg());
+
+    $ok = (string) $this->actingAs($user)->get("/people/{$user->id}/photo/thumb")->assertOk()->headers->get('Cache-Control');
+    $missing = (string) $this->actingAs($user)->get("/people/{$user->id}/photo/full")->assertNotFound()->headers->get('Cache-Control');
+
+    expect($ok)->toContain('private')->toContain('no-cache')->not->toContain('no-store')
+        ->and($missing)->toContain('no-store');
+});
