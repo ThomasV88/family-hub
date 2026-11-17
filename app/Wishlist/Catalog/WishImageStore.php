@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 /** Private storage for processed wish images on the local disk. No public disk, no URL generation. */
 final class WishImageStore
 {
-    private const FOREIGN_PREFIXES = ['wish-images/profile-photos/', 'wish-images/shopping/'];
+    private const FOREIGN_PREFIXES = ['wish-images/profile-photos/', 'wish-images/shopping/', 'wish-images/recipes/'];
 
     public function put(Wish $wish, ProcessedImage $image, string $source, ?string $host): Wish
     {
