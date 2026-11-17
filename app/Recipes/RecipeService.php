@@ -7,7 +7,6 @@ use App\Models\ShoppingUnit;
 use App\Models\User;
 use App\Recipes\Images\RecipeImageStore;
 use App\Recipes\Queries\RecipeQuery;
-use App\Shopping\NameKey;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -143,7 +142,7 @@ final class RecipeService
             if (mb_strlen($name) > (int) config('recipes.category_max')) {
                 $this->fail('categories', 'category_invalid');
             }
-            $key = NameKey::from($name);
+            $key = RecipeSearchKey::category($name);
             if (! isset($categories[$key])) {
                 $categories[$key] = ['name' => $name, 'key' => $key];
             }

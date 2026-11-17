@@ -190,3 +190,35 @@ it('keeps files when the delete is rolled back', function () {
 it('has the image store directory contract', function () {
     expect(app(RecipeImageStore::class)->directory(7))->toBe('wish-images/recipes/7');
 });
+
+it('stores CJK and Cyrillic titles, categories and ingredients without overflowing a key column', function () {
+    $a = RecipeFixtures::member();
+    $cjk = str_repeat('寿司', 30); // 60 characters, each folds to several ASCII letters
+    $cyr = str_repeat('щю', 10);   // 20 characters, each folds to several ASCII letters
+    $r = app(RecipeService::class)->create($a, rcpData([
+        'title' => $cjk,
+        'categories' => [str_repeat('寿', 30), $cyr],
+        'ingredients' => [['name' => str_repeat('щ', 120)], ['name' => str_repeat('魚', 120)]],
+    ]));
+
+    expect(mb_strlen($r->title_key))->toBeLessThanOrEqual(255)
+        ->and(DB::table('recipe_categories')->where('recipe_id', $r->id)->pluck('name_key')->map(fn ($k) => mb_strlen($k))->max())->toBeLessThanOrEqual(90)
+        ->and(DB::table('recipe_categories')->where('recipe_id', $r->id)->count())->toBe(2)
+        ->and(DB::table('recipe_ingredients')->where('recipe_id', $r->id)->pluck('name_key')->map(fn ($k) => mb_strlen($k))->max())->toBeLessThanOrEqual(360);
+
+    $updated = app(RecipeService::class)->update($a, $r->id, rcpData([
+        'title' => $cjk.'x', 'categories' => [$cyr],
+        'ingredients' => $r->ingredients()->get()->map(fn ($i) => ['id' => $i->id, 'name' => $i->name])->all(),
+    ]));
+    expect($updated->title_key)->not->toBe('');
+});
+
+it('finds a recipe by its long CJK category and title after the keys were cut', function () {
+    $a = RecipeFixtures::member();
+    $cat = str_repeat('寿', 30);
+    app(RecipeService::class)->create($a, rcpData(['title' => str_repeat('寿司', 30), 'categories' => [$cat], 'visibility' => 'shared']));
+
+    $byCategory = app(RecipeQuery::class)->index($a, ['categories' => [$cat]]);
+    $byTitle = app(RecipeQuery::class)->index($a, ['q' => str_repeat('寿司', 30)]);
+    expect($byCategory['items'])->toHaveCount(1)->and($byTitle['items'])->toHaveCount(1);
+});

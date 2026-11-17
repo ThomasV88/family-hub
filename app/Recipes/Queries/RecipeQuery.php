@@ -6,6 +6,7 @@ use App\Models\Recipe;
 use App\Models\User;
 use App\Recipes\RecipeAccess;
 use App\Recipes\RecipeVisibility;
+use App\Recipes\RecipeSearchKey;
 use App\Shopping\NameKey;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,7 @@ final class RecipeQuery
 
         $q = $this->tokens((string) ($filters['q'] ?? ''));
         $ingredient = $this->tokens((string) ($filters['ingredient'] ?? ''));
-        $categories = array_values(array_filter(array_map(fn ($c) => NameKey::from((string) $c), (array) ($filters['categories'] ?? [])), fn ($c) => $c !== ''));
+        $categories = array_values(array_filter(array_map(fn ($c) => RecipeSearchKey::category((string) $c), (array) ($filters['categories'] ?? [])), fn ($c) => $c !== ''));
         $show = $filters['show'] ?? 'all';
 
         $query = Recipe::query()->visibleTo($actor);
