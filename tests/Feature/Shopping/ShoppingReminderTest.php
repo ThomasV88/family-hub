@@ -29,7 +29,7 @@ beforeEach(function () {
 
 afterEach(fn () => Carbon::setTestNow());
 
-function pushOn(User $user): User
+function shoppingPushOn(User $user): User
 {
     app(NotificationPreferences::class)->set($user, 'push', true);
     $endpoint = 'https://fcm.googleapis.com/fcm/send/u'.$user->id;
@@ -41,7 +41,7 @@ function pushOn(User $user): User
     return $user;
 }
 
-function dueList(User $creator, ?User $responsible = null, array $over = []): ShoppingList
+function shoppingDueList(User $creator, ?User $responsible = null, array $over = []): ShoppingList
 {
     $list = F::list($creator, $responsible);
     $list->forceFill(array_merge(['remind_at' => now()->subMinutes(5)], $over))->save();
@@ -49,21 +49,21 @@ function dueList(User $creator, ?User $responsible = null, array $over = []): Sh
     return $list->fresh();
 }
 
-function run(): void
+function runShoppingReminders(): void
 {
     test()->artisan('shopping:enqueue-reminders')->assertSuccessful();
 }
 
 it('queues one push row for the responsible person only, once', function () {
-    $creator = pushOn(F::user());
-    $resp = pushOn(F::user());
-    $contrib = pushOn(F::user());
-    $viewer = pushOn(F::user());
+    $creator = shoppingPushOn(F::user());
+    $resp = shoppingPushOn(F::user());
+    $contrib = shoppingPushOn(F::user());
+    $viewer = shoppingPushOn(F::user());
     $list = F::list($creator, $resp, contributors: [$contrib], viewers: [$viewer]);
     $list->forceFill(['remind_at' => now()->subMinutes(5)])->save();
 
-    run();
-    run();
+    runShoppingReminders();
+    runShoppingReminders();
 
     $row = OutboxItem::query()->sole();
     expect($row->kind)->toBe('shopping_reminder')
@@ -78,13 +78,13 @@ it('queues one push row for the responsible person only, once', function () {
 it('consumes the reminder without a row when push is off or there is no subscription', function () {
     $off = F::user();
     app(NotificationPreferences::class)->set($off, 'push', true); // on, but no subscription
-    $a = dueList($off);
+    $a = shoppingDueList($off);
     $b = F::user();
-    pushOn($b);
+    shoppingPushOn($b);
     app(NotificationPreferences::class)->set($b, 'push', false);
-    $c = dueList($b);
+    $c = shoppingDueList($b);
 
-    run();
+    runShoppingReminders();
 
     expect(OutboxItem::query()->count())->toBe(0)
         ->and($a->fresh()->reminder_enqueued_at)->not->toBeNull()
@@ -92,37 +92,37 @@ it('consumes the reminder without a row when push is off or there is no subscrip
 });
 
 it('gives the creator the reminder when the responsible person was removed, lost access or cannot sign in', function (string $how) {
-    $creator = pushOn(F::user());
-    $resp = pushOn(F::user());
-    $list = dueList($creator, $resp);
+    $creator = shoppingPushOn(F::user());
+    $resp = shoppingPushOn(F::user());
+    $list = shoppingDueList($creator, $resp);
     match ($how) {
         'deleted' => $resp->delete(),
         'revoked' => F::setLevel($resp, AccessLevel::None),
         'disabled' => $resp->forceFill(['sign_in_disabled' => true])->save(),
     };
 
-    run();
+    runShoppingReminders();
 
     expect(OutboxItem::query()->sole()->user_id)->toBe($creator->id);
 })->with(['deleted', 'revoked', 'disabled']);
 
 it('queues nothing for a done list or a future reminder, and again after the time is changed', function () {
-    $creator = pushOn(F::user());
-    $done = dueList($creator);
+    $creator = shoppingPushOn(F::user());
+    $done = shoppingDueList($creator);
     $done->forceFill(['status' => ListStatus::Done, 'done_at' => now()])->save();
-    $future = dueList($creator, null, ['remind_at' => now()->addHour()]);
+    $future = shoppingDueList($creator, null, ['remind_at' => now()->addHour()]);
 
-    run();
+    runShoppingReminders();
     expect(OutboxItem::query()->count())->toBe(0);
 
     Carbon::setTestNow(now()->addHours(2));
-    run();
+    runShoppingReminders();
     expect(OutboxItem::query()->sole()->subject_id)->toBe($future->id);
 
     app(ListService::class)->updateSettings($creator, $future->id, ['remind_at' => now()->addMinutes(30)->toImmutable()]);
     expect($future->fresh()->reminder_enqueued_at)->toBeNull();
     Carbon::setTestNow(now()->addHour());
-    run();
+    runShoppingReminders();
     expect(OutboxItem::query()->where('subject_id', $future->id)->count())->toBe(2);
 });
 
@@ -133,27 +133,27 @@ it('is scheduled every minute without overlapping', function () {
         ->and($events['shopping-enqueue-reminders']->withoutOverlapping)->toBeTrue();
 });
 
-function reminderRow(): OutboxItem
+function shoppingReminderRow(): OutboxItem
 {
-    run();
+    runShoppingReminders();
 
     return OutboxItem::query()->latest('id')->firstOrFail();
 }
 
-function deliver(OutboxItem $row): void
+function shoppingDeliver(OutboxItem $row): void
 {
     $row->forceFill(['status' => 'queued'])->save();
     (new SendOutboxItem($row->id))->handle(app(OutboxHandlers::class), app(NotificationPreferences::class));
 }
 
 it('delivers a localised push that links to the list', function () {
-    $resp = pushOn(F::user());
+    $resp = shoppingPushOn(F::user());
     $resp->forceFill(['locale' => 'sk'])->save();
     $store = ShoppingStore::query()->create(['name' => 'Tesco']);
-    $list = dueList(F::user(), $resp, ['name' => 'Víkend', 'store_id' => $store->id]);
-    $row = reminderRow();
+    $list = shoppingDueList(F::user(), $resp, ['name' => 'Víkend', 'store_id' => $store->id]);
+    $row = shoppingReminderRow();
 
-    deliver($row);
+    shoppingDeliver($row);
 
     expect($row->fresh()->status->value)->toBe('sent')
         ->and($this->fake->sent)->toHaveCount(1)
@@ -167,11 +167,11 @@ it('delivers a localised push that links to the list', function () {
 });
 
 it('drops a stale row at send time', function (string $change) {
-    $creator = pushOn(F::user());
-    $resp = pushOn(F::user());
+    $creator = shoppingPushOn(F::user());
+    $resp = shoppingPushOn(F::user());
     $other = F::user();
-    $list = dueList($creator, $resp);
-    $row = reminderRow();
+    $list = shoppingDueList($creator, $resp);
+    $row = shoppingReminderRow();
     match ($change) {
         'done' => $list->forceFill(['status' => ListStatus::Done, 'done_at' => now()])->save(),
         'time' => $list->forceFill(['remind_at' => now()->addDay()])->save(),
@@ -180,19 +180,19 @@ it('drops a stale row at send time', function (string $change) {
         'signin' => $resp->forceFill(['sign_in_disabled' => true])->save(),
     };
 
-    deliver($row);
+    shoppingDeliver($row);
 
     expect($row->fresh()->status->value)->toBe('skipped')
         ->and($this->fake->sent)->toHaveCount(0);
 })->with(['done', 'time', 'responsible', 'access', 'signin']);
 
 it('skips when push was turned off before sending', function () {
-    $resp = pushOn(F::user());
-    dueList(F::user(), $resp);
-    $row = reminderRow();
+    $resp = shoppingPushOn(F::user());
+    shoppingDueList(F::user(), $resp);
+    $row = shoppingReminderRow();
     app(NotificationPreferences::class)->set($resp, 'push', false);
 
-    deliver($row);
+    shoppingDeliver($row);
 
     expect($this->fake->sent)->toHaveCount(0);
 });
