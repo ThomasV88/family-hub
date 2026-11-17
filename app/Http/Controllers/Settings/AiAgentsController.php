@@ -11,6 +11,7 @@ use App\Support\SettingsSections;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -44,11 +45,13 @@ final class AiAgentsController extends Controller
     public function bulkDryRun(Request $request, AdminAiBulkQuery $bulk): JsonResponse
     {
         $valid = $request->validate([
-            'scope' => ['required', 'string', 'in:no_proposal,last_failed,all'],
+            'scope' => ['required', 'string', Rule::in(AdminAiBulkQuery::scopes())],
             'cap' => ['required', 'integer', 'min:1', 'max:'.(int) config('ai.bulk.max_cap')],
         ]);
 
-        return $this->json($bulk->dryRun($request->user(), $valid['scope'], (int) $valid['cap']));
+        $result = $bulk->dryRun($request->user(), $valid['scope'], (int) $valid['cap']);
+
+        return ($result['result'] ?? null) === 'ocr_off' ? $this->json(['reason' => 'ocr_off'], 422) : $this->json($result);
     }
 
     public function bulkStart(Request $request, AdminAiBulkQuery $bulk): JsonResponse
@@ -64,6 +67,7 @@ final class AiAgentsController extends Controller
         $result = $bulk->start($request->user(), $valid['token'], true, array_values($valid['providers']));
 
         return match ($result['result']) {
+            'ocr_off' => $this->json(['reason' => 'ocr_off'], 422),
             'ok' => $this->json(['panel' => $result['panel']], 201),
             'active' => $this->json(['reason' => 'active', 'panel' => $result['panel']], 409),
             'stale' => $this->json(['reason' => 'stale'], 409),

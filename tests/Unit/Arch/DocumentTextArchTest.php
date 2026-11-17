@@ -11,6 +11,7 @@ const DOC_TEXT_ARCH_TABLE_ALLOWED = [
     'Medical/Queries/DocumentSearchQuery.php',
     'Medical/Queries/AiJobQuery.php',
     'Medical/Queries/AiRunQuery.php',
+    'Medical/Queries/AiBulkEligibility.php',
     'Console/Commands/StagingAudit.php',
 ];
 

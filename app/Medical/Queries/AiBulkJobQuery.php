@@ -60,6 +60,11 @@ final class AiBulkJobQuery
                 return ['enqueued' => null, 'reconciled' => $reconciled, 'completed' => 0];
             }
 
+            // A text-only backfill sends documents only while reading of the full text is on; otherwise it is held, not ended.
+            if ((string) $run->scope === 'no_text' && ! config('ai.ocr.enabled')) {
+                return ['enqueued' => null, 'reconciled' => $reconciled, 'completed' => 0];
+            }
+
             $open = DB::table('ai_bulk_run_items')->where('bulk_run_id', $runId)->whereNull('outcome')->exists();
             $candidate = $this->eligibility->nextCandidate((string) $run->scope, $runId);
 
@@ -204,7 +209,9 @@ final class AiBulkJobQuery
         if ($person === null || $document === null || ! in_array((string) $document->kind, ['pdf', 'image', 'heic'], true) || ! AiConsent::allows($subjectId)) {
             return $skip();
         }
-        $decided = DB::table('medical_ai_extractions as e')->join('medical_ai_decisions as x', 'x.extraction_id', '=', 'e.id')
+        // The text-only backfill never touches proposals or decisions, so an accepted decision does not skip it.
+        $textOnly = (string) $run->scope === 'no_text';
+        $decided = ! $textOnly && DB::table('medical_ai_extractions as e')->join('medical_ai_decisions as x', 'x.extraction_id', '=', 'e.id')
             ->where('e.document_id', $docId)->where('x.decision', 'accepted')->exists();
         if ($decided) {
             return $skip();
@@ -216,6 +223,7 @@ final class AiBulkJobQuery
             DB::transaction(fn () => DB::table('medical_ai_extractions')->insert([
                 'id' => $id, 'subject_id' => $subjectId, 'document_id' => $docId, 'status' => 'queued', 'agent' => $agentKey,
                 'model' => null, 'schema_version' => ExtractionSchema::SCHEMA_VERSION, 'prompt_version' => ExtractionSchema::PROMPT_VERSION,
+                'mode' => $textOnly ? 'text' : (config('ai.ocr.enabled') ? 'full' : 'entries'),
                 'started_by' => (int) $run->started_by, 'bulk_run_id' => $runId, 'queued_at' => $now, 'created_at' => $now, 'updated_at' => $now,
             ]));
         } catch (QueryException $e) {

@@ -28,7 +28,13 @@ final class AdminAiBulkQuery
         private readonly AiAgentSettingsQuery $agents,
     ) {}
 
-    /** @return array{token: string, checkedAt: string, validMinutes: int, counts: array<string, int>} */
+    /** The accepted scopes (the controller may name only this class, see the arch pin). @return list<string> */
+    public static function scopes(): array
+    {
+        return AiBulkEligibility::SCOPES;
+    }
+
+    /** @return array{token: string, checkedAt: string, validMinutes: int, counts: array<string, int>}|array{result: string} the second shape is the refusal ocr_off (scope no_text while reading of the full text is off) */
     public function dryRun(User $admin, string $scope, int $cap): array
     {
         if (! in_array($scope, AiBulkEligibility::SCOPES, true)) {
@@ -36,6 +42,10 @@ final class AdminAiBulkQuery
         }
         if ($cap < 1 || $cap > (int) config('ai.bulk.max_cap')) {
             throw new InvalidArgumentException('Cap out of range.');
+        }
+
+        if ($scope === 'no_text' && ! config('ai.ocr.enabled')) {
+            return ['result' => 'ocr_off'];
         }
 
         return DB::transaction(function () use ($admin, $scope, $cap) {
@@ -66,7 +76,7 @@ final class AdminAiBulkQuery
      * 'providers_changed' with the current set, so the dialog opens again with what is true now.
      *
      * @param  list<string>|null  $shownProviders
-     * @return array{result: string, panel?: array<string, mixed>, providers?: list<string>} result is ok, expired, stale, active or providers_changed
+     * @return array{result: string, panel?: array<string, mixed>, providers?: list<string>} result is ok, expired, stale, active, ocr_off or providers_changed
      */
     public function start(User $admin, string $token, bool $acknowledged, ?array $shownProviders = null): array
     {
@@ -95,6 +105,9 @@ final class AdminAiBulkQuery
                 return 'providers_changed';
             }
             $scope = (string) $row->scope;
+            if ($scope === 'no_text' && ! config('ai.ocr.enabled')) {
+                return 'ocr_off';
+            }
             if ($this->eligibility->counts($scope)['eligible'] !== (int) $row->eligible) {
                 return 'stale';
             }
@@ -177,7 +190,7 @@ final class AdminAiBulkQuery
     /**
      * The open run (if any) and the last runs, as integers, enums and times.
      *
-     * @return array{active: ?array<string, mixed>, history: list<array<string, mixed>>}
+     * @return array{ocrEnabled: bool, active: ?array<string, mixed>, history: list<array<string, mixed>>}
      */
     public function panel(): array
     {
@@ -206,7 +219,11 @@ final class AdminAiBulkQuery
             ];
         }
 
-        return ['active' => $open === null ? null : $this->activeBlock($open, $tally[$open->id], $now), 'history' => $history];
+        return [
+            'ocrEnabled' => (bool) config('ai.ocr.enabled'),
+            'active' => $open === null ? null : $this->activeBlock($open, $tally[$open->id], $now),
+            'history' => $history,
+        ];
     }
 
     /** @return array{result: string, panel?: array<string, mixed>} */
