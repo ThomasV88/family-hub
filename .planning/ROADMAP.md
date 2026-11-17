@@ -466,7 +466,12 @@ Plans:
 Conflict to resolve with the owner: issue #11 reverses the current design rule that the full text is not kept (see the AI data-flow explanation given on 2026-11-17 and the extraction prompt's rule against free-form transcription); this needs an explicit decision, a prompt/schema version bump and a migration plan.
 **Commit rule:** every commit that resolves part of #11 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
 
-**Plans:** 0 plans
+**Plans:** 5 plans planned (13-01 to 13-05); 13-06 to 13-10 to be planned after the evaluation gate (13-02)
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 13 to break down)
+- [ ] 13-01-PLAN.md — Evaluation tooling: metrics (CER, WER, diacritics, numbers, search-term recall, entry F1), decision rule as code, GD pre-processing arms, Codex token counters, transcription schema and prompt, synthetic corpus ground truth and generator, guarded `ai:ocr-eval` harness (wave 1)
+- [ ] 13-03-PLAN.md — Text storage foundation: `unaccent` extension, `fh_unaccent` wrapper, `medical_document_texts` with generated tsvector and GIN index, store with consent and archive guards, purge on consent withdrawal, privacy net, leak canary, arch pins, staging audit rule (wave 1)
+- [ ] 13-02-PLAN.md — Live evaluation run on staging as orchestrator checkpoint (real Codex, synthetic only, max 150 calls) and `13-EVALUATION.md` with the decisions block: the gate (wave 2)
+- [ ] 13-04-PLAN.md — Search backend: POST `/health/search` in one access-scoped statement, prefix and suffix-trim matching, `{text, hit}` snippets, recognised-text view and remove endpoints with audit event, person page flags, privacy differential and matrix (wave 2)
+- [ ] 13-05-PLAN.md — Search UI on the person page and the Recognised text section in the document panel, copy in en/sk/pl, help tips, manual sections `search` and `recognised-text` (wave 3)
+- [ ] 13-06 to 13-10 — to be planned after the evaluation gate (13-02): transcription step, extraction from text, bulk backfill (`no_text`), notice/consent/docs/seed, staging verification and release
