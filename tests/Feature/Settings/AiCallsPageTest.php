@@ -44,7 +44,7 @@ it('lists calls newest first with names only and the page shape', function () {
         ->where('calls.rows.0.startedBy', 'Alice Admin')
         ->where('calls.rows.1.status', 'queued')
         ->where('calls.rows.1.model', null)
-        ->has('calls.rows.0', fn (Assert $r) => $r->hasAll(['time', 'startedBy', 'person', 'agent', 'model', 'status', 'durationMs', 'quota', 'bulk']))
+        ->has('calls.rows.0', fn (Assert $r) => $r->hasAll(['time', 'kind', 'startedBy', 'person', 'agent', 'model', 'status', 'durationMs', 'quota', 'bulk']))
         ->where('filters', ['person' => null, 'member' => null, 'status' => null])
         ->has('options.people', 1)
         ->missing('login'));
@@ -172,4 +172,21 @@ it('masks the person of bulk rows and keeps them out of the person filter', func
 
     $this->actingAs($admin)->get('/settings/ai-calls?person='.$s->id)->assertInertia(fn (Assert $p) => $p
         ->where('calls.total', 1)->where('calls.rows.0.bulk', false));
+});
+
+it('lists a recipe call with its kind, no person, and never matches it with a person filter', function () {
+    $admin = User::factory()->admin()->create(['name' => 'Alice Admin']);
+    $anna = acSubject('Anna');
+    acCall($anna, $admin, ['queued_at' => now()->subHour()]);
+    AiCall::factory()->recipe()->failed('no_recipe')->create(['started_by' => $admin->id, 'queued_at' => now()->subMinute()]);
+
+    $this->actingAs($admin)->get('/settings/ai-calls')->assertOk()->assertInertia(fn (Assert $p) => $p
+        ->where('calls.rows.0.kind', 'recipe')
+        ->where('calls.rows.0.person', null)
+        ->where('calls.rows.0.startedBy', 'Alice Admin')
+        ->where('calls.rows.1.kind', 'medical')
+        ->has('calls.rows.0', fn (Assert $r) => $r->hasAll(['time', 'kind', 'startedBy', 'person', 'agent', 'model', 'status', 'durationMs', 'quota', 'bulk'])));
+
+    $this->actingAs($admin)->get('/settings/ai-calls?person='.$anna->id)->assertInertia(fn (Assert $p) => $p
+        ->has('calls.rows', 1)->where('calls.rows.0.kind', 'medical'));
 });

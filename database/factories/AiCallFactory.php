@@ -22,6 +22,12 @@ class AiCallFactory extends Factory
         ];
     }
 
+    /** A recipe import call: no person or document, content-free like every row. */
+    public function recipe(): static
+    {
+        return $this->state(fn () => ['kind' => 'recipe', 'subject_id' => null, 'document_id' => null]);
+    }
+
     public function running(): static
     {
         return $this->state(fn () => ['status' => 'running', 'started_at' => now()]);

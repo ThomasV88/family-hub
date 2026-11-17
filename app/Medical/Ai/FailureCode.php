@@ -23,4 +23,7 @@ enum FailureCode: string
     case QuotaTimeout = 'quota_timeout';
     case NoAgent = 'no_agent';
     case NoticeRequired = 'notice_required';
+    // Recipe import: the page held no recipe, or the page could not be fetched.
+    case NoRecipe = 'no_recipe';
+    case FetchFailed = 'fetch_failed';
 }

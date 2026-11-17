@@ -78,7 +78,8 @@ it('refuses identity changes, going back, and any change to a terminal row', fun
         ->and(aiCallError(fn () => $row()->update(['started_by' => 2])))->toContain('identity')
         ->and(aiCallError(fn () => $row()->update(['queued_at' => now()->subDay()])))->toContain('identity')
         ->and(aiCallError(fn () => $row()->update(['attempt' => 2])))->toContain('identity')
-        ->and(aiCallError(fn () => $row()->update(['bulk_run_id' => (string) Str::uuid()])))->toContain('identity');
+        ->and(aiCallError(fn () => $row()->update(['bulk_run_id' => (string) Str::uuid()])))->toContain('identity')
+        ->and(aiCallError(fn () => $row()->update(['kind' => 'recipe', 'subject_id' => null, 'document_id' => null])))->toContain('identity');
 
     $row()->update(['status' => 'running']);
     expect(aiCallError(fn () => $row()->update(['status' => 'queued'])))->toContain('forward');
@@ -162,7 +163,7 @@ it('has no column that could hold content', function () {
 
     expect($cols)->toBe(collect([
         'id', 'extraction_id', 'subject_id', 'document_id', 'started_by', 'agent', 'model', 'attempt', 'status',
-        'failure_code', 'queued_at', 'started_at', 'finished_at', 'duration_ms', 'bulk_run_id',
+        'failure_code', 'queued_at', 'started_at', 'finished_at', 'duration_ms', 'bulk_run_id', 'kind',
     ])->sort()->values()->all());
 });
 
@@ -206,4 +207,38 @@ it('keeps bulk_run_id immutable and attempts unique per extraction', function ()
     $db->table('ai_calls')->where('id', $id)->update(['status' => 'running', 'started_at' => now()]);
 
     expect($db->table('ai_calls')->where('id', $id)->value('status'))->toBe('running');
+});
+
+it('accepts recipe rows without a person or document and ties the ids to the kind', function () {
+    $db = aiConn('app');
+    $recipe = fn (array $extra = []) => $db->table('ai_calls')->insertGetId($extra + [
+        'extraction_id' => (string) Str::uuid(), 'subject_id' => null, 'document_id' => null,
+        'started_by' => 1, 'agent' => 'codex', 'status' => 'queued', 'kind' => 'recipe',
+    ]);
+
+    $id = $recipe();
+    $db->table('ai_calls')->where('id', $id)->update(['status' => 'running', 'started_at' => now()]);
+    $db->table('ai_calls')->where('id', $id)->update(['status' => 'failed', 'failure_code' => 'no_recipe', 'finished_at' => now()]);
+
+    expect($db->table('ai_calls')->where('id', $id)->value('failure_code'))->toBe('no_recipe')
+        ->and($db->table('ai_calls')->where('id', callRow())->value('kind'))->toBe('medical')
+        ->and(aiCallError(fn () => callRow(['subject_id' => null])))->toContain('ai_calls_kind_subject_check')
+        ->and(aiCallError(fn () => callRow(['document_id' => null])))->toContain('ai_calls_kind_subject_check')
+        ->and(aiCallError(fn () => $recipe(['subject_id' => (string) Str::uuid()])))->toContain('ai_calls_kind_subject_check')
+        ->and(aiCallError(fn () => $recipe(['document_id' => (string) Str::uuid()])))->toContain('ai_calls_kind_subject_check')
+        ->and(aiCallError(fn () => callRow(['kind' => 'other'])))->toContain('ai_calls_kind_check');
+});
+
+it('keeps the guard and the prune function after the kind migration, and refuses its rollback while recipe rows exist', function () {
+    $migration = require database_path('migrations/2026_11_29_120000_add_kind_to_ai_calls.php');
+    $db = aiConn('app');
+    $db->table('ai_calls')->insert([
+        'extraction_id' => (string) Str::uuid(), 'subject_id' => null, 'document_id' => null,
+        'started_by' => 1, 'agent' => 'codex', 'status' => 'queued', 'kind' => 'recipe', 'queued_at' => now()->subMonths(14),
+    ]);
+
+    expect(DB::selectOne("select count(*) as n from pg_trigger where tgrelid = 'ai_calls'::regclass and not tgisinternal")->n)->toBeGreaterThan(0)
+        ->and(DB::selectOne("select proconfig from pg_proc where proname = 'ai_calls_prune'")->proconfig)->toContain('search_path=public, pg_temp')
+        ->and(fn () => $migration->down())->toThrow(RuntimeException::class, "1 ai_calls row(s) have kind 'recipe'")
+        ->and((int) $db->selectOne('select ai_calls_prune(12) as n')->n)->toBe(1);
 });
