@@ -2780,6 +2780,33 @@
             "body": "The list and its items will be deleted for everyone. This cannot be undone.",
             "confirm": "Delete list",
             "cancel": "Keep list"
+        },
+        "picker": {
+            "title": "Add items",
+            "search": "Search items",
+            "grid_label": "Catalog items",
+            "selected": "{n} selected",
+            "type_own": "Type your own item",
+            "free_row": "Add “{text}” as a new item",
+            "own_heading": "Your own items",
+            "free_name": "Name",
+            "free_quantity": "Quantity",
+            "free_unit": "Unit",
+            "free_add": "Add to list",
+            "save_catalog": "Also save to catalog",
+            "on_list": "On list",
+            "quantity_of": "Quantity of {name}",
+            "unit_of": "Unit of {name}",
+            "more": "More {name}",
+            "less": "Less {name}",
+            "remove_own": "Remove {name} from your selection",
+            "add_n": "Add {n} item | Add {n} items",
+            "cancel": "Cancel",
+            "empty_title": "The catalog is empty",
+            "empty_body": "Type your own item below.",
+            "empty_settings": "Add items in Shopping settings",
+            "no_match": "No catalog item matches “{text}”.",
+            "load_error": "We could not load the catalog. You can still type your own item."
         }
     }
 }

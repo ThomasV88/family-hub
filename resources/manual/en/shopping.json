@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 35,
   "title": "Shopping",
-  "summary": "Shared shopping lists for the family: the overview, creating and copying lists, and the item catalog, stores and units that you manage in Settings.",
+  "summary": "Shared shopping lists for the family: the overview, creating and copying lists, adding and changing items, and the item catalog, stores and units that you manage in Settings.",
   "covers": ["module:shopping", "settings:shopping"],
   "sections": [
     {
@@ -32,6 +32,26 @@
           "Press **Create list**. The new list opens, empty, and the window for adding items opens with it."
         ] },
         { "type": "tip", "text": "Who else may add items, who may only view, and a reminder are set afterwards in the settings of the list." }
+      ]
+    },
+    {
+      "id": "add-items",
+      "title": "Adding and changing items",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Open a list and press **Add items**. The button is shown to the responsible person and to people who were added to the list as someone who may add and edit items. A new, empty list opens this window by itself.",
+          "Look through the catalog. Each item has a picture. The search box ignores capital letters and accents, so \"mliecko\" finds \"Mliečko\".",
+          "Tap an item to select it. A selected item shows its quantity and unit. Use **+** and **-** to change the quantity (by half for grams, kilograms and litres, by one otherwise) and pick another unit if you like. You can select many items in one go.",
+          "Something is not in the catalog? Press **Type your own item** (or, while you are searching, the line **Add \"...\" as a new item**), fill in the name, quantity and unit, and press **Add to list**. Your own item is not saved to the catalog unless you tick **Also save to catalog**, which only people who manage the catalog see.",
+          "Press **Add** at the bottom (it shows how many items you picked). All selected items join the list at once."
+        ] },
+        { "type": "p", "text": "An item from the catalog that is already on the list does not get a second row. Its quantity is raised instead, and you see \"Quantity of ... updated\". Such items carry the tag **On list** in the window." },
+        { "type": "steps", "items": [
+          "To change an item, tap its row. You can change the quantity, the unit and the note, and the name too if it is your own item (one that is not in the catalog).",
+          "To remove an item, open it, press **Remove item** and confirm. The item is removed for everyone who sees the list."
+        ] },
+        { "type": "p", "text": "Quantities accept a decimal comma, for example \"1,5\". They must be above 0 and below 1000. People who may only view a list see the items but cannot change them, and nothing can be changed while the list is locked or finished. To remove a whole list, open the menu **More actions** on the list and choose **Delete list**. This is offered to the person responsible and to the person who created the list." },
+        { "type": "tip", "text": "The catalog with its pictures is kept in Settings, under Shopping (see Item catalog and stores below)." }
       ]
     },
     {

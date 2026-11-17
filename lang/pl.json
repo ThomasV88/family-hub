@@ -2780,6 +2780,33 @@
             "body": "Lista i jej produkty zostaną usunięte dla wszystkich. Tego nie można cofnąć.",
             "confirm": "Usuń listę",
             "cancel": "Zachowaj listę"
+        },
+        "picker": {
+            "title": "Dodaj produkty",
+            "search": "Szukaj produktów",
+            "grid_label": "Produkty z katalogu",
+            "selected": "Wybrano: {n}",
+            "type_own": "Wpisz własny produkt",
+            "free_row": "Dodaj „{text}” jako nowy produkt",
+            "own_heading": "Twoje własne produkty",
+            "free_name": "Nazwa",
+            "free_quantity": "Ilość",
+            "free_unit": "Jednostka",
+            "free_add": "Dodaj do listy",
+            "save_catalog": "Zapisz też w katalogu",
+            "on_list": "Na liście",
+            "quantity_of": "Ilość produktu {name}",
+            "unit_of": "Jednostka produktu {name}",
+            "more": "Więcej: {name}",
+            "less": "Mniej: {name}",
+            "remove_own": "Usuń {name} z wyboru",
+            "add_n": "Dodaj {n} produkt | Dodaj {n} produkty | Dodaj {n} produktów",
+            "cancel": "Anuluj",
+            "empty_title": "Katalog jest pusty",
+            "empty_body": "Wpisz własny produkt poniżej.",
+            "empty_settings": "Dodaj produkty w ustawieniach Zakupów",
+            "no_match": "Żaden produkt z katalogu nie pasuje do „{text}”.",
+            "load_error": "Nie udało się wczytać katalogu. Nadal możesz wpisać własny produkt."
         }
     }
 }

@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 35,
   "title": "Zakupy",
-  "summary": "Wspólne listy zakupów dla rodziny: przegląd, tworzenie i kopiowanie list oraz katalog produktów, sklepy i jednostki, którymi zarządzasz w Ustawieniach.",
+  "summary": "Wspólne listy zakupów dla rodziny: przegląd, tworzenie i kopiowanie list, dodawanie i zmiana produktów oraz katalog produktów, sklepy i jednostki, którymi zarządzasz w Ustawieniach.",
   "covers": ["module:shopping", "settings:shopping"],
   "sections": [
     {
@@ -32,6 +32,26 @@
           "Naciśnij **Utwórz listę**. Nowa lista otwiera się pusta, a razem z nią okno dodawania produktów."
         ] },
         { "type": "tip", "text": "To, kto jeszcze może dodawać produkty, kto może tylko przeglądać, oraz przypomnienie ustawisz później w ustawieniach listy." }
+      ]
+    },
+    {
+      "id": "add-items",
+      "title": "Dodawanie i zmiana produktów",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Otwórz listę i naciśnij **Dodaj produkty**. Przycisk widzi osoba odpowiedzialna oraz osoby dodane do listy jako mogące dodawać i edytować produkty. Nowa, pusta lista otwiera to okno sama.",
+          "Przejrzyj katalog. Każdy produkt ma obrazek. Wyszukiwanie nie rozróżnia wielkich liter ani znaków diakrytycznych, więc \"mleko\" znajdzie \"Mleko\", a \"zolc\" znajdzie \"żółć\".",
+          "Dotknij produktu, aby go wybrać. Wybrany produkt pokazuje ilość i jednostkę. Przyciskami **+** i **-** zmieniasz ilość (o pół przy gramach, kilogramach i litrach, w pozostałych przypadkach o jeden) i w razie potrzeby wybierasz inną jednostkę. W jednym kroku możesz wybrać wiele produktów.",
+          "Czegoś nie ma w katalogu? Naciśnij **Wpisz własny produkt** (albo podczas szukania wiersz **Dodaj \"...\" jako nowy produkt**), wpisz nazwę, ilość i jednostkę i naciśnij **Dodaj do listy**. Twój produkt nie trafi do katalogu, dopóki nie zaznaczysz **Zapisz też w katalogu**, co widzą tylko osoby zarządzające katalogiem.",
+          "Na dole naciśnij **Dodaj** (pokazuje, ile produktów wybrano). Wszystkie wybrane produkty trafią na listę naraz."
+        ] },
+        { "type": "p", "text": "Produkt z katalogu, który już jest na liście, nie dostaje drugiego wiersza. Zwiększa się jego ilość i zobaczysz \"Zmieniono ilość produktu ...\". Takie produkty mają w oknie znacznik **Na liście**." },
+        { "type": "steps", "items": [
+          "Aby zmienić produkt, dotknij jego wiersza. Możesz zmienić ilość, jednostkę i notatkę, a także nazwę, jeśli to Twój własny produkt (spoza katalogu).",
+          "Aby usunąć produkt, otwórz go, naciśnij **Usuń produkt** i potwierdź. Produkt zostanie usunięty dla wszystkich, którzy widzą listę."
+        ] },
+        { "type": "p", "text": "Ilości przyjmują przecinek dziesiętny, na przykład \"1,5\". Muszą być większe niż 0 i mniejsze niż 1000. Osoby, które mogą tylko przeglądać listę, widzą produkty, ale nie mogą ich zmieniać, a gdy lista jest zablokowana lub zakończona, nic nie można zmienić. Całą listę usuniesz w menu **Więcej akcji** na liście, wybierając **Usuń listę**. Ta opcja jest dla osoby odpowiedzialnej i osoby, która utworzyła listę." },
+        { "type": "tip", "text": "Katalog z obrazkami prowadzi się w Ustawieniach, w części Zakupy (zobacz Katalog produktów i sklepy poniżej)." }
       ]
     },
     {

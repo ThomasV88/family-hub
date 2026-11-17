@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 35,
   "title": "Nákupy",
-  "summary": "Spoločné nákupné zoznamy pre rodinu: prehľad, vytváranie a kopírovanie zoznamov a katalóg položiek, obchody a jednotky, ktoré spravujete v Nastaveniach.",
+  "summary": "Spoločné nákupné zoznamy pre rodinu: prehľad, vytváranie a kopírovanie zoznamov, pridávanie a zmena položiek a katalóg položiek, obchody a jednotky, ktoré spravujete v Nastaveniach.",
   "covers": ["module:shopping", "settings:shopping"],
   "sections": [
     {
@@ -32,6 +32,26 @@
           "Stlačte **Vytvoriť zoznam**. Nový zoznam sa otvorí prázdny a spolu s ním okno na pridávanie položiek."
         ] },
         { "type": "tip", "text": "Kto ďalší smie pridávať položky, kto smie iba prezerať, a pripomienku nastavíte neskôr v nastaveniach zoznamu." }
+      ]
+    },
+    {
+      "id": "add-items",
+      "title": "Pridávanie a zmena položiek",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Otvorte zoznam a stlačte **Pridať položky**. Tlačidlo vidí zodpovedná osoba a ľudia, ktorí boli do zoznamu pridaní ako tí, čo môžu pridávať a upravovať položky. Nový, prázdny zoznam toto okno otvorí sám.",
+          "Prezrite si katalóg. Každá položka má obrázok. Hľadanie nerozlišuje veľké písmená ani diakritiku, takže \"mliecko\" nájde \"Mliečko\".",
+          "Položku vyberiete ťuknutím. Vybraná položka ukáže množstvo a jednotku. Tlačidlami **+** a **-** zmeníte množstvo (o polovicu pri gramoch, kilogramoch a litroch, inak o jednu) a podľa potreby vyberiete inú jednotku. V jednom kroku môžete vybrať veľa položiek.",
+          "Nie je niečo v katalógu? Stlačte **Zadať vlastnú položku** (alebo počas hľadania riadok **Pridať \"...\" ako novú položku**), vyplňte názov, množstvo a jednotku a stlačte **Pridať do zoznamu**. Vaša vlastná položka sa do katalógu neuloží, kým nezaškrtnete **Uložiť aj do katalógu**, čo vidia len ľudia, ktorí spravujú katalóg.",
+          "Dole stlačte **Pridať** (ukáže, koľko položiek ste vybrali). Všetky vybrané položky sa pridajú do zoznamu naraz."
+        ] },
+        { "type": "p", "text": "Položka z katalógu, ktorá už v zozname je, nedostane druhý riadok. Zvýši sa jej množstvo a uvidíte \"Množstvo položky ... zmenené\". Takéto položky majú v okne štítok **V zozname**." },
+        { "type": "steps", "items": [
+          "Položku zmeníte ťuknutím na jej riadok. Môžete zmeniť množstvo, jednotku a poznámku, a aj názov, ak ide o vašu vlastnú položku (ktorá nie je v katalógu).",
+          "Položku odstránite tak, že ju otvoríte, stlačíte **Odstrániť položku** a potvrdíte. Položka sa odstráni pre všetkých, ktorí zoznam vidia."
+        ] },
+        { "type": "p", "text": "Množstvá prijímajú desatinnú čiarku, napríklad \"1,5\". Musia byť väčšie ako 0 a menšie ako 1000. Ľudia, ktorí môžu zoznam iba zobraziť, položky vidia, ale nemôžu ich meniť, a nič sa nedá meniť, kým je zoznam uzamknutý alebo vybavený. Celý zoznam odstránite v ponuke **Ďalšie akcie** na zozname voľbou **Odstrániť zoznam**. Ponúka sa zodpovednej osobe a tomu, kto zoznam vytvoril." },
+        { "type": "tip", "text": "Katalóg s obrázkami sa spravuje v Nastaveniach, v časti Nákupy (pozrite Katalóg položiek a obchody nižšie)." }
       ]
     },
     {

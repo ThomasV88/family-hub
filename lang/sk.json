@@ -2780,6 +2780,33 @@
             "body": "Zoznam a jeho položky sa odstránia pre všetkých. Nedá sa to vrátiť.",
             "confirm": "Odstrániť zoznam",
             "cancel": "Ponechať zoznam"
+        },
+        "picker": {
+            "title": "Pridať položky",
+            "search": "Hľadať položky",
+            "grid_label": "Položky katalógu",
+            "selected": "Vybrané: {n}",
+            "type_own": "Zadať vlastnú položku",
+            "free_row": "Pridať „{text}“ ako novú položku",
+            "own_heading": "Vaše vlastné položky",
+            "free_name": "Názov",
+            "free_quantity": "Množstvo",
+            "free_unit": "Jednotka",
+            "free_add": "Pridať do zoznamu",
+            "save_catalog": "Uložiť aj do katalógu",
+            "on_list": "V zozname",
+            "quantity_of": "Množstvo položky {name}",
+            "unit_of": "Jednotka položky {name}",
+            "more": "Viac: {name}",
+            "less": "Menej: {name}",
+            "remove_own": "Odstrániť {name} z výberu",
+            "add_n": "Pridať {n} položku | Pridať {n} položky | Pridať {n} položiek",
+            "cancel": "Zrušiť",
+            "empty_title": "Katalóg je prázdny",
+            "empty_body": "Zadajte vlastnú položku nižšie.",
+            "empty_settings": "Pridajte položky v nastaveniach Nákupov",
+            "no_match": "Žiadna položka katalógu nezodpovedá „{text}“.",
+            "load_error": "Katalóg sa nepodarilo načítať. Vlastnú položku môžete stále zadať."
         }
     }
 }

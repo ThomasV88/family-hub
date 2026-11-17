@@ -61,4 +61,8 @@ const storeName = computed(() => props.list.store?.name ?? props.list.storeName 
 .shop-head__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); color: var(--color-text-muted); font-size: var(--text-sm); }
 .shop-head__meta-item { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; overflow-wrap: anywhere; }
 .shop-head__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); }
+@media (max-width: 640px) {
+    .shop-head__actions { width: 100%; justify-content: stretch; }
+    .shop-head__actions :deep(.ui-button--primary) { flex: 1 1 auto; }
+}
 </style>
