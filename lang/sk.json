@@ -760,7 +760,10 @@
             "medical_type_document": "Dokument",
             "timings_idle": "Opätovné potvrdenie po nečinnosti nastavené na {duration}",
             "timings_confirm": "Opätovné potvrdenie citlivých akcií nastavené na {duration}",
-            "help_text_changed": "Upravený text nápovedy {key} ({locales})"
+            "help_text_changed": "Upravený text nápovedy {key} ({locales})",
+            "profile_changed_photo": "Zmenená fotografia osoby {name}",
+            "profile_changed_name": "Zmenené meno osoby {name}",
+            "profile_changed_other": "Zmenený profil osoby {name}"
         },
         "page": "Strana {n} z {total}",
         "prev": "Predchádzajúca",
@@ -770,6 +773,19 @@
         "caption": "Záznamy aktivity",
         "error": {
             "range": "Začiatočný dátum musí byť rovnaký alebo skorší než koncový."
+        }
+    },
+    "profile": {
+        "photo": {
+            "err_type": "Vyberte obrázok JPG, PNG alebo WebP.",
+            "err_size": "Obrázok je väčší ako 5 MB. Vyberte menší.",
+            "err_pixels": "Obrázok má príliš veľa pixelov. Vyberte menší.",
+            "err_decode": "Tento obrázok sa nepodarilo použiť. Vyberte JPG, PNG alebo WebP do 5 MB a skúste to znova.",
+            "err_write": "Obrázok sa nepodarilo uložiť. Nič sa nezmenilo. Skúste to znova."
+        },
+        "toast": {
+            "photo_saved": "Fotografia uložená",
+            "photo_removed": "Fotografia odstránená"
         }
     },
     "account": {

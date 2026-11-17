@@ -61,6 +61,24 @@ describe('Audit page', () => {
         expect(current.text()).toContain('Stopped sharing a finance account with Cyril');
     });
 
+    it('describes a profile changed by someone else without any name text, in every language', () => {
+        const entries = [
+            { id: 8, occurredAt: '2026-05-12T10:00:00+00:00', actorLabel: 'Anna', event: 'profile_changed_by_other', group: 'account', module: null, targetLabel: 'Kid', meta: { field: 'photo' }, ip: null },
+            { id: 7, occurredAt: '2026-05-12T09:00:00+00:00', actorLabel: 'Anna', event: 'profile_changed_by_other', group: 'account', module: null, targetLabel: 'Kid', meta: { field: 'name' }, ip: null },
+            { id: 6, occurredAt: '2026-05-12T08:00:00+00:00', actorLabel: 'Anna', event: 'profile_changed_by_other', group: 'account', module: null, targetLabel: 'Kid', meta: { field: 'bogus' }, ip: null },
+        ];
+        mountPage({ entries });
+        expect(current.text()).toContain('Changed the photo of Kid');
+        expect(current.text()).toContain('Changed the name of Kid');
+        expect(current.text()).toContain('Changed the profile of Kid');
+        current.unmount();
+        mountPage({ locale: 'sk', entries });
+        expect(current.text()).toContain('Zmenená fotografia osoby Kid');
+        current.unmount();
+        mountPage({ locale: 'pl', entries });
+        expect(current.text()).toContain('Zmieniono zdjęcie osoby Kid');
+    });
+
     it('shows heading, intro, hidden caption, scoped headers and composed details', () => {
         mountPage();
         expect(current.find('h1').text()).toBe('Audit log');

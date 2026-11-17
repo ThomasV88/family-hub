@@ -150,3 +150,28 @@ it('rejects an unknown variant', function () {
     withPhoto($this->parent);
     $this->actingAs($this->parent)->get("/people/{$this->parent->id}/photo/huge")->assertNotFound();
 });
+
+it('shares an avatars map of id => version for users with a photo and no paths', function () {
+    withPhoto($this->parent);
+    withPhoto($this->parent);
+    $viewer = User::factory()->withPreset(Preset::Parent)->create();
+
+    $this->actingAs($viewer)->get('/')->assertInertia(function ($page) {
+        $props = $page->toArray()['props'];
+        expect($props['avatars'])->toBe([(string) $this->parent->id => 2]);
+        $json = json_encode($props);
+        expect($json)->not->toContain('profile-photos')->not->toContain('photo_path')->not->toContain('-full.jpg');
+
+        return $page;
+    });
+});
+
+it('shares an empty avatars object to a guest', function () {
+    withPhoto($this->parent);
+
+    $this->get('/login')->assertInertia(function ($page) {
+        expect($page->toArray()['props']['avatars'])->toBe([]);
+
+        return $page;
+    });
+});

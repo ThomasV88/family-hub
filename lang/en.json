@@ -760,7 +760,10 @@
             "medical_type_document": "Document",
             "timings_idle": "Re-confirmation after inactivity set to {duration}",
             "timings_confirm": "Re-confirmation of sensitive actions set to {duration}",
-            "help_text_changed": "Edited help text {key} ({locales})"
+            "help_text_changed": "Edited help text {key} ({locales})",
+            "profile_changed_photo": "Changed the photo of {name}",
+            "profile_changed_name": "Changed the name of {name}",
+            "profile_changed_other": "Changed the profile of {name}"
         },
         "page": "Page {n} of {total}",
         "prev": "Previous",
@@ -770,6 +773,19 @@
         "caption": "Audit log entries",
         "error": {
             "range": "The start date must be on or before the end date."
+        }
+    },
+    "profile": {
+        "photo": {
+            "err_type": "Choose a JPG, PNG or WebP image.",
+            "err_size": "The picture is larger than 5 MB. Choose a smaller one.",
+            "err_pixels": "The picture has too many pixels. Choose a smaller one.",
+            "err_decode": "We could not use that picture. Choose a JPG, PNG or WebP image up to 5 MB and try again.",
+            "err_write": "We could not save the picture. Nothing was changed. Try again."
+        },
+        "toast": {
+            "photo_saved": "Photo saved",
+            "photo_removed": "Photo removed"
         }
     },
     "account": {

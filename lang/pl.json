@@ -760,7 +760,10 @@
             "medical_type_document": "Dokument",
             "timings_idle": "Ponowne potwierdzenie po bezczynności ustawione na {duration}",
             "timings_confirm": "Ponowne potwierdzenie wrażliwych czynności ustawione na {duration}",
-            "help_text_changed": "Zmieniono tekst pomocy {key} ({locales})"
+            "help_text_changed": "Zmieniono tekst pomocy {key} ({locales})",
+            "profile_changed_photo": "Zmieniono zdjęcie osoby {name}",
+            "profile_changed_name": "Zmieniono imię osoby {name}",
+            "profile_changed_other": "Zmieniono profil osoby {name}"
         },
         "page": "Strona {n} z {total}",
         "prev": "Poprzednia",
@@ -770,6 +773,19 @@
         "caption": "Wpisy dziennika zdarzeń",
         "error": {
             "range": "Data początkowa musi być taka sama lub wcześniejsza niż końcowa."
+        }
+    },
+    "profile": {
+        "photo": {
+            "err_type": "Wybierz obraz JPG, PNG lub WebP.",
+            "err_size": "Obraz jest większy niż 5 MB. Wybierz mniejszy.",
+            "err_pixels": "Obraz ma zbyt wiele pikseli. Wybierz mniejszy.",
+            "err_decode": "Nie udało się użyć tego obrazu. Wybierz JPG, PNG lub WebP do 5 MB i spróbuj ponownie.",
+            "err_write": "Nie udało się zapisać obrazu. Nic nie zostało zmienione. Spróbuj ponownie."
+        },
+        "toast": {
+            "photo_saved": "Zdjęcie zapisane",
+            "photo_removed": "Zdjęcie usunięte"
         }
     },
     "account": {
