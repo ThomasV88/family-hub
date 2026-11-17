@@ -18,6 +18,7 @@ use App\Wishlist\Catalog\ImageProcessor;
 use App\Wishlist\WishlistManagerSync;
 use Database\Seeders\Staging\AiProposalsSeeder;
 use Database\Seeders\Staging\DocumentsSeeder;
+use Database\Seeders\Staging\DocumentTextsSeeder;
 use Database\Seeders\Staging\FinanceSeeder;
 use Database\Seeders\Staging\HealthSeeder;
 use Database\Seeders\Staging\RecipesSeeder;
@@ -147,6 +148,7 @@ class StagingSeeder extends Seeder
         $documents = (new DocumentsSeeder)->seed($ctx, $health['subjects']);
         $this->summary['documents'] = count($documents);
         $this->summary['ai'] = (new AiProposalsSeeder)->seed($ctx, $health['subjects'], $documents);
+        $this->summary['texts'] = (new DocumentTextsSeeder)->seed($ctx, $health['subjects'], $documents);
         $this->summary['shopping'] = (new ShoppingSeeder)->seed($ctx);
         $this->summary['recipes'] = (new RecipesSeeder)->seed($ctx);
         $this->summary['seconds'] = round(microtime(true) - $started, 2);
@@ -195,7 +197,7 @@ class StagingSeeder extends Seeder
      * not trip a RESTRICT foreign key. Rows of real users are never touched (the audit must keep failing on those).
      * Children are removed by the existing ON DELETE CASCADE foreign keys: task members, wish urls, reservations and
      * contributions, wishlist managers and own occasions, finance rows of an account (members, import rows, match
-     * rejections), medical records, contacts, memberships, documents, AI proposals and their decisions, ai_notice_acks.
+     * rejections), medical records, contacts, memberships, documents, recognised document texts, AI proposals and their decisions, ai_notice_acks.
      * Finance categories are never created by the seed (only the migration's defaults are used), so none needs purging.
      * audit_logs and ai_calls are append-only and stay (the audit accepts their dangling synthetic ids). The files of the
      * medical documents of the deleted people are removed after the transaction commits (a rolled-back seed keeps them);
@@ -274,6 +276,8 @@ class StagingSeeder extends Seeder
         // Medical: a proposal started by a synthetic user, then the people it created (documents, visits, allergies,
         // medications, vaccinations, contacts, memberships, proposals cascade). A person linked to a real user is kept.
         DB::table('medical_ai_extractions')->whereIn('started_by', $ids)->delete();
+        // Phase 13: recognised texts written for a synthetic user (also those of a kept person, which the cascade misses).
+        DB::table('medical_document_texts')->whereIn('started_by', $ids)->delete();
         $people = DB::table('medical_subjects')->whereIn('created_by', $ids)
             ->where(fn ($q) => $q->whereNull('user_id')->orWhereIn('user_id', $ids));
         $subjectIds = $people->pluck('id')->map(fn ($id) => (string) $id)->all();

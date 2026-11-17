@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Six tiny synthetic documents (two PDFs with two pages, a PNG and JPEGs drawn with GD) stored through
+ * Nine tiny synthetic documents (PDFs with two to nine pages, a PNG and JPEGs drawn with GD) stored through
  * MedicalDocumentStore (the row is made with the document factory, as in DocumentQuery::create), so previews, thumbnails and downloads work like for real uploads.
  *
  * Files live on the private medical disk. A reseed removes the rows (cascade from the people), and StagingSeeder removes
@@ -35,6 +35,10 @@ final class DocumentsSeeder
             'discharge_pdf' => ['grandparent', 'Prepúšťacia správa (demo)', 'pdf', ['Prepustacia sprava', 'Odporucania']],
             'prescription_jpg' => ['hidden', 'Recept (demo)', 'jpg', 'Recept'],
             // Archived demo document: older than the delete window and archived, so it is hidden everywhere and restorable.
+            // Phase 13: two more documents for the recognised-text scenarios (DocumentTextsSeeder): a text-only run with one
+            // illegible page, and a nine-page report that is read only in part.
+            'text_only_pdf' => ['adult_linked', 'Správa z ambulancie, text uložený (demo)', 'pdf', ['Sprava z ambulancie', 'Druha strana', 'Tretia strana']],
+            'partial_pdf' => ['grandparent', 'Dlhá správa, deväť strán (demo)', 'pdf', array_map(fn (int $n) => "Dlha sprava, strana {$n}", range(1, 9))],
             'archived_pdf' => ['adult_linked', 'Archivovaný starý výsledok (demo)', 'pdf', ['Stary vysledok', 'Archivovane'], true],
         ];
 

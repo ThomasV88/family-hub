@@ -76,6 +76,12 @@ trap cleanup EXIT
 dc up -d --wait postgres >/dev/null
 psql_live "drop table if exists backup_test_marker; create table backup_test_marker(id int primary key, note text); insert into backup_test_marker values (1,'marker');" >/dev/null
 
+# recognised document text (Phase 13): the table with its generated search column and the fh_unaccent wrapper, one synthetic row
+psql_live "create extension if not exists unaccent;
+create or replace function public.fh_unaccent(text) returns text language sql immutable parallel safe strict as \$\$ select public.unaccent('public.unaccent'::regdictionary, \$1) \$\$;
+create table medical_document_texts(document_id uuid primary key, body text not null, search tsvector generated always as (to_tsvector('simple', public.fh_unaccent(body))) stored);
+insert into medical_document_texts values ('00000000-0000-4000-8000-000000000001', 'synthetic drill text');" >/dev/null
+
 # marker file in the uploads volume (private wish images)
 dc run --rm --no-deps -T app sh -c 'echo marker > storage/app/private/wish-images/backup-marker.txt' >/dev/null
 
@@ -122,6 +128,7 @@ cout=$(BACKUP_RESTIC_REPOSITORY="$COPY_REPO" RESTIC_PASSWORD_FILE="$COPY_PW" DRI
 echo "$cout" | grep -q 'RESTORE-DRILL UPLOADS OK' || fail "copy drill: uploads not proven: $cout"
 echo "$cout" | tail -n 1 | grep -q '^RESTORE-DRILL OK tables=' || fail "copy drill: final line unexpected: $cout"
 echo "$cout" | grep -q 'RESTORE-DRILL MEDICAL OK' || fail "copy drill: medical not proven: $cout"
+echo "$cout" | grep -q '^RESTORE-DRILL TEXT OK rows=1$' || fail "copy drill: recognised text table not proven: $cout"
 [ "$(restic_c dump --tag uploads-manual --path /uploads.tar latest /uploads.tar | tar -xOf - ./backup-marker.txt)" = "marker" ] \
   || fail "marker not restorable from the copy repository"
 [ "$(restic_c dump --tag medical-manual --path /medical.tar latest /medical.tar | tar -xOf - ./subject-1/backup-marker.txt)" = "medical-marker" ] \
@@ -142,6 +149,7 @@ echo "$out" | tail -n 1 | grep -q '^RESTORE-DRILL OK tables=' || fail "drill out
 echo "$out" | tail -n 1 | grep -q "snapshot=$(newest_db_id)\$" || fail "drill did not restore the newest database snapshot: $out"
 echo "$out" | grep -q 'RESTORE-DRILL UPLOADS OK files=' || fail "drill did not prove uploads: $out"
 echo "$out" | grep -q 'RESTORE-DRILL MEDICAL OK files=' || fail "drill did not prove medical: $out"
+echo "$out" | grep -q '^RESTORE-DRILL TEXT OK rows=1$' || fail "drill did not prove the recognised text table and fh_unaccent: $out"
 [ "$(restic_r dump --tag medical-manual --path /medical.tar latest /medical.tar | tar -xOf - ./subject-1/backup-marker.txt)" = "medical-marker" ] \
   || fail "medical marker not restorable from the primary repository"
 [ "$(restic_r dump --tag uploads-manual --path /uploads.tar latest /uploads.tar | tar -xOf - ./backup-marker.txt)" = "marker" ] \
@@ -206,6 +214,13 @@ if DRILL_DB="postgres" bash scripts/restore-drill.sh >/dev/null 2>&1; then
   fail "drill accepted an arbitrary DRILL_DB"
 fi
 
+# 8c. a snapshot without the recognised text table: the drill says so instead of failing
+psql_live "drop table medical_document_texts" >/dev/null
+bash scripts/backup.sh manual >/dev/null || fail "backup after dropping the text table failed"
+nout=$(DRILL_TAG=manual DRILL_CHECK_TABLE=backup_test_marker bash scripts/restore-drill.sh) || fail "drill without the text table failed"
+echo "$nout" | grep -q '^RESTORE-DRILL TEXT NONE$' || fail "drill did not report RESTORE-DRILL TEXT NONE: $nout"
+echo "$nout" | tail -n 1 | grep -q '^RESTORE-DRILL OK tables=' || fail "drill without the text table: final line unexpected: $nout"
+
 # 9. freshness: only nightly snapshots count, a newer manual snapshot must not mask a missing nightly
 if bash scripts/backup-freshness.sh >/dev/null 2>&1; then
   fail "freshness passed with manual snapshots only"
@@ -223,6 +238,7 @@ dout=$(DRILL_CHECK_TABLE=backup_test_marker bash scripts/restore-drill.sh) || fa
 echo "$dout" | grep -q '^RESTORE-DRILL OK' || fail "default drill output unexpected: $dout"
 echo "$dout" | grep -q 'RESTORE-DRILL UPLOADS OK' || fail "default drill did not prove uploads: $dout"
 echo "$dout" | grep -q 'RESTORE-DRILL MEDICAL OK' || fail "default drill did not prove medical: $dout"
+echo "$dout" | grep -Eq '^RESTORE-DRILL TEXT (OK rows=[0-9]+|NONE)$' || fail "default drill printed no RESTORE-DRILL TEXT line: $dout"
 # shellcheck disable=SC2046
 restic_r forget --prune $(restic_r snapshots --json --tag uploads-nightly | python3 -c 'import json,sys; print(" ".join(x["short_id"] for x in json.load(sys.stdin)))') >/dev/null
 if eout=$(bash scripts/backup-freshness.sh 2>&1); then

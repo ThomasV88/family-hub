@@ -104,8 +104,8 @@ it('fills every module within the expected ranges and measures the run', functio
         ->and($c['finance_import_batches'])->toBeBetween(1, 3)
         ->and($c['medical_subjects'])->toBeBetween(5, 6)
         ->and($c['medical_visits'])->toBeBetween(40, 80)
-        ->and($c['medical_documents'])->toBe(7)
-        ->and($c['medical_ai_extractions'])->toBe(3)
+        ->and($c['medical_documents'])->toBe(9)
+        ->and($c['medical_ai_extractions'])->toBe(4)
         ->and($c['shopping_lists'])->toBe(8)
         ->and($c['shopping_catalog_items'])->toBeBetween(25, 35)
         ->and($c['shopping_stores'])->toBe(5)
@@ -281,7 +281,8 @@ it('keeps health private per person and seeds a full record for each', function 
     expect(MedicalSubject::whereNotNull('user_id')->count())->toBe(2)
         ->and(MedicalSubject::where('user_id', $parent->id)->exists())->toBeTrue()
         ->and(MedicalSubject::where('user_id', $grandparent->id)->exists())->toBeTrue()
-        ->and(MedicalSubject::where('ai_consent', true)->count())->toBe(2)
+        // parent, grandparent and (Phase 13: the store needs consent to hold a text) the hidden person
+        ->and(MedicalSubject::where('ai_consent', true)->count())->toBe(3)
         ->and(MedicalSubject::whereNull('blood_type')->count())->toBe(0)
         ->and(MedicalSubject::whereNull('birth_date')->count())->toBe(0);
     $ages = MedicalSubject::all()->map(fn ($s) => (int) $s->birth_date->age)->sort()->values()->all();
@@ -310,12 +311,12 @@ it('keeps health private per person and seeds a full record for each', function 
         ->and($c->firstWhere('vaccine', 'MMR (2. dávka)')->status)->toBe('overdue');
 });
 
-it('stores seven synthetic documents (one archived) that can be read back, with a two-page PDF', function () {
+it('stores nine synthetic documents (one archived) that can be read back, with PDFs of two, three and nine pages', function () {
     demoSeed();
 
     $docs = DB::table('medical_documents')->get();
-    expect($docs)->toHaveCount(7)
-        ->and($docs->where('kind', 'pdf'))->toHaveCount(4)
+    expect($docs)->toHaveCount(9)
+        ->and($docs->where('kind', 'pdf'))->toHaveCount(6)
         ->and($docs->where('kind', 'image'))->toHaveCount(3);
     $disk = Storage::disk('medical');
     foreach ($docs as $doc) {
@@ -327,7 +328,8 @@ it('stores seven synthetic documents (one archived) that can be read back, with 
         }
     }
     foreach ($docs->where('kind', 'pdf') as $pdf) {
-        expect(app(PdfRasterizer::class)->pageCount($disk->path($pdf->path)))->toBe(2);
+        $pages = str_contains($pdf->title, 'text uložený') ? 3 : (str_contains($pdf->title, 'deväť strán') ? 9 : 2);
+        expect(app(PdfRasterizer::class)->pageCount($disk->path($pdf->path)))->toBe($pages);
     }
     // the files of one document are reachable through the real query class for an Edit viewer, not for the child
     $doc = $docs->first(fn ($d) => str_contains($d->title, 'Recept'));

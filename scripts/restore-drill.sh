@@ -3,6 +3,9 @@
 # of any kind) into a scratch database in the SAME stack, compare it with the live database, drop the
 # scratch database. Then prove the newest uploads snapshot (tag uploads-<DRILL_TAG>, path /uploads.tar)
 # readable: RESTORE-DRILL UPLOADS OK files=<n> snapshot=<id>, or RESTORE-DRILL UPLOADS NONE when absent.
+# The restored database is also checked for the recognised document text (Phase 13): RESTORE-DRILL TEXT OK rows=<n> when
+# the table medical_document_texts exists and public.fh_unaccent folds a letter in the restored database (the generated search
+# column needs it), RESTORE-DRILL TEXT NONE when the snapshot predates the table. Counts only, never any text.
 # RULE: never restore into another stack's database; a production backup is never restored into staging.
 # Usage: restore-drill.sh [snapshot|latest]   (run from the stack directory)
 # Optional env: DRILL_DB, DRILL_TAG (default nightly; pre-migrate snapshots are not drilled by default), DRILL_CHECK_TABLE (must have >= 1 row), DRILL_ADMIN_USER (default postgres)
@@ -92,6 +95,23 @@ if [ -n "${DRILL_CHECK_TABLE:-}" ]; then
   [[ "$DRILL_CHECK_TABLE" =~ ^[a-z_][a-z0-9_]*$ ]] || die "invalid DRILL_CHECK_TABLE"
   CHK="$(q "$DRILL_DB" "select count(*) from \"$DRILL_CHECK_TABLE\"")"
   [ "$CHK" -ge 1 ] || die "check table $DRILL_CHECK_TABLE is empty after restore"
+fi
+
+# Recognised document text: the table, its generated search column and the immutable fh_unaccent wrapper must restore.
+T_EXISTS="$(q "$DRILL_DB" "select count(*) from information_schema.tables where table_schema='public' and table_name='medical_document_texts'")"
+if [ "$T_EXISTS" = "1" ]; then
+  # chr(321) is the Polish capital L with stroke; the wrapper must turn it into a plain L.
+  FOLDED="$(q "$DRILL_DB" "select public.fh_unaccent(chr(321) || 'ukasz')")"
+  [ "$FOLDED" = "Lukasz" ] || die "fh_unaccent does not work in the restored database"
+  T_ROWS="$(q "$DRILL_DB" 'select count(*) from public.medical_document_texts')"
+  T_SEARCH="$(q "$DRILL_DB" 'select count(*) from public.medical_document_texts where search is not null')"
+  [ "$T_SEARCH" = "$T_ROWS" ] || die "search column of the recognised text is incomplete after restore"
+  TMSG="RESTORE-DRILL TEXT OK rows=$T_ROWS"
+  log "$TMSG"
+  echo "$TMSG"
+else
+  log "no medical_document_texts table in the restored database"
+  echo "RESTORE-DRILL TEXT NONE"
 fi
 
 # Uploads: the newest uploads snapshot of this kind must list as a readable tar.
