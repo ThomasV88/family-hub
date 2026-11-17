@@ -586,6 +586,9 @@
             "history_empty_heading": "Brak masowych przetwarzań",
             "history_empty_body": "Gdy rozpoczniesz masowe przetwarzanie, jego liczby pojawią się tutaj.",
             "no_text_note": "Te dokumenty odczyta dostawca AI, a ich tekst zostanie zapisany tutaj. Sugestie nie zostaną utworzone.",
+            "text_notice_codex": "Te dokumenty opuszczą ten serwer i zostaną wysłane do OpenAI w celu odczytania. OpenAI może przechowywać to, co otrzyma, zgodnie z własnymi warunkami. Odczytany tekst jest zapisywany w bazie danych tej aplikacji, mogą w nim wyszukiwać członkowie, którzy mogą otworzyć dany dokument, i pozostaje, dopóki dokument nie zostanie usunięty lub tekst nie zostanie usunięty. Jest też w kopiach zapasowych do czasu ich wygaśnięcia. To powiadomienie zobaczysz tylko raz.",
+            "text_notice_multi": "Te dokumenty opuszczą ten serwer i zostaną wysłane do OpenAI, lub do GitHub, jeśli OpenAI jest niedostępne, w celu odczytania. Mogą przechowywać to, co otrzymają, zgodnie z własnymi warunkami. Odczytany tekst jest zapisywany w bazie danych tej aplikacji, mogą w nim wyszukiwać członkowie, którzy mogą otworzyć dany dokument, i pozostaje, dopóki dokument nie zostanie usunięty lub tekst nie zostanie usunięty. Jest też w kopiach zapasowych do czasu ich wygaśnięcia. To powiadomienie zobaczysz ponownie tylko wtedy, gdy zostanie dodana inna usługa.",
+            "text_notice_github": "Te dokumenty opuszczą ten serwer i zostaną wysłane do GitHub w celu odczytania. GitHub może przechowywać to, co otrzyma, zgodnie z własnymi warunkami. Odczytany tekst jest zapisywany w bazie danych tej aplikacji, mogą w nim wyszukiwać członkowie, którzy mogą otworzyć dany dokument, i pozostaje, dopóki dokument nie zostanie usunięty lub tekst nie zostanie usunięty. Jest też w kopiach zapasowych do czasu ich wygaśnięcia. To powiadomienie zobaczysz ponownie tylko wtedy, gdy zostanie dodana inna usługa.",
             "history_text_only": "Tylko tekst"
         },
         "security": {
@@ -2369,6 +2372,13 @@
                 "text_saved_preparing": "Tekst jest zapisany. AI przygotowuje teraz na jego podstawie sugestie.",
                 "waiting_text_saved": "Tekst jest już zapisany.",
                 "failed_text_saved": "Brakuje tylko propozycji: rozpoznany tekst został zapisany i można w nim wyszukiwać.",
+                "failed_suggestions": "AI nie mogła przygotować propozycji",
+                "failed_suggestions_detail": "AI nie mogła przygotować propozycji dla tego dokumentu. Żadne propozycje nie zostały zapisane, ale rozpoznany tekst został zapisany i można w nim wyszukiwać. Spróbuj ponownie lub dodaj dane ręcznie.",
+                "quota_timeout_suggestions_detail": "Limit użycia AI nie wrócił na czas. Żadne propozycje nie zostały zapisane, ale rozpoznany tekst został zapisany i można w nim wyszukiwać. Spróbuj później lub dodaj dane ręcznie.",
+                "quota_exhausted_suggestions_detail": "Usługi AI osiągnęły limit użycia i nie wrócą dość szybko. Żadne propozycje nie zostały zapisane, ale rozpoznany tekst został zapisany i można w nim wyszukiwać. Spróbuj później lub dodaj dane ręcznie.",
+                "cancelled_suggestions_detail": "Uruchomienie zostało anulowane. Żadne propozycje nie zostały zapisane, ale rozpoznany tekst został zapisany i można w nim wyszukiwać.",
+                "consent_suggestions_detail": "Uruchomienie zostało zatrzymane, ponieważ AI została wyłączona dla tej osoby. Żadne propozycje nie zostały zapisane, ale rozpoznany tekst został zapisany.",
+                "announce_failed_suggestions": "AI nie mogła przygotować propozycji, ale tekst dokumentu jest zapisany",
                 "announce_text_saved": "Tekst dokumentu został zapisany."
             },
             "review": {
@@ -2557,7 +2567,7 @@
             "loaded_more": "Wczytano kolejne dokumenty: {n}",
             "title_only": "Pasuje do nazwy dokumentu.",
             "page": "Strona {n}",
-            "partial": "Przeszukiwane są tylko pierwsze {n} strony.",
+            "partial": "Przeszukiwana jest tylko pierwsza strona. | Przeszukiwane są tylko pierwsze {n} strony. | Przeszukiwanych jest tylko pierwszych {n} stron. | Przeszukiwane są tylko pierwsze {n} strony.",
             "uncertain": "Tekst odczytała AI i może zawierać błędy. Słowo może nie zostać znalezione, jeśli zostało źle odczytane.",
             "empty_title": "Nie znaleziono dokumentów",
             "empty_body": "Dokumenty są przeszukiwane według nazwy i tekstu odczytanego z nich przez AI. Przeszukiwane są tylko dokumenty, które możesz otworzyć. Dokumenty, których AI nigdy nie czytała, są znajdowane tylko po nazwie.",
@@ -2569,6 +2579,7 @@
             "error_forbidden": "Nie możesz już przeszukiwać tych dokumentów. Wczytaj stronę ponownie.",
             "more_failed": "Nie udało się wczytać kolejnych dokumentów.",
             "throttled": "Szukano zbyt często. Poczekaj chwilę i spróbuj ponownie.",
+            "dropped_hint": "{n} słowo z wyszukiwania nie zostało użyte. Słowa jednoliterowe, słowa bez liter łacińskich lub cyfr oraz słowa po ósmym są pomijane. | {n} słowa z wyszukiwania nie zostały użyte. Słowa jednoliterowe, słowa bez liter łacińskich lub cyfr oraz słowa po ósmym są pomijane. | {n} słów z wyszukiwania nie zostało użytych. Słowa jednoliterowe, słowa bez liter łacińskich lub cyfr oraz słowa po ósmym są pomijane. | {n} słowa z wyszukiwania nie zostały użyte. Słowa jednoliterowe, słowa bez liter łacińskich lub cyfr oraz słowa po ósmym są pomijane.",
             "results_aria": "Wyniki wyszukiwania"
         },
         "document_text": {
@@ -2577,9 +2588,9 @@
             "region_aria": "Rozpoznany tekst dokumentu {title}",
             "page": "Strona {n}",
             "tag_errors": "Może zawierać błędy",
-            "tag_partial": "Pierwsze {n} z {total} stron",
+            "tag_partial": "Pierwsza strona z {total} stron | Pierwsze {n} z {total} stron | Pierwszych {n} z {total} stron | Pierwsze {n} z {total} stron",
             "info": "Tekst odczytała AI z dokumentu. Słowa mogą zostać źle odczytane, dlatego gdy to ważne, sprawdź sam dokument.",
-            "partial_alert": "Odczytano tylko pierwsze {n} z {total} stron, więc tylko te strony można przeszukiwać.",
+            "partial_alert": "Odczytano tylko pierwszą stronę z {total}, więc tylko tę stronę można przeszukiwać. | Odczytano tylko pierwsze {n} z {total} stron, więc tylko te strony można przeszukiwać. | Odczytano tylko pierwszych {n} z {total} stron, więc tylko te strony można przeszukiwać. | Odczytano tylko pierwsze {n} z {total} stron, więc tylko te strony można przeszukiwać.",
             "empty_page": "Na tej stronie nic nie jest czytelne.",
             "being_read": "Tekst jest odczytywany. Pojawi się tu po zapisaniu.",
             "being_reread": "Trwa nowy odczyt. To jest wcześniejszy tekst.",

@@ -178,6 +178,47 @@ describe('phase 13 final parity: notice, run states, consent sentence, bulk no_t
     });
 });
 
+// Phase 13 review fixes: the run lines for "text saved, no suggestions", the bulk notice bodies, the dropped-word hint and
+// the plural forms of the partial-page strings (sk and pl have four forms like the other counted strings, en has two).
+describe('phase 13 review keys', () => {
+    const SINGLE = [
+        'health.ai.status.failed_suggestions', 'health.ai.status.failed_suggestions_detail', 'health.ai.status.quota_timeout_suggestions_detail',
+        'health.ai.status.quota_exhausted_suggestions_detail', 'health.ai.status.cancelled_suggestions_detail', 'health.ai.status.consent_suggestions_detail',
+        'health.ai.status.announce_failed_suggestions',
+        'settings.ai_bulk.text_notice_codex', 'settings.ai_bulk.text_notice_multi', 'settings.ai_bulk.text_notice_github',
+    ];
+    const PLURAL = ['health.search.partial', 'health.search.dropped_hint', 'health.document_text.tag_partial', 'health.document_text.partial_alert'];
+
+    it('exist in en, sk and pl, are translated and keep the placeholders', () => {
+        for (const key of [...SINGLE, ...PLURAL]) {
+            const base = placeholders(get(lang.en, key) ?? '');
+            for (const locale of LOCALES) {
+                const v = get(lang[locale], key);
+                expect({ locale, key, ok: typeof v === 'string' && v.trim() !== '' }).toEqual({ locale, key, ok: true });
+            }
+            for (const locale of ['sk', 'pl']) {
+                expect({ locale, key, same: get(lang[locale], key) === get(lang.en, key) }).toEqual({ locale, key, same: false });
+                expect({ locale, key, p: placeholders(get(lang[locale], key)) }).toEqual({ locale, key, p: base });
+            }
+        }
+    });
+
+    it('has two plural forms in en and four in sk and pl for the counted strings, the single strings none', () => {
+        for (const key of PLURAL) {
+            expect({ key, n: get(lang.en, key).split(' | ').length }).toEqual({ key, n: 2 });
+            for (const locale of ['sk', 'pl']) expect({ locale, key, n: get(lang[locale], key).split(' | ').length }).toEqual({ locale, key, n: 4 });
+        }
+        for (const key of SINGLE) expect({ key, plural: get(lang.en, key).includes(' | ') }).toEqual({ key, plural: false });
+    });
+
+    it('says in the saved-text lines that no suggestions were saved and never "Nothing was saved"', () => {
+        for (const key of SINGLE.filter((k) => k.endsWith('_suggestions_detail'))) {
+            expect(get(lang.en, key)).toContain('No suggestions were saved');
+            expect(get(lang.en, key)).not.toContain('Nothing was saved');
+        }
+    });
+});
+
 describe('phase 13 final parity: help and manual (13-05, 13-08, 13-09)', () => {
     const topics = read('resources/help/topics.json').topics;
     const files = Object.fromEntries(LOCALES.map((l) => [l, read(`resources/help/${l}.json`)]));

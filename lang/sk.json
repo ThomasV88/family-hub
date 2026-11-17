@@ -586,6 +586,9 @@
             "history_empty_heading": "Zatiaľ žiadne hromadné spracovania",
             "history_empty_body": "Keď spustíte hromadné spracovanie, jeho počty sa zobrazia tu.",
             "no_text_note": "Tieto dokumenty prečíta poskytovateľ AI a ich text sa uloží sem. Návrhy sa nevytvoria.",
+            "text_notice_codex": "Tieto dokumenty opustia tento server a odošlú sa do OpenAI na prečítanie. OpenAI môže to, čo dostane, uchovávať podľa vlastných podmienok. Prečítaný text sa uloží do databázy tejto aplikácie, môžu v ňom hľadať členovia, ktorí môžu otvoriť daný dokument, a zostane, kým sa dokument nezmaže alebo text neodstránite. Je aj v zálohách, kým nevyprší ich platnosť. Toto upozornenie uvidíte iba raz.",
+            "text_notice_multi": "Tieto dokumenty opustia tento server a odošlú sa do OpenAI, alebo do GitHubu, ak OpenAI nie je dostupné, na prečítanie. Môžu to, čo dostanú, uchovávať podľa vlastných podmienok. Prečítaný text sa uloží do databázy tejto aplikácie, môžu v ňom hľadať členovia, ktorí môžu otvoriť daný dokument, a zostane, kým sa dokument nezmaže alebo text neodstránite. Je aj v zálohách, kým nevyprší ich platnosť. Toto upozornenie uvidíte znova, len ak sa pridá ďalšia služba.",
+            "text_notice_github": "Tieto dokumenty opustia tento server a odošlú sa do GitHubu na prečítanie. GitHub môže to, čo dostane, uchovávať podľa vlastných podmienok. Prečítaný text sa uloží do databázy tejto aplikácie, môžu v ňom hľadať členovia, ktorí môžu otvoriť daný dokument, a zostane, kým sa dokument nezmaže alebo text neodstránite. Je aj v zálohách, kým nevyprší ich platnosť. Toto upozornenie uvidíte znova, len ak sa pridá ďalšia služba.",
             "history_text_only": "Iba text"
         },
         "security": {
@@ -2369,6 +2372,13 @@
                 "text_saved_preparing": "Text je uložený. AI z neho teraz pripravuje návrhy.",
                 "waiting_text_saved": "Text je už uložený.",
                 "failed_text_saved": "Chýbajú len návrhy: rozpoznaný text sa uložil a dá sa v ňom hľadať.",
+                "failed_suggestions": "AI nevedela urobiť návrhy",
+                "failed_suggestions_detail": "AI k tomuto dokumentu nedokázala urobiť návrhy. Žiadne návrhy sa neuložili, ale rozpoznaný text sa uložil a dá sa v ňom hľadať. Skúste to znova alebo údaje pridajte ručne.",
+                "quota_timeout_suggestions_detail": "Limit používania AI sa neobnovil včas. Žiadne návrhy sa neuložili, ale rozpoznaný text sa uložil a dá sa v ňom hľadať. Skúste to neskôr alebo údaje pridajte ručne.",
+                "quota_exhausted_suggestions_detail": "Služby AI dosiahli limit používania a nebudú dostupné dosť skoro. Žiadne návrhy sa neuložili, ale rozpoznaný text sa uložil a dá sa v ňom hľadať. Skúste to neskôr alebo údaje pridajte ručne.",
+                "cancelled_suggestions_detail": "Beh bol zrušený. Žiadne návrhy sa neuložili, ale rozpoznaný text sa uložil a dá sa v ňom hľadať.",
+                "consent_suggestions_detail": "Beh sa zastavil, pretože AI bola pre túto osobu vypnutá. Žiadne návrhy sa neuložili, ale rozpoznaný text sa uložil.",
+                "announce_failed_suggestions": "AI nevedela urobiť návrhy, ale text dokumentu je uložený",
                 "announce_text_saved": "Text dokumentu je uložený."
             },
             "review": {
@@ -2557,7 +2567,7 @@
             "loaded_more": "Načítaných ďalších dokumentov: {n}",
             "title_only": "Zhoduje sa s názvom dokumentu.",
             "page": "Strana {n}",
-            "partial": "Prehľadávajú sa len prvé {n} strany.",
+            "partial": "Prehľadáva sa len prvá strana. | Prehľadávajú sa len prvé {n} strany. | Prehľadáva sa len prvých {n} strany. | Prehľadáva sa len prvých {n} strán.",
             "uncertain": "Text prečítala AI a môže obsahovať chyby. Slovo sa nemusí nájsť, ak sa nesprávne prečítalo.",
             "empty_title": "Nenašli sa žiadne dokumenty",
             "empty_body": "Dokumenty sa hľadajú podľa názvu a podľa textu, ktorý z nich AI prečítala. Hľadajú sa len dokumenty, ktoré môžete otvoriť. Dokumenty, ktoré AI nikdy neprečítala, sa nájdu len podľa názvu.",
@@ -2569,6 +2579,7 @@
             "error_forbidden": "V týchto dokumentoch už hľadať nemôžete. Načítajte stránku znova.",
             "more_failed": "Ďalšie dokumenty sa nepodarilo načítať.",
             "throttled": "Hľadali ste príliš často. Chvíľu počkajte a skúste to znova.",
+            "dropped_hint": "{n} slovo z vášho hľadania sa nepoužilo. Jednopísmenové slová, slová bez latinských písmen alebo číslic a slová za ôsmym sa preskakujú. | {n} slová z vášho hľadania sa nepoužili. Jednopísmenové slová, slová bez latinských písmen alebo číslic a slová za ôsmym sa preskakujú. | {n} slova z vášho hľadania sa nepoužilo. Jednopísmenové slová, slová bez latinských písmen alebo číslic a slová za ôsmym sa preskakujú. | {n} slov z vášho hľadania sa nepoužilo. Jednopísmenové slová, slová bez latinských písmen alebo číslic a slová za ôsmym sa preskakujú.",
             "results_aria": "Výsledky hľadania"
         },
         "document_text": {
@@ -2577,9 +2588,9 @@
             "region_aria": "Rozpoznaný text dokumentu {title}",
             "page": "Strana {n}",
             "tag_errors": "Môže obsahovať chyby",
-            "tag_partial": "Prvé {n} z {total} strán",
+            "tag_partial": "Prvá strana z {total} strán | Prvé {n} z {total} strán | Prvých {n} z {total} strán | Prvých {n} z {total} strán",
             "info": "Text prečítala AI z dokumentu. Slová sa môžu prečítať nesprávne, preto keď na tom záleží, skontrolujte samotný dokument.",
-            "partial_alert": "Prečítaných bolo len prvých {n} z {total} strán, preto sa dajú prehľadávať len tie.",
+            "partial_alert": "Prečítaná bola len prvá strana z {total}, preto sa dá prehľadávať len tá. | Prečítané boli len prvé {n} z {total} strán, preto sa dajú prehľadávať len tie. | Prečítaných bolo len prvých {n} z {total} strán, preto sa dajú prehľadávať len tie. | Prečítaných bolo len prvých {n} z {total} strán, preto sa dajú prehľadávať len tie.",
             "empty_page": "Na tejto strane nie je nič čitateľné.",
             "being_read": "Text sa číta. Zobrazí sa tu, keď sa uloží.",
             "being_reread": "Prebieha nové čítanie. Toto je predchádzajúci text.",

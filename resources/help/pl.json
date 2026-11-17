@@ -208,7 +208,7 @@
         },
         "health.ai_consent": {
             "title": "AI dla tej osoby",
-            "text": "Domyślnie wyłączone. Gdy włączone, dokumenty tej osoby można wysłać do zewnętrznej firmy AI, która zaproponuje wpisy. Każdą propozycję sprawdzasz przed zapisem. Wyłączenie niczego nie usuwa."
+            "text": "Domyślnie wyłączone. Gdy włączone, dokumenty tej osoby można wysłać do zewnętrznej firmy AI, która zaproponuje wpisy. Każdą propozycję sprawdzasz przed zapisem. Wyłączenie zatrzymuje nowe uruchomienia. Jeśli osoba ma rozpoznany tekst, najpierw zostaniesz zapytany, a potem zostanie on usunięty."
         },
         "health.ai_run": {
             "title": "Uruchom AI",

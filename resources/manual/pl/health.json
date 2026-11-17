@@ -89,7 +89,8 @@
           "Znaki diakrytyczne i końcówki słów nie mają dużego znaczenia: słowo wpisane bez polskich znaków lub w nieco innej formie też zostanie znalezione.",
           "AI czyta dokument tylko wtedy, gdy ktoś o to poprosił. Dokument, którego AI nigdy nie czytała, jest znajdowany tylko po nazwie. Dokumenty odczytane przez AI są znajdowane także po słowach w nich zawartych.",
           "Zawsze widzisz tylko dokumenty, które możesz otworzyć. Dokument osoby, której nie widzisz, lub zarchiwizowany dokument nigdy się nie znajdzie, a dostaniesz to samo „Nie znaleziono dokumentów” co przy słowie, którego po prostu tam nie ma.",
-          "Jeśli wynik pokazuje **Przeszukiwane są tylko pierwsze strony**, AI odczytała tylko początek długiego dokumentu, więc słowa dalej nie zostaną znalezione."
+          "Jeśli wynik pokazuje **Przeszukiwane są tylko pierwsze strony**, AI odczytała tylko początek długiego dokumentu, więc słowa dalej nie zostaną znalezione.",
+          "Jeśli notatka mówi, że niektóre słowa z wyszukiwania nie zostały użyte, zostały one pominięte: słowa jednoliterowe, słowa bez liter łacińskich lub cyfr (na przykład chińskie) oraz każde słowo po ósmym. Pozostałe słowa zostały wyszukane."
         ] },
         { "type": "warning", "text": "Tekst odczytała AI i może zawierać błędy. Słowo może nie zostać znalezione, jeśli zostało źle odczytane. Gdy strona tak zaznacza, pokazuje uwagę nad wynikami. Jeśli wyszukiwanie nic nie znajdzie, sprawdź sam dokument." },
         { "type": "p", "text": "Wpisane słowa są używane tylko do tego wyszukiwania. Nie są zapisywane, nie trafiają do adresu strony i nie są pamiętane po opuszczeniu strony." }
@@ -113,7 +114,7 @@
           "Członek, który może zmieniać osobę, może nacisnąć **Usuń rozpoznany tekst** i potwierdzić. Tekst zostanie usunięty z aplikacji. Dokument i zaakceptowane już sugestie zostają, a dokument nie będzie już znajdowany według słów w nim zawartych. Później możesz ponownie uruchomić AI, aby go odczytać.",
           "Kopie w kopiach zapasowych znikną po wygaśnięciu kopii.",
           "Tekst jest usuwany razem z dokumentem. Jest ukryty razem z zarchiwizowanymi dokumentami i zarchiwizowanymi osobami.",
-          "Jeśli AI zostanie wyłączona dla osoby, rozpoznany tekst dokumentów tej osoby też zostanie usunięty. Dokumenty będzie można wtedy znaleźć tylko po nazwach."
+          "Jeśli AI zostanie wyłączona dla osoby, która ma rozpoznany tekst, najpierw zostaniesz zapytany, a potem rozpoznany tekst dokumentów tej osoby też zostanie usunięty. Dokumenty będzie można wtedy znaleźć tylko po nazwach."
         ] },
         { "type": "p", "text": "Gdy AI czyta dokument ponownie, nadal możesz czytać wcześniejszy tekst, a wiersz informuje, że trwa nowy odczyt. Gdy nowy odczyt zapisze pierwsze strony, sekcja pokazuje już ten tekst; długi dokument jest zapisywany po kilka stron, a uwaga mówi, kiedy odczytano tylko pierwsze strony. Zobacz też [Pomoc AI i Twoja zgoda](health#ai)." }
       ]
@@ -168,7 +169,7 @@
           "Przy pierwszym uruchomieniu AI po włączeniu tej funkcji ponownie pojawia się nowe powiadomienie i potwierdzasz je przed wysłaniem dokumentu. Mówi ono, że tekst jest zapisywany tutaj. Administrator potwierdza to samo powiadomienie przed uruchomieniem przetwarzania zbiorczego.",
           "Jeśli dokument ma już pełny rozpoznany tekst, **Uruchom AI** przygotowuje z niego sugestie i nie wysyła stron ponownie. Aby dokument został odczytany jeszcze raz, najpierw usuń tekst (zobacz [Rozpoznany tekst dokumentu](health#recognised-text)).",
           "Uruchomienie, które tylko czyta tekst, na przykład zbiorcze dla dokumentów bez rozpoznanego tekstu, pokazuje etykietę **Tekst zapisany**. Nie tworzy sugestii i nie pokazuje przycisku **Sprawdź sugestie**. Aby dostać sugestie, naciśnij **Uruchom AI**.",
-          "Jeśli AI jest wyłączona dla osoby, nowe uruchomienie się nie rozpocznie, oczekujące uruchomienia zostaną zatrzymane, a zobaczysz informację, że rozpoznany tekst dokumentów tej osoby zostanie usunięty. Dokumenty będą wtedy znajdowane tylko po nazwie."
+          "Jeśli AI jest wyłączona dla osoby, nowe uruchomienie się nie rozpocznie, a oczekujące uruchomienia zostaną zatrzymane. Gdy ta osoba ma rozpoznany tekst, najpierw zobaczysz informację, że zostanie usunięty, a dokumenty będą wtedy znajdowane tylko po nazwie."
         ] },
         { "type": "p", "text": "Jeśli AI jest niedostępna, zobaczysz krótki komunikat, a dane zawsze możesz dodać sam. Administrator widzi listę wywołań AI, ale nigdy tego, co było w dokumencie." }
       ]

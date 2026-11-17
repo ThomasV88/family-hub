@@ -586,6 +586,9 @@
             "history_empty_heading": "No bulk runs yet",
             "history_empty_body": "When you start a bulk run, its counts are listed here.",
             "no_text_note": "These documents will be read by the AI provider and their text saved here. No suggestions will be made.",
+            "text_notice_codex": "These documents will leave this server and be sent to OpenAI to be read. OpenAI may keep what it receives under its own terms. The text that was read is saved in this app's database, can be searched by members who may open each document, and stays until the document is deleted or the text is removed. It is also in backups until they expire. You will only see this notice once.",
+            "text_notice_multi": "These documents will leave this server and be sent to OpenAI, or to GitHub if OpenAI is not available, to be read. They may keep what they receive under their own terms. The text that was read is saved in this app's database, can be searched by members who may open each document, and stays until the document is deleted or the text is removed. It is also in backups until they expire. You will see this notice again only if another service is added.",
+            "text_notice_github": "These documents will leave this server and be sent to GitHub to be read. GitHub may keep what it receives under its own terms. The text that was read is saved in this app's database, can be searched by members who may open each document, and stays until the document is deleted or the text is removed. It is also in backups until they expire. You will see this notice again only if another service is added.",
             "history_text_only": "Text only"
         },
         "security": {
@@ -2369,6 +2372,13 @@
                 "text_saved_preparing": "The text is saved. AI is now preparing suggestions from it.",
                 "waiting_text_saved": "The text is already saved.",
                 "failed_text_saved": "Only the suggestions are missing: the recognised text was saved and can be searched.",
+                "failed_suggestions": "AI could not make suggestions",
+                "failed_suggestions_detail": "AI could not make suggestions for this document. No suggestions were saved, but the recognised text was saved and can be searched. Try again, or add the details by hand.",
+                "quota_timeout_suggestions_detail": "The AI usage limit did not come back in time. No suggestions were saved, but the recognised text was saved and can be searched. Try again later, or add the details by hand.",
+                "quota_exhausted_suggestions_detail": "The AI services have reached their usage limit and will not be back soon enough. No suggestions were saved, but the recognised text was saved and can be searched. Try again later, or add the details by hand.",
+                "cancelled_suggestions_detail": "The run was cancelled. No suggestions were saved, but the recognised text was saved and can be searched.",
+                "consent_suggestions_detail": "The run was stopped because AI was turned off for this person. No suggestions were saved, but the recognised text was saved.",
+                "announce_failed_suggestions": "AI could not make suggestions, but the text of the document is saved",
                 "announce_text_saved": "The text of the document is saved."
             },
             "review": {
@@ -2557,7 +2567,7 @@
             "loaded_more": "{n} more documents loaded",
             "title_only": "Matches the document name.",
             "page": "Page {n}",
-            "partial": "Only the first {n} pages are searched.",
+            "partial": "Only the first page is searched. | Only the first {n} pages are searched.",
             "uncertain": "The text was read by AI and may contain mistakes. A word can be missed if it was misread.",
             "empty_title": "No documents found",
             "empty_body": "Documents are searched by name and by the text read from them. Only documents you may open are searched. Documents that were never read by AI are found by name only.",
@@ -2569,6 +2579,7 @@
             "error_forbidden": "You can no longer search these documents. Reload the page.",
             "more_failed": "The next documents could not be loaded.",
             "throttled": "You searched too often. Wait a moment and try again.",
+            "dropped_hint": "{n} word of your search was not used. One-letter words, words without Latin letters or digits and words past the eighth are skipped. | {n} words of your search were not used. One-letter words, words without Latin letters or digits and words past the eighth are skipped.",
             "results_aria": "Search results"
         },
         "document_text": {
@@ -2577,9 +2588,9 @@
             "region_aria": "Recognised text of {title}",
             "page": "Page {n}",
             "tag_errors": "May contain errors",
-            "tag_partial": "First {n} of {total} pages",
+            "tag_partial": "First page of {total} pages | First {n} of {total} pages",
             "info": "Read by AI from the document. Words can be misread, so check the document itself when it matters.",
-            "partial_alert": "Only the first {n} of {total} pages were read, so only those pages are searchable.",
+            "partial_alert": "Only the first page of {total} was read, so only that page is searchable. | Only the first {n} of {total} pages were read, so only those pages are searchable.",
             "empty_page": "Nothing legible on this page.",
             "being_read": "The text is being read. It will appear here when it is saved.",
             "being_reread": "A new reading is in progress. This is the earlier text.",

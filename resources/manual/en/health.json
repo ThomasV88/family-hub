@@ -89,7 +89,8 @@
           "Accents and word endings do not matter much: typing a word without accents, or in a slightly different form, still finds it.",
           "AI reads a document only when someone asked it to. A document AI never read is found by its name only. Documents AI did read are also found by the words inside them.",
           "You only ever see documents you may open. A document of a person you cannot see, or an archived document, is never found, and you get the same \"No documents found\" as for a word that is simply not there.",
-          "If a result says **Only the first pages are searched**, AI read only the beginning of a long document, so words further on are not found."
+          "If a result says **Only the first pages are searched**, AI read only the beginning of a long document, so words further on are not found.",
+          "If a note says that some words of your search were not used, those words were skipped: words of one letter, words without Latin letters or digits (such as Chinese) and every word after the eighth. The other words were searched."
         ] },
         { "type": "warning", "text": "The text was read by AI and may contain mistakes. A word can be missed if it was misread. When the page says so, it shows a note above the results. If a search finds nothing, look at the document itself." },
         { "type": "p", "text": "The words you type are used only for this search. They are not saved, not kept in the address of the page and not remembered after you leave the page." }
@@ -113,7 +114,7 @@
           "A member who can change the person can press **Remove recognised text** and confirm. The text is deleted from the app. The document and the suggestions you already accepted stay, and the document is no longer found by the words inside it. You can run AI again to read it later.",
           "Copies in backups are removed when the backups expire.",
           "The text is deleted with the document. It is hidden together with archived documents and archived people.",
-          "If AI is turned off for a person, the recognised text of that person's documents is deleted too. The documents can then be found by their names only."
+          "If AI is turned off for a person who has recognised text, you are asked first, and then the recognised text of that person's documents is deleted too. The documents can then be found by their names only."
         ] },
         { "type": "p", "text": "While AI is reading a document again, you can still read the earlier text, and a line tells you that a new reading is in progress. As soon as the new reading has saved its first pages, the section shows that text instead; a long document is saved a few pages at a time, and a note says when only the first pages were read. See also [AI help and your consent](health#ai)." }
       ]
@@ -168,7 +169,7 @@
           "The first time you run AI after this was turned on, a new notice is shown once more, and you confirm it before the document is sent. It says that the text is saved here. An administrator confirms the same notice before starting a bulk run.",
           "If the document already has complete recognised text, **Run AI** makes suggestions from it and does not send the pages again. To have the document read again, remove the text first (see [Recognised text of a document](health#recognised-text)).",
           "A run that only reads the text, such as a bulk run for documents without recognised text, shows the tag **Text saved**. It makes no suggestions and shows no **Review suggestions** button. Press **Run AI** to get suggestions.",
-          "If AI is switched off for a person, no new run starts, runs that were waiting are stopped, and you are told that the recognised text of that person's documents is deleted. The documents are then found by their names only."
+          "If AI is switched off for a person, no new run starts and runs that were waiting are stopped. When that person has recognised text, you are told first that it will be deleted, and the documents are then found by their names only."
         ] },
         { "type": "p", "text": "If AI is not available, you will see a short message, and you can always add the details yourself. The administrator can see a list of AI calls, but never what was in a document." }
       ]
