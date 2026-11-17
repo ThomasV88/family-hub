@@ -1,13 +1,15 @@
 <?php
 
 use App\Http\Controllers\Settings\ShoppingCatalogController;
+use App\Http\Controllers\Settings\ShoppingSettingsController;
 use App\Http\Controllers\Settings\ShoppingStoresController;
 use App\Http\Controllers\Settings\ShoppingUnitsController;
 use Illuminate\Support\Facades\Route;
 
 // Shopping settings writes. Catalog and stores: any member with Shopping edit. Units: administrator with Shopping edit.
-// The settings page itself (GET) is added by plan 11-06 in this file.
 Route::prefix('/settings/shopping')->group(function () {
+    Route::get('/', [ShoppingSettingsController::class, 'index'])->middleware('access:module,shopping,edit')->name('settings.shopping');
+
     Route::middleware('access:module,shopping,edit')->group(function () {
         Route::post('/catalog', [ShoppingCatalogController::class, 'store'])->middleware('throttle:60,1,shopping.settings.write')->name('settings.shopping.catalog.store');
         Route::put('/catalog/{item}', [ShoppingCatalogController::class, 'update'])->whereNumber('item')->middleware('throttle:60,1,shopping.settings.write')->name('settings.shopping.catalog.update');

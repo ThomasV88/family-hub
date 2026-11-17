@@ -16,6 +16,7 @@ $unit = fn (array $users) => ['unit' => ShoppingUnit::factory()->create()->id];
 $unitData = ['name_en' => 'tin', 'name_sk' => 'plech', 'name_pl' => 'puszk'];
 
 return [
+    'settings.shopping' => ['method' => 'GET', 'uri' => '/settings/shopping', 'expect' => ['guest' => 302, 'admin' => 403, 'parent' => 200, 'child' => 200, 'grandparent' => 200, 'guestPreset' => 403, 'noGrants' => 403]],
     'settings.shopping.catalog.store' => ['method' => 'POST', 'uri' => '/settings/shopping/catalog', 'data' => fn () => ['name' => 'Matrix item '.uniqid()], 'expect' => $editors],
     'settings.shopping.catalog.update' => ['method' => 'PUT', 'uri' => '/settings/shopping/catalog/{item}', 'params' => $item, 'data' => fn () => ['name' => 'Renamed item '.uniqid()], 'expect' => $editors],
     'settings.shopping.catalog.destroy' => ['method' => 'DELETE', 'uri' => '/settings/shopping/catalog/{item}', 'params' => $item, 'expect' => $editors],

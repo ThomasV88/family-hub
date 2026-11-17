@@ -1,5 +1,6 @@
 <?php
 
+use App\Access\AccessLevel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -25,6 +26,14 @@ it('shows a member the notifications, security and appearance sections', functio
         ->where('sections.2.key', 'appearance')
         ->where('sections.2.href', '/settings/appearance')
         ->where('sections.2.labelKey', 'settings.section.appearance'));
+});
+
+it('also lists Shopping for a member with Shopping edit', function () {
+    $user = User::factory()->create();
+    $user->modulePermissions()->updateOrCreate(['module' => 'shopping'], ['level' => AccessLevel::Edit]);
+
+    $this->actingAs($user)->get('/settings')->assertOk()->assertInertia(fn (Assert $p) => $p
+        ->has('sections', 4)->where('sections.0.key', 'shopping'));
 });
 
 it('renders the appearance page with the sections', function () {
