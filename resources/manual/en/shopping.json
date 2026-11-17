@@ -13,8 +13,8 @@
         { "type": "p", "text": "**Shopping** is in the menu on the left (on a phone, in the bar at the bottom) if your administrator gave you access to it. The page lists the shopping lists you may see, on two tabs: **Open** and **Archive**." },
         { "type": "list", "items": [
           "**Open** shows the lists you are still planning or shopping from, ordered by reminder time (lists without a reminder come last), then newest first. A list that is being shopped from has a **Locked** tag and a bar that shows how many of its items are bought.",
-          "Each row shows the store logo, the name of the list, the store, the person responsible and the reminder time. The tag **Reminder passed** appears when the reminder time has gone but the list is not finished.",
-          "**Archive** shows finished lists, newest first, with the date they were finished. A long archive is split into pages.",
+          "Each row shows the store logo, the name of the list, the store, the person responsible and the reminder time. The tag **Reminder passed** appears when the reminder time has gone but the list is not finished. Reminder times are always shown in the family time zone, on every device.",
+          "**Archive** shows finished lists, newest first, with the date they were finished. A long archive is split into pages. The tab you chose stays in the address, so **Back** from an opened list returns to the same tab.",
           "When there are more than 10 open lists, a search box appears above them. It ignores capital letters and accents."
         ] },
         { "type": "p", "text": "You see a list if you created it, if you are its responsible person, or if you were added to it, either as a person who may add and edit items or as a person who may only view. Lists you cannot see are not shown at all. A list shows in the table in [who can see what](who-sees-what#table)." }
@@ -41,7 +41,7 @@
         { "type": "steps", "items": [
           "Open a list and press **Add items**. The button is shown to the responsible person and to people who were added to the list as someone who may add and edit items. A new, empty list opens this window by itself.",
           "Look through the catalog. Each item has a picture. The search box ignores capital letters and accents, so \"mliecko\" finds \"Mliečko\".",
-          "Tap an item to select it. A selected item shows its quantity and unit. Use **+** and **-** to change the quantity (by half for grams, kilograms and litres, by one otherwise) and pick another unit if you like. You can select many items in one go.",
+          "Tap an item to select it. A selected item shows its quantity and unit. Change the quantity with **+** and **-** or type it in the box (a decimal comma such as \"1,5\" works). One step is 1 piece, 0.1 for kilograms and litres, and 10 for grams and millilitres. Pick another unit if you like: grams and kilograms, and millilitres and litres, are converted, and a fraction is rounded on units that have none. You can select many items in one go.",
           "Something is not in the catalog? Press **Type your own item** (or, while you are searching, the line **Add \"...\" as a new item**), fill in the name, quantity and unit, and press **Add to list**. Your own item is not saved to the catalog unless you tick **Also save to catalog**, which only people who manage the catalog see.",
           "Press **Add** at the bottom (it shows how many items you picked). All selected items join the list at once."
         ] },
@@ -99,8 +99,8 @@
         { "type": "list", "items": [
           "A list needs at least one item before it can be locked. On an empty list **Lock list** is greyed out and a note says why.",
           "While the list is locked nobody can add, remove or edit items.",
-          "In the shop the responsible person presses **Bought** or **Unavailable** next to each item. The change shows at once. Press the same button again to clear the mark.",
-          "If a mark cannot be saved, it jumps back and a message says **Could not save. Try again.**",
+          "In the shop the responsible person presses **Bought** or **Unavailable** next to each item. The change shows at once. The pressed button also gets a different icon and a thick border, so it does not depend on colour. Press the same button again to clear the mark. You can tap many items quickly: the marks are saved one after another, and **Unlock list** and **Finish shopping** wait until they are all saved.",
+          "If a mark cannot be saved, only that item jumps back and a message says **Could not save. Try again.** If the list was changed by someone else meanwhile (for example unlocked), the page reloads and says so.",
           "Everyone else sees the marks, and the progress line, after they reload the page.",
           "**Unlock list** brings the list back to planning, for example when you forgot an item. The marks are kept."
         ] },

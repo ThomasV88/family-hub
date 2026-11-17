@@ -301,7 +301,7 @@
         },
         "shopping.reminder": {
             "title": "Przypomnienie",
-            "text": "Lista ma jedno przypomnienie, datę i godzinę w strefie czasowej rodziny. Powiadomienie push otrzymuje tylko osoba odpowiedzialna, i tylko jeśli włączyła powiadomienia push na swoim urządzeniu w Ustawieniach, Powiadomienia. Czas z przeszłości zostanie odrzucony. Zmiana godziny ustawia nowe przypomnienie."
+            "text": "Lista ma jedno przypomnienie, datę i godzinę w strefie czasowej rodziny. Powiadomienie push otrzymuje tylko osoba odpowiedzialna, i tylko jeśli włączyła powiadomienia push na swoim urządzeniu w Ustawieniach, Powiadomienia. Gdy push jest wtedy wyłączony, przypomnienie wyjdzie po jego włączeniu, do 24 godzin później. Czas z przeszłości zostanie odrzucony. Zmiana godziny ustawia nowe przypomnienie."
         },
         "shopping.email": {
             "title": "Wysyłanie listy e-mailem",

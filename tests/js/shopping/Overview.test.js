@@ -7,7 +7,7 @@ import { pseudoLong } from '../helpers/pseudoLong.js';
 
 let mockProps = {};
 const { routerMock, forms } = vi.hoisted(() => ({
-    routerMock: { get: vi.fn(), post: vi.fn(), visit: vi.fn(), on: vi.fn() },
+    routerMock: { get: vi.fn(), post: vi.fn(), visit: vi.fn(), replace: vi.fn(), reload: vi.fn(), on: vi.fn() },
     forms: [],
 }));
 vi.mock('@inertiajs/vue3', async () => {
@@ -120,6 +120,62 @@ describe('Shopping overview', () => {
         const next = current.findAll('button').find((b) => b.text() === 'Next');
         await next.trigger('click');
         expect(routerMock.get).toHaveBeenCalledWith('/shopping', { tab: 'archive', page: 2 }, expect.objectContaining({ preserveState: true }));
+    });
+
+    it('shows an archive load error with Retry after a server error or a dropped connection', async () => {
+        mountPage({ tab: 'archive', archive: { ...ARCHIVE, currentPage: 1, lastPage: 3, total: 41 } });
+        const next = () => current.findAll('button').find((b) => b.text() === 'Next');
+        await next().trigger('click');
+        const opts = routerMock.get.mock.calls.at(-1)[2];
+        expect(opts.onHttpException({ status: 500 })).toBe(false);
+        opts.onFinish();
+        await flushPromises();
+        expect(current.text()).toContain('We could not load');
+        const retry = current.findAll('button').find((b) => b.text() === 'Try again');
+        await retry.trigger('click');
+        expect(routerMock.get).toHaveBeenCalledTimes(2);
+        routerMock.get.mock.calls.at(-1)[2].onNetworkError();
+        routerMock.get.mock.calls.at(-1)[2].onFinish();
+        await flushPromises();
+        expect(current.text()).toContain('We could not load');
+    });
+
+    it('opens a list with an in-app visit on a plain click and leaves modified clicks to the browser', async () => {
+        mountPage();
+        const link = rows()[0].find('a');
+        expect(link.attributes('href')).toBe('/shopping/lists/1');
+        const event = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
+        link.element.dispatchEvent(event);
+        expect(event.defaultPrevented).toBe(true);
+        expect(routerMock.visit).toHaveBeenCalledWith('/shopping/lists/1');
+        routerMock.visit.mockClear();
+        const modified = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0, ctrlKey: true });
+        link.element.dispatchEvent(modified);
+        expect(modified.defaultPrevented).toBe(false);
+        expect(routerMock.visit).not.toHaveBeenCalled();
+    });
+
+    it('puts the selected tab in the address so Back returns to it', async () => {
+        mountPage();
+        await tab('Archive').trigger('click');
+        await flushPromises();
+        expect(routerMock.replace).toHaveBeenCalledTimes(1);
+        const call = routerMock.replace.mock.calls[0][0];
+        expect(call.url).toBe('/shopping?tab=archive');
+        expect(call.props({ tab: 'open', lists: [] })).toEqual({ tab: 'archive', lists: [] });
+        // the replace has made the page's own tab 'archive'
+        await current.setProps({ tab: 'archive' });
+        await tab('Open').trigger('click');
+        await flushPromises();
+        expect(routerMock.replace.mock.calls[1][0].url).toBe('/shopping');
+    });
+
+    it('follows the tab of the page when Back restores another one', async () => {
+        mountPage({ tab: 'archive' });
+        expect(tab('Archive').attributes('aria-selected')).toBe('true');
+        await current.setProps({ tab: 'open' });
+        expect(tab('Open').attributes('aria-selected')).toBe('true');
+        expect(routerMock.replace).not.toHaveBeenCalled();
     });
 
     it('shows the empty states with the New list action only when the member may create', async () => {

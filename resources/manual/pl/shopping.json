@@ -13,8 +13,8 @@
         { "type": "p", "text": "**Zakupy** są w menu po lewej (w telefonie na pasku na dole), jeśli administrator dał Ci do nich dostęp. Strona pokazuje listy zakupów, które możesz widzieć, na dwóch kartach: **Otwarte** i **Archiwum**." },
         { "type": "list", "items": [
           "**Otwarte** pokazuje listy, które jeszcze planujesz albo z których robisz zakupy, uporządkowane według czasu przypomnienia (listy bez przypomnienia na końcu), potem od najnowszej. Lista, z której robi się zakupy, ma znacznik **Zablokowana** i pasek pokazujący, ile produktów już kupiono.",
-          "Każdy wiersz pokazuje logo sklepu, nazwę listy, sklep, osobę odpowiedzialną i czas przypomnienia. Znacznik **Przypomnienie minęło** pojawia się, gdy czas przypomnienia minął, a lista nie jest zakończona.",
-          "**Archiwum** pokazuje zakończone listy od najnowszej, z datą zakończenia. Długie archiwum jest podzielone na strony.",
+          "Każdy wiersz pokazuje logo sklepu, nazwę listy, sklep, osobę odpowiedzialną i czas przypomnienia. Znacznik **Przypomnienie minęło** pojawia się, gdy czas przypomnienia minął, a lista nie jest zakończona. Czas przypomnienia jest zawsze pokazywany w strefie czasowej rodziny, na każdym urządzeniu.",
+          "**Archiwum** pokazuje zakończone listy od najnowszej, z datą zakończenia. Długie archiwum jest podzielone na strony. Wybrana karta zostaje w adresie, więc **Wstecz** z otwartej listy wraca do tej samej karty.",
           "Gdy otwartych list jest więcej niż 10, nad nimi pojawia się pole wyszukiwania. Nie rozróżnia wielkich liter ani znaków diakrytycznych."
         ] },
         { "type": "p", "text": "Widzisz listę, jeśli ją utworzyłeś, jeśli jesteś jej osobą odpowiedzialną albo jeśli zostałeś do niej dodany, jako osoba, która może dodawać i edytować produkty, albo jako osoba, która może tylko przeglądać. Listy, których nie możesz widzieć, nie są pokazywane w ogóle. Listę znajdziesz w tabeli [kto co widzi](who-sees-what#table)." }
@@ -41,7 +41,7 @@
         { "type": "steps", "items": [
           "Otwórz listę i naciśnij **Dodaj produkty**. Przycisk widzi osoba odpowiedzialna oraz osoby dodane do listy jako mogące dodawać i edytować produkty. Nowa, pusta lista otwiera to okno sama.",
           "Przejrzyj katalog. Każdy produkt ma obrazek. Wyszukiwanie nie rozróżnia wielkich liter ani znaków diakrytycznych, więc \"mleko\" znajdzie \"Mleko\", a \"zolc\" znajdzie \"żółć\".",
-          "Dotknij produktu, aby go wybrać. Wybrany produkt pokazuje ilość i jednostkę. Przyciskami **+** i **-** zmieniasz ilość (o pół przy gramach, kilogramach i litrach, w pozostałych przypadkach o jeden) i w razie potrzeby wybierasz inną jednostkę. W jednym kroku możesz wybrać wiele produktów.",
+          "Dotknij produktu, aby go wybrać. Wybrany produkt pokazuje ilość i jednostkę. Ilość zmieniasz przyciskami **+** i **-** albo wpisujesz w polu (działa przecinek dziesiętny, na przykład \"1,5\"). Jeden krok to 1 sztuka, 0,1 dla kilogramów i litrów oraz 10 dla gramów i mililitrów. W razie potrzeby wybierz inną jednostkę: gramy i kilogramy oraz mililitry i litry są przeliczane, a ułamek jest zaokrąglany przy jednostkach, które go nie mają. W jednym kroku możesz wybrać wiele produktów.",
           "Czegoś nie ma w katalogu? Naciśnij **Wpisz własny produkt** (albo podczas szukania wiersz **Dodaj \"...\" jako nowy produkt**), wpisz nazwę, ilość i jednostkę i naciśnij **Dodaj do listy**. Twój produkt nie trafi do katalogu, dopóki nie zaznaczysz **Zapisz też w katalogu**, co widzą tylko osoby zarządzające katalogiem.",
           "Na dole naciśnij **Dodaj** (pokazuje, ile produktów wybrano). Wszystkie wybrane produkty trafią na listę naraz."
         ] },
@@ -99,8 +99,8 @@
         { "type": "list", "items": [
           "Lista musi mieć co najmniej jeden produkt, zanim ją zablokujesz. Na pustej liście **Zablokuj listę** jest wyszarzone, a informacja wyjaśnia dlaczego.",
           "Dopóki lista jest zablokowana, nikt nie może dodawać, usuwać ani edytować produktów.",
-          "W sklepie osoba odpowiedzialna naciska przy każdym produkcie **Kupione** albo **Niedostępne**. Zmiana jest widoczna od razu. Ponowne naciśnięcie tego samego przycisku cofa oznaczenie.",
-          "Jeśli oznaczenia nie da się zapisać, wraca ono do poprzedniego stanu i pojawia się komunikat **Nie udało się zapisać. Spróbuj ponownie.**",
+          "W sklepie osoba odpowiedzialna naciska przy każdym produkcie **Kupione** albo **Niedostępne**. Zmiana jest widoczna od razu. Wciśnięty przycisk ma też inną ikonę i grubą ramkę, więc nie zależy od koloru. Ponowne naciśnięcie tego samego przycisku cofa oznaczenie. Możesz szybko stukać wiele produktów: oznaczenia zapisują się jedno po drugim, a **Odblokuj listę** i **Zakończ zakupy** czekają, aż wszystkie zostaną zapisane.",
+          "Jeśli oznaczenia nie da się zapisać, wraca tylko ten produkt i pojawia się komunikat **Nie udało się zapisać. Spróbuj ponownie.** Jeśli listę w międzyczasie zmieniła inna osoba (na przykład ją odblokowała), strona wczytuje się ponownie i o tym informuje.",
           "Pozostali widzą oznaczenia i wiersz postępu dopiero po odświeżeniu strony.",
           "**Odblokuj listę** przywraca planowanie, na przykład gdy o czymś zapomniałeś. Oznaczenia zostają zachowane."
         ] },

@@ -15,6 +15,8 @@ import UiTag from '../Components/ui/UiTag.vue';
 import { INTL_LOCALES } from '../i18n.js';
 import CatalogImage from './CatalogImage.vue';
 import { matches } from './catalogSearch.js';
+import { httpHandlers } from './failure.js';
+import { MAX_ITEMS, NAME_MAX, clip } from './limits.js';
 import { localeCode, unitLabel } from './units.js';
 
 // "Add items" pop-up: pick several catalog items (picture tiles) with quantity and unit, add your own free-text items, and send
@@ -27,8 +29,8 @@ const props = defineProps({
     onListIds: { type: Array, default: () => [] },
     units: { type: Array, default: () => [] },
     canManageCatalog: { type: Boolean, default: false },
-    nameMax: { type: Number, default: 80 },
-    maxItems: { type: Number, default: 50 },
+    nameMax: { type: Number, default: NAME_MAX },
+    maxItems: { type: Number, default: MAX_ITEMS },
 });
 const emit = defineEmits(['update:open']);
 const { t, locale } = useI18n();
@@ -37,7 +39,8 @@ const QUANTITY_MAX = 999.99;
 const form = useForm({ items: [] });
 const query = ref('');
 const search = ref(null);
-// key -> { key, catalogItemId|null, name, quantity (number), unitId ('' = none), saveToCatalog }
+const httpError = ref('');
+// key -> { key, catalogItemId|null, name, quantity (number, null while the typed text is not a valid quantity), text, unitId ('' = none), saveToCatalog }
 const selection = reactive({});
 const own = reactive({ open: false, name: '', quantity: '1', unitId: '', save: false, errors: {} });
 let counter = 0;
@@ -50,14 +53,22 @@ const onList = computed(() => new Set(props.onListIds));
 
 const number = computed(() => new Intl.NumberFormat(INTL_LOCALES[localeCode(locale.value)], { maximumFractionDigits: 2 }));
 const fmt = (n) => number.value.format(n);
-const stepFor = (unitId) => (['g', 'kg', 'l'].includes(unitOf(unitId)?.key) ? 0.5 : 1);
+// One step of the - and + buttons: whole pieces, 0.1 for kg and l, 10 for g and ml.
+const STEPS = { g: 10, ml: 10, kg: 0.1, l: 0.1 };
+const stepFor = (unitId) => STEPS[unitOf(unitId)?.key] ?? 1;
+const FRACTIONAL = ['kg', 'l'];
+// g <-> kg and ml <-> l: the quantity keeps its meaning when the unit is switched.
+const CONVERT = { 'g>kg': 0.001, 'kg>g': 1000, 'ml>l': 0.001, 'l>ml': 1000 };
 const round = (n) => Math.round(n * 100) / 100;
+const textOf = (n) => (n === null ? '' : fmt(n));
+const invalidCount = computed(() => Object.values(selection).filter((e) => e.quantity === null).length);
 
 watch(
     () => props.open,
     (open) => {
         if (!open) return;
         form.clearErrors();
+        httpError.value = '';
         Object.keys(selection).forEach((k) => delete selection[k]);
         query.value = '';
         Object.assign(own, { open: false, name: '', quantity: '1', unitId: pcsId(), save: false, errors: {} });
@@ -79,24 +90,43 @@ function toggle(item) {
         delete selection[key];
         return;
     }
-    selection[key] = { key, catalogItemId: item.id, name: item.name, quantity: 1, unitId: item.defaultUnitId == null ? '' : String(item.defaultUnitId), saveToCatalog: false };
+    selection[key] = { key, catalogItemId: item.id, name: item.name, quantity: 1, text: '1', unitId: item.defaultUnitId == null ? '' : String(item.defaultUnitId), saveToCatalog: false };
 }
 
+function setQuantity(entry, n) {
+    entry.quantity = n;
+    entry.text = textOf(n);
+}
 function change(entry, direction) {
     const step = stepFor(entry.unitId);
-    entry.quantity = Math.min(QUANTITY_MAX, Math.max(step, round(entry.quantity + direction * step)));
+    const base = entry.quantity ?? 0;
+    setQuantity(entry, Math.min(QUANTITY_MAX, Math.max(step, round(base + direction * step))));
 }
+// Typed quantity: a decimal comma is fine. While the text is not a valid quantity the entry has none and cannot be added.
+function typeQuantity(entry, raw) {
+    entry.text = raw;
+    entry.quantity = parseQuantity(raw);
+}
+// A unit change converts g <-> kg and ml <-> l, and never leaves a fraction on a unit that has none (pieces, packs...).
 function changeUnit(entry, unitId) {
+    const from = unitOf(entry.unitId)?.key;
+    const to = unitOf(unitId)?.key;
     entry.unitId = unitId;
-    entry.quantity = Math.max(stepFor(unitId), entry.quantity);
+    if (entry.quantity === null) return;
+    let n = entry.quantity;
+    const factor = CONVERT[`${from}>${to}`];
+    if (factor) n = round(n * factor);
+    if (!FRACTIONAL.includes(to) && !Number.isInteger(n)) n = Math.round(n);
+    setQuantity(entry, Math.min(QUANTITY_MAX, Math.max(FRACTIONAL.includes(to) ? 0.01 : stepFor(unitId), n)));
 }
 
 function addOwn({ name, quantity, unitId, save }) {
     const key = `f${++counter}`;
-    selection[key] = { key, catalogItemId: null, name, quantity, unitId, saveToCatalog: save };
+    selection[key] = { key, catalogItemId: null, name, quantity, text: textOf(quantity), unitId, saveToCatalog: save };
 }
 function addTyped() {
-    addOwn({ name: text.value.slice(0, props.nameMax), quantity: 1, unitId: pcsId(), save: false });
+    // Cut by characters, never inside an emoji (a lone half of a surrogate pair would make the whole request invalid).
+    addOwn({ name: clip(text.value, props.nameMax), quantity: 1, unitId: pcsId(), save: false });
     query.value = '';
 }
 
@@ -123,6 +153,8 @@ function submitOwn() {
 const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
 const errorText = computed(() => {
     if (tooMany.value) return t('shopping.error.items_count');
+    if (invalidCount.value > 0) return t('shopping.error.quantity');
+    if (httpError.value) return httpError.value;
     const first = Object.values(form.errors ?? {})[0];
 
     return first ? translate(first) : '';
@@ -130,11 +162,16 @@ const errorText = computed(() => {
 const close = () => emit('update:open', false);
 
 function submit() {
-    if (count.value === 0 || tooMany.value || form.processing) return;
+    if (count.value === 0 || tooMany.value || form.processing || invalidCount.value > 0) return;
+    httpError.value = '';
     form.items = entries.value.map((e) => (e.catalogItemId === null
         ? { name: e.name, quantity: String(e.quantity), unit_id: e.unitId === '' ? null : Number(e.unitId), ...(e.saveToCatalog ? { save_to_catalog: true } : {}) }
         : { catalog_item_id: e.catalogItemId, quantity: String(e.quantity), unit_id: e.unitId === '' ? null : Number(e.unitId) }));
-    form.post(`/shopping/lists/${props.listId}/items`, { preserveScroll: true, onSuccess: close });
+    form.post(`/shopping/lists/${props.listId}/items`, {
+        preserveScroll: true,
+        onSuccess: close,
+        ...httpHandlers((key) => { httpError.value = t(key); }),
+    });
 }
 
 // Autofocus the search on desktop only: on a phone the keyboard would cover the grid.
@@ -168,12 +205,12 @@ const initialFocus = () => (typeof window.matchMedia === 'function' && window.ma
                         <button type="button" class="shop-pick__tile-btn" :aria-pressed="isSelected(c.id) ? 'true' : 'false'" @click="toggle(c)">
                             <CatalogImage kind="catalog" :id="c.id" :version="c.imageVersion" :size="72" />
                             <span class="shop-pick__name">{{ c.name }}</span>
-                            <span v-if="isSelected(c.id)" class="shop-pick__badge" aria-hidden="true"><Check :size="14" :stroke-width="2.5" />{{ fmt(selection[`c${c.id}`].quantity) }}</span>
+                            <span v-if="isSelected(c.id)" class="shop-pick__badge" aria-hidden="true"><Check :size="14" :stroke-width="2.5" />{{ selection[`c${c.id}`].text }}</span>
                         </button>
                         <UiTag v-if="onList.has(c.id)" variant="neutral" class="shop-pick__on-list">{{ t('shopping.picker.on_list') }}</UiTag>
                         <div v-if="isSelected(c.id)" class="shop-pick__stepper">
                             <UiButton variant="secondary" icon-only :icon="Minus" :label="t('shopping.picker.less', { name: c.name })" @click="change(selection[`c${c.id}`], -1)" />
-                            <output class="shop-pick__qty" :aria-label="t('shopping.picker.quantity_of', { name: c.name })">{{ fmt(selection[`c${c.id}`].quantity) }}</output>
+                            <input class="shop-pick__qty" inputmode="decimal" autocomplete="off" :value="selection[`c${c.id}`].text" :aria-label="t('shopping.picker.quantity_of', { name: c.name })" :aria-invalid="selection[`c${c.id}`].quantity === null ? 'true' : undefined" data-testid="qty-input" @input="typeQuantity(selection[`c${c.id}`], $event.target.value)" />
                             <UiButton variant="secondary" icon-only :icon="Plus" :label="t('shopping.picker.more', { name: c.name })" @click="change(selection[`c${c.id}`], 1)" />
                             <UiSelect :model-value="selection[`c${c.id}`].unitId" class="shop-pick__unit" :aria-label="t('shopping.picker.unit_of', { name: c.name })" @update:model-value="changeUnit(selection[`c${c.id}`], $event)">
                                 <option value="">-</option>
@@ -191,7 +228,7 @@ const initialFocus = () => (typeof window.matchMedia === 'function' && window.ma
                         <span class="shop-pick__own-name">{{ e.name }}</span>
                         <div class="shop-pick__stepper">
                             <UiButton variant="secondary" icon-only :icon="Minus" :label="t('shopping.picker.less', { name: e.name })" @click="change(e, -1)" />
-                            <output class="shop-pick__qty" :aria-label="t('shopping.picker.quantity_of', { name: e.name })">{{ fmt(e.quantity) }}</output>
+                            <input class="shop-pick__qty" inputmode="decimal" autocomplete="off" :value="e.text" :aria-label="t('shopping.picker.quantity_of', { name: e.name })" :aria-invalid="e.quantity === null ? 'true' : undefined" data-testid="qty-input" @input="typeQuantity(e, $event.target.value)" />
                             <UiButton variant="secondary" icon-only :icon="Plus" :label="t('shopping.picker.more', { name: e.name })" @click="change(e, 1)" />
                             <UiSelect :model-value="e.unitId" class="shop-pick__unit" :aria-label="t('shopping.picker.unit_of', { name: e.name })" @update:model-value="changeUnit(e, $event)">
                                 <option value="">-</option>
@@ -230,7 +267,7 @@ const initialFocus = () => (typeof window.matchMedia === 'function' && window.ma
         </div>
         <template #footer>
             <UiButton variant="ghost" @click="close">{{ t('shopping.picker.cancel') }}</UiButton>
-            <UiButton variant="primary" data-testid="picker-add" :disabled="count === 0 || tooMany || form.processing" :loading="form.processing" @click="submit">{{ count === 0 ? t('shopping.detail.add_items') : t('shopping.picker.add_n', { n: count }, count) }}</UiButton>
+            <UiButton variant="primary" data-testid="picker-add" :disabled="count === 0 || tooMany || form.processing || invalidCount > 0" :loading="form.processing" @click="submit">{{ count === 0 ? t('shopping.detail.add_items') : t('shopping.picker.add_n', { n: count }, count) }}</UiButton>
         </template>
     </UiDialog>
 </template>
@@ -251,7 +288,9 @@ const initialFocus = () => (typeof window.matchMedia === 'function' && window.ma
 .shop-pick__badge { position: absolute; top: var(--space-1); right: var(--space-1); display: inline-flex; align-items: center; gap: 2px; padding: 2px var(--space-2); border-radius: 999px; background: var(--color-primary); color: var(--color-on-primary, #fff); font-size: var(--text-sm); font-weight: 600; }
 .shop-pick__on-list { align-self: center; margin-block-end: var(--space-1); }
 .shop-pick__stepper { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-1); padding: 0 var(--space-1) var(--space-2); }
-.shop-pick__qty { min-width: 2.5ch; text-align: center; font-weight: 600; }
+.shop-pick__qty { width: 5.5ch; min-height: 44px; padding-inline: var(--space-1); border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); text-align: center; font: inherit; font-weight: 600; }
+.shop-pick__qty:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.shop-pick__qty[aria-invalid='true'] { border-color: var(--color-danger); }
 .shop-pick__unit { flex: 1 1 100%; }
 .shop-pick__own-title { margin: 0 0 var(--space-2); font-size: var(--text-base); font-weight: 600; }
 .shop-pick__own-list { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }

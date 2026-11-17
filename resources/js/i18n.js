@@ -10,7 +10,7 @@ const FORM_ORDER = {
     pl: ['one', 'few', 'many', 'other'],
 };
 
-const TIME_ZONE = 'Europe/Bratislava';
+export const TIME_ZONE = 'Europe/Bratislava';
 
 // vue-i18n hands its own locale key straight to Intl.*Format, so the instance is keyed by the
 // region-specific Intl locale (en-GB, sk-SK, pl-PL); that is what makes en print "5 Mar 2026".

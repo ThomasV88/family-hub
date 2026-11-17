@@ -13,8 +13,8 @@
         { "type": "p", "text": "**Nákupy** sú v ponuke vľavo (v telefóne v lište dole), ak vám k nim správca dal prístup. Stránka zobrazuje nákupné zoznamy, ktoré smiete vidieť, na dvoch záložkách: **Otvorené** a **Archív**." },
         { "type": "list", "items": [
           "**Otvorené** zobrazuje zoznamy, ktoré ešte plánujete alebo podľa ktorých nakupujete, zoradené podľa času pripomienky (zoznamy bez pripomienky sú na konci), potom od najnovšieho. Zoznam, podľa ktorého sa nakupuje, má štítok **Uzamknutý** a lištu, ktorá ukazuje, koľko položiek je už kúpených.",
-          "Každý riadok ukazuje logo obchodu, názov zoznamu, obchod, zodpovednú osobu a čas pripomienky. Štítok **Pripomienka už prešla** sa zobrazí, keď čas pripomienky uplynul, ale zoznam nie je vybavený.",
-          "**Archív** zobrazuje vybavené zoznamy od najnovšieho s dátumom, kedy boli vybavené. Dlhý archív je rozdelený na strany.",
+          "Každý riadok ukazuje logo obchodu, názov zoznamu, obchod, zodpovednú osobu a čas pripomienky. Štítok **Pripomienka už prešla** sa zobrazí, keď čas pripomienky uplynul, ale zoznam nie je vybavený. Časy pripomienok sa vždy zobrazujú v časovom pásme rodiny, na každom zariadení.",
+          "**Archív** zobrazuje vybavené zoznamy od najnovšieho s dátumom, kedy boli vybavené. Dlhý archív je rozdelený na strany. Zvolená karta ostáva v adrese, takže **Späť** z otvoreného zoznamu vás vráti na tú istú kartu.",
           "Keď je otvorených zoznamov viac ako 10, nad nimi sa zobrazí pole na hľadanie. Nerozlišuje veľké písmená ani diakritiku."
         ] },
         { "type": "p", "text": "Zoznam vidíte, ak ste ho vytvorili, ak ste jeho zodpovedná osoba, alebo ak ste do neho boli pridaní, buď ako osoba, ktorá smie pridávať a upravovať položky, alebo ako osoba, ktorá smie iba prezerať. Zoznamy, ktoré nevidíte, sa nezobrazujú vôbec. Zoznam nájdete v tabuľke [kto čo vidí](who-sees-what#table)." }
@@ -41,7 +41,7 @@
         { "type": "steps", "items": [
           "Otvorte zoznam a stlačte **Pridať položky**. Tlačidlo vidí zodpovedná osoba a ľudia, ktorí boli do zoznamu pridaní ako tí, čo môžu pridávať a upravovať položky. Nový, prázdny zoznam toto okno otvorí sám.",
           "Prezrite si katalóg. Každá položka má obrázok. Hľadanie nerozlišuje veľké písmená ani diakritiku, takže \"mliecko\" nájde \"Mliečko\".",
-          "Položku vyberiete ťuknutím. Vybraná položka ukáže množstvo a jednotku. Tlačidlami **+** a **-** zmeníte množstvo (o polovicu pri gramoch, kilogramoch a litroch, inak o jednu) a podľa potreby vyberiete inú jednotku. V jednom kroku môžete vybrať veľa položiek.",
+          "Položku vyberiete ťuknutím. Vybraná položka ukáže množstvo a jednotku. Množstvo zmeníte tlačidlami **+** a **-** alebo ho napíšete do políčka (funguje aj desatinná čiarka, napríklad \"1,5\"). Jeden krok je 1 kus, 0,1 pre kilogramy a litre a 10 pre gramy a mililitre. Podľa potreby vyberte inú jednotku: gramy a kilogramy, mililitre a litre sa prepočítajú a zlomok sa pri jednotkách, ktoré ho nemajú, zaokrúhli. V jednom kroku môžete vybrať veľa položiek.",
           "Nie je niečo v katalógu? Stlačte **Zadať vlastnú položku** (alebo počas hľadania riadok **Pridať \"...\" ako novú položku**), vyplňte názov, množstvo a jednotku a stlačte **Pridať do zoznamu**. Vaša vlastná položka sa do katalógu neuloží, kým nezaškrtnete **Uložiť aj do katalógu**, čo vidia len ľudia, ktorí spravujú katalóg.",
           "Dole stlačte **Pridať** (ukáže, koľko položiek ste vybrali). Všetky vybrané položky sa pridajú do zoznamu naraz."
         ] },
@@ -99,8 +99,8 @@
         { "type": "list", "items": [
           "Pred uzamknutím musí mať zoznam aspoň jednu položku. Na prázdnom zozname je **Uzamknúť zoznam** zosivené a poznámka vysvetľuje prečo.",
           "Kým je zoznam uzamknutý, nikto nemôže pridávať, odstraňovať ani upravovať položky.",
-          "V obchode zodpovedná osoba pri každej položke stlačí **Zakúpené** alebo **Nedostupné**. Zmena sa zobrazí hneď. Opätovným stlačením rovnakého tlačidla označenie zrušíte.",
-          "Ak sa označenie nepodarí uložiť, vráti sa späť a zobrazí sa hlásenie **Nepodarilo sa uložiť. Skúste to znova.**",
+          "V obchode zodpovedná osoba pri každej položke stlačí **Zakúpené** alebo **Nedostupné**. Zmena sa zobrazí hneď. Stlačené tlačidlo má aj inú ikonu a hrubý okraj, takže nezávisí od farby. Opätovným stlačením rovnakého tlačidla označenie zrušíte. Môžete ťukať rýchlo na veľa položiek: označenia sa ukladajú jedno po druhom a **Odomknúť zoznam** a **Ukončiť nákup** počkajú, kým sa uložia všetky.",
+          "Ak sa označenie nepodarí uložiť, späť sa vráti iba táto položka a zobrazí sa hlásenie **Nepodarilo sa uložiť. Skúste to znova.** Ak zoznam medzitým zmenil niekto iný (napríklad ho odomkol), stránka sa načíta znova a povie to.",
           "Ostatní vidia označenia a riadok o priebehu až po opätovnom načítaní stránky.",
           "**Odomknúť zoznam** vráti zoznam do plánovania, napríklad keď ste na niečo zabudli. Označenia ostanú zachované."
         ] },

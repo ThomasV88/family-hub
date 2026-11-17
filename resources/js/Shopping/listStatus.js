@@ -1,4 +1,5 @@
 import { Archive, Lock } from '@lucide/vue';
+import { TIME_ZONE } from '../i18n.js';
 
 // Shared by every Shopping screen: the state tag of a list and the reminder helpers. Status never relies on colour alone,
 // each tag has a text label (and an icon for Locked and Finished).
@@ -18,11 +19,16 @@ export function reminderTag(list) {
     return null;
 }
 
-/** "20 Nov, 18:00" for a reminder, "20 Nov 2026" for a finish date. Null or an unparsable value gives ''. */
+/**
+ * "20 Nov, 18:00" for a reminder, "20 Nov 2026" for a finish date. Null or an unparsable value gives ''.
+ * Always in the family time zone, the same wall clock the settings field shows, whatever zone the device is in.
+ */
 export function formatListDate(iso, locale, { time = false } = {}) {
     const date = iso ? new Date(iso) : null;
     if (!date || Number.isNaN(date.getTime())) return '';
-    const options = time ? { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' } : { dateStyle: 'medium' };
+    const options = time
+        ? { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: TIME_ZONE }
+        : { dateStyle: 'medium', timeZone: TIME_ZONE };
 
     return new Intl.DateTimeFormat(locale, options).format(date);
 }

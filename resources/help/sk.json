@@ -301,7 +301,7 @@
         },
         "shopping.reminder": {
             "title": "Pripomienka",
-            "text": "Zoznam má jednu pripomienku, dátum a čas v časovom pásme rodiny. Push upozornenie dostane iba zodpovedná osoba, a to len ak má na svojom zariadení zapnuté push upozornenia v Nastaveniach, Upozornenia. Čas v minulosti sa odmietne. Zmenou času sa nastaví nová pripomienka."
+            "text": "Zoznam má jednu pripomienku, dátum a čas v časovom pásme rodiny. Push upozornenie dostane iba zodpovedná osoba, a to len ak má na svojom zariadení zapnuté push upozornenia v Nastaveniach, Upozornenia. Ak je push v ten čas vypnutý, pripomienka sa odošle, keď ho zapnete, najneskôr s 24-hodinovým oneskorením. Čas v minulosti sa odmietne. Zmenou času sa nastaví nová pripomienka."
         },
         "shopping.email": {
             "title": "Odoslanie zoznamu e-mailom",

@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { Bell, Copy } from '@lucide/vue';
 import UiAvatar from '../Components/ui/UiAvatar.vue';
@@ -39,11 +40,16 @@ const meta = computed(() => {
 
     return parts.join(' · ');
 });
+// An in-app visit instead of a full page load; the link keeps its address for a new tab.
+function openList(href, event) {
+    event.preventDefault();
+    router.visit(href);
+}
 const progressLabel = computed(() => t('shopping.overview.progress', { bought: props.list.boughtCount, total: props.list.itemsCount }));
 </script>
 
 <template>
-    <UiListRow as="link" :href="`/shopping/lists/${list.id}`" class="shop-list-row" data-testid="list-row">
+    <UiListRow as="link" :href="`/shopping/lists/${list.id}`" class="shop-list-row" data-testid="list-row" @navigate="openList">
         <template #leading><CatalogImage kind="store" :id="archived ? null : (list.store?.id ?? null)" :version="archived ? null : (list.store?.logoVersion ?? null)" :size="40" /></template>
         {{ list.name }}
         <template #meta>

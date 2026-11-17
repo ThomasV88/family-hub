@@ -301,7 +301,7 @@
         },
         "shopping.reminder": {
             "title": "Reminder",
-            "text": "A list has one reminder, a date and time in the family time zone. A push notification goes to the responsible person only, and only if they turned push notifications on for their device in Settings, Notifications. A time in the past is refused. Changing the time sets a new reminder."
+            "text": "A list has one reminder, a date and time in the family time zone. A push notification goes to the responsible person only, and only if they turned push notifications on for their device in Settings, Notifications. If push is off at that time, the reminder is sent once you turn it on, up to 24 hours late. A time in the past is refused. Changing the time sets a new reminder."
         },
         "shopping.email": {
             "title": "Sending a list by e-mail",

@@ -63,6 +63,21 @@ const typeSearch = async (value) => {
     await flushPromises();
 };
 const settle = () => flushPromises();
+const qtyInput = (name) => tile(name).querySelector('[data-testid="qty-input"]');
+const qtyOf = (name) => qtyInput(name).value;
+const typeQty = async (name, value) => {
+    const input = qtyInput(name);
+    input.value = value;
+    input.dispatchEvent(new Event('input'));
+    await flushPromises();
+};
+const setUnit = async (name, id) => {
+    const select = tile(name).querySelector('select');
+    select.value = String(id);
+    select.dispatchEvent(new Event('change'));
+    await flushPromises();
+};
+const GRAMS = [{ id: 1, key: 'pcs', names: null }, { id: 2, key: 'kg', names: null }, { id: 3, key: 'l', names: null }, { id: 4, key: 'g', names: null }, { id: 5, key: 'ml', names: null }];
 
 beforeEach(() => { forms.length = 0; });
 afterEach(() => { current?.unmount(); current = null; document.body.innerHTML = ''; delete document.documentElement.dataset.theme; });
@@ -79,7 +94,7 @@ describe('Item picker', () => {
         expect(dialog().querySelector('[data-testid="no-match"]').textContent).toBe('No catalog item matches “zzz”.');
     });
 
-    it('selects several tiles, steps the quantity (kg by 0.5) and posts one request with every item', async () => {
+    it('selects several tiles, steps the quantity (kg by 0.1) and posts one request with every item', async () => {
         mountPicker();
         await settle();
         expect(button('Add items').disabled).toBe(true);
@@ -90,20 +105,21 @@ describe('Item picker', () => {
         button('More Jablká').click();
         button('More Jablká').click();
         await settle();
-        expect(tile('Jablká').querySelector('output').textContent).toBe('2');
+        expect(qtyOf('Jablká')).toBe('1.2');
         button('Less Jablká').click();
         button('Less Jablká').click();
         button('Less Jablká').click();
         await settle();
-        expect(tile('Jablká').querySelector('output').textContent).toBe('0.5');
+        expect(qtyOf('Jablká')).toBe('0.9');
         button('More Jablká').click();
         await settle();
-        // the unit of the second tile changes to pieces: the step becomes 1 and the quantity is at least one step
+        expect(qtyOf('Jablká')).toBe('1');
+        // the unit of the second tile changes to pieces: no fraction is left on a unit that has none
         const select = tile('Jablká').querySelector('select');
         select.value = '1';
         select.dispatchEvent(new Event('change'));
         await settle();
-        expect(tile('Jablká').querySelector('output').textContent).toBe('1');
+        expect(qtyOf('Jablká')).toBe('1');
         dialog().querySelector('[data-testid="type-own"]').click();
         await settle();
         const own = dialog().querySelector('[data-testid="own-form"]');
@@ -230,6 +246,72 @@ describe('Item picker', () => {
         mountPicker({ catalog: [], canManageCatalog: true });
         await settle();
         expect(dialog().querySelector('a[href="/settings/shopping"]').textContent).toBe('Add items in Shopping settings');
+    });
+
+    it('lets a quantity be typed, with a decimal comma, and sends it', async () => {
+        mountPicker({ units: GRAMS });
+        await settle();
+        tileButton('Jablká').click();
+        await settle();
+        await typeQty('Jablká', '1,25');
+        button('Add 1 item').click();
+        await settle();
+        expect(forms[0].items).toEqual([{ catalog_item_id: 12, quantity: '1.25', unit_id: 2 }]);
+    });
+
+    it('does not add while a typed quantity is invalid and says why', async () => {
+        mountPicker({ units: GRAMS });
+        await settle();
+        tileButton('Jablká').click();
+        await settle();
+        for (const bad of ['', '0', 'abc', '1000', '1.234']) {
+            await typeQty('Jablká', bad);
+            expect(qtyInput('Jablká').getAttribute('aria-invalid')).toBe('true');
+            expect(dialog().querySelector('[data-testid="picker-error"]').textContent).toContain('Enter a quantity greater than 0.');
+            expect(dialog().querySelector('[data-testid="picker-add"]').disabled).toBe(true);
+        }
+        await typeQty('Jablká', '2');
+        expect(dialog().querySelector('[data-testid="picker-add"]').disabled).toBe(false);
+        expect(forms[0].post).not.toHaveBeenCalled();
+    });
+
+    it('steps grams and millilitres by 10 and pieces by 1', async () => {
+        mountPicker({ units: GRAMS });
+        await settle();
+        tileButton('Jablká').click();
+        await settle();
+        await setUnit('Jablká', 4);
+        await typeQty('Jablká', '250');
+        button('More Jablká').click();
+        await settle();
+        expect(qtyOf('Jablká')).toBe('260');
+        await setUnit('Jablká', 1);
+        expect(qtyOf('Jablká')).toBe('260');
+        button('Less Jablká').click();
+        await settle();
+        expect(qtyOf('Jablká')).toBe('259');
+        await setUnit('Jablká', 5);
+        button('More Jablká').click();
+        await settle();
+        expect(qtyOf('Jablká')).toBe('269');
+    });
+
+    it('converts g to kg and ml to l on a unit change and rounds a fraction away from pieces', async () => {
+        mountPicker({ units: GRAMS });
+        await settle();
+        tileButton('Jablká').click();
+        await settle();
+        await setUnit('Jablká', 4);
+        await typeQty('Jablká', '250');
+        await setUnit('Jablká', 2);
+        expect(qtyOf('Jablká')).toBe('0.25');
+        await setUnit('Jablká', 4);
+        expect(qtyOf('Jablká')).toBe('250');
+        await setUnit('Jablká', 2);
+        await typeQty('Jablká', '1.5');
+        await setUnit('Jablká', 1);
+        expect(qtyOf('Jablká')).toBe('2');
+        expect(forms[0]).toBeTruthy();
     });
 
     it('keeps free text usable when the catalog could not be loaded', async () => {

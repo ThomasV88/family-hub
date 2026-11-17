@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { Plus, Search, ShoppingCart } from '@lucide/vue';
@@ -44,6 +44,21 @@ const tabs = computed(() => [
     { key: 'archive', label: label('shopping.overview.tab_archive', props.counts.archive) },
 ]);
 
+// The selected tab lives in the address (?tab=archive, plus the page), so Back from an opened list returns to the same tab. This is a
+// client-side replace of the current history entry: no request, the props stay and only `tab` follows the selection.
+function tabUrl(key) {
+    if (key !== 'archive') return '/shopping';
+    const page = props.archive.currentPage ?? 1;
+
+    return page > 1 ? `/shopping?tab=archive&page=${page}` : '/shopping?tab=archive';
+}
+watch(tab, (key) => {
+    if (key === props.tab) return;
+    router.replace({ url: tabUrl(key), props: (current) => ({ ...current, tab: key }), preserveScroll: true, preserveState: true });
+});
+// Back or Forward restores another tab.
+watch(() => props.tab, (key) => { tab.value = key === 'archive' ? 'archive' : 'open'; });
+
 const showSearch = computed(() => props.lists.length > SEARCH_FROM);
 const visibleLists = computed(() => {
     const needle = plain(query.value.trim());
@@ -67,6 +82,9 @@ function goTo(page) {
         preserveScroll: true,
         replace: true,
         onError: () => { loadFailed.value = true; },
+        // A 5xx or a dropped connection is not a validation error: they have their own callbacks.
+        onHttpException: () => { loadFailed.value = true; return false; },
+        onNetworkError: () => { loadFailed.value = true; },
         onFinish: () => { loading.value = false; },
     });
 }
