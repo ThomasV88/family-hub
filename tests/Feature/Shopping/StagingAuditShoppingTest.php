@@ -104,3 +104,27 @@ it('keeps real shopping rows and their picture folders through a reseed, so the 
         ->and(ShoppingCatalogItem::where('name', 'Real catalog')->count())->toBe(1);
     $this->artisan('staging:audit')->assertExitCode(1);
 });
+
+it('flags rows whose creator was deleted, because only a real user can have been deleted', function (string $table) {
+    $real = auditRealUser();
+    $list = ShoppingList::factory()->create(['creator_id' => $this->synthetic->id]);
+    match ($table) {
+        'shopping_items' => ShoppingItem::factory()->create(['list_id' => $list->id, 'created_by' => $real->id]),
+        'shopping_catalog_items' => auditOwned(ShoppingCatalogItem::class, 'Gone', $real),
+        'shopping_stores' => auditOwned(ShoppingStore::class, 'Gone', $real),
+        'shopping_units' => ShoppingUnit::factory()->create(['created_by' => $real->id]),
+    };
+    DB::table($table)->where('created_by', $real->id)->update(['created_by' => null]);
+    $real->delete();
+
+    $this->artisan('staging:audit')->expectsOutputToContain("non-synthetic {$table}")->assertExitCode(1);
+})->with(['shopping_items', 'shopping_catalog_items', 'shopping_stores', 'shopping_units']);
+
+it('does not flag a built-in unit without a creator but flags a custom unit without one', function () {
+    $this->artisan('staging:seed --force')->assertExitCode(0);
+    $this->artisan('staging:audit')->assertExitCode(0);
+
+    ShoppingUnit::factory()->create(['key' => null, 'created_by' => null]);
+
+    $this->artisan('staging:audit')->expectsOutputToContain('non-synthetic shopping_units')->assertExitCode(1);
+});

@@ -68,14 +68,15 @@ class StagingAudit extends Command
             ['medical_ai_extractions', "(started_by in {$real})"],
             ['ai_calls', "(started_by in {$real})"],
             // Phase 11: shopping data of a real user (names, lists, stores) must never reach staging. A list needs a
-            // synthetic creator (the column is NOT NULL and RESTRICT, so a null cannot occur); the other owner columns may
-            // be null (built-in units, a responsible person who was removed) but never a real user.
+            // synthetic creator (the column is NOT NULL and RESTRICT, so a null cannot occur). As with finance, a null creator on
+            // an item, catalog item, store or custom unit stays flagged: it can only be a real user who was deleted (nullOnDelete).
+            // Only built-in units (they have a key) legitimately have no creator. A responsible person who was removed may be null.
             ['shopping_lists', "(creator_id not in {$synthetic}) or (responsible_id is not null and responsible_id not in {$synthetic})"],
             ['shopping_list_members', "(user_id not in {$synthetic})"],
-            ['shopping_items', "(created_by is not null and created_by not in {$synthetic}) or (state_changed_by is not null and state_changed_by not in {$synthetic})"],
-            ['shopping_catalog_items', "(created_by is not null and created_by not in {$synthetic})"],
-            ['shopping_stores', "(created_by is not null and created_by not in {$synthetic})"],
-            ['shopping_units', "(created_by is not null and created_by not in {$synthetic})"],
+            ['shopping_items', "(created_by is null or created_by not in {$synthetic}) or (state_changed_by is not null and state_changed_by not in {$synthetic})"],
+            ['shopping_catalog_items', "(created_by is null or created_by not in {$synthetic})"],
+            ['shopping_stores', "(created_by is null or created_by not in {$synthetic})"],
+            ['shopping_units', "(key is null and (created_by is null or created_by not in {$synthetic})) or (key is not null and created_by is not null and created_by not in {$synthetic})"],
         ];
     }
 
