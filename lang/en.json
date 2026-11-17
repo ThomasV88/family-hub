@@ -506,6 +506,8 @@
             "intro": "Read past documents again with AI. First check what would be read. Nothing you or a member already accepted is ever changed, and you see only counts, never names or content.",
             "scope_legend": "Which documents?",
             "scope_no_proposal": "Documents without any suggestions yet",
+            "scope_no_text": "Documents without recognised text",
+            "scope_no_text_hint": "Only the text is read and saved. Suggestions that exist or were accepted are not changed.",
             "scope_last_failed": "Documents whose latest AI run failed",
             "scope_all": "All documents",
             "scope_all_hint": "Documents with accepted suggestions are still skipped.",
@@ -525,6 +527,7 @@
             "valid_minutes": "This check is valid for {n} minute. | This check is valid for {n} minutes.",
             "check_announce": "Check finished. {n} documents would be read.",
             "zero_eligible": "Nothing would be read with these settings.",
+            "zero_eligible_no_text": "Every document already has recognised text.",
             "start": "Start bulk run",
             "start_reason_none": "Check what would run first.",
             "start_reason_stale": "The last check is out of date. Check again.",
@@ -581,7 +584,9 @@
             "col_skipped": "Skipped",
             "col_status": "Status",
             "history_empty_heading": "No bulk runs yet",
-            "history_empty_body": "When you start a bulk run, its counts are listed here."
+            "history_empty_body": "When you start a bulk run, its counts are listed here.",
+            "no_text_note": "These documents will be read by the AI provider and their text saved here. No suggestions will be made.",
+            "history_text_only": "Text only"
         },
         "security": {
             "title": "Re-confirmation",

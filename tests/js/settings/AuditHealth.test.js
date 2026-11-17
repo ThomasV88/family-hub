@@ -99,6 +99,7 @@ describe('Audit table AI agent and bulk rows', () => {
         { id: 26, event: 'ai_bulk_run_changed', meta: { action: 'resumed', scope: 'all', count: 7 } },
         { id: 27, event: 'ai_bulk_run_changed', meta: { action: 'cancelled', scope: 'all', count: 3 } },
         { id: 28, event: 'ai_bulk_run_changed', meta: { action: 'completed', scope: 'all', count: 7 } },
+        { id: 29, event: 'ai_bulk_run_changed', meta: { action: 'started', scope: 'no_text', count: 5 } },
     ].map((e) => ({ ...base, ...e, targetLabel: null }));
 
     it('renders agent display names, field labels and values without a person', () => {
@@ -113,6 +114,7 @@ describe('Audit table AI agent and bulk rows', () => {
             'Resumed a bulk AI re-generation: All documents. Documents: 7',
             'Cancelled a bulk AI re-generation: All documents. Documents: 3',
             'A bulk AI re-generation finished: All documents. Documents: 7',
+            'Started a bulk AI re-generation: Documents without recognised text. Documents: 5',
         ]) expect(text).toContain(expected);
     });
 

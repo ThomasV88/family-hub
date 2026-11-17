@@ -506,6 +506,8 @@
             "intro": "Odczytaj starsze dokumenty ponownie za pomocą AI. Najpierw sprawdź, co zostałoby odczytane. Nic, co Ty lub członek już zaakceptowaliście, nigdy się nie zmieni, a widzisz tylko liczby, nigdy nazwy ani treść.",
             "scope_legend": "Które dokumenty?",
             "scope_no_proposal": "Dokumenty bez żadnych sugestii",
+            "scope_no_text": "Dokumenty bez rozpoznanego tekstu",
+            "scope_no_text_hint": "Odczytywany i zapisywany jest tylko tekst. Istniejące i zaakceptowane sugestie nie są zmieniane.",
             "scope_last_failed": "Dokumenty, których ostatnie uruchomienie AI się nie powiodło",
             "scope_all": "Wszystkie dokumenty",
             "scope_all_hint": "Dokumenty z zaakceptowanymi sugestiami są nadal pomijane.",
@@ -525,6 +527,7 @@
             "valid_minutes": "Sprawdzenie jest ważne przez {n} minutę. | Sprawdzenie jest ważne przez {n} minuty. | Sprawdzenie jest ważne przez {n} minut. | Sprawdzenie jest ważne przez {n} minuty.",
             "check_announce": "Sprawdzanie zakończone. Zostałoby odczytanych dokumentów: {n}.",
             "zero_eligible": "Przy tych ustawieniach nic nie zostałoby odczytane.",
+            "zero_eligible_no_text": "Każdy dokument ma już rozpoznany tekst.",
             "start": "Rozpocznij masowe przetwarzanie",
             "start_reason_none": "Najpierw sprawdź, co zostałoby przetworzone.",
             "start_reason_stale": "Ostatnie sprawdzenie jest nieaktualne. Sprawdź ponownie.",
@@ -581,7 +584,9 @@
             "col_skipped": "Pominięte",
             "col_status": "Status",
             "history_empty_heading": "Brak masowych przetwarzań",
-            "history_empty_body": "Gdy rozpoczniesz masowe przetwarzanie, jego liczby pojawią się tutaj."
+            "history_empty_body": "Gdy rozpoczniesz masowe przetwarzanie, jego liczby pojawią się tutaj.",
+            "no_text_note": "Te dokumenty odczyta dostawca AI, a ich tekst zostanie zapisany tutaj. Sugestie nie zostaną utworzone.",
+            "history_text_only": "Tylko tekst"
         },
         "security": {
             "title": "Ponowne potwierdzenie",

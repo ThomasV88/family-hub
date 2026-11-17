@@ -33,7 +33,7 @@ const uid = useId();
 
 const DRY_URL = '/settings/ai-agents/bulk/dry-run';
 const START_URL = '/settings/ai-agents/bulk';
-const SCOPES = ['no_proposal', 'last_failed', 'all'];
+const ALL_SCOPES = ['no_proposal', 'no_text', 'last_failed', 'all'];
 
 const config = computed(() => ({
     defaultCap: Number(props.bulkConfig?.defaultCap) || 20,
@@ -66,6 +66,9 @@ const status = useBulkStatus({
 watch(() => props.bulk, (next) => { if (next) status.adopt(next, { quiet: true }); });
 
 const active = computed(() => status.panel.value?.active ?? null);
+// The text-only backfill is offered only while reading of the full text is on (the server refuses it otherwise).
+const ocrEnabled = computed(() => status.panel.value?.ocrEnabled === true);
+const SCOPES_SHOWN = computed(() => ALL_SCOPES.filter((key) => key !== 'no_text' || ocrEnabled.value));
 const history = computed(() => status.panel.value?.history ?? []);
 const historyFailed = ref(false);
 
@@ -98,12 +101,15 @@ const fresh = computed(() => Boolean(result.value)
     && !expired.value
     && result.value.scope === scope.value
     && result.value.cap === capValue.value);
+const confirmTextOnly = computed(() => result.value?.scope === 'no_text');
 const eligible = computed(() => result.value?.counts?.eligible ?? 0);
 const stale = computed(() => Boolean(result.value) && !fresh.value);
+// The scope the shown result was checked for (a scope change makes the result stale, never mixes the copy).
+const textOnly = computed(() => (result.value ? result.value.scope : scope.value) === 'no_text');
 const reasonKey = computed(() => {
     if (!result.value) return 'start_reason_none';
     if (stale.value) return 'start_reason_stale';
-    if (eligible.value === 0) return 'zero_eligible';
+    if (eligible.value === 0) return textOnly.value ? 'zero_eligible_no_text' : 'zero_eligible';
     return '';
 });
 const reason = computed(() => (reasonKey.value ? t(`settings.ai_bulk.${reasonKey.value}`) : ''));
@@ -143,10 +149,13 @@ const rows = computed(() => {
     return [
         ['row_eligible', c.eligible, true], ['row_consent', c.skipped_consent], ['row_unsupported', c.skipped_unsupported],
         ['row_decided', c.skipped_decided], ['row_active', c.skipped_active],
-    ].map(([key, value, strong]) => ({ key, label: t(`settings.ai_bulk.${key}`), value: Number(value) || 0, strong: Boolean(strong) }));
+    ].filter(([key]) => !(textOnly.value && key === 'row_decided')).map(([key, value, strong]) => ({ key, label: t(`settings.ai_bulk.${key}`), value: Number(value) || 0, strong: Boolean(strong) }));
 });
 
-const scopeLabels = computed(() => SCOPES.map((key) => ({ key, label: t(`settings.ai_bulk.scope_${key}`), hint: key === 'all' ? t('settings.ai_bulk.scope_all_hint') : '' })));
+const HINTS = { all: 'scope_all_hint', no_text: 'scope_no_text_hint' };
+const scopeLabels = computed(() => SCOPES_SHOWN.value.map((key) => ({ key, label: t(`settings.ai_bulk.scope_${key}`), hint: HINTS[key] ? t(`settings.ai_bulk.${HINTS[key]}`) : '' })));
+
+watch(SCOPES_SHOWN, (list) => { if (!list.includes(scope.value)) scope.value = 'no_proposal'; });
 
 // ---- scope radiogroup (arrow keys move and select, one Tab stop)
 function choose(key) {
@@ -158,8 +167,9 @@ function onRadioKey(event, index) {
     if (!step) return;
     event.preventDefault();
     if (checking.value) return;
-    const next = (index + step + SCOPES.length) % SCOPES.length;
-    scope.value = SCOPES[next];
+    const list = SCOPES_SHOWN.value;
+    const next = (index + step + list.length) % list.length;
+    scope.value = list[next];
     nextTick(() => radios.value[next]?.focus());
 }
 
@@ -398,7 +408,8 @@ const problemText = computed(() => ({
                         </div>
                     </dl>
                     <p v-if="eligible > 0" class="bulk-result__line">{{ t('settings.ai_bulk.days_estimate', { n: days, cap: result.cap }, days) }}</p>
-                    <p v-else class="bulk-result__line">{{ t('settings.ai_bulk.zero_eligible') }}</p>
+                    <p v-else class="bulk-result__line">{{ t(textOnly ? 'settings.ai_bulk.zero_eligible_no_text' : 'settings.ai_bulk.zero_eligible') }}</p>
+                    <UiAlert v-if="textOnly" variant="info" data-testid="bulk-no-text-note">{{ t('settings.ai_bulk.no_text_note') }}</UiAlert>
                     <p v-if="checkedAt" class="bulk-result__meta">
                         <I18nT keypath="settings.ai_bulk.checked_at" tag="span" scope="global">
                             <template #time><time :datetime="checkedAt.iso">{{ checkedAt.text }}</time></template>
@@ -425,6 +436,7 @@ const problemText = computed(() => ({
 
             <UiDialog :open="confirmOpen" :title="t('settings.ai_bulk.confirm_title')" :initial-focus="() => safe" @update:open="(v) => (confirmOpen = v)">
                 <p class="bulk-dialog__body">{{ t('settings.ai_bulk.confirm_body', { n: eligible, providers: providerWords, cap: result?.cap ?? capValue, hour }, eligible) }}</p>
+                <p v-if="confirmTextOnly" class="bulk-dialog__note" data-testid="bulk-confirm-no-text">{{ t('settings.ai_bulk.no_text_note') }}</p>
                 <p v-if="noAgentSignedIn" class="bulk-dialog__note">{{ t('settings.ai_bulk.no_agent_note') }}</p>
                 <template #footer>
                     <UiButton ref="safe" variant="secondary" @click="confirmOpen = false">{{ t('settings.ai_bulk.confirm_safe') }}</UiButton>

@@ -46,7 +46,7 @@ const eventLabel = (row) => (row.event === 'access_denied' ? t('audit.event.acce
 const AGENT_NAMES = { codex: 'OpenAI Codex', copilot: 'GitHub Copilot' };
 const AGENT_FIELDS = ['enabled', 'position', 'model'];
 const BULK_ACTIONS = ['dry_run', 'started', 'paused', 'resumed', 'cancelled', 'completed'];
-const BULK_SCOPES = ['no_proposal', 'last_failed', 'all'];
+const BULK_SCOPES = ['no_proposal', 'no_text', 'last_failed', 'all'];
 // A stored window in seconds as "1 hour" / "90 minutes"; a value that is not a plain positive number shows nothing.
 function durationPhrase(value) {
     const n = Number(value);

@@ -506,6 +506,8 @@
             "intro": "Prečítajte staršie dokumenty znova pomocou AI. Najprv skontrolujte, čo by sa čítalo. Nič, čo ste vy alebo člen už prijali, sa nikdy nezmení, a vidíte len počty, nikdy mená ani obsah.",
             "scope_legend": "Ktoré dokumenty?",
             "scope_no_proposal": "Dokumenty zatiaľ bez návrhov",
+            "scope_no_text": "Dokumenty bez rozpoznaného textu",
+            "scope_no_text_hint": "Číta sa a ukladá iba text. Existujúce ani prijaté návrhy sa nemenia.",
             "scope_last_failed": "Dokumenty, kde posledné spustenie AI zlyhalo",
             "scope_all": "Všetky dokumenty",
             "scope_all_hint": "Dokumenty s prijatými návrhmi sa stále preskakujú.",
@@ -525,6 +527,7 @@
             "valid_minutes": "Kontrola platí {n} minútu. | Kontrola platí {n} minúty. | Kontrola platí {n} minúty. | Kontrola platí {n} minút.",
             "check_announce": "Kontrola skončila. Prečítalo by sa dokumentov: {n}.",
             "zero_eligible": "Pri týchto nastaveniach by sa nič nečítalo.",
+            "zero_eligible_no_text": "Každý dokument už má rozpoznaný text.",
             "start": "Spustiť hromadné spracovanie",
             "start_reason_none": "Najprv skontrolujte, čo by sa spracovalo.",
             "start_reason_stale": "Posledná kontrola je zastaraná. Skontrolujte znova.",
@@ -581,7 +584,9 @@
             "col_skipped": "Preskočené",
             "col_status": "Stav",
             "history_empty_heading": "Zatiaľ žiadne hromadné spracovania",
-            "history_empty_body": "Keď spustíte hromadné spracovanie, jeho počty sa zobrazia tu."
+            "history_empty_body": "Keď spustíte hromadné spracovanie, jeho počty sa zobrazia tu.",
+            "no_text_note": "Tieto dokumenty prečíta poskytovateľ AI a ich text sa uloží sem. Návrhy sa nevytvoria.",
+            "history_text_only": "Iba text"
         },
         "security": {
             "title": "Opätovné potvrdenie",

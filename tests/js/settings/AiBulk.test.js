@@ -211,6 +211,95 @@ describe('Bulk panel: plan block', () => {
     });
 });
 
+describe('Bulk panel: scope no_text (text-only backfill)', () => {
+    const ocrPanel = (extra = {}) => ({ ...PANEL(), ocrEnabled: true, ...extra });
+    const order = () => radios().map((r) => r.attributes('data-scope'));
+
+    it('offers four scopes in order with the hint visible while reading is on, three while it is off', () => {
+        mountPanel({ bulk: ocrPanel() });
+        expect(order()).toEqual(['no_proposal', 'no_text', 'last_failed', 'all']);
+        expect(radios()[1].text()).toContain('Documents without recognised text');
+        expect(radios()[1].text()).toContain('Only the text is read and saved. Suggestions that exist or were accepted are not changed.');
+        current.unmount();
+        mountPanel({ bulk: { ...PANEL(), ocrEnabled: false } });
+        expect(order()).toEqual(['no_proposal', 'last_failed', 'all']);
+        expect(current.text()).not.toContain('Documents without recognised text');
+    });
+
+    it('choosing it after a check of another scope makes the result stale', async () => {
+        mountPanel({ bulk: ocrPanel() });
+        await doCheck();
+        expect(startBtn().attributes('aria-disabled')).toBeUndefined();
+        await radios()[1].trigger('click');
+        expect(startBtn().attributes('aria-disabled')).toBe('true');
+    });
+
+    it('hides the decided row, shows the note and sends the scope; the confirm repeats the note for this scope only', async () => {
+        mountPanel({ bulk: ocrPanel() });
+        await radios()[1].trigger('click');
+        await doCheck(COUNTS({ skipped_decided: 0 }));
+        expect(fetchMock).toHaveBeenCalledWith('/settings/ai-agents/bulk/dry-run', { method: 'POST', body: { scope: 'no_text', cap: 20 }, replay: true });
+        const result = current.find('[data-testid="bulk-result"]');
+        expect(result.text()).toContain('Documents that would be read');
+        expect(result.text()).not.toContain('already has suggestions you accepted');
+        expect(result.find('[data-testid="bulk-no-text-note"]').text()).toContain('These documents will be read by the AI provider and their text saved here. No suggestions will be made.');
+        await startBtn().trigger('click');
+        await flushPromises();
+        expect(dialog().textContent).toContain('their text saved here. No suggestions will be made.');
+    });
+
+    it('keeps the decided row and no note for the other scopes, and no note in their confirm', async () => {
+        mountPanel({ bulk: ocrPanel() });
+        await doCheck();
+        const result = current.find('[data-testid="bulk-result"]');
+        expect(result.text()).toContain('already has suggestions you accepted');
+        expect(result.find('[data-testid="bulk-no-text-note"]').exists()).toBe(false);
+        await startBtn().trigger('click');
+        await flushPromises();
+        expect(dialog().textContent).not.toContain('their text saved here');
+    });
+
+    it('uses its own zero line', async () => {
+        mountPanel({ bulk: ocrPanel() });
+        await radios()[1].trigger('click');
+        await doCheck(COUNTS({ eligible: 0, skipped_decided: 0 }));
+        expect(current.find('[data-testid="bulk-result"]').text()).toContain('Every document already has recognised text.');
+        expect(current.find(`#${startBtn().attributes('aria-describedby')}`).text()).toBe('Every document already has recognised text.');
+        expect(startBtn().attributes('aria-disabled')).toBe('true');
+    });
+
+    it('falls back to the first scope when reading is switched off while no_text is chosen', async () => {
+        mountPanel({ bulk: ocrPanel() });
+        await radios()[1].trigger('click');
+        await current.setProps({ bulk: { ...PANEL(), ocrEnabled: false } });
+        expect(order()).toEqual(['no_proposal', 'last_failed', 'all']);
+        expect(radios()[0].attributes('aria-checked')).toBe('true');
+    });
+
+    it('tags a text-only history row with an icon and no other row', () => {
+        const wrapper = mount(BulkHistoryTable, {
+            props: { rows: [ROW({ scope: 'no_text' }), ROW()], timezone: 'Europe/Bratislava' },
+            global: { plugins: [createAppI18n('en', load('en'))] },
+        });
+        const tags = wrapper.findAll('[data-testid="bulk-text-only-tag"]');
+        expect(tags).toHaveLength(1);
+        expect(tags[0].text()).toBe('Text only');
+        expect(tags[0].find('svg').exists()).toBe(true);
+        expect(wrapper.text()).toContain('Documents without recognised text');
+        wrapper.unmount();
+    });
+
+    it('has the five new keys in en, sk and pl', () => {
+        for (const l of ['en', 'sk', 'pl']) {
+            const b = load(l).settings.ai_bulk;
+            for (const key of ['scope_no_text', 'scope_no_text_hint', 'no_text_note', 'zero_eligible_no_text', 'history_text_only']) {
+                expect(typeof b[key]).toBe('string');
+                expect(b[key].length).toBeGreaterThan(0);
+            }
+        }
+    });
+});
+
 describe('Bulk panel: start confirmation', () => {
     it('opens a confirm that names the providers, count, cap and hour, with the safe button focused', async () => {
         mountPanel({ providers: ['codex', 'copilot'] });

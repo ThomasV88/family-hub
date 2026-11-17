@@ -47,7 +47,7 @@ export function useBulkStatus({ initial = null, onTransition = () => {}, interva
     function adopt(next, { quiet = false } = {}) {
         if (!next || typeof next !== 'object') return;
         const change = quiet ? null : transitionOf(panel.value, next);
-        panel.value = { active: next.active ?? null, history: Array.isArray(next.history) ? next.history : (panel.value?.history ?? []) };
+        panel.value = { ocrEnabled: typeof next.ocrEnabled === 'boolean' ? next.ocrEnabled : Boolean(panel.value?.ocrEnabled), active: next.active ?? null, history: Array.isArray(next.history) ? next.history : (panel.value?.history ?? []) };
         failures.value = 0;
         if (change) onTransition(change);
         schedule();
