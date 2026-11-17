@@ -99,7 +99,8 @@ Recipe photos (Phase 12) live in the same `uploads` volume under `wish-images/re
   in the app (the per-document Remove, a consent withdrawal, deleting or archiving the document) does not remove it from older
   snapshots; production keeps daily 14, weekly 8, monthly 6. Treat every database snapshot and its off-site copy as holding health text.
   `restore-drill.sh` proves the restore works for it: it prints `RESTORE-DRILL TEXT OK rows=N` after checking, in the restored database,
-  that the table restored, that its generated search column is filled and that `public.fh_unaccent` turns `Łukasz` into `Lukasz`
+  that the table restored, that a probe string run through the search expression matches a prefix `to_tsquery`, that every row's stored
+  search column equals the expression recomputed from its body, and that `public.fh_unaccent` turns `Łukasz` into `Lukasz`
   (the generated column and the search need that wrapper). `RESTORE-DRILL TEXT NONE` means the snapshot predates the table. Counts
   only, never any text. `scripts/test-backup-local.sh` asserts one of the two lines (OK for a database with the table, NONE without it).
 - Decision (provisional, owner to confirm in plan 07-20): no app-level file encryption in v1. `APP_KEY` lives on the same host, so it

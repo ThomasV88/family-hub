@@ -4,8 +4,8 @@
 # scratch database. Then prove the newest uploads snapshot (tag uploads-<DRILL_TAG>, path /uploads.tar)
 # readable: RESTORE-DRILL UPLOADS OK files=<n> snapshot=<id>, or RESTORE-DRILL UPLOADS NONE when absent.
 # The restored database is also checked for the recognised document text (Phase 13): RESTORE-DRILL TEXT OK rows=<n> when
-# the table medical_document_texts exists and public.fh_unaccent folds a letter in the restored database (the generated search
-# column needs it), RESTORE-DRILL TEXT NONE when the snapshot predates the table. Counts only, never any text.
+# the table medical_document_texts exists, public.fh_unaccent folds a letter, a probe matches a prefix tsquery and every stored
+# search value equals its recomputed expression in the restored database, RESTORE-DRILL TEXT NONE when the snapshot predates the table. Counts only, never any text.
 # RULE: never restore into another stack's database; a production backup is never restored into staging.
 # Usage: restore-drill.sh [snapshot|latest]   (run from the stack directory)
 # Optional env: DRILL_DB, DRILL_TAG (default nightly; pre-migrate snapshots are not drilled by default), DRILL_CHECK_TABLE (must have >= 1 row), DRILL_ADMIN_USER (default postgres)
