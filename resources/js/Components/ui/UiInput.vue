@@ -35,7 +35,7 @@ defineExpose({ focus: () => el.value?.focus() });
             :readonly="readonly"
             :autocomplete="autocomplete"
             :inputmode="inputmode"
-            :aria-describedby="describedBy"
+            :aria-describedby="describedBy ?? $attrs['aria-describedby']"
             :aria-invalid="invalid ? 'true' : undefined"
             @input="$emit('update:modelValue', $event.target.value)"
         />

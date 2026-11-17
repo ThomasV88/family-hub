@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, useId, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { Link as LinkIcon, PencilLine } from '@lucide/vue';
@@ -41,6 +41,7 @@ const props = defineProps({
     units: { type: Array, default: () => [] },
 });
 const emit = defineEmits(['update:open', 'failed']);
+const uid = useId();
 const { t, te, locale } = useI18n();
 const toast = useToast();
 
@@ -384,7 +385,7 @@ const submitLabel = computed(() => t(target.value === 'new' ? 'recipes.shopping.
                         <li v-for="row in rows" :key="row.key" :class="['rec-shop__row', { 'is-off': !row.include }]" data-testid="shopping-row">
                             <div class="rec-shop__line">
                                 <UiCheckbox v-model="row.include" :aria-label="t('recipes.shopping.include', { name: row.name })" data-testid="row-include" />
-                                <UiInput v-model="row.name" class="rec-shop__name" autocomplete="off" :maxlength="nameMax" :disabled="!row.include" :aria-label="t('recipes.shopping.name_of', { name: row.name })" :aria-invalid="row.include && row.catalogItemId === null && row.name.trim() === '' ? 'true' : undefined" data-testid="row-name" />
+                                <UiInput v-model="row.name" class="rec-shop__name" autocomplete="off" :maxlength="nameMax" :disabled="!row.include" :readonly="row.catalogItemId !== null" :aria-describedby="row.catalogItemId !== null ? `${uid}-lock-${row.key}` : undefined" :aria-label="t('recipes.shopping.name_of', { name: row.name })" :aria-invalid="row.include && row.catalogItemId === null && row.name.trim() === '' ? 'true' : undefined" data-testid="row-name" />
                             </div>
                             <div class="rec-shop__line rec-shop__line--qty">
                                 <UiInput :model-value="row.text" class="rec-shop__qty" inputmode="decimal" autocomplete="off" :disabled="!row.include" :aria-label="t('recipes.shopping.quantity_of', { name: row.name })" :aria-invalid="row.include && quantityOf(row.text) === null ? 'true' : undefined" data-testid="row-quantity" @update:model-value="(v) => typeQuantity(row, v)" />
@@ -393,6 +394,7 @@ const submitLabel = computed(() => t(target.value === 'new' ? 'recipes.shopping.
                                     <option v-for="o in unitOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
                                 </UiSelect>
                             </div>
+                            <p v-if="row.catalogItemId !== null" :id="`${uid}-lock-${row.key}`" class="rec-shop__muted" data-testid="row-name-locked">{{ t('recipes.shopping.name_locked') }}</p>
                             <p v-if="row.noAmount && row.include" class="rec-shop__muted" data-testid="row-no-amount">{{ t('recipes.shopping.no_amount') }}</p>
                             <p v-if="rowError(row)" class="rec-shop__error" data-testid="row-error">{{ rowError(row) }}</p>
                             <div class="rec-shop__match">

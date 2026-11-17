@@ -3224,6 +3224,7 @@
             "search_catalog": "Szukaj w katalogu",
             "catalog_item_for": "Pozycja katalogu: {name}",
             "as_typed": "Dodaj jako wpisany produkt",
+            "name_locked": "Lista dostanie nazwę z katalogu. Aby użyć własnej nazwy, w Zmień wybierz Dodaj jako wpisany produkt.",
             "no_amount": "W przepisie nie podano ilości.",
             "already_on_list": "Już jest na liście: {qty}. Zostanie dodane do tej ilości.",
             "different_unit": "Inna jednostka: zostanie jako osobna pozycja.",

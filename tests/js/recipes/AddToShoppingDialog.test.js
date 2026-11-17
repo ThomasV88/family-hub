@@ -233,6 +233,26 @@ describe('AddToShoppingDialog: changing the match', () => {
     });
 });
 
+describe('AddToShoppingDialog: the name of a matched row', () => {
+    it('is read-only with an explanation while matched, and editable again as a typed item', async () => {
+        await mountDialog();
+        const name = (i) => inRow(i, 'row-name');
+        expect(name(0).readOnly).toBe(true);
+        const note = inRow(0, 'row-name-locked');
+        expect(note.textContent).toContain('The list gets the catalog name');
+        expect(name(0).getAttribute('aria-describedby')).toBe(note.id);
+        // An unmatched row has no lock and no note.
+        expect(name(1).readOnly).toBe(false);
+        expect(inRow(1, 'row-name-locked')).toBeNull();
+        expect(name(1).getAttribute('aria-describedby')).toBeNull();
+        // "Add as typed item" frees the name.
+        await click(inRow(0, 'row-change'));
+        await setValue(inRow(0, 'row-catalog-select'), '');
+        expect(name(0).readOnly).toBe(false);
+        expect(inRow(0, 'row-name-locked')).toBeNull();
+    });
+});
+
 describe('AddToShoppingDialog: review and footer', () => {
     it('counts the included rows and disables the button at zero', async () => {
         await mountDialog();

@@ -3224,6 +3224,7 @@
             "search_catalog": "Search the catalog",
             "catalog_item_for": "Catalog item for {name}",
             "as_typed": "Add as typed item",
+            "name_locked": "The list gets the catalog name. To use your own name, choose Add as typed item under Change.",
             "no_amount": "No amount in the recipe.",
             "already_on_list": "Already on the list: {qty}. It will be added up.",
             "different_unit": "Different unit: kept as a separate line.",

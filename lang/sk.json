@@ -3224,6 +3224,7 @@
             "search_catalog": "Hľadať v katalógu",
             "catalog_item_for": "Položka katalógu: {name}",
             "as_typed": "Pridať ako vlastnú položku",
+            "name_locked": "Zoznam dostane názov z katalógu. Ak chcete vlastný názov, pod Zmeniť vyberte Pridať ako vlastnú položku.",
             "no_amount": "V recepte nie je uvedené množstvo.",
             "already_on_list": "Už je v zozname: {qty}. Pripočíta sa.",
             "different_unit": "Iná jednotka: ostane ako samostatný riadok.",
