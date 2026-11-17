@@ -59,6 +59,16 @@ return [
             'grandparent' => 200, 'guestPreset' => 200, 'noGrants' => 200,
         ],
     ],
+    // The target is the parent member (an adult), so every role gets the same 404; real access is covered in ProfilePeopleTest.
+    'profile.people.show' => [
+        'method' => 'GET',
+        'uri' => '/profile/people/{user}',
+        'params' => $parentTarget,
+        'expect' => [
+            'guest' => 302, 'admin' => 404, 'parent' => 404, 'child' => 404,
+            'grandparent' => 404, 'guestPreset' => 404, 'noGrants' => 404,
+        ],
+    ],
     // Only the parent (self) may rename; everyone else is refused with 403 before validation.
     'profile.name.update' => [
         'method' => 'PUT',

@@ -16,5 +16,8 @@ Route::get('/people/{user}/photo/{variant}', [ProfilePhotoController::class, 'sh
 // Own profile page and display name. The request authorizes per target through ProfileAccess.
 Route::get('/profile', [ProfileController::class, 'show'])
     ->middleware('access:authenticated')->name('profile.show');
+// A child the viewer manages (or any child for an admin); everything else is a uniform 404 in the controller.
+Route::get('/profile/people/{user}', [ProfileController::class, 'person'])
+    ->whereNumber('user')->middleware('access:authenticated')->name('profile.people.show');
 Route::put('/people/{user}/name', [ProfileController::class, 'updateName'])
     ->whereNumber('user')->middleware(['access:authenticated', 'throttle:30,1,profile.name.update'])->name('profile.name.update');
