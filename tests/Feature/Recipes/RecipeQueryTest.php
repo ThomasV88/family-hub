@@ -102,7 +102,8 @@ it('pages by 24 with hasMore', function () {
     $p1 = rcpIndex($a, [], 1);
     $p2 = rcpIndex($a, [], 2);
     expect($p1['titles'])->toHaveCount(24)->and($p1['hasMore'])->toBeTrue()->and($p1['titles'][0])->toBe('R25');
-    expect($p2['titles'])->toBe(['R1'])->and($p2['hasMore'])->toBeFalse();
+    // Page N answers pages 1..N, so the address of a loaded list is restorable.
+    expect($p2['titles'])->toHaveCount(25)->and($p2['titles'][24])->toBe('R1')->and($p2['hasMore'])->toBeFalse();
 });
 
 it('answers 404 without module view', function () {

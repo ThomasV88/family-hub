@@ -2949,8 +2949,8 @@
             "loading": "Wczytywanie przepisów"
         },
         "card": {
-            "favourite_add": "Dodaj do ulubionych",
-            "favourite_remove": "Usuń z ulubionych",
+            "favourite": "Ulubione",
+            "favourite_of": "Ulubione: {title}",
             "minutes": "{n} min",
             "servings": "{n} porcja | {n} porcje | {n} porcji | {n} porcji",
             "by": "od {name}",

@@ -105,26 +105,45 @@ describe('Recipes overview cards', () => {
         expect(kids).toEqual(['A', 'BUTTON']);
         const fav = card.find('[data-testid="recipe-favourite"]');
         expect(fav.attributes('aria-pressed')).toBe('true');
-        expect(fav.attributes('aria-label')).toBe('Remove from favourites');
-        expect(cards()[0].find('[data-testid="recipe-favourite"]').attributes('aria-label')).toBe('Add to favourites');
+        // A stable name (with the recipe) and the state in aria-pressed only: the label never flips with the state.
+        expect(fav.attributes('aria-label')).toBe('Favourite: <img src=x onerror=alert(1)>');
+        expect(cards()[0].find('[data-testid="recipe-favourite"]').attributes('aria-label')).toBe('Favourite: Recipe 1');
     });
 });
 
 describe('Favourite toggle', () => {
-    it('flips at once and sends PUT with the new value', async () => {
+    beforeEach(() => { fetchMock.mockReset(); });
+
+    it('flips at once and sends a plain PUT (not an Inertia visit, which the next visit would cancel)', async () => {
+        fetchMock.mockResolvedValue({ ok: true, status: 204, data: {} });
         mountPage();
         const fav = cards()[0].find('[data-testid="recipe-favourite"]');
         await fav.trigger('click');
         expect(fav.attributes('aria-pressed')).toBe('true');
-        expect(routerMock.put).toHaveBeenCalledWith('/recipes/1/favourite', { favourite: true }, expect.objectContaining({ preserveState: true }));
+        expect(fetchMock).toHaveBeenCalledWith('/recipes/1/favourite', { method: 'PUT', body: { favourite: true } });
+        expect(routerMock.put).not.toHaveBeenCalled();
     });
 
-    it.each(['onError', 'onHttpException', 'onNetworkError'])('rolls back and shows the toast on %s', async (cb) => {
+    it('survives a filter visit started while it is in flight and does not cancel it', async () => {
+        let settle;
+        fetchMock.mockImplementation(() => new Promise((resolve) => { settle = resolve; }));
         mountPage();
         const fav = cards()[0].find('[data-testid="recipe-favourite"]');
         await fav.trigger('click');
-        routerMock.put.mock.calls[0][2][cb]({});
-        routerMock.put.mock.calls[0][2].onFinish();
+        await current.find('[data-testid="favourites-toggle"]').trigger('click');
+        expect(routerMock.get).toHaveBeenCalledTimes(1);
+        settle({ ok: true, status: 204, data: {} });
+        await flushPromises();
+        expect(fav.attributes('aria-pressed')).toBe('true');
+        expect(useToast().toasts).toHaveLength(0);
+    });
+
+    it.each([{ ok: false, status: 500, data: {} }, { ok: false, status: 0, data: {} }, 'throws'])('rolls back and shows the toast on %j', async (answer) => {
+        if (answer === 'throws') fetchMock.mockRejectedValue(new Error('offline'));
+        else fetchMock.mockResolvedValue(answer);
+        mountPage();
+        const fav = cards()[0].find('[data-testid="recipe-favourite"]');
+        await fav.trigger('click');
         await flushPromises();
         expect(fav.attributes('aria-pressed')).toBe('false');
         expect(useToast().toasts.map((x) => x.message)).toEqual(['Could not save. Try again.']);
@@ -199,14 +218,20 @@ describe('Search, filters and chips', () => {
 });
 
 describe('Load more', () => {
-    it('asks for the next page, keeps the shown cards, appends the new ones and announces them', async () => {
+    it('asks for the next page; the answer holds every loaded card (page N = pages 1..N) and the new ones are announced', async () => {
         mountPage({ hasMore: true });
         await current.find('[data-testid="load-more"]').trigger('click');
         expect(routerMock.get).toHaveBeenCalledWith('/recipes', { page: 2 }, expect.objectContaining({ only: ['recipes', 'hasMore', 'page'], preserveState: true }));
-        await current.setProps({ recipes: [recipe(10), recipe(11)], page: 2, hasMore: false });
+        await current.setProps({ recipes: [...RECIPES, recipe(10), recipe(11)], page: 2, hasMore: false });
         expect(cards()).toHaveLength(5);
         expect(current.find('[data-testid="recipes-announce"]').text()).toBe('2 more recipes loaded');
         expect(current.find('[data-testid="load-more"]').exists()).toBe(false);
+    });
+
+    it('shows the whole list when the page is restored at ?page=2 (Back, reload) and does not announce', async () => {
+        mountPage({ hasMore: false, page: 2, recipes: [...RECIPES, recipe(10), recipe(11)] });
+        expect(cards()).toHaveLength(5);
+        expect(current.find('[data-testid="recipes-announce"]').text()).toBe('');
     });
 
     it('is not shown when there is nothing more', () => {
@@ -287,6 +312,16 @@ describe('New recipe and import drafts', () => {
         mountPage();
         await newButton().trigger('click');
         expect(routerMock.visit).toHaveBeenCalledWith('/recipes/create');
+    });
+
+    it.each([{ metaKey: true }, { ctrlKey: true }, { shiftKey: true }, { altKey: true }, { button: 1 }])('leaves a modified click %j to the browser (new tab)', async (mods) => {
+        mountPage({ import: IMPORT });
+        const event = new MouseEvent('click', { bubbles: true, cancelable: true, ...mods });
+        newButton().element.dispatchEvent(event);
+        await flushPromises();
+        expect(event.defaultPrevented).toBe(false);
+        expect(body('[data-testid="new-from-page"]')).toBeNull();
+        expect(routerMock.visit).not.toHaveBeenCalled();
     });
 
     it('the empty state button opens the choice dialog too', async () => {

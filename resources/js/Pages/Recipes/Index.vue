@@ -51,16 +51,17 @@ const searching = computed(() => filters.value.q.trim() !== '' || q.value.trim()
 const anyFilter = computed(() => count.value > 0 || searching.value);
 const onlyFavourites = computed(() => filters.value.favourites && count.value === 1 && !searching.value);
 
-// Server -> view: page 1 replaces the cards, later pages append (already shown cards stay).
+// Server -> view: `?page=N` answers every card of pages 1..N (not only slice N), so the props always are the whole list the
+// address describes. After Back, a reload or a shared link the list is therefore complete; "Load more" only asks for N+1.
+let lastPage = props.page;
 watch(() => [props.recipes, props.page], () => {
-    if (props.page <= 1) {
-        shown.value = [...props.recipes];
-    } else {
-        const known = new Set(shown.value.map((r) => r.id));
-        const added = props.recipes.filter((r) => !known.has(r.id));
-        shown.value = [...shown.value, ...added];
-        announcement.value = added.length > 0 ? t('recipes.overview.loaded_more', { n: added.length }, added.length) : '';
+    const before = shown.value.length;
+    shown.value = [...props.recipes];
+    if (props.page > lastPage) {
+        const added = shown.value.length - before;
+        announcement.value = added > 0 ? t('recipes.overview.loaded_more', { n: added }, added) : '';
     }
+    lastPage = props.page;
     hasMoreShown.value = props.hasMore;
 });
 watch(() => props.hasMore, (v) => { hasMoreShown.value = v; });
@@ -84,12 +85,15 @@ function visit(next, page = null, extra = {}) {
         ...extra,
     });
 }
+// A newer filter visit supersedes an older one: only the latest one may switch the skeleton off (a cancelled visit also finishes).
+let applySerial = 0;
 function apply(next) {
     filters.value = next;
     loadFailed.value = false;
     loading.value = true;
     announcement.value = '';
-    visit(next, null, { onFinish: () => { loading.value = false; } });
+    const mine = ++applySerial;
+    visit(next, null, { onFinish: () => { if (mine === applySerial) loading.value = false; } });
 }
 
 function onSearch(value) {
@@ -138,6 +142,8 @@ const importInfo = computed(() => props.import ?? { available: false, acknowledg
 const newOpen = ref(false);
 const urlOpen = ref(false);
 function goNew(event) {
+    // Ctrl/Cmd/Shift/Alt-click and middle click keep the browser's own link behaviour (a new tab opens the plain form).
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     if (importInfo.value.available) newOpen.value = true;
     else router.visit('/recipes/create');
@@ -146,7 +152,8 @@ let reloadingDrafts = false;
 function reloadDrafts() {
     if (reloadingDrafts) return;
     reloadingDrafts = true;
-    router.reload({ only: ['drafts', 'import'], preserveScroll: true, preserveState: true, onFinish: () => { reloadingDrafts = false; } });
+    // async: a draft refresh neither cancels nor is cancelled by a filter or load-more visit.
+    router.reload({ only: ['drafts', 'import'], preserveScroll: true, preserveState: true, async: true, onFinish: () => { reloadingDrafts = false; } });
 }
 
 onBeforeUnmount(() => {

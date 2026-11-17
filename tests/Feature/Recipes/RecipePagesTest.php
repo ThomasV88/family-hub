@@ -47,7 +47,7 @@ it('pages the overview 24 at a time and echoes the filters', function () {
 
     $this->actingAs($me)->get('/recipes')->assertInertia(fn (Assert $p) => $p->component('Recipes/Index')->has('recipes', 24)->where('hasMore', true));
     $this->actingAs($me)->get('/recipes?page=2&show=mine&q=%20soup%20')->assertInertia(fn (Assert $p) => $p
-        ->component('Recipes/Index')->has('recipes', 1)->where('hasMore', false)->where('page', 2)
+        ->component('Recipes/Index')->has('recipes', 25)->where('hasMore', false)->where('page', 2)
         ->where('filters.show', 'mine')->where('filters.q', 'soup'));
 });
 
@@ -56,9 +56,9 @@ it('refuses a page number that would overflow the offset instead of answering 50
     RecipeFixtures::sharedRecipe($me, [], 1, 1);
 
     $this->actingAs($me)->get('/recipes?page=999999999999999999')->assertSessionHasErrors('page');
-    $this->actingAs($me)->get('/recipes?page=1001')->assertSessionHasErrors('page');
-    $this->actingAs($me)->get('/recipes?page=1000')->assertOk();
-    expect(app(RecipeQuery::class)->index($me, [], PHP_INT_MAX)['items'])->toHaveCount(0);
+    $this->actingAs($me)->get('/recipes?page=101')->assertSessionHasErrors('page');
+    $this->actingAs($me)->get('/recipes?page=100')->assertOk();
+    expect(app(RecipeQuery::class)->index($me, [], PHP_INT_MAX)['items'])->toHaveCount(1);
 });
 
 it('filters by favourites, shows and refuses a bad show value', function () {

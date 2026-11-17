@@ -275,7 +275,7 @@ function onMenu({ key }) {
                         variant="ghost"
                         icon-only
                         :icon="Heart"
-                        :label="favourite ? t('recipes.card.favourite_remove') : t('recipes.card.favourite_add')"
+                        :label="t('recipes.card.favourite')"
                         :aria-pressed="favourite ? 'true' : 'false'"
                         :class="['rec-head__fav', { 'is-on': favourite }]"
                         data-testid="favourite"

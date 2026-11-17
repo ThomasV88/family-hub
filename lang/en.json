@@ -2949,8 +2949,8 @@
             "loading": "Loading recipes"
         },
         "card": {
-            "favourite_add": "Add to favourites",
-            "favourite_remove": "Remove from favourites",
+            "favourite": "Favourite",
+            "favourite_of": "Favourite: {title}",
             "minutes": "{n} min",
             "servings": "{n} serving | {n} servings",
             "by": "by {name}",

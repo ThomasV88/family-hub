@@ -2949,8 +2949,8 @@
             "loading": "Načítavajú sa recepty"
         },
         "card": {
-            "favourite_add": "Pridať medzi obľúbené",
-            "favourite_remove": "Odstrániť z obľúbených",
+            "favourite": "Obľúbené",
+            "favourite_of": "Obľúbené: {title}",
             "minutes": "{n} min",
             "servings": "{n} porcia | {n} porcie | {n} porcie | {n} porcií",
             "by": "od {name}",

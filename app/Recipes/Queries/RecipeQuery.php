@@ -14,11 +14,13 @@ use Illuminate\Support\Facades\DB;
 /** Every query starts from Recipe::visibleTo, so a private recipe of another member never leaks. */
 final class RecipeQuery
 {
+    public const MAX_PAGE = 100;
+
     public function __construct(private readonly RecipeAccess $access) {}
 
     /**
      * @param  array{q?: string, ingredient?: string, categories?: list<string>, author?: int|null, show?: string, favourites?: bool}  $filters
-     * @return array{items: Collection<int, Recipe>, hasMore: bool}
+     * @return array{items: Collection<int, Recipe>, hasMore: bool} all recipes of pages 1..$page
      */
     public function index(User $actor, array $filters, int $page = 1): array
     {
@@ -72,12 +74,13 @@ final class RecipeQuery
         $query->orderByDesc('recipes.created_at')->orderByDesc('recipes.id');
 
         $perPage = (int) config('recipes.per_page');
-        // Bounded so a crafted page number cannot push the OFFSET out of bigint range (HTTP 500).
-        $page = min(1000, max(1, $page));
-        $rows = $query->with(['author:id,name', 'categories', 'photos'])
-            ->offset(($page - 1) * $perPage)->limit($perPage + 1)->get();
+        // `?page=N` answers pages 1..N, not page N alone: the address then describes the whole list a member has loaded, so Back,
+        // reload and a shared link show the same cards instead of only the last slice. N is bounded (and so is the row count).
+        $page = min(self::MAX_PAGE, max(1, $page));
+        $limit = $page * $perPage;
+        $rows = $query->with(['author:id,name', 'categories', 'photos'])->limit($limit + 1)->get();
 
-        return ['items' => $rows->take($perPage)->values(), 'hasMore' => $rows->count() > $perPage];
+        return ['items' => $rows->take($limit)->values(), 'hasMore' => $rows->count() > $limit];
     }
 
     /** @return array{categories: list<array{name: string, key: string}>, authors: list<array{id: int, name: string}>} */

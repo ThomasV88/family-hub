@@ -23,7 +23,7 @@ class RecipeIndexRequest extends FormRequest
             'author' => ['nullable', 'integer'],
             'show' => ['nullable', Rule::in(['all', 'mine', 'shared'])],
             'favourites' => ['nullable', 'boolean'],
-            'page' => ['nullable', 'integer', 'min:1', 'max:1000'],
+            'page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
     }
 

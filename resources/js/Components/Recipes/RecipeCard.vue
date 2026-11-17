@@ -1,10 +1,11 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { ChefHat, Heart, Lock, Users } from '@lucide/vue';
 import UiAvatar from '../ui/UiAvatar.vue';
 import UiTag from '../ui/UiTag.vue';
+import { securityFetch } from '../../Security/securityFetch.js';
 import { useToast } from '../ui/useToast.js';
 import { totalMinutes } from './recipeFilters.js';
 
@@ -40,21 +41,22 @@ const byOther = computed(() => props.recipe.author && !props.recipe.author.isMe)
 const authorFirst = computed(() => (props.recipe.author?.name ?? '').trim().split(/\s+/)[0] ?? '');
 const isShared = computed(() => props.recipe.visibility === 'shared');
 
-// Optimistic toggle: flips at once, rolls back and tells the member when the server refuses.
-function toggle() {
+// Optimistic toggle: flips at once, rolls back and tells the member when the server refuses. Sent with a plain request, not an
+// Inertia visit: a visit is cancelled by the next visit (a search, a filter, Load more) and would leave the heart on although
+// nothing was saved.
+async function toggle() {
     if (saving) return;
     const next = !favourite.value;
     favourite.value = next;
     saving = true;
-    router.put(`/recipes/${props.recipe.id}/favourite`, { favourite: next }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['flash'],
-        onError: () => rollback(next),
-        onHttpException: () => { rollback(next); return false; },
-        onNetworkError: () => rollback(next),
-        onFinish: () => { saving = false; },
-    });
+    let result;
+    try {
+        result = await securityFetch(`/recipes/${props.recipe.id}/favourite`, { method: 'PUT', body: { favourite: next } });
+    } catch {
+        result = { ok: false };
+    }
+    saving = false;
+    if (!result?.ok) rollback(next);
 }
 function rollback(attempted) {
     if (favourite.value === attempted) favourite.value = !attempted;
@@ -89,8 +91,8 @@ function rollback(attempted) {
             type="button"
             class="recipe-card__fav"
             :aria-pressed="favourite ? 'true' : 'false'"
-            :aria-label="t(favourite ? 'recipes.card.favourite_remove' : 'recipes.card.favourite_add')"
-            :title="t(favourite ? 'recipes.card.favourite_remove' : 'recipes.card.favourite_add')"
+            :aria-label="t('recipes.card.favourite_of', { title: recipe.title })"
+            :title="t('recipes.card.favourite')"
             data-testid="recipe-favourite"
             @click="toggle"
         >

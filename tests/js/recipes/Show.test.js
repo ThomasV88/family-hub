@@ -339,6 +339,8 @@ describe('Recipe detail: per-member ticks', () => {
         mountPage();
         await $('[data-testid="favourite"]').trigger('click');
         expect($('[data-testid="favourite"]').attributes('aria-pressed')).toBe('true');
+        // The name does not change with the state (aria-pressed carries it).
+        expect($('[data-testid="favourite"]').attributes('aria-label')).toBe('Favourite');
         settle({ ok: false, status: 500, data: {} });
         await flushPromises();
         expect(fetchMock).toHaveBeenCalledWith('/recipes/12/favourite', { method: 'PUT', body: { favourite: true } });
