@@ -1,6 +1,6 @@
 // The grant table lives on the server (Preset::grants(), sent as the `presets` prop).
 // This only reads it: no module levels are defined in JS.
-export const MODULE_KEYS = ['todo', 'wishlist', 'finance', 'health'];
+export const MODULE_KEYS = ['todo', 'wishlist', 'finance', 'health', 'shopping', 'recipes'];
 
 export function applyPreset(presetKey, presets) {
     const grants = presets?.[presetKey];

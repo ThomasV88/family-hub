@@ -46,7 +46,7 @@ const eventLabel = (row) => (row.event === 'access_denied' ? t('audit.event.acce
 const AGENT_NAMES = { codex: 'OpenAI Codex', copilot: 'GitHub Copilot' };
 const AGENT_FIELDS = ['enabled', 'position', 'model'];
 const BULK_ACTIONS = ['dry_run', 'started', 'paused', 'resumed', 'cancelled', 'completed'];
-const BULK_SCOPES = ['no_proposal', 'last_failed', 'all'];
+const BULK_SCOPES = ['no_proposal', 'no_text', 'last_failed', 'all'];
 // A stored window in seconds as "1 hour" / "90 minutes"; a value that is not a plain positive number shows nothing.
 function durationPhrase(value) {
     const n = Number(value);
@@ -141,6 +141,13 @@ function details(row) {
             return t('audit.detail.reauth_confirmed');
         case 'help_text_changed':
             return helpTextDetail(meta);
+        case 'child_created':
+            return t('audit.detail.child_created', { name });
+        case 'child_converted':
+            return t('audit.detail.child_converted', { name });
+        case 'profile_changed_by_other':
+            // The meta holds only which part changed (photo or name), never the name text.
+            return t(`audit.detail.profile_changed_${['photo', 'name'].includes(meta.field) ? meta.field : 'other'}`, { name });
         case 'medical_access_changed':
             return joinPhrases(t('audit.detail.medical_access_changed'), medicalPhrase('change', meta.change));
         case 'medical_exported':
@@ -153,7 +160,14 @@ function details(row) {
         case 'medical_subject_created':
         case 'medical_subject_deleted':
         case 'medical_admin_self_added':
+        case 'medical_text_removed':
+            // Ids only in the meta; nothing but the fixed label is shown.
             return t(`audit.detail.${row.event}`);
+        case 'shopping_list_mailed': {
+            // Only the number of recipients is stored and shown, never an address.
+            const n = Number.isFinite(Number(meta.recipient_count)) ? Math.max(0, Math.trunc(Number(meta.recipient_count))) : 0;
+            return t('audit.detail.shopping_list_mailed', { n }, n);
+        }
         case 'ai_agent_setting_changed':
             return agentSettingDetail(meta);
         case 'ai_bulk_run_changed':

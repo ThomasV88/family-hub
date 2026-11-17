@@ -49,6 +49,8 @@ import AiReview from '../../../resources/js/Pages/Health/AiReview.vue';
 import AiCalls from '../../../resources/js/Pages/Settings/AiCalls.vue';
 import TimelineList from '../../../resources/js/Health/TimelineList.vue';
 import SpecialtyFolder from '../../../resources/js/Health/SpecialtyFolder.vue';
+import DocumentSearch from '../../../resources/js/Health/Search/DocumentSearch.vue';
+import RecognisedText from '../../../resources/js/Health/Text/RecognisedText.vue';
 
 const ID = '11111111-1111-4111-8111-111111111111';
 const PERSON = { id: ID, name: 'Ada Novak', birthDate: '2015-03-04', ageYears: 11, sex: 'female', bloodType: 'A+', hasAccount: false, aiConsent: false, canEdit: true, notes: 'Notes', contacts: [] };
@@ -341,6 +343,80 @@ const states = {
     'AI calls loading': callsState({ calls: null }, '[aria-busy="true"], .ui-skeleton, h1'),
 };
 
+// 13-05: document search states and the recognised text section. The server answers are fixtures; the component is
+// driven through its own input, so every state is reached the way a member reaches it.
+const SEARCH_PEOPLE = 2;
+const hit = (n, over = {}) => ({
+    documentId: `bbbbbbbb-bbbb-4bbb-8bbb-${String(n).padStart(12, '0')}`, personId: ID, personName: 'Ada Novak', title: `Blood test ${n}`, uploadedOn: '2026-03-04',
+    visitId: 'v1', visitName: 'Dr Heart', visitOn: '2026-03-01', visitSpecialty: 'cardiology', page: 2,
+    snippets: [[{ text: 'Hemoglobin ', hit: false }, { text: 'result', hit: true }, { text: ' within range', hit: false }]],
+    textComplete: false, pagesRead: 3, pagesTotal: 8, ...over,
+});
+const searchState = (answer, target, { reliability = 'uncertain', more = false } = {}) => ({
+    component: DocumentSearch,
+    props: () => ({ person: PERSON, peopleCount: SEARCH_PEOPLE, reliability }),
+    target,
+    after: async () => {
+        fetchMock.mockResolvedValue(answer);
+        const input = $('[data-testid="search-input"]');
+        if (!input) return;
+        input.value = 'result';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        await nextTick();
+        $('[data-testid="doc-search-form"]').dispatchEvent(new Event('submit', { cancelable: true }));
+        for (let i = 0; i < 6; i += 1) { await Promise.resolve(); await nextTick(); }
+    },
+});
+const okAnswer = (items, over = {}) => ({ ok: true, status: 200, data: { items, hasMore: false, page: 1, ...over } });
+const TEXT_DOC = { ...D1, hasText: true };
+const textState = (data, target, { canEdit = true, reliability = 'uncertain' } = {}) => ({
+    component: RecognisedText,
+    props: () => ({ personId: ID, document: TEXT_DOC, canEdit, reliability, runActive: false }),
+    target,
+    after: async () => {
+        fetchMock.mockResolvedValue({ ok: true, status: 200, data });
+        $('[data-testid="rtext-toggle"]')?.click();
+        for (let i = 0; i < 6; i += 1) { await Promise.resolve(); await nextTick(); }
+    },
+});
+const ONE_PAGE = { pages: [{ page: 1, text: 'Hemoglobin 140 g/l\nGlucose 5.1 mmol/l' }], pagesRead: 1, pagesTotal: 1, complete: true, language: 'sk' };
+const MANY_PAGES = { pages: [{ page: 1, text: 'First page text' }, { page: 2, text: '' }, { page: 3, text: 'Third page text' }], pagesRead: 3, pagesTotal: 8, complete: false, language: 'en' };
+
+const searchStates = {
+    'Search idle': { component: DocumentSearch, props: () => ({ person: PERSON, peopleCount: SEARCH_PEOPLE, reliability: 'reliable' }), target: '[data-testid="search-idle"]' },
+    'Search results with marks': searchState(okAnswer([hit(1), hit(2, { snippets: [], textComplete: true, visitId: null, page: null })]), '[data-testid="search-list"] mark'),
+    'Search results with more pages': searchState(okAnswer([hit(1), hit(2)], { hasMore: true }), '[data-testid="search-more"]', { reliability: 'reliable' }),
+    'Search empty': searchState(okAnswer([]), '[data-testid="search-empty"]'),
+    'Search error': searchState({ ok: false, status: 500, error: 'failed', data: {} }, '[data-testid="search-error"]'),
+    'Search throttled': searchState({ ok: false, status: 429, error: 'throttle', minutes: 1, data: {} }, '[data-testid="search-throttled"]'),
+    'Recognised text single page editor': textState(ONE_PAGE, '[data-testid="rtext-text"]'),
+    'Recognised text multi page partial': textState(MANY_PAGES, '[data-testid="rtext-partial-alert"]'),
+    'Recognised text read-only': textState(ONE_PAGE, '[data-testid="rtext-copy"]', { canEdit: false, reliability: 'reliable' }),
+    'Recognised text load failed': textState(null, '[data-testid="rtext-load-failed"]'),
+};
+Object.assign(states, searchStates);
+// 13-10: run states with saved text, the notice dialog text variants and the consent turn-off confirmation with the purge sentence.
+const TEXT_AI = { ...AI_RUN, noticeAcknowledged: true, textNotice: true };
+const textRun = (name, status, extra, target, ai = TEXT_AI) => [name, { ...runState({ [D1.id]: aiStatus(status, extra) }, { ai, target }), ai: true }];
+const phase13States = Object.fromEntries([
+    textRun('AI run text saved', 'text_saved', { mode: 'text', textSaved: true, pagesRead: 4, pagesTotal: 9 }, '[data-testid="ai-detail"]'),
+    textRun('AI run running with text saved', 'running', { textSaved: true }, '[data-testid="ai-detail"]'),
+    textRun('AI run waiting with text saved', 'waiting', { textSaved: true, availableAt: new Date(Date.now() + 3 * 3600 * 1000).toISOString() }, '[data-testid="ai-detail-text"]'),
+    textRun('AI run failed with text saved', 'failed', { textSaved: true }, '[data-testid="ai-detail"]'),
+    textRun('AI run cancelled after the text was saved', 'cancelled', { textSaved: true }, '[data-testid="ai-detail"]'),
+    ['AI run text provider line', { ...runState({}, { ai: { ...TEXT_AI, providers: ['codex', 'copilot'] }, target: '[data-testid="ai-sends"]' }), ai: true }],
+    ['AI run text notice dialog', { ...runState({}, { ai: { ...AI_RUN, textNotice: true }, target: '[role="dialog"]', after: async () => { await click('[data-testid="ai-run"]'); } }), ai: true }],
+    ['AI notice dialog text variant', { component: AiNoticeDialog, props: () => ({ open: true, text: true }), target: '[data-testid="ai-notice-confirm"]', ai: true }],
+    ['AI notice dialog text variant multi', { component: AiNoticeDialog, props: () => ({ open: true, text: true, variant: 'multi' }), target: '[data-testid="ai-notice-confirm"]', ai: true }],
+    ['AI notice dialog text variant github', { component: AiNoticeDialog, props: () => ({ open: true, text: true, variant: 'github' }), target: '[data-testid="ai-notice-confirm"]', ai: true }],
+    ['AI consent turn-off confirmation with the purge sentence', {
+        component: AiConsentControl, props: () => ({ personId: ID, value: true, canEdit: true, purgesText: true }), target: '[data-testid="ai-off-purge"]',
+        after: async () => { await click('[data-testid="ai-switch"]'); }, ai: true,
+    }],
+]);
+Object.assign(states, phase13States);
+
+
 let current;
 afterEach(() => {
     current?.unmount();
@@ -459,5 +535,15 @@ describe('health styles cannot force horizontal overflow', () => {
         const css = raw.replace(/@(container|media)[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, '');
         expect(css).not.toMatch(/text-overflow:\s*ellipsis/);
         expect(css).not.toMatch(/(^|[;{\s])(min-)?width:\s*(32[1-9]|3[3-9]\d|[4-9]\d\d|\d{4,})px/);
+    });
+});
+
+describe('13-05 sources', () => {
+    it('has no v-html, browser storage or history use in the search and recognised text components', () => {
+        for (const dir of ['resources/js/Health/Search', 'resources/js/Health/Text']) {
+            for (const file of readdirSync(dir)) {
+                expect(readFileSync(`${dir}/${file}`, 'utf8'), `${dir}/${file}`).not.toMatch(/v-html|localStorage|sessionStorage|indexedDB|caches\.|history\.|console\./);
+            }
+        }
     });
 });

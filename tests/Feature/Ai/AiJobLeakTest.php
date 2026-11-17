@@ -4,6 +4,7 @@ use App\Access\AccessLevel;
 use App\Console\Commands\AiReapStuck;
 use App\Medical\Ai\RunExtractionJob;
 use App\Medical\Ai\Work\WorkDir;
+use App\Medical\Queries\DocumentTextStore;
 use App\Models\AiAgentSetting;
 use App\Models\AiCall;
 use App\Models\MedicalAiExtraction;
@@ -89,7 +90,7 @@ beforeEach(function () {
     $this->scripts = [];
     $this->root = sys_get_temp_dir().'/lk-work-'.strtolower((string) Str::ulid());
     config([
-        'ai.work_dir' => $this->root, 'ai.codex.home' => $this->root, 'ai.codex.model' => null,
+        'ai.work_dir' => $this->root, 'ai.codex.home' => $this->root, 'ai.codex.model' => null, 'ai.ocr.enabled' => true,
         'ai.copilot.home' => $this->root.'-copilot', 'ai.copilot.cache' => $this->root.'-cache', 'ai.copilot.model' => null,
     ]);
 });
@@ -302,4 +303,103 @@ it('puts only the extraction id into the jobs table when a waiting run is resume
     foreach ([MedicalPrivacy::CANARY, $s['subject']->name, $s['doc']->title, $s['doc']->path, $s['doc']->id, $s['subject']->id, 'jpeg-bytes'] as $needle) {
         expect($payload)->not->toContain($needle);
     }
+});
+
+/** Everything a transcription run may leave behind, apart from the text table itself. */
+function lkTxClean(array $logsBefore, array $s, string $needle): void
+{
+    $row = DB::table('medical_ai_extractions')->where('id', $s['run']->id)->first();
+    expect(lkSinks())->not->toContain($needle)->and(json_encode($row))->not->toContain($needle)->and(lkLogSince($logsBefore))->not->toContain($needle);
+}
+
+it('keeps the recognised text out of every sink on a successful transcription run', function () {
+    $s = lkSetup();
+    DB::table('medical_ai_extractions')->where('id', $s['run']->id)->update(['mode' => 'full']);
+    $state = sys_get_temp_dir().'/lk-tx-state-'.bin2hex(random_bytes(4));
+    $log = sys_get_temp_dir().'/lk-tx-log-'.bin2hex(random_bytes(4));
+    $this->scripts[] = $script = FakeCodex::transcribing($state, $log, 'ZxCanaryOcr Page', ['extract' => json_encode(lkPayload('Dr Clean'))]);
+    array_push($this->scripts, $state, $log);
+    config(['ai.codex.binary' => $script]);
+    $logs = lkLogSizes();
+
+    (new RunExtractionJob($s['run']->id))->handle();
+
+    expect(DB::table('medical_ai_extractions')->where('id', $s['run']->id)->value('status'))->toBe('ready')
+        ->and((string) DB::table('medical_document_texts')->where('document_id', $s['doc']->id)->value('body'))->toContain('ZxCanaryOcr');
+    lkTxClean($logs, $s, 'ZxCanaryOcr');
+});
+
+it('keeps CLI output full of the canary out of every sink when a text-only run fails', function () {
+    $s = lkSetup();
+    DB::table('medical_ai_extractions')->where('id', $s['run']->id)->update(['mode' => 'text']);
+    $this->scripts[] = $script = FakeCodex::echoing('ZxCanaryOcr');
+    config(['ai.codex.binary' => $script]);
+    $logs = lkLogSizes();
+
+    (new RunExtractionJob($s['run']->id))->handle();
+
+    expect(DB::table('medical_ai_extractions')->where('id', $s['run']->id)->value('status'))->toBe('failed')
+        ->and(DB::table('medical_document_texts')->count())->toBe(0);
+    lkTxClean($logs, $s, 'ZxCanaryOcr');
+});
+
+it('ends as the content-free worker_lost failure when the text write raises an error that carries the text', function () {
+    $s = lkSetup();
+    DB::table('medical_ai_extractions')->where('id', $s['run']->id)->update(['mode' => 'text']);
+    DB::unprepared('CREATE FUNCTION lk_tx_boom() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION \'text was %\', NEW.body; END $$');
+    DB::unprepared('CREATE TRIGGER lk_tx_boom BEFORE INSERT OR UPDATE ON medical_document_texts FOR EACH ROW EXECUTE FUNCTION lk_tx_boom()');
+    $state = sys_get_temp_dir().'/lk-tx-state-'.bin2hex(random_bytes(4));
+    $log = sys_get_temp_dir().'/lk-tx-log-'.bin2hex(random_bytes(4));
+    $this->scripts[] = $script = FakeCodex::transcribing($state, $log, 'ZxCanaryOcr Page');
+    array_push($this->scripts, $state, $log);
+    config(['ai.codex.binary' => $script]);
+    $logs = lkLogSizes();
+
+    $thrown = null;
+    try {
+        (new RunExtractionJob($s['run']->id))->handle();
+    } catch (Throwable $e) {
+        $thrown = $e;
+    }
+
+    $row = DB::table('medical_ai_extractions')->where('id', $s['run']->id)->first();
+    expect($thrown)->toBeInstanceOf(RuntimeException::class)->and($thrown->getMessage())->toBe('Extraction job failed.')->and($thrown->getPrevious())->toBeNull()
+        ->and($row->status)->toBe('failed')->and($row->failure_code)->toBe('worker_lost')
+        ->and(DB::table('medical_document_texts')->count())->toBe(0)
+        ->and(json_encode($thrown->getTrace()))->not->toContain('ZxCanaryOcr');
+    lkTxClean($logs, $s, 'ZxCanaryOcr');
+});
+
+it('keeps the stored text out of every sink when step 2 of a reused text fails with output full of the canary', function () {
+    $s = lkSetup();
+    DB::table('medical_ai_extractions')->where('id', $s['run']->id)->update(['mode' => 'full']);
+    app(DocumentTextStore::class)->saveStandalone($s['doc']->id, $s['user']->id, 'codex', 'gpt-test', 'sk', ['ZxCanaryOcr one', 'ZxCanaryOcr two'], 2, true);
+    $this->scripts[] = $script = FakeCodex::echoing('ZxCanaryOcr');
+    config(['ai.codex.binary' => $script]);
+    $logs = lkLogSizes();
+
+    (new RunExtractionJob($s['run']->id))->handle();
+
+    $row = DB::table('medical_ai_extractions')->where('id', $s['run']->id)->first();
+    expect($row->status)->toBe('failed')->and($row->payload)->toBeNull()
+        ->and((string) DB::table('medical_document_texts')->where('document_id', $s['doc']->id)->value('body'))->toContain('ZxCanaryOcr');
+    lkTxClean($logs, $s, 'ZxCanaryOcr');
+});
+
+it('records prompt version 2 and the text only in the text table after a ready two-step run', function () {
+    $s = lkSetup();
+    DB::table('medical_ai_extractions')->where('id', $s['run']->id)->update(['mode' => 'full']);
+    $state = sys_get_temp_dir().'/lk-ts-state-'.bin2hex(random_bytes(4));
+    $log = sys_get_temp_dir().'/lk-ts-log-'.bin2hex(random_bytes(4));
+    $this->scripts[] = $script = FakeCodex::transcribing($state, $log, 'ZxCanaryTwo Page', ['extract' => json_encode(lkPayload('Dr Clean'))]);
+    array_push($this->scripts, $state, $log);
+    config(['ai.codex.binary' => $script]);
+    $logs = lkLogSizes();
+
+    (new RunExtractionJob($s['run']->id))->handle();
+
+    $row = DB::table('medical_ai_extractions')->where('id', $s['run']->id)->first();
+    expect($row->status)->toBe('ready')->and((int) $row->prompt_version)->toBe(2)->and((string) $row->payload)->not->toContain('ZxCanaryTwo');
+    lkTxClean($logs, $s, 'ZxCanaryTwo');
+    expect(glob(config('ai.work_dir').'/*') ?: [])->toBe([]);
 });

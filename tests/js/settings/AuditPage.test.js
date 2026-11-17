@@ -61,6 +61,45 @@ describe('Audit page', () => {
         expect(current.text()).toContain('Stopped sharing a finance account with Cyril');
     });
 
+    it('describes a profile changed by someone else without any name text, in every language', () => {
+        const entries = [
+            { id: 8, occurredAt: '2026-05-12T10:00:00+00:00', actorLabel: 'Anna', event: 'profile_changed_by_other', group: 'account', module: null, targetLabel: 'Kid', meta: { field: 'photo' }, ip: null },
+            { id: 7, occurredAt: '2026-05-12T09:00:00+00:00', actorLabel: 'Anna', event: 'profile_changed_by_other', group: 'account', module: null, targetLabel: 'Kid', meta: { field: 'name' }, ip: null },
+            { id: 6, occurredAt: '2026-05-12T08:00:00+00:00', actorLabel: 'Anna', event: 'profile_changed_by_other', group: 'account', module: null, targetLabel: 'Kid', meta: { field: 'bogus' }, ip: null },
+        ];
+        mountPage({ entries });
+        expect(current.text()).toContain('Changed the photo of Kid');
+        expect(current.text()).toContain('Changed the name of Kid');
+        expect(current.text()).toContain('Changed the profile of Kid');
+        current.unmount();
+        mountPage({ locale: 'sk', entries });
+        expect(current.text()).toContain('Zmenená fotografia osoby Kid');
+        current.unmount();
+        mountPage({ locale: 'pl', entries });
+        expect(current.text()).toContain('Zmieniono zdjęcie osoby Kid');
+    });
+
+    it('describes an e-mailed shopping list with the recipient count only, in every language', () => {
+        const entries = [
+            { id: 12, occurredAt: '2026-05-12T10:00:00+00:00', actorLabel: 'Anna', event: 'shopping_list_mailed', group: 'account', module: null, targetLabel: null, meta: { recipient_count: 3, address: 'secret@example.test' }, ip: null },
+            { id: 11, occurredAt: '2026-05-12T09:00:00+00:00', actorLabel: 'Anna', event: 'shopping_list_mailed', group: 'account', module: null, targetLabel: null, meta: { recipient_count: 1 }, ip: null },
+            { id: 10, occurredAt: '2026-05-12T08:00:00+00:00', actorLabel: 'Anna', event: 'shopping_list_mailed', group: 'account', module: null, targetLabel: null, meta: { recipient_count: 'x' }, ip: null },
+        ];
+        mountPage({ entries });
+        expect(current.text()).toContain('Shopping list e-mailed to 3 addresses');
+        expect(current.text()).toContain('Shopping list e-mailed to 1 address');
+        expect(current.text()).not.toContain('secret@example.test');
+        expect(current.text()).not.toContain('audit.detail');
+        current.unmount();
+        mountPage({ locale: 'sk', entries });
+        expect(current.text()).toContain('Nákupný zoznam odoslaný e-mailom na 3 adresy');
+        expect(current.text()).toContain('na 1 adresu');
+        current.unmount();
+        mountPage({ locale: 'pl', entries });
+        expect(current.text()).toContain('Listę zakupów wysłano e-mailem na 3 adresy');
+        expect(current.text()).toContain('na 1 adres');
+    });
+
     it('shows heading, intro, hidden caption, scoped headers and composed details', () => {
         mountPage();
         expect(current.find('h1').text()).toBe('Audit log');

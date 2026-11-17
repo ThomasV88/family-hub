@@ -55,4 +55,10 @@ describe('the real service worker source', () => {
         expect(swSource).toContain('showNotification');
         expect(swSource).toContain('openWindow');
     });
+
+    it('never caches photos: no runtime routes, strategies or /people/ path', () => {
+        for (const token of ['registerRoute', 'CacheFirst', 'StaleWhileRevalidate', '/people/']) {
+            expect(swSource).not.toContain(token);
+        }
+    });
 });

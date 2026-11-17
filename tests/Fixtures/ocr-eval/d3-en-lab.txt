@@ -1,0 +1,24 @@
+Riverside Clinical Laboratory (demo)
+Laboratory Report
+Patient: Anna Novak (demo)
+Date of birth: 02.11.1985
+Sample collected: 04.03.2026
+Report date: 05.03.2026
+
+Test | Result | Unit | Reference range
+Hemoglobin | 13.4 | g/dL | 12.0 - 15.5
+Hematocrit | 40.2 | % | 36.0 - 46.0
+White blood cells | 7.8 | 10^9/L | 4.0 - 11.0
+Platelets | 251 | 10^9/L | 150 - 400
+Glucose (fasting) | 5.4 | mmol/L | 3.9 - 5.6
+Creatinine | 71 | umol/L | 45 - 84
+ALT | 22 | U/L | 7 - 35
+Cholesterol total | 5.1 | mmol/L | below 5.2
+TSH | 2.31 | mIU/L | 0.40 - 4.00
+
+Comment: All values are within the reference ranges.
+Medication reported by the patient:
+Levothyroxine 50 mcg once daily in the morning.
+Known allergy: Latex, reaction mild.
+Vaccination note: Influenza vaccine given on 11.10.2025.
+Reviewed by Dr. Peter Hall (demo), Laboratory medicine

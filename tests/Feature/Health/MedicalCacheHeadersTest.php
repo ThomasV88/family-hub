@@ -239,3 +239,44 @@ it('keeps the extended AI status poll no-store and private while a run waits or 
         ->and($response->headers->get('ETag'))->toBeNull()
         ->and(collect($response->json('documents'))->pluck('status')->all())->toContain('waiting');
 });
+
+it('marks the document search answer, an empty answer and a validation error no-store and private', function () {
+    $ctx = MedicalPrivacy::scenario();
+    MedicalPrivacy::seedVisible($ctx);
+    MedicalPrivacy::seedHidden($ctx);
+
+    foreach (['match' => ['q' => 'paracetamol'], 'canary' => ['q' => MedicalPrivacy::CANARY], 'invalid' => ['q' => ''], 'malformed person' => ['q' => 'abc', 'person' => 'x']] as $label => $payload) {
+        app('auth')->forgetGuards();
+        $this->flushSession();
+        $response = $this->actingAs($ctx['viewer'])->postJson('/health/search', $payload);
+        $header = (string) $response->headers->get('Cache-Control');
+        expect(str_contains($header, 'no-store') && str_contains($header, 'private'))->toBeTrue("$label answered ".$response->getStatusCode()." with '$header'")
+            ->and($response->headers->get('ETag'))->toBeNull();
+    }
+});
+
+it('marks the recognised text view, its 404 and its removal no-store and private', function () {
+    $ctx = MedicalPrivacy::scenario();
+    MedicalPrivacy::seedVisible($ctx);
+    MedicalPrivacy::seedHidden($ctx);
+    $person = $ctx['person']->getKey();
+    $bare = MedicalDocument::factory()->pdf()->create(['subject_id' => $person, 'title' => 'No text']);
+
+    $calls = [
+        'text' => ['GET', route('health.documents.text', ['person' => $person, 'document' => $ctx['document']], false)],
+        'no text' => ['GET', route('health.documents.text', ['person' => $person, 'document' => $bare->getKey()], false)],
+        'hidden' => ['GET', route('health.documents.text', ['person' => $ctx['hidden']['person'], 'document' => $ctx['hidden']['document']], false)],
+        'remove' => ['DELETE', route('health.documents.text.destroy', ['person' => $person, 'document' => $ctx['document']], false)],
+        'remove again' => ['DELETE', route('health.documents.text.destroy', ['person' => $person, 'document' => $ctx['document']], false)],
+    ];
+    $expected = ['text' => 200, 'no text' => 404, 'hidden' => 403, 'remove' => 204, 'remove again' => 403];
+    foreach ($calls as $label => [$method, $url]) {
+        app('auth')->forgetGuards();
+        $this->flushSession();
+        $response = $this->actingAs($ctx['viewer'])->call($method, $url, [], [], [], ['HTTP_ACCEPT' => 'application/json']);
+        $header = (string) $response->headers->get('Cache-Control');
+        expect($response->getStatusCode())->toBe($expected[$label], $label)
+            ->and(str_contains($header, 'no-store') && str_contains($header, 'private'))->toBeTrue("$label answered with '$header'")
+            ->and($response->headers->get('ETag'))->toBeNull();
+    }
+});

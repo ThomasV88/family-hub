@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { UserPlus } from '@lucide/vue';
+import { Baby, UserPlus } from '@lucide/vue';
 import SettingsLayout from '../../Layouts/SettingsLayout.vue';
 import UiCard from '../../Components/ui/UiCard.vue';
 import UiList from '../../Components/ui/UiList.vue';
@@ -12,6 +12,7 @@ import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
 import UiConfirmDialog from '../../Components/ui/UiConfirmDialog.vue';
 import { useToast } from '../../Components/ui/useToast.js';
 import InvitationRow from '../../Components/Settings/InvitationRow.vue';
+import ChildCreateDialog from '../../Components/Profile/ChildCreateDialog.vue';
 import InviteDialog from '../../Components/Settings/InviteDialog.vue';
 import MemberRow from '../../Components/Settings/MemberRow.vue';
 import MemberPanel from '../../Components/Settings/MemberPanel.vue';
@@ -24,6 +25,8 @@ import PermissionMatrix from '../../Components/Settings/PermissionMatrix.vue';
 const props = defineProps({
     sections: { type: Array, default: () => [] },
     members: { type: Array, default: () => [] },
+    // Members who may be chosen as parents of a child (sign in, Wishlist Edit); null offers everyone in the managers tab.
+    eligibleParents: { type: Array, default: null },
     presets: { type: Object, default: () => ({}) },
     openMember: { type: Number, default: null },
     invitations: { type: Array, default: () => [] },
@@ -46,6 +49,26 @@ const toast = useToast();
 const inviteOpen = ref(false);
 const inviteResult = ref(null);
 const revoking = ref(null);
+
+// Adding a child: the server creates it, then the photo (if any) is sent to the photo endpoint, then its panel opens.
+const childOpen = ref(false);
+const photoError = ref('');
+const selfEligible = computed(() => {
+    const self = props.members.find((m) => m.isSelf);
+
+    return !self || (props.eligibleParents ?? []).some((p) => p.id === self.id);
+});
+function childCreated({ id, photo }) {
+    photoError.value = '';
+    if (!id) return;
+    open(id, 'profile');
+    if (!photo) return;
+    router.post(`/people/${id}/photo`, { photo }, {
+        forceFormData: true,
+        preserveScroll: true,
+        onError: (errors) => { photoError.value = errors?.photo ?? 'profile.photo.err_decode'; },
+    });
+}
 
 function readInvite() {
     return usePage().props.flash?.data?.invite ?? null;
@@ -97,6 +120,7 @@ function open(id, tab = 'permissions') {
     <SettingsLayout :sections="sections" current="members" title="settings.section.members">
         <div class="members__header">
             <UiButton variant="primary" :icon="UserPlus" @click="openInvite">{{ t('settings.members.invite') }}</UiButton>
+            <UiButton variant="secondary" :icon="Baby" @click="childOpen = true">{{ t('settings.members.child.add') }}</UiButton>
         </div>
         <UiTabs v-model="view" :tabs="viewTabs" :label="t('settings.section.members')">
             <template #panel-members>
@@ -130,6 +154,7 @@ function open(id, tab = 'permissions') {
                 <PermissionMatrix :members="members" @open="open($event)" />
             </template>
         </UiTabs>
+        <ChildCreateDialog v-model:open="childOpen" :parents="eligibleParents ?? []" :self-eligible="selfEligible" @created="childCreated" />
         <InviteDialog
             :open="inviteOpen"
             :presets="presets"
@@ -149,7 +174,7 @@ function open(id, tab = 'permissions') {
         />
         <template #panel>
             <PersonAccessPanel v-if="openPerson" :key="openPerson.id" :person="openPerson" :members="members" @close="openPersonId = null" />
-            <MemberPanel v-else-if="opened" :key="`${opened.id}-${openTab}`" :member="opened" :presets="presets" :members="members" :security-policy="securityPolicy" :confirm-fresh="confirmFresh" :methods="methods" :initial-tab="openTab" @close="openId = null" />
+            <MemberPanel v-else-if="opened" :key="`${opened.id}-${openTab}`" :member="opened" :presets="presets" :members="members" :eligible-parents="eligibleParents" :photo-error="photoError" :security-policy="securityPolicy" :confirm-fresh="confirmFresh" :methods="methods" :initial-tab="openTab" @close="openId = null; photoError = ''" />
         </template>
     </SettingsLayout>
 </template>

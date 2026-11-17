@@ -6,7 +6,9 @@
         "finance": "Finances",
         "health": "Health",
         "account": "Account and security",
-        "settings": "Settings (administrators)"
+        "settings": "Settings (administrators)",
+        "shopping": "Shopping",
+        "recipes": "Recipes"
     },
     "screens": {
         "task_panel": "Task panel",
@@ -36,7 +38,20 @@
         "invite_dialog": "Invite dialog",
         "members_permissions": "Members, Permissions tab",
         "ai_agents": "AI agents",
-        "home": "Overview page"
+        "home": "Overview page",
+        "profile_page": "Profile settings page",
+        "members_child": "Members, child dialog and panel",
+        "shopping_settings": "Settings, Shopping",
+        "shopping_list_panel": "Shopping list settings panel",
+        "shopping_email": "Shopping e-mail dialog",
+        "shopping_list": "Shopping list page",
+        "shopping_finish": "Finish shopping dialog",
+        "recipe_form": "Recipe form",
+        "recipe_detail": "Recipe detail",
+        "recipe_shopping": "Add to shopping",
+        "recipe_import": "Reading a recipe from a web page",
+        "document_search": "Document search",
+        "document_text": "Recognised text of a document"
     },
     "topics": {
         "tasks.visibility": {
@@ -193,11 +208,11 @@
         },
         "health.ai_consent": {
             "title": "AI for this person",
-            "text": "Off by default. When on, documents of this person can be sent to an outside AI company to suggest entries. You check every suggestion before it is saved. Turning it off deletes nothing."
+            "text": "Off by default. When on, documents of this person can be sent to an outside AI company to suggest entries. You check every suggestion before it is saved. Turning it off stops new runs. If the person has recognised text, you are asked first and that text is deleted."
         },
         "health.ai_run": {
             "title": "Run AI",
-            "text": "Sends this one document to the outside AI company to read it and suggest entries. A PDF is read up to its first 20 pages; a HEIC photo is converted to a plain picture for AI only. Nothing is saved until you review and accept the suggestions."
+            "text": "Sends this one document to the outside AI company to read it and suggest entries. Where full-text reading is on, AI first reads all the text and saves it here, so members who may open the document can search it, then suggests entries from that text (a complete saved text is reused). A PDF is read up to its first 20 pages. Nothing goes into the record until you accept it."
         },
         "health.export_format": {
             "title": "Export format",
@@ -218,6 +233,14 @@
         "security.recovery_codes": {
             "title": "Recovery codes",
             "text": "One-time codes that let you sign in if you lose your phone. Each works once. Keep them somewhere safe; creating new codes makes the old ones stop working."
+        },
+        "profile.photo": {
+            "title": "Your photo",
+            "text": "Everyone in the family who can open any part of the app can see your photo, next to your name. It is stored privately, never on a public address, and hidden details such as the place it was taken are removed."
+        },
+        "profile.name": {
+            "title": "Display name",
+            "text": "This is the name shown on tasks, wishes and lists. You can change it any time. Your e-mail address is used to sign in and cannot be changed here yet."
         },
         "settings.security_requirement": {
             "title": "Require two-step verification",
@@ -253,11 +276,87 @@
         },
         "settings.ai_bulk": {
             "title": "Bulk re-generation",
-            "text": "Reads older documents with AI again, a few per day. First check what would run, then start. Suggestions you already accepted are never changed. You see counts only."
+            "text": "Reads older documents with AI again, a few per day. First check what would run, then start. Suggestions you already accepted are never changed. The scope \"Documents without recognised text\" (shown when full-text reading is on) only reads and saves the text and makes no suggestions. You see counts only."
         },
         "overview.system_status": {
             "title": "System status",
             "text": "Shows that the background checks which send reminders are running. If the coverage is low or no check has run, reminders may be late; ask whoever runs the server."
+        },
+        "members.child": {
+            "title": "What is a child account?",
+            "text": "A child account has no e-mail and cannot sign in, and it gets no mail or notifications. The parents you choose, and administrators, manage the name and photo, and the parents manage the wish list. Only members who can sign in and may edit the Wishlist can be chosen."
+        },
+        "members.convert": {
+            "title": "Why an e-mail for a child?",
+            "text": "The e-mail is where the invitation goes. When the child accepts it, this same account gets the e-mail and can sign in. Wish list, tasks, permissions and parents are kept. Until then the child cannot sign in, and revoking the invitation changes nothing."
+        },
+        "shopping.catalog": {
+            "title": "Item catalog",
+            "text": "The catalog is a shared list of things the family buys often, with a picture and a default unit, so anyone can pick them quickly. You can also type your own item on a list. Deleting a catalog item never removes it from lists: it stays there as plain text without the picture."
+        },
+        "shopping.store": {
+            "title": "Stores",
+            "text": "Add the shops you use, with a logo, and assign one to a shopping list. A PNG with a transparent background works best; it is shown on a white background. If you delete a store, the lists stay but they then have no store."
+        },
+        "shopping.units": {
+            "title": "Units",
+            "text": "Built-in units such as pcs, g, kg and l are shown in every language and cannot be changed. Administrators can add more units, each with an English, a Slovak and a Polish name. If you delete a unit that is in use, the items keep their quantity but show it without a unit."
+        },
+        "shopping.roles": {
+            "title": "Responsible person, contributors and viewers",
+            "text": "The responsible person is the only one who can lock and unlock the list, mark items and finish the shopping, and can be changed at any time. People who can add and edit items change the items. People who can only view see the list but change nothing. A person has one role at a time."
+        },
+        "shopping.reminder": {
+            "title": "Reminder",
+            "text": "A list has one reminder, a date and time in the family time zone. A push notification goes to the responsible person only, and only if they turned push notifications on for their device in Settings, Notifications. If push is off at that time, the reminder is sent once you turn it on, up to 24 hours late. A time in the past is refused. Changing the time sets a new reminder."
+        },
+        "shopping.email": {
+            "title": "Sending a list by e-mail",
+            "text": "Type or paste up to 5 addresses; any address works. The e-mail is plain text with the items, quantities, store and responsible person, and has no link to the app. People who can only view cannot send. Daily limits apply, so a list cannot be sent over and over."
+        },
+        "shopping.lock": {
+            "title": "Locking a list",
+            "text": "Locking a list starts the shopping: nobody can add, remove or edit items any more. Only the responsible person locks and unlocks it and marks each item Bought or Unavailable; tap a button again to clear it. Others see the marks after they reload. Unlocking keeps the marks."
+        },
+        "shopping.carry_over": {
+            "title": "Items that could not be bought",
+            "text": "Items you mark Unavailable can go into a new open list named after this one with \"(unbought)\", with the same store, responsible person and access, and without the reminder. The finished list moves to the Archive either way and stays read-only."
+        },
+        "recipes.import": {
+            "title": "Reading a recipe from a web page",
+            "text": "The app reads the web page you paste and fills in the recipe form for you. The text of the page is sent to the AI provider your administrator turned on, and nothing else from your account. It works with most recipe pages, not all. Check everything before saving: nothing is saved until you press Save recipe."
+        },
+        "recipes.sharing": {
+            "title": "Who can see this recipe",
+            "text": "Choose Only me to keep the recipe to yourself. Choose Everyone in the family who uses Recipes to let other members read it, cook from it and add it to shopping. In both cases only you, as the author, can edit it. If you make a shared recipe private again, other members' notes, ticks and favourites on it are kept but hidden, and they return if you share it again."
+        },
+        "recipes.servings": {
+            "title": "Servings",
+            "text": "Change the number of servings to rescale the quantities on screen. Only what you see changes: the recipe itself is not touched, and rows without an amount, baking times and pan sizes are not recalculated. The number you choose is remembered for you on this recipe. Reset returns to the recipe's own servings."
+        },
+        "recipes.progress": {
+            "title": "Your progress",
+            "text": "Tick an ingredient when it is prepared and a step when it is done. Your ticks are saved at once and stored per person: nobody else sees them, and you do not see theirs. Reset my progress in the menu clears only your own ticks on this recipe."
+        },
+        "recipes.notes": {
+            "title": "Personal notes",
+            "text": "Write what you want to remember, for example to use less salt next time. Notes save by themselves a moment after you stop typing. Only you can see them, other members never do, and that includes the author of the recipe. They are shown on your own recipes too."
+        },
+        "recipes.cooking": {
+            "title": "Cooking mode",
+            "text": "Cooking mode makes the rows larger and keeps ingredients and steps in one long page, so you can follow along with floury hands. On phones a bar at the bottom shows how far you are. Where your browser allows it the screen stays on while the mode is active. Nothing is stored: it is off again next time."
+        },
+        "recipes.shopping": {
+            "title": "Add to shopping list",
+            "text": "Choose a new list or one of your open lists. Check every ingredient before adding: untick what you already have and change the amount or unit. Matched ingredients keep the catalog name and get their picture (choose Add as typed item to use your own name). Everything is added together or nothing is. Ingredient notes are not copied."
+        },
+        "health.search": {
+            "title": "Search documents",
+            "text": "Searches the names of documents and the text AI read from them. Only documents you may open are searched, so a document you cannot see is never found. Documents AI never read are found by name only. The words you type are not saved and are not put in the address bar."
+        },
+        "health.document_text": {
+            "title": "Recognised text",
+            "text": "The text AI read from this document. Everyone who may open the document can read and copy it. It can contain errors, so check the document itself when it matters. Editors can remove it. Backups keep a copy until they expire."
         }
     }
 }

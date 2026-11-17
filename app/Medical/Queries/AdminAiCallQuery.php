@@ -60,7 +60,7 @@ final class AdminAiCallQuery
 
         $rows = $base->orderByDesc('c.queued_at')->orderByDesc('c.id')
             ->forPage($page, self::PER_PAGE)
-            ->select(['c.queued_at', 'c.agent', 'c.model', 'c.status', 'c.duration_ms', 'u.name as member_name'])
+            ->select(['c.queued_at', 'c.kind', 'c.agent', 'c.model', 'c.status', 'c.duration_ms', 'u.name as member_name'])
             ->selectRaw('CASE WHEN c.bulk_run_id IS NULL THEN s.name END as person_name')
             ->selectRaw('(c.bulk_run_id IS NOT NULL) as is_bulk')
             ->selectRaw("(c.status = 'failed' AND c.failure_code = 'quota_exhausted') as is_quota")
@@ -69,6 +69,7 @@ final class AdminAiCallQuery
                 'time' => Carbon::parse($r->queued_at)->toIso8601String(),
                 'startedBy' => $r->member_name,
                 'person' => $r->person_name,
+                'kind' => $r->kind,
                 'agent' => $r->agent,
                 'model' => $r->model,
                 'status' => $r->status,

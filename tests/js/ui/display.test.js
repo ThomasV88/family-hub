@@ -1,7 +1,12 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { mountUi } from '../helpers/mount.js';
 import { expectNoAxeViolations } from '../helpers/axe.js';
+let mockAvatars;
+vi.mock('@inertiajs/vue3', async (importOriginal) => ({
+    ...(await importOriginal()),
+    usePage: () => ({ props: mockAvatars === undefined ? {} : { avatars: mockAvatars } }),
+}));
 import UiTag from '../../../resources/js/Components/ui/UiTag.vue';
 import UiAvatar from '../../../resources/js/Components/ui/UiAvatar.vue';
 import UiChip from '../../../resources/js/Components/ui/UiChip.vue';
@@ -39,6 +44,53 @@ describe('UiAvatar', () => {
         m(UiAvatar, { props: { name: 'Peter', decorative: true } });
         expect(wrapper.attributes('aria-hidden')).toBe('true');
         expect(wrapper.attributes('role')).toBeUndefined();
+    });
+});
+
+describe('UiAvatar photo', () => {
+    afterEach(() => { mockAvatars = undefined; });
+    it('shows the thumbnail of a member in the avatars map, with empty alt and lazy loading', () => {
+        mockAvatars = { 5: 3 };
+        m(UiAvatar, { props: { name: 'Anna', userId: 5 } });
+        const img = wrapper.find('img');
+        expect(img.attributes('src')).toBe('/people/5/photo/thumb?v=3');
+        expect(img.attributes('alt')).toBe('');
+        expect(img.attributes('loading')).toBe('lazy');
+        expect(wrapper.attributes('aria-label')).toBe('Anna');
+    });
+    it('uses the full variant at size 96', () => {
+        mockAvatars = { 5: 3 };
+        m(UiAvatar, { props: { name: 'Anna', userId: 5, size: 96 } });
+        expect(wrapper.find('img').attributes('src')).toBe('/people/5/photo/full?v=3');
+    });
+    it('falls back to the initial for an unknown id, no map, or no user id', () => {
+        mockAvatars = { 5: 3 };
+        m(UiAvatar, { props: { name: 'Bob', userId: 6 } });
+        expect(wrapper.find('img').exists()).toBe(false);
+        expect(wrapper.text()).toBe('B');
+        wrapper.unmount();
+        mockAvatars = undefined;
+        m(UiAvatar, { props: { name: 'Bob', userId: 5 } });
+        expect(wrapper.find('img').exists()).toBe(false);
+        wrapper.unmount();
+        m(UiAvatar, { props: { name: 'Bob' } });
+        expect(wrapper.text()).toBe('B');
+    });
+    it('switches to the initial when the image fails', async () => {
+        mockAvatars = { 5: 3 };
+        m(UiAvatar, { props: { name: 'Anna', userId: 5 } });
+        await wrapper.find('img').trigger('error');
+        expect(wrapper.find('img').exists()).toBe(false);
+        expect(wrapper.text()).toBe('A');
+    });
+    it('prefers an explicit src', () => {
+        mockAvatars = { 5: 3 };
+        m(UiAvatar, { props: { name: 'Anna', userId: 5, src: 'blob:preview' } });
+        expect(wrapper.find('img').attributes('src')).toBe('blob:preview');
+    });
+    it('accepts size 96 only besides 32 and 40', () => {
+        expect(UiAvatar.props.size.validator(96)).toBe(true);
+        expect(UiAvatar.props.size.validator(64)).toBe(false);
     });
 });
 

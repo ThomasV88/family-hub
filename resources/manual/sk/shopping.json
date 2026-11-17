@@ -1,0 +1,234 @@
+{
+  "id": "shopping",
+  "category": "modules",
+  "order": 35,
+  "title": "Nákupy",
+  "summary": "Spoločné nákupné zoznamy pre rodinu: prehľad, vytváranie a kopírovanie zoznamov, pridávanie a zmena položiek, kto čo smie na zozname, uzamknutie a nákup, ukončenie a archív, odoslanie zoznamu e-mailom, pripomienky a katalóg položiek, obchody a jednotky, ktoré spravujete v Nastaveniach.",
+  "covers": ["module:shopping", "settings:shopping"],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Stránka Nákupy",
+      "blocks": [
+        { "type": "p", "text": "**Nákupy** sú v ponuke vľavo (v telefóne v lište dole), ak vám k nim správca dal prístup. Stránka zobrazuje nákupné zoznamy, ktoré smiete vidieť, na dvoch záložkách: **Otvorené** a **Archív**." },
+        { "type": "list", "items": [
+          "**Otvorené** zobrazuje zoznamy, ktoré ešte plánujete alebo podľa ktorých nakupujete, zoradené podľa času pripomienky (zoznamy bez pripomienky sú na konci), potom od najnovšieho. Zoznam, podľa ktorého sa nakupuje, má štítok **Uzamknutý** a lištu, ktorá ukazuje, koľko položiek je už kúpených.",
+          "Každý riadok ukazuje logo obchodu, názov zoznamu, obchod, zodpovednú osobu a čas pripomienky. Štítok **Pripomienka už prešla** sa zobrazí, keď čas pripomienky uplynul, ale zoznam nie je vybavený. Časy pripomienok sa vždy zobrazujú v časovom pásme rodiny, na každom zariadení.",
+          "**Archív** zobrazuje vybavené zoznamy od najnovšieho s dátumom, kedy boli vybavené. Dlhý archív je rozdelený na strany. Zvolená karta ostáva v adrese, takže **Späť** z otvoreného zoznamu vás vráti na tú istú kartu.",
+          "Keď je otvorených zoznamov viac ako 10, nad nimi sa zobrazí pole na hľadanie. Nerozlišuje veľké písmená ani diakritiku."
+        ] },
+        { "type": "p", "text": "Zoznam vidíte, ak ste ho vytvorili, ak ste jeho zodpovedná osoba, alebo ak ste do neho boli pridaní, buď ako osoba, ktorá smie pridávať a upravovať položky, alebo ako osoba, ktorá smie iba prezerať. Zoznamy, ktoré nevidíte, sa nezobrazujú vôbec. Zoznam nájdete v tabuľke [kto čo vidí](who-sees-what#table)." }
+      ]
+    },
+    {
+      "id": "create-list",
+      "title": "Vytvorenie zoznamu",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Otvorte **Nákupy** a stlačte **Nový zoznam**. Tlačidlo sa zobrazí, iba ak smiete meniť Nákupy.",
+          "Zadajte **Názov** zoznamu, napríklad \"Týždenný nákup\".",
+          "Ak chcete, vyberte **Obchod**. Prvá možnosť, **Bez obchodu**, ho nechá prázdny.",
+          "Vyberte **Zodpovednú osobu**. Ste to vy, kým nevyberiete niekoho iného.",
+          "Stlačte **Vytvoriť zoznam**. Nový zoznam sa otvorí prázdny a spolu s ním okno na pridávanie položiek."
+        ] },
+        { "type": "tip", "text": "Kto ďalší smie pridávať položky, kto smie iba prezerať, a pripomienku nastavíte neskôr v nastaveniach zoznamu." }
+      ]
+    },
+    {
+      "id": "add-items",
+      "title": "Pridávanie a zmena položiek",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Otvorte zoznam a stlačte **Pridať položky**. Tlačidlo vidí zodpovedná osoba a ľudia, ktorí boli do zoznamu pridaní ako tí, čo môžu pridávať a upravovať položky. Nový, prázdny zoznam toto okno otvorí sám.",
+          "Prezrite si katalóg. Každá položka má obrázok. Hľadanie nerozlišuje veľké písmená ani diakritiku, takže \"mliecko\" nájde \"Mliečko\".",
+          "Položku vyberiete ťuknutím. Vybraná položka ukáže množstvo a jednotku. Množstvo zmeníte tlačidlami **+** a **-** alebo ho napíšete do políčka (funguje aj desatinná čiarka, napríklad \"1,5\"). Jeden krok je 1 kus, 0,1 pre kilogramy a litre a 10 pre gramy a mililitre. Podľa potreby vyberte inú jednotku: gramy a kilogramy, mililitre a litre sa prepočítajú a zlomok sa pri jednotkách, ktoré ho nemajú, zaokrúhli. V jednom kroku môžete vybrať veľa položiek.",
+          "Nie je niečo v katalógu? Stlačte **Zadať vlastnú položku** (alebo počas hľadania riadok **Pridať \"...\" ako novú položku**), vyplňte názov, množstvo a jednotku a stlačte **Pridať do zoznamu**. Vaša vlastná položka sa do katalógu neuloží, kým nezaškrtnete **Uložiť aj do katalógu**, čo vidia len ľudia, ktorí spravujú katalóg.",
+          "Dole stlačte **Pridať** (ukáže, koľko položiek ste vybrali). Všetky vybrané položky sa pridajú do zoznamu naraz."
+        ] },
+        { "type": "p", "text": "Položka z katalógu, ktorá už v zozname je, nedostane druhý riadok. Zvýši sa jej množstvo a uvidíte \"Množstvo položky ... zmenené\". Takéto položky majú v okne štítok **V zozname**. Poznámka, ktorú zadáte k tej istej položke, sa pridá k existujúcej poznámke. Ak by obe množstvá spolu dosiahli 1000 alebo viac, alebo by boli poznámky spolu príliš dlhé, nič sa nepridá a uvidíte správu. Zoznam môže obsahovať najviac 500 položiek." },
+        { "type": "steps", "items": [
+          "Položku zmeníte ťuknutím na jej riadok. Môžete zmeniť množstvo, jednotku a poznámku, a aj názov, ak ide o vašu vlastnú položku (ktorá nie je v katalógu).",
+          "Položku odstránite tak, že ju otvoríte, stlačíte **Odstrániť položku** a potvrdíte. Položka sa odstráni pre všetkých, ktorí zoznam vidia."
+        ] },
+        { "type": "p", "text": "Množstvá prijímajú desatinnú čiarku, napríklad \"1,5\". Musia byť väčšie ako 0 a menšie ako 1000. Ľudia, ktorí môžu zoznam iba zobraziť, položky vidia, ale nemôžu ich meniť, a nič sa nedá meniť, kým je zoznam uzamknutý alebo vybavený. Celý zoznam odstránite v ponuke **Ďalšie akcie** na zozname voľbou **Odstrániť zoznam**. Ponúka sa zodpovednej osobe a tomu, kto zoznam vytvoril." },
+        { "type": "tip", "text": "Katalóg s obrázkami sa spravuje v Nastaveniach, v časti Nákupy (pozrite Katalóg položiek a obchody nižšie)." }
+      ]
+    },
+    {
+      "id": "people",
+      "title": "Ľudia a kto čo smie",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Každý zoznam má **autora**, jednu **zodpovednú osobu** a, ak chcete, ľudí, ktorí smú pridávať a upravovať položky, a ľudí, ktorí smú iba zobraziť. Otvorte zoznam, stlačte **Ďalšie akcie** a vyberte **Nastavenia zoznamu**, aby ste to videli a zmenili."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Zodpovedná osoba**: jediná osoba, ktorá môže zoznam uzamknúť a odomknúť, označovať položky ako zakúpené alebo nedostupné a ukončiť nákup. Zodpovednú osobu môžete zmeniť kedykoľvek, aj keď je zoznam uzamknutý. Osoba, ktorá zoznam odovzdá, na ňom zostane ako ten, kto môže pridávať a upravovať položky, takže jej zoznam nezmizne.",
+            "**Môže pridávať a upravovať položky**: ľudia, ktorí smú pridávať, meniť a odstraňovať položky v otvorenom zozname.",
+            "**Môže iba zobraziť**: ľudia, ktorí zoznam vidia, ale nemôžu nič meniť.",
+            "Osoba má naraz jednu rolu. Ak vyberiete niekoho, kto je už v druhej skupine, presunie sa a poznámka vás o tom informuje.",
+            "Deti môžete pridať ako každého iného člena, majú štítok **Dieťa**."
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "Zmena toho, kto sa na zozname podieľa",
+          "items": [
+            "Otvorte zoznam, stlačte **Ďalšie akcie** a vyberte **Nastavenia zoznamu**.",
+            "Vyberte **Zodpovednú osobu** alebo stlačte **Pridať osobu** pod **Môže pridávať a upravovať položky** alebo **Môže iba zobraziť** a vyberte niekoho. Krížikom pri mene osobu odstránite.",
+            "Stlačte **Uložiť nastavenia**. Tlačidlo je dostupné až po zmene."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Autor a zodpovedná osoba môžu v otvorenom zozname v nastaveniach meniť všetko: názov, obchod, zodpovednú osobu, ľudí aj pripomienku. Keď je zoznam uzamknutý, zodpovednú osobu a pripomienku môže meniť iba zodpovedná osoba. Ostatní vidia nastavenia iba na čítanie, takže stále vidia, kto je kto."
+        },
+        {
+          "type": "tip",
+          "text": "Ak zodpovedná osoba opustí rodinu alebo stratí prístup k Nákupom, zodpovedným sa stane autor. Autor o tom vidí poznámku na začiatku zoznamu, kým sa znova neuloží zodpovedná osoba. Ak nemôže konať ani autor, zodpovedným sa stane prvý, kto bol do zoznamu pridaný ako ten, kto môže pridávať a upravovať položky. Ak na zozname nemôže konať nikto, môže zoznam otvoriť správca s právom úprav v Nákupoch a konať ako zodpovedná osoba, takže zoznam nikdy nezostane navždy uzamknutý."
+        }
+      ]
+    },
+    {
+      "id": "lock-and-shop",
+      "title": "Uzamknutie zoznamu a nákup",
+      "blocks": [
+        { "type": "p", "text": "Keď je zoznam pripravený, **zodpovedná osoba** ho uzamkne a ide nakupovať. Tlačidlo **Uzamknúť zoznam** vidí iba zodpovedná osoba. Ostatní vidia krátku poznámku, kto ho môže uzamknúť." },
+        { "type": "list", "items": [
+          "Pred uzamknutím musí mať zoznam aspoň jednu položku. Na prázdnom zozname je **Uzamknúť zoznam** zosivené a poznámka vysvetľuje prečo.",
+          "Kým je zoznam uzamknutý, nikto nemôže pridávať, odstraňovať ani upravovať položky.",
+          "V obchode zodpovedná osoba pri každej položke stlačí **Zakúpené** alebo **Nedostupné**. Zmena sa zobrazí hneď. Stlačené tlačidlo má aj inú ikonu a hrubý okraj, takže nezávisí od farby. Opätovným stlačením rovnakého tlačidla označenie zrušíte. Môžete ťukať rýchlo na veľa položiek: označenia sa ukladajú jedno po druhom a **Odomknúť zoznam** a **Ukončiť nákup** počkajú, kým sa uložia všetky.",
+          "Ak sa označenie nepodarí uložiť, späť sa vráti iba táto položka a zobrazí sa hlásenie **Nepodarilo sa uložiť. Skúste to znova.** Ak zoznam medzitým zmenil niekto iný (napríklad ho odomkol), stránka sa načíta znova a povie to.",
+          "Ostatní vidia označenia a riadok o priebehu až po opätovnom načítaní stránky.",
+          "**Odomknúť zoznam** vráti zoznam do plánovania, napríklad keď ste na niečo zabudli. Označenia ostanú zachované."
+        ] },
+        { "type": "steps", "title": "Uzamknutie a odomknutie", "items": [
+          "Otvorte zoznam a stlačte **Uzamknúť zoznam**.",
+          "Potvrďte tlačidlom **Uzamknúť zoznam** v otázke, ktorá sa zobrazí.",
+          "Ak chcete položky znova meniť, stlačte **Odomknúť zoznam** a potvrďte."
+        ] },
+        { "type": "tip", "text": "Lišta v spodnej časti obrazovky na telefóne ukazuje, koľko položiek zostáva, a po označení všetkých sa zmení na **Ukončiť nákup**." }
+      ]
+    },
+    {
+      "id": "finish",
+      "title": "Ukončenie nákupu",
+      "blocks": [
+        { "type": "p", "text": "**Ukončiť nákup** sa zodpovednej osobe zobrazí, keď je každá položka označená ako **Zakúpené** alebo **Nedostupné**. Zoznam sa potom presunie do **archívu** a bude iba na čítanie. Stále ho môžete kopírovať a poslať e-mailom." },
+        { "type": "p", "text": "Ak sú niektoré položky označené ako **Nedostupné**, aplikácia sa opýta: **Niektoré položky sa nepodarilo zakúpiť. Chcete z nich vytvoriť nový nákupný zoznam?**" },
+        { "type": "list", "items": [
+          "**Vytvoriť nový zoznam** vytvorí nový otvorený zoznam s názvom pôvodného a dodatkom „(nezakúpené)“, iba s nedostupnými položkami a ich množstvom. Zachová obchod, zodpovednú osobu a to, kto ho vidí, a nemá pripomienku. Môžete doň pridať ďalšie položky.",
+          "**Nie, iba ukončiť** zoznam iba archivuje.",
+          "**Zrušiť** vás vráti na zoznam bez akejkoľvek zmeny."
+        ] },
+        { "type": "p", "text": "V oboch prípadoch pôvodný zoznam ostane v archíve ako vybavený. Ak sa ukončenie nepodarí, nič sa nezmení a môžete to skúsiť znova." }
+      ]
+    },
+    {
+      "id": "copy",
+      "title": "Kopírovanie zoznamu",
+      "blocks": [
+        { "type": "steps", "items": [
+          "V prehľade stlačte tlačidlo kopírovania na konci riadka (**Kopírovať zoznam**). Kopírovať môžete aj zo samotného zoznamu.",
+          "Skontrolujte **Názov nového zoznamu**. Na začiatku je to pôvodný názov a za ním \"(kópia)\".",
+          "Nechajte začiarknuté **Zachovať obchod, zodpovednú osobu a prístup**, ak ich chcete zachovať, alebo políčko zrušte a začnite odznova.",
+          "Stlačte **Kopírovať zoznam**. Nový zoznam sa otvorí."
+        ] },
+        { "type": "p", "text": "Kópia má rovnaké položky s rovnakými množstvami a jednotkami a každá položka začína neoznačená (nekúpená, nedostupná). Nový zoznam je otvorený, neuzamknutý a bez pripomienky. Stávate sa jeho vlastníkom." },
+        { "type": "p", "text": "Ak je **Zachovať obchod, zodpovednú osobu a prístup** začiarknuté, kópia si ponechá obchod, zodpovednú osobu a ľudí, ktorí smú pridávať položky alebo prezerať. Ak nie je začiarknuté, zodpovednou osobou ste vy a nikto ďalší nie je pridaný." },
+        { "type": "tip", "text": "Skopírovať môžete každý zoznam, ktorý vidíte, aj vybavený. Je to rýchly spôsob, ako začať nákup na ďalší týždeň." }
+      ]
+    },
+    {
+      "id": "email",
+      "title": "Odoslanie zoznamu e-mailom",
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            "Otvorte zoznam, stlačte **Ďalšie akcie** a vyberte **Odoslať e-mailom**.",
+            "Zadajte adresu a stlačte Enter, čiarku alebo medzerník, alebo vložte naraz viac adries. Každá adresa sa zmení na malý štítok s krížikom na odstránenie. Pridať môžete najviac 5 adries, používajte obyčajnú adresu, napríklad meno@example.com: jeden riadok, bez úvodzoviek a zátvoriek a s doménou obsahujúcou bodku. Varianty so znakom plus, napríklad meno+nakup@example.com, sa v dennom limite počítajú ako tá istá adresa.",
+            "Stlačte **Odoslať**. Správa dole vám oznámi, na koľko adries sa zoznam odoslal."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Zoznam môže odoslať autor, zodpovedná osoba a ľudia, ktorí smú pridávať a upravovať položky, v ktoromkoľvek stave zoznamu. Ľudia, ktorí smú iba zobraziť, **Odoslať e-mailom** nevidia."
+        },
+        {
+          "type": "p",
+          "text": "E-mail je čistý text. Obsahuje položky s množstvami, obchod a zodpovednú osobu. Neobsahuje odkaz na Family Hub ani e-mailové adresy členov rodiny."
+        },
+        {
+          "type": "warning",
+          "text": "Proti zneužitiu platia limity: počet odoslaní za hodinu a za deň pre vás a niekoľko za deň pre každú adresu. Ak limit dosiahnete, okno napíše **Dnes ste odoslali príliš veľa zoznamov. Skúste to neskôr.**"
+        },
+        {
+          "type": "tip",
+          "text": "Správa po stlačení Odoslať znamená, že e-maily sa odosielajú. Zvyčajne dorazia do minúty. Protokol auditu zaznamenáva iba počet adries, na ktoré sa zoznam odoslal, nikdy adresy."
+        }
+      ]
+    },
+    {
+      "id": "reminder",
+      "title": "Pripomienka zoznamu",
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            "Otvorte zoznam, stlačte **Ďalšie akcie** a vyberte **Nastavenia zoznamu**.",
+            "V poli **Pripomienka** vyberte dátum a čas. Sú v časovom pásme rodiny, rovnakom, aké ukazuje hlavička zoznamu.",
+            "Stlačte **Uložiť nastavenia**. Hlavička ukáže **Pripomienka: dátum, čas**. Ak ju chcete zrušiť, stlačte **Odstrániť pripomienku** a uložte."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Zoznam má jednu pripomienku. Push upozornenie dostane iba zodpovedná osoba, nikto iný. Musí mať na svojom zariadení zapnuté push upozornenia v **Nastaveniach**, **Upozornenia**, inak sa k nej nemusí dostať; vtedy nastavenia ukážu poznámku s jej menom. Upozornenie hovorí iba **Čas na nákup** a otvorí zoznam, takže názov zoznamu sa na zamknutej obrazovke nezobrazí. Ak je push vypnutý alebo zariadenie nie je registrované, keď príde čas, pripomienka sa nestratí: odošle sa hneď, ako sa push zapne. Pripomienka s oneskorením viac ako 24 hodín sa už neodošle."
+        },
+        {
+          "type": "p",
+          "text": "Pripomienka v minulosti sa odmietne správou **Vyberte čas v budúcnosti.** Po odoslaní pripomienky hlavička doplní **(odoslaná)**. Zmenou času sa nastaví nová pripomienka, ktorá sa odošle znova v novom čase."
+        }
+      ]
+    },
+    {
+      "id": "stores-catalog",
+      "title": "Katalóg položiek a obchody",
+      "blocks": [
+        { "type": "p", "text": "V **Nastaveniach** má sekcia **Nákupy** tri záložky: **Katalóg položiek**, **Obchody** a **Jednotky**. Sekciu vidíte, iba ak smiete meniť Nákupy. Všetci s týmto oprávnením zdieľajú rovnaký katalóg, obchody a jednotky." },
+        { "type": "steps", "title": "Pridanie položky do katalógu", "items": [
+          "Otvorte **Nastavenia**, vyberte **Nákupy** a ostaňte na záložke **Katalóg položiek**.",
+          "Stlačte **Pridať položku**.",
+          "Zadajte **Názov**. Názov sa dá použiť iba raz: položka, ktorá sa líši len veľkými písmenami alebo diakritikou, sa považuje za tú istú.",
+          "Ak chcete, stlačte **Nahrať obrázok** a pridajte obrázok JPG, PNG alebo WebP do 5 MB a vyberte **Predvolenú jednotku**.",
+          "Stlačte **Uložiť položku**."
+        ] },
+        { "type": "p", "text": "Každý riadok ukazuje predvolenú jednotku a v koľkých zoznamoch sa položka používa. Položku nájdete cez vyhľadávacie pole a zmeníte tlačidlom s ceruzkou." },
+        { "type": "steps", "title": "Pridanie obchodu", "items": [
+          "Otvorte záložku **Obchody** a stlačte **Pridať obchod**.",
+          "Zadajte **Názov obchodu** a ak chcete, pridajte **Logo** (PNG, JPG alebo WebP, najviac 2 MB).",
+          "Stlačte **Uložiť obchod**."
+        ] },
+        { "type": "tip", "text": "Najlepšie je logo vo formáte PNG s priehľadným pozadím. Priehľadné miesta sa vyplnia bielou." },
+        { "type": "warning", "text": "Pri odstránení položky alebo obchodu vás aplikácia požiada o potvrdenie a povie, v koľkých zoznamoch sa používa. Položky, ktoré už sú v zozname, v ňom ostanú ako obyčajný text bez obrázka. Zoznam, ktorému odstránite obchod, bude bez obchodu." }
+      ]
+    },
+    {
+      "id": "units",
+      "title": "Jednotky",
+      "adminOnly": true,
+      "blocks": [
+        { "type": "p", "text": "Množstvá používajú jednotky. Vstavané jednotky (ks, g, kg, ml, l, balenie, zväzok, PL a ČL) sa zobrazujú vo vašom jazyku a nedajú sa meniť ani odstrániť. Členovia ich vidia na záložke **Jednotky**, ďalšie môžu pridávať iba správcovia." },
+        { "type": "steps", "title": "Pridanie jednotky", "items": [
+          "Otvorte **Nastavenia**, vyberte **Nákupy** a otvorte záložku **Jednotky**.",
+          "Stlačte **Pridať jednotku**.",
+          "Zadajte názov v troch jazykoch: **Názov (anglicky)**, **Názov (slovensky)** a **Názov (poľsky)**. Každý názov môže mať najviac 12 znakov, napríklad „plechovka“.",
+          "Stlačte **Uložiť jednotku**."
+        ] },
+        { "type": "warning", "text": "Ak odstránite jednotku, ktorú už položky používajú, aplikácia povie, koľko položiek ju používa. Tieto položky si ponechajú množstvo, ale zobrazia ho bez jednotky." }
+      ]
+    }
+  ]
+}

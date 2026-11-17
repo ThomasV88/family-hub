@@ -34,6 +34,7 @@ final class SafeFetcher
         ?callable $handler = null,
         private readonly int $maxHops = 3,
         private readonly array $allowedPorts = [80, 443],
+        private readonly ?string $userAgent = null,
     ) {
         $this->dns = $dns ?? new SystemDnsResolver;
         $this->policy = $policy ?? new PublicIpv4Policy;
@@ -164,7 +165,7 @@ final class SafeFetcher
                 'decode_content' => false,
                 'headers' => [
                     'Accept-Encoding' => 'identity',
-                    'User-Agent' => 'FamilyHubImageFetcher/1.0',
+                    'User-Agent' => $this->userAgent ?? 'FamilyHubImageFetcher/1.0',
                     'Accept' => $kind === 'image' ? 'image/*' : 'text/html,application/xhtml+xml',
                 ],
                 'protocols' => ['http', 'https'],

@@ -45,8 +45,13 @@ class AiRunQuery
      */
     public function noticeAcknowledged(Viewer $viewer, ?array $enabled = null): bool
     {
-        $providers = DB::table('ai_notice_acks')->where('user_id', $viewer->userId())->value('providers');
+        $row = DB::table('ai_notice_acks')->where('user_id', $viewer->userId())->first(['providers', 'text_notice_acked_at']);
+        $providers = $row?->providers;
         if ($providers === null) {
+            return false;
+        }
+        // While recognised text is stored, the statement about the stored text must have been acknowledged too.
+        if (config('ai.ocr.enabled') && $row->text_notice_acked_at === null) {
             return false;
         }
         $acked = explode(',', (string) $providers);
@@ -77,8 +82,9 @@ class AiRunQuery
      * 'notice_required' with the current set, so the dialog opens again with what is true now.
      *
      * @param  list<string>|null  $shownProviders
+     * @param  bool  $textNotice  the notice the member confirmed carried the statement about the stored text
      */
-    public function start(Viewer $viewer, MedicalSubject $subject, string $documentId, User $user, bool $acknowledged, ?array $shownProviders = null): StartResult
+    public function start(Viewer $viewer, MedicalSubject $subject, string $documentId, User $user, bool $acknowledged, ?array $shownProviders = null, bool $textNotice = false): StartResult
     {
         if (! $viewer->canEdit()) {
             return new StartResult('denied');
@@ -88,7 +94,7 @@ class AiRunQuery
         $raced = false;
 
         try {
-            return DB::transaction(function () use (&$raced, $viewer, $subject, $subjectId, $documentId, $user, $acknowledged, $shownProviders): StartResult {
+            return DB::transaction(function () use (&$raced, $viewer, $subject, $subjectId, $documentId, $user, $acknowledged, $shownProviders, $textNotice): StartResult {
                 $locked = Visibility::apply(
                     DB::table('medical_subjects')->where('id', $subjectId)->sharedLock(),
                     $viewer,
@@ -115,7 +121,9 @@ class AiRunQuery
                 DB::select("select pg_advisory_xact_lock_shared(hashtext('ai-agent-settings'))");
                 $enabledKeys = $this->agents->providers();
                 $acked = $this->noticeAcknowledged($viewer, $enabledKeys);
-                if (! $acked && (! $acknowledged || ! self::sameSet($shownProviders, $enabledKeys))) {
+                // While recognised text is stored the request must also say that the dialog showed the statement about it ($textNotice):
+                // an acknowledgment from a dialog that never showed it (the switch was turned on meanwhile) does not count.
+                if (! $acked && (! $acknowledged || ! self::sameSet($shownProviders, $enabledKeys) || (config('ai.ocr.enabled') && ! $textNotice))) {
                     return new StartResult('notice_required', null, array_values($enabledKeys));
                 }
                 $active = $this->activeId($viewer, $subjectId, $documentId);
@@ -138,6 +146,8 @@ class AiRunQuery
                         'subject_id' => $subjectId,
                         'document_id' => $documentId,
                         'status' => 'queued',
+                        // Behind the OCR switch a run reads the text first; with it off every run is the single call of before.
+                        'mode' => config('ai.ocr.enabled') ? 'full' : 'entries',
                         'agent' => $first->key(),
                         'model' => null,
                         'schema_version' => ExtractionSchema::SCHEMA_VERSION,
@@ -170,11 +180,13 @@ class AiRunQuery
                 if (! $acked) {
                     $set = $enabledKeys;
                     sort($set);
-                    DB::table('ai_notice_acks')->upsert(
-                        [['user_id' => $viewer->userId(), 'acknowledged_at' => $now, 'providers' => implode(',', $set)]],
-                        ['user_id'],
-                        ['acknowledged_at', 'providers'],
-                    );
+                    $row = ['user_id' => $viewer->userId(), 'acknowledged_at' => $now, 'providers' => implode(',', $set)];
+                    $update = ['acknowledged_at', 'providers'];
+                    if (config('ai.ocr.enabled')) {
+                        $row['text_notice_acked_at'] = $now;
+                        $update[] = 'text_notice_acked_at';
+                    }
+                    DB::table('ai_notice_acks')->upsert([$row], ['user_id'], $update);
                 }
 
                 return new StartResult('queued', $id);
@@ -260,7 +272,12 @@ class AiRunQuery
                 ->where('status', '!=', 'superseded'),
             $viewer,
         )->orderByDesc('queued_at')->orderByDesc('id')
-            ->select(['id', 'document_id', 'status', 'cancel_reason', 'available_at', 'failure_code', 'agent', 'model', 'pages_read', 'pages_total', 'entry_count']);
+            ->select(['id', 'document_id', 'status', 'mode', 'cancel_reason', 'available_at', 'failure_code', 'agent', 'model', 'pages_read', 'pages_total', 'entry_count'])
+            // Whether this very run has saved text: a flag only, the text itself never leaves the text store.
+            ->selectSub(
+                DB::table('medical_document_texts')->selectRaw('1')->whereColumn('medical_document_texts.extraction_id', 'medical_ai_extractions.id')->limit(1),
+                'text_flag',
+            );
         if ($withCounts) {
             $query->selectSub(
                 DB::table('medical_ai_decisions')->selectRaw('count(*)')->whereColumn('medical_ai_decisions.extraction_id', 'medical_ai_extractions.id'),
@@ -269,12 +286,25 @@ class AiRunQuery
         }
         $rows = $query->get();
 
+        // A text-only run never hides a proposal: while the document has a ready run, text_saved rows are skipped.
+        $hasReady = [];
+        foreach ($rows as $row) {
+            if ($row->status === 'ready') {
+                $hasReady[(string) $row->document_id] = true;
+            }
+        }
+
         $map = [];
         foreach ($rows as $row) {
             $doc = (string) $row->document_id;
+            if (! isset($map[$doc]) && $row->status === 'text_saved' && isset($hasReady[$doc])) {
+                continue;
+            }
             if (! isset($map[$doc])) {
                 $map[$doc] = [
                     'status' => (string) $row->status,
+                    'mode' => (string) $row->mode,
+                    'textSaved' => $row->text_flag !== null,
                     'extractionId' => (string) $row->id,
                     'cancelReason' => $row->cancel_reason,
                     'pagesRead' => $row->pages_read === null ? null : (int) $row->pages_read,
@@ -327,7 +357,7 @@ class AiRunQuery
         return $cooldown > 0 && DB::table('medical_ai_extractions')
             ->where('document_id', $documentId)
             ->where('finished_at', '>', Carbon::now()->subMinutes($cooldown))
-            ->where(fn ($q) => $q->whereIn('status', ['ready', 'superseded'])
+            ->where(fn ($q) => $q->whereIn('status', ['ready', 'superseded', 'text_saved'])
                 // Only failures after the CLI really ran used quota; a lost worker, a bad file or a dispatch failure did not.
                 ->orWhere(fn ($f) => $f->where('status', 'failed')->whereIn('failure_code', self::QUOTA_FAILURES)))
             ->exists();

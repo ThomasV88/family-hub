@@ -106,7 +106,21 @@ it('spawns processes only in the runners, PdfRasterizer, HeicConverter and Prefl
 });
 
 it('keeps log, report and dump calls out of the AI layer', function () {
-    expect(aiArchViolations(aiArchSources('Medical/Ai'), AI_ARCH_LOG_PATTERNS))->toBe([]);
+    expect(aiArchSources('Medical/Ai'))->not->toBe([])
+        ->and(aiArchViolations(aiArchSources('Medical/Ai'), AI_ARCH_LOG_PATTERNS))->toBe([]);
+});
+
+// The recipe import handles hostile page text and recipe content: nothing of it may reach a log or a dump. A folder that
+// does not exist yet is skipped (aiArchSources returns no files for it).
+it('keeps log, report and dump calls out of the recipe AI and import code', function (string $dir) {
+    expect(aiArchViolations(aiArchSources($dir), AI_ARCH_LOG_PATTERNS))->toBe([]);
+})->with(['Recipes/Ai', 'Recipes/Import']);
+
+it('has recipe AI sources and flags a log call in them in memory', function () {
+    $dirty = ['Recipes/Ai/X.php' => aiArchStrip('<?php Log::info($t); logger($t); report($e); dump($t); dd($t); error_log($t);')];
+
+    expect(aiArchSources('Recipes/Ai'))->not->toBe([])
+        ->and(aiArchViolations($dirty, AI_ARCH_LOG_PATTERNS))->toHaveCount(6);
 });
 
 /**

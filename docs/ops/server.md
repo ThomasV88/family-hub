@@ -76,6 +76,10 @@ is older than 26 h it prints `BACKUP STALE` to `logs/cron.log`, appends to `logs
 if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script with the message as its argument
 (hook point for mail or push notification; none is configured in Phase 1).
 
+Profile photos (Phase 10) live in the `uploads` volume under `wish-images/profile-photos/<user id>/` and are covered by the existing uploads snapshot; a daily sweep removes files no member references.
+Shopping catalog pictures and store logos (Phase 11) live in the same `uploads` volume under `wish-images/shopping/{catalog,stores}/<id>/` and are covered by the existing backup; on staging the seed fills them with generated shapes and purges them on every reseed.
+Recipe photos (Phase 12) live in the same `uploads` volume under `wish-images/recipes/<recipe id>/` (full and thumbnail per photo), are covered by the existing backup and are swept with the wishlist prune; on staging the seed generates them and purges the folders on every reseed.
+
 ### Phase 7: medical files volume
 
 - Volume `medical` (compose.server.yaml, one per stack because each stack has its own project name; `medical-dev` locally), mounted at
@@ -90,6 +94,15 @@ if `BACKUP_ALERT_COMMAND=/path/to/script` is set in `.env`, runs that script wit
 - Restore one person's files: `restic -r <repo> dump latest /medical.tar --tag medical-nightly | tar -xf - ./<subject-uuid>` into a
   scratch directory, then copy back into the volume as the app user. Files are stored under one directory per subject uuid.
 - Erasure: deleted medical data stays in snapshots for the retention window (production: daily 14, weekly 8, monthly 6).
+- Recognised document text (Phase 13): the database snapshots (`/family_hub.dump`) now contain the recognised text of documents
+  (table `medical_document_texts`, plain text, the owner's decision) until the retention period of the snapshot expires. Removing a text
+  in the app (the per-document Remove, a consent withdrawal, deleting or archiving the document) does not remove it from older
+  snapshots; production keeps daily 14, weekly 8, monthly 6. Treat every database snapshot and its off-site copy as holding health text.
+  `restore-drill.sh` proves the restore works for it: it prints `RESTORE-DRILL TEXT OK rows=N` after checking, in the restored database,
+  that the table restored, that a probe string run through the search expression matches a prefix `to_tsquery`, that every row's stored
+  search column equals the expression recomputed from its body, and that `public.fh_unaccent` turns `Łukasz` into `Lukasz`
+  (the generated column and the search need that wrapper). `RESTORE-DRILL TEXT NONE` means the snapshot predates the table. Counts
+  only, never any text. `scripts/test-backup-local.sh` asserts one of the two lines (OK for a database with the table, NONE without it).
 - Decision (provisional, owner to confirm in plan 07-20): no app-level file encryption in v1. `APP_KEY` lives on the same host, so it
   would add little; restic encrypts the backups and the volume is 0700/0600.
 - nginx: only `POST /health/people/<uuid>/documents` accepts a body up to 12m; PHP `upload_max_filesize=11M`, `post_max_size=13M`.
@@ -171,6 +184,18 @@ reports "login expired" once the health check exists). Never set `OPENAI_API_KEY
   - **Interactive latency (IN-07).** One worker with no preemption: an interactive run can wait behind one running bulk job for up to the job budget (11 minutes). Queue order `ai-control,ai,ai-bulk` only decides what starts next.
   - **Retention (IN-06).** `ai_bulk_run_items` (document ids) and `ai_bulk_runs` are not pruned by `ai:prune-calls`; they are kept until a retention rule is decided (see DEFERRED.md).
   - **Copilot `--available-tools` (IN-02).** It is passed without a value to mean "no tools"; the fake CLI cannot prove that. Verify it live on every Copilot version bump (the version is pinned in `config/ai.php` and the Dockerfile).
+- Full-text reading (Phase 13) env keys. `AI_OCR_ENABLED` must carry the SAME value in `app.env` AND `ai-worker.env` of the stack:
+  the app decides the run mode when a run is queued, and `RunExtractionJob` re-reads the flag inside the ai-worker (whose environment
+  is `ai-worker.env`, never `app.env`) and `DocumentTextStore::save` refuses while it is off. With the flag on only in `app.env`, runs
+  are queued in text mode but no text is saved. `AI_OCR_TEXT_RELIABILITY` is read by the web app only (`app.env` only). A change needs
+  the `app`, `worker`, `scheduler` and `ai-worker` services recreated, no other stack restarted. **Existing servers:** `server-provision.sh`
+  never overwrites env files, so add the line `AI_OCR_ENABLED=false` (or the value `app.env` has) to the existing `ai-worker.env` by hand
+  (mode 600, do not print the file); a missing key means `false` through the config default, so existing deployments keep working unchanged.
+  - `AI_OCR_ENABLED` (default `false`). Off: Run AI works as before (one call, entries only), no text is stored, the search box finds titles only.
+    Production stays off until the owner enables it; staging may enable it for the check. Turning it on does not touch existing data.
+  - `AI_OCR_TEXT_RELIABILITY` (`reliable` or `uncertain`, default `reliable`). `uncertain` shows the "may contain errors" label on the
+    recognised text; the switch needs no code change.
+  - The recognised text is part of the database snapshots (see "Phase 7: medical files volume", Recognised document text).
 - Deferred WR-06: both CLIs run under the www-data uid (same uid as the app files). Still open; now covers two CLIs.
 
 ## Deploy

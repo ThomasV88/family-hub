@@ -74,6 +74,20 @@
         { "type": "p", "text": "A child, or anyone who finds it hard to keep a list, can have a manager. The administrator chooses the managers (see [Wishlist managers](admin#wishlist-managers))." },
         { "type": "p", "text": "If you are a manager, the child's button is in your row and a banner says **You are managing** the list. You can add and edit wishes, and you see the list exactly as the child does: with no reservations. That keeps the surprise for the child too." }
       ]
+    },
+    {
+      "id": "child-list",
+      "title": "A child's list",
+      "blocks": [
+        { "type": "p", "text": "A child added by the administrator has a list like any other member. It appears among the people at the top of the Wishlist for everyone who can see the Wishlist." },
+        { "type": "p", "text": "The parents chosen when the child was added are its managers. They add and edit wishes on the child's list and see it the way the child does (see [Wishlist managers](admin#wishlist-managers))." },
+        { "type": "steps", "title": "Changing the child's name or photo", "items": [
+          "Open the account menu and choose [Profile settings](/profile).",
+          "Under **People you manage**, press **Edit** next to the child.",
+          "Change the name or the photo."
+        ] },
+        { "type": "p", "text": "An administrator can do the same under Members and access. Nobody else can change a child's name or photo." }
+      ]
     }
   ]
 }

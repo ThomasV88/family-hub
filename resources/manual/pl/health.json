@@ -74,6 +74,52 @@
       ]
     },
     {
+      "id": "search",
+      "title": "Wyszukiwanie w dokumentach",
+      "blocks": [
+        { "type": "p", "text": "Na stronie Zdrowie, nad folderami i osią czasu, znajduje się pole **Szukaj w dokumentach**. Znajduje dokumenty według ich nazwy i słów w nich zawartych. Pole pojawia się, gdy jest co przeszukiwać, a gdy nie jest pokazana żadna osoba, nie ma go na stronie." },
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Wpisz w polu co najmniej dwie litery. Jedna litera nie wystarczy i dopóki nie ma dwóch, nic nie jest szukane.",
+          "Chwilę poczekaj albo naciśnij Enter lub **Szukaj**, aby zobaczyć wyniki.",
+          "W polu **Szukaj w** wybierz, czy szukać wśród **Wszystkie osoby**, czy tylko u otwartej osoby. Ten wybór pojawia się tylko wtedy, gdy widzisz więcej niż jedną osobę.",
+          "Naciśnij wynik, aby otworzyć dany dokument. Naciśnij **Wyczyść wyszukiwanie** (lub Escape w polu), aby wrócić do folderów i osi czasu."
+        ] },
+        { "type": "list", "items": [
+          "Wynik pokazuje nazwę dokumentu, osobę, datę dodania, wizytę, do której należy, i stronę, na której znaleziono słowa, z wyróżnionymi pasującymi słowami.",
+          "Znaki diakrytyczne i końcówki słów nie mają dużego znaczenia: słowo wpisane bez polskich znaków lub w nieco innej formie też zostanie znalezione.",
+          "AI czyta dokument tylko wtedy, gdy ktoś o to poprosił. Dokument, którego AI nigdy nie czytała, jest znajdowany tylko po nazwie. Dokumenty odczytane przez AI są znajdowane także po słowach w nich zawartych.",
+          "Zawsze widzisz tylko dokumenty, które możesz otworzyć. Dokument osoby, której nie widzisz, lub zarchiwizowany dokument nigdy się nie znajdzie, a dostaniesz to samo „Nie znaleziono dokumentów” co przy słowie, którego po prostu tam nie ma.",
+          "Jeśli wynik pokazuje **Przeszukiwane są tylko pierwsze strony**, AI odczytała tylko początek długiego dokumentu, więc słowa dalej nie zostaną znalezione.",
+          "Jeśli notatka mówi, że niektóre słowa z wyszukiwania nie zostały użyte, zostały one pominięte: słowa jednoliterowe, słowa bez liter łacińskich lub cyfr (na przykład chińskie) oraz każde słowo po ósmym. Pozostałe słowa zostały wyszukane."
+        ] },
+        { "type": "warning", "text": "Tekst odczytała AI i może zawierać błędy. Słowo może nie zostać znalezione, jeśli zostało źle odczytane. Gdy strona tak zaznacza, pokazuje uwagę nad wynikami. Jeśli wyszukiwanie nic nie znajdzie, sprawdź sam dokument." },
+        { "type": "p", "text": "Wpisane słowa są używane tylko do tego wyszukiwania. Nie są zapisywane, nie trafiają do adresu strony i nie są pamiętane po opuszczeniu strony." }
+      ]
+    },
+    {
+      "id": "recognised-text",
+      "title": "Rozpoznany tekst dokumentu",
+      "blocks": [
+        { "type": "p", "text": "Gdy AI odczyta dokument, odczytany tekst jest zapisywany i pokazywany w panelu dokumentu pod **Rozpoznany tekst**. Dzięki niemu dokument można wyszukiwać według słów." },
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Otwórz dokument. Sekcja **Rozpoznany tekst** jest na początku zamknięta.",
+          "Naciśnij **Rozpoznany tekst**, aby ją otworzyć. Tekst jest wczytywany dopiero teraz i czytasz go stronami.",
+          "Naciśnij **Kopiuj tekst**, aby skopiować całość. W dokumencie z wieloma stronami każda strona po pierwszej zaczyna się pustym wierszem i oznaczeniem strony.",
+          "Naciśnij **Rozpoznany tekst** ponownie, aby ją zamknąć. Tekst nie jest przechowywany w przeglądarce."
+        ] },
+        { "type": "list", "items": [
+          "Rozpoznany tekst może czytać i kopiować każdy, kto może otworzyć dokument. Członek, który może tylko wyświetlać osobę, też go widzi, ale nie może go usunąć.",
+          "Może zawierać błędy: uwaga „Może zawierać błędy” jest widoczna, dopóki tak jest, a tekst informuje, że odczytała go AI. Gdy to ważne, sprawdź sam dokument.",
+          "Jeśli AI odczytała tylko pierwsze strony długiego dokumentu, uwaga pokazuje na przykład „Pierwsze 3 z 8 stron”. Przeszukiwać można tylko te strony.",
+          "Członek, który może zmieniać osobę, może nacisnąć **Usuń rozpoznany tekst** i potwierdzić. Tekst zostanie usunięty z aplikacji. Dokument i zaakceptowane już sugestie zostają, a dokument nie będzie już znajdowany według słów w nim zawartych. Później możesz ponownie uruchomić AI, aby go odczytać.",
+          "Kopie w kopiach zapasowych znikną po wygaśnięciu kopii.",
+          "Tekst jest usuwany razem z dokumentem. Jest ukryty razem z zarchiwizowanymi dokumentami i zarchiwizowanymi osobami.",
+          "Jeśli AI zostanie wyłączona dla osoby, która ma rozpoznany tekst, najpierw zostaniesz zapytany, a potem rozpoznany tekst dokumentów tej osoby też zostanie usunięty. Dokumenty będzie można wtedy znaleźć tylko po nazwach."
+        ] },
+        { "type": "p", "text": "Gdy AI czyta dokument ponownie, nadal możesz czytać wcześniejszy tekst, a wiersz informuje, że trwa nowy odczyt. Gdy nowy odczyt zapisze pierwsze strony, sekcja pokazuje już ten tekst; długi dokument jest zapisywany po kilka stron, a uwaga mówi, kiedy odczytano tylko pierwsze strony. Zobacz też [Pomoc AI i Twoja zgoda](health#ai)." }
+      ]
+    },
+    {
       "id": "exports",
       "title": "Drukowanie i eksporty dla lekarza",
       "blocks": [
@@ -113,13 +159,17 @@
       "blocks": [
         { "type": "p", "text": "AI potrafi przeczytać dokument i zasugerować wizyty, leki, alergie i szczepienia, dzięki czemu piszesz mniej. To opcjonalne." },
         { "type": "warning", "text": "AI jest wyłączona, dopóki administrator jej nie skonfiguruje i nie włączy, a dla każdej osoby jest wyłączona, dopóki członek jej nie włączy. Gdy AI jest używana, dokument opuszcza ten serwer i trafia do zewnętrznej firmy (OpenAI albo GitHub, jeśli OpenAI jest niedostępne). Firma ta może go przechowywać zgodnie z własnymi warunkami." },
+        { "type": "p", "text": "Tam, gdzie włączono odczyt pełnego tekstu (mówi o tym powiadomienie, które widzisz), AI czyta dokument w dwóch krokach. Najpierw wysyłane są obrazy do 20 stron, a AI odczytuje cały tekst. Potem wysyłany jest także odczytany tekst, a AI przygotowuje na jego podstawie sugestie. Oba kroki trafiają do firmy wskazanej w powiadomieniu. Tekst jest zapisywany w bazie danych tej aplikacji i pokazywany w panelu dokumentu w sekcji **Rozpoznany tekst**. Może w nim szukać każdy członek, który może otworzyć dokument. Pozostaje do usunięcia dokumentu lub tekstu, a w kopiach zapasowych do ich wygaśnięcia." },
         { "type": "list", "items": [
           "Każda osoba ma przełącznik **Zezwól AI na czytanie dokumentów tej osoby**. Domyślnie jest wyłączony. Decyduje członek, który może zmieniać tę osobę, i przed włączeniem widzi wyraźne pytanie. Możesz go wyłączyć w każdej chwili.",
           "AI nigdy nie uruchamia się sama na dokumencie. Ktoś naciska **Uruchom AI** i widzi komunikat z nazwą firmy, do której dokument zostanie wysłany.",
           "AI odczytuje pliki PDF do ich pierwszych 20 stron oraz zdjęcia, w tym zdjęcia HEIC z iPhone'a. Zdjęcie HEIC jest zamieniane na serwerze na zwykły obraz tylko na potrzeby uruchomienia AI; zapisany oryginał nie jest zmieniany, a dane o miejscu i aparacie nie są wysyłane.",
           "Gdy sugestie są gotowe, naciśnij **Sprawdź sugestie**. Nic nie jest zapisywane, dopóki nie naciśniesz **Zaakceptuj** przy wpisie. Możesz go **Edytuj** albo **Odrzuć**.",
           "Wszystko, co zasugerowała AI, jest oznaczone jako **Niezweryfikowane**, dopóki człowiek nie naciśnie **Oznacz jako zweryfikowane**. AI może się mylić, więc zawsze porównuj z dokumentem.",
-          "Jeśli AI jest wyłączona dla osoby, nowe uruchomienie się nie rozpocznie, a oczekujące uruchomienia zostaną zatrzymane."
+          "Przy pierwszym uruchomieniu AI po włączeniu tej funkcji ponownie pojawia się nowe powiadomienie i potwierdzasz je przed wysłaniem dokumentu. Mówi ono, że tekst jest zapisywany tutaj. Administrator potwierdza to samo powiadomienie przed uruchomieniem przetwarzania zbiorczego.",
+          "Jeśli dokument ma już pełny rozpoznany tekst, **Uruchom AI** przygotowuje z niego sugestie i nie wysyła stron ponownie. Aby dokument został odczytany jeszcze raz, najpierw usuń tekst (zobacz [Rozpoznany tekst dokumentu](health#recognised-text)).",
+          "Uruchomienie, które tylko czyta tekst, na przykład zbiorcze dla dokumentów bez rozpoznanego tekstu, pokazuje etykietę **Tekst zapisany**. Nie tworzy sugestii i nie pokazuje przycisku **Sprawdź sugestie**. Aby dostać sugestie, naciśnij **Uruchom AI**.",
+          "Jeśli AI jest wyłączona dla osoby, nowe uruchomienie się nie rozpocznie, a oczekujące uruchomienia zostaną zatrzymane. Gdy ta osoba ma rozpoznany tekst, najpierw zobaczysz informację, że zostanie usunięty, a dokumenty będą wtedy znajdowane tylko po nazwie."
         ] },
         { "type": "p", "text": "Jeśli AI jest niedostępna, zobaczysz krótki komunikat, a dane zawsze możesz dodać sam. Administrator widzi listę wywołań AI, ale nigdy tego, co było w dokumencie." }
       ]

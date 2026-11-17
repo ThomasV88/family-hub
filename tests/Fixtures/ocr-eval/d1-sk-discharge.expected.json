@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "document_date": "2026-03-09",
+  "specialty_key": "internal_medicine",
+  "visits": [
+    {
+      "visited_on": "2026-03-09",
+      "doctor": "MUDr. Mária Kováčová (demo)",
+      "specialty_key": "internal_medicine",
+      "specialty_other": null,
+      "diagnosis": "Akútna žltačka",
+      "notes": null
+    }
+  ],
+  "medications": [
+    {
+      "name": "Ursosan",
+      "dose": "250 mg",
+      "schedule": "jedna kapsula ráno a večer",
+      "started_on": "2026-03-09",
+      "ended_on": null,
+      "notes": null
+    },
+    {
+      "name": "Paralen",
+      "dose": "500 mg",
+      "schedule": "pri bolesti, najviac štyrikrát denne",
+      "started_on": null,
+      "ended_on": null,
+      "notes": null
+    }
+  ],
+  "allergies": [
+    {
+      "substance": "Penicilín",
+      "reaction": "vyrážka",
+      "severity": "moderate"
+    }
+  ],
+  "vaccinations": [
+    {
+      "vaccine": "Tetanus",
+      "given_on": "2022-05-12",
+      "next_due_on": null,
+      "notes": null
+    }
+  ]
+}

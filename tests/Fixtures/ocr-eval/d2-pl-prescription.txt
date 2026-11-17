@@ -1,0 +1,22 @@
+Przychodnia Zdrowie Rodzinne (demo)
+ul. Źródlana 12, Gdańsk
+Recepta lekarska nr 0042/2026
+
+Pacjent: Łukasz Wiśniewski (demo)
+Data wystawienia: 15.03.2026
+Rozpoznanie: Zapalenie gardła i migdałków
+Wystąpiły ból gardła i gorączka do 38,5 stopnia od trzech dni.
+
+Lek | Dawka | Dawkowanie | Ilość
+Amoksycylina | 500 mg | 3 razy dziennie przez 7 dni | 21 tabl.
+Ibuprofen | 400 mg | w razie bólu, maks. 3 razy dziennie | 20 tabl.
+Pantoprazol | 20 mg | raz dziennie rano | 14 tabl.
+
+Uwaga: pacjent uczulony na pyłki traw, reakcja łagodna.
+Zalecenia: dużo płynów, więcej odpoczynku, kontrola w środę.
+Następna wizyta: 22.03.2026, godzina 14:30.
+
+Szczepienie: przeciw grypie, podane 10.10.2025.
+
+lek. Ewa Dąbrowska (demo)
+Specjalność: medycyna rodzinna

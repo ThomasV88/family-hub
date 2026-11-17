@@ -43,16 +43,38 @@ describe('account header and log out', () => {
     it('lists the manual right after Settings and opens /manual', async () => {
         const w = await open({ app: { name: 'FH', env: 'local', styleGuide: false } });
         const entries = [...document.querySelectorAll('[role=menuitem],[role=menuitemradio]')];
-        expect(entries[1].textContent).toContain(messages.nav.manual);
-        entries[1].click();
+        expect(entries[2].textContent).toContain(messages.nav.manual);
+        entries[2].click();
         expect(visit).toHaveBeenCalledWith('/manual');
         w.unmount();
     });
 
-    it('lists Settings first, before Language and Theme, and navigates to /settings', async () => {
+    it('lists Profile settings directly above Settings and opens /profile', async () => {
         const w = await open({ app: { name: 'FH', env: 'local', styleGuide: false } });
         const entries = [...document.querySelectorAll('[role=menuitem],[role=menuitemradio]')];
-        expect(entries[0].textContent).toContain('Settings');
+        expect(entries[0].textContent).toContain('Profile settings');
+        expect(entries[1].textContent.trim()).toBe('Settings');
+        entries[0].click();
+        expect(visit).toHaveBeenCalledWith('/profile');
+        w.unmount();
+    });
+
+    it('shows the avatar in the trigger and the header: the photo when there is one, the initial otherwise', async () => {
+        const w = await open({ avatars: { 1: 4 }, app: { name: 'FH', env: 'local', styleGuide: false } });
+        expect(w.find('button').find('img').attributes('src')).toBe('/people/1/photo/thumb?v=4');
+        expect(document.querySelector('[data-testid=menu-header] img')).not.toBeNull();
+        w.unmount();
+        const plain = await open({ avatars: {}, app: { name: 'FH', env: 'local', styleGuide: false } });
+        expect(plain.find('button').find('img').exists()).toBe(false);
+        expect(plain.find('button').text()).toContain('A');
+        expect(document.querySelector('[data-testid=menu-header]').textContent).toContain('Anna Nováková');
+        plain.unmount();
+    });
+
+    it('lists Settings before Language and Theme, and navigates to /settings', async () => {
+        const w = await open({ app: { name: 'FH', env: 'local', styleGuide: false } });
+        const entries = [...document.querySelectorAll('[role=menuitem],[role=menuitemradio]')];
+        expect(entries[1].textContent).toContain('Settings');
         const settings = [...document.querySelectorAll('[role=menuitem]')].find((e) => e.textContent.includes('Settings'));
         settings.click();
         expect(visit).toHaveBeenCalledWith('/settings');

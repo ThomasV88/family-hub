@@ -105,7 +105,7 @@ it('accepts an invitation only once even when attempted twice on the same row', 
     // The second caller still holds the stale, apparently valid model: the row lock and re-check must refuse it.
     expect(fn () => $service->accept($inv, ['name' => 'Eva2', 'password' => GOOD_PASSWORD]))->toThrow(InvalidInviteException::class);
 
-    expect(User::count())->toBe(1)->and(DB::table('module_permissions')->count())->toBe(4);
+    expect(User::count())->toBe(1)->and(DB::table('module_permissions')->count())->toBe(6);
 });
 
 it('refuses to accept when the email already has an account', function () {

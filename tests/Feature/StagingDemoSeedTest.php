@@ -22,10 +22,19 @@ use App\Medical\Viewer as MedicalViewer;
 use App\Models\FinanceTransaction;
 use App\Models\MedicalAiExtraction;
 use App\Models\MedicalSubject;
+use App\Models\Recipe;
+use App\Models\RecipePhoto;
+use App\Models\ShoppingCatalogItem;
+use App\Models\ShoppingItem;
+use App\Models\ShoppingList;
+use App\Models\ShoppingStore;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Wish;
 use App\Models\WishReservation;
+use App\Shopping\ItemState;
+use App\Shopping\ListStatus;
+use App\Shopping\SourceKind;
 use App\Tasks\TaskStatus;
 use App\Tasks\TaskVisibility;
 use Carbon\CarbonImmutable;
@@ -37,6 +46,7 @@ beforeEach(function () {
     $this->originalEnv = app()->environment();
     app()['env'] = 'staging';
     Storage::fake('medical');
+    Storage::fake('local');
 });
 
 afterEach(function () {
@@ -70,7 +80,9 @@ function demoCounts(): array
         'finance_accounts', 'finance_account_members', 'finance_transactions', 'finance_recurring', 'finance_recurring_matches', 'finance_budgets',
         'finance_import_profiles', 'finance_import_batches', 'finance_import_rows', 'medical_subjects', 'medical_subject_members', 'medical_visits',
         'medical_medications', 'medical_allergies', 'medical_vaccinations', 'medical_contacts', 'medical_documents', 'medical_ai_extractions',
-        'medical_ai_decisions', 'module_permissions', 'users'];
+        'medical_ai_decisions', 'shopping_lists', 'shopping_items', 'shopping_list_members', 'shopping_catalog_items', 'shopping_stores',
+        'shopping_units', 'recipes', 'recipe_photos', 'recipe_ingredients', 'recipe_steps', 'recipe_member_states', 'recipe_ingredient_ticks',
+        'recipe_step_done', 'recipe_categories', 'recipe_imports', 'module_permissions', 'users'];
 
     return collect($tables)->mapWithKeys(fn (string $t) => [$t => DB::table($t)->count()])->all();
 }
@@ -81,7 +93,7 @@ it('fills every module within the expected ranges and measures the run', functio
     $seconds = microtime(true) - $started;
 
     $c = demoCounts();
-    expect($c['users'])->toBe(7)
+    expect($c['users'])->toBe(8)
         ->and($c['tasks'])->toBeBetween(60, 120)
         ->and($c['wishes'])->toBeBetween(30, 60)
         ->and($c['wish_occasions'])->toBeBetween(6, 14)
@@ -92,8 +104,14 @@ it('fills every module within the expected ranges and measures the run', functio
         ->and($c['finance_import_batches'])->toBeBetween(1, 3)
         ->and($c['medical_subjects'])->toBeBetween(5, 6)
         ->and($c['medical_visits'])->toBeBetween(40, 80)
-        ->and($c['medical_documents'])->toBe(7)
-        ->and($c['medical_ai_extractions'])->toBe(3)
+        ->and($c['medical_documents'])->toBe(9)
+        ->and($c['medical_ai_extractions'])->toBe(4)
+        ->and($c['shopping_lists'])->toBe(8)
+        ->and($c['shopping_catalog_items'])->toBeBetween(25, 35)
+        ->and($c['shopping_stores'])->toBe(5)
+        ->and($c['shopping_units'])->toBe(10)
+        ->and($c['recipes'])->toBe(12)
+        ->and($c['recipe_imports'])->toBe(0)
         ->and($seconds)->toBeLessThan(60);
 });
 
@@ -263,7 +281,8 @@ it('keeps health private per person and seeds a full record for each', function 
     expect(MedicalSubject::whereNotNull('user_id')->count())->toBe(2)
         ->and(MedicalSubject::where('user_id', $parent->id)->exists())->toBeTrue()
         ->and(MedicalSubject::where('user_id', $grandparent->id)->exists())->toBeTrue()
-        ->and(MedicalSubject::where('ai_consent', true)->count())->toBe(2)
+        // parent, grandparent and (Phase 13: the store needs consent to hold a text) the hidden person
+        ->and(MedicalSubject::where('ai_consent', true)->count())->toBe(3)
         ->and(MedicalSubject::whereNull('blood_type')->count())->toBe(0)
         ->and(MedicalSubject::whereNull('birth_date')->count())->toBe(0);
     $ages = MedicalSubject::all()->map(fn ($s) => (int) $s->birth_date->age)->sort()->values()->all();
@@ -292,12 +311,12 @@ it('keeps health private per person and seeds a full record for each', function 
         ->and($c->firstWhere('vaccine', 'MMR (2. dávka)')->status)->toBe('overdue');
 });
 
-it('stores seven synthetic documents (one archived) that can be read back, with a two-page PDF', function () {
+it('stores nine synthetic documents (one archived) that can be read back, with PDFs of two, three and nine pages', function () {
     demoSeed();
 
     $docs = DB::table('medical_documents')->get();
-    expect($docs)->toHaveCount(7)
-        ->and($docs->where('kind', 'pdf'))->toHaveCount(4)
+    expect($docs)->toHaveCount(9)
+        ->and($docs->where('kind', 'pdf'))->toHaveCount(6)
         ->and($docs->where('kind', 'image'))->toHaveCount(3);
     $disk = Storage::disk('medical');
     foreach ($docs as $doc) {
@@ -309,7 +328,8 @@ it('stores seven synthetic documents (one archived) that can be read back, with 
         }
     }
     foreach ($docs->where('kind', 'pdf') as $pdf) {
-        expect(app(PdfRasterizer::class)->pageCount($disk->path($pdf->path)))->toBe(2);
+        $pages = str_contains($pdf->title, 'text uložený') ? 3 : (str_contains($pdf->title, 'deväť strán') ? 9 : 2);
+        expect(app(PdfRasterizer::class)->pageCount($disk->path($pdf->path)))->toBe($pages);
     }
     // the files of one document are reachable through the real query class for an Edit viewer, not for the child
     $doc = $docs->first(fn ($d) => str_contains($d->title, 'Recept'));
@@ -451,4 +471,126 @@ it('seeds records older than the delete window and an archive demo (one visit, o
     $a = demoSubject($parent->name);
     expect(app(VisitQuery::class)->forSubject($viewer, $a)->pluck('diagnosis')->all())->not->toContain('Archivovaná návšteva (demo)')
         ->and(collect(app(ArchiveQuery::class)->forSubject($viewer, $a))->pluck('type')->sort()->values()->all())->toBe(['document', 'visit']);
+});
+
+it('seeds one synthetic child with a photo, demo wishes and a managing parent, and reseeding leaves no orphan photo', function () {
+    Storage::fake('local');
+    demoSeed();
+    demoSeed();
+
+    $children = User::whereNull('email')->get();
+    expect($children)->toHaveCount(1);
+    $child = $children->first();
+    $parent = demoUser('sk_sk.1');
+    expect($child->name)->toEndWith(' (demo)')
+        ->and($child->sign_in_disabled)->toBeTrue()
+        ->and($child->photo_path)->not->toBeNull()
+        ->and(Wish::where('owner_id', $child->id)->count())->toBeGreaterThanOrEqual(2)
+        ->and(DB::table('wishlist_managers')->where('owner_id', $child->id)->pluck('manager_id')->all())->toBe([$parent->id])
+        ->and(app(AccessGate::class)->level($parent, Module::Wishlist))->toBe(AccessLevel::Edit);
+    Storage::disk('local')->assertExists($child->photo_path);
+    Storage::disk('local')->assertExists($child->photo_thumb_path);
+
+    $files = Storage::disk('local')->allFiles('wish-images/profile-photos');
+    expect($files)->toHaveCount(2);
+    foreach ($files as $f) {
+        expect(str_starts_with($f, "wish-images/profile-photos/{$child->id}/"))->toBeTrue();
+    }
+});
+
+it('seeds the Shopping demo through the services: every list state, carry-over, copy, reminder and pictures, no orphan file on reseed', function () {
+    demoSeed();
+    demoSeed();
+
+    $lists = ShoppingList::query()->get();
+    expect($lists->where('status', ListStatus::Open)->count())->toBeGreaterThanOrEqual(2)
+        ->and($lists->where('status', ListStatus::Locked)->count())->toBe(2)
+        ->and($lists->where('status', ListStatus::Done)->count())->toBe(2)
+        ->and($lists->where('source_kind', SourceKind::Carry)->count())->toBe(1)
+        ->and($lists->where('source_kind', SourceKind::Copy)->count())->toBe(1);
+
+    $carry = $lists->firstWhere('source_kind', SourceKind::Carry);
+    $source = ShoppingList::find($carry->source_list_id);
+    expect($source->status)->toBe(ListStatus::Done)
+        ->and($carry->name)->toBe($source->name.' (nezakúpené)')
+        ->and(ShoppingItem::where('list_id', $carry->id)->where('state', '!=', ItemState::Pending->value)->count())->toBe(0)
+        ->and(ShoppingItem::where('list_id', $carry->id)->count())->toBeGreaterThan(0);
+
+    $reminder = $lists->firstWhere('name', 'Týždenný nákup');
+    expect($reminder->remind_at->isFuture())->toBeTrue()
+        ->and($reminder->reminder_enqueued_at)->toBeNull();
+
+    $resolvedLocked = $lists->where('name', 'Oslava narodenín')->first();
+    expect(ShoppingItem::where('list_id', $resolvedLocked->id)->where('state', ItemState::Pending->value)->count())->toBe(0);
+    $half = $lists->where('name', 'Sobotný trh')->first();
+    expect(ShoppingItem::where('list_id', $half->id)->pluck('state')->map(fn ($s) => $s->value)->unique()->sort()->values()->all())
+        ->toBe(['bought', 'pending', 'unavailable']);
+
+    $disk = Storage::disk('local');
+    $referenced = [];
+    foreach (ShoppingCatalogItem::all() as $row) {
+        $disk->assertExists($row->image_path);
+        $disk->assertExists($row->thumb_path);
+        array_push($referenced, $row->image_path, $row->thumb_path);
+    }
+    foreach (ShoppingStore::all() as $row) {
+        $disk->assertExists($row->logo_path);
+        $disk->assertExists($row->logo_thumb_path);
+        array_push($referenced, $row->logo_path, $row->logo_thumb_path);
+    }
+    expect(collect($disk->allFiles('wish-images/shopping'))->sort()->values()->all())->toBe(collect($referenced)->sort()->values()->all());
+
+    expect(DB::table('shopping_catalog_items')->selectRaw('count(distinct name_key) as n')->value('n'))->toBe(ShoppingCatalogItem::count());
+    $gate = app(AccessGate::class);
+    foreach ($lists as $list) {
+        $responsible = User::find($list->responsible_id);
+        expect($responsible->email)->not->toBeNull()
+            ->and($gate->allows($responsible, Module::Shopping, AccessLevel::Edit))->toBeTrue();
+    }
+});
+
+it('seeds the Recipes demo through the services: every starter category, both visibilities, progress, one shopping run, no orphan photo on reseed', function () {
+    demoSeed();
+    $first = demoCounts();
+    demoSeed();
+    expect(demoCounts())->toBe($first);
+
+    $recipes = Recipe::query()->get();
+    expect($recipes)->toHaveCount(12)
+        ->and($recipes->where('visibility', 'shared')->count())->toBeGreaterThanOrEqual(5)
+        ->and($recipes->where('visibility', 'private')->count())->toBeGreaterThanOrEqual(3)
+        ->and($recipes->whereNull('servings')->count())->toBe(1)
+        ->and($recipes->where('created_via', 'url')->count())->toBe(1)
+        ->and($recipes->where('created_via', 'url')->first()->source_host)->toBe('recepty.example')
+        ->and($recipes->max(fn ($r) => mb_strlen($r->title)))->toBeGreaterThan(80)
+        ->and($recipes->pluck('author_id')->unique()->count())->toBeGreaterThanOrEqual(3);
+
+    $starter = ['Raňajky', 'Obed', 'Večera', 'Polievka', 'Šalát', 'Dezert', 'Pečenie', 'Desiata', 'Nápoj', 'Vegetariánske'];
+    expect(DB::table('recipe_categories')->whereIn('name', $starter)->distinct()->pluck('name')->sort()->values()->all())->toBe(collect($starter)->sort()->values()->all());
+
+    $perRecipe = DB::table('recipe_photos')->selectRaw('recipe_id, count(*) as n')->groupBy('recipe_id')->pluck('n')->all();
+    expect(max($perRecipe))->toBe(10);
+
+    // two members keep ticks and done marks on the same shared recipe; favourites for two members; one note
+    $shared = DB::table('recipe_ingredient_ticks as t')->join('recipe_ingredients as i', 'i.id', '=', 't.ingredient_id')
+        ->selectRaw('i.recipe_id, count(distinct t.user_id) as u')->groupBy('i.recipe_id')->pluck('u', 'recipe_id');
+    expect($shared->max())->toBeGreaterThanOrEqual(2)
+        ->and(DB::table('recipe_step_done')->distinct()->count('user_id'))->toBeGreaterThanOrEqual(2)
+        ->and(DB::table('recipe_member_states')->where('favourite', true)->distinct()->count('user_id'))->toBeGreaterThanOrEqual(2)
+        ->and(DB::table('recipe_member_states')->whereNotNull('note')->count())->toBe(1);
+
+    // the Add-to-shopping run landed in the open weekly list, with a catalog match
+    $list = ShoppingList::where('name', 'Týždenný nákup')->firstOrFail();
+    expect(ShoppingItem::where('list_id', $list->id)->where('name', 'Džem')->exists())->toBeTrue()
+        ->and(ShoppingItem::where('list_id', $list->id)->whereNotNull('catalog_item_id')->where('name', 'Múka')->exists())->toBeTrue();
+
+    // files under wish-images/recipes are exactly the referenced ones
+    $disk = Storage::disk('local');
+    $referenced = [];
+    foreach (RecipePhoto::all() as $row) {
+        $disk->assertExists($row->path);
+        $disk->assertExists($row->thumb_path);
+        array_push($referenced, $row->path, $row->thumb_path);
+    }
+    expect(collect($disk->allFiles('wish-images/recipes'))->sort()->values()->all())->toBe(collect($referenced)->sort()->values()->all());
 });

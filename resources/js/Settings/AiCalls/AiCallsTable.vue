@@ -61,7 +61,8 @@ const statusLabel = (row) => (row.quota ? t('settings.ai_calls.status_quota') : 
             <template #cell-time="{ row }"><time :datetime="row.time">{{ dateFormat.format(new Date(row.time)) }}</time></template>
             <template #cell-startedBy="{ row }">{{ row.startedBy ?? '-' }}</template>
             <template #cell-person="{ row }">
-                <span v-if="row.bulk" class="ai-table__muted">{{ t('settings.ai_calls.person_bulk') }}</span>
+                <span v-if="row.kind === 'recipe'" data-testid="kind-recipe">{{ t('settings.ai_calls.kind_recipe') }}</span>
+                <span v-else-if="row.bulk" class="ai-table__muted">{{ t('settings.ai_calls.person_bulk') }}</span>
                 <template v-else>{{ row.person ?? t('settings.ai_calls.removed_person') }}</template>
             </template>
             <template #cell-agent="{ row }">{{ agent(row) }}</template>

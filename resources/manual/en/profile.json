@@ -1,0 +1,58 @@
+{
+  "id": "profile",
+  "category": "account",
+  "order": 65,
+  "title": "Your profile",
+  "summary": "Your name and your photo: how to open Profile settings, change your display name, add, replace or remove your photo, and what your e-mail is used for.",
+  "covers": ["feature:profile"],
+  "sections": [
+    {
+      "id": "open-profile",
+      "title": "Opening Profile settings",
+      "blocks": [
+        { "type": "steps", "title": "Where to click", "items": [
+          "Open the account menu at the top. It shows your photo, or your first initial if you have no photo yet.",
+          "Choose **Profile settings**. It is directly above **Settings**.",
+          "You can also open [Profile settings](/profile) directly."
+        ] },
+        { "type": "p", "text": "The page has two parts: **Photo** and **Details**." }
+      ]
+    },
+    {
+      "id": "change-name",
+      "title": "Changing your display name",
+      "blocks": [
+        { "type": "steps", "title": "Where to click", "items": [
+          "In **Details**, edit the **Display name**.",
+          "Press **Save changes**. The button is active only when you changed something.",
+          "A short message says **Profile saved**."
+        ] },
+        { "type": "p", "text": "Your name is shown on tasks, wishes and lists. It can have up to 60 characters. Extra spaces are removed and invisible or control characters are not allowed." }
+      ]
+    },
+    {
+      "id": "photo",
+      "title": "Adding, replacing or removing your photo",
+      "blocks": [
+        { "type": "steps", "title": "Where to click", "items": [
+          "In **Photo**, press **Upload photo**. If you already have a photo, the button says **Replace photo**.",
+          "Choose a picture. It is uploaded at once and shows in the menu without reloading the page.",
+          "To go back to your initial, press **Remove photo** and confirm with **Remove photo**."
+        ] },
+        { "type": "list", "items": [
+          "Accepted formats: JPG, PNG or WebP, up to 5 MB.",
+          "A square picture looks best, because the photo is shown in a circle.",
+          "Hidden details inside the picture, such as the place where it was taken, are removed when it is saved."
+        ] },
+        { "type": "tip", "text": "If a picture is refused, the page tells you why, for example that it is too big or not a JPG, PNG or WebP image. Nothing is changed in that case." }
+      ]
+    },
+    {
+      "id": "email",
+      "title": "Your e-mail address",
+      "blocks": [
+        { "type": "p", "text": "Your e-mail address is shown on the page but you cannot change it there yet. It is the address you sign in with and receive messages at. If it must change, ask your administrator." }
+      ]
+    }
+  ]
+}

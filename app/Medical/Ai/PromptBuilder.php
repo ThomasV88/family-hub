@@ -7,7 +7,7 @@ use App\Medical\Specialty;
 /** The static extraction prompt. No per-run data: the document travels as attached images. */
 final class PromptBuilder
 {
-    private const ISSUE_PATTERN = '/^[a-z_]+(\[\d+\])?(\.[a-z_]+)?:[a-z_]+(:[a-z_]+)?$/D';
+    public const ISSUE_PATTERN = '/^[a-z_]+(\[\d+\])?(\.[a-z_]+)?:[a-z_]+(:[a-z_]+)?$/D';
 
     public const SEVERITIES = ['mild', 'moderate', 'severe', 'unknown'];
 
@@ -41,5 +41,49 @@ final class PromptBuilder
         )), 0, 20);
 
         return $prompt."\nYour previous reply was rejected. Problems: ".implode(', ', $codes).". Reply again with ONLY the JSON object.\n";
+    }
+
+    /** Static rules for the extraction from recognised text; only the nonce, specialties and severities are filled in. */
+    public function buildFromText(string $nonce): string
+    {
+        $template = (string) file_get_contents(ExtractionSchema::textPromptPath());
+
+        return str_replace(
+            ['{{nonce}}', '{{specialties}}', '{{severities}}'],
+            [$nonce, implode(', ', array_map(fn (Specialty $s) => $s->value, Specialty::cases())), implode(', ', self::SEVERITIES)],
+            $template,
+        );
+    }
+
+    /**
+     * Rules plus the inline schema appendix and, for the single repair call, issue codes only. The data block of the
+     * task goes between the rules and the appendix (see ExtractFromTextTask).
+     *
+     * @param  list<string>|null  $issues
+     */
+    public function buildFromTextInline(string $nonce, ?array $issues = null): string
+    {
+        return $this->buildFromText($nonce).$this->schemaAppendix().$this->repairSuffix($issues);
+    }
+
+    public function schemaAppendix(): string
+    {
+        $inline = (string) file_get_contents(resource_path('ai/prompt.inline-json.v1.md'));
+
+        return str_replace('{{schema}}', (string) json_encode(ExtractionSchema::decoded(), JSON_UNESCAPED_SLASHES), $inline);
+    }
+
+    /** @param  list<string>|null  $issues */
+    public function repairSuffix(?array $issues): string
+    {
+        if ($issues === null) {
+            return '';
+        }
+        $codes = array_slice(array_values(array_filter(
+            $issues,
+            fn ($code) => is_string($code) && preg_match(self::ISSUE_PATTERN, $code) === 1,
+        )), 0, 20);
+
+        return "\nYour previous reply was rejected. Problems: ".implode(', ', $codes).". Reply again with ONLY the JSON object.\n";
     }
 }

@@ -16,6 +16,7 @@ Heslo: všetky účty majú rovnaké heslo zo servera (`STAGING_SEED_PASSWORD` v
 | `en_gb.6@example.test` | Dieťa (12 rokov) | Úlohy a priania. Financie a zdravie nevidí vôbec. Jeho zoznam prianí spravuje rodič `en_gb.5`. |
 | `pl_pl.3@example.test` | Starý rodič | Úlohy a priania môže meniť. Zdravie len na čítanie (vlastný záznam, Peter Kováč a Miško). Financie nevidí. |
 | `pl_pl.4@example.test` | Hosť | Úlohy a zoznamy prianí len na čítanie (nemôže rezervovať). Financie a zdravie nevidí vôbec. |
+| Maťko Demo (demo) | Dieťa bez prihlásenia | Detský účet bez e-mailu a bez hesla: **nemôže sa prihlásiť**, nemá reláciu ani prístupový kľúč. Má vygenerovanú syntetickú fotku (farebné tvary) a tri prianá. Jeho zoznam prianí a profil spravuje rodič `sk_sk.1` (z `/profile` časť "People you manage"). Pri každom nasadení sa zmaže aj s fotkou a vytvorí nanovo. |
 | `admin@example.test` | Správca | Len nastavenia (členovia, oprávnenia, audit). Nemá žiadne financie ani zdravie, nikomu nič nepatrí. |
 
 Predvolené oprávnenia (Rodič, Dieťa, Starý rodič, Hosť) zostávajú. Demo ich dopĺňa troma vecami, aby sa dali skúšať obe strany súkromia: zdravie pre oboch rodičov (zmena) a pre `sk_sk.2` a `pl_pl.3` (čítanie), financie na čítanie pre `sk_sk.2` a zoznamy prianí na čítanie pre hosťa (inak by jeho zoznam nikto nevidel).
@@ -38,6 +39,28 @@ Predvolené oprávnenia (Rodič, Dieťa, Starý rodič, Hosť) zostávajú. Demo
 - **Darované:** "Robot kuchenny" v zozname starého rodiča je už označený ako dostaný (pred asi 12 dňami), rezervácia sa ešte drží, kým ju neprečistí denná údržba.
 - **Príležitosti:** narodeniny členov v rôznych vzdialenostiach (jedny o 20 dní, jedny pred 30 dňami), mená dní (slovenský a poľský kalendár), Vianoce a Silvester pre celú rodinu, jednorazové "Rodinný zraz" čoskoro a "Promócia" v minulosti.
 
+### Nákupné zoznamy (`/shopping`)
+Všetko vzniká cez produkčné služby (rovnaké pravidlá ako v aplikácii). Katalóg má 30 bežných vecí (Mlieko, Chlieb, Vajcia, Zemiaky, Jablká a ďalšie) s predvolenou jednotkou a vygenerovaným obrázkom, päť vymyslených obchodov ("Demo Market", "Zelený košík", "Potraviny Pri Dube", "Drogéria Lúka", "Mini Obchod Ráno") s vygenerovaným logom (farebné tvary, žiadny text ani skutočná značka) a jedna vlastná jednotka "plechovka" (en can, pl puszka). Zodpovedná osoba zoznamu je tá, ktorá ho vie zamknúť a uzavrieť.
+- **"Týždenný nákup"** (rodič `sk_sk.1` je zodpovedný, otvorený, obchod Demo Market): 9 položiek z katalógu aj voľným textom, desatinné množstvá (0,75 kg jabĺk s poznámkou), prispievatelia `sk_sk.2` a `pl_pl.3`, čitateľ hosť `pl_pl.4`, pripomienka zajtra o 18:00 (podľa časovej zóny rodiny, ešte neodoslaná).
+- **"Drobnosti z drogérie"** (rodič `en_gb.5`, otvorený): bez obchodu, tri položky voľným textom.
+- **"Sobotný trh"** (starý rodič `pl_pl.3`, **zamknutý, napoly označený**): kúpené, nedostupné aj čakajúce položky; prispievateľ `sk_sk.1`, čitateľ `sk_sk.2`.
+- **"Oslava narodenín"** (rodič `en_gb.5`, **zamknutý, všetko vyriešené**): vidno tlačidlo na ukončenie nákupu.
+- **"Nákup na víkend"** (rodič `sk_sk.1`, **ukončený**, bez prenosu): vidno ho v archíve; prispievateľ `sk_sk.2`.
+- **"Veľký nákup"** (rodič `en_gb.5`, **ukončený s nedostupnými položkami**) a jeho **prenesený** otvorený zoznam "Veľký nákup (nezakúpené)" (iba nedostupné položky, všetky čakajú).
+- **"Nákup na víkend (kópia)"** (**kópia** ukončeného zoznamu, rodič `sk_sk.1`, ľudia zachovaní).
+- Hosť `pl_pl.4` má Nákupy len na čítanie (vidí len zoznamy, kde je čitateľ). Pri ďalšom nasadení sa všetko vrátane obrázkov (`wish-images/shopping/`) zmaže a vytvorí nanovo; na produkcii sa katalóg ani obchody nevytvárajú, tam ho plní rodina.
+
+### Recepty (`/recipes`)
+Všetko vzniká cez produkčné služby (recepty, fotky, odškrtávanie, nákupný most), rovnaké pravidlá ako v aplikácii. Je tam 12 vymyslených slovenských receptov; fotky sú vygenerované farebné tvary (žiadny text, žiadne tváre, žiadna sieť). Použité sú všetky štartovacie kategórie (Raňajky, Obed, Večera, Polievka, Šalát, Dezert, Pečenie, Desiata, Nápoj, Vegetariánske).
+- **Zdieľané recepty** (vidia ich všetci členovia s Receptami): "Palacinky s džemom" (rodič `sk_sk.1`), "Zemiaková polievka", "Jablkový koláč" a dlhý názov "Babičkina nedeľná slepačia polievka ..." (starý rodič `pl_pl.3`), "Cestoviny s paradajkovou omáčkou" a "Zemlovka" (rodič `en_gb.5`), "Vyprážané kuracie rezne" (rodič `sk_sk.1`), "Chlebíčky na desiatu" (`sk_sk.2`).
+- **Súkromné recepty** (vidí ich len autor): "Domáca limonáda" (`sk_sk.1`), "Ovsená kaša s ovocím" (`en_gb.5`, bez počtu porcií), "Šalát z čerstvej zeleniny" (`sk_sk.2`), "Lečo s vajíčkom" (`pl_pl.3`).
+- **Fotky:** "Jablkový koláč" má 10 fotiek (strop), väčšina ostatných jednu.
+- **Množstvá, ktoré sa zle prepočítavajú:** "Vyprážané kuracie rezne" (soľ bez množstva, 1 vajce, 3 strúčiky cesnaku v kusoch, 1/2 lyžičky rasce).
+- **Pokrok členov na jednom zdieľanom recepte:** "Palacinky s džemom" má odškrtnuté suroviny a hotové kroky u `sk_sk.1` aj `sk_sk.2`; `sk_sk.2` má vlastný počet porcií 2. Obľúbené: "Palacinky" u `sk_sk.1` aj `sk_sk.2`, "Zemiaková polievka" u `sk_sk.1`, "Jablkový koláč" u `pl_pl.3`. Jedna osobná poznámka u `sk_sk.1` k palacinkám.
+- **Recept z adresy:** "Zemlovka" je označená ako z adresy (`https://recepty.example/zemlovka`, vymyslený web). Samotný import sa na stagingu **nedá nasadiť ako demo**: žiadny AI beh sa pri seedovaní nespúšťa a tabuľka importov zostáva prázdna (žiadny návrh ani text stránky). Import si vyskúšaš len ručne, so skutočným behom AI.
+- **Pridanie do nákupu:** suroviny "Palaciniek" sú už pridané do otvoreného zoznamu "Týždenný nákup" (rodič `sk_sk.1`); múka, mlieko, vajcia, maslo, cukor a soľ sa spárovali s katalógom, džem je voľným textom.
+- Pri ďalšom nasadení sa všetko vrátane fotiek (`wish-images/recipes/`) zmaže a vytvorí nanovo. Skutočný recept, fotka alebo import skutočného člena na stagingu zhodí `staging:audit`.
+
 ### Financie (`/finance`)
 - **Päť účtov:** Spoločný účet (bežný), Súkromný účet rodiča, Úspory, Kreditná karta, Hotovosť v peňaženke. Všetko v eurách.
 - **Skrytý účet:** prihlás sa ako `sk_sk.2` a over, že vidí len Spoločný účet a Hotovosť. Súkromný účet, úspory a karta pre neho neexistujú. `sk_sk.1` vidí všetkých päť, `en_gb.5` štyri (bez súkromného účtu rodiča 1).
@@ -57,15 +80,34 @@ Predvolené oprávnenia (Rodič, Dieťa, Starý rodič, Hosť) zostávajú. Demo
 - **Očkovanie, pripomienky:** "Tetanus (preočkovanie)" u osoby A má ďalší termín **o 14 dní** (na vyskúšanie pripomienky), "MMR (2. dávka)" u Miška je **po termíne** o 45 dní. Ďalšie termíny sú o 90 až 400 dní.
 - **Núdzové kontakty a krvné skupiny:** každá osoba má 1 až 3 kontakty (vymyslené čísla) a krvnú skupinu, takže funguje aj núdzová karta.
 - **Vek:** od približne 8 do 74 rokov.
-- **Súhlas s AI:** zapnutý len pri osobe A a pri starom rodičovi D, vypnutý pri ostatných.
+- **Súhlas s AI:** zapnutý pri osobe A, pri starom rodičovi D a pri skrytom Marekovi E (jeho zapnutie potrebuje demo rozpoznaný text, bez súhlasu ho aplikácia neuloží), vypnutý pri ostatných.
 - **Archív (rozhodnutie majiteľa: po lehote len archivácia):** všetky osoby a záznamy sú vytvorené viac než 72 hodín dozadu (lehota `MEDICAL_DELETE_WINDOW_HOURS`, predvolene 72), takže zmazanie na staging záznam **archivuje**, nie zmaže. Navyše je v demo dátach archivovaná jedna návšteva osoby A ("Archivovaná návšteva (demo)"), jeden dokument osoby A ("Archivovaný starý výsledok (demo)") a jedna osoba "Archivovaná osoba (demo)" (s návštevou a alergiou). Archivované veci nie sú v zoznamoch, exportoch, núdzovej karte ani v pripomienkach. Rodičia (Edit) ich obnovia z položky "Archivované položky" v menu osoby a z časti "Archivované osoby" pod výberom osôb; `sk_sk.2` a `pl_pl.3` (len čítanie) archív nevidia. Nový záznam vytvorený na staging dnes sa dá do lehoty zmazať natrvalo.
 
 ### Dokumenty a návrhy od AI (`/health`, detail osoby)
-- **Sedem malých súborov (jeden je archivovaný):** výsledky krvných testov (PDF, 2 strany) a fotka vyrážky (obrázok) u osoby A, laboratórny výsledok (obrázok) u Petra Kováča, očkovací preukaz (PDF, 2 strany) u Miška, prepúšťacia správa (PDF, 2 strany) u starého rodiča a recept (obrázok) u skrytého Mareka. K tomu archivovaný PDF dokument osoby A (v Archíve, nie v zozname). Náhľady a sťahovanie fungujú. Obsah je len nápis "SYNTHETIC DEMO DOCUMENT".
+- **Deväť malých súborov (jeden je archivovaný):** výsledky krvných testov (PDF, 2 strany), fotka vyrážky (obrázok) a "Správa z ambulancie, text uložený" (PDF, 3 strany) u osoby A, laboratórny výsledok (obrázok) u Petra Kováča, očkovací preukaz (PDF, 2 strany) u Miška, prepúšťacia správa (PDF, 2 strany) a "Dlhá správa, deväť strán" (PDF, 9 strán) u starého rodiča a recept (obrázok) u skrytého Mareka. K tomu archivovaný PDF dokument osoby A (v Archíve, nie v zozname). Náhľady a sťahovanie fungujú. Obsah je len nápis "SYNTHETIC DEMO DOCUMENT".
 - **Návrhy na kontrolu bez Codexu:** dokument "Výsledky krvných testov" (osoba A) má hotový návrh. Návšteva je už prijatá ako "AI vyťažené, neoverené" (značka "Mark as verified" / "Označiť ako overené" funguje), alergia je prijatá a overená, liek je zamietnutý a očkovanie čaká na rozhodnutie. Dokument "Prepúšťacia správa" (starý rodič) má návrh, kde nie je nič rozhodnuté (štyri položky na prijatie alebo zamietnutie). "Fotka vyrážky" má neúspešný beh (neplatný výstup). V zozname AI volaní v nastaveniach sú tri bezobsahové záznamy.
 - Žiadne volanie na žiadneho poskytovateľa AI sa pri seedovaní nevykoná.
 
+### Rozpoznaný text a hľadanie v dokumentoch (`/health`, Fáza 13)
+Texty vzniknú cez produkčné `DocumentTextStore` (rovnaké stráže ako pri skutočnom behu: súhlas zapnutý, nie archivované, normalizácia, počítanie strán), nikdy ručným zápisom. Sú to vymyslené vety s diakritikou a **nie sú to OCR vymyslených obrázkov**: seedované PDF a obrázky hovoria len "SYNTHETIC DEMO DOCUMENT" a názov, takže text a obrázok sa pri porovnaní nezhodnú. Je to zámer. Nevykoná sa žiadne volanie AI a nezapíše sa žiadny záznam do `ai_calls`.
+
+| Dokument (osoba) | Čo ukazuje | Slová na vyskúšanie (bez diakritiky stačí) |
+|---|---|---|
+| "Výsledky krvných testov" (A) | trojstranový slovenský text, úplný; má aj hotový návrh z kroku 1 (režim entries) | `zltacka`, `ladviny`, `penicilin` |
+| "Prepúšťacia správa" (starý rodič D) | dvojstranový poľský text, úplný; jeho hotový návrh je teraz dvojkrokový beh (režim full, verzia promptu 2) | `zazolc`, `lukasz` |
+| "Dlhá správa, deväť strán" (D) | anglický text, prečítané len **prvé 4 z 9 strán** (čiastočný text: štítok "First 4 of 9 pages" a upozornenie) | `paracetamolu` (hľadanie hľadá predponu, `paracetamol` nájde tiež), `diary` na štvrtej strane |
+| "Správa z ambulancie, text uložený" (A) | beh len s textom (režim text, stav "Text saved"), druhá strana je prázdna ("Nothing legible on this page."); tlačidlo Run AI, bez Review | `ambulancie`, `prechladnutie` |
+| "Recept" (skrytý Marek E) | text je vidieť len tomu, kto smie vidieť Mareka (rodičia); `sk_sk.2` ho nenájde | `warfarin` |
+| "Archivovaný starý výsledok" (A, archivovaný) | text bol zapísaný pred archiváciou; po archivácii sa nenájde a jeho zobrazenie zmizne, po obnovení sa nájde znova | `betaloc` |
+
+- **Kto čo vidí:** rodič `sk_sk.1` nájde všetko okrem archivovaného dokumentu a vidí aj Marekov text. `sk_sk.2` (dieťa) nenájde Marekov text (osoba je pred ním skrytá) ani texty osôb, ktoré nevidí. Pri `pl_pl.3` (len čítanie) je text vidieť a tlačidlo Remove chýba.
+- **Štítok "may contain errors":** predvolene sa nezobrazuje (`AI_OCR_TEXT_RELIABILITY=reliable`). Na zobrazenie nastav na stagingu v `app.env` `AI_OCR_TEXT_RELIABILITY=uncertain` a znovu vytvor služby `app`, `worker`, `scheduler`; späť na `reliable` vrátiš rovnako, bez zmeny kódu.
+- **Nové nasadenie:** texty sa zmažú spolu s osobami a dokumentmi, ktorým patrili, a `StagingSeeder` navyše maže riadky textov podľa používateľa, ktorý ich spustil, takže po opakovanom seedovaní je práve jeden text na seedovaný dokument.
+- **Audit:** `staging:audit` zlyhá, ak riadok `medical_document_texts` spustil skutočný (nesyntetický) používateľ. Skutočný rozpoznaný text sa na staging nikdy nesmie dostať.
+
 ## Poznámky pre správu
+- Rozpoznaný text zo seedu je len vymyslený. Záložné snímky stagingu ho obsahujú tak isto ako ostatné demo údaje; skutočné zdravotné texty na staging nepatria (pozri `staging:audit`).
 - Súbory dokumentov sa pri novom nasadení zmažú spolu s osobami, ktorým patrili, aj archivovanými (zmazanie osôb ide podľa vlastníka, bez ohľadu na archív; po úspešnom dokončení seedovania); `medical:prune-orphans` je poistka pre prípadné zvyšky.
 - História volaní AI (`ai_calls`) a audit sa nikdy nemažú. Každé nasadenie pridá tri záznamy o volaniach AI so zaniknutými demo používateľmi (audit ich akceptuje, `ai:prune-calls` ich odstráni po období uchovania). Seedovanie samo nezapisuje žiadne audit záznamy.
+- Syntetické dieťa (bez e-mailu) sa pozná podľa prípony "(demo)" v mene **a zároveň** podľa toho, že ho spravujú len syntetickí členovia (`@example.test`, aspoň jeden správca zoznamu prianí). Samotná prípona nestačí, lebo je to voľný text, ktorý vie niekto napísať alebo doplniť pri premenovaní. Skutočné dieťa (alebo dieťa bez správcu, alebo so skutočným rodičom medzi správcami), aj keď sa volá "Anna (demo)", sa pri novom nasadení nikdy nezmaže a `staging:audit` ho označí ako nesyntetické. Pravidlo je na jednom mieste, v `App\Support\SyntheticChild`, a používa ho seeder aj audit.
 - Seedovanie sa nikdy nespúšťa na produkcii (`staging:seed` aj `staging:audit` odmietnu prostredie `production`).

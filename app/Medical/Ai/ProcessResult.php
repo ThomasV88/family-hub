@@ -22,5 +22,6 @@ final readonly class ProcessResult
         public bool $quotaSignature = false,
         public ?int $quotaMinutes = null,
         public ?CarbonImmutable $quotaResetAt = null,
+        public ?TokenUsage $usage = null,
     ) {}
 }

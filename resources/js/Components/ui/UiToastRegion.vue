@@ -44,6 +44,11 @@ function onFocusOut(id, event) {
     hold(id, 'focus', false);
 }
 
+function select(toast) {
+    dismiss(toast.id);
+    toast.action.onSelect();
+}
+
 watch(
     () => toasts.map((toast) => toast.id),
     (ids) => {
@@ -67,6 +72,7 @@ onBeforeUnmount(() => timers.forEach((entry) => clearTimeout(entry.timer)));
             @focusout="onFocusOut(toast.id, $event)"
         >
             <span class="ui-toast__message">{{ toast.message }}</span>
+            <UiButton v-if="toast.action" variant="ghost" size="sm" class="ui-toast__action" @click="select(toast)">{{ toast.action.label }}</UiButton>
             <UiButton variant="ghost" size="sm" icon-only :icon="X" :label="t('ui.close')" @click="dismiss(toast.id)" />
         </div>
     </div>
@@ -76,7 +82,7 @@ onBeforeUnmount(() => timers.forEach((entry) => clearTimeout(entry.timer)));
 .ui-toasts {
     position: fixed;
     inset-inline: 0;
-    inset-block-end: calc(var(--fh-toast-offset, 16px) + var(--fh-banner-lift, 0px));
+    inset-block-end: calc(var(--fh-toast-offset, 16px) + var(--fh-banner-lift, 0px) + var(--fh-bar-lift, 0px));
     z-index: 60;
     display: flex;
     flex-direction: column;
@@ -98,4 +104,5 @@ onBeforeUnmount(() => timers.forEach((entry) => clearTimeout(entry.timer)));
     box-shadow: var(--shadow-md);
     font-size: var(--text-base);
 }
+.ui-toast__action { min-height: 44px; flex: none; }
 </style>

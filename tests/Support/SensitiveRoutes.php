@@ -59,6 +59,10 @@ class SensitiveRoutes
             'settings.health_people.link.update',
             // Lets a chosen member manage another member's wishlist (widens who can act for them) (v1.0 gap W3).
             'settings.members.wishlist_managers.update',
+            // Creates an account with Todo and Wishlist edit grants whose list a chosen member manages (issue 6).
+            'settings.members.children.store',
+            // Gives a child an e-mail and a sign-in path by invitation (issue 6).
+            'settings.members.children.convert',
             // Removes a member's authenticator, passkeys and recovery codes: it lowers the protection of their account (v1.0 gap W3).
             'settings.members.second_factor.destroy',
             // Raising or lowering the re-confirmation windows changes how long a stolen session keeps sensitive access (issue 2).

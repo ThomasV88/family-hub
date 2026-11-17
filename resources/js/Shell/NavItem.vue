@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useShell } from './shellState.js';
@@ -10,9 +11,15 @@ const props = defineProps({
     variant: { type: String, default: 'side' },
     // Rail mode: label becomes visually hidden text plus a visual tooltip.
     rail: { type: Boolean, default: false },
+    // Bottom bar density by item count: 'normal' | 'dense' | 'tight'
+    density: { type: String, default: 'normal' },
 });
 const { t } = useI18n();
 const shell = useShell();
+const dense = computed(() => props.variant === 'bottom' && props.density !== 'normal');
+const tight = computed(() => props.variant === 'bottom' && props.density === 'tight');
+// At 7 or more items the labels cannot all fit whole: only the current item shows its label, the others are icon-only.
+const iconOnly = computed(() => tight.value && !props.current);
 
 function open(event) {
     shell.openComingSoon(props.module.key, event.currentTarget);
@@ -20,17 +27,19 @@ function open(event) {
 </script>
 
 <template>
-    <li class="nav-item">
+    <li :class="['nav-item', { 'nav-item--current': current }]">
         <component
             :is="module.href ? Link : 'button'"
             :href="module.href ?? undefined"
             :type="module.href ? undefined : 'button'"
             :aria-current="current ? 'page' : undefined"
-            :class="['nav-item__link', `nav-item__link--${variant}`, { 'is-current': current, 'is-soon': !module.href, 'is-rail': rail }]"
+            :aria-label="iconOnly ? t(module.labelKey) : undefined"
+            :title="variant === 'bottom' ? t(module.labelKey) : undefined"
+            :class="['nav-item__link', `nav-item__link--${variant}`, { 'is-current': current, 'is-soon': !module.href, 'is-rail': rail, 'is-dense': dense, 'is-tight': tight }]"
             @click="module.href ? undefined : open($event)"
         >
-            <component :is="module.icon" :size="24" :stroke-width="1.75" aria-hidden="true" class="nav-item__icon" />
-            <span :class="['nav-item__label', { 'visually-hidden': rail }]">{{ t(module.labelKey) }}</span>
+            <component :is="module.icon" :size="dense ? 20 : 24" :stroke-width="1.75" aria-hidden="true" class="nav-item__icon" />
+            <span :class="['nav-item__label', { 'visually-hidden': rail || iconOnly }]">{{ t(module.labelKey) }}</span>
             <span v-if="rail" class="nav-item__tip" aria-hidden="true">{{ t(module.labelKey) }}</span>
         </component>
     </li>
@@ -72,7 +81,7 @@ function open(event) {
 }
 .nav-item__link.is-rail { justify-content: center; padding-inline: 0; }
 .nav-item__icon { flex: none; }
-.nav-item__label { overflow-wrap: anywhere; min-width: 0; }
+.nav-item__link--side .nav-item__label { overflow-wrap: anywhere; min-width: 0; }
 
 .nav-item__link--bottom {
     flex-direction: column;
@@ -80,8 +89,28 @@ function open(event) {
     gap: 2px;
     padding: var(--space-1);
     text-align: center;
+    min-width: 0;
 }
-.nav-item__link--bottom .nav-item__label { text-align: center; }
+.nav-item__link--bottom .nav-item__label {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: manual;
+}
+.nav-item__link--bottom.is-dense { padding-inline: 1px; }
+.nav-item__link--bottom.is-dense .nav-item__label { font-size: 0.6875rem; letter-spacing: -0.02em; }
+.nav-item__link--bottom.is-tight { padding-inline: 2px; }
+.nav-item__link--bottom.is-tight .nav-item__label { font-size: 0.6875rem; letter-spacing: -0.02em; }
+/* 7+ items are only 40 px wide: an invisible strip on each side keeps the touch target at 44 px. */
+.nav-item__link--bottom.is-tight:not(.is-current)::before { content: ''; position: absolute; inset-block: 0; inset-inline: -2px; }
+/* Current item at 7+: the whole label, never ellipsised. */
+.nav-item--current > .nav-item__link--bottom.is-tight .nav-item__label { overflow: visible; text-overflow: clip; }
 
 .nav-item__tip {
     position: absolute;

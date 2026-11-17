@@ -272,6 +272,18 @@
             "field": "recovery_codes"
         },
         {
+            "key": "profile.photo",
+            "area": "account",
+            "screen": "profile_page",
+            "field": "photo"
+        },
+        {
+            "key": "profile.name",
+            "area": "account",
+            "screen": "profile_page",
+            "field": "name"
+        },
+        {
             "key": "settings.security_requirement",
             "area": "settings",
             "screen": "members_security",
@@ -330,6 +342,120 @@
             "area": "overview",
             "screen": "home",
             "field": "system_status"
+        },
+        {
+            "key": "members.child",
+            "area": "settings",
+            "screen": "members_child",
+            "field": "child"
+        },
+        {
+            "key": "members.convert",
+            "area": "settings",
+            "screen": "members_child",
+            "field": "convert"
+        },
+        {
+            "key": "shopping.catalog",
+            "area": "shopping",
+            "screen": "shopping_settings",
+            "field": "catalog"
+        },
+        {
+            "key": "shopping.store",
+            "area": "shopping",
+            "screen": "shopping_settings",
+            "field": "store"
+        },
+        {
+            "key": "shopping.units",
+            "area": "shopping",
+            "screen": "shopping_settings",
+            "field": "units"
+        },
+        {
+            "key": "shopping.roles",
+            "area": "shopping",
+            "screen": "shopping_list_panel",
+            "field": "roles"
+        },
+        {
+            "key": "shopping.reminder",
+            "area": "shopping",
+            "screen": "shopping_list_panel",
+            "field": "reminder"
+        },
+        {
+            "key": "shopping.email",
+            "area": "shopping",
+            "screen": "shopping_email",
+            "field": "addresses"
+        },
+        {
+            "key": "shopping.lock",
+            "area": "shopping",
+            "screen": "shopping_list",
+            "field": "lock"
+        },
+        {
+            "key": "shopping.carry_over",
+            "area": "shopping",
+            "screen": "shopping_finish",
+            "field": "carry_over"
+        },
+        {
+            "key": "recipes.import",
+            "area": "recipes",
+            "screen": "recipe_import",
+            "field": "url_step"
+        },
+        {
+            "key": "recipes.sharing",
+            "area": "recipes",
+            "screen": "recipe_form",
+            "field": "visibility"
+        },
+        {
+            "key": "recipes.servings",
+            "area": "recipes",
+            "screen": "recipe_detail",
+            "field": "servings"
+        },
+        {
+            "key": "recipes.progress",
+            "area": "recipes",
+            "screen": "recipe_detail",
+            "field": "ingredients"
+        },
+        {
+            "key": "recipes.notes",
+            "area": "recipes",
+            "screen": "recipe_detail",
+            "field": "notes"
+        },
+        {
+            "key": "recipes.cooking",
+            "area": "recipes",
+            "screen": "recipe_detail",
+            "field": "cooking_mode"
+        },
+        {
+            "key": "recipes.shopping",
+            "area": "recipes",
+            "screen": "recipe_shopping",
+            "field": "dialog_title"
+        },
+        {
+            "key": "health.search",
+            "area": "health",
+            "screen": "document_search",
+            "field": "search"
+        },
+        {
+            "key": "health.document_text",
+            "area": "health",
+            "screen": "document_text",
+            "field": "recognised_text"
         }
     ]
 }

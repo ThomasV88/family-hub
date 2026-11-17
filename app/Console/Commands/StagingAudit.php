@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\SyntheticChild;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -19,16 +20,20 @@ class StagingAudit extends Command
      */
     protected function rules(): array
     {
-        $synthetic = "(select id from users where email like '%@example.test')";
+        // A child has no e-mail (NULL), so NOT LIKE would be NULL and silently pass: the synthetic marker is explicit.
+        // The name suffix is user-editable text, so a child is only synthetic when all its managers are synthetic too.
+        $synthetic = "(select c.id from users c where c.email like '%@example.test' or ".SyntheticChild::condition('c').')';
         // Phase 5: staging must never hold real finance data. Rows created by a deleted (null) or non-synthetic user fail.
         // Null stays flagged: StagingSeeder deletes the rows of the synthetic users before it deletes them, so a null
         // creator can only be a real user who was deleted (real data) and never a reseeded synthetic one.
-        $real = "(select id from users where email not like '%@example.test')";
+        $real = "(select id from users where id not in {$synthetic})";
         $anyUser = '(select id from users)';
         $createdByReal = "(created_by is null or created_by not in {$synthetic})";
 
         return [
-            ['users', "email not like '%@example.test'"],
+            ['users', "id not in {$synthetic}"],
+            // Phase 10: a real child's photo is a real person's picture.
+            ['users', "photo_path is not null and id not in {$synthetic}"],
             // Phase 2: invitations hold the invited address; audit rows keep names (labels) and invite emails.
             ['invitations', "email not like '%@example.test'"],
             // A reseed deletes the synthetic users, and audit_logs and ai_calls are append-only, so their rows keep ids that no
@@ -61,7 +66,28 @@ class StagingAudit extends Command
             // (health content) may sit in the database. started_by has no foreign key and ai_calls is append-only, so a
             // dangling id is a deleted synthetic user and is accepted; an existing non-synthetic user fails.
             ['medical_ai_extractions', "(started_by in {$real})"],
+            // Phase 13: the recognised full text of a document started by a real user. Same dangling-id rule.
+            ['medical_document_texts', "(started_by in {$real})"],
             ['ai_calls', "(started_by in {$real})"],
+            // Phase 11: shopping data of a real user (names, lists, stores) must never reach staging. A list needs a
+            // synthetic creator (the column is NOT NULL and RESTRICT, so a null cannot occur). As with finance, a null creator on
+            // an item, catalog item, store or custom unit stays flagged: it can only be a real user who was deleted (nullOnDelete).
+            // Only built-in units (they have a key) legitimately have no creator. A responsible person who was removed may be null.
+            ['shopping_lists', "(creator_id not in {$synthetic}) or (responsible_id is not null and responsible_id not in {$synthetic})"],
+            ['shopping_list_members', "(user_id not in {$synthetic})"],
+            ['shopping_items', "(created_by is null or created_by not in {$synthetic}) or (state_changed_by is not null and state_changed_by not in {$synthetic})"],
+            ['shopping_catalog_items', "(created_by is null or created_by not in {$synthetic})"],
+            ['shopping_stores', "(created_by is null or created_by not in {$synthetic})"],
+            ['shopping_units', "(key is null and (created_by is null or created_by not in {$synthetic})) or (key is not null and created_by is not null and created_by not in {$synthetic})"],
+            // Phase 12: recipes (titles, ingredients, photos, personal notes) of a real member must never reach staging.
+            // author_id is NOT NULL and RESTRICT, so a null cannot occur. Member state, ticks and done marks cascade with
+            // their user, so any row of a non-synthetic user is real use. recipe_imports.user_id has no foreign key and holds
+            // the pasted address of a real member, so it is checked like ai_calls.started_by but any non-synthetic id fails.
+            ['recipes', "(author_id not in {$synthetic})"],
+            ['recipe_member_states', "(user_id not in {$synthetic})"],
+            ['recipe_ingredient_ticks', "(user_id not in {$synthetic})"],
+            ['recipe_step_done', "(user_id not in {$synthetic})"],
+            ['recipe_imports', "(user_id not in {$synthetic})"],
         ];
     }
 

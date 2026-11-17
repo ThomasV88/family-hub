@@ -1,12 +1,13 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ListChecks } from '@lucide/vue';
+import { FileText, ListChecks } from '@lucide/vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import UiEmptyState from '../../Components/ui/UiEmptyState.vue';
 import UiErrorState from '../../Components/ui/UiErrorState.vue';
 import UiSkeleton from '../../Components/ui/UiSkeleton.vue';
 import UiTable from '../../Components/ui/UiTable.vue';
+import UiTag from '../../Components/ui/UiTag.vue';
 
 // Counts-only history. Only the contract fields are read, so an unexpected extra field in the data is never rendered.
 const props = defineProps({
@@ -20,7 +21,7 @@ const emit = defineEmits(['retry']);
 
 const { t, locale } = useI18n();
 
-const SCOPES = ['no_proposal', 'last_failed', 'all'];
+const SCOPES = ['no_proposal', 'no_text', 'last_failed', 'all'];
 const STATUSES = ['active', 'paused', 'completed', 'cancelled'];
 const num = (v) => (Number.isFinite(Number(v)) ? Math.max(0, Math.trunc(Number(v))) : 0);
 
@@ -45,6 +46,7 @@ const shown = computed(() => props.rows.slice(0, 10).map((row, i) => ({
     id: String(i),
     started: started(row?.startedAt),
     scope: SCOPES.includes(row?.scope) ? t(`settings.ai_bulk.scope_${row.scope}`) : '',
+    textOnly: row?.scope === 'no_text',
     dailyCap: num(row?.dailyCap),
     wouldRead: num(row?.wouldRead),
     read: num(row?.read),
@@ -74,7 +76,10 @@ const shown = computed(() => props.rows.slice(0, 10).map((row, i) => ({
         <template v-else>
             <UiTable :caption="t('settings.ai_bulk.history_heading')" caption-hidden :columns="columns" :rows="shown">
                 <template #cell-startedAt="{ row }"><time :datetime="row.started.iso">{{ row.started.text }}</time></template>
-                <template #cell-scope="{ row }">{{ row.scope }}</template>
+                <template #cell-scope="{ row }">
+                    {{ row.scope }}
+                    <UiTag v-if="row.textOnly" :icon="FileText" class="bulk-history__tag" data-testid="bulk-text-only-tag">{{ t('settings.ai_bulk.history_text_only') }}</UiTag>
+                </template>
                 <template #cell-status="{ row }">{{ row.status }}</template>
             </UiTable>
             <p class="bulk-history__note">{{ t('settings.ai_bulk.history_note') }}</p>
@@ -85,6 +90,7 @@ const shown = computed(() => props.rows.slice(0, 10).map((row, i) => ({
 <style scoped>
 .bulk-history { display: flex; flex-direction: column; gap: var(--space-3); }
 .bulk-history__heading { margin: 0; font-size: var(--text-lg); font-weight: 600; }
+.bulk-history__tag { margin-inline-start: var(--space-2); }
 .bulk-history__note { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 .bulk-history :deep(td), .bulk-history :deep(th) { overflow-wrap: anywhere; white-space: normal; }
 </style>

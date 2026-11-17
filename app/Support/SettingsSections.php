@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use App\Access\AccessGate;
+use App\Access\AccessLevel;
+use App\Access\Module;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +33,9 @@ class SettingsSections
         }
         if ($user->is_admin && Route::has('settings.help')) {
             $sections[] = ['key' => 'help', 'href' => route('settings.help', absolute: false), 'labelKey' => 'settings.section.help', 'icon' => 'circle-help'];
+        }
+        if (Route::has('settings.shopping') && app(AccessGate::class)->allows($user, Module::Shopping, AccessLevel::Edit)) {
+            $sections[] = ['key' => 'shopping', 'href' => route('settings.shopping', absolute: false), 'labelKey' => 'settings.section.shopping', 'icon' => 'shopping-cart'];
         }
         if (Route::has('settings.notifications')) {
             $sections[] = ['key' => 'notifications', 'href' => route('settings.notifications', absolute: false), 'labelKey' => 'notifications.nav', 'icon' => 'bell'];

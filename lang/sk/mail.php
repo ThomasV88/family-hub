@@ -16,4 +16,22 @@ return [
     'google_linked_line' => 'Niekto sa práve prihlásil účtom Google s vašou e-mailovou adresou a ten je teraz pripojený k vášmu účtu vo Family Hub.',
     'google_linked_action' => 'Ak ste to boli vy, nemusíte robiť nič. Ak nie, požiadajte správcu rodiny o kontrolu účtu a ihneď si zmeňte heslo.',
     'salutation' => 'Family Hub',
+    'shopping_list' => [
+        'subject' => ':name — nákupný zoznam',
+        'store' => 'Obchod: :name',
+        'responsible' => 'Zodpovedná osoba: :name',
+        'bought' => 'kúpené',
+        'unavailable' => 'nedostupné',
+        'units' => [
+            'pcs' => 'ks|ks|ks',
+            'g' => 'g|g|g',
+            'kg' => 'kg|kg|kg',
+            'ml' => 'ml|ml|ml',
+            'l' => 'l|l|l',
+            'pack' => 'balenie|balenia|balení',
+            'bunch' => 'zväzok|zväzky|zväzkov',
+            'tbsp' => 'polievková lyžica|polievkové lyžice|polievkových lyžíc',
+            'tsp' => 'čajová lyžička|čajové lyžičky|čajových lyžičiek',
+        ],
+    ],
 ];

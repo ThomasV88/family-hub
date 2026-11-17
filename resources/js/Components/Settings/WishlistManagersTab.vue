@@ -12,11 +12,13 @@ const props = defineProps({
     member: { type: Object, required: true },
     // Every member of the family: [{ id, name, ... }]
     members: { type: Array, default: () => [] },
+    // Members who may be chosen (sign in, Wishlist Edit); null offers every member.
+    candidates: { type: Array, default: null },
 });
 const emit = defineEmits(['dirty']);
 const { t } = useI18n();
 
-const others = computed(() => props.members.filter((m) => m.id !== props.member.id));
+const others = computed(() => (props.candidates ?? props.members).filter((m) => m.id !== props.member.id));
 const saved = () => [...(props.member.wishlistManagerIds ?? [])].sort((a, b) => a - b);
 const form = useForm({ manager_ids: saved() });
 const failed = ref(false);

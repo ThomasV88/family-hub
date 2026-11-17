@@ -40,7 +40,7 @@ class GuardTwoFactorRoutes
         }
 
         if ($name === 'two-factor.login' || $name === 'two-factor.login.store' || str_starts_with($name, 'two-factor.passkey.')) {
-            if ($this->challengeExpired($request)) {
+            if ($this->challengeExpired($request) || $this->pendingUserBlocked($request)) {
                 $request->session()->forget(self::PENDING_KEYS);
 
                 return $this->wantsJson($request)
@@ -134,6 +134,23 @@ class GuardTwoFactorRoutes
         }
 
         return now()->getTimestamp() - (int) $at > (int) config('security.challenge_ttl_seconds');
+    }
+
+    /** A pending login naming a missing or sign-in-disabled account (forged login.id) is treated like an expired challenge. */
+    private function pendingUserBlocked(Request $request): bool
+    {
+        if (! $request->session()->has('login.id')) {
+            return false;
+        }
+
+        $id = $request->session()->get('login.id');
+        if (! is_int($id) && ! (is_string($id) && ctype_digit($id))) {
+            return false; // not an id at all: the endpoints' own "no pending login" answer applies
+        }
+
+        $user = User::find((int) $id);
+
+        return $user === null || ! $user->canSignIn();
     }
 
     /** A passkey-only member (or one with a pending secret) has no code to give: Fortify would decrypt null. */

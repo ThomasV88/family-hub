@@ -6,7 +6,9 @@
         "finance": "Financie",
         "health": "Zdravie",
         "account": "Účet a zabezpečenie",
-        "settings": "Nastavenia (administrátori)"
+        "settings": "Nastavenia (administrátori)",
+        "shopping": "Nákupy",
+        "recipes": "Receptár"
     },
     "screens": {
         "task_panel": "Panel úlohy",
@@ -36,7 +38,20 @@
         "invite_dialog": "Dialóg pozvánky",
         "members_permissions": "Členovia, karta Oprávnenia",
         "ai_agents": "AI agenti",
-        "home": "Stránka Prehľad"
+        "home": "Stránka Prehľad",
+        "profile_page": "Stránka Nastavenia profilu",
+        "members_child": "Členovia, dialóg a panel dieťaťa",
+        "shopping_settings": "Nastavenia, Nákupy",
+        "shopping_list_panel": "Panel nastavení nákupného zoznamu",
+        "shopping_email": "Dialóg odoslania nákupného zoznamu e-mailom",
+        "shopping_list": "Stránka nákupného zoznamu",
+        "shopping_finish": "Dialóg ukončenia nákupu",
+        "recipe_form": "Formulár receptu",
+        "recipe_detail": "Detail receptu",
+        "recipe_shopping": "Pridanie do nákupu",
+        "recipe_import": "Načítanie receptu z webovej stránky",
+        "document_search": "Hľadanie v dokumentoch",
+        "document_text": "Rozpoznaný text dokumentu"
     },
     "topics": {
         "tasks.visibility": {
@@ -193,11 +208,11 @@
         },
         "health.ai_consent": {
             "title": "AI pre túto osobu",
-            "text": "Predvolene vypnuté. Keď je zapnuté, dokumenty tejto osoby možno poslať externej AI firme, ktorá navrhne záznamy. Každý návrh skontrolujete, kým sa uloží. Vypnutie nič nezmaže."
+            "text": "Predvolene vypnuté. Keď je zapnuté, dokumenty tejto osoby možno poslať externej AI firme, ktorá navrhne záznamy. Každý návrh skontrolujete, kým sa uloží. Vypnutie zastaví nové behy. Ak má osoba rozpoznaný text, najprv sa vás opýta a potom sa zmaže."
         },
         "health.ai_run": {
             "title": "Spustiť AI",
-            "text": "Pošle tento jeden dokument externej AI firme, aby ho prečítala a navrhla záznamy. PDF sa číta do prvých 20 strán; fotografia HEIC sa premení na bežný obrázok iba pre AI. Nič sa neuloží, kým návrhy neskontrolujete a neprijmete."
+            "text": "Pošle tento jeden dokument externej AI firme, aby ho prečítala a navrhla záznamy. Tam, kde je zapnuté čítanie celého textu, AI najprv prečíta všetok text a uloží ho sem, aby v ňom mohli hľadať členovia, ktorí môžu dokument otvoriť, a potom z neho navrhne záznamy (úplný uložený text sa použije znova). PDF sa číta do prvých 20 strán. Nič sa nedostane do záznamu, kým ho neprijmete."
         },
         "health.export_format": {
             "title": "Formát exportu",
@@ -218,6 +233,14 @@
         "security.recovery_codes": {
             "title": "Záložné kódy",
             "text": "Jednorazové kódy, ktorými sa prihlásite, ak stratíte telefón. Každý funguje raz. Uložte ich na bezpečné miesto; vytvorením nových prestanú staré fungovať."
+        },
+        "profile.photo": {
+            "title": "Vaša fotografia",
+            "text": "Vašu fotografiu vidí každý člen rodiny, ktorý môže otvoriť niektorú časť aplikácie, pri vašom mene. Je uložená súkromne, nie na verejnej adrese, a skryté údaje, napríklad miesto snímky, sa odstránia."
+        },
+        "profile.name": {
+            "title": "Zobrazované meno",
+            "text": "Toto meno sa zobrazuje pri úlohách, želaniach a zoznamoch. Môžete ho kedykoľvek zmeniť. E-mail slúži na prihlásenie a zatiaľ sa tu nedá zmeniť."
         },
         "settings.security_requirement": {
             "title": "Vyžadovať dvojkrokové overenie",
@@ -253,11 +276,87 @@
         },
         "settings.ai_bulk": {
             "title": "Hromadné opätovné spracovanie",
-            "text": "Znova prečíta staršie dokumenty pomocou AI, niekoľko denne. Najprv skontrolujte, čo by sa spustilo, potom spustite. Návrhy, ktoré ste už prijali, sa nikdy nezmenia. Vidíte len počty."
+            "text": "Znova prečíta staršie dokumenty pomocou AI, niekoľko denne. Najprv skontrolujte, čo by sa spustilo, potom spustite. Návrhy, ktoré ste už prijali, sa nikdy nezmenia. Rozsah „Dokumenty bez rozpoznaného textu“ (zobrazí sa pri zapnutom čítaní celého textu) len prečíta a uloží text a nevytvára návrhy. Vidíte len počty."
         },
         "overview.system_status": {
             "title": "Stav systému",
             "text": "Ukazuje, že bežia kontroly na pozadí, ktoré posielajú pripomienky. Ak je pokrytie nízke alebo nebežala žiadna kontrola, pripomienky môžu meškať; opýtajte sa toho, kto spravuje server."
+        },
+        "members.child": {
+            "title": "Čo je detský účet?",
+            "text": "Detský účet nemá e-mail, nemôže sa prihlásiť a nedostáva e-maily ani upozornenia. Meno a fotografiu spravujú vybraní rodičia a administrátori, zoznam želaní spravujú rodičia. Vybrať možno len členov, ktorí sa môžu prihlásiť a smú upravovať Zoznam želaní."
+        },
+        "members.convert": {
+            "title": "Načo e-mail pre dieťa?",
+            "text": "Na e-mail príde pozvánka. Keď ju dieťa prijme, ten istý účet dostane e-mail a môže sa prihlásiť. Zoznam želaní, úlohy, oprávnenia aj rodičia zostanú. Dovtedy sa dieťa prihlásiť nemôže a zrušenie pozvánky nič nezmení."
+        },
+        "shopping.catalog": {
+            "title": "Katalóg položiek",
+            "text": "Katalóg je spoločný zoznam vecí, ktoré rodina často kupuje, s obrázkom a predvolenou jednotkou, aby ich ktokoľvek vedel rýchlo vybrať. Do zoznamu môžete zadať aj vlastnú položku. Odstránenie položky z katalógu ju nikdy neodstráni zo zoznamov: ostane tam ako obyčajný text bez obrázka."
+        },
+        "shopping.store": {
+            "title": "Obchody",
+            "text": "Pridajte obchody, v ktorých nakupujete, aj s logom, a priraďte ich k nákupnému zoznamu. Najlepšie je PNG s priehľadným pozadím, zobrazí sa na bielom pozadí. Ak obchod odstránite, zoznamy ostanú, ale už nebudú mať obchod."
+        },
+        "shopping.units": {
+            "title": "Jednotky",
+            "text": "Vstavané jednotky ako ks, g, kg a l sa zobrazujú v každom jazyku a nedajú sa meniť. Správcovia môžu pridať ďalšie jednotky, každú s anglickým, slovenským a poľským názvom. Ak odstránite jednotku, ktorá sa používa, položky si ponechajú množstvo, no zobrazia ho bez jednotky."
+        },
+        "shopping.roles": {
+            "title": "Zodpovedná osoba, prispievatelia a čitatelia",
+            "text": "Zodpovedná osoba je jediná, ktorá môže zoznam uzamknúť a odomknúť, označovať položky a ukončiť nákup. Dá sa zmeniť kedykoľvek. Ľudia, ktorí môžu pridávať a upravovať položky, menia položky. Ľudia, ktorí môžu iba zobraziť, zoznam vidia, ale nič nemenia. Osoba má naraz jednu rolu."
+        },
+        "shopping.reminder": {
+            "title": "Pripomienka",
+            "text": "Zoznam má jednu pripomienku, dátum a čas v časovom pásme rodiny. Push upozornenie dostane iba zodpovedná osoba, a to len ak má na svojom zariadení zapnuté push upozornenia v Nastaveniach, Upozornenia. Ak je push v ten čas vypnutý, pripomienka sa odošle, keď ho zapnete, najneskôr s 24-hodinovým oneskorením. Čas v minulosti sa odmietne. Zmenou času sa nastaví nová pripomienka."
+        },
+        "shopping.email": {
+            "title": "Odoslanie zoznamu e-mailom",
+            "text": "Zadajte alebo vložte najviac 5 adries, funguje akákoľvek adresa. E-mail je čistý text s položkami, množstvami, obchodom a zodpovednou osobou a neobsahuje odkaz do aplikácie. Ľudia, ktorí môžu iba zobraziť, odosielať nemôžu. Platia denné limity, zoznam sa teda nedá posielať stále dokola."
+        },
+        "shopping.lock": {
+            "title": "Uzamknutie zoznamu",
+            "text": "Uzamknutím sa začína nákup: nikto už nemôže pridávať, odstraňovať ani upravovať položky. Zoznam uzamyká a odomyká a každú položku označuje ako Zakúpené alebo Nedostupné iba zodpovedná osoba; ďalším ťuknutím označenie zrušíte. Ostatní vidia označenia po opätovnom načítaní. Odomknutím sa označenia zachovajú."
+        },
+        "shopping.carry_over": {
+            "title": "Položky, ktoré sa nepodarilo zakúpiť",
+            "text": "Položky označené ako Nedostupné môžu ísť do nového otvoreného zoznamu s názvom pôvodného a dodatkom „(nezakúpené)“, s rovnakým obchodom, zodpovednou osobou a prístupom a bez pripomienky. Ukončený zoznam sa tak či tak presunie do archívu a ostane iba na čítanie."
+        },
+        "recipes.import": {
+            "title": "Načítanie receptu z webovej stránky",
+            "text": "Aplikácia prečíta webovú stránku, ktorú vložíte, a vyplní formulár receptu. Text stránky sa odošle poskytovateľovi AI, ktorého zapol váš administrátor, a nič iné z vášho účtu. Funguje s väčšinou stránok s receptami, nie so všetkými. Pred uložením všetko skontrolujte: nič sa neuloží, kým nestlačíte Uložiť recept."
+        },
+        "recipes.sharing": {
+            "title": "Kto môže tento recept vidieť",
+            "text": "Voľbou Iba ja si recept necháte len pre seba. Voľbou Všetci v rodine, ktorí používajú Receptár, umožníte ostatným členom recept čítať, variť podľa neho a pridať ho do nákupu. Upravovať ho môžete vždy iba vy ako autor. Ak zdieľaný recept znova nastavíte ako súkromný, poznámky, odškrtnutia a obľúbené ostatných pri ňom ostanú zachované, ale skryté."
+        },
+        "recipes.servings": {
+            "title": "Porcie",
+            "text": "Zmenou počtu porcií sa množstvá prepočítajú iba na obrazovke. Samotný recept sa nemení a riadky bez množstva, časy pečenia ani veľkosti foriem sa neprepočítavajú. Zvolený počet si Receptár pri tomto recepte pamätá pre vás. Tlačidlom Vrátiť sa vrátite na porcie z receptu."
+        },
+        "recipes.progress": {
+            "title": "Váš postup",
+            "text": "Surovinu odškrtnite, keď je pripravená, a krok, keď je hotový. Odškrtnutia sa ukladajú hneď a evidujú sa pre každého osobitne: nikto iný ich nevidí a vy nevidíte jeho. Voľba Obnoviť môj postup v ponuke zruší iba vaše odškrtnutia pri tomto recepte."
+        },
+        "recipes.notes": {
+            "title": "Osobné poznámky",
+            "text": "Napíšte si, čo si chcete zapamätať, napríklad dať nabudúce menej soli. Poznámky sa uložia samy chvíľu po tom, čo prestanete písať. Vidíte ich iba vy, ostatní členovia nikdy, ani autor receptu. Zobrazujú sa aj pri vašich vlastných receptoch."
+        },
+        "recipes.cooking": {
+            "title": "Režim varenia",
+            "text": "Režim varenia zväčší riadky a necháva suroviny a postup na jednej dlhej stránke, aby ste sa mohli orientovať aj s ušpinenými rukami. Na telefóne dolná lišta ukazuje, ako ďaleko ste. Ak to prehliadač dovolí, obrazovka počas režimu ostane zapnutá. Nič sa neukladá: nabudúce je režim opäť vypnutý."
+        },
+        "recipes.shopping": {
+            "title": "Pridanie do nákupného zoznamu",
+            "text": "Vyberte nový zoznam alebo jeden zo svojich otvorených zoznamov. Pred pridaním skontrolujte každú surovinu: odškrtnite, čo už máte, a upravte množstvo alebo jednotku. Priradené suroviny si ponechajú názov z katalógu a dostanú obrázok (vlastný názov: Pridať ako vlastnú položku). Pridá sa všetko naraz, alebo nič. Poznámky k surovinám sa neprenášajú."
+        },
+        "health.search": {
+            "title": "Hľadať v dokumentoch",
+            "text": "Hľadá v názvoch dokumentov a v texte, ktorý z nich AI prečítala. Hľadajú sa len dokumenty, ktoré môžete otvoriť, takže dokument, ktorý nevidíte, sa nikdy nenájde. Dokumenty, ktoré AI nikdy neprečítala, sa nájdu len podľa názvu. Slová, ktoré napíšete, sa neukladajú a nedávajú sa do adresy."
+        },
+        "health.document_text": {
+            "title": "Rozpoznaný text",
+            "text": "Text, ktorý AI prečítala z tohto dokumentu. Môže ho čítať a kopírovať každý, kto môže dokument otvoriť. Môže obsahovať chyby, preto keď na tom záleží, skontrolujte samotný dokument. Odstrániť ho môžu len tí, ktorí môžu upravovať. Zálohy uchovávajú kópiu, kým nevypršia."
         }
     }
 }

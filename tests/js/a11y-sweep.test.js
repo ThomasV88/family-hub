@@ -1,4 +1,5 @@
 import { describe, it, vi, afterEach } from 'vitest';
+import { flushPromises } from '@vue/test-utils';
 import { mountUi, loadMessages } from './helpers/mount.js';
 import { expectNoAxeViolations } from './helpers/axe.js';
 import { pseudoLong } from './helpers/pseudoLong.js';
@@ -6,18 +7,27 @@ import { mount } from '@vue/test-utils';
 import { createAppI18n } from '../../resources/js/i18n.js';
 
 let mockLocale = 'en';
+// Only the bulk panel sweep below sets a handler; every other page keeps the real securityFetch.
+const { bulkFetch } = vi.hoisted(() => ({ bulkFetch: { handler: null } }));
+vi.mock('../../resources/js/Security/securityFetch.js', async (importOriginal) => {
+    const actual = await importOriginal();
+    return { ...actual, securityFetch: (...args) => (bulkFetch.handler ? bulkFetch.handler(...args) : actual.securityFetch(...args)) };
+});
 vi.mock('@inertiajs/vue3', async () => {
-    const { h } = await import('vue');
+    const { h, reactive } = await import('vue');
     return {
         usePage: () => ({
             props: {
                 locale: mockLocale,
                 app: { name: 'Family Hub', env: 'local' },
-                auth: { user: { id: 1, name: 'Mira' }, access: { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'edit' } },
+                auth: { user: { id: 1, name: 'Mira', isAdmin: true }, access: { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'edit', shopping: 'edit', recipes: 'edit' } },
+                flash: { status: null, toast: null, data: null },
+                availableLocales: ['sk', 'pl', 'en'],
                 heartbeat: { last_recorded_at: '2026-11-13T10:00:00+00:00', last_source: 'schedule', count_24h: 3, expected_24h: 1440 },
             },
         }),
-        router: { post: vi.fn(), get: vi.fn(), visit: vi.fn(), on: vi.fn(), reload: vi.fn() },
+        router: { post: vi.fn(), get: vi.fn(), visit: vi.fn(), on: vi.fn(), reload: vi.fn(), delete: vi.fn() },
+        useForm: (data) => reactive({ ...data, processing: false, errors: {}, put: vi.fn(), post: vi.fn(), clearErrors: vi.fn() }),
         Head: { render: () => null },
         Link: { props: ['href'], render() { return h('a', { href: this.href }, this.$slots.default?.()); } },
     };
@@ -29,10 +39,19 @@ import TodoIndex from '../../resources/js/Pages/Todo/Index.vue';
 import AiCalls from '../../resources/js/Pages/Settings/AiCalls.vue';
 import AiAgents from '../../resources/js/Pages/Settings/AiAgents.vue';
 import HelpSettings from '../../resources/js/Pages/Settings/Help.vue';
+import ProfileEdit from '../../resources/js/Pages/Profile/Edit.vue';
+import ShoppingIndex from '../../resources/js/Pages/Shopping/Index.vue';
+import ShoppingShow from '../../resources/js/Pages/Shopping/Show.vue';
+import SettingsShopping from '../../resources/js/Pages/Settings/Shopping.vue';
+import RecipesIndex from '../../resources/js/Pages/Recipes/Index.vue';
+import RecipesShow from '../../resources/js/Pages/Recipes/Show.vue';
+import RecipesForm from '../../resources/js/Pages/Recipes/Form.vue';
 import { helpAreas, helpRows } from './helpers/help.js';
 import AppShell from '../../resources/js/Layouts/AppShell.vue';
+import BulkRegenPanel from '../../resources/js/Settings/AiAgents/BulkRegenPanel.vue';
 
 let wrapper;
+window.matchMedia = (q) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
 const originalWidth = window.innerWidth;
 afterEach(() => {
     wrapper?.unmount();
@@ -41,7 +60,14 @@ afterEach(() => {
     window.innerWidth = originalWidth;
 });
 
-const pages = { StyleGuide, Home, 'Todo/Index': TodoIndex, 'Settings/AiCalls': AiCalls, 'Settings/AiAgents': AiAgents, 'Settings/Help': HelpSettings };
+const pages = { StyleGuide, Home, 'Todo/Index': TodoIndex, 'Settings/AiCalls': AiCalls, 'Settings/AiAgents': AiAgents, 'Settings/Help': HelpSettings, 'Profile/Edit': ProfileEdit,
+    'Shopping/Index': ShoppingIndex, 'Shopping/Index (empty)': ShoppingIndex,
+    'Shopping/Show (open)': ShoppingShow, 'Shopping/Show (locked)': ShoppingShow, 'Shopping/Show (done)': ShoppingShow,
+    'Settings/Shopping': SettingsShopping,
+    'Recipes/Index': RecipesIndex, 'Recipes/Index (empty)': RecipesIndex, 'Recipes/Index (draft)': RecipesIndex,
+    'Recipes/Show (author)': RecipesShow, 'Recipes/Show (non-author)': RecipesShow,
+    'Recipes/Form (create)': RecipesForm, 'Recipes/Form (edit)': RecipesForm, 'Recipes/Form (review)': RecipesForm,
+};
 const ME = 1;
 const todoTask = (id, extra = {}) => ({
     id, title: `Task ${id}`, notes: null, status: 'todo', visibility: 'family', creatorId: ME, assigneeId: ME,
@@ -101,11 +127,144 @@ pageProps['Settings/Help'] = {
     maxLength: 400,
     error: false,
 };
+pageProps['Profile/Edit'] = {
+    sections: [{ key: 'appearance', href: '/settings/appearance', labelKey: 'settings.section.appearance', icon: 'palette' }],
+    subject: { id: 1, name: 'Mira', email: 'mira@example.test', photoVersion: 2, isSelf: true, isChild: false },
+    nameMax: 60,
+};
+const shopPerson = (id, name) => ({ id, name, isChild: false });
+const shopList = (id, extra = {}) => ({
+    id, name: `List ${id}`, status: 'open', store: null, responsible: shopPerson(1, 'Mira'), remindAt: null, reminderPassed: false,
+    itemsCount: 0, boughtCount: 0, unavailableCount: 0, abilities: { copy: true }, ...extra,
+});
+const shopLists = [
+    shopList(1, { name: 'Weekly shop', store: { id: 4, name: 'Tesco', logoVersion: 2 }, remindAt: '2026-11-20T18:00:00+01:00' }),
+    shopList(2, { name: 'Party', status: 'locked', itemsCount: 8, boughtCount: 3, store: { id: 5, name: 'Lidl', logoVersion: null } }),
+    shopList(3, { name: 'Garden', remindAt: '2026-11-10T08:00:00+01:00', reminderPassed: true }),
+];
+const shopIndexBase = {
+    tab: 'open', stores: [{ id: 4, name: 'Tesco', logoVersion: 2 }], responsibleCandidates: [shopPerson(1, 'Mira'), shopPerson(2, 'Adam')], canCreate: true,
+};
+pageProps['Shopping/Index'] = {
+    ...shopIndexBase, lists: shopLists, counts: { open: 3, archive: 1 },
+    archive: { data: [{ id: 9, name: 'Old shop', doneAt: '2026-11-01T10:00:00+01:00', storeName: 'Tesco', abilities: { copy: true } }], currentPage: 1, lastPage: 1, perPage: 20, total: 1 },
+};
+pageProps['Shopping/Index (empty)'] = {
+    ...shopIndexBase, lists: [], counts: { open: 0, archive: 0 },
+    archive: { data: [], currentPage: 1, lastPage: 1, perPage: 20, total: 0 },
+};
+const shopItem = (id, extra = {}) => ({ id, name: `Item ${id}`, quantity: '1.00', unitId: 1, note: null, state: 'pending', catalogItemId: null, imageVersion: null, ...extra });
+const shopShowBase = {
+    items: [shopItem(1, { name: 'Milk' }), shopItem(2, { name: 'Bread', state: 'bought' }), shopItem(3, { name: 'Apples', state: 'unavailable' })],
+    members: { contributors: [shopPerson(2, 'Adam')], viewers: [] },
+    units: [{ id: 1, key: 'pcs', names: null }], stores: [{ id: 4, name: 'Tesco', logoVersion: 2 }], catalog: [{ id: 1, name: 'Milk', defaultUnitId: 1, imageVersion: null }],
+};
+const shopListBase = {
+    id: 5, name: 'Weekly shop', status: 'open', store: null, storeName: '', creator: shopPerson(1, 'Mira'), responsible: shopPerson(1, 'Mira'),
+    responsibleFallback: null, remindAt: null, reminderPassed: false, reminderSent: false, lockedAt: null, doneAt: null, source: null,
+};
+const shopPlan = { editItems: true, lock: true, unlock: false, mark: false, finish: false, copy: true, mail: true, delete: true, manageCatalog: false };
+pageProps['Shopping/Show (open)'] = { ...shopShowBase, list: shopListBase, abilities: shopPlan };
+pageProps['Shopping/Show (locked)'] = {
+    ...shopShowBase, list: { ...shopListBase, status: 'locked', lockedAt: '2026-11-17T10:00:00+01:00' },
+    abilities: { editItems: false, lock: false, unlock: true, mark: true, finish: true, copy: true, mail: true, delete: false },
+};
+pageProps['Shopping/Show (done)'] = {
+    ...shopShowBase, list: { ...shopListBase, status: 'done', doneAt: '2026-11-17T12:00:00+01:00' },
+    abilities: { editItems: false, lock: false, unlock: false, mark: false, finish: false, copy: true, mail: true, delete: false },
+};
+pageProps['Settings/Shopping'] = {
+    sections: [
+        { key: 'shopping', href: '/settings/shopping', labelKey: 'settings.section.shopping', icon: 'shopping-cart' },
+        { key: 'appearance', href: '/settings/appearance', labelKey: 'settings.section.appearance', icon: 'palette' },
+    ],
+    catalog: [{ id: 1, name: 'Milk', defaultUnitId: 3, imageVersion: 2, usedOn: 2 }, { id: 2, name: 'Apple', defaultUnitId: null, imageVersion: null, usedOn: 0 }],
+    stores: [{ id: 1, name: 'Tesco', logoVersion: 1, usedOn: 1 }, { id: 2, name: 'Lidl', logoVersion: null, usedOn: 0 }],
+    units: [
+        { id: 1, key: 'pcs', names: null, builtIn: true, usedOn: 0 },
+        { id: 3, key: 'kg', names: null, builtIn: true, usedOn: 0 },
+        { id: 10, key: null, names: { en: 'tin', sk: 'plech', pl: 'puszka' }, builtIn: false, usedOn: 3 },
+    ],
+    canManageUnits: true,
+};
+const recUnits = [{ id: 1, key: 'pcs', names: null }, { id: 2, key: 'g', names: null }, { id: 9, key: 'tsp', names: null }];
+const recCard = (id, extra = {}) => ({
+    id, title: `Recipe ${id}`, mainPhoto: null, prepMinutes: 10, cookMinutes: 20, servings: 4, visibility: 'shared', categories: ['Soup', 'Vegetarian'],
+    author: { id: 1, name: 'Mira', isMe: true }, favourite: false, ...extra,
+});
+const recIndexBase = {
+    hasMore: false, page: 1, filters: {}, canCreate: true,
+    filterOptions: { categories: [{ name: 'Soup', key: 'soup' }], authors: [{ id: 1, name: 'Mira' }, { id: 5, name: 'Anna' }] },
+};
+pageProps['Recipes/Index'] = {
+    ...recIndexBase,
+    recipes: [recCard(1, { favourite: true }), recCard(2, { visibility: 'private', author: { id: 5, name: 'Anna', isMe: false }, categories: [], prepMinutes: null, cookMinutes: null, servings: null }), recCard(3)],
+};
+pageProps['Recipes/Index (empty)'] = { ...recIndexBase, recipes: [] };
+pageProps['Recipes/Index (draft)'] = {
+    ...recIndexBase, recipes: [recCard(1)],
+    import: { available: true, acknowledged: true, providers: ['codex'] },
+    drafts: [
+        { id: '33333333-3333-4333-8333-333333333333', status: 'ready', host: 'recepty.example', reason: null },
+        { id: '44444444-4444-4444-8444-444444444444', status: 'failed', host: 'blog.example', reason: 'no_recipe' },
+    ],
+};
+const recDetail = {
+    id: 12, title: 'Tomato soup', description: 'Warm and simple', servings: 4, prepMinutes: 10, cookMinutes: 30, visibility: 'shared',
+    sourceUrl: 'https://www.example.test/soup', sourceHost: 'www.example.test', createdVia: 'manual',
+    author: { id: 1, name: 'Mira', isMe: true }, categories: ['Soup'],
+    ingredients: [
+        { id: 101, name: 'Flour', quantity: '200', unitId: 2, note: 'sifted' },
+        { id: 102, name: 'Eggs', quantity: '2', unitId: 1, note: null },
+        { id: 103, name: 'Salt', quantity: null, unitId: null, note: 'to taste' },
+    ],
+    steps: [{ id: 201, body: 'Boil water' }, { id: 202, body: 'Serve' }],
+    photos: [{ id: 31, position: 1, isMain: true, version: 1, thumbUrl: '/recipes/12/photos/31/thumb?v=1', fullUrl: '/recipes/12/photos/31/full?v=1' }],
+};
+const recState = { favourite: true, note: 'Less salt', servings: null, tickedIngredientIds: [101], doneStepIds: [201] };
+pageProps['Recipes/Show (author)'] = { recipe: recDetail, state: recState, units: recUnits, abilities: { edit: true, delete: true, changeVisibility: true, addToShopping: true } };
+pageProps['Recipes/Show (non-author)'] = {
+    recipe: { ...recDetail, author: { id: 3, name: 'Anna', isMe: false } }, state: { ...recState, favourite: false, note: null },
+    units: recUnits, abilities: { edit: false, delete: false, changeVisibility: false, addToShopping: true },
+};
+const recLimits = {
+    titleMax: 120, descriptionMax: 1000, ingredientNameMax: 120, ingredientNoteMax: 80, stepMax: 1000, ingredientsMax: 80, stepsMax: 60,
+    categoriesMax: 3, categoryMax: 30, servingsMin: 1, servingsMax: 99, minutesMax: 1440, quantityMax: 9999, sourceUrlMax: 2000, photosMax: 10, photoMaxBytes: 5242880,
+};
+const recFormBase = {
+    recipe: null, defaults: { servings: 4, visibility: 'private' }, units: recUnits, categorySuggestions: ['Polievka'],
+    starterCategories: ['breakfast', 'soup', 'dessert'], limits: recLimits, isShared: false, canAddToShopping: true,
+};
+pageProps['Recipes/Form (create)'] = recFormBase;
+pageProps['Recipes/Form (edit)'] = { ...recFormBase, recipe: recDetail, isShared: true };
+pageProps['Recipes/Form (review)'] = {
+    ...recFormBase,
+    prefill: {
+        title: 'Palacinky', description: null, servings: null, prep_minutes: 10, cook_minutes: null, categories: ['Dessert'],
+        ingredients: [{ name: 'flour', quantity: '250', unit_id: 2, note: null, original: '250 g flour' }, { name: 'eggs', quantity: '2', unit_id: 1, note: null, original: '2 eggs' }],
+        steps: [{ body: 'Mix everything.' }], aiFields: ['title', 'ingredients', 'steps'],
+        sourceUrl: 'https://recepty.example/palacinky', sourceHost: 'recepty.example', textCut: false, importId: '33333333-3333-4333-8333-333333333333',
+    },
+};
 const cases = [];
 for (const locale of ['en', 'sk', 'pl'])
     for (const theme of ['light', 'dark'])
         for (const width of [390, 1280])
             for (const name of Object.keys(pages)) cases.push([name, locale, theme, width]);
+// Phone minimum width: the Shopping overview (bottom bar with six items, stacked rows).
+for (const locale of ['en', 'sk', 'pl'])
+    for (const theme of ['light', 'dark'])
+        for (const name of ['Shopping/Index', 'Shopping/Index (empty)']) cases.push([name, locale, theme, 360]);
+
+// Phone minimum width for the Recipes pages (seven-item bottom bar).
+for (const locale of ['en', 'sk', 'pl'])
+    for (const theme of ['light', 'dark'])
+        for (const name of ['Recipes/Index', 'Recipes/Show (author)', 'Recipes/Form (create)']) cases.push([name, locale, theme, 360]);
+
+// Recipe form in review mode (the "From the page" tags beside narrow labels) at phone and mid widths.
+for (const locale of ['en', 'sk', 'pl'])
+    for (const theme of ['light', 'dark'])
+        for (const width of [360, 800]) cases.push(['Recipes/Form (review)', locale, theme, width]);
 
 describe('accessibility sweep', () => {
     it.each(cases)('%s in %s, %s theme, %ipx has no axe violations', async (name, locale, theme, width) => {
@@ -116,7 +275,18 @@ describe('accessibility sweep', () => {
         await expectNoAxeViolations(wrapper.element);
     });
 
-    it.each([390, 1280])('AppShell with pseudo-long English text at %ipx has no axe violations', async (width) => {
+    it.each([['en', 'light'], ['sk', 'dark'], ['pl', 'light']])('Recipes/Show in cooking mode in %s, %s theme, 390px has no axe violations', async (locale, theme) => {
+        mockLocale = locale;
+        document.documentElement.dataset.theme = theme;
+        window.innerWidth = 400;
+        wrapper = mountUi(RecipesShow, { locale, props: pageProps['Recipes/Show (author)'] });
+        await flushPromises();
+        await wrapper.find('[data-testid="cooking-toggle-bar"]').trigger('click');
+        await flushPromises();
+        await expectNoAxeViolations(wrapper.element);
+    });
+
+    it.each([360, 390, 1280])('AppShell with pseudo-long English text at %ipx has no axe violations', async (width) => {
         mockLocale = 'en';
         window.innerWidth = width;
         wrapper = mount(AppShell, {
@@ -124,6 +294,46 @@ describe('accessibility sweep', () => {
             slots: { default: '<h1>Title</h1>' },
             global: { plugins: [createAppI18n('en', pseudoLong(loadMessages('en')))] },
         });
+        await expectNoAxeViolations(wrapper.element);
+    });
+});
+
+// 13-10: the bulk panel with the "documents without recognised text" scope selected and its dry-run result (counts only).
+describe('accessibility sweep: AI bulk panel, scope no_text', () => {
+    const panelProps = {
+        bulk: { active: null, history: [], ocrEnabled: true, textNoticeAcknowledged: true },
+        bulkConfig: { defaultCap: 20, maxCap: 30, startHour: 2, timezone: 'Europe/Bratislava', validMinutes: 15 },
+        providers: ['codex'], agents: [{ key: 'codex', enabled: true, position: 1, health: { state: 'logged_in' } }],
+    };
+    const dry = { ok: true, status: 200, data: { token: '11111111-1111-4111-8111-111111111111', checkedAt: '2026-11-14T10:00:00+00:00', validMinutes: 15, counts: { eligible: 18, skipped_consent: 2, skipped_unsupported: 3, skipped_decided: 0, skipped_active: 1 } } };
+    afterEach(() => { bulkFetch.handler = null; });
+
+    const cases = [];
+    for (const locale of ['en', 'sk', 'pl']) for (const theme of ['light', 'dark']) for (const width of [390, 1280]) cases.push([locale, theme, width]);
+
+    it.each(cases)('is accessible after the check in %s, %s theme, %ipx', async (locale, theme, width) => {
+        mockLocale = locale;
+        document.documentElement.dataset.theme = theme;
+        window.innerWidth = width;
+        bulkFetch.handler = vi.fn(async () => dry);
+        wrapper = mountUi(BulkRegenPanel, { locale, props: panelProps });
+        await flushPromises();
+        await wrapper.find('[role="radio"][data-scope="no_text"]').trigger('click');
+        await wrapper.find('[data-control="check"]').trigger('click');
+        await flushPromises();
+        if (!wrapper.find('[data-testid="bulk-no-text-note"]').exists()) throw new Error('the dry-run result with the no_text note was not reached');
+        await expectNoAxeViolations(wrapper.element);
+    });
+
+    it.each(['sk', 'pl'])('is accessible after the check with +40% text at 360px in %s', async (locale) => {
+        mockLocale = locale;
+        window.innerWidth = 360;
+        bulkFetch.handler = vi.fn(async () => dry);
+        wrapper = mount(BulkRegenPanel, { props: panelProps, attachTo: document.body, global: { plugins: [createAppI18n(locale, pseudoLong(loadMessages(locale)))] } });
+        await flushPromises();
+        await wrapper.find('[role="radio"][data-scope="no_text"]').trigger('click');
+        await wrapper.find('[data-control="check"]').trigger('click');
+        await flushPromises();
         await expectNoAxeViolations(wrapper.element);
     });
 });

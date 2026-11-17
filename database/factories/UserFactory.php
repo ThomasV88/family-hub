@@ -53,6 +53,19 @@ class UserFactory extends Factory
         ]);
     }
 
+    /** A child: no e-mail, no credential, never signs in. */
+    public function child(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'email' => null,
+            'email_verified_at' => null,
+            'sign_in_disabled' => true,
+            'password_set' => false,
+            'password' => Hash::make(Str::random(64)),
+            'google_id' => null,
+        ]);
+    }
+
     /**
      * Indicate that the model's email address should be unverified.
      */

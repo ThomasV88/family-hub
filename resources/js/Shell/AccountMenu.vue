@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { BookOpen, CircleUser, LogOut, Palette, Settings } from '@lucide/vue';
+import { BookOpen, CircleUser, LogOut, Palette, Settings, UserRound } from '@lucide/vue';
 import UiMenu from '../Components/ui/UiMenu.vue';
 import { currentSubscription, disable } from '../push.js';
 import { THEME_OPTIONS, getThemePreference, setThemePreference } from '../theme.js';
@@ -18,10 +18,17 @@ const LANGUAGES = [
     { value: 'en', label: 'English' },
 ];
 
+const avatar = computed(() => {
+    const user = page.props.auth?.user;
+
+    return user ? { name: user.name, userId: user.id } : null;
+});
+
 const items = computed(() => {
     const user = page.props.auth?.user;
     const list = [
-        ...(user ? [{ type: 'header', key: 'account-header', label: user.name, sublabel: user.email }] : []),
+        ...(user ? [{ type: 'header', key: 'account-header', label: user.name, sublabel: user.email, leading: { name: user.name, userId: user.id } }] : []),
+        ...(user ? [{ type: 'item', key: 'profile', label: t('profile.menu'), icon: UserRound }] : []),
         ...(user ? [{ type: 'item', key: 'settings', label: t('account.settings'), icon: Settings }] : []),
         ...(user ? [{ type: 'item', key: 'manual', label: t('nav.manual'), icon: BookOpen }] : []),
         { type: 'radio-group', key: 'language', label: t('nav.language'), value: page.props.locale ?? 'en', options: LANGUAGES },
@@ -42,7 +49,8 @@ function onSelect({ key, value }) {
     else if (key === 'theme') {
         setThemePreference(value);
         theme.value = value;
-    } else if (key === 'settings') router.visit('/settings');
+    } else if (key === 'profile') router.visit('/profile');
+    else if (key === 'settings') router.visit('/settings');
     else if (key === 'manual') router.visit('/manual');
     else if (key === 'style') router.visit('/_style');
     else if (key === 'logout') logout();
@@ -71,5 +79,5 @@ async function logout() {
 </script>
 
 <template>
-    <UiMenu :label="t('nav.account')" :icon="CircleUser" :items="items" @select="onSelect" />
+    <UiMenu :label="t('nav.account')" :icon="CircleUser" :avatar="avatar" :items="items" @select="onSelect" />
 </template>

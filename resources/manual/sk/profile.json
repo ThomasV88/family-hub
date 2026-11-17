@@ -1,0 +1,58 @@
+{
+  "id": "profile",
+  "category": "account",
+  "order": 65,
+  "title": "Váš profil",
+  "summary": "Vaše meno a fotografia: ako otvoriť Nastavenia profilu, zmeniť zobrazované meno, pridať, zmeniť alebo odstrániť fotografiu a načo slúži váš e-mail.",
+  "covers": ["feature:profile"],
+  "sections": [
+    {
+      "id": "open-profile",
+      "title": "Otvorenie Nastavení profilu",
+      "blocks": [
+        { "type": "steps", "title": "Kde kliknúť", "items": [
+          "Otvorte menu účtu hore. Zobrazuje vašu fotografiu, alebo prvé písmeno mena, ak ešte fotografiu nemáte.",
+          "Vyberte **Nastavenia profilu**. Je priamo nad položkou **Nastavenia**.",
+          "Môžete tiež otvoriť [Nastavenia profilu](/profile) priamo."
+        ] },
+        { "type": "p", "text": "Stránka má dve časti: **Fotografia** a **Údaje**." }
+      ]
+    },
+    {
+      "id": "change-name",
+      "title": "Zmena zobrazovaného mena",
+      "blocks": [
+        { "type": "steps", "title": "Kde kliknúť", "items": [
+          "V časti **Údaje** upravte **Zobrazované meno**.",
+          "Stlačte **Uložiť zmeny**. Tlačidlo je aktívne, len keď ste niečo zmenili.",
+          "Krátka správa oznámi **Profil uložený**."
+        ] },
+        { "type": "p", "text": "Vaše meno sa zobrazuje pri úlohách, želaniach a zoznamoch. Môže mať najviac 60 znakov. Nadbytočné medzery sa odstránia a neviditeľné alebo riadiace znaky nie sú povolené." }
+      ]
+    },
+    {
+      "id": "photo",
+      "title": "Pridanie, zmena alebo odstránenie fotografie",
+      "blocks": [
+        { "type": "steps", "title": "Kde kliknúť", "items": [
+          "V časti **Fotografia** stlačte **Nahrať fotografiu**. Ak už fotografiu máte, tlačidlo sa volá **Zmeniť fotografiu**.",
+          "Vyberte obrázok. Nahrá sa hneď a zobrazí sa v menu bez opätovného načítania stránky.",
+          "Ak sa chcete vrátiť k iniciále, stlačte **Odstrániť fotografiu** a potvrďte tlačidlom **Odstrániť fotografiu**."
+        ] },
+        { "type": "list", "items": [
+          "Povolené formáty: JPG, PNG alebo WebP, najviac 5 MB.",
+          "Najlepšie vyzerá štvorcový obrázok, lebo fotografia sa zobrazuje v kruhu.",
+          "Skryté údaje v obrázku, napríklad miesto, kde vznikol, sa pri uložení odstránia."
+        ] },
+        { "type": "tip", "text": "Ak sa obrázok odmietne, stránka povie prečo, napríklad že je príliš veľký alebo to nie je obrázok JPG, PNG či WebP. Nič sa v takom prípade nezmení." }
+      ]
+    },
+    {
+      "id": "email",
+      "title": "Vaša e-mailová adresa",
+      "blocks": [
+        { "type": "p", "text": "E-mailová adresa sa na stránke zobrazuje, ale zatiaľ ju tam nemožno zmeniť. Je to adresa, ktorou sa prihlasujete a na ktorú dostávate správy. Ak sa musí zmeniť, požiadajte administrátora." }
+      ]
+    }
+  ]
+}

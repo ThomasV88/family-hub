@@ -2,14 +2,13 @@
 
 namespace App\Medical\Ai\Agents;
 
+use App\Medical\Ai\AiTask;
 use App\Medical\Ai\CodexRequest;
 use App\Medical\Ai\CodexRunner;
-use App\Medical\Ai\ExtractionSchema;
-use App\Medical\Ai\ExtractionValidator;
 use App\Medical\Ai\FailureCode;
 use App\Medical\Ai\LoginState;
+use App\Medical\Ai\MedicalTask;
 use App\Medical\Ai\ModelId;
-use App\Medical\Ai\PromptBuilder;
 use Closure;
 
 /**
@@ -40,7 +39,9 @@ final class CodexAgent implements Agent
     public function extract(AgentInput $in, ?Closure $shouldAbort = null): AgentOutcome
     {
         $dir = $in->workDir;
-        $schemaPath = $dir->put('schema.json', (string) file_get_contents(ExtractionSchema::path()));
+        /** @var AiTask $task */
+        $task = $in->task ?? new MedicalTask;
+        $schemaPath = $dir->put('schema.json', (string) file_get_contents($task->schemaPath()));
         $resultPath = $dir->file('result.json');
         $images = array_map(fn (string $name) => $dir->file($name), $in->images);
 
@@ -53,17 +54,17 @@ final class CodexAgent implements Agent
         }
 
         $result = ($this->runner ?? new CodexRunner)->exec(
-            new CodexRequest($dir->path(), $schemaPath, $resultPath, $images, (new PromptBuilder)->build(), $this->configuredModel()),
+            new CodexRequest($dir->path(), $schemaPath, $resultPath, $images, $task->prompt(), $this->configuredModel()),
             $shouldAbort,
             $timeout,
         );
         // With a configured model the recorded name is that one: text the CLI echoes can never choose the label.
         $model = $this->configuredModel() ?? $result->reportedModel ?? $this->modelLabel();
 
-        $fail = fn (FailureCode $code) => new AgentOutcome(false, null, null, $code, false, $result->durationMs, $model);
+        $fail = fn (FailureCode $code) => new AgentOutcome(false, null, null, $code, false, $result->durationMs, $model, usage: $result->usage);
 
         if ($result->aborted) {
-            return new AgentOutcome(false, null, null, null, true, $result->durationMs, $model);
+            return new AgentOutcome(false, null, null, null, true, $result->durationMs, $model, usage: $result->usage);
         }
         if ($result->timedOut) {
             return $fail(FailureCode::Timeout);
@@ -75,12 +76,12 @@ final class CodexAgent implements Agent
             return $fail(FailureCode::OutputTooLarge);
         }
 
-        $outcome = (new ExtractionValidator)->fromFile($resultPath);
+        $outcome = $task->validateFile($resultPath);
         if ($outcome->ok) {
-            return new AgentOutcome(true, $outcome->payload, $outcome->entryCount, null, false, $result->durationMs, $model);
+            return new AgentOutcome(true, $outcome->payload, $outcome->entryCount, null, false, $result->durationMs, $model, usage: $result->usage);
         }
         if ($result->quotaSignature && $result->exitCode !== null && $result->exitCode !== 0) {
-            return new AgentOutcome(false, null, null, FailureCode::QuotaExhausted, false, $result->durationMs, $model, $result->quotaResetAt, $result->quotaMinutes);
+            return new AgentOutcome(false, null, null, FailureCode::QuotaExhausted, false, $result->durationMs, $model, $result->quotaResetAt, $result->quotaMinutes, $result->usage);
         }
         if ($result->authSignature) {
             return $fail(FailureCode::Auth);

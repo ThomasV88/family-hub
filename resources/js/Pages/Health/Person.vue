@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { HeartPulse, Plus } from '@lucide/vue';
@@ -22,6 +22,7 @@ import SpecialtyFolder from '../../Health/SpecialtyFolder.vue';
 import TimelineList from '../../Health/TimelineList.vue';
 import VaccinationList from '../../Health/VaccinationList.vue';
 import VaccinationPanel from '../../Health/VaccinationPanel.vue';
+import DocumentSearch from '../../Health/Search/DocumentSearch.vue';
 import ViewSwitch from '../../Health/ViewSwitch.vue';
 import VisitPanel from '../../Health/VisitPanel.vue';
 import ShellAdd from '../../Wishlist/ShellAdd.vue';
@@ -50,6 +51,7 @@ const props = defineProps({
     limits: { type: Object, default: () => ({ maxMb: 10, filesAtOnce: 10 }) },
     ai: { type: Object, default: () => ({ canRun: false, available: false, noticeAcknowledged: false, statuses: {} }) },
     archive: { type: Object, default: () => ({ items: [], people: [] }) },
+    search: { type: Object, default: () => ({ enabled: false, textReliability: 'reliable' }) },
 });
 const { t } = useI18n();
 
@@ -57,6 +59,9 @@ const { t } = useI18n();
 const aiStatuses = useAiStatus(() => props.person?.id ?? null, () => props.ai?.statuses ?? {});
 
 const busy = ref(false);
+// True while the document search shows results: they take the place of the folder and timeline views.
+const searchActive = ref(false);
+const searchRef = ref(null);
 // The view and filter live in the URL; a panel change keeps them and an id-less query drops the panel.
 function go(params, only) {
     const query = {};
@@ -82,6 +87,32 @@ const openVaccination = (id) => go({ panel: 'vaccination', id }, ['panel']);
 const openNewDocument = (visit) => go({ panel: 'new-document', ...(typeof visit === 'string' ? { visit } : {}) }, ['panel']);
 const openDocument = (id) => go({ panel: 'document', id }, ['panel']);
 const closePanel = () => go({}, ['panel']);
+// A search result opens its document panel. The query is not part of the address; another person's result keeps the
+// search (same page component, state preserved) so Back to the list is one close away.
+function openSearchResult(item) {
+    if (item.personId === props.person?.id) {
+        openDocument(item.documentId);
+        return;
+    }
+    router.get(`/health/people/${item.personId}`, { panel: 'document', id: item.documentId }, { preserveState: true, preserveScroll: true });
+}
+
+// Whether this person has recognised text: the turn-off confirm names the deletion only then. When the document list does
+// not say (an older answer), the page falls back to the switch of the feature.
+const personHasText = computed(() => {
+    const known = props.documents.some((d) => typeof d.hasText === 'boolean');
+    return known ? props.documents.some((d) => d.hasText === true) : Boolean(props.search?.enabled);
+});
+// The search results are only ever as true as the text behind them: when this person's text was deleted (removal,
+// consent turned off) or a result's document turned out not to be openable, the same query runs again so no snippet of
+// deleted text stays on screen.
+const textSignature = computed(() => `${props.person?.id ?? ''}|${props.person?.aiConsent ? 1 : 0}|${props.documents.map((d) => (d.hasText ? d.id : '')).join(',')}`);
+watch(textSignature, (now, before) => {
+    if (before === undefined || now.split('|')[0] !== before.split('|')[0]) return;
+    searchRef.value?.refresh();
+});
+const missingPanelDocument = computed(() => props.panel?.kind === 'document' && Boolean(props.person) && props.documents.every((d) => d.id !== props.panel.id));
+watch(missingPanelDocument, (now) => { if (now) searchRef.value?.refresh(); });
 const setView = (view) => go({ view: view === 'folders' ? undefined : view, filter: undefined }, ['view', 'filter', 'timeline']);
 const setFilter = (filter) => go({ filter: filter === 'all' ? undefined : filter }, ['timeline', 'filter']);
 
@@ -110,7 +141,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
             <template v-if="person">
                 <PersonSwitcher :people="people" :current-id="person.id" :can-create="canCreate" @add="openNew" />
                 <ArchivedPeople :people="archive.people" />
-                <PersonHeader :person="person" @add-visit="openNewVisit" @add-document="openNewDocument" @edit-person="openEditPerson" @open-archive="openArchive" />
+                <PersonHeader :person="person" :text-stored="personHasText" @add-visit="openNewVisit" @add-document="openNewDocument" @edit-person="openEditPerson" @open-archive="openArchive" />
                 <UiAlert v-if="vaccinationAttention > 0" variant="warning" data-testid="vaccination-alert">
                     <strong>{{ t('health.vaccination.attention_title') }}</strong>
                     {{ t('health.vacc.attention', { n: vaccinationAttention }, vaccinationAttention) }}
@@ -123,6 +154,8 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                         <VaccinationList :vaccinations="vaccinations" :can-edit="canAddVisit" @add="openNewVaccination" @open="openVaccination" />
                     </div>
                     <section class="health-person__main" data-testid="person-main">
+                        <DocumentSearch v-if="search.enabled" ref="searchRef" :person="person" :people-count="people.length" :reliability="search.textReliability" @update:active="(v) => (searchActive = v)" @open="openSearchResult" />
+                        <template v-if="!(searchActive && search.enabled)">
                         <UiEmptyState v-if="visits.length === 0 && documents.length === 0" :title="t('health.visits.empty_title')" :body="t('health.visits.empty_body')" :icon="HeartPulse">
                             <template v-if="canAddVisit" #action>
                                 <UiButton variant="primary" :icon="Plus" data-testid="empty-add-visit" @click="openNewVisit">{{ t('health.visit.add') }}</UiButton>
@@ -143,6 +176,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
                             </div>
                             <TimelineList v-else :entries="timeline" :visits="visits" :vaccinations="vaccinations" :documents="documents" :filters="timelineFilters" :filter="filter" :busy="busy" :ai-statuses="aiStatuses.statuses.value" @open="openVisit" @open-vaccination="openVaccination" @open-document="openDocument" @filter="setFilter" />
                         </template>
+                        </template>
                     </section>
                 </div>
             </template>
@@ -161,7 +195,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
         <AllergyPanel v-if="person" :open="allergyPanelOpen" :person-id="person.id" :allergy="activeAllergy" :can-edit="canAddVisit" @close="closePanel" />
         <MedicationPanel v-if="person" :open="medicationPanelOpen" :person-id="person.id" :medication="activeMedication" :can-edit="canAddVisit" @close="closePanel" />
         <VaccinationPanel v-if="person" :open="vaccinationPanelOpen" :person-id="person.id" :vaccination="activeVaccination" :can-edit="canAddVisit" @close="closePanel" />
-        <DocumentPanel v-if="person" :open="documentPanelOpen" :person-id="person.id" :document="activeDocument" :visits="visits" :limits="limits" :can-edit="canAddVisit" :initial-visit="panel?.visit ?? null" :ai="ai" :ai-status="aiStatuses" :consent-on="Boolean(person.aiConsent)" @close="closePanel" />
+        <DocumentPanel v-if="person" :open="documentPanelOpen" :person-id="person.id" :document="activeDocument" :visits="visits" :limits="limits" :can-edit="canAddVisit" :initial-visit="panel?.visit ?? null" :ai="ai" :ai-status="aiStatuses" :consent-on="Boolean(person.aiConsent)" :text-reliability="search.textReliability" @close="closePanel" />
         <ShellAdd :enabled="canAddVisit" :label="t('health.fab.add_visit')" @add="openNewVisit" />
     </AppShell>
 </template>

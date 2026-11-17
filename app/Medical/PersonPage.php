@@ -8,6 +8,7 @@ use App\Medical\Queries\AllergyQuery;
 use App\Medical\Queries\ArchiveQuery;
 use App\Medical\Queries\ContactQuery;
 use App\Medical\Queries\DocumentQuery;
+use App\Medical\Queries\DocumentTextQuery;
 use App\Medical\Queries\MedicationQuery;
 use App\Medical\Queries\SubjectQuery;
 use App\Medical\Queries\VaccinationQuery;
@@ -36,7 +37,7 @@ class PersonPage
 
     private const WITH_ID = ['visit', 'allergy', 'medication', 'vaccination', 'document'];
 
-    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations, private readonly DocumentQuery $documents, private readonly ContactQuery $contacts, private readonly AiRunQuery $aiRuns, private readonly ArchiveQuery $archive) {}
+    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations, private readonly DocumentQuery $documents, private readonly ContactQuery $contacts, private readonly AiRunQuery $aiRuns, private readonly ArchiveQuery $archive, private readonly DocumentTextQuery $texts) {}
 
     public function render(Viewer $viewer, ?MedicalSubject $subject, Request $request): Response
     {
@@ -49,6 +50,9 @@ class PersonPage
         $people = $this->subjects->visible($viewer);
 
         $documents = $this->documentProps($viewer, $subject);
+        // Which documents have recognised text: ids only, the text itself is never a prop (it has its own endpoint).
+        $withText = $subject === null ? [] : array_flip($this->texts->documentIdsWithText($viewer, $subject));
+        $documents = array_map(fn (array $d) => $d + ['hasText' => isset($withText[$d['id']])], $documents);
 
         return $this->visitProps($viewer, $subject, $request, $documents) + [
             'documents' => $documents,
@@ -67,6 +71,7 @@ class PersonPage
             'canCreate' => $viewer->canEdit(),
             'panel' => $this->panel($viewer, $subject, $request),
             'ai' => $this->aiProps($viewer, $subject),
+            'search' => $this->searchProps($viewer),
             'archive' => $this->archiveProps($viewer, $subject),
         ];
     }
@@ -95,7 +100,7 @@ class PersonPage
      * Whether Run AI may be offered and each document's AI state. Statuses only: no proposal content, and counts only
      * for members who can change the person.
      *
-     * @return array{canRun: bool, available: bool, providers: list<string>, noticeAcknowledged: bool, statuses: array<string, mixed>}
+     * @return array{canRun: bool, available: bool, providers: list<string>, noticeAcknowledged: bool, textNotice: bool, statuses: array<string, mixed>}
      */
     private function aiProps(Viewer $viewer, ?MedicalSubject $subject): array
     {
@@ -104,7 +109,23 @@ class PersonPage
             'available' => $this->aiRuns->available(),
             'providers' => $this->aiRuns->providers(),
             'noticeAcknowledged' => $this->aiRuns->noticeAcknowledged($viewer),
+            // Whether the notice must carry the statement about the stored recognised text.
+            'textNotice' => (bool) config('ai.ocr.enabled'),
             'statuses' => $subject === null ? (object) [] : (object) $this->aiRuns->statusMap($viewer, $subject),
+        ];
+    }
+
+    /**
+     * Whether the document search box is shown and how far the recognised text can be trusted. Flags only: the box is
+     * shown while recognition is on or any visible document already has text (titles are searchable either way).
+     *
+     * @return array{enabled: bool, textReliability: string}
+     */
+    private function searchProps(Viewer $viewer): array
+    {
+        return [
+            'enabled' => (bool) config('ai.ocr.enabled') || $this->texts->anyVisible($viewer),
+            'textReliability' => config('ai.ocr.text_reliability') === 'reliable' ? 'reliable' : 'uncertain',
         ];
     }
 
@@ -121,6 +142,7 @@ class PersonPage
             'sex' => $subject->sex,
             'bloodType' => $subject->blood_type,
             'hasAccount' => $subject->user_id !== null,
+            'photoUserId' => $subject->user_id === null ? null : (int) $subject->user_id,
             'aiConsent' => (bool) $subject->ai_consent,
             'canEdit' => $this->subjects->levelFor($viewer, $subject) === AccessLevel::Edit,
             'permanentDelete' => Retention::canDeletePermanently($subject->created_at),

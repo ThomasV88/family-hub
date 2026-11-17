@@ -28,7 +28,13 @@ final class AdminAiBulkQuery
         private readonly AiAgentSettingsQuery $agents,
     ) {}
 
-    /** @return array{token: string, checkedAt: string, validMinutes: int, counts: array<string, int>} */
+    /** The accepted scopes (the controller may name only this class, see the arch pin). @return list<string> */
+    public static function scopes(): array
+    {
+        return AiBulkEligibility::SCOPES;
+    }
+
+    /** @return array{token: string, checkedAt: string, validMinutes: int, counts: array<string, int>}|array{result: string} the second shape is the refusal ocr_off (scope no_text while reading of the full text is off) */
     public function dryRun(User $admin, string $scope, int $cap): array
     {
         if (! in_array($scope, AiBulkEligibility::SCOPES, true)) {
@@ -36,6 +42,10 @@ final class AdminAiBulkQuery
         }
         if ($cap < 1 || $cap > (int) config('ai.bulk.max_cap')) {
             throw new InvalidArgumentException('Cap out of range.');
+        }
+
+        if ($scope === 'no_text' && ! config('ai.ocr.enabled')) {
+            return ['result' => 'ocr_off'];
         }
 
         return DB::transaction(function () use ($admin, $scope, $cap) {
@@ -66,9 +76,9 @@ final class AdminAiBulkQuery
      * 'providers_changed' with the current set, so the dialog opens again with what is true now.
      *
      * @param  list<string>|null  $shownProviders
-     * @return array{result: string, panel?: array<string, mixed>, providers?: list<string>} result is ok, expired, stale, active or providers_changed
+     * @return array{result: string, panel?: array<string, mixed>, providers?: list<string>} result is ok, expired, stale, active, ocr_off, notice_required or providers_changed
      */
-    public function start(User $admin, string $token, bool $acknowledged, ?array $shownProviders = null): array
+    public function start(User $admin, string $token, bool $acknowledged, ?array $shownProviders = null, bool $textNotice = false): array
     {
         if (! $acknowledged) {
             throw new InvalidArgumentException('Start needs the acknowledgment.');
@@ -78,7 +88,7 @@ final class AdminAiBulkQuery
         }
 
         $current = [];
-        $result = DB::transaction(function () use ($admin, $token, $shownProviders, &$current) {
+        $result = DB::transaction(function () use ($admin, $token, $shownProviders, $textNotice, &$current) {
             $row = DB::table('ai_bulk_dry_runs')->where('id', $token)->lockForUpdate()->first();
             $now = Carbon::now();
             if ($row === null || (int) $row->requested_by !== $admin->id || $row->consumed_at !== null
@@ -95,6 +105,16 @@ final class AdminAiBulkQuery
                 return 'providers_changed';
             }
             $scope = (string) $row->scope;
+            if ($scope === 'no_text' && ! config('ai.ocr.enabled')) {
+                return 'ocr_off';
+            }
+            // While recognised text is stored, the administrator acknowledges the statement about it once, like a member.
+            $textAcked = config('ai.ocr.enabled')
+                ? DB::table('ai_notice_acks')->where('user_id', $admin->id)->whereNotNull('text_notice_acked_at')->exists()
+                : true;
+            if (! $textAcked && ! $textNotice) {
+                return 'notice_required';
+            }
             if ($this->eligibility->counts($scope)['eligible'] !== (int) $row->eligible) {
                 return 'stale';
             }
@@ -118,11 +138,13 @@ final class AdminAiBulkQuery
 
             DB::table('ai_bulk_dry_runs')->where('id', $token)->update(['consumed_at' => $now]);
             // The admin's own interactive acknowledgment records the same set; bulk attempts read the run's copy.
-            DB::table('ai_notice_acks')->upsert(
-                [['user_id' => $admin->id, 'acknowledged_at' => $now, 'providers' => implode(',', $providers)]],
-                ['user_id'],
-                ['acknowledged_at', 'providers'],
-            );
+            $ack = ['user_id' => $admin->id, 'acknowledged_at' => $now, 'providers' => implode(',', $providers)];
+            $update = ['acknowledged_at', 'providers'];
+            if (config('ai.ocr.enabled')) {
+                $ack['text_notice_acked_at'] = $now;
+                $update[] = 'text_notice_acked_at';
+            }
+            DB::table('ai_notice_acks')->upsert([$ack], ['user_id'], $update);
             $this->audit->record(AuditEvent::AiBulkRunChanged, $admin, ['action' => 'started', 'scope' => $scope, 'count' => (int) $row->eligible]);
 
             return 'ok';
@@ -133,7 +155,7 @@ final class AdminAiBulkQuery
         }
 
         return $result === 'ok' || $result === 'active'
-            ? ['result' => $result, 'panel' => $this->panel()]
+            ? ['result' => $result, 'panel' => $this->panel($admin)]
             : ['result' => $result];
     }
 
@@ -171,15 +193,15 @@ final class AdminAiBulkQuery
             return 'ok';
         });
 
-        return $result === 'ok' ? ['result' => 'ok', 'panel' => $this->panel()] : ['result' => $result];
+        return $result === 'ok' ? ['result' => 'ok', 'panel' => $this->panel($admin)] : ['result' => $result];
     }
 
     /**
      * The open run (if any) and the last runs, as integers, enums and times.
      *
-     * @return array{active: ?array<string, mixed>, history: list<array<string, mixed>>}
+     * @return array{ocrEnabled: bool, textNoticeAcknowledged: bool, active: ?array<string, mixed>, history: list<array<string, mixed>>}
      */
-    public function panel(): array
+    public function panel(?User $admin = null): array
     {
         $now = CarbonImmutable::now();
         $runs = DB::table('ai_bulk_runs')->orderByDesc('created_at')->orderByDesc('id')
@@ -206,7 +228,13 @@ final class AdminAiBulkQuery
             ];
         }
 
-        return ['active' => $open === null ? null : $this->activeBlock($open, $tally[$open->id], $now), 'history' => $history];
+        return [
+            'ocrEnabled' => (bool) config('ai.ocr.enabled'),
+            'textNoticeAcknowledged' => $admin !== null
+                && DB::table('ai_notice_acks')->where('user_id', $admin->id)->whereNotNull('text_notice_acked_at')->exists(),
+            'active' => $open === null ? null : $this->activeBlock($open, $tally[$open->id], $now),
+            'history' => $history,
+        ];
     }
 
     /** @return array{result: string, panel?: array<string, mixed>} */
@@ -233,7 +261,7 @@ final class AdminAiBulkQuery
             return 'ok';
         });
 
-        return $result === 'ok' ? ['result' => 'ok', 'panel' => $this->panel()] : ['result' => $result];
+        return $result === 'ok' ? ['result' => 'ok', 'panel' => $this->panel($admin)] : ['result' => $result];
     }
 
     /**

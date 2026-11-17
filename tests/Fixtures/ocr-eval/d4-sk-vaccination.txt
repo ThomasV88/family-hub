@@ -1,0 +1,17 @@
+Očkovací preukaz (demo)
+Meno: Nina Horváthová (demo)
+Dátum narodenia: 20.08.2016
+
+Očkovanie | Dátum | Šarža | Ďalšia dávka
+Hexavakcína | 12.10.2016 | A123B (demo) | 12.12.2016
+Hexavakcína | 14.12.2016 | B456C (demo) | 14.06.2017
+MMR vakcína | 15.09.2017 | C789D (demo) | 15.09.2022
+Tetanus | 10.05.2022 | D012E (demo) | 10.05.2032
+Chrípka | 21.10.2025 | E345F (demo) | 21.10.2026
+
+DETSKÁ AMBULANCIA ŽILINA (demo)
+MUDr. Janka Šimková
+
+Poznámka lekára: dieťa po očkovaní bez komplikácií,
+jemné začervenanie v mieste vpichu, pôvodne šesť hodín.
+Ďalšia kontrola 21.10.2026, nezabudnúť na očkovací preukaz.

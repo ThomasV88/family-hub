@@ -12,6 +12,7 @@ const props = defineProps({
     required: { type: Boolean, default: false },
     labelVisuallyHidden: { type: Boolean, default: false },
     // Contextual help topic (registry key): a small green "?" after the label. Ignored when the label is visually hidden.
+    // The `label-after` slot puts something (a tag) next to the label, also ignored when the label is visually hidden.
     help: { type: String, default: '' },
 });
 
@@ -30,18 +31,19 @@ provideField({ id: controlId, describedBy, invalid: computed(() => Boolean(props
 
 <template>
     <div class="ui-field">
-        <div v-if="help && !labelVisuallyHidden" class="ui-field__head">
+        <div v-if="(help || $slots['label-after']) && !labelVisuallyHidden" class="ui-field__head">
             <label :for="controlId" class="ui-field__label">
                 {{ label }}<span v-if="required" class="ui-field__required" aria-hidden="true"> *</span>
             </label>
-            <HelpTip :topic="help" :label="label" />
+            <HelpTip v-if="help" :topic="help" :label="label" />
+            <slot name="label-after" />
         </div>
         <label v-else :for="controlId" class="ui-field__label" :class="{ 'visually-hidden': labelVisuallyHidden }">
             {{ label }}<span v-if="required" class="ui-field__required" aria-hidden="true"> *</span>
         </label>
         <slot />
         <p v-if="hint" :id="hintId" class="ui-field__hint">{{ hint }}</p>
-        <p v-if="error" :id="errorId" class="ui-field__error">
+        <p v-if="error" :id="errorId" class="ui-field__error" aria-live="polite">
             <CircleAlert :size="16" :stroke-width="1.75" aria-hidden="true" />
             <span>{{ error }}</span>
         </p>
@@ -50,8 +52,9 @@ provideField({ id: controlId, describedBy, invalid: computed(() => Boolean(props
 
 <style scoped>
 .ui-field { display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-4); }
-.ui-field__head { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
-.ui-field__label { font-size: var(--text-sm); font-weight: 600; line-height: 1.4; color: var(--color-text); }
+.ui-field__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); min-width: 0; }
+.ui-field__head > * { max-width: 100%; }
+.ui-field__label { min-width: 0; overflow-wrap: anywhere; font-size: var(--text-sm); font-weight: 600; line-height: 1.4; color: var(--color-text); }
 .ui-field__hint { margin: 0; font-size: var(--text-sm); font-weight: 400; line-height: 1.4; color: var(--color-text-muted); }
 .ui-field__error { display: flex; align-items: flex-start; gap: var(--space-1); margin: 0; font-size: var(--text-sm); font-weight: 400; line-height: 1.4; color: var(--color-danger); }
 .ui-field__error svg { flex: none; margin-top: 2px; }

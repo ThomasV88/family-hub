@@ -1,0 +1,43 @@
+Zhrnutie návštev (demo)
+Podsumowanie wizyt (demo)
+Summary of visits (demo)
+
+Pacient: Dušan Čierny (demo)
+Dátum: 03.02.2026, Žilina
+Diagnóza: bolesť chrbta, mäkké
+tkanivá bez zmien. Dĺžka liečby
+14 dní. Alergia na peľ vŕby.
+
+Pacjentka: Zofia Gołąb (demo)
+Data: 05.02.2026, Łódź
+Rozpoznanie: zapalenie zatok.
+Zalecenia: płukanie nosa, odpoczynek
+Lek: Augmentin 875 mg, 2 razy dziennie
+przez 7 dni. Kontrola w środę.
+
+Patient: Henry Brooks (demo)
+Date: 09.02.2026, Leeds
+Diagnosis: mild asthma.
+Medication: Salbutamol 100 mcg,
+two puffs when needed.
+Mŕtvica nebola potvrdená; vyšetrenie
+mozgu bez nálezu. Ťažké bolesti hlavy
+ustúpili po liečbe (Paralen 500 mg).
+
+Szczepienie: Tężec, podano 12.05.2022.
+Alergia: Penicylina, reakcja ciężka.
+Uwaga: pacjentka źle znosi upał,
+zażółć gęślą jaźń (test znaków).
+
+Allergy: Peanuts, severe reaction.
+Vaccine: Influenza, given 11.10.2025.
+Follow-up in two weeks. If symptoms
+get worse, contact the clinic.
+
+Ošetrujúci lekár: MUDr. Ján Šťastný
+(demo), Oddelenie všeobecného
+lekárstva.
+
+Lekarz prowadzący: lek. Anna Różycka
+(demo).
+Doctor: Dr. Sarah Quinn (demo).

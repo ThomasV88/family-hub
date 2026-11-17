@@ -34,22 +34,63 @@
       ]
     },
     {
+      "id": "children",
+      "title": "Children",
+      "blocks": [
+        { "type": "p", "text": "A child account is for someone who does not use the app alone, such as a young child. It has **no email**, **cannot sign in** and gets no email or notifications. It still appears in the lists, for example as a wishlist owner." },
+        { "type": "steps", "title": "Adding a child", "items": [
+          "Open [Settings > Members and access](/settings/members).",
+          "Press **Add child**.",
+          "Type the **Name** and, if you like, choose a **Photo**.",
+          "Choose at least one of the **Parents who manage the wish list**. Only members who can sign in and may edit the Wishlist are offered.",
+          "Press **Create child**."
+        ] },
+        { "type": "list", "items": [
+          "The child gets the Child starting access (To-do and Wishlist: Edit).",
+          "In the member list the child shows the tags **Child** and **No sign-in**, and **Managed by** the parents instead of an email.",
+          "Open the child with **Manage**. The **Profile** tab changes the name and photo. The chosen parents can do the same under **Profile settings > People you manage**.",
+          "Adding a child needs a recent confirmation of your identity, like sending an invitation."
+        ] }
+      ]
+    },
+    {
+      "id": "child-convert",
+      "title": "Giving a child their own sign-in",
+      "blocks": [
+        { "type": "p", "text": "When a child grows up and needs their own sign-in, you do not create a second account. You invite the same person with an email, and everything the child had stays." },
+        { "type": "steps", "title": "Making a normal member", "items": [
+          "Open [Settings > Members and access](/settings/members).",
+          "Press **Manage** next to the child.",
+          "Under **Make a normal member**, type their **E-mail**.",
+          "Press **Send invitation**."
+        ] },
+        { "type": "list", "items": [
+          "The child keeps the wish list, tasks, permissions and parents. No second account is created.",
+          "Until the invitation is accepted the child **still cannot sign in**. The row shows **Invited** and the invitation appears in the list of invitations.",
+          "When the child accepts (with a password or Google), the same account gets the email and can sign in, and it becomes a normal member.",
+          "If you **revoke** the invitation, nothing changes for the child. An email that already belongs to a member is refused.",
+          "Sending the invitation needs a recent confirmation of your identity.",
+          "The parents who managed the child's wish list **still manage it** after the child becomes a member. The new member sees who they are on their own **Profile settings** page. An administrator can remove them under [Wishlist managers](admin#wishlist-managers)."
+        ] }
+      ]
+    },
+    {
       "id": "permissions",
       "title": "Permissions for each module",
       "blocks": [
-        { "type": "p", "text": "Each member has a level for each module (To-do, Wishlist, Finances and Health): **None** (cannot see it), **View** (can read) or **Edit** (can read and change). The server enforces this on every page." },
+        { "type": "p", "text": "Each member has a level for each module (To-do, Wishlist, Finances, Health, Shopping and Recipes): **None** (cannot see it), **View** (can read) or **Edit** (can read and change). The server enforces this on every page." },
         { "type": "steps", "title": "Where to click", "items": [
           "In **Members and access**, press **Manage** next to a member.",
           "On the **Permissions** tab, choose a **Preset** and press **Apply**, or set each module yourself.",
           "Press **Save permissions**."
         ] },
         { "type": "list", "items": [
-          "**Parent**: To-do, Wishlist and Finances: edit. Health: none.",
-          "**Child**: To-do and Wishlist: edit. Finances and Health: none.",
-          "**Grandparent**: To-do and Wishlist: edit. Finances and Health: none.",
-          "**Guest**: To-do: view only. Everything else: none."
+          "**Parent**: To-do, Wishlist, Finances, Shopping and Recipes: edit. Health: none.",
+          "**Child**: To-do, Wishlist, Shopping and Recipes: edit. Finances and Health: none.",
+          "**Grandparent**: To-do, Wishlist, Shopping and Recipes: edit. Finances and Health: none.",
+          "**Guest**: To-do, Shopping and Recipes: view only. Everything else: none."
         ] },
-        { "type": "p", "text": "The **Permission matrix** tab shows all members and modules in one table, so you can check everyone at a glance. Health and Finances are restricted by default. Settings are for administrators only." }
+        { "type": "p", "text": "The **Permission matrix** tab shows all members and modules in one table, so you can check everyone at a glance. Health and Finances are restricted by default. Settings are for administrators only. Recipes are private or shared by their author, and there is no administrator bypass: an administrator sees a recipe only when its author shared it." }
       ]
     },
     {
@@ -77,7 +118,7 @@
       "id": "wishlist-managers",
       "title": "Wishlist managers",
       "blocks": [
-        { "type": "p", "text": "Some people, such as young children, cannot keep their own list. Open **Manage** for that member and choose the **Wishlist** tab. Tick the members who may add and edit wishes on their list, and press **Save managers**. Managers see the list as the owner does, without reservations." }
+        { "type": "p", "text": "Some people, such as young children, cannot keep their own list. Open **Manage** for that member and choose the **Wishlist** tab. Tick the members who may add and edit wishes on their list, and press **Save managers**. Only members who can sign in and may edit the Wishlist are offered. Managers see the list as the owner does, without reservations." }
       ]
     },
     {
@@ -105,14 +146,16 @@
       "id": "ai-agents",
       "title": "AI agents and the AI call log",
       "blocks": [
-        { "type": "p", "text": "Open [Settings > AI agents](/settings/ai-agents). Here you choose which AI tools may read documents in Health and in which order. If the first has reached its usage limit, the next is tried. Each tool has a switch, a position and an optional model." },
+        { "type": "p", "text": "Open [Settings > AI agents](/settings/ai-agents). Here you choose which AI tools may read documents in Health and recipe pages in Recipes, and in which order. If the first has reached its usage limit, the next is tried. Each tool has a switch, a position and an optional model." },
         { "type": "list", "items": [
           "At least one tool must stay on, or nobody can run AI.",
           "A tool must be signed in on the server. This cannot be done on this page: ask whoever runs the server. The page shows the login status and **Check again**.",
           "Turning on a tool that sends documents to a new company shows members a new notice before their next run.",
-          "**Bulk re-generation** reads past documents again. First press **Check what would run**, then **Start bulk run**. You can pause or cancel it. Anything a person already accepted is never changed."
+          "**Bulk re-generation** reads past documents again. First press **Check what would run**, then **Start bulk run**. You can pause or cancel it. Anything a person already accepted is never changed.",
+          "**Documents without recognised text** is shown only when reading of the full text is turned on. It reads only the text of each document, one call per 4 pages, and saves it so the document can be searched. Suggestions that exist or were accepted are not changed, and no new suggestions are made."
         ] },
-        { "type": "p", "text": "Every time AI reads a document, it is listed under [Settings > AI calls](/settings/ai-calls): who started it and when, never what was in the document. Calls older than 12 months are removed automatically." },
+        { "type": "p", "text": "Every time AI reads a document, it is listed under [Settings > AI calls](/settings/ai-calls): who started it and when, never what was in the document. A document read with the full text appears once per call: one call per 4 pages plus one for the suggestions. Calls older than 12 months are removed automatically." },
+        { "type": "p", "text": "Recipe imports work the same way. When a member reads a recipe from a web page, the text of that page is sent to the first enabled tool, under the same settings, the same daily ceiling and the same usage limit as documents. A recipe import appears in the AI calls table as **Recipe import**, with the member who started it and the time, never with the address of the page or the recipe. Members confirm a one-time notice that the page text goes to the AI provider; there is no per-person switch for recipes. If no tool is on, the option **Read from a web page** is not shown in Recipes." },
         { "type": "warning", "text": "Medical documents leave the server when AI is used. Before you turn a tool on, make sure the family agrees and that you are comfortable with the company's terms." }
       ]
     },
@@ -139,7 +182,7 @@
       "id": "backups",
       "title": "Backups",
       "blocks": [
-        { "type": "p", "text": "The server makes encrypted backups every night, and keeps them on the same server: a copy of the database, uploaded files and settings. They protect against mistakes and damage, but not against losing the whole server. A deleted record can stay in older backups until they expire. Backups, the delete window for Health records and other server settings are managed by the person who runs the server, not in this app." }
+        { "type": "p", "text": "The server makes encrypted backups every night, and keeps them on the same server: a copy of the database, uploaded files and settings. They protect against mistakes and damage, but not against losing the whole server. A deleted record can stay in older backups until they expire. Backups also contain the recognised text of documents (the text AI read from them): after it is removed in the app, it stays in older backups until they expire. Backups, the delete window for Health records and other server settings are managed by the person who runs the server, not in this app." }
       ]
     }
   ]

@@ -25,6 +25,11 @@ class ResetUserPassword implements ResetsUserPasswords
      */
     public function reset(User $user, array $input): void
     {
+        if (! $user->canSignIn()) {
+            // Same message key as an invalid token, so the refusal reveals nothing.
+            throw ValidationException::withMessages(['email' => 'auth.reset.invalid_body']);
+        }
+
         Validator::make($input, [
             'password' => $this->passwordRules(),
         ], [

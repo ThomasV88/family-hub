@@ -74,6 +74,20 @@
         { "type": "p", "text": "Dziecko albo ktoś, komu trudno prowadzić listę, może mieć opiekuna listy. Opiekunów wybiera administrator (zobacz [Opiekunowie listy życzeń](admin#wishlist-managers))." },
         { "type": "p", "text": "Jeśli jesteś opiekunem, przycisk dziecka jest w Twoim rzędzie, a nad listą widać pasek informujący, że nią zarządzasz. Możesz dodawać i edytować życzenia, a listę widzisz dokładnie tak jak dziecko: bez rezerwacji. Dzięki temu niespodzianka zostaje także dla dziecka." }
       ]
+    },
+    {
+      "id": "child-list",
+      "title": "Lista dziecka",
+      "blocks": [
+        { "type": "p", "text": "Dziecko dodane przez administratora ma listę jak każdy członek. Widać je wśród osób u góry Listy życzeń dla każdego, kto widzi Listę życzeń." },
+        { "type": "p", "text": "Rodzice wybrani przy dodawaniu dziecka są jego opiekunami listy. Dodają i edytują życzenia na liście dziecka i widzą ją tak jak dziecko (zobacz [Opiekunowie listy życzeń](admin#wishlist-managers))." },
+        { "type": "steps", "title": "Zmiana imienia lub zdjęcia dziecka", "items": [
+          "Otwórz menu konta i wybierz [Ustawienia profilu](/profile).",
+          "W części **Osoby, którymi zarządzasz** naciśnij **Edytuj** przy dziecku.",
+          "Zmień imię lub zdjęcie."
+        ] },
+        { "type": "p", "text": "To samo może zrobić administrator w części Członkowie i dostęp. Nikt inny nie może zmienić imienia ani zdjęcia dziecka." }
+      ]
     }
   ]
 }

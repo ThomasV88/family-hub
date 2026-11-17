@@ -1,0 +1,271 @@
+{
+  "id": "recipes",
+  "category": "modules",
+  "order": 36,
+  "title": "Receptár",
+  "summary": "Rodinný receptár: pridávanie a úprava receptov s fotkami, kto recept vidí, prehliadanie a hľadanie receptov, ktoré smiete vidieť, filtre a obľúbené, varenie podľa receptu s vlastnými odškrtnutiami, porciami a poznámkami pridanie surovín do nákupného zoznamu a odstránenie.",
+  "covers": [
+    "module:recipes"
+  ],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Stránka Receptár",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "**Receptár** je v ponuke vľavo (na telefóne v lište dole), ak vám k nemu správca dal prístup. Stránka ukazuje recepty, ktoré smiete vidieť, ako karty od najnovšieho. Karta ukazuje hlavnú fotku (alebo kuchársku čiapku, ak fotka nie je), názov, čas a počet porcií, štítok **Súkromný** alebo **Zdieľaný**, prvú kategóriu a pri receptoch iných členov meno autora. Recept otvoríte stlačením karty."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Mriežka ukazuje jednu, dve alebo najviac tri karty v riadku podľa šírky okna.",
+            "**Hľadať recepty** nájde recepty podľa názvu alebo suroviny. Nerozlišuje veľké písmená ani diakritiku, takže \"vajce\" nájde \"Vajcia\".",
+            "**Filtre** zúžia zoznam podľa kategórie, autora a suroviny a podľa **Všetky**, **Moje** alebo **Zdieľané so mnou**. Použité filtre sa ukážu ako štítky pod poľom hľadania. Štítok odstránite stlačením, všetky naraz tlačidlom **Zrušiť filtre**. Filtre zostávajú v adrese, takže **Späť** vráti rovnaký pohľad.",
+            "Srdce na karte označí recept ako obľúbený. **Obľúbené** vedľa poľa hľadania ukáže len recepty, ktoré ste označili. Obľúbené sú len vaše, nikto iný ich nevidí.",
+            "Zoznam ukazuje 24 receptov naraz. Ďalšie zobrazíte tlačidlom **Načítať ďalšie**. Po **Späť** alebo po obnovení stránky ostanú všetky recepty, ktoré ste si načítali."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Recept vidíte, ak ste ho napísali vy alebo ak ho autor zdieľal so všetkými, ktorí používajú Receptár. Recept, ktorý autor nechal súkromný, sa nikomu inému nezobrazí, ani správcovi. Recept nájdete v tabuľke v [kto čo vidí](who-sees-what#table)."
+        }
+      ]
+    },
+    {
+      "id": "adding",
+      "title": "Pridanie a úprava receptu",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Recept môžete pridať, ak vám administrátor dal povolenie meniť **Receptár**. Bez neho recepty len čítate a tlačidlo **Nový recept** sa nezobrazí."
+        },
+        {
+          "type": "steps",
+          "title": "Pridanie receptu ručne",
+          "items": [
+            "Na stránke Receptár stlačte **Nový recept**. Ak sa zobrazí okno s výberom, vyberte **Zadať ručne** (druhá možnosť je popísaná v časti Načítanie receptu z webovej stránky).",
+            "Podľa potreby pridajte fotky (pozrite Fotky nižšie).",
+            "Napíšte **Názov**. Je povinný. Môžete pridať aj krátky **Popis**.",
+            "Nastavte **Porcie** (1 až 99): množstvá, ktoré zadáte, platia pre tento počet porcií. Ak chcete, zadajte **Čas prípravy** a **Čas varenia** v minútach; súčet sa zobrazí pod nimi.",
+            "Pridajte najviac 3 **Kategórie**. Začnite písať alebo vyberte návrh a potom stlačte Enter alebo napíšte čiarku. Návrhy tvorí hotová sada (Raňajky, Polievka, Dezert a podobne) a kategórie, ktoré rodina už používa. Tú istú kategóriu dvakrát nepridáte, bez ohľadu na veľké písmená a diakritiku.",
+            "V časti **Suroviny** vyplňte **Množstvo**, **Jednotku**, **Názov** a podľa potreby **Poznámku**, napríklad „nakrájané“. Ďalší riadok pridáte tlačidlom **Pridať surovinu** alebo klávesom Enter v názve.",
+            "V časti **Postup** napíšte jeden krok do jedného poľa a ďalší pridajte tlačidlom **Pridať krok**.",
+            "Podľa potreby pridajte **Zdroj** (webovú adresu) a vyberte, **Kto môže tento recept vidieť** (pozrite Kto recept vidí). Adresy s menom alebo heslom sa odmietnu.",
+            "Stlačte **Uložiť recept**. Otvorí sa recept a uvidíte „Recept uložený“."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "Recept potrebuje názov, aspoň jednu surovinu a aspoň jeden krok. Ak niečo chýba, formulár povie, čo, a prejde na prvé pole, ktoré treba opraviť.",
+            "Limity: názov 120 znakov, popis 1000, názov suroviny 120, poznámka k surovine 80, krok 1000; najviac 80 surovín a 60 krokov; kategória najviac 30 znakov.",
+            "Jednotka je z rovnakého zoznamu ako v nákupných zoznamoch (ks, g, kg, ml, l, balenie, zväzok, PL, ČL a jednotky, ktoré pridal administrátor), alebo **Bez jednotky**."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Množstvá** môžete zadať s desatinnou čiarkou alebo bodkou („0,5“), ako zlomky („1/2“, „1 1/2“) a znakmi ½ ¼ ¾ ⅓ ⅔. Množstvo musí byť väčšie ako 0 a najviac 9999, s najviac dvoma desatinnými miestami. Pri veciach „podľa chuti“ ho nechajte prázdne. V angličtine je čiarka nasledovaná presne tromi číslicami oddeľovač tisícov (\"1,000\" je 1000); v slovenčine a poľštine je to desatinná čiarka (\"1,000\" je 1)."
+        },
+        {
+          "type": "p",
+          "text": "**Vloženie zoznamu.** Ak do názvu suroviny vložíte viac riadkov, napríklad zoznam skopírovaný z webovej stránky, formulár ponúkne **Rozdeliť na n surovín**. Z každého riadka prečíta množstvo, jednotku a názov („200 g múka“, „2 ks vajcia“, „1/2 ČL soli“). Čo neprečíta, ostane v názve, preto nové riadky skontrolujte. Voľbou **Ponechať ako jednu** nechajte text tak, ako ste ho vložili. \"cl\" sa číta ako centilitre a prepočíta sa na mililitre (4 cl sa stane 40 ml)."
+        },
+        {
+          "type": "p",
+          "text": "**Zmena poradia.** Suroviny majú ponuku (tri bodky) s voľbami **Posunúť vyššie** a **Posunúť nižšie**; kroky majú na to tlačidlá. Po odstránení suroviny alebo kroku sa na pár sekúnd zobrazí **Vrátiť späť**."
+        },
+        {
+          "type": "p",
+          "text": "**Úprava.** Recept upravuje iba jeho autor. Otvorte ho a stlačte **Upraviť**; formulár je rovnaký. Suroviny a kroky, ktoré ponecháte, ostanú tými istými riadkami, takže odškrtnutia, ktoré urobili ostatní členovia pri varení, im ostanú; odškrtnutia stratia iba riadky, ktoré odstránite. Ak formulár opustíte s neuloženými zmenami, najprv sa vás opýta. Tá istá otázka sa objaví, keď v prehliadači stlačíte **Späť** alebo na telefóne potiahnete späť. Ak sa pri ukladaní preruší spojenie a znova stlačíte **Uložiť recept**, vznikne jeden recept, nie dva."
+        }
+      ]
+    },
+    {
+      "id": "import-from-link",
+      "title": "Načítanie receptu z webovej stránky",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Ak administrátor v Nastaveniach zapol agenta AI, **Nový recept** sa najprv opýta, ako chcete recept pridať. **Načítať z webovej stránky** nechá aplikáciu prečítať stránku, ktorú vložíte, a vyplniť formulár, ktorý si skontrolujete. Bez agenta AI sa táto možnosť nezobrazí a **Nový recept** hneď otvorí prázdny formulár."
+        },
+        {
+          "type": "steps",
+          "title": "Načítanie receptu z webovej stránky",
+          "items": [
+            "Na stránke Receptár stlačte **Nový recept** a vyberte **Načítať z webovej stránky**.",
+            "Prvýkrát sa zobrazí upozornenie, že text stránky sa odošle poskytovateľovi AI, ktorého zapol váš administrátor, a že sa neodosiela nič iné z vášho účtu. Stlačte **Rozumiem**. Potom vám to pripomenie krátky riadok pod poľom.",
+            "Vložte **Adresu webovej stránky** (musí začínať http:// alebo https://) a stlačte **Načítať recept**. Adresy s menom alebo heslom, s iným portom než obvyklým alebo také, ktoré ukazujú na počítač vo vašej vlastnej sieti, sa odmietnu hneď.",
+            "Počkajte, kým sa stránka prečíta, zvyčajne necelú minútu. Tlačidlom **Zrušiť** čítanie zastavíte. Okno môžete aj zavrieť: čítanie pokračuje a nad receptami sa objaví riadok „Váš recept zo stránky ... je pripravený na kontrolu“ s tlačidlami **Skontrolovať** a **Zahodiť**. Ak čítanie trvá dlhšie než tri minúty, okno to povie: **Zrušiť** a **Skúsiť znova** zastavia prvý pokus, než sa začne nový, a zatvorením okna ostane pokus nad receptami, kde má recept, ktorý sa ešte číta, vlastné **Zrušiť**.",
+            "Formulár sa otvorí s nadpisom **Skontrolujte recept**. Polia, ktoré aplikácia vyplnila, majú štítok **Zo stránky**, kým ich nezmeníte. Čo nenašla, hlási **Na stránke sa nenašlo** a každá surovina ukazuje riadok tak, ako je na stránke. Opravte všetko, čo nesedí.",
+            "Stlačte **Uložiť recept**. Dovtedy sa nič neuloží. Adresa stránky ostane v **Zdroji** a pri recepte sa zobrazí ako odkaz."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "Výsledok pred uložením vždy skontrolujte: aplikácia môže zle prečítať množstvo alebo niečo vynechať.",
+            "Naraz sa môžu čítať 2 stránky a za deň môžete načítať 20 stránok. Nad to sa zobrazí „Dnes ste načítali príliš veľa stránok“.",
+            "Ak čítanie zlyhá, okno povie, čo sa stalo. Stlačte **Skúsiť znova** alebo **Zmeniť adresu**, prípadne **Zadať ručne**: otvorí sa prázdny formulár s webovou adresou už v **Zdroji**.",
+            "Návrh, ktorý neotvoríte, sa po dni odstráni. **Zahodiť** ho odstráni hneď."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Čo nefunguje.** Nedajú sa čítať stránky, ktoré recept zobrazia až po spustení skriptu, stránky blokujúce automatické čítače, stránky vyžadujúce prihlásenie a stránky dostupné iba cez IPv6. Veľmi dlhá stránka sa prečíta iba od začiatku a formulár vám to povie. Fotka zo stránky sa neprevezme: pridajte vlastné fotky. Nie je zaručené, že funguje každá stránka; keď nefunguje, recept zadajte ručne."
+        },
+        {
+          "type": "warning",
+          "text": "Text stránky sa odošle poskytovateľovi AI mimo tohto servera. Z vášho účtu sa neodosiela nič: ani meno, ani e-mail, ani vaše ďalšie recepty. Administrátori vidia v zozname volaní AI, že import receptu prebehol, nikdy však adresu ani recept."
+        }
+      ]
+    },
+    {
+      "id": "photos",
+      "title": "Fotky receptu",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Recept môže mať najviac 10 fotiek. Musia byť vo formáte JPG, PNG alebo WebP a každá do 5 MB. Vo formulári stlačte **Pridať fotky**; môžete vybrať viac naraz."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Prvá fotka je **hlavná**: tá, ktorá je na karte receptu. Ak chcete použiť inú, otvorte ponuku (tri bodky) pri jej obrázku a vyberte **Nastaviť ako hlavnú**.",
+            "**Posunúť dopredu** a **Posunúť dozadu** menia poradie. **Odstrániť** zmaže fotku po potvrdení.",
+            "Keď vytvárate recept, fotky sa nahrajú po stlačení **Uložiť recept**. Ak sa niektorú nepodarí nahrať, recept sa aj tak uloží a dozviete sa to; fotku pridáte znova pri úprave receptu.",
+            "Keď recept upravujete, pridanie, nastavenie ako hlavnej, posunutie a odstránenie fotiek sa prejaví hneď, bez **Uložiť recept**."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Aplikácia každú fotku uloží znova a odstráni z nej skryté údaje, napríklad kde bola nafotená. Fotky sa ukladajú súkromne: vidia ich iba členovia, ktorí smú vidieť recept."
+        }
+      ]
+    },
+    {
+      "id": "sharing",
+      "title": "Kto recept vidí",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Každý recept je buď **Iba ja**, alebo **Všetci v rodine, ktorí používajú Receptár**. Nový recept začína ako **Iba ja**. Vyberáte vo formulári pri **Kto môže tento recept vidieť**."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Iba ja**: recept vidíte iba vy. Nikto iný, ani administrátor.",
+            "**Všetci v rodine, ktorí používajú Receptár**: ostatní členovia, ktorí majú prístup do Receptára, si ho môžu prečítať, variť podľa neho a pridať ho do nákupného zoznamu.",
+            "Iba autor recept upravuje, mení jeho fotky a viditeľnosť alebo ho maže. Ostatní ho upravovať nemôžu. Ak účet autora už neexistuje, recept to povie a nikto ho nemôže upraviť."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Poznámky, odškrtnutia a obľúbené ostatných členov pri vašom recepte sú ich vlastné: vy ich nikdy nevidíte a oni nikdy nevidia vaše. Keď upravíte zdieľaný recept, ich odškrtnutia ostanú pri surovinách a krokoch, ktoré ponecháte."
+        },
+        {
+          "type": "warning",
+          "text": "Ak zdieľaný recept znova nastavíte ako **súkromný**, najprv sa vás opýta. Ostatní členovia ho už neuvidia. Ich poznámky, odškrtnutia a obľúbené pri ňom ostanú zachované, ale skryté, a vrátia sa, ak recept znova zdieľate."
+        }
+      ]
+    },
+    {
+      "id": "ingredients-servings",
+      "title": "Suroviny, postup a porcie",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Otvorte recept a uvidíte jeho fotky, časy, kategórie, **Zdroj** (názov webovej adresy, otvorí sa v novej karte), suroviny a postup. Na telefóne sú suroviny, postup a vaše poznámky na troch kartách; na širokej obrazovke sú vľavo suroviny a vpravo postup a poznámky."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Surovinu** odškrtnite, keď je pripravená, a **krok**, keď je hotový. Vaše odškrtnutia sa ukladajú hneď a patria vám: evidujú sa pre každého osobitne, ostatní členovia ich nikdy nevidia a vy nevidíte ich. Odškrtnutý riadok sa len zafarbí a nikdy sa nepresúva.",
+            "**Obnoviť môj postup** (v ponuke s tromi bodkami) zruší po potvrdení iba vaše odškrtnutia pri tomto recepte.",
+            "**Porcie** zmeníte tlačidlami mínus a plus alebo zadaním čísla od 1 do 99. Množstvá sa prepočítajú na obrazovke a objaví sa štítok **Prepočítané** s tlačidlom **Vrátiť na {n}**. Bežné zlomky sa zobrazujú ako zlomky (\"1/2 tsp\"), kusy si ponechajú desatinné miesta (\"1,5 ks\"). Výsledok blízky celému číslu sa ukáže ako celé číslo (tretina lyžice krát tri je \"1 tsp\") a tretiny, šestiny a osminy sa tiež ukážu ako zlomky. Číslo mimo rozsahu sa posunie do rozsahu a riadok pod tlačidlami to povie.",
+            "Zvolený počet porcií si Receptár pri tomto recepte pamätá pre vás. Samotný recept sa tým nikdy nezmení."
+          ]
+        },
+        {
+          "type": "warning",
+          "text": "Prepočítavajú sa iba množstvá. Riadky bez množstva (napríklad „soľ podľa chuti“), časy pečenia a veľkosti foriem nie, preto ich pri veľmi inom množstve skontrolujte sami. Ak recept nemá porcie, nie je čo prepočítať a ovládanie sa nezobrazí."
+        }
+      ]
+    },
+    {
+      "id": "cooking",
+      "title": "Režim varenia",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Stlačením **Režim varenia** (na telefóne v lište dole) môžete variť podľa receptu. Riadky sa zväčšia, popis a pás fotiek sa skryjú a suroviny s postupom idú za sebou na jednej stránke. Na telefóne dve tlačidlá pod názvom skočia na **Suroviny** a **Postup** a dolná lišta ukazuje, koľko surovín je pripravených a koľko krokov hotových. Tlačidlom **Opustiť režim varenia** sa vrátite."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Ak to váš prehliadač podporuje, **obrazovka ostane zapnutá**, kým je režim varenia zapnutý. Ak nie, nič sa nezmení a nezobrazí sa žiadna správa.",
+            "Režim varenia platí iba na tomto zariadení a pri ďalšom otvorení receptu je opäť vypnutý.",
+            "Odškrtávanie funguje rovnako ako mimo režimu varenia. **Obnoviť môj postup** nájdete v ponuke s tromi bodkami a keď sú všetky kroky hotové, ponúka sa aj pri správe „Všetky kroky sú hotové. Dobrú chuť.“."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notes-favourites",
+      "title": "Poznámky a obľúbené",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Pod postupom (na telefóne na karte **Poznámky**) nájdete **Moje poznámky**. Napíšte si, čo si chcete zapamätať, napríklad dať nabudúce menej soli. Poznámky sa uložia samy chvíľu po tom, čo prestanete písať, a uvidíte **Ukladá sa...** a potom **Uložené**. Ak sa uloženie nepodarí, môžete stlačiť **Skúsiť znova**."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Vaše poznámky sú osobné: vidíte ich iba vy, ostatní členovia nikdy, ani autor receptu. Poznámky môžete písať aj pri vlastných receptoch.",
+            "Text poznámok môže mať najviac 2000 znakov.",
+            "**Srdiečkom** vedľa názvu označíte recept ako obľúbený. Srdiečko je vaše: ostatní členovia majú vlastné. Na stránke Receptár zobrazí **Obľúbené** iba recepty, ktoré ste označili."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shopping",
+      "title": "Pridanie do nákupného zoznamu",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Stlačte **Pridať do nákupného zoznamu** pri recepte (na telefóne je tlačidlo v lište dole). Zobrazí sa len vtedy, ak môžete používať Receptár aj Nákupy: v Nákupoch potrebujete právo upravovať. Pred pridaním sa otvorí okno na kontrolu."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Vyberte **Nový zoznam** (názov je názov receptu, môžete ho zmeniť a vybrať obchod) alebo **Otvorený zoznam** a vyberte jeden zo svojich otvorených zoznamov. Uzamknuté a dokončené zoznamy sa neponúkajú, ani zoznamy, ktoré môžete len čítať. Ak nemáte otvorený zoznam, do ktorého môžete pridávať, je možný len nový zoznam.",
+            "**Množstvá pre** ukazuje počet porcií, ktorý ste zvolili pri recepte. Zmenou tu sa množstvá do nákupu prepočítajú, samotný recept sa nemení.",
+            "Každá surovina je jeden riadok. Odškrtnite tie, ktoré už máte, a podľa potreby upravte názov, množstvo alebo jednotku. Riadok bez množstva v recepte sa pridá ako 1 kus s poznámkou \"V recepte nie je uvedené množstvo.\"",
+            "Riadok so štítkom **Priradené** sa našiel v nákupnom katalógu a pridá sa s obrázkom; **Návrh** znamená, že zhoda je len pravdepodobná, preto ju skontrolujte. Tlačidlom **Zmeniť** vyberiete inú položku katalógu alebo **Pridať ako vlastnú položku**. Riadok so štítkom **Nie je v katalógu** sa pridá ako vlastná položka s názvom, ktorý vidíte. Kým je riadok priradený, jeho názov sa nedá upraviť: zoznam dostane názov z katalógu. Ak chcete vlastný názov, vyberte **Pridať ako vlastnú položku**.",
+            "Ak už vybraný zoznam obsahuje rovnakú položku katalógu, ktorá ešte nie je kúpená, riadok uvedie **Už je v zozname** a množstvá sa pripočítajú (gramy a kilogramy, mililitre a litre sa prepočítajú, ak sa tým nič nestratí). Pri inej jednotke ostane **samostatný riadok**.",
+            "Stlačte **Pridať {n} položiek** (alebo **Vytvoriť zoznam a pridať {n} položiek**). Správa vám povie, koľko položiek sa pridalo, s tlačidlom **Otvorený zoznam** na prechod do nákupného zoznamu. Zostanete pri recepte."
+          ]
+        },
+        {
+          "type": "warning",
+          "text": "Pridá sa všetko naraz, alebo nič: ak sa niečo nepodarí, uvidíte \"Položky sa nepodarilo pridať. Nič sa nepridalo.\" a vaše riadky ostanú, ako ste ich nechali. Ak sa zoznam medzitým uzamkol, vyberte iný zoznam. Poznámky k surovinám sa do zoznamu neprenášajú."
+        }
+      ]
+    },
+    {
+      "id": "deleting",
+      "title": "Odstránenie receptu",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Recept môže odstrániť iba autor: otvorte ponuku s tromi bodkami a vyberte **Odstrániť recept**. Najprv sa vás opýtame a stále môžete zvoliť **Ponechať recept**."
+        },
+        {
+          "type": "warning",
+          "text": "Odstránením sa zmaže recept, jeho fotky a poznámky i odškrtnutia všetkých a nedá sa to vrátiť. Nákupné zoznamy, ktoré ste z receptu už vytvorili, sa nezmenia. Po odstránení sa vrátite na stránku Receptár."
+        }
+      ]
+    }
+  ]
+}

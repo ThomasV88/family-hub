@@ -74,6 +74,52 @@
       ]
     },
     {
+      "id": "search",
+      "title": "Hľadanie v dokumentoch",
+      "blocks": [
+        { "type": "p", "text": "Na stránke Zdravie, nad priečinkami a časovou osou, je pole **Hľadať v dokumentoch**. Nájde dokumenty podľa ich názvu a podľa slov v nich. Pole sa zobrazí, keď je čo hľadať, a nie je na stránke, keď sa nezobrazuje žiadna osoba." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Do poľa napíšte aspoň dve písmená. Jedno písmeno nestačí a kým nie sú dve, nič sa nehľadá.",
+          "Chvíľu počkajte, alebo stlačte Enter či **Hľadať**, a uvidíte výsledky.",
+          "Cez **Hľadať v** vyberte, či hľadať u **Všetci ľudia**, alebo len u osoby, ktorú máte otvorenú. Táto voľba sa zobrazí, len keď vidíte viac než jednu osobu.",
+          "Stlačením výsledku otvoríte daný dokument. Stlačením **Zrušiť hľadanie** (alebo Escape v poli) sa vrátite k priečinkom a časovej osi."
+        ] },
+        { "type": "list", "items": [
+          "Výsledok ukazuje názov dokumentu, osobu, dátum pridania, návštevu, ku ktorej patrí, a stranu, na ktorej sa slová našli, so zvýraznenými zhodnými slovami.",
+          "Diakritika a koncovky slov nehrajú veľkú rolu: slovo napísané bez diakritiky alebo v trochu inom tvare sa tiež nájde.",
+          "AI číta dokument len vtedy, keď o to niekto požiadal. Dokument, ktorý AI nikdy neprečítala, sa nájde len podľa názvu. Dokumenty, ktoré AI prečítala, sa nájdu aj podľa slov v nich.",
+          "Vždy vidíte len dokumenty, ktoré môžete otvoriť. Dokument osoby, ktorú nevidíte, alebo archivovaný dokument sa nikdy nenájde a dostanete rovnaké „Nenašli sa žiadne dokumenty“ ako pri slove, ktoré tam jednoducho nie je.",
+          "Ak výsledok uvádza **Prehľadávajú sa len prvé strany**, AI prečítala len začiatok dlhého dokumentu, takže slová ďalej sa nenájdu.",
+          "Ak poznámka hovorí, že niektoré slová z hľadania sa nepoužili, tieto slová sa preskočili: slová z jedného písmena, slová bez latinských písmen alebo číslic (napríklad čínske) a každé slovo po ôsmom. Ostatné slová sa hľadali."
+        ] },
+        { "type": "warning", "text": "Text prečítala AI a môže obsahovať chyby. Slovo sa nemusí nájsť, ak sa nesprávne prečítalo. Keď to stránka uvádza, zobrazí poznámku nad výsledkami. Ak hľadanie nič nenájde, pozrite sa na samotný dokument." },
+        { "type": "p", "text": "Slová, ktoré napíšete, sa používajú len na toto hľadanie. Neukladajú sa, nedávajú sa do adresy stránky a po odchode zo stránky sa nepamätajú." }
+      ]
+    },
+    {
+      "id": "recognised-text",
+      "title": "Rozpoznaný text dokumentu",
+      "blocks": [
+        { "type": "p", "text": "Keď AI prečíta dokument, prečítaný text sa uloží a zobrazí v paneli dokumentu pod **Rozpoznaný text**. Vďaka nemu sa dá dokument hľadať podľa slov." },
+        { "type": "steps", "title": "Kam kliknúť", "items": [
+          "Otvorte dokument. Sekcia **Rozpoznaný text** je spočiatku zatvorená.",
+          "Stlačením **Rozpoznaný text** ju otvoríte. Text sa načíta až teraz a číta sa po stranách.",
+          "Stlačením **Kopírovať text** skopírujete všetko. Pri dokumente s viacerými stranami každá strana po prvej začína prázdnym riadkom a označením strany.",
+          "Opätovným stlačením **Rozpoznaný text** sekciu zatvoríte. Text sa v prehliadači neuchováva."
+        ] },
+        { "type": "list", "items": [
+          "Rozpoznaný text môže čítať a kopírovať každý, kto môže dokument otvoriť. Člen, ktorý osobu môže len zobraziť, ho tiež vidí, ale nemôže ho odstrániť.",
+          "Môže obsahovať chyby: poznámka „Môže obsahovať chyby“ sa zobrazuje, kým to platí, a text uvádza, že ho prečítala AI. Keď na tom záleží, skontrolujte samotný dokument.",
+          "Ak AI prečítala len prvé strany dlhého dokumentu, poznámka uvádza napríklad „Prvé 3 z 8 strán“. Prehľadať sa dajú len tie strany.",
+          "Člen, ktorý môže osobu meniť, môže stlačiť **Odstrániť rozpoznaný text** a potvrdiť. Text sa z aplikácie odstráni. Dokument a návrhy, ktoré ste už prijali, ostanú a dokument sa už nenájde podľa slov v ňom. Neskôr môžete znova spustiť AI a text prečítať.",
+          "Kópie v zálohách sa odstránia, keď zálohy vypršia.",
+          "Text sa zmaže spolu s dokumentom. Skrytý je spolu s archivovanými dokumentmi a archivovanými osobami.",
+          "Ak sa AI vypne pre osobu, ktorá má rozpoznaný text, najprv sa vás opýta a potom sa zmaže aj rozpoznaný text dokumentov tejto osoby. Dokumenty sa potom dajú nájsť len podľa názvov."
+        ] },
+        { "type": "p", "text": "Kým AI dokument číta znova, môžete čítať predchádzajúci text a riadok vám povie, že prebieha nové čítanie. Hneď ako nové čítanie uloží prvé strany, sekcia ukáže tento text; dlhý dokument sa ukladá po niekoľkých stranách a poznámka povie, keď sa prečítali len prvé strany. Pozri aj [Pomoc od AI a váš súhlas](health#ai)." }
+      ]
+    },
+    {
       "id": "exports",
       "title": "Tlač a exporty pre lekára",
       "blocks": [
@@ -113,13 +159,17 @@
       "blocks": [
         { "type": "p", "text": "AI vie prečítať dokument a navrhnúť návštevy, lieky, alergie a očkovania, takže píšete menej. Je to voliteľné." },
         { "type": "warning", "text": "AI je vypnutá, kým ju správca nenastaví a nezapne, a pre každú osobu je vypnutá, kým ju člen nezapne. Keď sa AI použije, dokument opustí tento server a pošle sa externej spoločnosti (OpenAI, alebo GitHub, ak OpenAI nie je dostupná). Tá ho môže uchovať podľa vlastných podmienok." },
+        { "type": "p", "text": "Tam, kde je zapnuté čítanie celého textu (oznámenie, ktoré uvidíte, to hovorí), AI číta dokument v dvoch krokoch. Najprv sa odošlú obrázky až 20 strán a AI prečíta všetok text. Potom sa odošle aj prečítaný text a AI z neho pripraví návrhy. Oboje ide spoločnosti uvedenej v oznámení. Text sa uloží do databázy tejto aplikácie a zobrazí sa pod **Rozpoznaný text** v paneli dokumentu. Môže v ňom hľadať každý člen, ktorý môže dokument otvoriť. Ostane, kým sa dokument nezmaže alebo text neodstráni, a v zálohách ostane, kým nevypršia." },
         { "type": "list", "items": [
           "Každá osoba má spínač **Povoliť AI čítať dokumenty tejto osoby**. Predvolene je vypnutý. Rozhoduje člen, ktorý môže túto osobu meniť, a pred zapnutím uvidí jasnú otázku. Kedykoľvek ho môžete vypnúť.",
           "AI sa nikdy nespustí sama od seba. Niekto stlačí **Spustiť AI** a uvidí oznámenie, ktoré uvádza spoločnosť, ktorej sa dokument pošle.",
           "AI číta PDF súbory do ich prvých 20 strán a fotografie vrátane fotografií HEIC z iPhonu. Fotografia HEIC sa na serveri premení na bežný obrázok iba pre beh AI; uložený originál sa nemení a údaje o mieste a fotoaparáte sa neposielajú.",
           "Keď sú návrhy hotové, stlačte **Skontrolovať návrhy**. Nič sa neuloží, kým pri položke nestlačíte **Prijať**. Môžete ju **Upraviť** alebo **Odmietnuť**.",
           "Všetko, čo AI navrhla, je označené **Neoverené**, kým človek nestlačí **Označiť ako overené**. AI sa môže mýliť, preto vždy porovnajte s dokumentom.",
-          "Ak je AI pre osobu vypnutá, nezačne nový beh a behy, ktoré čakali, sa zastavia."
+          "Pri prvom spustení AI po zapnutí tejto funkcie sa ešte raz zobrazí nové oznámenie a pred odoslaním dokumentu ho potvrdíte. Hovorí, že text sa ukladá sem. Správca potvrdí rovnaké oznámenie pred spustením hromadného behu.",
+          "Ak má dokument už úplný rozpoznaný text, **Spustiť AI** z neho pripraví návrhy a strany neposiela znova. Ak chcete dokument prečítať znova, najprv text odstráňte (pozri [Rozpoznaný text dokumentu](health#recognised-text)).",
+          "Beh, ktorý len číta text, napríklad hromadný beh pre dokumenty bez rozpoznaného textu, ukáže štítok **Text uložený**. Nevytvorí návrhy a nezobrazí tlačidlo **Skontrolovať návrhy**. Pre návrhy stlačte **Spustiť AI**.",
+          "Ak je AI pre osobu vypnutá, nezačne nový beh a behy, ktoré čakali, sa zastavia. Ak má osoba rozpoznaný text, najprv dostanete upozornenie, že sa odstráni, a dokumenty sa potom nájdu len podľa názvu."
         ] },
         { "type": "p", "text": "Ak AI nie je dostupná, uvidíte krátku správu a údaje môžete vždy doplniť sami. Správca vidí zoznam volaní AI, ale nikdy nie to, čo bolo v dokumente." }
       ]

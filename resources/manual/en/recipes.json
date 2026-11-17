@@ -1,0 +1,271 @@
+{
+  "id": "recipes",
+  "category": "modules",
+  "order": 36,
+  "title": "Recipes",
+  "summary": "The family recipe book: adding and editing recipes with photos, who can see a recipe, browsing and searching the recipes you may see, the filters and favourites, cooking from a recipe with your own ticks, servings and notes, adding the ingredients to a shopping list, and deleting.",
+  "covers": [
+    "module:recipes"
+  ],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "The Recipes page",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "**Recipes** is in the menu on the left (on a phone, in the bar at the bottom) if your administrator gave you access to it. The page shows the recipes you may see as cards, newest first. A card shows the main photo (or a chef hat when there is none), the title, the time and the number of servings, a tag **Private** or **Shared**, the first category and, for recipes by other members, the name of the author. Press a card to open the recipe."
+        },
+        {
+          "type": "list",
+          "items": [
+            "The grid shows one, two or at most three cards in a row, depending on the width of the window.",
+            "**Search recipes** finds recipes by title or by an ingredient. It ignores capital letters and accents, so \"vajce\" finds \"Vajcia\".",
+            "**Filters** narrow the list by category, author and ingredient, and by **All**, **Mine** or **Shared with me**. The filters you use are shown as chips under the search box. Press a chip to remove it, or **Clear filters** to remove all of them. The filters stay in the address, so **Back** returns to the same view.",
+            "The heart on a card marks the recipe as your favourite. **Favourites** next to the search box shows only the recipes you marked. Favourites are yours alone; nobody else sees them.",
+            "The list shows 24 recipes at a time. Press **Load more** to see the next ones. After **Back** or a reload, all the recipes you had loaded are still there."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "You see a recipe if you wrote it or if its author shared it with everyone who uses Recipes. A recipe that its author kept private never appears for anyone else, not even for an administrator. A recipe shows in the table in [who can see what](who-sees-what#table)."
+        }
+      ]
+    },
+    {
+      "id": "adding",
+      "title": "Adding and editing a recipe",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "You can add a recipe if your administrator gave you permission to change **Recipes**. Without it you can read recipes but the button **New recipe** is not shown."
+        },
+        {
+          "type": "steps",
+          "title": "Adding a recipe by hand",
+          "items": [
+            "On the Recipes page press **New recipe**. If a window asks how, choose **Type it in** (the other choice is described in Reading a recipe from a web page).",
+            "Optionally add photos (see Photos below).",
+            "Type the **Title**. It is required. You can also add a short **Description**.",
+            "Set the **Servings** (1 to 99): the quantities you enter are for this number of portions. Enter the **Preparation time** and **Cooking time** in minutes if you want; the total is shown under them.",
+            "Add up to 3 **Categories**. Start typing or pick a suggestion, then press Enter or type a comma. Suggestions are a ready-made set (Breakfast, Soup, Dessert and so on) and the categories the family already uses. The same category twice is refused, whatever the capital letters or accents.",
+            "Under **Ingredients** fill in **Quantity**, **Unit**, **Name** and, if you like, a **Note** such as \"chopped\". Press **Add ingredient**, or Enter in the name, for the next line.",
+            "Under **Steps** write one step per box and press **Add step** for the next.",
+            "Optionally add the **Source** (a web address) and choose **Who can see this recipe** (see Who can see a recipe). Addresses with a user name or password in them are refused.",
+            "Press **Save recipe**. You land on the recipe and see \"Recipe saved\"."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "A recipe needs a title, at least one ingredient and at least one step. If something is missing, the form shows what and moves to the first field that needs attention.",
+            "Limits: title 120 characters, description 1000, an ingredient name 120, an ingredient note 80, a step 1000; up to 80 ingredients and 60 steps; a category up to 30 characters.",
+            "The unit comes from the same list as the shopping lists (pcs, g, kg, ml, l, pack, bunch, tbsp, tsp and the units your administrator added), or **No unit**."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Quantities** accept a decimal comma or dot (\"0,5\"), fractions (\"1/2\", \"1 1/2\") and the signs ½ ¼ ¾ ⅓ ⅔. A quantity must be above 0 and at most 9999, with up to two decimals. Leave it empty for something \"to taste\". In English a comma followed by exactly three digits is a thousands separator (\"1,000\" is 1000); in Slovak and Polish it is a decimal comma (\"1,000\" is 1)."
+        },
+        {
+          "type": "p",
+          "text": "**Pasting a list.** If you paste several lines into the name of an ingredient, for example a list copied from a web page, the form offers **Split into n ingredients**. It reads quantity, unit and name from each line (\"200 g flour\", \"2 ks eggs\", \"1/2 tsp salt\"). What it cannot read stays in the name, so check the new lines. Choose **Keep as one** to leave it as typed. \"cl\" is read as centilitres and converted to millilitres (4 cl becomes 40 ml)."
+        },
+        {
+          "type": "p",
+          "text": "**Changing the order.** Ingredients have a menu (three dots) with **Move up** and **Move down**; steps have buttons for the same. Removing an ingredient or a step shows **Undo** for a few seconds."
+        },
+        {
+          "type": "p",
+          "text": "**Editing.** Only the author edits a recipe. Open it and press **Edit**; the form is the same. The ingredients and steps you keep stay the same lines, so ticks that other members made while cooking stay in place for them; only the lines you remove lose their ticks. If you leave the form with changes that are not saved, you are asked first. The same question appears when you press **Back** in the browser or swipe back on a phone. If the connection drops while you save and you press **Save recipe** again, you get one recipe, not two."
+        }
+      ]
+    },
+    {
+      "id": "import-from-link",
+      "title": "Reading a recipe from a web page",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "If your administrator turned an AI agent on in Settings, **New recipe** first asks how you want to add the recipe. **Read from a web page** lets the app read a page you link and fill in the form for you to check. Without an AI agent the option does not appear and **New recipe** opens the empty form straight away."
+        },
+        {
+          "type": "steps",
+          "title": "Reading a recipe from a web page",
+          "items": [
+            "On the Recipes page press **New recipe** and choose **Read from a web page**.",
+            "The first time, a notice says that the text of the page is sent to the AI provider your administrator turned on, and that nothing else from your account is sent. Press **Got it**. Afterwards a short line under the field reminds you.",
+            "Paste the **Web page address** (it must start with http:// or https://) and press **Read recipe**. Addresses with a user name or password in them, with a port other than the usual one, or that point at a computer on your own network are refused at once.",
+            "Wait while the page is read, usually under a minute. Press **Cancel** to stop it. You can also close the window: the reading goes on, and above the recipes a line \"Your recipe from ... is ready to review\" appears with **Review** and **Discard**. If reading takes more than three minutes the window says so: **Cancel** and **Try again** stop the first attempt before anything new starts, and closing the window leaves it above the recipes, where a recipe that is still being read has its own **Cancel**.",
+            "The form opens with the title **Check the recipe**. Fields the app filled in carry the tag **From the page** until you change them. What it did not find says **Not found on the page**, and each ingredient shows the line as written on the page. Correct whatever is wrong.",
+            "Press **Save recipe**. Nothing is saved before that. The address of the page is kept in **Source** and shown as a link on the recipe."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "Always check the result before saving: the app can misread a quantity or leave something out.",
+            "You can have 2 pages being read at a time and read 20 pages a day. Above that you see \"You have read too many pages today\".",
+            "If reading fails, the window says what went wrong. Press **Try again** or **Change address**, or **Type it in**: the empty form opens with the web address already in **Source**.",
+            "A draft you do not open is removed after a day. **Discard** removes it at once."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**What does not work.** Pages that show the recipe only after a script runs, sites that block automatic readers, pages that need a sign-in and sites that can be reached only over IPv6 cannot be read. A very long page is read only from the beginning, and the form tells you so. The photo on the page is not taken over: add your own photos. There is no promise that every page works; when one does not, type the recipe in."
+        },
+        {
+          "type": "warning",
+          "text": "The text of the page is sent to an AI provider outside this server. Nothing from your account is sent: not your name, your email or your other recipes. Administrators see in the AI calls log that a recipe import happened, never the address or the recipe."
+        }
+      ]
+    },
+    {
+      "id": "photos",
+      "title": "Photos of a recipe",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "A recipe can have up to 10 photos. They must be JPG, PNG or WebP and up to 5 MB each. In the form press **Add photos**; you can choose several at once."
+        },
+        {
+          "type": "list",
+          "items": [
+            "The first photo is the **main** photo: the one on the recipe card. To use another one, open the menu (three dots) on its picture and choose **Make main**.",
+            "**Move earlier** and **Move later** change the order. **Remove** deletes a photo after you confirm.",
+            "When you create a recipe, the photos are uploaded when you press **Save recipe**. If one of them cannot be uploaded, the recipe is still saved and you are told; add the photo again by editing the recipe.",
+            "When you edit a recipe, adding, making main, moving and removing photos take effect at once, without **Save recipe**."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The app re-saves every photo and removes the information hidden in it, such as where it was taken. Photos are stored privately: only members who may see the recipe can see its photos."
+        }
+      ]
+    },
+    {
+      "id": "sharing",
+      "title": "Who can see a recipe",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Every recipe is either **Only me** or **Everyone in the family who uses Recipes**. A new recipe starts as **Only me**. You choose under **Who can see this recipe** in the form."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Only me**: only you see the recipe. Nobody else does, not even an administrator.",
+            "**Everyone in the family who uses Recipes**: other members who have access to Recipes can read it, cook from it and add it to a shopping list.",
+            "Only the author edits a recipe, changes its photos and visibility, or deletes it. Others cannot edit it. If the author's account no longer exists, the recipe says so and nobody can edit it."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Other members' notes, ticks and favourites on your recipe are their own: you never see them, and they never see yours. When you edit a shared recipe, their ticks stay on the ingredients and steps you keep."
+        },
+        {
+          "type": "warning",
+          "text": "If you make a shared recipe **private** again, you are asked first. Other members no longer see it. Their notes, ticks and favourites on it are kept but hidden, and they come back if you share the recipe again."
+        }
+      ]
+    },
+    {
+      "id": "ingredients-servings",
+      "title": "Ingredients, steps and servings",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Open a recipe to see its photos, times, categories, the **Source** (the web address host, opening in a new tab), the ingredients and the steps. On a phone the ingredients, steps and your notes are three tabs; on a wide screen the ingredients are on the left and the steps and notes on the right."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Tick an **ingredient** when it is prepared and a **step** when it is done. Your ticks are saved at once and are yours: they are stored per person, other members never see them and you never see theirs. A ticked row only changes colour and never moves.",
+            "**Reset my progress** (in the menu with the three dots) clears only your own ticks on that recipe, after you confirm.",
+            "Change the **Servings** with the minus and plus buttons or by typing a number from 1 to 99. The quantities are recalculated on screen and the tag **Scaled** appears, with **Reset to {n}** to go back. Common fractions are shown as fractions (\"1/2 tsp\"), pieces keep their decimals (\"1,5 pcs\"). A result close to a whole number is shown as that number (a third of a spoon times three is \"1 tsp\"), and thirds, sixths and eighths are shown as fractions too. A number outside the range is moved into it, and a line under the buttons says so.",
+            "Your chosen number of servings is remembered for you on that recipe. The recipe itself is never changed by it."
+          ]
+        },
+        {
+          "type": "warning",
+          "text": "Only the quantities are recalculated. Rows without an amount (for example \"salt, to taste\"), baking times and pan sizes are not, so check them yourself when you cook a very different amount. If a recipe has no servings, there is nothing to recalculate and the control is not shown."
+        }
+      ]
+    },
+    {
+      "id": "cooking",
+      "title": "Cooking mode",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Press **Cooking mode** (on a phone, in the bar at the bottom) to cook from the recipe. The rows get larger, the description and the photo strip are hidden and the ingredients and the steps follow each other on one page. On a phone two buttons under the title jump to **Ingredients** and **Steps**, and the bar at the bottom shows how many ingredients are prepared and how many steps are done. Press **Leave cooking mode** to return."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Where your browser supports it, the **screen stays on** while cooking mode is on. If it does not, nothing changes and no message is shown.",
+            "Cooking mode is only on this device and is off again the next time you open a recipe.",
+            "Ticking works the same as outside cooking mode. **Reset my progress** is in the menu with the three dots, and when every step is done it is also offered next to the message \"All steps done. Enjoy your meal.\"."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notes-favourites",
+      "title": "Notes and favourites",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Below the steps (on a phone, in the **Notes** tab) you find **My notes**. Write what you want to remember, for example to use less salt next time. Notes are saved by themselves a moment after you stop typing, and you see **Saving...** and then **Saved**. If saving fails you can press **Try again**."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Your notes are personal: only you see them, other members never do, and that includes the author of the recipe. You can write notes on your own recipes too.",
+            "A notes text can have up to 2000 characters.",
+            "Press the **heart** next to the title to mark a recipe as a favourite. The heart is yours: other members have their own. On the Recipes page, **Favourites** shows only the recipes you marked."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shopping",
+      "title": "Adding to the shopping list",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Press **Add to shopping list** on a recipe (on a phone the button is in the bar at the bottom). It is shown only if you may use both Recipes and Shopping: you need permission to edit in Shopping. A review window opens before anything is added."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Choose **New list** (the name is the recipe title, you can change it, and you can pick a store) or **Open list** and choose one of your open lists. Locked and finished lists are not offered, and neither are lists you may only read. If you have no open list you can add to, only a new list is possible.",
+            "**Quantities for** shows the servings you chose on the recipe. Change them here to recalculate the quantities for the shopping; the recipe itself is not changed.",
+            "Every ingredient is a row. Untick the ones you already have, and change the name, quantity or unit if you want. A row without an amount in the recipe comes in as 1 piece with the note \"No amount in the recipe.\"",
+            "A row tagged **Matched** was found in the shopping catalog and is added with its picture; **Suggested** means the match is only likely, so check it. **Change** lets you pick another catalog item or **Add as typed item**. A row tagged **Not in catalog** is added as a typed item with the name you see. While a row is matched its name cannot be edited: the list gets the catalog name. Choose **Add as typed item** to use your own name.",
+            "If the chosen list already has the same catalog item that is not yet bought, the row says **Already on the list** and the quantities are added up (grams and kilograms, millilitres and litres are converted when this loses nothing). With a different unit it is **kept as a separate line**.",
+            "Press **Add {n} items** (or **Create list and add {n} items**). A message tells you how many items were added, with **Open list** to go to the shopping list. You stay on the recipe."
+          ]
+        },
+        {
+          "type": "warning",
+          "text": "Everything is added together or nothing is: if anything fails you see \"We could not add the items. Nothing was added.\" and your rows stay as they are. If the list was locked in the meantime, choose another list. The notes of the ingredients are not copied to the list."
+        }
+      ]
+    },
+    {
+      "id": "deleting",
+      "title": "Deleting a recipe",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Only the author can delete a recipe: open the menu with the three dots and choose **Delete recipe**. You are asked first, and you can still choose **Keep recipe**."
+        },
+        {
+          "type": "warning",
+          "text": "Deleting a recipe removes the recipe, its photos and everyone's notes and ticks, and it cannot be undone. Shopping lists you already made from the recipe are not changed. After deleting you return to the Recipes page."
+        }
+      ]
+    }
+  ]
+}

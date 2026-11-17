@@ -10,20 +10,20 @@ function levelsOf(Preset $preset): array
 }
 
 it('defines the Parent preset exactly', function () {
-    expect(levelsOf(Preset::Parent))->toBe(['todo' => 'edit', 'wishlist' => 'edit', 'finance' => 'edit', 'health' => 'none']);
+    expect(levelsOf(Preset::Parent))->toBe(['todo' => 'edit', 'wishlist' => 'edit', 'finance' => 'edit', 'health' => 'none', 'shopping' => 'edit', 'recipes' => 'edit']);
 });
 
 it('defines Child and Grandparent exactly', function () {
-    $expected = ['todo' => 'edit', 'wishlist' => 'edit', 'finance' => 'none', 'health' => 'none'];
+    $expected = ['todo' => 'edit', 'wishlist' => 'edit', 'finance' => 'none', 'health' => 'none', 'shopping' => 'edit', 'recipes' => 'edit'];
     expect(levelsOf(Preset::Child))->toBe($expected)
         ->and(levelsOf(Preset::Grandparent))->toBe($expected);
 });
 
-it('defines Guest as todo view only', function () {
-    expect(levelsOf(Preset::Guest))->toBe(['todo' => 'view', 'wishlist' => 'none', 'finance' => 'none', 'health' => 'none']);
+it('defines Guest as todo, shopping and recipes view only', function () {
+    expect(levelsOf(Preset::Guest))->toBe(['todo' => 'view', 'wishlist' => 'none', 'finance' => 'none', 'health' => 'none', 'shopping' => 'view', 'recipes' => 'view']);
 });
 
-it('covers all four modules in every preset', function () {
+it('covers all six modules in every preset', function () {
     foreach (Preset::cases() as $preset) {
         expect(array_keys($preset->grants()))->toBe(array_map(fn (Module $m) => $m->value, Module::cases()));
     }

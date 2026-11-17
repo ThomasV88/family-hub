@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "document_date": "2026-03-18",
+  "specialty_key": "cardiology",
+  "visits": [
+    {
+      "visited_on": "2026-03-30",
+      "doctor": "lek. Tomasz Wójcik (demo)",
+      "specialty_key": "cardiology",
+      "specialty_other": null,
+      "diagnosis": "Kołatanie serca, podejrzenie zaburzeń rytmu",
+      "notes": null
+    }
+  ],
+  "medications": [
+    {
+      "name": "Bisoprolol",
+      "dose": "5 mg",
+      "schedule": "raz dziennie rano",
+      "started_on": null,
+      "ended_on": null,
+      "notes": null
+    }
+  ],
+  "allergies": [
+    {
+      "substance": "Orzechy",
+      "reaction": "umiarkowana",
+      "severity": "moderate"
+    }
+  ],
+  "vaccinations": []
+}

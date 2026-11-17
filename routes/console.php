@@ -12,10 +12,13 @@ Artisan::command('inspire', function () {
 
 Schedule::job(new RecordHeartbeat('schedule'))->everyMinute()->name('record-heartbeat')->withoutOverlapping();
 Schedule::command('reminders:enqueue')->everyMinute()->name('reminders-enqueue')->withoutOverlapping();
+Schedule::command('shopping:enqueue-reminders')->everyMinute()->name('shopping-enqueue-reminders')->withoutOverlapping();
 Schedule::command('outbox:dispatch')->everyMinute()->name('outbox-dispatch')->withoutOverlapping();
 Schedule::command('outbox:prune')->daily()->name('outbox-prune');
 Schedule::command('occasions:enqueue')->hourly()->name('occasions-enqueue')->withoutOverlapping();
 Schedule::command('wishlist:prune')->daily()->name('wishlist-prune');
+// Failed jobs keep a serialised mail (with its recipient address): drop them after three days.
+Schedule::command('queue:prune-failed --hours=72')->daily()->name('queue-prune-failed');
 Schedule::command('finance:prune-imports')->daily()->name('finance-prune-imports');
 Schedule::command('medical:prune-orphans')->daily()->name('medical-prune-orphans');
 Schedule::command('medical:enqueue-reminders')->hourly()->withoutOverlapping()->name('medical-enqueue-reminders');
@@ -26,3 +29,7 @@ Schedule::command('ai:reap-stuck')->everyFiveMinutes()->withoutOverlapping()->na
 Schedule::command('ai:resume-waiting')->everyMinute()->withoutOverlapping()->name('ai-resume-waiting');
 Schedule::command('ai:bulk-tick')->everyFiveMinutes()->withoutOverlapping()->name('ai-bulk-tick');
 Schedule::command('ai:prune-calls')->daily()->name('ai-prune-calls');
+
+// Recipe import maintenance (12-14): stuck imports, abandoned drafts, row retention.
+Schedule::command('recipes:reap-imports')->everyFiveMinutes()->withoutOverlapping()->name('recipes-reap-imports');
+Schedule::command('recipes:prune-imports')->daily()->name('recipes-prune-imports');

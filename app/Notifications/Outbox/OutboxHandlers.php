@@ -13,6 +13,7 @@ class OutboxHandlers
         'task_reminder' => TaskReminderHandler::class,
         'wish_occasion' => WishOccasionHandler::class,
         'vaccination_due' => VaccinationDueHandler::class,
+        'shopping_reminder' => ShoppingReminderHandler::class,
     ];
 
     public function for(string $kind): OutboxHandler

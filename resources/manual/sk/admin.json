@@ -34,22 +34,63 @@
       ]
     },
     {
+      "id": "children",
+      "title": "Deti",
+      "blocks": [
+        { "type": "p", "text": "Detský účet je pre toho, kto aplikáciu nepoužíva sám, napríklad malé dieťa. Nemá **e-mail**, **nemôže sa prihlásiť** a nedostáva e-maily ani upozornenia. V zoznamoch sa však zobrazuje, napríklad ako majiteľ zoznamu želaní." },
+        { "type": "steps", "title": "Pridanie dieťaťa", "items": [
+          "Otvorte [Nastavenia > Členovia a prístup](/settings/members).",
+          "Stlačte **Pridať dieťa**.",
+          "Napíšte **Meno** a ak chcete, vyberte **Fotografiu**.",
+          "Vyberte aspoň jedného z **Rodičov, ktorí spravujú zoznam želaní**. Ponúkajú sa len členovia, ktorí sa môžu prihlásiť a smú upravovať Zoznam želaní.",
+          "Stlačte **Vytvoriť dieťa**."
+        ] },
+        { "type": "list", "items": [
+          "Dieťa dostane východzí prístup Dieťa (Úlohy a Zoznam želaní: Úpravy).",
+          "V zozname členov má dieťa štítky **Dieťa** a **Bez prihlásenia** a namiesto e-mailu text **Spravuje** s menami rodičov.",
+          "Dieťa otvoríte cez **Spravovať**. Karta **Profil** mení meno a fotografiu. Vybraní rodičia to môžu urobiť v **Nastavenia profilu > Ľudia, ktorých spravujete**.",
+          "Pridanie dieťaťa vyžaduje nedávne potvrdenie vašej identity, rovnako ako poslanie pozvánky."
+        ] }
+      ]
+    },
+    {
+      "id": "child-convert",
+      "title": "Vlastné prihlásenie pre dieťa",
+      "blocks": [
+        { "type": "p", "text": "Keď dieťa vyrastie a potrebuje vlastné prihlásenie, nevytvárate druhý účet. Pozvete tú istú osobu e-mailom a všetko, čo dieťa malo, zostane." },
+        { "type": "steps", "title": "Urobiť z neho bežného člena", "items": [
+          "Otvorte [Nastavenia > Členovia a prístup](/settings/members).",
+          "Stlačte **Spravovať** pri dieťati.",
+          "V časti **Urobiť z neho bežného člena** zadajte jeho **E-mail**.",
+          "Stlačte **Poslať pozvánku**."
+        ] },
+        { "type": "list", "items": [
+          "Dieťa si ponechá zoznam želaní, úlohy, oprávnenia aj rodičov. Druhý účet sa nevytvorí.",
+          "Kým sa pozvánka neprijme, dieťa sa **stále nemôže prihlásiť**. Riadok ukazuje **Pozvaný** a pozvánka sa zobrazí v zozname pozvánok.",
+          "Keď dieťa pozvánku prijme (heslom alebo cez Google), ten istý účet dostane e-mail, môže sa prihlásiť a stane sa bežným členom.",
+          "Ak pozvánku **zrušíte**, pre dieťa sa nič nezmení. E-mail, ktorý už patrí členovi, sa odmietne.",
+          "Odoslanie pozvánky vyžaduje nedávne potvrdenie vašej identity.",
+          "Rodičia, ktorí spravovali zoznam želaní dieťaťa, ho **spravujú aj naďalej**, keď sa dieťa stane členom. Nový člen vidí, kto to je, na svojej stránke **Nastavenia profilu**. Administrátor ich môže odobrať v časti [Správcovia zoznamu želaní](admin#wishlist-managers)."
+        ] }
+      ]
+    },
+    {
       "id": "permissions",
       "title": "Oprávnenia pre jednotlivé moduly",
       "blocks": [
-        { "type": "p", "text": "Každý člen má úroveň pre každý modul (Úlohy, Wishlist, Financie a Zdravie): **Žiadny** (nevidí ho), **Čítanie** (môže čítať) alebo **Úpravy** (môže čítať aj meniť). Server to vynucuje na každej stránke." },
+        { "type": "p", "text": "Každý člen má úroveň pre každý modul (Úlohy, Wishlist, Financie, Zdravie, Nákupy a Receptár): **Žiadny** (nevidí ho), **Čítanie** (môže čítať) alebo **Úpravy** (môže čítať aj meniť). Server to vynucuje na každej stránke." },
         { "type": "steps", "title": "Kam kliknúť", "items": [
           "V **Členovia a prístup** stlačte **Spravovať** pri členovi.",
           "Na karte **Oprávnenia** vyberte **Predvoľba** a stlačte **Použiť**, alebo nastavte každý modul sami.",
           "Stlačte **Uložiť oprávnenia**."
         ] },
         { "type": "list", "items": [
-          "**Rodič**: Úlohy, Wishlist a Financie: úpravy. Zdravie: žiadny.",
-          "**Dieťa**: Úlohy a Wishlist: úpravy. Financie a Zdravie: žiadny.",
-          "**Starý rodič**: Úlohy a Wishlist: úpravy. Financie a Zdravie: žiadny.",
-          "**Hosť**: Úlohy: len čítanie. Všetko ostatné: žiadny."
+          "**Rodič**: Úlohy, Wishlist, Financie, Nákupy a Receptár: úpravy. Zdravie: žiadny.",
+          "**Dieťa**: Úlohy, Wishlist, Nákupy a Receptár: úpravy. Financie a Zdravie: žiadny.",
+          "**Starý rodič**: Úlohy, Wishlist, Nákupy a Receptár: úpravy. Financie a Zdravie: žiadny.",
+          "**Hosť**: Úlohy, Nákupy a Receptár: len čítanie. Všetko ostatné: žiadny."
         ] },
-        { "type": "p", "text": "Karta **Matica oprávnení** ukazuje všetkých členov a moduly v jednej tabuľke, takže môžete skontrolovať všetkých naraz. Zdravie a Financie sú predvolene obmedzené. Nastavenia sú len pre správcov." }
+        { "type": "p", "text": "Karta **Matica oprávnení** ukazuje všetkých členov a moduly v jednej tabuľke, takže môžete skontrolovať všetkých naraz. Zdravie a Financie sú predvolene obmedzené. Nastavenia sú len pre správcov. Recepty sú súkromné alebo zdieľané ich autorom a správca nemá výnimku: správca vidí recept len vtedy, keď ho autor zdieľal." }
       ]
     },
     {
@@ -77,7 +118,7 @@
       "id": "wishlist-managers",
       "title": "Správcovia zoznamu želaní",
       "blocks": [
-        { "type": "p", "text": "Niektorí ľudia, napríklad malé deti, si nevedia viesť zoznam sami. Otvorte **Spravovať** pri tom členovi a vyberte kartu **Zoznam želaní**. Zaškrtnite členov, ktorí smú pridávať a upravovať želania v jeho zozname, a stlačte **Uložiť správcov**. Správcovia vidia zoznam tak ako majiteľ, bez rezervácií." }
+        { "type": "p", "text": "Niektorí ľudia, napríklad malé deti, si nevedia viesť zoznam sami. Otvorte **Spravovať** pri tom členovi a vyberte kartu **Zoznam želaní**. Zaškrtnite členov, ktorí smú pridávať a upravovať želania v jeho zozname, a stlačte **Uložiť správcov**. Ponúkajú sa len členovia, ktorí sa môžu prihlásiť a smú upravovať Zoznam želaní. Správcovia vidia zoznam tak ako majiteľ, bez rezervácií." }
       ]
     },
     {
@@ -105,14 +146,16 @@
       "id": "ai-agents",
       "title": "Agenti AI a zoznam volaní AI",
       "blocks": [
-        { "type": "p", "text": "Otvorte [Nastavenia > Agenti AI](/settings/ai-agents). Tu vyberáte, ktoré nástroje AI smú čítať dokumenty v Zdraví a v akom poradí. Ak prvý dosiahol limit používania, skúsi sa ďalší. Každý nástroj má spínač, pozíciu a voliteľný model." },
+        { "type": "p", "text": "Otvorte [Nastavenia > Agenti AI](/settings/ai-agents). Tu vyberáte, ktoré nástroje AI smú čítať dokumenty v Zdraví a stránky s receptami v Receptári a v akom poradí. Ak prvý dosiahol limit používania, skúsi sa ďalší. Každý nástroj má spínač, pozíciu a voliteľný model." },
         { "type": "list", "items": [
           "Aspoň jeden nástroj musí ostať zapnutý, inak nikto nemôže spustiť AI.",
           "Nástroj musí byť prihlásený na serveri. Na tejto stránke sa to urobiť nedá: spýtajte sa toho, kto spravuje server. Stránka ukazuje stav prihlásenia a **Skontrolovať znova**.",
           "Po zapnutí nástroja, ktorý posiela dokumenty novej spoločnosti, uvidia členovia pred ďalším behom nové oznámenie.",
-          "**Hromadné spracovanie** prečíta staré dokumenty znova. Najprv stlačte **Skontrolovať, čo by sa spracovalo**, potom **Spustiť hromadné spracovanie**. Môžete ho pozastaviť alebo zrušiť. Nič, čo človek už prijal, sa nikdy nezmení."
+          "**Hromadné spracovanie** prečíta staré dokumenty znova. Najprv stlačte **Skontrolovať, čo by sa spracovalo**, potom **Spustiť hromadné spracovanie**. Môžete ho pozastaviť alebo zrušiť. Nič, čo človek už prijal, sa nikdy nezmení.",
+          "**Dokumenty bez rozpoznaného textu** sa zobrazuje len vtedy, keď je zapnuté čítanie celého textu. Prečíta iba text každého dokumentu, jedno volanie na 4 strany, a uloží ho, aby sa v dokumente dalo hľadať. Existujúce ani prijaté návrhy sa nemenia a nové návrhy sa nevytvárajú."
         ] },
-        { "type": "p", "text": "Pri každom čítaní dokumentu AI sa záznam objaví v [Nastavenia > Volania AI](/settings/ai-calls): kto ho spustil a kedy, nikdy nie to, čo v dokumente bolo. Volania staršie ako 12 mesiacov sa odstránia automaticky." },
+        { "type": "p", "text": "Pri každom čítaní dokumentu AI sa záznam objaví v [Nastavenia > Volania AI](/settings/ai-calls): kto ho spustil a kedy, nikdy nie to, čo v dokumente bolo. Dokument prečítaný s celým textom sa objaví raz za každé volanie: jedno volanie na 4 strany plus jedno na návrhy. Volania staršie ako 12 mesiacov sa odstránia automaticky." },
+        { "type": "p", "text": "Importy receptov fungujú rovnako. Keď člen načíta recept z webovej stránky, text tej stránky sa odošle prvému zapnutému nástroju, s rovnakými nastaveniami, rovnakým denným stropom a rovnakým limitom používania ako dokumenty. Import receptu sa v tabuľke volaní AI zobrazí ako **Import receptu**, s členom, ktorý ho spustil, a časom, nikdy s adresou stránky ani receptom. Členovia raz potvrdia upozornenie, že text stránky ide poskytovateľovi AI; pre recepty neexistuje spínač pre jednotlivých ľudí. Ak nie je zapnutý žiadny nástroj, možnosť **Načítať z webovej stránky** sa v Receptári nezobrazí." },
         { "type": "warning", "text": "Pri použití AI lekárske dokumenty opúšťajú server. Skôr než nástroj zapnete, uistite sa, že rodina súhlasí a že vám vyhovujú podmienky tej spoločnosti." }
       ]
     },
@@ -139,7 +182,7 @@
       "id": "backups",
       "title": "Zálohy",
       "blocks": [
-        { "type": "p", "text": "Server každú noc vytvára šifrované zálohy a uchováva ich na tom istom serveri: kópiu databázy, nahraných súborov a nastavení. Chránia pred chybami a poškodením, ale nie pred stratou celého servera. Zmazaný záznam môže zostať v starších zálohách, kým nevyprší ich doba uchovávania. Zálohy, lehotu na zmazanie zdravotných záznamov a ďalšie nastavenia servera spravuje ten, kto server prevádzkuje, nie táto aplikácia." }
+        { "type": "p", "text": "Server každú noc vytvára šifrované zálohy a uchováva ich na tom istom serveri: kópiu databázy, nahraných súborov a nastavení. Chránia pred chybami a poškodením, ale nie pred stratou celého servera. Zmazaný záznam môže zostať v starších zálohách, kým nevyprší ich doba uchovávania. Zálohy obsahujú aj rozpoznaný text dokumentov (text, ktorý z nich AI prečítala): po jeho odstránení v aplikácii ostáva v starších zálohách, kým nevypršia. Zálohy, lehotu na zmazanie zdravotných záznamov a ďalšie nastavenia servera spravuje ten, kto server prevádzkuje, nie táto aplikácia." }
       ]
     }
   ]

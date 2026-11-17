@@ -2,11 +2,13 @@
 
 namespace Database\Seeders\Staging;
 
+use App\Models\User;
 use App\Models\Wish;
 use App\Models\WishlistManager;
 use App\Models\WishOccasion;
 use App\Wishlist\Occasions\NameDayCalendar;
 use App\Wishlist\WishPriority;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -46,6 +48,25 @@ final class WishlistSeeder
         ]);
 
         return ['wishes' => $wishes, 'reservations' => $reservations, 'contributions' => $contributions, 'occasions' => $occasions];
+    }
+
+    /**
+     * Demo wishes of the synthetic child (not one of the six roles, so no co-buy or occasion touches them).
+     *
+     * @return int number of wishes
+     */
+    public function seedChild(User $child, CarbonImmutable $today): int
+    {
+        $rows = [['Pastelky a skicár (demo)', 14, 'top', 40], ['Drevené puzzle 500 dielikov', 19, 'love', 25], ['Plyšový dinosaurus', 12, 'nice', 9]];
+        foreach ($rows as [$title, $price, $priority, $daysAgo]) {
+            $at = $today->subDays($daysAgo)->setTime(10, 0);
+            (new Wish)->forceFill([
+                'owner_id' => $child->id, 'created_by_id' => $child->id, 'title' => $title, 'price_minor' => $price * 100,
+                'price_currency' => 'EUR', 'priority' => WishPriority::fromKey($priority), 'created_at' => $at, 'updated_at' => $at,
+            ])->save();
+        }
+
+        return count($rows);
     }
 
     /**

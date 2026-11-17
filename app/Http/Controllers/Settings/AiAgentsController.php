@@ -11,6 +11,7 @@ use App\Support\SettingsSections;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -24,7 +25,7 @@ final class AiAgentsController extends Controller
             'agents' => $this->agents($settings, $health),
             'providers' => $settings->enabledKeys(),
             'checkRoute' => 'settings.ai_calls.check',
-            'bulk' => $bulk->panel(),
+            'bulk' => $bulk->panel($request->user()),
             'bulkConfig' => [
                 'defaultCap' => (int) config('ai.bulk.default_cap'),
                 'maxCap' => (int) config('ai.bulk.max_cap'),
@@ -36,19 +37,21 @@ final class AiAgentsController extends Controller
     }
 
     /** Counts-only panel for polling. */
-    public function bulk(AdminAiBulkQuery $bulk): JsonResponse
+    public function bulk(Request $request, AdminAiBulkQuery $bulk): JsonResponse
     {
-        return $this->json($bulk->panel());
+        return $this->json($bulk->panel($request->user()));
     }
 
     public function bulkDryRun(Request $request, AdminAiBulkQuery $bulk): JsonResponse
     {
         $valid = $request->validate([
-            'scope' => ['required', 'string', 'in:no_proposal,last_failed,all'],
+            'scope' => ['required', 'string', Rule::in(AdminAiBulkQuery::scopes())],
             'cap' => ['required', 'integer', 'min:1', 'max:'.(int) config('ai.bulk.max_cap')],
         ]);
 
-        return $this->json($bulk->dryRun($request->user(), $valid['scope'], (int) $valid['cap']));
+        $result = $bulk->dryRun($request->user(), $valid['scope'], (int) $valid['cap']);
+
+        return ($result['result'] ?? null) === 'ocr_off' ? $this->json(['reason' => 'ocr_off'], 422) : $this->json($result);
     }
 
     public function bulkStart(Request $request, AdminAiBulkQuery $bulk): JsonResponse
@@ -59,11 +62,15 @@ final class AiAgentsController extends Controller
             // The provider keys the confirm dialog named; the server compares them with the enabled set.
             'providers' => ['required', 'array', 'min:1', 'max:5'],
             'providers.*' => ['string', 'in:codex,copilot'],
+            // The administrator saw the statement about the stored recognised text.
+            'textNotice' => ['sometimes', 'boolean'],
         ]);
 
-        $result = $bulk->start($request->user(), $valid['token'], true, array_values($valid['providers']));
+        $result = $bulk->start($request->user(), $valid['token'], true, array_values($valid['providers']), (bool) ($valid['textNotice'] ?? false));
 
         return match ($result['result']) {
+            'ocr_off' => $this->json(['reason' => 'ocr_off'], 422),
+            'notice_required' => $this->json(['reason' => 'notice_required'], 409),
             'ok' => $this->json(['panel' => $result['panel']], 201),
             'active' => $this->json(['reason' => 'active', 'panel' => $result['panel']], 409),
             'stale' => $this->json(['reason' => 'stale'], 409),
@@ -74,27 +81,27 @@ final class AiAgentsController extends Controller
 
     public function bulkPause(Request $request, AdminAiBulkQuery $bulk, string $run): JsonResponse
     {
-        return $this->control($bulk, $bulk->pause($request->user(), $run));
+        return $this->control($request, $bulk, $bulk->pause($request->user(), $run));
     }
 
     public function bulkResume(Request $request, AdminAiBulkQuery $bulk, string $run): JsonResponse
     {
-        return $this->control($bulk, $bulk->resume($request->user(), $run));
+        return $this->control($request, $bulk, $bulk->resume($request->user(), $run));
     }
 
     public function bulkCancel(Request $request, AdminAiBulkQuery $bulk, string $run): JsonResponse
     {
-        return $this->control($bulk, $bulk->cancel($request->user(), $run));
+        return $this->control($request, $bulk, $bulk->cancel($request->user(), $run));
     }
 
     /** @param array{result: string, panel?: array<string, mixed>} $result */
-    private function control(AdminAiBulkQuery $bulk, array $result): JsonResponse
+    private function control(Request $request, AdminAiBulkQuery $bulk, array $result): JsonResponse
     {
         abort_if($result['result'] === 'missing', 404);
 
         return $result['result'] === 'ok'
             ? $this->json(['panel' => $result['panel']])
-            : $this->json(['reason' => 'conflict', 'panel' => $bulk->panel()], 409);
+            : $this->json(['reason' => 'conflict', 'panel' => $bulk->panel($request->user())], 409);
     }
 
     public function update(Request $request, AiAgentSettingsQuery $settings, AgentHealth $health, string $agent): JsonResponse

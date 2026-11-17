@@ -1,0 +1,271 @@
+{
+  "id": "recipes",
+  "category": "modules",
+  "order": 36,
+  "title": "Receptarz",
+  "summary": "Rodzinna książka kucharska: dodawanie i edycja przepisów ze zdjęciami, kto widzi przepis, przeglądanie i szukanie przepisów, które możesz widzieć, filtry i ulubione, gotowanie według przepisu z własnymi odhaczeniami, porcjami i notatkami dodawanie składników do listy zakupów oraz usuwanie.",
+  "covers": [
+    "module:recipes"
+  ],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Strona Receptarz",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "**Receptarz** jest w menu po lewej (na telefonie w pasku na dole), jeśli administrator dał ci do niego dostęp. Strona pokazuje przepisy, które możesz widzieć, jako karty od najnowszego. Karta pokazuje główne zdjęcie (albo czapkę kucharską, gdy zdjęcia nie ma), tytuł, czas i liczbę porcji, etykietę **Prywatny** lub **Udostępniony**, pierwszą kategorię, a przy przepisach innych członków imię autora. Przepis otworzysz, naciskając kartę."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Siatka pokazuje jedną, dwie lub najwyżej trzy karty w rzędzie, zależnie od szerokości okna.",
+            "**Szukaj przepisów** znajduje przepisy po tytule lub składniku. Nie rozróżnia wielkich liter ani znaków diakrytycznych, więc \"jajko\" znajdzie \"Jajka\".",
+            "**Filtry** zawężają listę według kategorii, autora i składnika oraz według **Wszystkie**, **Moje** lub **Udostępnione mi**. Używane filtry widać jako znaczniki pod polem wyszukiwania. Znacznik usuniesz, naciskając go, wszystkie naraz przyciskiem **Wyczyść filtry**. Filtry zostają w adresie, więc **Wstecz** wraca do tego samego widoku.",
+            "Serce na karcie oznacza przepis jako ulubiony. **Ulubione** obok pola wyszukiwania pokazuje tylko przepisy, które oznaczyłeś. Ulubione są tylko twoje, nikt inny ich nie widzi.",
+            "Lista pokazuje 24 przepisy naraz. Kolejne zobaczysz przyciskiem **Wczytaj więcej**. Po **Wstecz** lub odświeżeniu strony wszystkie wczytane przepisy nadal tam są."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Widzisz przepis, jeśli ty go napisałeś lub jeśli autor udostępnił go wszystkim korzystającym z Receptarza. Przepis, który autor zostawił prywatny, nie pojawia się nikomu innemu, nawet administratorowi. Przepis znajdziesz w tabeli w [kto co widzi](who-sees-what#table)."
+        }
+      ]
+    },
+    {
+      "id": "adding",
+      "title": "Dodawanie i edycja przepisu",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Przepis możesz dodać, jeśli administrator dał ci zgodę na zmiany w **Receptarzu**. Bez niej przepisy tylko czytasz, a przycisk **Nowy przepis** się nie pokazuje."
+        },
+        {
+          "type": "steps",
+          "title": "Dodawanie przepisu ręcznie",
+          "items": [
+            "Na stronie Receptarz naciśnij **Nowy przepis**. Jeśli pojawi się okno wyboru, wybierz **Wpisz ręcznie** (druga opcja jest opisana w części Wczytywanie przepisu ze strony internetowej).",
+            "Jeśli chcesz, dodaj zdjęcia (zobacz Zdjęcia poniżej).",
+            "Wpisz **Tytuł**. Jest wymagany. Możesz też dodać krótki **Opis**.",
+            "Ustaw **Porcje** (1 do 99): ilości, które wpiszesz, dotyczą tej liczby porcji. Jeśli chcesz, wpisz **Czas przygotowania** i **Czas gotowania** w minutach; suma pokaże się pod nimi.",
+            "Dodaj najwyżej 3 **Kategorie**. Zacznij pisać albo wybierz podpowiedź, a potem naciśnij Enter lub wpisz przecinek. Podpowiedzi to gotowy zestaw (Śniadanie, Zupa, Deser i tak dalej) oraz kategorie, których rodzina już używa. Tej samej kategorii nie dodasz dwa razy, niezależnie od wielkości liter i znaków diakrytycznych.",
+            "W części **Składniki** wpisz **Ilość**, **Jednostkę**, **Nazwę** i w razie potrzeby **Notatkę**, na przykład „posiekane”. Kolejny wiersz dodasz przyciskiem **Dodaj składnik** albo klawiszem Enter w nazwie.",
+            "W części **Kroki** wpisz jeden krok w jednym polu, a następny dodaj przyciskiem **Dodaj krok**.",
+            "Jeśli chcesz, dodaj **Źródło** (adres strony) i wybierz, **Kto może zobaczyć ten przepis** (zobacz Kto widzi przepis). Adresy z nazwą użytkownika lub hasłem są odrzucane.",
+            "Naciśnij **Zapisz przepis**. Otworzy się przepis i zobaczysz „Przepis zapisany”."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "Przepis potrzebuje tytułu, co najmniej jednego składnika i co najmniej jednego kroku. Jeśli czegoś brakuje, formularz mówi czego i przechodzi do pierwszego pola do poprawy.",
+            "Limity: tytuł 120 znaków, opis 1000, nazwa składnika 120, notatka do składnika 80, krok 1000; najwyżej 80 składników i 60 kroków; kategoria najwyżej 30 znaków.",
+            "Jednostka pochodzi z tej samej listy co listy zakupów (szt., g, kg, ml, l, opakowanie, pęczek, łyżka, łyżeczka i jednostki dodane przez administratora) albo **Bez jednostki**."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Ilości** możesz wpisać z przecinkiem lub kropką dziesiętną („0,5”), jako ułamki („1/2”, „1 1/2”) i znakami ½ ¼ ¾ ⅓ ⅔. Ilość musi być większa niż 0 i najwyżej 9999, z najwyżej dwoma miejscami po przecinku. Przy rzeczach „do smaku” zostaw pole puste. W języku angielskim przecinek z dokładnie trzema cyframi po nim jest separatorem tysięcy (\"1,000\" to 1000); po słowacku i polsku to przecinek dziesiętny (\"1,000\" to 1)."
+        },
+        {
+          "type": "p",
+          "text": "**Wklejanie listy.** Jeśli wkleisz kilka wierszy do nazwy składnika, na przykład listę skopiowaną ze strony internetowej, formularz zaproponuje **Podziel na n składników**. Z każdego wiersza odczyta ilość, jednostkę i nazwę („200 g mąki”, „2 szt. jajka”, „1/2 łyżeczki soli”). To, czego nie odczyta, zostaje w nazwie, więc sprawdź nowe wiersze. Wybierz **Zostaw jako jeden**, aby zostawić tekst tak, jak go wkleiłeś. \"cl\" jest czytane jako centylitry i przeliczane na mililitry (4 cl to 40 ml)."
+        },
+        {
+          "type": "p",
+          "text": "**Zmiana kolejności.** Składniki mają menu (trzy kropki) z opcjami **Przesuń wyżej** i **Przesuń niżej**; kroki mają do tego przyciski. Po usunięciu składnika lub kroku na kilka sekund pojawia się **Cofnij**."
+        },
+        {
+          "type": "p",
+          "text": "**Edycja.** Przepis edytuje tylko jego autor. Otwórz go i naciśnij **Edytuj**; formularz jest ten sam. Składniki i kroki, które zostawisz, pozostają tymi samymi wierszami, więc odhaczenia, które inni członkowie zrobili podczas gotowania, zostają dla nich na miejscu; odhaczenia tracą tylko usunięte wiersze. Jeśli opuścisz formularz z niezapisanymi zmianami, najpierw o to zapyta. To samo pytanie pojawia się, gdy w przeglądarce naciśniesz **Wstecz** albo na telefonie przesuniesz palcem wstecz. Jeśli połączenie przerwie się podczas zapisu i ponownie naciśniesz **Zapisz przepis**, powstanie jeden przepis, nie dwa."
+        }
+      ]
+    },
+    {
+      "id": "import-from-link",
+      "title": "Wczytywanie przepisu ze strony internetowej",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Jeśli administrator włączył w Ustawieniach agenta AI, **Nowy przepis** najpierw pyta, jak chcesz dodać przepis. **Wczytaj ze strony internetowej** pozwala aplikacji przeczytać stronę, którą wkleisz, i wypełnić formularz do sprawdzenia. Bez agenta AI ta opcja się nie pojawia, a **Nowy przepis** od razu otwiera pusty formularz."
+        },
+        {
+          "type": "steps",
+          "title": "Wczytywanie przepisu ze strony internetowej",
+          "items": [
+            "Na stronie Receptarz naciśnij **Nowy przepis** i wybierz **Wczytaj ze strony internetowej**.",
+            "Za pierwszym razem pojawi się informacja, że tekst strony jest wysyłany do dostawcy AI włączonego przez administratora i że nic więcej z twojego konta nie jest wysyłane. Naciśnij **Rozumiem**. Potem przypomina o tym krótki wiersz pod polem.",
+            "Wklej **Adres strony internetowej** (musi zaczynać się od http:// lub https://) i naciśnij **Wczytaj przepis**. Adresy z nazwą użytkownika lub hasłem, z innym portem niż zwykły albo wskazujące komputer w Twojej własnej sieci są odrzucane od razu.",
+            "Poczekaj, aż strona zostanie przeczytana, zwykle krócej niż minutę. Przyciskiem **Anuluj** zatrzymasz czytanie. Możesz też zamknąć okno: czytanie trwa dalej, a nad przepisami pojawi się wiersz „Twój przepis ze strony ... jest gotowy do sprawdzenia” z przyciskami **Sprawdź** i **Odrzuć**. Jeśli odczyt trwa dłużej niż trzy minuty, okno to mówi: **Anuluj** i **Spróbuj ponownie** zatrzymują pierwszą próbę, zanim zacznie się nowa, a zamknięcie okna zostawia próbę nad przepisami, gdzie przepis, który jest jeszcze czytany, ma własne **Anuluj**.",
+            "Formularz otwiera się z tytułem **Sprawdź przepis**. Pola wypełnione przez aplikację mają etykietę **Ze strony**, dopóki ich nie zmienisz. To, czego nie znalazła, ma napis **Nie znaleziono na stronie**, a każdy składnik pokazuje wiersz tak, jak jest na stronie. Popraw wszystko, co się nie zgadza.",
+            "Naciśnij **Zapisz przepis**. Wcześniej nic nie jest zapisywane. Adres strony zostaje w **Źródle** i jest pokazany jako link przy przepisie."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "Zawsze sprawdź wynik przed zapisaniem: aplikacja może źle odczytać ilość lub coś pominąć.",
+            "Naraz mogą być czytane 2 strony, a dziennie możesz wczytać 20 stron. Powyżej tego zobaczysz „Dziś wczytano zbyt wiele stron”.",
+            "Jeśli czytanie się nie uda, okno mówi, co poszło nie tak. Naciśnij **Spróbuj ponownie** lub **Zmień adres**, albo **Wpisz ręcznie**: otworzy się pusty formularz z adresem strony już w **Źródle**.",
+            "Szkic, którego nie otworzysz, jest usuwany po dobie. **Odrzuć** usuwa go od razu."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Co nie działa.** Nie da się czytać stron, które pokazują przepis dopiero po uruchomieniu skryptu, stron blokujących automatyczne czytniki, stron wymagających logowania ani stron dostępnych tylko przez IPv6. Bardzo długa strona jest czytana tylko od początku, o czym informuje formularz. Zdjęcie ze strony nie jest przejmowane: dodaj własne zdjęcia. Nie ma gwarancji, że działa każda strona; gdy nie działa, wpisz przepis ręcznie."
+        },
+        {
+          "type": "warning",
+          "text": "Tekst strony jest wysyłany do dostawcy AI poza tym serwerem. Nic z twojego konta nie jest wysyłane: ani imię, ani e-mail, ani twoje inne przepisy. Administratorzy widzą na liście wywołań AI, że import przepisu się odbył, ale nigdy adresu ani przepisu."
+        }
+      ]
+    },
+    {
+      "id": "photos",
+      "title": "Zdjęcia przepisu",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Przepis może mieć najwyżej 10 zdjęć. Muszą być w formacie JPG, PNG lub WebP, każde do 5 MB. W formularzu naciśnij **Dodaj zdjęcia**; możesz wybrać kilka naraz."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Pierwsze zdjęcie jest **główne**: to, które widać na karcie przepisu. Aby użyć innego, otwórz menu (trzy kropki) przy jego obrazie i wybierz **Ustaw jako główne**.",
+            "**Przesuń wcześniej** i **Przesuń później** zmieniają kolejność. **Usuń** kasuje zdjęcie po potwierdzeniu.",
+            "Gdy tworzysz przepis, zdjęcia są przesyłane po naciśnięciu **Zapisz przepis**. Jeśli któregoś nie uda się przesłać, przepis i tak zostanie zapisany i dowiesz się o tym; zdjęcie dodasz ponownie przy edycji przepisu.",
+            "Gdy edytujesz przepis, dodanie, ustawienie jako głównego, przesunięcie i usunięcie zdjęć działa od razu, bez **Zapisz przepis**."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Aplikacja zapisuje każde zdjęcie na nowo i usuwa z niego ukryte informacje, na przykład miejsce zrobienia. Zdjęcia są przechowywane prywatnie: widzą je tylko członkowie, którzy mogą zobaczyć przepis."
+        }
+      ]
+    },
+    {
+      "id": "sharing",
+      "title": "Kto widzi przepis",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Każdy przepis jest albo **Tylko ja**, albo **Wszyscy w rodzinie korzystający z Receptarza**. Nowy przepis zaczyna jako **Tylko ja**. Wybierasz w formularzu przy **Kto może zobaczyć ten przepis**."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Tylko ja**: przepis widzisz tylko ty. Nikt inny, nawet administrator.",
+            "**Wszyscy w rodzinie korzystający z Receptarza**: pozostali członkowie, którzy mają dostęp do Receptarza, mogą go czytać, gotować według niego i dodawać do listy zakupów.",
+            "Tylko autor edytuje przepis, zmienia jego zdjęcia i widoczność lub go usuwa. Inni nie mogą go edytować. Jeśli konto autora już nie istnieje, przepis to mówi i nikt nie może go edytować."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Notatki, odhaczenia i ulubione innych członków przy twoim przepisie są ich własne: ty ich nigdy nie widzisz, a oni nigdy nie widzą twoich. Gdy edytujesz udostępniony przepis, ich odhaczenia zostają przy składnikach i krokach, które zostawisz."
+        },
+        {
+          "type": "warning",
+          "text": "Jeśli udostępniony przepis ponownie ustawisz jako **prywatny**, najpierw o to zapyta. Pozostali członkowie go nie zobaczą. Ich notatki, odhaczenia i ulubione przy nim zostaną zachowane, ale ukryte, i wrócą, jeśli znów udostępnisz przepis."
+        }
+      ]
+    },
+    {
+      "id": "ingredients-servings",
+      "title": "Składniki, kroki i porcje",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Otwórz przepis, aby zobaczyć jego zdjęcia, czasy, kategorie, **Źródło** (nazwa hosta adresu internetowego, otwiera się w nowej karcie), składniki i kroki. Na telefonie składniki, kroki i twoje notatki są w trzech kartach; na szerokim ekranie po lewej są składniki, a po prawej kroki i notatki."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Odhacz **składnik**, gdy jest przygotowany, i **krok**, gdy jest gotowy. Twoje odhaczenia zapisują się od razu i należą do ciebie: są przechowywane osobno dla każdej osoby, inni członkowie nigdy ich nie widzą, a ty nie widzisz cudzych. Odhaczony wiersz tylko zmienia kolor i nigdy się nie przesuwa.",
+            "**Zresetuj mój postęp** (w menu z trzema kropkami) po potwierdzeniu czyści tylko twoje odhaczenia przy tym przepisie.",
+            "**Porcje** zmienisz przyciskami minus i plus albo wpisując liczbę od 1 do 99. Ilości są przeliczane na ekranie i pojawia się znacznik **Przeliczone** z przyciskiem **Przywróć {n}**. Typowe ułamki są pokazywane jako ułamki (\"1/2 tsp\"), sztuki zachowują miejsca dziesiętne (\"1,5 szt.\"). Wynik bliski liczbie całkowitej jest pokazywany jako ta liczba (jedna trzecia łyżki razy trzy to \"1 tsp\"), a trzecie, szóste i ósme części są też pokazywane jako ułamki. Liczba spoza zakresu jest przesuwana do zakresu, a wiersz pod przyciskami o tym informuje.",
+            "Wybrana liczba porcji jest zapamiętana dla ciebie przy tym przepisie. Sam przepis nigdy się przez to nie zmienia."
+          ]
+        },
+        {
+          "type": "warning",
+          "text": "Przeliczane są tylko ilości. Wiersze bez ilości (na przykład „sól do smaku”), czasy pieczenia i rozmiary form nie są przeliczane, więc przy bardzo innej ilości sprawdź je sam. Jeśli przepis nie ma porcji, nie ma czego przeliczać i element sterujący nie jest widoczny."
+        }
+      ]
+    },
+    {
+      "id": "cooking",
+      "title": "Tryb gotowania",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Naciśnij **Tryb gotowania** (na telefonie na dolnym pasku), aby gotować według przepisu. Wiersze robią się większe, opis i pasek zdjęć są ukryte, a składniki i kroki idą jedne za drugimi na jednej stronie. Na telefonie dwa przyciski pod tytułem przechodzą do **Składniki** i **Kroki**, a dolny pasek pokazuje, ile składników jest przygotowanych i ile kroków gotowych. Przyciskiem **Wyłącz tryb gotowania** wrócisz."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Jeśli twoja przeglądarka to obsługuje, **ekran pozostaje włączony**, gdy tryb gotowania jest aktywny. Jeśli nie, nic się nie zmienia i nie pojawia się żaden komunikat.",
+            "Tryb gotowania działa tylko na tym urządzeniu i przy następnym otwarciu przepisu jest znów wyłączony.",
+            "Odhaczanie działa tak samo jak poza trybem gotowania. **Zresetuj mój postęp** jest w menu z trzema kropkami, a gdy wszystkie kroki są gotowe, jest też obok komunikatu „Wszystkie kroki gotowe. Smacznego.”."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notes-favourites",
+      "title": "Notatki i ulubione",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Pod krokami (na telefonie w karcie **Notatki**) znajdziesz **Moje notatki**. Zapisz to, co chcesz zapamiętać, na przykład żeby następnym razem dać mniej soli. Notatki zapisują się same chwilę po zakończeniu pisania i widzisz **Zapisywanie...**, a potem **Zapisano**. Jeśli zapis się nie uda, możesz nacisnąć **Spróbuj ponownie**."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Twoje notatki są osobiste: widzisz je tylko ty, inni członkowie nigdy, także autor przepisu. Notatki możesz pisać również przy własnych przepisach.",
+            "Tekst notatek może mieć najwyżej 2000 znaków.",
+            "**Serduszkiem** obok tytułu oznaczysz przepis jako ulubiony. Serduszko jest twoje: inni członkowie mają własne. Na stronie Przepisy opcja **Ulubione** pokazuje tylko przepisy, które oznaczyłeś."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shopping",
+      "title": "Dodawanie do listy zakupów",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Naciśnij **Dodaj do listy zakupów** przy przepisie (na telefonie przycisk jest w pasku na dole). Pokazuje się tylko wtedy, gdy możesz korzystać z Przepisów i Zakupów: w Zakupach potrzebujesz uprawnienia do edycji. Przed dodaniem otwiera się okno do sprawdzenia."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Wybierz **Nowa lista** (nazwa to tytuł przepisu, możesz ją zmienić i wybrać sklep) albo **Otwarta lista** i wskaż jedną ze swoich otwartych list. Listy zablokowane i zakończone nie są proponowane, tak samo jak listy, które możesz tylko czytać. Jeśli nie masz otwartej listy, do której możesz dodawać, możliwa jest tylko nowa lista.",
+            "**Ilości dla** pokazuje liczbę porcji wybraną przy przepisie. Zmiana tutaj przelicza ilości do zakupów, sam przepis się nie zmienia.",
+            "Każdy składnik to jeden wiersz. Odznacz te, które już masz, i w razie potrzeby zmień nazwę, ilość lub jednostkę. Wiersz bez ilości w przepisie trafia jako 1 sztuka z uwagą \"W przepisie nie podano ilości.\"",
+            "Wiersz z etykietą **Dopasowano** został znaleziony w katalogu zakupów i jest dodawany z obrazem; **Propozycja** oznacza, że dopasowanie jest tylko prawdopodobne, więc sprawdź je. Przyciskiem **Zmień** wybierzesz inną pozycję katalogu lub **Dodaj jako wpisany produkt**. Wiersz z etykietą **Nie ma w katalogu** jest dodawany jako wpisany produkt z widoczną nazwą. Dopóki wiersz jest dopasowany, jego nazwy nie można edytować: lista dostanie nazwę z katalogu. Aby użyć własnej nazwy, wybierz **Dodaj jako wpisany produkt**.",
+            "Jeśli wybrana lista ma już tę samą pozycję katalogu, która nie jest jeszcze kupiona, wiersz pokazuje **Już jest na liście** i ilości są dodawane (gramy i kilogramy, mililitry i litry są przeliczane, gdy nic się przez to nie traci). Przy innej jednostce zostaje **osobna pozycja**.",
+            "Naciśnij **Dodaj {n} produktów** (albo **Utwórz listę i dodaj {n} produktów**). Komunikat powie, ile produktów dodano, z przyciskiem **Otwarta lista**, który przenosi do listy zakupów. Zostajesz przy przepisie."
+          ]
+        },
+        {
+          "type": "warning",
+          "text": "Dodaje się wszystko naraz albo nic: jeśli coś się nie uda, zobaczysz \"Nie udało się dodać produktów. Nic nie zostało dodane.\", a Twoje wiersze zostają bez zmian. Jeśli lista została w międzyczasie zablokowana, wybierz inną. Notatki do składników nie są kopiowane na listę."
+        }
+      ]
+    },
+    {
+      "id": "deleting",
+      "title": "Usuwanie przepisu",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Przepis może usunąć tylko autor: otwórz menu z trzema kropkami i wybierz **Usuń przepis**. Najpierw zostaniesz zapytany i nadal możesz wybrać **Zachowaj przepis**."
+        },
+        {
+          "type": "warning",
+          "text": "Usunięcie kasuje przepis, jego zdjęcia oraz notatki i odhaczenia wszystkich i nie można tego cofnąć. Listy zakupów już utworzone z przepisu nie zostaną zmienione. Po usunięciu wracasz na stronę Przepisy."
+        }
+      ]
+    }
+  ]
+}

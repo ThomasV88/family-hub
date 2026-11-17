@@ -55,7 +55,11 @@ describe('form', function () {
             foreach ([$hidden->id, (string) Str::uuid(), 'abc', $viewOnly->id] as $id) {
                 $response = $this->actingAs($user)->get(exportUrl($id, $route));
                 $response->assertForbidden();
-                $bodies[] = Str::of($response->getContent())->replace($id, '')->toString();
+                // Strip only the id from the request path: a global replace of a short malformed id such as 'abc'
+                // would also eat the same letters inside a built asset hash and make the bodies differ.
+                $bodies[] = Str::isUuid($id)
+                    ? Str::of($response->getContent())->replace($id, '')->toString()
+                    : preg_replace('#people(\\\\?/)'.preg_quote($id, '#').'#', 'people$1', $response->getContent());
                 expect($response->getContent())->not->toContain('Hidden Hana');
             }
             expect(array_unique($bodies))->toHaveCount(1);

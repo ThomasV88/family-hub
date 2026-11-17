@@ -1,0 +1,14 @@
+{
+  "generator": "scripts/ocr-eval/generate.sh",
+  "page": {"width": 2480, "height": 3508, "dpi": 300},
+  "docs": [
+    {"id": "d1-sk-discharge", "language": "sk", "font": "LiberationSerif", "pt": 11, "layout": "running text", "hand": [], "stamp": [], "small": []},
+    {"id": "d2-pl-prescription", "language": "pl", "font": "DejaVuSans", "pt": 10, "layout": "medication table", "hand": [], "stamp": [], "small": []},
+    {"id": "d3-en-lab", "language": "en", "font": "LiberationSans", "pt": 11, "layout": "numeric table", "hand": [], "stamp": [], "small": []},
+    {"id": "d4-sk-vaccination", "language": "sk", "font": "URWBookman", "pt": 12, "layout": "table, round stamp, handwriting-like note", "hand": [15, 16, 17], "stamp": [12, 13], "small": []},
+    {"id": "d5-pl-referral", "language": "pl", "font": "NimbusRoman", "pt": 11, "layout": "handwriting-like signature block, small-print footer", "hand": [15, 16], "stamp": [], "small": [18, 19]},
+    {"id": "d6-mixed-dense", "language": "mixed", "font": "DejaVuSans", "pt": 10, "layout": "two columns, dense", "columns": 2, "split": 22, "hand": [], "stamp": [], "small": []}
+  ],
+  "conditions": ["clean", "rot3", "rot8", "rot90", "upside", "persp", "blur", "lowc", "noise", "jpeg", "phone"],
+  "probe": {"id": "probe", "size": 4000, "px": 26}
+}

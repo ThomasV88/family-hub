@@ -51,7 +51,7 @@ class VaccinationReminderPlanner
 
             foreach ($this->system->reminderCandidateIds($vaccination['subject_id']) as $userId) {
                 $user = array_key_exists($userId, $users) ? $users[$userId] : ($users[$userId] = User::query()->find($userId));
-                if ($user === null) {
+                if ($user === null || ! $user->canSignIn()) {
                     continue;
                 }
                 // Long-lived process: never trust a cached grant.

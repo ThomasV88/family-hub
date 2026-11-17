@@ -78,7 +78,7 @@ const dateText = (iso) => {
                         <component :is="row.document.kind === 'image' ? ImageIcon : FileText" :size="20" :stroke-width="1.75" aria-hidden="true" />
                         <span>{{ row.document.title }}</span>
                     </span>
-                    <AiStatusTag v-if="aiTag(row.document.id)" :status="aiTag(row.document.id).status" :cancel-reason="aiTag(row.document.id).cancelReason ?? null" :entry-count="aiTag(row.document.id).entryCount ?? null" class="timeline__ai" />
+                    <AiStatusTag v-if="aiTag(row.document.id)" :status="aiTag(row.document.id).status" :cancel-reason="aiTag(row.document.id).cancelReason ?? null" :entry-count="aiTag(row.document.id).entryCount ?? null" :text-saved="aiTag(row.document.id).textSaved === true" class="timeline__ai" />
                 </button>
                 <button v-else type="button" class="timeline__row" data-testid="timeline-entry" @click="emit('open', row.visit.id)">
                     <time class="timeline__date" :datetime="row.date">{{ dateText(row.date) }}</time>

@@ -302,3 +302,41 @@ describe('forced colors and reduced motion', () => {
         expect(current.html()).not.toMatch(/transition/);
     });
 });
+
+describe('AI calls page: recipe imports', () => {
+    const RECIPE_ROWS = [
+        { time: '2026-11-14T10:00:00+00:00', startedBy: 'Anna', person: null, kind: 'recipe', agent: 'codex', model: 'default', status: 'succeeded', durationMs: 20000, quota: false, bulk: false },
+        { time: '2026-11-14T09:00:00+00:00', startedBy: 'Bob', person: 'Eva', kind: 'document', agent: 'codex', model: 'default', status: 'succeeded', durationMs: 5000, quota: false, bulk: false },
+    ];
+
+    it('labels a recipe run Recipe import where the person is shown, and nothing else changes', () => {
+        mountPage({ calls: { rows: RECIPE_ROWS, page: 1, pages: 1, total: 2 } });
+        const cells = (i) => current.findAll('tbody tr')[i].findAll('td').map((c) => c.text());
+        expect(cells(0)[2]).toBe('Recipe import');
+        expect(cells(0)[1]).toBe('Anna');
+        expect(cells(1)[2]).toBe('Eva');
+        expect(current.findAll('th').map((h) => h.text())).toEqual(['Time', 'Started by', 'Person', 'Agent', 'Model', 'Status', 'Duration']);
+    });
+
+    it('renders no address or recipe text, even if one were present on the row', () => {
+        const dirty = [{ ...RECIPE_ROWS[0], url: 'https://recepty.example/palacinky', title: 'Palacinky', host: 'recepty.example' }];
+        mountPage({ calls: { rows: dirty, page: 1, pages: 1, total: 1 } });
+        expect(current.text()).not.toMatch(/https?:\/\//);
+        expect(current.text()).not.toContain('recepty.example');
+        expect(current.text()).not.toContain('Palacinky');
+        expect(current.find('tbody').findAll('a')).toHaveLength(0);
+    });
+
+    it('has the label in every language', () => {
+        for (const locale of ['sk', 'pl']) {
+            mountPage({ locale, calls: { rows: RECIPE_ROWS, page: 1, pages: 1, total: 2 } });
+            expect(current.findAll('tbody tr')[0].findAll('td')[2].text()).toBe(load(locale).settings.ai_calls.kind_recipe);
+            current.unmount();
+        }
+    });
+
+    it('has no axe violations with a recipe row', async () => {
+        mountPage({ calls: { rows: RECIPE_ROWS, page: 1, pages: 1, total: 2 } });
+        await expectNoAxeViolations(current.element);
+    });
+});

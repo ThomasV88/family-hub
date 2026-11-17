@@ -16,4 +16,22 @@ return [
     'google_linked_line' => 'Ktoś właśnie zalogował się kontem Google z Twoim adresem e-mail i jest ono teraz połączone z Twoim kontem Family Hub.',
     'google_linked_action' => 'Jeśli to Ty, nie musisz nic robić. Jeśli nie, poproś administratora rodziny o sprawdzenie konta i od razu zmień hasło.',
     'salutation' => 'Family Hub',
+    'shopping_list' => [
+        'subject' => ':name — lista zakupów',
+        'store' => 'Sklep: :name',
+        'responsible' => 'Osoba odpowiedzialna: :name',
+        'bought' => 'kupione',
+        'unavailable' => 'niedostępne',
+        'units' => [
+            'pcs' => 'szt.|szt.|szt.',
+            'g' => 'g|g|g',
+            'kg' => 'kg|kg|kg',
+            'ml' => 'ml|ml|ml',
+            'l' => 'l|l|l',
+            'pack' => 'opakowanie|opakowania|opakowań',
+            'bunch' => 'pęczek|pęczki|pęczków',
+            'tbsp' => 'łyżka|łyżki|łyżek',
+            'tsp' => 'łyżeczka|łyżeczki|łyżeczek',
+        ],
+    ],
 ];

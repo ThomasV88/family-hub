@@ -211,6 +211,95 @@ describe('Bulk panel: plan block', () => {
     });
 });
 
+describe('Bulk panel: scope no_text (text-only backfill)', () => {
+    const ocrPanel = (extra = {}) => ({ ...PANEL(), ocrEnabled: true, ...extra });
+    const order = () => radios().map((r) => r.attributes('data-scope'));
+
+    it('offers four scopes in order with the hint visible while reading is on, three while it is off', () => {
+        mountPanel({ bulk: ocrPanel() });
+        expect(order()).toEqual(['no_proposal', 'no_text', 'last_failed', 'all']);
+        expect(radios()[1].text()).toContain('Documents without recognised text');
+        expect(radios()[1].text()).toContain('Only the text is read and saved. Suggestions that exist or were accepted are not changed.');
+        current.unmount();
+        mountPanel({ bulk: { ...PANEL(), ocrEnabled: false } });
+        expect(order()).toEqual(['no_proposal', 'last_failed', 'all']);
+        expect(current.text()).not.toContain('Documents without recognised text');
+    });
+
+    it('choosing it after a check of another scope makes the result stale', async () => {
+        mountPanel({ bulk: ocrPanel() });
+        await doCheck();
+        expect(startBtn().attributes('aria-disabled')).toBeUndefined();
+        await radios()[1].trigger('click');
+        expect(startBtn().attributes('aria-disabled')).toBe('true');
+    });
+
+    it('hides the decided row, shows the note and sends the scope; the confirm repeats the note for this scope only', async () => {
+        mountPanel({ bulk: ocrPanel() });
+        await radios()[1].trigger('click');
+        await doCheck(COUNTS({ skipped_decided: 0 }));
+        expect(fetchMock).toHaveBeenCalledWith('/settings/ai-agents/bulk/dry-run', { method: 'POST', body: { scope: 'no_text', cap: 20 }, replay: true });
+        const result = current.find('[data-testid="bulk-result"]');
+        expect(result.text()).toContain('Documents that would be read');
+        expect(result.text()).not.toContain('already has suggestions you accepted');
+        expect(result.find('[data-testid="bulk-no-text-note"]').text()).toContain('These documents will be read by the AI provider and their text saved here. No suggestions will be made.');
+        await startBtn().trigger('click');
+        await flushPromises();
+        expect(dialog().textContent).toContain('their text saved here. No suggestions will be made.');
+    });
+
+    it('keeps the decided row and no note for the other scopes, and no note in their confirm', async () => {
+        mountPanel({ bulk: ocrPanel() });
+        await doCheck();
+        const result = current.find('[data-testid="bulk-result"]');
+        expect(result.text()).toContain('already has suggestions you accepted');
+        expect(result.find('[data-testid="bulk-no-text-note"]').exists()).toBe(false);
+        await startBtn().trigger('click');
+        await flushPromises();
+        expect(dialog().textContent).not.toContain('their text saved here');
+    });
+
+    it('uses its own zero line', async () => {
+        mountPanel({ bulk: ocrPanel() });
+        await radios()[1].trigger('click');
+        await doCheck(COUNTS({ eligible: 0, skipped_decided: 0 }));
+        expect(current.find('[data-testid="bulk-result"]').text()).toContain('Every document already has recognised text.');
+        expect(current.find(`#${startBtn().attributes('aria-describedby')}`).text()).toBe('Every document already has recognised text.');
+        expect(startBtn().attributes('aria-disabled')).toBe('true');
+    });
+
+    it('falls back to the first scope when reading is switched off while no_text is chosen', async () => {
+        mountPanel({ bulk: ocrPanel() });
+        await radios()[1].trigger('click');
+        await current.setProps({ bulk: { ...PANEL(), ocrEnabled: false } });
+        expect(order()).toEqual(['no_proposal', 'last_failed', 'all']);
+        expect(radios()[0].attributes('aria-checked')).toBe('true');
+    });
+
+    it('tags a text-only history row with an icon and no other row', () => {
+        const wrapper = mount(BulkHistoryTable, {
+            props: { rows: [ROW({ scope: 'no_text' }), ROW()], timezone: 'Europe/Bratislava' },
+            global: { plugins: [createAppI18n('en', load('en'))] },
+        });
+        const tags = wrapper.findAll('[data-testid="bulk-text-only-tag"]');
+        expect(tags).toHaveLength(1);
+        expect(tags[0].text()).toBe('Text only');
+        expect(tags[0].find('svg').exists()).toBe(true);
+        expect(wrapper.text()).toContain('Documents without recognised text');
+        wrapper.unmount();
+    });
+
+    it('has the five new keys in en, sk and pl', () => {
+        for (const l of ['en', 'sk', 'pl']) {
+            const b = load(l).settings.ai_bulk;
+            for (const key of ['scope_no_text', 'scope_no_text_hint', 'no_text_note', 'zero_eligible_no_text', 'history_text_only']) {
+                expect(typeof b[key]).toBe('string');
+                expect(b[key].length).toBeGreaterThan(0);
+            }
+        }
+    });
+});
+
 describe('Bulk panel: start confirmation', () => {
     it('opens a confirm that names the providers, count, cap and hour, with the safe button focused', async () => {
         mountPanel({ providers: ['codex', 'copilot'] });
@@ -710,5 +799,88 @@ describe('Bulk panel: privacy and wiring', () => {
         const page = src('resources/js/Pages/Settings/AiAgents.vue');
         expect(page.indexOf('<BulkRegenPanel')).toBeGreaterThan(page.indexOf('class="agents__list"'));
         expect(page.indexOf('<BulkRegenPanel')).toBeGreaterThan(page.indexOf('role="status"'));
+    });
+});
+
+describe('Bulk panel: acknowledgment of the stored-text notice (13-09)', () => {
+    const onPanel = (extra = {}) => ({ ...PANEL(), ocrEnabled: true, textNoticeAcknowledged: false, ...extra });
+    const START = '/settings/ai-agents/bulk';
+    const startCalls = () => fetchMock.mock.calls.filter((c) => c[0] === START);
+
+    it('shows the notice body in the Start confirm and sends textNotice while it was not acknowledged', async () => {
+        mountPanel({ bulk: onPanel() });
+        await doCheck();
+        await startBtn().trigger('click');
+        await flushPromises();
+        const notice = dialog().querySelector('[data-testid="bulk-confirm-notice"]');
+        // Its own bulk wording: nothing about "this document", suggestions to check or a notice that is "once" for one document.
+        expect(notice.textContent).toContain('These documents will leave this server');
+        expect(notice.textContent).toContain("saved in this app's database");
+        expect(notice.textContent).not.toContain('this document');
+        expect(notice.textContent).not.toContain('every suggestion');
+        expect(notice.textContent).not.toContain('two steps');
+        fetchMock.mockResolvedValueOnce({ ok: true, status: 201, data: { panel: onPanel({ textNoticeAcknowledged: true, active: RUN() }) } });
+        dialogButton('Start bulk run').click();
+        await flushPromises();
+        expect(startCalls()[0][1].body).toEqual({ token: '11111111-1111-4111-8111-111111111111', acknowledged: true, providers: ['codex'], textNotice: true });
+    });
+
+    it('shows no notice and sends no textNotice once acknowledged, or while reading is off', async () => {
+        for (const bulk of [onPanel({ textNoticeAcknowledged: true }), { ...PANEL(), ocrEnabled: false }]) {
+            fetchMock.mockReset();
+            mountPanel({ bulk });
+            await doCheck();
+            await startBtn().trigger('click');
+            await flushPromises();
+            expect(dialog().querySelector('[data-testid="bulk-confirm-notice"]')).toBeNull();
+            fetchMock.mockResolvedValueOnce({ ok: true, status: 201, data: { panel: bulk } });
+            dialogButton('Start bulk run').click();
+            await flushPromises();
+            expect(startCalls()[0][1].body.textNotice).toBeUndefined();
+            current.unmount();
+            document.body.innerHTML = '';
+        }
+    });
+
+    it('uses the github and multi bodies for the frozen provider set', async () => {
+        for (const [providers, marker] of [[['copilot'], 'sent to GitHub to be read'], [['codex', 'copilot'], 'or to GitHub if OpenAI is not available']]) {
+            mountPanel({ bulk: onPanel(), providers });
+            await doCheck();
+            await startBtn().trigger('click');
+            await flushPromises();
+            expect(dialog().querySelector('[data-testid="bulk-confirm-notice"]').textContent).toContain(marker);
+            current.unmount();
+            document.body.innerHTML = '';
+        }
+    });
+
+    it('reopens the notice after a 409 notice_required and starts nothing', async () => {
+        mountPanel({ bulk: onPanel({ textNoticeAcknowledged: true }) });
+        await doCheck();
+        await startBtn().trigger('click');
+        await flushPromises();
+        expect(dialog().querySelector('[data-testid="bulk-confirm-notice"]')).toBeNull();
+        fetchMock.mockResolvedValueOnce({ ok: false, status: 409, error: 'failed', data: { reason: 'notice_required' } });
+        dialogButton('Start bulk run').click();
+        await flushPromises();
+        expect(dialog().querySelector('[data-testid="bulk-confirm-notice"]')).not.toBeNull();
+        expect(document.body.textContent).not.toContain('could not start');
+        fetchMock.mockResolvedValueOnce({ ok: true, status: 201, data: { panel: onPanel({ textNoticeAcknowledged: true, active: RUN() }) } });
+        dialogButton('Start bulk run').click();
+        await flushPromises();
+        expect(startCalls()[1][1].body.textNotice).toBe(true);
+    });
+
+    it('has the notice keys in en, sk and pl and no v-html in the touched components', () => {
+        for (const l of ['en', 'sk', 'pl']) {
+            const a = load(l).health.ai;
+            for (const v of [a.run.notice_text_body, a.notice.multi_text_body, a.notice.github_text_body, a.run.provider_text_codex, a.run.provider_text_both, a.run.provider_text_copilot, a.status.text_saved, a.status.text_saved_detail, a.status.text_saved_preparing, a.status.waiting_text_saved, a.status.failed_text_saved, a.status.announce_text_saved, a.off_title, a.off_text_purge, a.off_confirm, a.off_keep]) {
+                expect(typeof v).toBe('string');
+                expect(v.length).toBeGreaterThan(0);
+            }
+        }
+        for (const f of ['Health/Ai/AiStatusTag', 'Health/Ai/RunAiControl', 'Health/Ai/AiNoticeDialog', 'Health/Text/RecognisedText', 'Health/AiConsentControl', 'Health/PersonHeader', 'Settings/AiAgents/BulkRegenPanel']) {
+            expect(src(`resources/js/${f}.vue`)).not.toContain('v-html');
+        }
     });
 });

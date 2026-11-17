@@ -18,10 +18,12 @@
           ["Who reserved a wish", "Everyone except the owner of the list", "The person who reserved it"],
           ["A finance account and its transactions", "Only the members it is shared with", "Those members, if they have Edit on Finances"],
           ["A health record of one person", "Members with Health access and access to that person", "Members with Can change on that person"],
+          ["A shopping list", "Its creator, responsible person and the people added to it", "The creator and the responsible person (settings), people who may add items (items)"],
+          ["A recipe","Its author; a shared recipe: everyone with access to Recipes","Only its author. Administrators have no bypass"],
           ["Settings, members, permissions, audit log, AI tools", "Administrators", "Administrators"],
           ["This manual", "Every signed-in member (the administrator guide only for administrators)", "Nobody in the app: it is part of the app"]
         ] },
-        { "type": "p", "text": "Learn more in [Tasks](tasks#who-sees), [Wishlist](wishlist#surprise), [Finance](finance#accounts), [Health](health#people-access) and the [Administrator guide](admin#permissions)." }
+        { "type": "p", "text": "Learn more in [Tasks](tasks#who-sees), [Wishlist](wishlist#surprise), [Finance](finance#accounts), [Shopping](shopping#overview), [Recipes](recipes#overview), [Health](health#people-access) and the [Administrator guide](admin#permissions)." }
       ]
     },
     {
@@ -34,6 +36,13 @@
           "**Edit**: you can read, add and change."
         ] },
         { "type": "tip", "text": "Not sure what you can do? Open a part of the app. If you can only view it, a short message at the top says so." }
+      ]
+    },
+    {
+      "id": "profile-photo",
+      "title": "Who can see your photo",
+      "blocks": [
+        { "type": "p", "text": "Every signed-in member who can open any part of the app can see every member's profile photo, next to the name. The administrator sees it too. A signed-in account with no access at all does not. Photos are stored privately and are never on a public address: they can only be opened by a signed-in member. You decide what to show: remove your photo in [Profile settings](/profile) and your initial is shown instead." }
       ]
     }
   ]

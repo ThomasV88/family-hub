@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Ban, Bot, Check, CircleX, Clock, Hourglass, Layers, Loader } from '@lucide/vue';
+import { Ban, Bot, Check, CircleX, Clock, FileText, Hourglass, Layers, Loader } from '@lucide/vue';
 import UiTag from '../../Components/ui/UiTag.vue';
 import { formatWhen, isPast } from './aiWhen.js';
 
@@ -15,6 +15,8 @@ const props = defineProps({
     // whole status entry; the quota-timeout difference is the detail line, the tag stays the Phase 8 one.
     availableAt: { type: String, default: null },
     failureCode: { type: String, default: null },
+    // The recognised text of the run is saved: a failed run then only lacks the suggestions.
+    textSaved: { type: Boolean, default: false },
     now: { type: Date, default: null },
 });
 const { t, locale } = useI18n();
@@ -35,12 +37,14 @@ const view = computed(() => {
             return props.entryCount === 0
                 ? { icon: Check, variant: 'neutral', text: t('health.ai.status.ready_empty') }
                 : { icon: Check, variant: 'success', text: t('health.ai.status.ready') };
+        // A text-only run (bulk "documents without recognised text"): the text is saved, no suggestions exist.
+        case 'text_saved': return { icon: FileText, variant: 'neutral', text: t('health.ai.status.text_saved') };
         case 'waiting':
             if (!props.availableAt) return { icon: Hourglass, variant: 'neutral', text: t('health.ai.status.waiting_short') };
             return waitingWhen.value
                 ? { icon: Hourglass, variant: 'neutral', when: waitingWhen.value, before: whenParts.value[0], after: whenParts.value[1] }
                 : { icon: Hourglass, variant: 'neutral', text: t('health.ai.status.waiting_soon') };
-        case 'failed': return { icon: CircleX, variant: 'danger', text: t('health.ai.status.failed') };
+        case 'failed': return { icon: CircleX, variant: 'danger', text: t(`health.ai.status.${props.textSaved ? 'failed_suggestions' : 'failed'}`) };
         case 'cancelled':
             return props.cancelReason === 'consent'
                 ? { icon: Bot, variant: 'neutral', text: t('health.ai.status.cancelled_consent') }

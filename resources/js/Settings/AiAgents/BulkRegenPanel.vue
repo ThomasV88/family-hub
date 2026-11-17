@@ -33,7 +33,7 @@ const uid = useId();
 
 const DRY_URL = '/settings/ai-agents/bulk/dry-run';
 const START_URL = '/settings/ai-agents/bulk';
-const SCOPES = ['no_proposal', 'last_failed', 'all'];
+const ALL_SCOPES = ['no_proposal', 'no_text', 'last_failed', 'all'];
 
 const config = computed(() => ({
     defaultCap: Number(props.bulkConfig?.defaultCap) || 20,
@@ -66,6 +66,9 @@ const status = useBulkStatus({
 watch(() => props.bulk, (next) => { if (next) status.adopt(next, { quiet: true }); });
 
 const active = computed(() => status.panel.value?.active ?? null);
+// The text-only backfill is offered only while reading of the full text is on (the server refuses it otherwise).
+const ocrEnabled = computed(() => status.panel.value?.ocrEnabled === true);
+const SCOPES_SHOWN = computed(() => ALL_SCOPES.filter((key) => key !== 'no_text' || ocrEnabled.value));
 const history = computed(() => status.panel.value?.history ?? []);
 const historyFailed = ref(false);
 
@@ -98,12 +101,15 @@ const fresh = computed(() => Boolean(result.value)
     && !expired.value
     && result.value.scope === scope.value
     && result.value.cap === capValue.value);
+const confirmTextOnly = computed(() => result.value?.scope === 'no_text');
 const eligible = computed(() => result.value?.counts?.eligible ?? 0);
 const stale = computed(() => Boolean(result.value) && !fresh.value);
+// The scope the shown result was checked for (a scope change makes the result stale, never mixes the copy).
+const textOnly = computed(() => (result.value ? result.value.scope : scope.value) === 'no_text');
 const reasonKey = computed(() => {
     if (!result.value) return 'start_reason_none';
     if (stale.value) return 'start_reason_stale';
-    if (eligible.value === 0) return 'zero_eligible';
+    if (eligible.value === 0) return textOnly.value ? 'zero_eligible_no_text' : 'zero_eligible';
     return '';
 });
 const reason = computed(() => (reasonKey.value ? t(`settings.ai_bulk.${reasonKey.value}`) : ''));
@@ -129,6 +135,18 @@ watch(() => props.providers, () => { providersLocal.value = null; });
 const effectiveProviders = computed(() => (Array.isArray(providersLocal.value) && providersLocal.value.length > 0 ? providersLocal.value : (props.providers ?? [])));
 // The set the confirm dialog named when it opened; Start sends exactly this.
 const shownProviders = ref([]);
+// Full-text reading on and this administrator has not yet acknowledged the statement about the stored text: the confirm
+// dialog carries it once and Start sends textNotice. A 409 notice_required (the server's answer wins) opens it again.
+const textAckLocal = ref(null);
+watch(() => status.panel.value?.textNoticeAcknowledged, () => { textAckLocal.value = null; });
+const needsTextNotice = computed(() => ocrEnabled.value && !(textAckLocal.value ?? status.panel.value?.textNoticeAcknowledged === true));
+const shownTextNotice = ref(false);
+const textNoticeKey = computed(() => {
+    const keys = shownProviders.value;
+    // Their own bodies: the per-document notice promises suggestions and speaks of "this document".
+    if (keys.includes('codex') && keys.includes('copilot')) return 'settings.ai_bulk.text_notice_multi';
+    return keys.includes('copilot') ? 'settings.ai_bulk.text_notice_github' : 'settings.ai_bulk.text_notice_codex';
+});
 const providerWords = computed(() => {
     const keys = effectiveProviders.value;
     const both = keys.includes('codex') && keys.includes('copilot');
@@ -143,10 +161,13 @@ const rows = computed(() => {
     return [
         ['row_eligible', c.eligible, true], ['row_consent', c.skipped_consent], ['row_unsupported', c.skipped_unsupported],
         ['row_decided', c.skipped_decided], ['row_active', c.skipped_active],
-    ].map(([key, value, strong]) => ({ key, label: t(`settings.ai_bulk.${key}`), value: Number(value) || 0, strong: Boolean(strong) }));
+    ].filter(([key]) => !(textOnly.value && key === 'row_decided')).map(([key, value, strong]) => ({ key, label: t(`settings.ai_bulk.${key}`), value: Number(value) || 0, strong: Boolean(strong) }));
 });
 
-const scopeLabels = computed(() => SCOPES.map((key) => ({ key, label: t(`settings.ai_bulk.scope_${key}`), hint: key === 'all' ? t('settings.ai_bulk.scope_all_hint') : '' })));
+const HINTS = { all: 'scope_all_hint', no_text: 'scope_no_text_hint' };
+const scopeLabels = computed(() => SCOPES_SHOWN.value.map((key) => ({ key, label: t(`settings.ai_bulk.scope_${key}`), hint: HINTS[key] ? t(`settings.ai_bulk.${HINTS[key]}`) : '' })));
+
+watch(SCOPES_SHOWN, (list) => { if (!list.includes(scope.value)) scope.value = 'no_proposal'; });
 
 // ---- scope radiogroup (arrow keys move and select, one Tab stop)
 function choose(key) {
@@ -158,8 +179,9 @@ function onRadioKey(event, index) {
     if (!step) return;
     event.preventDefault();
     if (checking.value) return;
-    const next = (index + step + SCOPES.length) % SCOPES.length;
-    scope.value = SCOPES[next];
+    const list = SCOPES_SHOWN.value;
+    const next = (index + step + list.length) % list.length;
+    scope.value = list[next];
     nextTick(() => radios.value[next]?.focus());
 }
 
@@ -220,6 +242,7 @@ function pressStart() {
         return;
     }
     shownProviders.value = [...effectiveProviders.value];
+    shownTextNotice.value = needsTextNotice.value;
     confirmOpen.value = true;
 }
 
@@ -228,7 +251,7 @@ async function start() {
     if (!ready.value || !result.value) return;
     starting.value = true;
     problem.value = '';
-    const response = await securityFetch(START_URL, { method: 'POST', body: { token: result.value.token, acknowledged: true, providers: [...shownProviders.value] }, replay: true });
+    const response = await securityFetch(START_URL, { method: 'POST', body: { token: result.value.token, acknowledged: true, providers: [...shownProviders.value], ...(shownTextNotice.value ? { textNotice: true } : {}) }, replay: true });
     starting.value = false;
     const data = response.data ?? {};
     if (response.ok && response.status === 201 && data.panel) {
@@ -247,10 +270,18 @@ async function start() {
         say(t('settings.ai_bulk.already_active'));
         return;
     }
+    if (response.status === 409 && data.reason === 'notice_required') {
+        // The statement about the stored text was not acknowledged yet: nothing was started; show it and ask again.
+        textAckLocal.value = false;
+        shownTextNotice.value = true;
+        confirmOpen.value = true;
+        return;
+    }
     if (response.status === 409 && data.reason === 'providers_changed') {
         // An agent was enabled or disabled after the dialog opened. Nothing was started; ask again with the current set.
         if (Array.isArray(data.providers) && data.providers.length > 0) providersLocal.value = data.providers;
         shownProviders.value = [...effectiveProviders.value];
+        shownTextNotice.value = needsTextNotice.value;
         confirmOpen.value = true;
         return;
     }
@@ -398,7 +429,8 @@ const problemText = computed(() => ({
                         </div>
                     </dl>
                     <p v-if="eligible > 0" class="bulk-result__line">{{ t('settings.ai_bulk.days_estimate', { n: days, cap: result.cap }, days) }}</p>
-                    <p v-else class="bulk-result__line">{{ t('settings.ai_bulk.zero_eligible') }}</p>
+                    <p v-else class="bulk-result__line">{{ t(textOnly ? 'settings.ai_bulk.zero_eligible_no_text' : 'settings.ai_bulk.zero_eligible') }}</p>
+                    <UiAlert v-if="textOnly" variant="info" data-testid="bulk-no-text-note">{{ t('settings.ai_bulk.no_text_note') }}</UiAlert>
                     <p v-if="checkedAt" class="bulk-result__meta">
                         <I18nT keypath="settings.ai_bulk.checked_at" tag="span" scope="global">
                             <template #time><time :datetime="checkedAt.iso">{{ checkedAt.text }}</time></template>
@@ -425,6 +457,8 @@ const problemText = computed(() => ({
 
             <UiDialog :open="confirmOpen" :title="t('settings.ai_bulk.confirm_title')" :initial-focus="() => safe" @update:open="(v) => (confirmOpen = v)">
                 <p class="bulk-dialog__body">{{ t('settings.ai_bulk.confirm_body', { n: eligible, providers: providerWords, cap: result?.cap ?? capValue, hour }, eligible) }}</p>
+                <p v-if="shownTextNotice" class="bulk-dialog__body bulk-dialog__notice" data-testid="bulk-confirm-notice">{{ t(textNoticeKey) }}</p>
+                <p v-if="confirmTextOnly" class="bulk-dialog__note" data-testid="bulk-confirm-no-text">{{ t('settings.ai_bulk.no_text_note') }}</p>
                 <p v-if="noAgentSignedIn" class="bulk-dialog__note">{{ t('settings.ai_bulk.no_agent_note') }}</p>
                 <template #footer>
                     <UiButton ref="safe" variant="secondary" @click="confirmOpen = false">{{ t('settings.ai_bulk.confirm_safe') }}</UiButton>
@@ -481,6 +515,7 @@ const problemText = computed(() => ({
 .bulk__start :deep(.ui-button__label), .bulk__row :deep(.ui-button__label) { overflow-wrap: anywhere; }
 .bulk__reason { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 .bulk-dialog__body { margin: 0; font-size: var(--text-base); }
+.bulk-dialog__notice { margin-top: var(--space-3); }
 .bulk-dialog__note { margin: var(--space-3) 0 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 @media (prefers-reduced-motion: no-preference) {
     .bulk-result { transition: opacity 175ms; }

@@ -6,7 +6,9 @@
         "finance": "Finanse",
         "health": "Zdrowie",
         "account": "Konto i bezpieczeństwo",
-        "settings": "Ustawienia (administratorzy)"
+        "settings": "Ustawienia (administratorzy)",
+        "shopping": "Zakupy",
+        "recipes": "Receptarz"
     },
     "screens": {
         "task_panel": "Panel zadania",
@@ -36,7 +38,20 @@
         "invite_dialog": "Okno zaproszenia",
         "members_permissions": "Członkowie, karta Uprawnienia",
         "ai_agents": "Agenci AI",
-        "home": "Strona Przegląd"
+        "home": "Strona Przegląd",
+        "profile_page": "Strona Ustawienia profilu",
+        "members_child": "Członkowie, okno i panel dziecka",
+        "shopping_settings": "Ustawienia, Zakupy",
+        "shopping_list_panel": "Panel ustawień listy zakupów",
+        "shopping_email": "Okno wysyłania listy zakupów e-mailem",
+        "shopping_list": "Strona listy zakupów",
+        "shopping_finish": "Okno kończenia zakupów",
+        "recipe_form": "Formularz przepisu",
+        "recipe_detail": "Szczegóły przepisu",
+        "recipe_shopping": "Dodawanie do zakupów",
+        "recipe_import": "Wczytywanie przepisu ze strony",
+        "document_search": "Wyszukiwanie w dokumentach",
+        "document_text": "Rozpoznany tekst dokumentu"
     },
     "topics": {
         "tasks.visibility": {
@@ -193,11 +208,11 @@
         },
         "health.ai_consent": {
             "title": "AI dla tej osoby",
-            "text": "Domyślnie wyłączone. Gdy włączone, dokumenty tej osoby można wysłać do zewnętrznej firmy AI, która zaproponuje wpisy. Każdą propozycję sprawdzasz przed zapisem. Wyłączenie niczego nie usuwa."
+            "text": "Domyślnie wyłączone. Gdy włączone, dokumenty tej osoby można wysłać do zewnętrznej firmy AI, która zaproponuje wpisy. Każdą propozycję sprawdzasz przed zapisem. Wyłączenie zatrzymuje nowe uruchomienia. Jeśli osoba ma rozpoznany tekst, najpierw zostaniesz zapytany, a potem zostanie on usunięty."
         },
         "health.ai_run": {
             "title": "Uruchom AI",
-            "text": "Wysyła ten jeden dokument do zewnętrznej firmy AI, aby go odczytała i zaproponowała wpisy. PDF jest czytany do pierwszych 20 stron; zdjęcie HEIC jest zamieniane na zwykły obraz tylko dla AI. Nic nie zostanie zapisane, dopóki nie sprawdzisz i nie zaakceptujesz propozycji."
+            "text": "Wysyła ten jeden dokument do zewnętrznej firmy AI. Tam, gdzie włączono odczyt pełnego tekstu, AI najpierw czyta cały tekst i zapisuje go tutaj, aby mogli w nim szukać członkowie, którzy mogą otworzyć dokument, a potem proponuje wpisy na jego podstawie (pełny zapisany tekst jest używany ponownie). PDF jest czytany do 20 stron. Nic nie trafia do rekordu bez Twojej akceptacji."
         },
         "health.export_format": {
             "title": "Format eksportu",
@@ -218,6 +233,14 @@
         "security.recovery_codes": {
             "title": "Kody odzyskiwania",
             "text": "Jednorazowe kody, którymi zalogujesz się po utracie telefonu. Każdy działa raz. Przechowuj je w bezpiecznym miejscu; utworzenie nowych unieważnia stare."
+        },
+        "profile.photo": {
+            "title": "Twoje zdjęcie",
+            "text": "Twoje zdjęcie widzi przy imieniu każda osoba z rodziny, która może otworzyć dowolną część aplikacji. Jest przechowywane prywatnie, nie pod publicznym adresem, a ukryte dane, na przykład miejsce wykonania zdjęcia, są usuwane."
+        },
+        "profile.name": {
+            "title": "Wyświetlana nazwa",
+            "text": "Ta nazwa jest widoczna przy zadaniach, życzeniach i listach. Możesz ją zmienić w każdej chwili. Adres e-mail służy do logowania i na razie nie można go tu zmienić."
         },
         "settings.security_requirement": {
             "title": "Wymagaj weryfikacji dwuetapowej",
@@ -253,11 +276,87 @@
         },
         "settings.ai_bulk": {
             "title": "Zbiorcze ponowne przetwarzanie",
-            "text": "Ponownie czyta starsze dokumenty z pomocą AI, kilka dziennie. Najpierw sprawdź, co by się uruchomiło, potem rozpocznij. Zaakceptowane już propozycje nigdy się nie zmieniają. Widzisz tylko liczby."
+            "text": "Ponownie czyta starsze dokumenty z pomocą AI, kilka dziennie. Najpierw sprawdź, co by się uruchomiło, potem rozpocznij. Zaakceptowane już propozycje nigdy się nie zmieniają. Zakres „Dokumenty bez rozpoznanego tekstu” (widoczny przy włączonym odczycie pełnego tekstu) tylko czyta i zapisuje tekst i nie tworzy sugestii. Widzisz tylko liczby."
         },
         "overview.system_status": {
             "title": "Stan systemu",
             "text": "Pokazuje, że działają kontrole w tle wysyłające przypomnienia. Jeśli pokrycie jest niskie lub żadna kontrola nie ruszyła, przypomnienia mogą się spóźniać; zapytaj osobę zarządzającą serwerem."
+        },
+        "members.child": {
+            "title": "Czym jest konto dziecka?",
+            "text": "Konto dziecka nie ma adresu e-mail, nie może się zalogować i nie dostaje e-maili ani powiadomień. Imieniem i zdjęciem zarządzają wybrani rodzice i administratorzy, a listą życzeń rodzice. Wybrać można tylko członków, którzy mogą się zalogować i mogą edytować Listę życzeń."
+        },
+        "members.convert": {
+            "title": "Po co e-mail dla dziecka?",
+            "text": "Na e-mail trafia zaproszenie. Gdy dziecko je przyjmie, to samo konto dostaje adres e-mail i może się zalogować. Lista życzeń, zadania, uprawnienia i rodzice zostają. Do tego czasu dziecko nie może się zalogować, a cofnięcie zaproszenia niczego nie zmienia."
+        },
+        "shopping.catalog": {
+            "title": "Katalog produktów",
+            "text": "Katalog to wspólna lista rzeczy, które rodzina często kupuje, z obrazem i domyślną jednostką, aby każdy mógł je szybko wybrać. Na liście możesz też wpisać własny produkt. Usunięcie produktu z katalogu nigdy nie usuwa go z list: zostaje tam jako zwykły tekst bez obrazu."
+        },
+        "shopping.store": {
+            "title": "Sklepy",
+            "text": "Dodaj sklepy, w których robisz zakupy, z logo, i przypisz je do listy zakupów. Najlepiej działa PNG z przezroczystym tłem, które jest pokazywane na białym tle. Jeśli usuniesz sklep, listy zostaną, ale nie będą miały sklepu."
+        },
+        "shopping.units": {
+            "title": "Jednostki",
+            "text": "Wbudowane jednostki, takie jak szt., g, kg i l, są pokazywane w każdym języku i nie można ich zmieniać. Administratorzy mogą dodać kolejne jednostki, każdą z angielską, słowacką i polską nazwą. Jeśli usuniesz jednostkę, która jest używana, produkty zachowają ilość, ale pokażą ją bez jednostki."
+        },
+        "shopping.roles": {
+            "title": "Osoba odpowiedzialna, współtwórcy i obserwatorzy",
+            "text": "Osoba odpowiedzialna jako jedyna może zablokować i odblokować listę, oznaczać produkty i zakończyć zakupy. Można ją zmienić w każdej chwili. Osoby, które mogą dodawać i edytować produkty, zmieniają produkty. Osoby, które mogą tylko przeglądać, widzą listę, ale niczego nie zmieniają. Osoba ma jednocześnie jedną rolę."
+        },
+        "shopping.reminder": {
+            "title": "Przypomnienie",
+            "text": "Lista ma jedno przypomnienie, datę i godzinę w strefie czasowej rodziny. Powiadomienie push otrzymuje tylko osoba odpowiedzialna, i tylko jeśli włączyła powiadomienia push na swoim urządzeniu w Ustawieniach, Powiadomienia. Gdy push jest wtedy wyłączony, przypomnienie wyjdzie po jego włączeniu, do 24 godzin później. Czas z przeszłości zostanie odrzucony. Zmiana godziny ustawia nowe przypomnienie."
+        },
+        "shopping.email": {
+            "title": "Wysyłanie listy e-mailem",
+            "text": "Wpisz lub wklej do 5 adresów, działa każdy adres. E-mail to zwykły tekst z produktami, ilościami, sklepem i osobą odpowiedzialną, bez linku do aplikacji. Osoby, które mogą tylko przeglądać, nie mogą wysyłać. Obowiązują dzienne limity, więc listy nie da się wysyłać bez końca."
+        },
+        "shopping.lock": {
+            "title": "Blokowanie listy",
+            "text": "Zablokowanie listy rozpoczyna zakupy: nikt nie może już dodawać, usuwać ani edytować produktów. Tylko osoba odpowiedzialna blokuje i odblokowuje listę oraz oznacza każdy produkt jako Kupione lub Niedostępne; kolejne dotknięcie cofa oznaczenie. Inni widzą oznaczenia po odświeżeniu strony. Odblokowanie zachowuje oznaczenia."
+        },
+        "shopping.carry_over": {
+            "title": "Produkty, których nie udało się kupić",
+            "text": "Produkty oznaczone jako Niedostępne mogą trafić na nową otwartą listę o nazwie z dopiskiem „(niekupione)”, z tym samym sklepem, osobą odpowiedzialną i dostępem, bez przypomnienia. Zakończona lista w obu przypadkach trafia do archiwum i jest tylko do odczytu."
+        },
+        "recipes.import": {
+            "title": "Wczytywanie przepisu ze strony internetowej",
+            "text": "Aplikacja czyta wklejoną stronę internetową i wypełnia formularz przepisu. Tekst strony jest wysyłany do dostawcy AI włączonego przez administratora, a nic więcej z twojego konta. Działa z większością stron z przepisami, nie ze wszystkimi. Przed zapisaniem wszystko sprawdź: nic nie zostanie zapisane, dopóki nie klikniesz Zapisz przepis."
+        },
+        "recipes.sharing": {
+            "title": "Kto może zobaczyć ten przepis",
+            "text": "Wybierz Tylko ja, aby zostawić przepis dla siebie. Wybierz Wszyscy w rodzinie korzystający z Receptarza, aby inni mogli go czytać, gotować według niego i dodawać do zakupów. Edytować go możesz zawsze tylko ty jako autor. Jeśli udostępniony przepis znów ustawisz jako prywatny, notatki, odhaczenia i ulubione innych przy nim zostaną zachowane, ale ukryte."
+        },
+        "recipes.servings": {
+            "title": "Porcje",
+            "text": "Zmiana liczby porcji przelicza ilości tylko na ekranie. Sam przepis się nie zmienia, a wiersze bez ilości, czasy pieczenia i rozmiary form nie są przeliczane. Wybrana liczba jest zapamiętana dla ciebie przy tym przepisie. Przycisk Przywróć wraca do porcji z przepisu."
+        },
+        "recipes.progress": {
+            "title": "Twój postęp",
+            "text": "Odhacz składnik, gdy jest przygotowany, i krok, gdy jest gotowy. Odhaczenia zapisują się od razu i są przechowywane osobno dla każdej osoby: nikt inny ich nie widzi, a ty nie widzisz cudzych. Opcja Zresetuj mój postęp w menu czyści tylko twoje odhaczenia przy tym przepisie."
+        },
+        "recipes.notes": {
+            "title": "Osobiste notatki",
+            "text": "Zapisz to, co chcesz zapamiętać, na przykład żeby następnym razem dać mniej soli. Notatki zapisują się same chwilę po zakończeniu pisania. Widzisz je tylko ty, inni członkowie nigdy, także autor przepisu. Są widoczne również przy twoich własnych przepisach."
+        },
+        "recipes.cooking": {
+            "title": "Tryb gotowania",
+            "text": "Tryb gotowania powiększa wiersze i trzyma składniki oraz kroki na jednej długiej stronie, żeby można było czytać nawet brudnymi rękami. Na telefonach dolny pasek pokazuje, jak daleko jesteś. Jeśli przeglądarka na to pozwala, ekran pozostaje włączony przy aktywnym trybie. Nic nie jest zapisywane: następnym razem tryb jest znów wyłączony."
+        },
+        "recipes.shopping": {
+            "title": "Dodawanie do listy zakupów",
+            "text": "Wybierz nową listę albo jedną ze swoich otwartych list. Przed dodaniem sprawdź każdy składnik: odznacz to, co już masz, i zmień ilość lub jednostkę. Dopasowane składniki zachowują nazwę z katalogu i dostają obraz (własna nazwa: Dodaj jako wpisany produkt). Dodaje się wszystko naraz albo nic. Notatki do składników nie są kopiowane."
+        },
+        "health.search": {
+            "title": "Szukaj w dokumentach",
+            "text": "Przeszukuje nazwy dokumentów i tekst odczytany z nich przez AI. Przeszukiwane są tylko dokumenty, które możesz otworzyć, więc dokument, którego nie widzisz, nigdy się nie znajdzie. Dokumenty, których AI nigdy nie czytała, są znajdowane tylko po nazwie. Wpisane słowa nie są zapisywane ani umieszczane w adresie."
+        },
+        "health.document_text": {
+            "title": "Rozpoznany tekst",
+            "text": "Tekst odczytany przez AI z tego dokumentu. Może go czytać i kopiować każdy, kto może otworzyć dokument. Może zawierać błędy, dlatego gdy to ważne, sprawdź sam dokument. Usunąć go mogą tylko osoby z prawem edycji. Kopie zapasowe przechowują kopię do czasu wygaśnięcia."
         }
     }
 }

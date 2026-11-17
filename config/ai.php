@@ -165,6 +165,30 @@ return [
         'stopped_after_hours' => 24,
     ],
 
+    // Recognised full text of medical documents (Phase 13). Off by default. The numbers below are the decisions of
+    // .planning/phases/13-ai-full-text-ocr-and-document-search-issue-11/13-EVALUATION.md: no pre-processing is applied to
+    // any page image, PDF pages keep ai.pdf.scale, and the process and job timeouts above stay as they are.
+    'ocr' => [
+        'enabled' => (bool) env('AI_OCR_ENABLED', false),
+        // reliable or uncertain; anything else reads as uncertain (config 'may contain errors' label).
+        'text_reliability' => env('AI_OCR_TEXT_RELIABILITY', 'reliable'),
+        'text_version' => 1,
+        // max_pages * max_page_chars plus the page separators must not exceed max_total_chars (and the 200000 CHECK of the body column), so every
+        // page that is read also fits the stored body; a test pins it.
+        'max_page_chars' => 9900,
+        'max_total_chars' => 200000,
+        // Pages per transcription call, pages read at most, and the measured seconds one page takes.
+        'pages_per_call' => 4,
+        'max_pages' => 20,
+        'seconds_per_page' => 14.52,
+        // Seconds of the job budget kept free for the entry extraction after the transcription (660 - 60 - 120 - 60).
+        'extract_reserve_seconds' => 120,
+        // Bytes of one transcription reply file.
+        'result_cap' => 524288,
+        // Bytes of the whole Copilot prompt of the extraction from text (argv limit); the text is cut on a line boundary.
+        'max_prompt_bytes' => 90000,
+    ],
+
     'login_stale_minutes' => 15,
     'call_retention_months' => 12,
     'queue' => 'ai',

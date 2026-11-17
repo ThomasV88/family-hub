@@ -80,7 +80,8 @@ class AiReviewQuery
                 return null;
             }
         } else {
-            $row = $scoped()->where('status', '!=', 'superseded')->orderByDesc('queued_at')->orderByDesc('id')->first($columns);
+            // A text-only run never carries suggestions: it is not a run to open.
+            $row = $scoped()->where('status', '!=', 'superseded')->where('mode', '<>', 'text')->orderByDesc('queued_at')->orderByDesc('id')->first($columns);
             if ($row !== null && $row->status === 'waiting') {
                 // A newer waiting run does not hide an older proposal that can still be reviewed.
                 $row = $scoped()->where('status', 'ready')->orderByDesc('queued_at')->orderByDesc('id')->first($columns) ?? $row;
@@ -123,7 +124,7 @@ class AiReviewQuery
             $newest = $newestId === null ? null : (string) $newestId;
         }
 
-        $newerWaiting = $scoped()->where('status', 'waiting')->where('queued_at', '>', $row->queued_at)
+        $newerWaiting = $scoped()->where('status', 'waiting')->where('mode', '<>', 'text')->where('queued_at', '>', $row->queued_at)
             ->orderByDesc('queued_at')->orderByDesc('id')->first(['id', 'available_at']);
 
         return [

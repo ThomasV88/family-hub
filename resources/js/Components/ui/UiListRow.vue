@@ -6,7 +6,15 @@ const props = defineProps({
     selected: { type: Boolean, default: false },
     disabled: { type: Boolean, default: false },
 });
-const emit = defineEmits(['select']);
+const emit = defineEmits(['select', 'navigate']);
+
+// A plain click on a link row may be taken over by the page (an in-app visit instead of a full page load): the page listens
+// to `navigate` and the browser's own navigation is cancelled. Modified clicks (new tab, new window) are left alone.
+function onLink(event) {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (props.disabled) return;
+    emit('navigate', props.href, event);
+}
 </script>
 
 <template>
@@ -31,6 +39,7 @@ const emit = defineEmits(['select']);
             :title="title || undefined"
             :aria-disabled="disabled ? 'true' : undefined"
             :aria-current="selected ? 'true' : undefined"
+            @click="onLink"
         >
             <span class="ui-row__title"><slot /></span>
             <span v-if="$slots.meta" class="ui-row__meta"><slot name="meta" /></span>

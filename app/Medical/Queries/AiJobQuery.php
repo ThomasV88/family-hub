@@ -8,6 +8,7 @@ use App\Audit\AuditLogger;
 use App\Medical\Ai\ExtractionSchema;
 use App\Medical\Ai\FailureCode;
 use App\Medical\AiConsent;
+use App\Medical\Documents\Text\TextNormalizer;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
@@ -30,7 +31,7 @@ class AiJobQuery
      * Moves a queued row to running (and its call row). Null when the row is gone or not queued: a redelivered job
      * finds nothing to do.
      *
-     * @return array{subject_id: string, document_id: string, started_by: int, bulk_run_id: ?string}|null
+     * @return array{subject_id: string, document_id: string, started_by: int, bulk_run_id: ?string, mode: string}|null
      */
     public function claim(string $id): ?array
     {
@@ -41,7 +42,7 @@ class AiJobQuery
         return DB::transaction(function () use ($id) {
             $now = Carbon::now();
             $rows = DB::select(
-                "update medical_ai_extractions set status = 'running', started_at = ?, updated_at = ? where id = ? and status = 'queued' returning subject_id, document_id, started_by, bulk_run_id",
+                "update medical_ai_extractions set status = 'running', started_at = ?, updated_at = ? where id = ? and status = 'queued' returning subject_id, document_id, started_by, bulk_run_id, mode",
                 [$now, $now, $id],
             );
             if ($rows === []) {
@@ -55,8 +56,138 @@ class AiJobQuery
                 'document_id' => (string) $rows[0]->document_id,
                 'started_by' => (int) $rows[0]->started_by,
                 'bulk_run_id' => $rows[0]->bulk_run_id === null ? null : (string) $rows[0]->bulk_run_id,
+                'mode' => (string) $rows[0]->mode,
             ];
         });
+    }
+
+    /** A two-step run that starts while ai.ocr.enabled is off becomes an ordinary one-call run (only while it is running). */
+    public function downgradeToEntries(string $id): void
+    {
+        if (Str::isUuid($id)) {
+            DB::table('medical_ai_extractions')->where('id', $id)->where('status', 'running')->update(['mode' => 'entries', 'updated_at' => Carbon::now()]);
+        }
+    }
+
+    /**
+     * The text already stored by this very run (resume after a quota park): only a text row whose extraction_id is the
+     * run counts, so a text of an earlier run is never mistaken for progress. Pages split on U+000C.
+     *
+     * @return array{pages: list<string>, pagesRead: int, pagesTotal: int, complete: bool, language: ?string}|null
+     */
+    public function savedText(string $id): ?array
+    {
+        if (! Str::isUuid($id)) {
+            return null;
+        }
+        $row = DB::table('medical_document_texts as t')
+            ->join('medical_ai_extractions as e', 'e.document_id', '=', 't.document_id')
+            ->where('e.id', $id)->where('t.extraction_id', $id)
+            ->first(['t.body', 't.pages_read', 't.pages_total', 't.complete', 't.language']);
+        if ($row === null) {
+            return null;
+        }
+        $pagesRead = (int) $row->pages_read;
+
+        return [
+            'pages' => $pagesRead === 0 ? [] : array_slice(explode(TextNormalizer::PAGE_SEPARATOR, (string) $row->body), 0, $pagesRead),
+            'pagesRead' => $pagesRead,
+            'pagesTotal' => (int) $row->pages_total,
+            'complete' => (bool) $row->complete,
+            'language' => $row->language === null ? null : (string) $row->language,
+        ];
+    }
+
+    /**
+     * The stored text of the run's document, whichever run wrote it (job side only; savedText answers only for this run's
+     * own text). Pages are the stored pages in order; language, agent and model are carried so the text can be re-saved
+     * unchanged under this run.
+     *
+     * @return array{pages: list<string>, pagesRead: int, pagesTotal: int, complete: bool, textVersion: int, extractionId: ?string, language: ?string, agent: ?string, model: ?string}|null
+     */
+    public function storedText(string $id): ?array
+    {
+        if (! Str::isUuid($id)) {
+            return null;
+        }
+        $row = DB::table('medical_document_texts as t')
+            ->join('medical_ai_extractions as e', 'e.document_id', '=', 't.document_id')
+            ->where('e.id', $id)
+            ->first(['t.body', 't.pages_read', 't.pages_total', 't.complete', 't.text_version', 't.extraction_id', 't.language', 't.agent', 't.model']);
+        if ($row === null) {
+            return null;
+        }
+        $pagesRead = (int) $row->pages_read;
+
+        return [
+            'pages' => $pagesRead === 0 ? [] : array_slice(explode(TextNormalizer::PAGE_SEPARATOR, (string) $row->body), 0, $pagesRead),
+            'pagesRead' => $pagesRead,
+            'pagesTotal' => (int) $row->pages_total,
+            'complete' => (bool) $row->complete,
+            'textVersion' => (int) $row->text_version,
+            'extractionId' => $row->extraction_id === null ? null : (string) $row->extraction_id,
+            'language' => $row->language === null ? null : (string) $row->language,
+            'agent' => $row->agent === null ? null : (string) $row->agent,
+            'model' => $row->model === null ? null : (string) $row->model,
+        ];
+    }
+
+    /** Closes the open call row of the run as succeeded (one transcription batch done); the extraction stays running. */
+    public function closeStep(string $id, string $model, int $durationMs): void
+    {
+        $this->closeCall($id, 'succeeded', null, $this->model($model), $durationMs, Carbon::now());
+    }
+
+    /**
+     * Ends a text-only run: the transcribed text is stored (a text row carries this run's id), the run becomes
+     * text_saved. Same guards as finishReady (still running, no cancel request, consent on under FOR SHARE, person and
+     * document not archived), but it never supersedes anything and never touches a ready row or a decision. False when
+     * any check fails; nothing is written then and the caller maps it to a cancelled finish.
+     */
+    public function finishTextSaved(string $id, int $pagesRead, int $pagesTotal, string $agent, string $model, int $durationMs): bool
+    {
+        if (! Str::isUuid($id)) {
+            return false;
+        }
+        $model = $this->model($model);
+        $now = Carbon::now();
+
+        try {
+            DB::transaction(function () use ($id, $pagesRead, $pagesTotal, $agent, $model, $durationMs, $now) {
+                $row = DB::table('medical_ai_extractions')->where('id', $id)->where('status', 'running')->where('mode', 'text')
+                    ->whereNull('cancel_requested_at')->lockForUpdate()->first(['document_id', 'subject_id']);
+                if ($row === null) {
+                    throw new LogicException('not running');
+                }
+                $consent = DB::table('medical_subjects')->where('id', $row->subject_id)->whereNull('archived_at')->sharedLock()->value('ai_consent');
+                if (! $consent) {
+                    throw new LogicException('consent withdrawn');
+                }
+                if (DB::table('medical_documents')->where('id', $row->document_id)->whereNotNull('archived_at')->exists()) {
+                    throw new LogicException('document archived');
+                }
+                if (! DB::table('medical_document_texts')->where('document_id', $row->document_id)->where('extraction_id', $id)->exists()) {
+                    throw new LogicException('no text stored');
+                }
+                $written = DB::table('medical_ai_extractions')->where('id', $id)->where('status', 'running')->update([
+                    'status' => 'text_saved',
+                    'agent' => $agent,
+                    'model' => $model,
+                    'pages_read' => $pagesRead,
+                    'pages_total' => $pagesTotal,
+                    'finished_at' => $now,
+                    'updated_at' => $now,
+                ]);
+                if ($written !== 1) {
+                    throw new LogicException('not running');
+                }
+                $this->closeCall($id, 'succeeded', null, $model, $durationMs, $now);
+            });
+        } catch (LogicException) {
+            return false;
+        }
+
+        return true;
     }
 
     /** The stored file of the run's document (path and kind), joined on document and person. @return array{path: string, kind: string}|null */
@@ -113,7 +244,7 @@ class AiJobQuery
      *
      * @param  array<string, mixed>  $payload
      */
-    public function finishReady(string $id, array $payload, int $entryCount, ?int $pagesRead, ?int $pagesTotal, string $agent, string $model, int $durationMs): bool
+    public function finishReady(string $id, array $payload, int $entryCount, ?int $pagesRead, ?int $pagesTotal, string $agent, string $model, int $durationMs, int $promptVersion = ExtractionSchema::PROMPT_VERSION): bool
     {
         if (! Str::isUuid($id)) {
             return false;
@@ -123,7 +254,7 @@ class AiJobQuery
         $decided = false;
 
         try {
-            DB::transaction(function () use ($id, $payload, $entryCount, $pagesRead, $pagesTotal, $agent, $model, $durationMs, $now, &$decided) {
+            DB::transaction(function () use ($id, $payload, $entryCount, $pagesRead, $pagesTotal, $agent, $model, $durationMs, $now, $promptVersion, &$decided) {
                 $row = DB::table('medical_ai_extractions')->where('id', $id)->where('status', 'running')
                     ->whereNull('cancel_requested_at')->lockForUpdate()->first(['document_id', 'subject_id', 'bulk_run_id']);
                 if ($row === null) {
@@ -158,7 +289,7 @@ class AiJobQuery
                     'pages_total' => $pagesTotal,
                     'model' => $model,
                     'schema_version' => (int) ($payload['schema_version'] ?? 1),
-                    'prompt_version' => ExtractionSchema::PROMPT_VERSION,
+                    'prompt_version' => $promptVersion,
                     'finished_at' => $now,
                     'updated_at' => $now,
                 ]);

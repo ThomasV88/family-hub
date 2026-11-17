@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 
 class SubjectQuery
 {
-    public function __construct(private readonly AuditLogger $audit, private readonly ContactQuery $contacts, private readonly MedicalDocumentStore $store) {}
+    public function __construct(private readonly AuditLogger $audit, private readonly ContactQuery $contacts, private readonly MedicalDocumentStore $store, private readonly DocumentTextStore $texts) {}
 
     /** @return Collection<int, MedicalSubject> */
     public function visible(Viewer $viewer): Collection
@@ -132,6 +132,12 @@ class SubjectQuery
                 ]);
             if ($changed === 0) {
                 return false;
+            }
+
+            // Owner default: withdrawing AI consent also removes the recognised text of the person's documents, in the
+            // same transaction as the consent change.
+            if (! $value) {
+                $this->texts->purgeForSubject($viewer, $id);
             }
 
             $this->audit->record(AuditEvent::MedicalConsentChanged, $viewer->user, ['subject' => $id, 'value' => $value ? 'on' : 'off'], null, Module::Health);

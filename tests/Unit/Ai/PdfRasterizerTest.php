@@ -68,18 +68,40 @@ it('writes only the first N pages into the directory', function () {
 });
 
 it('returns nothing and leaves no process when the timeout is hit', function () {
-    config(['ai.pdf.timeout' => 0.001, 'ai.pdf.pages_timeout' => 0.001, 'ai.pdf.info_timeout' => 0.001]);
-    $r = new PdfRasterizer;
-    $pdf = ($this->pdf)(2);
+    // Deterministic: both tools are replaced by a stub that sleeps far longer than any timeout, so the
+    // timeout always wins no matter how fast the machine is (a 1 ms limit against the real tools raced).
+    $bin = $this->dir.'/bin';
+    mkdir($bin, 0700);
+    foreach (['pdfinfo', 'pdftoppm'] as $tool) {
+        file_put_contents($bin.'/'.$tool, "#!/bin/sh\nexec sleep 37\n");
+        chmod($bin.'/'.$tool, 0700);
+    }
+    $path = (string) getenv('PATH');
+    $envPath = $_ENV['PATH'] ?? null;
+    // Symfony Process builds the child environment from $_ENV first, then getenv().
+    putenv('PATH='.$bin.':'.$path);
+    $_ENV['PATH'] = $bin.':'.$path;
 
-    expect($r->pageCount($pdf))->toBe(0)
-        ->and($r->page($pdf, 1))->toBeNull();
-    config(['ai.pdf.info_timeout' => 5]);
-    expect($r->pages($pdf, $this->dir, 2)['written'])->toBe([]);
+    try {
+        config(['ai.pdf.timeout' => 0.3, 'ai.pdf.pages_timeout' => 0.3, 'ai.pdf.info_timeout' => 0.3]);
+        $r = new PdfRasterizer;
+        $pdf = ($this->pdf)(2);
 
-    usleep(200_000);
-    exec('pgrep -x pdftoppm', $o, $code);
-    expect($code)->toBe(1);
+        expect($r->pageCount($pdf))->toBe(0)
+            ->and($r->page($pdf, 1))->toBeNull()
+            ->and($r->pages($pdf, $this->dir, 2)['written'])->toBe([]);
+
+        usleep(200_000);
+        exec('pgrep -fx "sleep 37"', $o, $code);
+        expect($code)->toBe(1);
+    } finally {
+        putenv('PATH='.$path);
+        if ($envPath === null) {
+            unset($_ENV['PATH']);
+        } else {
+            $_ENV['PATH'] = $envPath;
+        }
+    }
 });
 
 it('never writes under the medical disk root', function () {

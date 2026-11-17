@@ -250,7 +250,9 @@ describe('routes', function () {
     });
 
     it('creates a person, grants the creator Can change and lands on the person page', function () {
-        $user = User::factory()->create();
+        // Fixed name and e-mail that cannot contain "Ada": a random factory name (for example "Adam ...") made the audit-row
+        // check below fail by chance, whenever a random value of the row contained the letters.
+        $user = User::factory()->create(['name' => 'Zoltan Quill', 'email' => 'zoltan.quill@example.test']);
         MedicalFixtures::grantHealth($user);
 
         $response = $this->actingAs($user)->post('/health/people', [

@@ -14,7 +14,7 @@ use InvalidArgumentException;
  */
 final class AiBulkEligibility
 {
-    public const SCOPES = ['no_proposal', 'last_failed', 'all'];
+    public const SCOPES = ['no_proposal', 'no_text', 'last_failed', 'all'];
 
     /** Failures after which the CLI really ran and used quota; they start the per-document cool-down like a ready run. */
     private const QUOTA_FAILURES = ['timeout', 'idle_timeout', 'no_output', 'invalid_output', 'output_too_large', 'cli_error', 'auth'];
@@ -28,7 +28,7 @@ final class AiBulkEligibility
                     count(*) FILTER (WHERE bucket = 'unsupported') AS skipped_unsupported,
                     count(*) FILTER (WHERE bucket = 'decided') AS skipped_decided,
                     count(*) FILTER (WHERE bucket = 'active') AS skipped_active
-             FROM (SELECT {$this->bucket()} AS bucket
+             FROM (SELECT {$this->bucket($scope)} AS bucket
                    FROM medical_documents d JOIN medical_subjects s ON s.id = d.subject_id
                    WHERE {$this->scopePredicate($scope)}) t"
         );
@@ -55,13 +55,13 @@ final class AiBulkEligibility
         if ($cooldown > 0) {
             $quota = "'".implode("','", self::QUOTA_FAILURES)."'";
             $coolSql = "AND NOT EXISTS (SELECT 1 FROM medical_ai_extractions c WHERE c.document_id = d.id AND c.finished_at > ?
-                          AND (c.status IN ('ready', 'superseded') OR (c.status = 'failed' AND c.failure_code IN ({$quota}))))";
+                          AND (c.status IN ('ready', 'superseded', 'text_saved') OR (c.status = 'failed' AND c.failure_code IN ({$quota}))))";
             $bindings[] = Carbon::now()->subMinutes($cooldown);
         }
 
         $row = DB::selectOne(
             "SELECT t.document_id, t.subject_id
-             FROM (SELECT d.id AS document_id, d.subject_id, d.created_at, {$this->bucket()} AS bucket
+             FROM (SELECT d.id AS document_id, d.subject_id, d.created_at, {$this->bucket($scope)} AS bucket
                    FROM medical_documents d JOIN medical_subjects s ON s.id = d.subject_id
                    WHERE {$this->scopePredicate($scope)}
                      AND NOT EXISTS (SELECT 1 FROM ai_bulk_run_items i WHERE i.bulk_run_id = ? AND i.document_id = d.id)
@@ -75,14 +75,17 @@ final class AiBulkEligibility
         return $row === null ? null : ['document_id' => (string) $row->document_id, 'subject_id' => (string) $row->subject_id];
     }
 
-    private function bucket(): string
+    /** The text-only backfill never creates or replaces a proposal, so an accepted decision does not exclude a document from it. */
+    private function bucket(string $scope): string
     {
+        $decided = $scope === 'no_text' ? '' : "WHEN EXISTS (SELECT 1 FROM medical_ai_extractions e JOIN medical_ai_decisions x ON x.extraction_id = e.id
+                         WHERE e.document_id = d.id AND x.decision = 'accepted') THEN 'decided'
+            ";
+
         return "CASE
             WHEN d.kind NOT IN ('pdf', 'image', 'heic') THEN 'unsupported'
             WHEN NOT s.ai_consent THEN 'consent'
-            WHEN EXISTS (SELECT 1 FROM medical_ai_extractions e JOIN medical_ai_decisions x ON x.extraction_id = e.id
-                         WHERE e.document_id = d.id AND x.decision = 'accepted') THEN 'decided'
-            WHEN EXISTS (SELECT 1 FROM medical_ai_extractions a WHERE a.document_id = d.id AND a.status IN ('queued', 'running', 'waiting')) THEN 'active'
+            {$decided}            WHEN EXISTS (SELECT 1 FROM medical_ai_extractions a WHERE a.document_id = d.id AND a.status IN ('queued', 'running', 'waiting')) THEN 'active'
             ELSE 'eligible' END";
     }
 
@@ -96,7 +99,8 @@ final class AiBulkEligibility
     {
         return match ($scope) {
             'no_proposal' => "NOT EXISTS (SELECT 1 FROM medical_ai_extractions p WHERE p.document_id = d.id AND p.status IN ('ready', 'superseded'))",
-            'last_failed' => "(SELECT l.status FROM medical_ai_extractions l WHERE l.document_id = d.id AND l.status <> 'superseded' ORDER BY l.queued_at DESC, l.id DESC LIMIT 1) = 'failed'",
+            'no_text' => 'NOT EXISTS (SELECT 1 FROM medical_document_texts t WHERE t.document_id = d.id)',
+            'last_failed' => "(SELECT l.status FROM medical_ai_extractions l WHERE l.document_id = d.id AND l.status <> 'superseded' AND l.mode <> 'text' ORDER BY l.queued_at DESC, l.id DESC LIMIT 1) = 'failed'",
             'all' => 'TRUE',
             default => throw new InvalidArgumentException('Unknown bulk scope.'),
         };

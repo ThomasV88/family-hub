@@ -22,6 +22,7 @@ const Events = [
     { id: 10, event: 'medical_ai_entry_decided', meta: { subject: SUBJECT, document: DOCUMENT, decision: 'accepted' } },
     { id: 11, event: 'medical_archived', meta: { subject: SUBJECT, type: 'document', record: DOCUMENT } },
     { id: 12, event: 'medical_restored', meta: { subject: SUBJECT, type: 'person' } },
+    { id: 13, event: 'medical_text_removed', meta: { subject: SUBJECT, record: DOCUMENT } },
 ].map((e) => ({ ...base, ...e }));
 
 let current;
@@ -40,7 +41,7 @@ describe('Audit table medical rows', () => {
             'Own-record access turned off', 'Gave themselves access to a person in Health',
             'Exported health records: One specialty: Data file (JSON)', 'Changed the AI setting for a person in Health: AI turned on',
             'Started an AI run on a document in Health', 'An AI run on a document in Health finished', 'Decided on an AI suggestion in Health',
-            'Archived in Health: Document', 'Restored in Health: Person',
+            'Archived in Health: Document', 'Restored in Health: Person', 'Removed recognised text in Health',
         ]) expect(text).toContain(expected);
     });
 
@@ -76,6 +77,7 @@ describe('Audit table medical rows', () => {
             expect(current.text()).toContain(d.medical_ai_entry_decided);
             expect(current.text()).toContain(d.medical_archived);
             expect(current.text()).toContain(d.medical_restored);
+            expect(current.text()).toContain(d.medical_text_removed);
         }
     });
 
@@ -97,6 +99,7 @@ describe('Audit table AI agent and bulk rows', () => {
         { id: 26, event: 'ai_bulk_run_changed', meta: { action: 'resumed', scope: 'all', count: 7 } },
         { id: 27, event: 'ai_bulk_run_changed', meta: { action: 'cancelled', scope: 'all', count: 3 } },
         { id: 28, event: 'ai_bulk_run_changed', meta: { action: 'completed', scope: 'all', count: 7 } },
+        { id: 29, event: 'ai_bulk_run_changed', meta: { action: 'started', scope: 'no_text', count: 5 } },
     ].map((e) => ({ ...base, ...e, targetLabel: null }));
 
     it('renders agent display names, field labels and values without a person', () => {
@@ -111,6 +114,7 @@ describe('Audit table AI agent and bulk rows', () => {
             'Resumed a bulk AI re-generation: All documents. Documents: 7',
             'Cancelled a bulk AI re-generation: All documents. Documents: 3',
             'A bulk AI re-generation finished: All documents. Documents: 7',
+            'Started a bulk AI re-generation: Documents without recognised text. Documents: 5',
         ]) expect(text).toContain(expected);
     });
 

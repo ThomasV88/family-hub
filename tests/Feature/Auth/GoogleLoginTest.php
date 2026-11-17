@@ -55,7 +55,7 @@ it('creates the account from a valid invite when Google verifies the invited ema
 
     $user = User::sole();
     expect($user->google_id)->toBe('sub-1')->and($user->email)->toBe('eva@example.test')->and($user->locale)->toBe('sk')
-        ->and($user->is_admin)->toBeFalse()->and($user->modulePermissions()->count())->toBe(4);
+        ->and($user->is_admin)->toBeFalse()->and($user->modulePermissions()->count())->toBe(6);
     $this->assertAuthenticatedAs($user);
     expect($inv->refresh()->accepted_user_id)->toBe($user->id);
     expect(AuditEntry::where('event', 'invite_accepted')->count())->toBe(1);

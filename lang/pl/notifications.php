@@ -20,4 +20,7 @@ return [
     'vaccination_body' => 'Szczepienie, :person: termin się zbliża. Zajrzyj do dokumentacji.',
     'vaccination_due_in' => 'za :count dzień|za :count dni|za :count dni',
     'vaccination_action' => 'Otwórz zapis',
+    'shopping_reminder_title' => 'Czas na zakupy',
+    'shopping_reminder_body' => ':list w sklepie :store.',
+    'shopping_reminder_body_no_store' => ':list.',
 ];

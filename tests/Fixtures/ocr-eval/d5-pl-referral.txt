@@ -1,0 +1,19 @@
+SKIEROWANIE DO PORADNI SPECJALISTYCZNEJ (demo)
+Centrum Medyczne Pod Wawelem (demo), Kraków
+
+Pacjent: Karolina Zielińska (demo)
+Data urodzenia: 07.06.1992
+Data wystawienia: 18.03.2026
+
+Kierujemy do: poradnia kardiologiczna
+Rozpoznanie: Kołatanie serca, podejrzenie zaburzeń rytmu
+Cel konsultacji: ocena rytmu serca, badanie EKG i Holter
+Przyjmowane leki: Bisoprolol 5 mg, raz dziennie rano
+Alergie: Orzechy, reakcja umiarkowana.
+Termin wizyty: 30.03.2026
+
+Szanowny Panie Doktorze, proszę o pilną konsultację.
+lek. Tomasz Wójcik (demo), podpis i pieczątka
+
+Informacja: dokument wygenerowany do celów testowych (demo).
+Dane osobowe są fikcyjne. Ważne 30 dni od daty wystawienia.

@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "document_date": "2025-10-21",
+  "specialty_key": "pediatrics",
+  "visits": [
+    {
+      "visited_on": "2025-10-21",
+      "doctor": "MUDr. Janka Šimková (demo)",
+      "specialty_key": "pediatrics",
+      "specialty_other": null,
+      "diagnosis": "Očkovanie proti chrípke",
+      "notes": null
+    }
+  ],
+  "medications": [],
+  "allergies": [],
+  "vaccinations": [
+    {
+      "vaccine": "Hexavakcína",
+      "given_on": "2016-10-12",
+      "next_due_on": "2016-12-12",
+      "notes": null
+    },
+    {
+      "vaccine": "Hexavakcína",
+      "given_on": "2016-12-14",
+      "next_due_on": "2017-06-14",
+      "notes": null
+    },
+    {
+      "vaccine": "MMR vakcína",
+      "given_on": "2017-09-15",
+      "next_due_on": "2022-09-15",
+      "notes": null
+    },
+    {
+      "vaccine": "Tetanus",
+      "given_on": "2022-05-10",
+      "next_due_on": "2032-05-10",
+      "notes": null
+    },
+    {
+      "vaccine": "Chrípka",
+      "given_on": "2025-10-21",
+      "next_due_on": "2026-10-21",
+      "notes": null
+    }
+  ]
+}

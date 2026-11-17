@@ -343,3 +343,139 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Medical Records | 0/TBD | Not started | - |
 | 8. AI Extraction Platform | 0/TBD | Not started | - |
 | 9. Multi-Agent, Quota and Bulk Re-generation | 0/TBD | Not started | - |
+
+### Phase 10: Profile settings and child accounts (issues #7, #6)
+
+**Goal:** Members can edit their own profile (name, photo shown in all avatars, read-only e-mail) and an admin can create child members directly, without an invitation and with direct sign-in disabled, so a child who cannot sign in (a 2-year-old) still appears in Wishlist and has a list managed by a parent.
+**Requirements**: GitHub #7 and #6 (see description)
+**Depends on:** Phase 9
+**Success Criteria** (what must be TRUE):
+1. #7: the account menu has a new item "Profile settings" above "Settings".
+2. #7: a member can change their display name; the e-mail address is shown but cannot be changed yet.
+3. #7: a member can add or replace a profile photo (reuse the existing private image pipeline: sanitized re-encode, no metadata) and it replaces the initials in every avatar across the app.
+4. #6: an admin can create a child member by direct account creation (no invitation); such an account can be marked "no direct sign-in" and then cannot sign in by any route (password, reset, passkey, invitation).
+5. #6: the child appears as a Wishlist owner and a parent/admin can add and manage wishes on the child's behalf; finance is out of scope for now and health stays separated from sign-in accounts as already decided.
+6. #6: owner asked Claude to propose the best design (discuss-phase decides it: a normal member row with a nullable credential and a login_disabled flag versus a separate non-account person type; permissions default to the Child preset, with managing parent link).
+7. Privacy tests prove a sign-in-disabled child account can never authenticate and never receives mail; profile photo files are not publicly reachable.
+
+Open decisions for discuss-phase: child-account data model and who manages it (guardian link); what happens when the child grows up and gets sign-in; whether profile photos use the same cache rules as wish images.
+**Commit rule:** every commit that resolves part of #7 and #6 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
+
+**Plans:** 8/8 plans complete
+
+Plans:
+- [x] 10-01-PLAN.md — Data model: nullable e-mail, sign_in_disabled, photo columns, child CHECK invariant, canSignIn(), NULL-safe staging audit/seeder (wave 1)
+- [x] 10-02-PLAN.md — Sign-in lockout on every session path, BlockDisabledSignIn middleware, no mail or reminders for children (wave 2)
+- [x] 10-03-PLAN.md — Profile photo backend: private store under wish-images/profile-photos, access rules, ETag route, sweeper, nginx, avatars prop (wave 2)
+- [x] 10-04-PLAN.md — Profile settings page, name edit, photo editor, UiAvatar photo, account menu item, help and manual (wave 3)
+- [x] 10-05-PLAN.md — Admin creates a child, parents manage it, Members child UI, /profile/people/{user}, Wishlist proof (wave 4)
+- [x] 10-07-PLAN.md — Avatars everywhere: remaining call sites, health photoUserId, SW guard; closes #7 (wave 4)
+- [x] 10-06-PLAN.md — Convert a child to a member by invitation on the same users row; closes #6 (wave 5)
+- [x] 10-08-PLAN.md — Staging synthetic child seed, ops docs, locale parity, full gate, staging browser verification and DB invariant (wave 6)
+
+### Phase 11: Shopping lists section Nákupy (issue #8)
+
+**Goal:** A new Shopping module where members create shared shopping lists from an item catalog (with images and units), assign a store chain, a responsible person and per-list contributor/viewer access, lock the list for shopping, mark items bought or unavailable, finish the shop into the archive and carry unavailable items into a new list, with e-mail sharing and push reminders.
+**Requirements**: GitHub #8 (see description)
+**Depends on:** Phase 10
+**Success Criteria** (what must be TRUE):
+1. Lists: create a list; add items through a pop-up with the item catalog (with images); a free-text name + quantity is always possible without adding to the catalog; quantities carry a unit (owner answer: yes, including measure units such as kg, l, pcs).
+2. Stores: a list can be assigned to a store chain; chains (name + logo) and the item catalog (with images) are managed in the section's own settings page.
+3. Access: each list has one responsible person (changeable any time), members who may contribute (add/edit items) and members who may only view; only authorised members can open a list; module permissions enforced server-side.
+4. Locking: only the responsible person can lock a list and (owner answer: yes) unlock it again; while locked, items cannot be added, removed or edited, and only the responsible person (owner answer) marks items Bought or Unavailable.
+5. Finishing: when every item is Bought or Unavailable, "Finish shopping" appears; finishing marks the list done and moves it to the archive.
+6. Unavailable carry-over: if unavailable items exist, ask "Some items could not be bought. Create a new shopping list from them?"; on yes a new OPEN list keeps store, responsible person and access rights and receives only the unbought items with quantities; the original stays archived.
+7. Copy: an existing or archived list can be copied into a new list (owner answer: yes).
+8. E-mail: a list can be sent by e-mail to share it outside the app.
+9. Reminders: a list can have a reminder date and time that sends a push notification, for now only to the responsible person (owner answer).
+10. Claude proposes further features and flags conflicts for owner decision before implementation (issue section 8): e.g. rights for archived lists, behaviour when a responsible person is removed, catalog deletion while used, e-mail content and privacy.
+
+Open decisions for discuss-phase: new module permission area, data model for catalog/units/stores, archive retention, e-mail content, notification preference integration, interaction with Phase 10 children as list members.
+**Commit rule:** every commit that resolves part of #8 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
+
+**Plans:** 14/14 plans complete
+
+Plans:
+- [x] 11-01-PLAN.md — Module `shopping` in the permission layer: keyed presets, CHECK re-add and backfill from todo, five-module permission save, admin manual (wave 1)
+- [x] 11-02-PLAN.md — Schema and models: units (nine built-ins), stores, catalog, lists, members, items with CHECKs and the one-carry index; config; factories (wave 1)
+- [x] 11-03-PLAN.md — Domain: ShoppingAccess, effective responsible fallback, member sync, list and item services, lock/mark/finish/carry-over/copy state machine (wave 2)
+- [x] 11-04-PLAN.md — Catalog, stores, units backend and private images under wish-images/shopping/, sweeper, cache allowlist, nginx (wave 2)
+- [x] 11-05-PLAN.md — List HTTP layer: routes, requests (decimal comma, reminder in family time zone), Inertia payloads, endpoint matrix, privacy differential (wave 3)
+- [x] 11-06-PLAN.md — Settings > Shopping page (catalog, stores, units), Settings section, manual topic with settings coverage, help tips (wave 3)
+- [x] 11-07-PLAN.md — E-mail a list: plain-text queued mail per address, max 5, per-user and per-address limits, audit without addresses (wave 3)
+- [x] 11-08-PLAN.md — Reminder push to the effective responsible person through the outbox, scheduler and handler (wave 3)
+- [x] 11-09-PLAN.md — Staging synthetic Shopping demo through production services, purge, staging:audit rules, ops docs (wave 3)
+- [x] 11-10-PLAN.md — Navigation entry, overview with Open and Archive tabs, create and copy dialogs, module manual coverage (wave 4)
+- [x] 11-11-PLAN.md — List detail in plan mode: header, items, catalog picker with pictures and free text, item edit, delete (wave 5)
+- [x] 11-12-PLAN.md — List settings panel (people, reminder), e-mail dialog, audit label, notifications wording (wave 6)
+- [x] 11-13-PLAN.md — Shopping mode: lock/unlock, Bought/Unavailable marks, finish with carry-over, archived state (wave 7)
+- [x] 11-14-PLAN.md — Locale parity, a11y sweep, full gate (`Fixes #8`), staging browser verification as orchestrator checkpoint (wave 8)
+
+### Phase 12: Recipe book section Receptár (issue #9)
+
+**Goal:** A new Recipes module where every member creates and manages own recipes (manually or from a URL read by AI), with photos, structured ingredients with units, step-by-step progress tracking, private/shared visibility and a link to Shopping to add a recipe's ingredients to a list.
+**Requirements**: GitHub #9 (see description)
+**Depends on:** Phase 11 (Shopping catalog and lists), Phase 8 (AI platform)
+**Success Criteria** (what must be TRUE):
+1. Create: manual recipe form, or paste a URL and the AI extracts the fields; the source URL is kept on the recipe; all auto-filled values are reviewable and editable before saving.
+2. Photos: one or more photos per recipe, one marked as main, shown in the overview.
+3. Overview: responsive grid of cards (photo + title), at most 3 per row, card opens the detail.
+4. Detail: photos, structured ingredients (name, quantity, unit such as g, kg, ml, l, pcs, tbsp, tsp) with per-item "prepared" ticks, steps each markable as done; ticks and step progress are stored per member so members never overwrite each other's cooking state.
+5. Shopping link: "Add to shopping list" creates a new list or adds to an existing open list, carries names, quantities and units, lets the user review/edit before confirming, and matches catalog items automatically when possible (otherwise adds a manual item).
+6. Sharing: a recipe is private or shared with other members; only the author edits it.
+7. Claude evaluates and recommends the suggested extras (servings with recalculation, prep time, categories, favourites, search/filter, notes, cooking history, meal planning) and asks the owner which to include.
+8. Risks analysed and answered in the plan: reliability of AI recipe extraction from URLs (and SSRF/untrusted page content handling in the worker), ingredient and unit recognition, catalog matching, servings recalculation, private versus shared access rules.
+
+Open decisions for discuss-phase: AI-from-URL needs the worker to fetch a web page (a new outbound path; Codex has web search disabled by design) and the provider data-use consent for recipes (non-medical); which suggested extras are in v1.
+**Commit rule:** every commit that resolves part of #9 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
+
+**Plans:** 17/17 plans complete
+
+Plans:
+- [x] 12-01-PLAN.md — Module `recipes` in the permission layer: enum, keyed presets, CHECK re-add and backfill from todo, six-module permission save, admin manual (wave 1)
+- [x] 12-02-PLAN.md — Schema and models: recipes, categories, photos, ingredients (Shopping units), steps, per-member state tables; config with every limit; search key; fixtures (wave 1)
+- [x] 12-03-PLAN.md — Domain: RecipeAccess, RecipeService with update-by-diff, RecipeStateService (absolute marks), RecipeQuery (search, filters, paging) (wave 2)
+- [x] 12-04-PLAN.md — Photos backend: private store under wish-images/recipes/, JSON endpoints, image route, sweeper prefix, cache allowlist, nginx limit (wave 3)
+- [x] 12-05-PLAN.md — HTTP layer: overview, detail, form props, CRUD, visibility and per-member state routes, endpoint matrix, privacy differential (wave 3)
+- [x] 12-06-PLAN.md — Shopping bridge backend: catalog matching, eligible open lists, all-or-nothing commit through ListService and ItemService (wave 3)
+- [x] 12-07-PLAN.md — Navigation entry with dense seven-item bottom bar, overview grid (max 3 per row) with search and filters, manual topic skeleton (wave 4)
+- [x] 12-08-PLAN.md — Recipe form for create and edit with photos, categories, ingredients, steps, sharing; quantity and paste helpers; toast actions (wave 5)
+- [x] 12-09-PLAN.md — Detail with per-member ticks and done steps, servings recalculation, notes, favourites, gallery, author actions, cooking mode with Wake Lock (wave 6)
+- [x] 12-10-PLAN.md — Add to shopping list review dialog (new or open list, matches, merge hints) (wave 7)
+- [x] 12-11-PLAN.md — AI foundation: AiTask seam on Codex and Copilot, recipe schema, prompts and validator, ai_calls kind, failure codes, arch rule (wave 4)
+- [x] 12-12-PLAN.md — Page reducer: JSON-LD first, readable-text fallback, hidden-text stripping, charset and gzip guards, fetcher user agent (wave 4)
+- [x] 12-13-PLAN.md — Import pipeline: recipe_imports, recipe notice column, start service with limits, fetch job in the worker container, ai-worker job with fail-fast (wave 5)
+- [x] 12-14-PLAN.md — Import HTTP routes, overview flags and drafts, prefilled review form and used-on-save, reap and prune, leak canary (wave 6)
+- [x] 12-15-PLAN.md — Import UI: new-recipe choice, URL dialog with one-time notice, progress and failures, draft rows, review mode, admin calls label, docs (wave 8)
+- [x] 12-16-PLAN.md — Staging synthetic Recipes demo through production services, purge, staging:audit rules, ops docs (wave 6)
+- [x] 12-17-PLAN.md — Locale parity, pseudo-long, a11y sweep, full gate (`Fixes #9`), staging browser verification with the real-AI URL check list as orchestrator checkpoint (wave 9)
+
+### Phase 13: AI full-text OCR and document search (issue #11)
+
+**Goal:** Evaluate and, if it holds up, change AI document reading so the AI first transcribes all text of the document, stores the complete recognised text with the document for full-text search, then extracts the structured JSON from that text; also evaluate image pre-processing and measure whether it improves accuracy.
+**Requirements**: GitHub #11 (see description)
+**Depends on:** Phase 9 (AI platform and bulk re-generation)
+**Success Criteria** (what must be TRUE):
+1. Evaluate first, implement after the owner decides: how OCR works today, whether Codex adjusts contrast/brightness itself, and what pre-processing (contrast/brightness, denoise, deskew/perspective, sharpen, grayscale/binarise) actually helps.
+2. Measure OCR with and without image pre-processing on a labelled synthetic set and report accuracy, time and subscription-quota cost; recommend the best trade-off.
+3. Two-step reading: transcribe all text, store the complete recognised text with the document, then extract the structured JSON entries from that text (schema stays validated).
+4. Full-text search: users search documents by words in their content as well as by name/metadata, limited by the same per-person access rules as the document itself (no leakage across hidden persons, archived or unauthorised documents).
+5. Privacy decision recorded by the owner BEFORE implementation: the full recognised medical text is stored in the database (today only the extracted structured entries are stored). Decide access control, retention and deletion with the document, archive behaviour, exclusion from logs/exports, backup implications and the data-use notice; update the AI notice and the manual.
+6. Bulk re-generation can backfill text for existing documents within quota limits; running OCR is still an explicit per-document action with consent.
+
+Conflict to resolve with the owner: issue #11 reverses the current design rule that the full text is not kept (see the AI data-flow explanation given on 2026-11-17 and the extraction prompt's rule against free-form transcription); this needs an explicit decision, a prompt/schema version bump and a migration plan.
+**Commit rule:** every commit that resolves part of #11 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
+
+**Plans:** 10/10 plans complete
+
+Plans:
+- [x] 13-01-PLAN.md — Evaluation tooling: metrics (CER, WER, diacritics, numbers, search-term recall, entry F1), decision rule as code, GD pre-processing arms, Codex token counters, transcription schema and prompt, synthetic corpus ground truth and generator, guarded `ai:ocr-eval` harness (wave 1)
+- [x] 13-03-PLAN.md — Text storage foundation: `unaccent` extension, `fh_unaccent` wrapper, `medical_document_texts` with generated tsvector and GIN index, store with consent and archive guards, purge on consent withdrawal, privacy net, leak canary, arch pins, staging audit rule (wave 1)
+- [x] 13-02-PLAN.md — Live evaluation run on staging as orchestrator checkpoint (real Codex, synthetic only, max 150 calls) and `13-EVALUATION.md` with the decisions block: the gate (wave 2)
+- [x] 13-04-PLAN.md — Search backend: POST `/health/search` in one access-scoped statement, prefix and suffix-trim matching, `{text, hit}` snippets, recognised-text view and remove endpoints with audit event, person page flags, privacy differential and matrix (wave 2)
+- [x] 13-05-PLAN.md — Search UI on the person page and the Recognised text section in the document panel, copy in en/sk/pl, help tips, manual sections `search` and `recognised-text` (wave 3)
+- [x] 13-06-PLAN.md — Transcription step: run `mode` (entries, full, text) and status `text_saved` through every PHP status site, transcription task and strict batch validator, step 1 in the run job (no pre-processing, PDF 1800 px, 4 pages per call, at most 20 pages, text saved after each batch with a complete flag, resume after a quota park, text-only finish), timeouts unchanged, content-free failures (wave 4)
+- [x] 13-07-PLAN.md — Extraction from the stored text: `ExtractFromTextTask` with a nonce-marked data block, prompt v2 (entries schema unchanged, no evidence field), reuse of a complete text without re-transcribing, resume order, leak checks (wave 5)
+- [x] 13-08-PLAN.md — Bulk backfill scope `no_text`: text-only runs under every existing bulk guard, refused while `ai.ocr.enabled` is off, settings panel option, "Text only" history tag, copy and admin manual (wave 5)
+- [x] 13-09-PLAN.md — Notice re-acknowledgment (`text_notice_acked_at`) for runs and bulk Start, three notice variants, run states and `text_saved` tag, consent turn-off purge sentence, manual `ai`/`search`/`recognised-text`/admin `backups` and the `health.ai_run`/`settings.ai_bulk` tips (wave 6)
+- [x] 13-10-PLAN.md — Staging seed of recognised texts, ops notes and restore-drill line, locale parity, accessibility sweep, pseudo-long check, full gate (`Fixes #11`), staging verification with a real two-step run as orchestrator checkpoint (wave 7)

@@ -143,9 +143,11 @@ export function isRefusal(result) {
 
 // Wraps a function that performs one request and resolves { ok, error, ... } (never rejects). If the gate refused it,
 // confirm in the dialog and run the very same function once more.
-export async function runWithGate(attempt) {
+export async function runWithGate(attempt, { signal } = {}) {
     const first = await attempt();
     if (!isRefusal(first)) return first;
+    // The caller dropped this request meanwhile (a newer search): no dialog for a request nobody waits for.
+    if (signal?.aborted) return { ok: false, status: 0, error: 'aborted', data: {} };
 
     const outcome = await requestConfirmation({ methods: first.methods ?? first.data?.methods, replay: attempt });
     if (outcome.status === 'replayed') return outcome.result;

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Access\AccessGate;
 use App\Help\HelpTexts;
+use App\Profile\AvatarVersions;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -76,6 +77,8 @@ class HandleInertiaRequests extends Middleware
             'help' => $request->user()
                 ? Inertia::once(fn () => app(HelpTexts::class)->payload($locale()))->as('help-'.$locale().'-'.app(HelpTexts::class)->version())
                 : null,
+            // Members that have a photo: id => version, so any avatar can build /people/{id}/photo/thumb?v=N. Never paths.
+            'avatars' => fn () => $request->user() ? (object) AvatarVersions::map() : (object) [],
             'flash' => [
                 'status' => $request->session()->get('status'),
                 'toast' => $request->session()->get('toast'),

@@ -1,8 +1,12 @@
 <?php
 
+use App\Medical\Ai\Agents\AgentInput;
+use App\Medical\Ai\Agents\CodexAgent;
 use App\Medical\Ai\CodexRequest;
 use App\Medical\Ai\CodexRunner;
 use App\Medical\Ai\LoginState;
+use App\Medical\Ai\TokenUsage;
+use App\Medical\Ai\Work\WorkDir;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Tests\Support\FakeCodex;
@@ -218,4 +222,58 @@ it('lets the caller shorten the process timeout', function () {
     $res = (new CodexRunner)->exec(($this->req)(), null, 1.0);
 
     expect($res->timedOut)->toBeTrue()->and(microtime(true) - $t)->toBeLessThan(4.0);
+});
+
+it('reads the token counters of the last turn.completed event as integers', function () {
+    ($this->fake)(FakeCodex::withUsage('{"ok":true}', [
+        'input_tokens' => 1200, 'cached_input_tokens' => 300, 'output_tokens' => 450, 'reasoning_output_tokens' => 60, 'text' => 'ignored',
+    ]));
+    $res = (new CodexRunner)->exec(($this->req)());
+
+    expect($res->usage)->toBeInstanceOf(TokenUsage::class)
+        ->and([$res->usage->input, $res->usage->cached, $res->usage->output, $res->usage->reasoning])->toBe([1200, 300, 450, 60])
+        ->and($res->exitCode)->toBe(0)
+        ->and(file_get_contents($this->work.'/result.json'))->toBe('{"ok":true}');
+});
+
+it('has no usage when the CLI printed no turn.completed event', function () {
+    ($this->fake)(FakeCodex::succeeding('{"ok":true}'));
+
+    expect((new CodexRunner)->exec(($this->req)())->usage)->toBeNull();
+});
+
+it('keeps integers only from a usage object with strings, negatives and missing keys', function () {
+    ($this->fake)(FakeCodex::withUsage('{"ok":true}', [
+        'input_tokens' => '999', 'cached_input_tokens' => -5, 'output_tokens' => 7, 'secret' => 'canary-xyz',
+    ]));
+    $res = (new CodexRunner)->exec(($this->req)());
+
+    expect([$res->usage->input, $res->usage->cached, $res->usage->output, $res->usage->reasoning])->toBe([0, 0, 7, 0]);
+    expect(json_encode($res))->not->toContain('canary-xyz');
+});
+
+it('parses usage events without changing any other result field', function () {
+    $plain = FakeCodex::succeeding('{"ok":true}');
+    ($this->fake)($plain);
+    $a = (new CodexRunner)->exec(($this->req)());
+    ($this->fake)(FakeCodex::withUsage('{"ok":true}', ['input_tokens' => 1]));
+    $b = (new CodexRunner)->exec(($this->req)());
+
+    foreach (['exitCode', 'timedOut', 'idleTimedOut', 'aborted', 'outputCapped', 'authSignature', 'reportedModel', 'quotaSignature', 'quotaMinutes'] as $f) {
+        expect($b->{$f})->toBe($a->{$f});
+    }
+});
+
+it('passes the usage counters through the Codex agent on success and on failure', function () {
+    ($this->fake)(FakeCodex::withUsage('{"ok":true}', ['input_tokens' => 11, 'output_tokens' => 22]));
+    config(['ai.work_dir' => sys_get_temp_dir().'/ai-usage-'.strtolower((string) Str::ulid())]);
+    $dir = WorkDir::create();
+    try {
+        $out = (new CodexAgent)->extract(new AgentInput($dir, []));
+        // The medical validator rejects {"ok":true}: a failure outcome still carries the counters.
+        expect($out->ok)->toBeFalse()->and($out->usage?->input)->toBe(11)->and($out->usage?->output)->toBe(22);
+    } finally {
+        $dir->cleanup();
+        @rmdir(config('ai.work_dir'));
+    }
 });

@@ -1,0 +1,234 @@
+{
+  "id": "shopping",
+  "category": "modules",
+  "order": 35,
+  "title": "Zakupy",
+  "summary": "Wspólne listy zakupów dla rodziny: przegląd, tworzenie i kopiowanie list, dodawanie i zmiana produktów, kto co może na liście, blokowanie i zakupy, kończenie i archiwum, wysyłanie listy e-mailem, przypomnienia oraz katalog produktów, sklepy i jednostki, którymi zarządzasz w Ustawieniach.",
+  "covers": ["module:shopping", "settings:shopping"],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Strona Zakupy",
+      "blocks": [
+        { "type": "p", "text": "**Zakupy** są w menu po lewej (w telefonie na pasku na dole), jeśli administrator dał Ci do nich dostęp. Strona pokazuje listy zakupów, które możesz widzieć, na dwóch kartach: **Otwarte** i **Archiwum**." },
+        { "type": "list", "items": [
+          "**Otwarte** pokazuje listy, które jeszcze planujesz albo z których robisz zakupy, uporządkowane według czasu przypomnienia (listy bez przypomnienia na końcu), potem od najnowszej. Lista, z której robi się zakupy, ma znacznik **Zablokowana** i pasek pokazujący, ile produktów już kupiono.",
+          "Każdy wiersz pokazuje logo sklepu, nazwę listy, sklep, osobę odpowiedzialną i czas przypomnienia. Znacznik **Przypomnienie minęło** pojawia się, gdy czas przypomnienia minął, a lista nie jest zakończona. Czas przypomnienia jest zawsze pokazywany w strefie czasowej rodziny, na każdym urządzeniu.",
+          "**Archiwum** pokazuje zakończone listy od najnowszej, z datą zakończenia. Długie archiwum jest podzielone na strony. Wybrana karta zostaje w adresie, więc **Wstecz** z otwartej listy wraca do tej samej karty.",
+          "Gdy otwartych list jest więcej niż 10, nad nimi pojawia się pole wyszukiwania. Nie rozróżnia wielkich liter ani znaków diakrytycznych."
+        ] },
+        { "type": "p", "text": "Widzisz listę, jeśli ją utworzyłeś, jeśli jesteś jej osobą odpowiedzialną albo jeśli zostałeś do niej dodany, jako osoba, która może dodawać i edytować produkty, albo jako osoba, która może tylko przeglądać. Listy, których nie możesz widzieć, nie są pokazywane w ogóle. Listę znajdziesz w tabeli [kto co widzi](who-sees-what#table)." }
+      ]
+    },
+    {
+      "id": "create-list",
+      "title": "Tworzenie listy",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Otwórz **Zakupy** i naciśnij **Nowa lista**. Przycisk jest widoczny tylko wtedy, gdy możesz zmieniać Zakupy.",
+          "Wpisz **Nazwę** listy, na przykład \"Cotygodniowe zakupy\".",
+          "Jeśli chcesz, wybierz **Sklep**. Pierwszy wybór, **Bez sklepu**, zostawia go pustym.",
+          "Wybierz **Osobę odpowiedzialną**. To Ty, dopóki nie wybierzesz kogoś innego.",
+          "Naciśnij **Utwórz listę**. Nowa lista otwiera się pusta, a razem z nią okno dodawania produktów."
+        ] },
+        { "type": "tip", "text": "To, kto jeszcze może dodawać produkty, kto może tylko przeglądać, oraz przypomnienie ustawisz później w ustawieniach listy." }
+      ]
+    },
+    {
+      "id": "add-items",
+      "title": "Dodawanie i zmiana produktów",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Otwórz listę i naciśnij **Dodaj produkty**. Przycisk widzi osoba odpowiedzialna oraz osoby dodane do listy jako mogące dodawać i edytować produkty. Nowa, pusta lista otwiera to okno sama.",
+          "Przejrzyj katalog. Każdy produkt ma obrazek. Wyszukiwanie nie rozróżnia wielkich liter ani znaków diakrytycznych, więc \"mleko\" znajdzie \"Mleko\", a \"zolc\" znajdzie \"żółć\".",
+          "Dotknij produktu, aby go wybrać. Wybrany produkt pokazuje ilość i jednostkę. Ilość zmieniasz przyciskami **+** i **-** albo wpisujesz w polu (działa przecinek dziesiętny, na przykład \"1,5\"). Jeden krok to 1 sztuka, 0,1 dla kilogramów i litrów oraz 10 dla gramów i mililitrów. W razie potrzeby wybierz inną jednostkę: gramy i kilogramy oraz mililitry i litry są przeliczane, a ułamek jest zaokrąglany przy jednostkach, które go nie mają. W jednym kroku możesz wybrać wiele produktów.",
+          "Czegoś nie ma w katalogu? Naciśnij **Wpisz własny produkt** (albo podczas szukania wiersz **Dodaj \"...\" jako nowy produkt**), wpisz nazwę, ilość i jednostkę i naciśnij **Dodaj do listy**. Twój produkt nie trafi do katalogu, dopóki nie zaznaczysz **Zapisz też w katalogu**, co widzą tylko osoby zarządzające katalogiem.",
+          "Na dole naciśnij **Dodaj** (pokazuje, ile produktów wybrano). Wszystkie wybrane produkty trafią na listę naraz."
+        ] },
+        { "type": "p", "text": "Produkt z katalogu, który już jest na liście, nie dostaje drugiego wiersza. Zwiększa się jego ilość i zobaczysz \"Zmieniono ilość produktu ...\". Takie produkty mają w oknie znacznik **Na liście**. Notatka wpisana dla tego samego produktu jest dodawana do istniejącej notatki. Jeśli obie ilości razem osiągnęłyby 1000 lub więcej albo notatki razem byłyby zbyt długie, nic nie zostanie dodane i zobaczysz komunikat. Lista może zawierać najwyżej 500 produktów." },
+        { "type": "steps", "items": [
+          "Aby zmienić produkt, dotknij jego wiersza. Możesz zmienić ilość, jednostkę i notatkę, a także nazwę, jeśli to Twój własny produkt (spoza katalogu).",
+          "Aby usunąć produkt, otwórz go, naciśnij **Usuń produkt** i potwierdź. Produkt zostanie usunięty dla wszystkich, którzy widzą listę."
+        ] },
+        { "type": "p", "text": "Ilości przyjmują przecinek dziesiętny, na przykład \"1,5\". Muszą być większe niż 0 i mniejsze niż 1000. Osoby, które mogą tylko przeglądać listę, widzą produkty, ale nie mogą ich zmieniać, a gdy lista jest zablokowana lub zakończona, nic nie można zmienić. Całą listę usuniesz w menu **Więcej akcji** na liście, wybierając **Usuń listę**. Ta opcja jest dla osoby odpowiedzialnej i osoby, która utworzyła listę." },
+        { "type": "tip", "text": "Katalog z obrazkami prowadzi się w Ustawieniach, w części Zakupy (zobacz Katalog produktów i sklepy poniżej)." }
+      ]
+    },
+    {
+      "id": "people",
+      "title": "Osoby i kto co może",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Każda lista ma **autora**, jedną **osobę odpowiedzialną** i, jeśli chcesz, osoby, które mogą dodawać i edytować produkty, oraz osoby, które mogą tylko przeglądać. Otwórz listę, naciśnij **Więcej akcji** i wybierz **Ustawienia listy**, aby to zobaczyć i zmienić."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Osoba odpowiedzialna**: jedyna osoba, która może zablokować i odblokować listę, oznaczać produkty jako kupione lub niedostępne i zakończyć zakupy. Osobę odpowiedzialną możesz zmienić w każdej chwili, także gdy lista jest zablokowana. Osoba, która przekazuje listę, zostaje na niej jako ktoś, kto może dodawać i edytować produkty, więc lista nie znika jej sprzed oczu.",
+            "**Może dodawać i edytować produkty**: osoby, które mogą dodawać, zmieniać i usuwać produkty na otwartej liście.",
+            "**Może tylko przeglądać**: osoby, które widzą listę, ale niczego nie mogą zmieniać.",
+            "Osoba ma jednocześnie jedną rolę. Jeśli wybierzesz kogoś, kto jest już w drugiej grupie, zostanie przeniesiony, a uwaga o tym poinformuje.",
+            "Dzieci możesz dodać jak każdego innego członka, mają oznaczenie **Dziecko**."
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "Zmiana tego, kto bierze udział w liście",
+          "items": [
+            "Otwórz listę, naciśnij **Więcej akcji** i wybierz **Ustawienia listy**.",
+            "Wybierz **Osobę odpowiedzialną** albo naciśnij **Dodaj osobę** pod **Może dodawać i edytować produkty** lub **Może tylko przeglądać** i wybierz kogoś. Krzyżykiem przy nazwisku usuniesz osobę.",
+            "Naciśnij **Zapisz ustawienia**. Przycisk jest dostępny dopiero po zmianie."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Autor i osoba odpowiedzialna mogą na otwartej liście zmieniać w ustawieniach wszystko: nazwę, sklep, osobę odpowiedzialną, osoby i przypomnienie. Gdy lista jest zablokowana, osobę odpowiedzialną i przypomnienie może zmieniać tylko osoba odpowiedzialna. Pozostali widzą ustawienia tylko do odczytu, więc nadal widzą, kto jest kim."
+        },
+        {
+          "type": "tip",
+          "text": "Jeśli osoba odpowiedzialna opuści rodzinę lub straci dostęp do Zakupów, odpowiedzialnym zostaje autor. Autor widzi o tym uwagę na górze listy, dopóki osoba odpowiedzialna nie zostanie zapisana ponownie. Jeśli nie może działać także autor, odpowiedzialną zostaje pierwsza osoba dodana do listy jako mogąca dodawać i edytować produkty. Jeśli nikt na liście nie może działać, administrator z prawem edycji w Zakupach może otworzyć listę i działać jako osoba odpowiedzialna, więc lista nigdy nie zostaje zablokowana na zawsze."
+        }
+      ]
+    },
+    {
+      "id": "lock-and-shop",
+      "title": "Blokowanie listy i zakupy",
+      "blocks": [
+        { "type": "p", "text": "Gdy lista jest gotowa, **osoba odpowiedzialna** blokuje ją i idzie na zakupy. Przycisk **Zablokuj listę** widzi tylko osoba odpowiedzialna. Inni widzą krótką informację, kto może ją zablokować." },
+        { "type": "list", "items": [
+          "Lista musi mieć co najmniej jeden produkt, zanim ją zablokujesz. Na pustej liście **Zablokuj listę** jest wyszarzone, a informacja wyjaśnia dlaczego.",
+          "Dopóki lista jest zablokowana, nikt nie może dodawać, usuwać ani edytować produktów.",
+          "W sklepie osoba odpowiedzialna naciska przy każdym produkcie **Kupione** albo **Niedostępne**. Zmiana jest widoczna od razu. Wciśnięty przycisk ma też inną ikonę i grubą ramkę, więc nie zależy od koloru. Ponowne naciśnięcie tego samego przycisku cofa oznaczenie. Możesz szybko stukać wiele produktów: oznaczenia zapisują się jedno po drugim, a **Odblokuj listę** i **Zakończ zakupy** czekają, aż wszystkie zostaną zapisane.",
+          "Jeśli oznaczenia nie da się zapisać, wraca tylko ten produkt i pojawia się komunikat **Nie udało się zapisać. Spróbuj ponownie.** Jeśli listę w międzyczasie zmieniła inna osoba (na przykład ją odblokowała), strona wczytuje się ponownie i o tym informuje.",
+          "Pozostali widzą oznaczenia i wiersz postępu dopiero po odświeżeniu strony.",
+          "**Odblokuj listę** przywraca planowanie, na przykład gdy o czymś zapomniałeś. Oznaczenia zostają zachowane."
+        ] },
+        { "type": "steps", "title": "Blokowanie i odblokowanie", "items": [
+          "Otwórz listę i naciśnij **Zablokuj listę**.",
+          "Potwierdź przyciskiem **Zablokuj listę** w pytaniu, które się pojawi.",
+          "Aby znowu zmieniać produkty, naciśnij **Odblokuj listę** i potwierdź."
+        ] },
+        { "type": "tip", "text": "Pasek u dołu ekranu na telefonie pokazuje, ile produktów zostało, a po oznaczeniu wszystkich zmienia się w **Zakończ zakupy**." }
+      ]
+    },
+    {
+      "id": "finish",
+      "title": "Kończenie zakupów",
+      "blocks": [
+        { "type": "p", "text": "**Zakończ zakupy** pojawia się u osoby odpowiedzialnej, gdy każdy produkt jest oznaczony jako **Kupione** albo **Niedostępne**. Lista trafia wtedy do **archiwum** i jest tylko do odczytu. Nadal możesz ją skopiować i wysłać e-mailem." },
+        { "type": "p", "text": "Jeśli niektóre produkty są oznaczone jako **Niedostępne**, aplikacja pyta: **Nie udało się kupić niektórych produktów. Czy chcesz utworzyć z nich nową listę zakupów?**" },
+        { "type": "list", "items": [
+          "**Utwórz nową listę** tworzy nową otwartą listę o nazwie starej z dopiskiem „(niekupione)”, tylko z niedostępnymi produktami i ich ilościami. Zachowuje sklep, osobę odpowiedzialną i to, kto ją widzi, i nie ma przypomnienia. Możesz dodać do niej kolejne produkty.",
+          "**Nie, tylko zakończ** tylko archiwizuje listę.",
+          "**Anuluj** wraca do listy bez żadnych zmian."
+        ] },
+        { "type": "p", "text": "W obu przypadkach oryginalna lista zostaje w archiwum jako zakończona. Jeśli zakończenie się nie powiedzie, nic się nie zmienia i możesz spróbować ponownie." }
+      ]
+    },
+    {
+      "id": "copy",
+      "title": "Kopiowanie listy",
+      "blocks": [
+        { "type": "steps", "items": [
+          "W przeglądzie naciśnij przycisk kopiowania na końcu wiersza (**Kopiuj listę**). Kopiować możesz też z samej listy.",
+          "Sprawdź **Nazwę nowej listy**. Na początku jest to stara nazwa z dopiskiem \"(kopia)\".",
+          "Zostaw zaznaczone **Zachowaj sklep, osobę odpowiedzialną i dostęp**, aby je zachować, albo odznacz, aby zacząć od zera.",
+          "Naciśnij **Kopiuj listę**. Nowa lista się otworzy."
+        ] },
+        { "type": "p", "text": "Kopia ma te same produkty z tymi samymi ilościami i jednostkami, a każdy produkt zaczyna jako nieoznaczony (niekupiony, niedostępny). Nowa lista jest otwarta, niezablokowana i bez przypomnienia. Zostajesz jej właścicielem." },
+        { "type": "p", "text": "Jeśli **Zachowaj sklep, osobę odpowiedzialną i dostęp** jest zaznaczone, kopia zachowuje sklep, osobę odpowiedzialną oraz osoby, które mogą dodawać produkty lub przeglądać. Jeśli nie jest zaznaczone, osobą odpowiedzialną jesteś Ty i nikt inny nie jest dodany." },
+        { "type": "tip", "text": "Skopiować możesz każdą listę, którą widzisz, także zakończoną. To szybki sposób na rozpoczęcie zakupów na kolejny tydzień." }
+      ]
+    },
+    {
+      "id": "email",
+      "title": "Wysyłanie listy e-mailem",
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            "Otwórz listę, naciśnij **Więcej akcji** i wybierz **Wyślij e-mailem**.",
+            "Wpisz adres i naciśnij Enter, przecinek lub spację albo wklej kilka adresów naraz. Każdy adres zmienia się w mały znacznik z krzyżykiem do usunięcia. Możesz dodać do 5 adresów, używaj zwykłego adresu, jak imie@example.com: jedna linia, bez cudzysłowów i nawiasów, z domeną zawierającą kropkę. Warianty ze znakiem plus, jak imie+zakupy@example.com, liczą się jako ten sam adres w dziennym limicie.",
+            "Naciśnij **Wyślij**. Komunikat na dole mówi, na ile adresów wysłano listę."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Listę może wysłać autor, osoba odpowiedzialna i osoby, które mogą dodawać i edytować produkty, w każdym stanie listy. Osoby, które mogą tylko przeglądać, nie widzą **Wyślij e-mailem**."
+        },
+        {
+          "type": "p",
+          "text": "E-mail to zwykły tekst. Zawiera produkty z ilościami, sklep i osobę odpowiedzialną. Nie ma linku do Family Hub ani adresów e-mail członków rodziny."
+        },
+        {
+          "type": "warning",
+          "text": "Przed nadużyciami chronią limity: liczba wysyłek na godzinę i na dobę dla Ciebie oraz kilka na dobę dla każdego adresu. Gdy osiągniesz limit, okno wyświetli **Dziś wysłano zbyt wiele list. Spróbuj ponownie później.**"
+        },
+        {
+          "type": "tip",
+          "text": "Komunikat po naciśnięciu Wyślij oznacza, że e-maile są wysyłane. Zwykle docierają w ciągu minuty. Dziennik audytu zapisuje tylko liczbę adresów, na które wysłano listę, nigdy same adresy."
+        }
+      ]
+    },
+    {
+      "id": "reminder",
+      "title": "Przypomnienie listy",
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            "Otwórz listę, naciśnij **Więcej akcji** i wybierz **Ustawienia listy**.",
+            "W polu **Przypomnienie** wybierz datę i godzinę. Są w strefie czasowej rodziny, takiej samej jak w nagłówku listy.",
+            "Naciśnij **Zapisz ustawienia**. Nagłówek pokaże **Przypomnienie: data, godzina**. Aby je usunąć, naciśnij **Usuń przypomnienie** i zapisz."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Lista ma jedno przypomnienie. Powiadomienie push otrzymuje tylko osoba odpowiedzialna, nikt inny. Musi mieć na swoim urządzeniu włączone powiadomienia push w **Ustawieniach**, **Powiadomienia**, inaczej może do niej nie dotrzeć; wtedy ustawienia pokażą uwagę z jej imieniem. Powiadomienie mówi tylko **Czas na zakupy** i otwiera listę, więc nazwa listy nie pojawia się na zablokowanym ekranie. Jeśli powiadomienia push są wyłączone lub urządzenie nie jest zarejestrowane, gdy nadejdzie czas, przypomnienie nie przepada: zostanie wysłane, gdy tylko włączysz push. Przypomnienie spóźnione o ponad 24 godziny nigdy nie zostanie wysłane."
+        },
+        {
+          "type": "p",
+          "text": "Przypomnienie z przeszłości zostanie odrzucone komunikatem **Wybierz czas w przyszłości.** Po wysłaniu przypomnienia nagłówek dodaje **(wysłane)**. Zmiana godziny ustawia nowe przypomnienie, które zostanie wysłane ponownie o nowej godzinie."
+        }
+      ]
+    },
+    {
+      "id": "stores-catalog",
+      "title": "Katalog produktów i sklepy",
+      "blocks": [
+        { "type": "p", "text": "W **Ustawieniach** sekcja **Zakupy** ma trzy karty: **Katalog produktów**, **Sklepy** i **Jednostki**. Widzisz tę sekcję tylko wtedy, gdy możesz zmieniać Zakupy. Wszyscy z tym uprawnieniem dzielą ten sam katalog, sklepy i jednostki." },
+        { "type": "steps", "title": "Dodawanie produktu do katalogu", "items": [
+          "Otwórz **Ustawienia**, wybierz **Zakupy** i zostań na karcie **Katalog produktów**.",
+          "Naciśnij **Dodaj produkt**.",
+          "Wpisz **Nazwę**. Nazwa może być użyta tylko raz: produkt różniący się tylko wielkimi literami lub znakami diakrytycznymi jest uznawany za ten sam.",
+          "Jeśli chcesz, naciśnij **Prześlij obraz**, aby dodać obraz JPG, PNG lub WebP do 5 MB, i wybierz **Domyślną jednostkę**.",
+          "Naciśnij **Zapisz produkt**."
+        ] },
+        { "type": "p", "text": "Każdy wiersz pokazuje domyślną jednostkę i na ilu listach produkt jest używany. Produkt znajdziesz w polu wyszukiwania, a zmienisz go przyciskiem z ołówkiem." },
+        { "type": "steps", "title": "Dodawanie sklepu", "items": [
+          "Otwórz kartę **Sklepy** i naciśnij **Dodaj sklep**.",
+          "Wpisz **Nazwę sklepu** i, jeśli chcesz, dodaj **Logo** (PNG, JPG lub WebP, do 2 MB).",
+          "Naciśnij **Zapisz sklep**."
+        ] },
+        { "type": "tip", "text": "Najlepiej działa logo w formacie PNG z przezroczystym tłem. Przezroczyste miejsca są wypełniane bielą." },
+        { "type": "warning", "text": "Przy usuwaniu produktu lub sklepu aplikacja prosi o potwierdzenie i podaje, na ilu listach jest używany. Produkty, które już są na liście, zostają na niej jako zwykły tekst bez obrazu. Lista, której usuniesz sklep, będzie po prostu bez sklepu." }
+      ]
+    },
+    {
+      "id": "units",
+      "title": "Jednostki",
+      "adminOnly": true,
+      "blocks": [
+        { "type": "p", "text": "Ilości używają jednostek. Jednostki wbudowane (szt., g, kg, ml, l, opakowanie, pęczek, łyżka i łyżeczka) są pokazywane w Twoim języku i nie można ich zmieniać ani usuwać. Członkowie widzą je na karcie **Jednostki**, kolejne mogą dodawać tylko administratorzy." },
+        { "type": "steps", "title": "Dodawanie jednostki", "items": [
+          "Otwórz **Ustawienia**, wybierz **Zakupy** i otwórz kartę **Jednostki**.",
+          "Naciśnij **Dodaj jednostkę**.",
+          "Wpisz nazwę w trzech językach: **Nazwa (angielska)**, **Nazwa (słowacka)** i **Nazwa (polska)**. Każda nazwa może mieć najwyżej 12 znaków, na przykład „puszka”.",
+          "Naciśnij **Zapisz jednostkę**."
+        ] },
+        { "type": "warning", "text": "Jeśli usuniesz jednostkę, której produkty już używają, aplikacja poda, ile produktów jej używa. Te produkty zachowają ilość, ale pokażą ją bez jednostki." }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "id": "shopping",
+  "category": "modules",
+  "order": 35,
+  "title": "Shopping",
+  "summary": "Shared shopping lists for the family: the overview, creating and copying lists, adding and changing items, who may do what on a list, locking the list and shopping, finishing and the archive, sending a list by e-mail, reminders, and the item catalog, stores and units that you manage in Settings.",
+  "covers": ["module:shopping", "settings:shopping"],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "The Shopping page",
+      "blocks": [
+        { "type": "p", "text": "**Shopping** is in the menu on the left (on a phone, in the bar at the bottom) if your administrator gave you access to it. The page lists the shopping lists you may see, on two tabs: **Open** and **Archive**." },
+        { "type": "list", "items": [
+          "**Open** shows the lists you are still planning or shopping from, ordered by reminder time (lists without a reminder come last), then newest first. A list that is being shopped from has a **Locked** tag and a bar that shows how many of its items are bought.",
+          "Each row shows the store logo, the name of the list, the store, the person responsible and the reminder time. The tag **Reminder passed** appears when the reminder time has gone but the list is not finished. Reminder times are always shown in the family time zone, on every device.",
+          "**Archive** shows finished lists, newest first, with the date they were finished. A long archive is split into pages. The tab you chose stays in the address, so **Back** from an opened list returns to the same tab.",
+          "When there are more than 10 open lists, a search box appears above them. It ignores capital letters and accents."
+        ] },
+        { "type": "p", "text": "You see a list if you created it, if you are its responsible person, or if you were added to it, either as a person who may add and edit items or as a person who may only view. Lists you cannot see are not shown at all. A list shows in the table in [who can see what](who-sees-what#table)." }
+      ]
+    },
+    {
+      "id": "create-list",
+      "title": "Creating a list",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Open **Shopping** and press **New list**. The button is shown only if you are allowed to change Shopping.",
+          "Type the **Name** of the list, for example \"Weekly shopping\".",
+          "If you like, choose a **Store**. The first choice, **No store**, leaves it empty.",
+          "Choose the **Responsible person**. It is you unless you pick someone else.",
+          "Press **Create list**. The new list opens, empty, and the window for adding items opens with it."
+        ] },
+        { "type": "tip", "text": "Who else may add items, who may only view, and a reminder are set afterwards in the settings of the list." }
+      ]
+    },
+    {
+      "id": "add-items",
+      "title": "Adding and changing items",
+      "blocks": [
+        { "type": "steps", "items": [
+          "Open a list and press **Add items**. The button is shown to the responsible person and to people who were added to the list as someone who may add and edit items. A new, empty list opens this window by itself.",
+          "Look through the catalog. Each item has a picture. The search box ignores capital letters and accents, so \"mliecko\" finds \"Mliečko\".",
+          "Tap an item to select it. A selected item shows its quantity and unit. Change the quantity with **+** and **-** or type it in the box (a decimal comma such as \"1,5\" works). One step is 1 piece, 0.1 for kilograms and litres, and 10 for grams and millilitres. Pick another unit if you like: grams and kilograms, and millilitres and litres, are converted, and a fraction is rounded on units that have none. You can select many items in one go.",
+          "Something is not in the catalog? Press **Type your own item** (or, while you are searching, the line **Add \"...\" as a new item**), fill in the name, quantity and unit, and press **Add to list**. Your own item is not saved to the catalog unless you tick **Also save to catalog**, which only people who manage the catalog see.",
+          "Press **Add** at the bottom (it shows how many items you picked). All selected items join the list at once."
+        ] },
+        { "type": "p", "text": "An item from the catalog that is already on the list does not get a second row. Its quantity is raised instead, and you see \"Quantity of ... updated\". Such items carry the tag **On list** in the window. A note you type for the same item is added to the existing note. If the two quantities together would be 1000 or more, or the notes together would be too long, nothing is added and you see a message. A list can hold up to 500 items." },
+        { "type": "steps", "items": [
+          "To change an item, tap its row. You can change the quantity, the unit and the note, and the name too if it is your own item (one that is not in the catalog).",
+          "To remove an item, open it, press **Remove item** and confirm. The item is removed for everyone who sees the list."
+        ] },
+        { "type": "p", "text": "Quantities accept a decimal comma, for example \"1,5\". They must be above 0 and below 1000. People who may only view a list see the items but cannot change them, and nothing can be changed while the list is locked or finished. To remove a whole list, open the menu **More actions** on the list and choose **Delete list**. This is offered to the person responsible and to the person who created the list." },
+        { "type": "tip", "text": "The catalog with its pictures is kept in Settings, under Shopping (see Item catalog and stores below)." }
+      ]
+    },
+    {
+      "id": "people",
+      "title": "People and who can do what",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Every list has a **creator**, one **responsible person**, and, if you like, people who may add and edit items and people who may only view. Open the list, press **More actions** and choose **List settings** to see and change this."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Responsible person**: the only person who can lock and unlock the list, mark items as bought or unavailable and finish the shopping. You can change the responsible person at any time, even while the list is locked. The person who hands the list over stays on it as someone who can add and edit items, so the list does not disappear for them.",
+            "**Can add and edit items**: people who may add, change and remove items on an open list.",
+            "**Can only view**: people who see the list but cannot change anything.",
+            "A person has one role at a time. If you choose someone who is already in the other group, they are moved and a note says so.",
+            "Children can be added like any other member and carry the tag **Child**."
+          ]
+        },
+        {
+          "type": "steps",
+          "title": "Changing who takes part",
+          "items": [
+            "Open the list, press **More actions** and choose **List settings**.",
+            "Pick the **Responsible person**, or press **Add person** under **Can add and edit items** or **Can only view** and choose someone. Press the cross on a name to remove that person.",
+            "Press **Save settings**. The button is available only after you change something."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The creator and the responsible person change everything in the settings while the list is open: the name, the store, the responsible person, the people and the reminder. While the list is locked, only the responsible person can change the responsible person and the reminder. Everyone else sees the settings read-only, so they can still tell who is who."
+        },
+        {
+          "type": "tip",
+          "text": "If the responsible person leaves the family or loses access to Shopping, the creator becomes responsible. The creator sees a note about it at the top of the list until a responsible person is saved again. If the creator cannot act either, the first person who was added to the list as able to add and edit items becomes responsible. If nobody on the list can act, an administrator who has edit access to Shopping can open the list and act as the responsible person, so a list never stays locked for good."
+        }
+      ]
+    },
+    {
+      "id": "lock-and-shop",
+      "title": "Locking the list and shopping",
+      "blocks": [
+        { "type": "p", "text": "When the list is ready, the **responsible person** locks it and goes shopping. Only the responsible person sees **Lock list**. Others see a short note saying who can lock it." },
+        { "type": "list", "items": [
+          "A list needs at least one item before it can be locked. On an empty list **Lock list** is greyed out and a note says why.",
+          "While the list is locked nobody can add, remove or edit items.",
+          "In the shop the responsible person presses **Bought** or **Unavailable** next to each item. The change shows at once. The pressed button also gets a different icon and a thick border, so it does not depend on colour. Press the same button again to clear the mark. You can tap many items quickly: the marks are saved one after another, and **Unlock list** and **Finish shopping** wait until they are all saved.",
+          "If a mark cannot be saved, only that item jumps back and a message says **Could not save. Try again.** If the list was changed by someone else meanwhile (for example unlocked), the page reloads and says so.",
+          "Everyone else sees the marks, and the progress line, after they reload the page.",
+          "**Unlock list** brings the list back to planning, for example when you forgot an item. The marks are kept."
+        ] },
+        { "type": "steps", "title": "Locking and unlocking", "items": [
+          "Open the list and press **Lock list**.",
+          "Confirm with **Lock list** in the question that appears.",
+          "To change items again, press **Unlock list** and confirm."
+        ] },
+        { "type": "tip", "text": "A bar at the bottom of the screen on a phone shows how many items are left, and turns into **Finish shopping** when every item is marked." }
+      ]
+    },
+    {
+      "id": "finish",
+      "title": "Finishing the shopping",
+      "blocks": [
+        { "type": "p", "text": "**Finish shopping** appears for the responsible person once every item is marked **Bought** or **Unavailable**. The list then moves to the **Archive** and becomes read-only. You can still copy it and send it by e-mail." },
+        { "type": "p", "text": "If some items are marked **Unavailable**, you are asked: **Some items could not be bought. Create a new shopping list from them?**" },
+        { "type": "list", "items": [
+          "**Create new list** makes a new open list named like the old one followed by \"(unbought)\", with only the unavailable items and their quantities. It keeps the store, the responsible person and who can see it, and has no reminder. You can add more items to it.",
+          "**No, just finish** only archives the list.",
+          "**Cancel** returns to the list without changing anything."
+        ] },
+        { "type": "p", "text": "Either way the original list stays in the Archive as finished. If finishing fails, nothing is changed and you can try again." }
+      ]
+    },
+    {
+      "id": "copy",
+      "title": "Copying a list",
+      "blocks": [
+        { "type": "steps", "items": [
+          "In the overview, press the copy button at the end of the row (**Copy list**). You can also copy from the list itself.",
+          "Check the **Name of the new list**. It starts as the old name followed by \"(copy)\".",
+          "Leave **Keep store, responsible person and access** ticked to keep them, or untick it to start fresh.",
+          "Press **Copy list**. The new list opens."
+        ] },
+        { "type": "p", "text": "The copy has the same items with the same quantities and units, and every item starts unmarked (not bought, not unavailable). The new list is open, not locked, and has no reminder. You become its owner." },
+        { "type": "p", "text": "If **Keep store, responsible person and access** is ticked, the copy keeps the store, the responsible person and the people who may add items or view. If it is not ticked, you are the responsible person and nobody else is added." },
+        { "type": "tip", "text": "You can copy any list you can see, including finished ones. That is a quick way to start next week's shopping." }
+      ]
+    },
+    {
+      "id": "email",
+      "title": "Sending a list by e-mail",
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            "Open the list, press **More actions** and choose **Send by e-mail**.",
+            "Type an address and press Enter, a comma or the space bar, or paste several addresses at once. Each address becomes a small tag with a cross to remove it. You can add up to 5 addresses; use an ordinary address such as name@example.com: a single line, no quotes, no brackets and a host with a dot. Variants with a plus sign, such as name+shop@example.com, count as the same address for the daily limit.",
+            "Press **Send**. A message at the bottom tells you how many addresses the list was sent to."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The creator, the responsible person and people who may add and edit items can send a list, in any state of the list. People who can only view do not see **Send by e-mail**."
+        },
+        {
+          "type": "p",
+          "text": "The e-mail is plain text. It lists the items with their quantities, the store and the responsible person. It has no link to Family Hub and no e-mail addresses of family members."
+        },
+        {
+          "type": "warning",
+          "text": "There are limits to stop misuse: a number of sends per hour and per day for you, and a few per day for each address. If you reach a limit, the window says **You have sent too many lists today. Try again later.**"
+        },
+        {
+          "type": "tip",
+          "text": "The message after pressing Send means the e-mails are being sent. They usually arrive within a minute. The audit log records only how many addresses a list was sent to, never the addresses."
+        }
+      ]
+    },
+    {
+      "id": "reminder",
+      "title": "Reminder for a list",
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            "Open the list, press **More actions** and choose **List settings**.",
+            "Under **Reminder**, choose a date and time. They are in the family time zone, the same one the list header shows.",
+            "Press **Save settings**. The header shows **Reminder: date, time**. To clear it, press **Remove reminder** and save."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "A list has one reminder. A push notification goes to the responsible person only, nobody else. They must have push notifications turned on for their device in **Settings**, **Notifications**, otherwise it may not reach them; if so, the settings show a note with their name. The notification says only **Time to shop** and opens the list, so the name of the list does not appear on a locked screen. If push is off or the device is not registered when the time comes, the reminder is not lost: it is sent as soon as push is turned on. A reminder more than 24 hours late is never sent."
+        },
+        {
+          "type": "p",
+          "text": "A reminder in the past is refused with **Choose a time in the future.** Once the reminder has been sent, the header adds **(sent)**. Changing the time sets a new reminder, which is sent again at the new time."
+        }
+      ]
+    },
+    {
+      "id": "stores-catalog",
+      "title": "Item catalog and stores",
+      "blocks": [
+        { "type": "p", "text": "In **Settings**, the section **Shopping** has three tabs: **Item catalog**, **Stores** and **Units**. You see the section only if you are allowed to change Shopping. Everyone with that permission shares the same catalog, stores and units." },
+        { "type": "steps", "title": "Adding an item to the catalog", "items": [
+          "Open **Settings**, choose **Shopping** and stay on the tab **Item catalog**.",
+          "Press **Add item**.",
+          "Type the **Name**. A name can be used only once: an item that differs only in capital letters or accents counts as the same item.",
+          "If you like, press **Upload image** to add a JPG, PNG or WebP picture of up to 5 MB, and choose a **Default unit**.",
+          "Press **Save item**."
+        ] },
+        { "type": "p", "text": "Each row shows the default unit and on how many lists the item is used. Use the search box to find an item, and the pencil button to change it." },
+        { "type": "steps", "title": "Adding a store", "items": [
+          "Open the tab **Stores** and press **Add store**.",
+          "Type the **Store name** and, if you like, add a **Logo** (PNG, JPG or WebP, up to 2 MB).",
+          "Press **Save store**."
+        ] },
+        { "type": "tip", "text": "A PNG logo with a transparent background works best. Transparent areas are filled with white." },
+        { "type": "warning", "text": "Deleting an item or a store asks you to confirm and tells you on how many lists it is used. Items already on a list stay there as plain text, without the picture. A list whose store you delete simply has no store afterwards." }
+      ]
+    },
+    {
+      "id": "units",
+      "title": "Units",
+      "adminOnly": true,
+      "blocks": [
+        { "type": "p", "text": "Quantities use units. The built-in units (pcs, g, kg, ml, l, pack, bunch, tbsp and tsp) are shown in your language and cannot be changed or deleted. Members see them in the tab **Units**; only administrators can add more." },
+        { "type": "steps", "title": "Adding a unit", "items": [
+          "Open **Settings**, choose **Shopping** and open the tab **Units**.",
+          "Press **Add unit**.",
+          "Type the name in three languages: **Name (English)**, **Name (Slovak)** and **Name (Polish)**. Each name can have up to 12 characters, for example \"can\".",
+          "Press **Save unit**."
+        ] },
+        { "type": "warning", "text": "If you delete a unit that items already use, you are told how many items use it. Those items keep their quantity but show it without a unit." }
+      ]
+    }
+  ]
+}

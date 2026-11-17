@@ -14,6 +14,7 @@ use App\Security\SecondFactorPolicy;
 use App\Security\SecurityTimings;
 use App\Security\SensitiveSession;
 use App\Support\SettingsSections;
+use App\Wishlist\WishlistManagerSync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -32,25 +33,42 @@ class MembersController extends Controller
         // One grouped query for all passkey counts.
         $passkeyCounts = DB::table('passkeys')->selectRaw('user_id, count(*) as total')->groupBy('user_id')->pluck('total', 'user_id');
 
+        // Open conversion invitation per child (the admin already sees invitation e-mails), keyed by the child's user id.
+        $conversions = Invitation::query()->whereNotNull('user_id')->whereNull('accepted_at')->whereNull('revoked_at')
+            ->orderBy('id')->get()->keyBy('user_id');
+
+        $names = User::query()->whereIn('id', $managerIds->flatten()->unique()->values())->pluck('name', 'id');
+
         // Explicit field mapping: never expose password, remember_token, google_id or other columns.
         // The two_factor_* columns are read only to compute booleans, never passed on.
-        $members = User::query()->orderBy('name')->orderBy('id')
-            ->get(['id', 'name', 'email', 'is_admin', 'two_factor_secret', 'two_factor_confirmed_at'])
-            ->map(fn (User $member) => [
-                'id' => $member->id,
-                'name' => $member->name,
-                'email' => $member->email,
-                'isAdmin' => (bool) $member->is_admin,
-                'isSelf' => $member->id === $viewer->id,
-                'access' => $gate->levels($member),
-                'wishlistManagerIds' => $managerIds->get($member->id, []),
-                'security' => [
-                    'totp' => ReauthMethods::hasTotp($member),
-                    'passkeys' => (int) ($passkeyCounts[$member->id] ?? 0),
-                    'required' => $policy->required() && $policy->appliesTo($member),
-                    'needs' => $policy->mustEnrol($member),
-                ],
-            ])->values();
+        $rows = User::query()->orderBy('name')->orderBy('id')
+            ->get(['id', 'name', 'email', 'is_admin', 'sign_in_disabled', 'photo_path', 'photo_version', 'two_factor_secret', 'two_factor_confirmed_at']);
+        $members = $rows->map(fn (User $member) => [
+            'id' => $member->id,
+            'name' => $member->name,
+            'email' => $member->email,
+            'signInDisabled' => (bool) $member->sign_in_disabled,
+            'isChild' => ! $member->canSignIn() && $member->email === null,
+            'invitation' => ($conversions->get($member->id)) ? [
+                'id' => $conversions->get($member->id)->id,
+                'email' => $conversions->get($member->id)->email,
+                'expiresAt' => $conversions->get($member->id)->expires_at->toIso8601String(),
+            ] : null,
+            'photoVersion' => $member->photo_path !== null ? $member->photo_version : null,
+            'managerNames' => collect($managerIds->get($member->id, []))->map(fn ($id) => $names[$id] ?? null)->filter()->values()->all(),
+            'isAdmin' => (bool) $member->is_admin,
+            'isSelf' => $member->id === $viewer->id,
+            'access' => $gate->levels($member),
+            'wishlistManagerIds' => $managerIds->get($member->id, []),
+            'security' => [
+                'totp' => ReauthMethods::hasTotp($member),
+                'passkeys' => (int) ($passkeyCounts[$member->id] ?? 0),
+                'required' => $policy->required() && $policy->appliesTo($member),
+                'needs' => $policy->mustEnrol($member),
+            ],
+        ])->values();
+        $eligible = $rows->filter(fn (User $member) => WishlistManagerSync::isEligible($member))
+            ->map(fn (User $member) => ['id' => $member->id, 'name' => $member->name])->values();
 
         $presets = [];
         foreach (Preset::cases() as $preset) {
@@ -73,6 +91,8 @@ class MembersController extends Controller
         return Inertia::render('Settings/Members', [
             'sections' => SettingsSections::for($viewer),
             'members' => $members,
+            // Who can be chosen as a parent of a child: signs in and holds Wishlist Edit (id and name only).
+            'eligibleParents' => $eligible,
             'presets' => $presets,
             'invitations' => $invitations,
             'securityPolicy' => ['required' => $policy->required(), 'pending' => $policy->pendingCount()],

@@ -217,12 +217,25 @@ describe('AiStatusTag', () => {
         [{ status: 'cancelled', cancelReason: 'user' }, 'Cancelled'],
         [{ status: 'cancelled', cancelReason: 'consent' }, 'Stopped: AI is off'],
         [{ status: 'superseded' }, 'Replaced by a newer run'],
+        [{ status: 'text_saved' }, 'Text saved'],
     ];
     it.each(cases)('renders text and an aria-hidden icon for %j', (props, text) => {
         const w = mountTag(props);
         expect(w.text()).toBe(text);
         expect(w.find('svg').attributes('aria-hidden')).toBe('true');
         w.unmount();
+    });
+
+    it('renders text_saved as a neutral tag with data-status text_saved', () => {
+        const w = mountTag({ status: 'text_saved' });
+        expect(w.attributes('data-status')).toBe('text_saved');
+        expect(w.classes()).toContain('ui-tag--neutral');
+        w.unmount();
+        for (const [locale, text] of [['sk', 'Text uložený'], ['pl', 'Tekst zapisany']]) {
+            const t = mountTag({ status: 'text_saved' }, locale);
+            expect(t.text()).toBe(text);
+            t.unmount();
+        }
     });
 
     it('uses a neutral tag for "Nothing to suggest" and success otherwise', () => {

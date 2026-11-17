@@ -9,6 +9,8 @@ use Illuminate\Support\Str;
 /** Private storage for processed wish images on the local disk. No public disk, no URL generation. */
 final class WishImageStore
 {
+    private const FOREIGN_PREFIXES = ['wish-images/profile-photos/', 'wish-images/shopping/', 'wish-images/recipes/'];
+
     public function put(Wish $wish, ProcessedImage $image, string $source, ?string $host): Wish
     {
         $disk = Storage::disk('local');
@@ -67,6 +69,13 @@ final class WishImageStore
 
         $deleted = 0;
         foreach ($disk->allFiles('wish-images') as $path) {
+            // Profile photos and shopping images share the wish-images volume path but are owned by other rows;
+            // their own sweepers handle them.
+            foreach (self::FOREIGN_PREFIXES as $prefix) {
+                if (str_starts_with($path, $prefix)) {
+                    continue 2;
+                }
+            }
             if (! isset($referenced[$path]) && $disk->lastModified($path) < $cutoff) {
                 $disk->delete($path);
                 $deleted++;

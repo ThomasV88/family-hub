@@ -3,6 +3,7 @@
 namespace App\Medical\Ai\Agents;
 
 use App\Medical\Ai\FailureCode;
+use App\Medical\Ai\TokenUsage;
 use Carbon\CarbonImmutable;
 
 /** The result of one agent run: a validated payload or a content-free failure code, never CLI text. */
@@ -19,5 +20,6 @@ final readonly class AgentOutcome
         public string $model,
         public ?CarbonImmutable $quotaResetAt = null,
         public ?int $quotaMinutes = null,
+        public ?TokenUsage $usage = null,
     ) {}
 }

@@ -96,7 +96,8 @@ class RequireAccess
             return;
         }
 
-        $write = ! in_array($request->method(), ['GET', 'HEAD'], true);
+        // The document search is a POST only so that the query stays out of the URL; it reads, so it is audited as a read.
+        $write = ! in_array($request->method(), ['GET', 'HEAD'], true) && $request->route()?->getName() !== 'health.search';
 
         // Thumbnails are fetched one per <img>; the person page and the file download already carry the subject row.
         if ($module === Module::Health && ! $write && $request->route()?->getName() === 'health.documents.preview') {

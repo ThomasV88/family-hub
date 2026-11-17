@@ -6,6 +6,15 @@ use App\Models\MedicalAiExtraction;
 use App\Models\MedicalDocument;
 use App\Models\MedicalSubject;
 use App\Models\ModulePermission;
+use App\Models\Recipe;
+use App\Models\RecipeImport;
+use App\Models\RecipeIngredient;
+use App\Models\RecipeStep;
+use App\Models\ShoppingCatalogItem;
+use App\Models\ShoppingItem;
+use App\Models\ShoppingList;
+use App\Models\ShoppingStore;
+use App\Models\ShoppingUnit;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Wish;
@@ -15,6 +24,7 @@ beforeEach(function () {
     $this->originalEnv = app()->environment();
     // The demo seed stores a few synthetic documents; keep them off the real medical volume.
     Storage::fake('medical');
+    Storage::fake('local');
 });
 
 afterEach(function () {
@@ -44,13 +54,14 @@ it('requires --force to seed', function () {
     expect(User::count())->toBe(0);
 });
 
-it('seeds six synthetic members and one synthetic admin on staging', function () {
+it('seeds six synthetic members, one synthetic admin and one synthetic child on staging', function () {
     setEnv('staging');
 
     $this->artisan('staging:seed --force')->assertExitCode(0);
 
-    expect(User::count())->toBe(7)
-        ->and(User::where('email', 'not like', '%@example.test')->count())->toBe(0)
+    expect(User::count())->toBe(8)
+        ->and(User::whereNotNull('email')->where('email', 'not like', '%@example.test')->count())->toBe(0)
+        ->and(User::whereNull('email')->where('name', 'not like', '% (demo)')->count())->toBe(0)
         ->and(User::where('is_admin', true)->count())->toBe(1)
         ->and(User::where('is_admin', true)->first()->email)->toBe('admin@example.test');
 });
@@ -63,7 +74,7 @@ it('gives members preset grants (plus the demo health and finance grants) and th
     $admin = User::where('is_admin', true)->first();
     expect($admin->modulePermissions()->count())->toBe(0);
     foreach (User::where('is_admin', false)->get() as $member) {
-        expect($member->modulePermissions()->count())->toBe(4);
+        expect($member->modulePermissions()->count())->toBe(6);
     }
     // Health is restricted by default; the demo family grants it to exactly four members (the admin and Guest never).
     $health = fn (string $email) => DB::table('module_permissions')->where('module', 'health')->where('user_id', User::where('email', $email)->value('id'))->value('level');
@@ -85,7 +96,7 @@ it('is idempotent', function () {
     $this->artisan('staging:seed --force')->assertExitCode(0);
     $this->artisan('staging:seed --force')->assertExitCode(0);
 
-    expect(User::count())->toBe(7);
+    expect(User::count())->toBe(8);
 });
 
 it('audit passes when all users are synthetic', function () {
@@ -144,7 +155,8 @@ it('gives every synthetic account the shared staging password when one is config
 
     $this->artisan('staging:seed --force')->assertExitCode(0);
 
-    foreach (User::all() as $user) {
+    // the synthetic child cannot sign in and keeps a random unusable password
+    foreach (User::whereNotNull('email')->get() as $user) {
         expect(Hash::check('a-shared-staging-pass-1', $user->password))->toBeTrue()
             ->and($user->password_set)->toBeTrue();
     }
@@ -190,6 +202,22 @@ function synthRows(User $user): void
         'started_by' => $user->id, 'agent' => 'codex', 'attempt' => 1, 'status' => 'failed', 'queued_at' => now()]);
     Task::factory()->create(['creator_id' => $user->id]);
     Wish::factory()->create(['owner_id' => $user->id]);
+    $list = ShoppingList::factory()->create(['creator_id' => $user->id]);
+    ShoppingItem::factory()->create(['list_id' => $list->id, 'created_by' => $user->id]);
+    $catalog = new ShoppingCatalogItem(['name' => "Tester item {$user->id}"]);
+    $catalog->forceFill(['created_by' => $user->id])->save();
+    $store = new ShoppingStore(['name' => "Tester store {$user->id}"]);
+    $store->forceFill(['created_by' => $user->id])->save();
+    $unit = ShoppingUnit::factory()->create();
+    $unit->forceFill(['created_by' => $user->id])->save();
+    $recipe = Recipe::factory()->create(['author_id' => $user->id]);
+    $ingredient = RecipeIngredient::factory()->create(['recipe_id' => $recipe->id]);
+    $step = RecipeStep::factory()->create(['recipe_id' => $recipe->id]);
+    DB::table('recipe_member_states')->insert(['recipe_id' => $recipe->id, 'user_id' => $user->id, 'favourite' => true]);
+    DB::table('recipe_ingredient_ticks')->insert(['ingredient_id' => $ingredient->id, 'user_id' => $user->id]);
+    DB::table('recipe_step_done')->insert(['step_id' => $step->id, 'user_id' => $user->id]);
+    RecipeImport::factory()->create(['user_id' => $user->id]);
+    Storage::disk('local')->put("wish-images/recipes/{$recipe->id}/tester-full.jpg", 'x');
 }
 
 it('reseeds and audits cleanly after the synthetic admin produced audit rows (live staging failure)', function () {
@@ -220,7 +248,9 @@ function seededCounts(): array
         'finance_accounts', 'finance_account_members', 'finance_transactions', 'finance_recurring', 'finance_recurring_matches', 'finance_budgets',
         'finance_import_profiles', 'finance_import_batches', 'finance_import_rows', 'medical_subjects', 'medical_subject_members', 'medical_visits',
         'medical_medications', 'medical_allergies', 'medical_vaccinations', 'medical_contacts', 'medical_documents', 'medical_ai_extractions',
-        'medical_ai_decisions', 'module_permissions', 'users'];
+        'medical_ai_decisions', 'shopping_lists', 'shopping_items', 'shopping_list_members', 'shopping_catalog_items', 'shopping_stores',
+        'shopping_units', 'recipes', 'recipe_photos', 'recipe_ingredients', 'recipe_steps', 'recipe_member_states', 'recipe_ingredient_ticks',
+        'recipe_step_done', 'recipe_categories', 'recipe_imports', 'module_permissions', 'users'];
 
     return collect($tables)->mapWithKeys(fn (string $t) => [$t => DB::table($t)->count()])->all();
 }
@@ -234,7 +264,7 @@ it('reseeds and audits cleanly after synthetic users created finance, medical, A
         synthRows($user);
     }
     $calls = DB::table('ai_calls')->count();
-    expect($calls)->toBe($demoCalls + 7);
+    expect($calls)->toBe($demoCalls + User::count());
 
     $this->artisan('staging:seed --force')->assertExitCode(0);
 

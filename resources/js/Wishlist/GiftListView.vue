@@ -24,7 +24,7 @@ const wishes = computed(() => props.list.wishes ?? []);
         <slot name="context" />
 
         <header class="list-header">
-            <UiAvatar :name="name" :size="40" decorative />
+            <UiAvatar :name="name" :size="40" :user-id="list.owner.id ?? null" decorative />
             <h2 class="list-header__title">{{ t('wishlist.list.title', { name }) }}</h2>
             <span class="list-header__count">{{ t('wishlist.list.count', { n: wishes.length }, wishes.length) }}</span>
         </header>

@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Dev-stack smoke for the scoped nginx body limits of the wish image upload (plan 04-02 / 04-07) and the medical
-# document upload (plan 07-10: 12m on /health/people/<uuid>/documents).
+# Shopping catalog image and store logo upload (plan 11-04: 8m on /shopping/(catalog|stores)/<id>/image),
+# recipe photo upload (plan 12-04: 8m on /recipes/<id>/photos).
+# Dev-stack smoke for the scoped nginx body limits of the wish image upload (plan 04-02 / 04-07), the profile photo
+# upload (plan 10-03: 8m on /people/<id>/photo) and the medical document upload (plan 07-10: 12m on
+# /health/people/<uuid>/documents).
 # Usage: bash scripts/check-upload-limit.sh [compose-project]   (run from the repo root, default fh0407)
 # A well-formed 2 MiB multipart body must reach PHP on the upload route (any status except 413 and 404;
 # 419 from the CSRF check is expected and proves the pinned SCRIPT_NAME matched the route), while the same
@@ -48,6 +51,9 @@ post() {
 }
 echo "upload=$(post /wishlist/wishes/1/image)"
 echo "other=$(post /login)"
+echo "profile=$(post /people/1/photo)"
+echo "shopping=$(post /shopping/catalog/1/image)"
+echo "recipes=$(post /recipes/1/photos)"
 # 11 MiB body: above the 2m default, below the 12m scoped limit, so it must reach PHP on the medical route.
 rm -f "$F"
 {
@@ -68,6 +74,21 @@ if [ -z "$upload" ] || [ "$upload" = "413" ] || [ "$upload" = "404" ]; then
   echo "FAIL: upload route answered '${upload:-none}' (must reach PHP, not 413 or 404)" >&2
   exit 1
 fi
+profile=$(printf '%s\n' "$out" | sed -n 's/^profile=//p')
+if [ -z "$profile" ] || [ "$profile" = "413" ] || [ "$profile" = "404" ]; then
+  echo "FAIL: profile photo route answered '${profile:-none}' (must reach PHP, not 413 or 404)" >&2
+  exit 1
+fi
+shopping=$(printf '%s\n' "$out" | sed -n 's/^shopping=//p')
+if [ -z "$shopping" ] || [ "$shopping" = "413" ] || [ "$shopping" = "404" ]; then
+  echo "FAIL: shopping image route answered '${shopping:-none}' (must reach PHP, not 413 or 404)" >&2
+  exit 1
+fi
+recipes=$(printf '%s\n' "$out" | sed -n 's/^recipes=//p')
+if [ -z "$recipes" ] || [ "$recipes" = "413" ] || [ "$recipes" = "404" ]; then
+  echo "FAIL: recipe photo route answered '${recipes:-none}' (must reach PHP, not 413 or 404)" >&2
+  exit 1
+fi
 medical=$(printf '%s\n' "$out" | sed -n 's/^medical=//p')
 medicalother=$(printf '%s\n' "$out" | sed -n 's/^medicalother=//p')
 
@@ -83,4 +104,4 @@ if [ "$other" != "413" ]; then
   echo "FAIL: other route answered '${other:-none}' (expected 413)" >&2
   exit 1
 fi
-echo "UPLOAD-LIMIT OK upload=$upload other=$other medical=$medical medicalother=$medicalother"
+echo "UPLOAD-LIMIT OK upload=$upload profile=$profile shopping=$shopping recipes=$recipes other=$other medical=$medical medicalother=$medicalother"

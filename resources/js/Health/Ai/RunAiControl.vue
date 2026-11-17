@@ -19,7 +19,7 @@ import HelpTip from '../../Components/ui/HelpTip.vue';
 const props = defineProps({
     personId: { type: String, required: true },
     document: { type: Object, required: true },
-    // PersonPage `ai` prop: {canRun, available, providers, noticeAcknowledged}
+    // PersonPage `ai` prop: {canRun, available, providers, noticeAcknowledged, textNotice}
     ai: { type: Object, default: () => ({ canRun: false, available: false, providers: ['codex'], noticeAcknowledged: false }) },
     // useAiStatus() result shared by the whole page: {statuses, failedPolls, stoppedLongWait, stalled, refresh, markQueued}
     poller: { type: Object, required: true },
@@ -44,13 +44,19 @@ const providers = computed(() => {
     if (Array.isArray(providersLocal.value) && providersLocal.value.length > 0) return providersLocal.value;
     return Array.isArray(props.ai?.providers) && props.ai.providers.length > 0 ? props.ai.providers : ['codex'];
 });
-const providerLine = computed(() => {
+// Whether the notice and the provider line also say that the recognised text is stored here (full-text reading on).
+// A 409 answer that reopens the notice can turn it on for a page that loaded before the switch was.
+const textLocal = ref(null);
+watch(() => props.ai?.textNotice, () => { textLocal.value = null; });
+const textNotice = computed(() => textLocal.value ?? Boolean(props.ai?.textNotice));
+const providerKind = computed(() => {
     const hasCodex = providers.value.includes('codex');
     const hasCopilot = providers.value.includes('copilot');
-    if (hasCodex && hasCopilot) return 'provider_both';
-    return hasCopilot ? 'provider_copilot' : 'provider_codex';
+    if (hasCodex && hasCopilot) return 'both';
+    return hasCopilot ? 'copilot' : 'codex';
 });
-const noticeVariant = computed(() => ({ provider_both: 'multi', provider_copilot: 'github', provider_codex: 'codex' }[providerLine.value]));
+const providerLine = computed(() => `${textNotice.value ? 'provider_text' : 'provider'}_${providerKind.value}`);
+const noticeVariant = computed(() => ({ both: 'multi', copilot: 'github', codex: 'codex' }[providerKind.value]));
 const canRun = computed(() => Boolean(props.ai?.canRun));
 
 // Local corrections from a 409 answer; the matching prop wins again when it changes.
@@ -58,13 +64,16 @@ const consentLocal = ref(null);
 const availableLocal = ref(null);
 const unsupportedLocal = ref(false);
 const ackLocal = ref(false);
+// Set by a 409 notice_required: the server wants the dialog again whatever the page-load prop said, until a send succeeds.
+const noticeForced = ref(false);
+watch(() => props.ai?.noticeAcknowledged, () => { noticeForced.value = false; ackLocal.value = false; });
 watch(() => props.consentOn, () => { consentLocal.value = null; });
 watch(() => props.ai?.available, () => { availableLocal.value = null; });
 
 const consent = computed(() => consentLocal.value ?? props.consentOn);
 const available = computed(() => availableLocal.value ?? (props.poller.available?.value ?? props.ai?.available ?? false));
 const unsupported = computed(() => unsupportedLocal.value);
-const acknowledged = computed(() => ackLocal.value || Boolean(props.ai?.noticeAcknowledged));
+const acknowledged = computed(() => !noticeForced.value && (ackLocal.value || Boolean(props.ai?.noticeAcknowledged)));
 
 // The one reason the button is dead, if any (HEIC cannot be fixed by consent, so it comes first).
 const blocked = computed(() => {
@@ -91,36 +100,62 @@ const runLabel = computed(() => (status.value === 'ready' || status.value === 'f
 const runVariant = computed(() => (status.value === 'ready' ? 'ghost' : 'secondary'));
 const describedBy = computed(() => (blocked.value ? ids.reason : ids.sends));
 const readyCount = computed(() => (typeof entry.value?.entryCount === 'number' ? entry.value.entryCount : null));
-const partialPages = computed(() => status.value === 'ready' && entry.value?.pagesRead != null && entry.value?.pagesTotal != null && entry.value.pagesRead < entry.value.pagesTotal);
+const partialPages = computed(() => (status.value === 'ready' || status.value === 'text_saved') && entry.value?.pagesRead != null && entry.value?.pagesTotal != null && entry.value.pagesRead < entry.value.pagesTotal);
+// The recognised text of this run is already stored (step 1 done). A text-only run has no step 2.
+const textSaved = computed(() => entry.value?.textSaved === true);
 const detail = computed(() => {
     switch (status.value) {
-        case 'queued':
-        case 'running': return t('health.ai.status.wait_detail');
+        case 'queued': return t('health.ai.status.wait_detail');
+        case 'running': return textSaved.value && entry.value?.mode !== 'text' ? t('health.ai.status.text_saved_preparing') : t('health.ai.status.wait_detail');
+        case 'text_saved': return t('health.ai.status.text_saved_detail');
         case 'ready': return readyCount.value ? t('health.ai.status.ready_detail', { n: readyCount.value }, readyCount.value) : '';
         case 'waiting': return t('health.ai.status.waiting_detail');
         case 'failed': {
-            const code = { quota_timeout: 'quota_timeout_detail', quota_exhausted: 'quota_exhausted_detail', no_agent: 'no_agent_detail', notice_required: 'notice_required_detail' }[entry.value?.failureCode];
-            return t(`health.ai.status.${code ?? 'failed_detail'}`);
+            // With the recognised text already saved, the line says that only the suggestions are missing (never "Nothing was saved").
+            const code = textSaved.value
+                ? { quota_timeout: 'quota_timeout_suggestions_detail', quota_exhausted: 'quota_exhausted_suggestions_detail' }[entry.value?.failureCode] ?? 'failed_suggestions_detail'
+                : { quota_timeout: 'quota_timeout_detail', quota_exhausted: 'quota_exhausted_detail', no_agent: 'no_agent_detail', notice_required: 'notice_required_detail' }[entry.value?.failureCode] ?? 'failed_detail';
+            return t(`health.ai.status.${code}`);
         }
-        case 'cancelled': return entry.value.cancelReason === 'consent' ? t('health.ai.status.consent_detail') : t('health.ai.status.cancelled_detail');
+        case 'cancelled':
+            if (entry.value.cancelReason === 'consent') return t(`health.ai.status.${textSaved.value ? 'consent_suggestions_detail' : 'consent_detail'}`);
+            return t(`health.ai.status.${textSaved.value ? 'cancelled_suggestions_detail' : 'cancelled_detail'}`);
         default: return '';
     }
 });
+
+// A second line while waiting for quota: the text is kept, so say so. (After a failure or a cancel the detail line itself says it.)
+const extraDetail = computed(() => (textSaved.value && status.value === 'waiting' ? t('health.ai.status.waiting_text_saved') : ''));
 
 function announce(text) {
     announcement.value = '';
     nextTick(() => { announcement.value = text; });
 }
 
+// "The text is saved" is announced once per run, whether it comes with the first save or with the end of a text-only run.
+let savedAnnounced = false;
+watch(() => entry.value?.extractionId ?? null, () => { savedAnnounced = false; });
+function announceSaved() {
+    if (savedAnnounced) return;
+    savedAnnounced = true;
+    announce(t('health.ai.status.announce_text_saved'));
+}
+watch(() => status.value === 'running' && textSaved.value, (now, before) => {
+    if (before === false && now === true) announceSaved();
+});
+
 // Only transitions are announced; the first value seen on mount and unchanged polls say nothing.
 watch(status, (next, previous) => {
     if (previous === undefined || previous === null || next === previous) return;
+    if (next === 'text_saved') return announceSaved();
     if (next === 'waiting') {
         const at = entry.value?.availableAt;
         announce(at && !isPast(at) ? t('health.ai.status.waiting_announce', { when: formatWhen(at, appLocale.value) }) : t('health.ai.status.waiting_soon'));
         return;
     }
-    const key = { running: 'announce_running', ready: 'announce_ready', failed: 'announce_failed', cancelled: 'announce_cancelled' }[next];
+    // The text-saved announcement of the same poll wins over "AI is reading": it is said once and could not be repeated.
+    if (next === 'running' && textSaved.value && entry.value?.mode !== 'text') return;
+    const key = { running: 'announce_running', ready: 'announce_ready', failed: textSaved.value ? 'announce_failed_suggestions' : 'announce_failed', cancelled: 'announce_cancelled' }[next];
     if (key) announce(t(`health.ai.status.${key}`));
 });
 
@@ -154,15 +189,19 @@ function confirmNotice(shown) {
 }
 
 async function send(withAck, shown = null) {
+    if (busy.value) return;
     busy.value = true;
+    // textNotice is claimed only by the dialog that showed the statement about the stored text.
+    const body = withAck ? { acknowledged: true, providers: [...shown], ...(textNotice.value ? { textNotice: true } : {}) } : {};
     const result = await securityFetch(`/health/people/${props.personId}/documents/${props.document.id}/ai`, {
         method: 'POST',
-        body: withAck ? { acknowledged: true, providers: [...shown] } : {},
+        body,
         replay: true,
     });
     busy.value = false;
     if (result.ok) {
         ackLocal.value = true;
+        noticeForced.value = false;
         props.poller.markQueued(props.document.id, result.data?.extractionId ?? null);
         toast.show(t('health.ai.run.started_toast'));
         props.poller.refresh();
@@ -180,7 +219,9 @@ async function send(withAck, shown = null) {
         if (reason === 'notice_required') {
             // The enabled providers changed after the page loaded: ask again with the current set.
             if (Array.isArray(result.data?.providers) && result.data.providers.length > 0) providersLocal.value = result.data.providers;
+            if (typeof result.data?.textNotice === 'boolean') textLocal.value = result.data.textNotice;
             ackLocal.value = false;
+            noticeForced.value = true;
             noticeOpen.value = true;
             return;
         }
@@ -213,9 +254,10 @@ const pollFailed = computed(() => props.poller.failedPolls.value >= 3);
         <p class="visually-hidden" role="status" data-testid="ai-announce">{{ announcement }}</p>
 
         <div v-if="entry" class="run-ai__state">
-            <AiStatusTag :status="entry.status" :cancel-reason="entry.cancelReason" :entry-count="canRun ? readyCount : null" :available-at="availableAt" :failure-code="entry.failureCode ?? null" />
+            <AiStatusTag :status="entry.status" :cancel-reason="entry.cancelReason" :entry-count="canRun ? readyCount : null" :available-at="availableAt" :failure-code="entry.failureCode ?? null" :text-saved="textSaved" />
             <template v-if="canRun">
                 <p v-if="detail" class="run-ai__detail" data-testid="ai-detail">{{ detail }}</p>
+                <p v-if="extraDetail" class="run-ai__detail" data-testid="ai-detail-text">{{ extraDetail }}</p>
                 <AiProvenanceLine v-if="status === 'ready' && entry.agent" :agent="entry.agent" :model="entry.model ?? null" />
                 <p v-if="partialPages" class="run-ai__detail" data-testid="ai-pages">{{ t('health.ai.status.pages_read', { n: entry.pagesRead }, entry.pagesRead) }}</p>
             </template>
@@ -256,7 +298,7 @@ const pollFailed = computed(() => props.poller.failedPolls.value >= 3);
             </template>
         </template>
 
-        <AiNoticeDialog :open="noticeOpen" :variant="noticeVariant" :providers="providers" @confirm="confirmNotice" @cancel="noticeOpen = false" />
+        <AiNoticeDialog :open="noticeOpen" :variant="noticeVariant" :providers="providers" :text="textNotice" @confirm="confirmNotice" @cancel="noticeOpen = false" />
         <UiDialog :open="rerunOpen" :title="t('health.ai.run.rerun_title')" :initial-focus="() => keepCurrent" @update:open="(v) => { if (!v) rerunOpen = false; }">
             <p class="run-ai__body">{{ t('health.ai.run.rerun_body') }}</p>
             <template #footer>

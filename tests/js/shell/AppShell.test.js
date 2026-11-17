@@ -71,6 +71,18 @@ describe('AppShell desktop', () => {
         expect(wrapper.find('[aria-haspopup="menu"]').text()).toContain(en.nav.account);
     });
 
+    it('shows the signed-in member avatar (photo or initial) in the account menu trigger', () => {
+        setWidth(1280);
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, avatars: { 7: 2 }, auth: { user: { id: 7, name: 'Zuzana', email: 'z@example.test' } } };
+        mountShell();
+        expect(wrapper.find('[aria-haspopup="menu"] img').attributes('src')).toBe('/people/7/photo/thumb?v=2');
+        wrapper.unmount();
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, avatars: {}, auth: { user: { id: 7, name: 'Zuzana', email: 'z@example.test' } } };
+        mountShell();
+        expect(wrapper.find('[aria-haspopup="menu"] img').exists()).toBe(false);
+        expect(wrapper.find('[aria-haspopup="menu"]').text()).toContain('Z');
+    });
+
     it('toggles and remembers the sidebar', async () => {
         setWidth(1280);
         mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' } };
@@ -99,6 +111,62 @@ describe('AppShell desktop', () => {
         const nav = wrapper.find(`nav[aria-label="${en.nav.main}"]`);
         expect(nav.findAll('li')).toHaveLength(5);
         expect(nav.find('a[href="/manual"]').exists()).toBe(false);
+    });
+
+    it.each(['en', 'sk', 'pl'])('shows Shopping in the sidebar and the phone bottom bar for a member with the grant (%s)', async (locale) => {
+        const messages = loadMessages(locale);
+        mockProps = { locale, app: { name: 'Family Hub', env: 'production' }, auth: { access: { ...FULL_ACCESS, shopping: 'view' } } };
+        setWidth(1280);
+        mountShell({ locale, messages });
+        await nextTick();
+        const side = wrapper.find(`nav[aria-label="${messages.nav.main}"]`);
+        const item = side.findAll('li').at(5);
+        expect(item.find('a').attributes('href')).toBe('/shopping');
+        expect(item.text()).toBe(messages.nav.shopping);
+        expect(item.find('svg').exists()).toBe(true);
+        wrapper.unmount();
+        setWidth(390);
+        mountShell({ locale, messages });
+        await nextTick();
+        const bar = wrapper.find(`nav[aria-label="${messages.nav.main}"]`);
+        expect(bar.findAll('li')).toHaveLength(6);
+        expect(bar.find('a[href="/shopping"]').text()).toContain(messages.nav.shopping);
+    });
+
+    it.each(['en', 'sk', 'pl'])('shows Recipes with a chef-hat icon in the sidebar and as the seventh phone bar item (%s)', async (locale) => {
+        const messages = loadMessages(locale);
+        mockProps = { locale, app: { name: 'Family Hub', env: 'production' }, auth: { access: { ...FULL_ACCESS, shopping: 'view', recipes: 'view' } } };
+        setWidth(1280);
+        mountShell({ locale, messages });
+        await nextTick();
+        const side = wrapper.find(`nav[aria-label="${messages.nav.main}"]`);
+        const item = side.findAll('li').at(6);
+        expect(item.find('a').attributes('href')).toBe('/recipes');
+        expect(item.text()).toBe(messages.nav.recipes);
+        expect(item.find('svg').exists()).toBe(true);
+        wrapper.unmount();
+        setWidth(390);
+        mountShell({ locale, messages });
+        await nextTick();
+        const bar = wrapper.find(`nav[aria-label="${messages.nav.main}"]`);
+        expect(bar.findAll('li')).toHaveLength(7);
+        expect(bar.find('a[href="/recipes"]').text()).toContain(messages.nav.recipes);
+    });
+
+    it('hides Recipes without a grant', async () => {
+        setWidth(1280);
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, auth: { access: { ...FULL_ACCESS, shopping: 'view', recipes: 'none' } } };
+        mountShell();
+        await nextTick();
+        expect(wrapper.find('a[href="/recipes"]').exists()).toBe(false);
+    });
+
+    it('hides Shopping without a grant', async () => {
+        setWidth(1280);
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, auth: { access: { ...FULL_ACCESS, shopping: 'none' } } };
+        mountShell();
+        await nextTick();
+        expect(wrapper.find('a[href="/shopping"]').exists()).toBe(false);
     });
 
     it('links Health in the nav to /health with no badge or count', () => {
@@ -202,7 +270,7 @@ describe('AppShell text length', () => {
         ['pseudo-long en', () => pseudoLong(loadMessages('en'))],
     ];
     for (const [name, get] of cases) {
-        for (const width of [390, 1280]) {
+        for (const width of [360, 390, 1280]) {
             it(`shows full nav labels in ${name} at ${width}`, async () => {
                 setWidth(width);
                 mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' } };

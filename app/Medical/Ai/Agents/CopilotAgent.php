@@ -2,15 +2,15 @@
 
 namespace App\Medical\Ai\Agents;
 
+use App\Medical\Ai\AiTask;
 use App\Medical\Ai\CopilotRequest;
 use App\Medical\Ai\CopilotRunner;
-use App\Medical\Ai\ExtractionValidator;
 use App\Medical\Ai\FailureCode;
 use App\Medical\Ai\JsonReply;
 use App\Medical\Ai\LoginState;
+use App\Medical\Ai\MedicalTask;
 use App\Medical\Ai\ModelId;
 use App\Medical\Ai\ProcessResult;
-use App\Medical\Ai\PromptBuilder;
 use Closure;
 use Throwable;
 
@@ -54,16 +54,17 @@ final class CopilotAgent implements Agent
         $reply = $dir->file('reply.txt');
         $usage = $dir->file('usage.json');
         $images = array_map(fn (string $name) => $dir->file($name), $in->images);
-        $builder = new PromptBuilder;
+        /** @var AiTask $task */
+        $task = $in->task ?? new MedicalTask;
 
         $duration = 0;
-        $first = $this->call($in, $builder->buildInline(), $images, $usage, $shouldAbort, $duration);
-        $step = $first === null ? $this->timeout($duration) : $this->map($first, $reply, $duration);
+        $first = $this->call($in, $task->inlinePrompt(null), $images, $usage, $shouldAbort, $duration);
+        $step = $first === null ? $this->timeout($duration) : $this->map($first, $reply, $duration, $task);
 
         if (is_array($step) && ! $first?->aborted && $this->timeLeftForRepair($in)) {
             @unlink($reply);
-            $second = $this->call($in, $builder->buildInline($step), $images, $usage, $shouldAbort, $duration);
-            $step = $second === null ? $this->timeout($duration) : $this->map($second, $reply, $duration);
+            $second = $this->call($in, $task->inlinePrompt($step), $images, $usage, $shouldAbort, $duration);
+            $step = $second === null ? $this->timeout($duration) : $this->map($second, $reply, $duration, $task);
             if (is_array($step)) {
                 $step = $this->failed(FailureCode::InvalidOutput, $duration);
             }
@@ -108,7 +109,7 @@ final class CopilotAgent implements Agent
      *
      * @return AgentOutcome|list<string>
      */
-    private function map(ProcessResult $r, string $reply, int $duration): AgentOutcome|array
+    private function map(ProcessResult $r, string $reply, int $duration, AiTask $task): AgentOutcome|array
     {
         if ($r->aborted) {
             return new AgentOutcome(false, null, null, null, true, $duration, 'default');
@@ -126,9 +127,13 @@ final class CopilotAgent implements Agent
         $json = JsonReply::decode($reply);
         $issues = ['root:json_syntax'];
         if ($json !== null) {
-            $inspected = (new ExtractionValidator)->inspect($json);
+            $inspected = $task->inspect($json);
             if ($inspected['outcome']->ok) {
                 return new AgentOutcome(true, $inspected['outcome']->payload, $inspected['outcome']->entryCount, null, false, $duration, 'default');
+            }
+            // A well-formed reply that says the page holds no recipe is final: repairing it would only waste a call.
+            if ($inspected['outcome']->failure === FailureCode::NoRecipe) {
+                return $this->failed(FailureCode::NoRecipe, $duration);
             }
             $issues = array_map(fn (string $c) => str_contains($c, ':') ? $c : 'root:'.$c, $inspected['issues']);
         }

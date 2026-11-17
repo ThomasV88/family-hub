@@ -49,9 +49,14 @@ enum AuditEvent: string
     case MedicalAiEntryDecided = 'medical_ai_entry_decided';
     case MedicalArchived = 'medical_archived';
     case MedicalRestored = 'medical_restored';
+    case MedicalTextRemoved = 'medical_text_removed';
     case AiAgentSettingChanged = 'ai_agent_setting_changed';
     case AiBulkRunChanged = 'ai_bulk_run_changed';
     case HelpTextChanged = 'help_text_changed';
+    case ProfileChangedByOther = 'profile_changed_by_other';
+    case ChildCreated = 'child_created';
+    case ChildConverted = 'child_converted';
+    case ShoppingListMailed = 'shopping_list_mailed';
 
     /** UI filter groups, in display order. */
     public const GROUPS = ['login', 'login_failed', 'invite', 'permission', 'session_revoked', 'health', 'finance', 'account', 'security'];
@@ -89,10 +94,16 @@ enum AuditEvent: string
             self::MedicalAiRunFinished => ['subject', 'document', 'status', 'bulk'],
             self::MedicalAiEntryDecided => ['subject', 'document', 'decision'],
             self::MedicalArchived, self::MedicalRestored => ['subject', 'type', 'record'],
+            // Ids only: which person's document lost its recognised text, never the text or the title.
+            self::MedicalTextRemoved => ['subject', 'record'],
             self::AiAgentSettingChanged => ['agent', 'field', 'value'],
             self::AiBulkRunChanged => ['action', 'scope', 'count'],
             // The help key and the locale codes that changed; never the text itself.
             self::HelpTextChanged => ['key', 'locales'],
+            // Which part of a child's profile someone else changed (photo or name); never the name text.
+            self::ProfileChangedByOther => ['field'],
+            // How many addresses a list was e-mailed to; never the addresses.
+            self::ShoppingListMailed => ['recipient_count'],
             default => [],
         };
     }
@@ -110,11 +121,11 @@ enum AuditEvent: string
             self::MedicalSubjectCreated, self::MedicalSubjectDeleted, self::MedicalAccessChanged,
             self::MedicalAdminSelfAdded, self::MedicalExported, self::MedicalConsentChanged,
             self::MedicalAiRunRequested, self::MedicalAiRunFinished, self::MedicalAiEntryDecided,
-            self::MedicalArchived, self::MedicalRestored,
+            self::MedicalArchived, self::MedicalRestored, self::MedicalTextRemoved,
             self::AiAgentSettingChanged, self::AiBulkRunChanged => 'health',
             self::FinanceRead, self::FinanceWrite, self::FinanceVisibilityChanged, self::FinanceAdminSelfAdded, self::FinanceCategoryChanged => 'finance',
             self::AccessDenied => $module === 'finance' ? 'finance' : 'health',
-            self::PasswordReset, self::AdminCreated, self::GoogleLinked, self::HelpTextChanged => 'account',
+            self::PasswordReset, self::AdminCreated, self::GoogleLinked, self::HelpTextChanged, self::ProfileChangedByOther, self::ChildCreated, self::ChildConverted, self::ShoppingListMailed => 'account',
             self::TwoFactorEnabled, self::TwoFactorDisabled, self::RecoveryCodesRegenerated, self::RecoveryCodeUsed,
             self::PasskeyAdded, self::PasskeyRenamed, self::PasskeyRemoved, self::SecondFactorFailed,
             self::ReauthConfirmed, self::SecondFactorReset, self::SecurityPolicyChanged => 'security',

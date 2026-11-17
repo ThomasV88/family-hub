@@ -36,6 +36,9 @@ arch('medical queries are used only by the medical layers')
         'App\Http\Requests\Health',
         'App\Http\Requests\Settings\HealthPeople',
         'App\Console\Commands',
+        // the staging seed writes its synthetic recognised texts through the production DocumentTextStore (13-10); the one
+        // seeder class that does, nothing else under Database\Seeders
+        'Database\Seeders\Staging\DocumentTextsSeeder',
         'Tests',
     ]);
 

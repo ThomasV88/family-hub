@@ -21,7 +21,7 @@ const settingsKeys = [...settingsPhp.matchAll(/'key' => '(\w+)'/g)].map((m) => m
 const adminSettingsKeys = [...settingsPhp.matchAll(/\$user->is_admin && [^{]*\{\s*\$sections\[\] = \['key' => '(\w+)'/g)].map((m) => m[1]);
 
 // Features that are not a module or a Settings section but must be explained: the green question marks (issue 4).
-const FEATURES = ['feature:help', 'feature:help-admin'];
+const FEATURES = ['feature:help', 'feature:help-admin', 'feature:profile'];
 
 describe('manual covers the app', () => {
     it('explains the green question marks to everyone and how administrators edit them in an administrator-only part', () => {
@@ -29,6 +29,21 @@ describe('manual covers the app', () => {
         expect(covered(true).has('feature:help-admin'), 'no administrator-only section covers editing the help texts').toBe(true);
         expect(covered(true).has('feature:help'), 'the question marks are for everyone, not administrator-only').toBe(false);
         expect(readFileSync(`${ROOT}/resources/help/topics.json`, 'utf8')).toContain('"topics"');
+    });
+
+    it('explains the profile page (name, photo, e-mail) to everyone and says who sees a photo', () => {
+        expect(covered(false).has('feature:profile'), 'no manual topic covers the profile page').toBe(true);
+        for (const l of LOCALES) {
+            expect(manual[l].profile.sections.map((s) => s.id)).toEqual(['open-profile', 'change-name', 'photo', 'email']);
+            expect(manual[l]['who-sees-what'].sections.some((s) => s.id === 'profile-photo'), `${l} who-sees-what profile-photo`).toBe(true);
+        }
+    });
+
+    it('explains child accounts to administrators and a child list to everyone, with the same section ids in every language', () => {
+        for (const l of LOCALES) {
+            expect(manual[l].admin.sections.map((s) => s.id), `${l} admin`).toContain('children');
+            expect(manual[l].wishlist.sections.map((s) => s.id), `${l} wishlist`).toContain('child-list');
+        }
     });
 
     it('has a topic for every module in the navigation', () => {

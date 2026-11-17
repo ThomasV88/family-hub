@@ -60,14 +60,14 @@ class GoogleLoginService
         // The Google subject is the stable identity (Google accounts can change their email).
         $user = User::query()->where('google_id', $sub)->first();
         if ($user !== null) {
-            return ['login', $user];
+            return $user->canSignIn() ? ['login', $user] : [self::FAILED, null];
         }
 
         $byEmail = User::query()->whereRaw('lower(email) = ?', [$email])->first();
         if ($byEmail === null) {
             return [self::NOT_INVITED, null];
         }
-        if ($byEmail->google_id !== null) {
+        if ($byEmail->google_id !== null || ! $byEmail->canSignIn()) {
             return [self::FAILED, null];
         }
 

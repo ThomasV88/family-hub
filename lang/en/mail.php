@@ -16,4 +16,22 @@ return [
     'google_linked_line' => 'Someone just signed in with a Google account that uses your email address, and it is now linked to your Family Hub account.',
     'google_linked_action' => 'If this was you, nothing more to do. If it was not, ask your family admin to review your account and change your password right away.',
     'salutation' => 'Family Hub',
+    'shopping_list' => [
+        'subject' => ':name — shopping list',
+        'store' => 'Store: :name',
+        'responsible' => 'Responsible: :name',
+        'bought' => 'bought',
+        'unavailable' => 'unavailable',
+        'units' => [
+            'pcs' => 'pc|pcs',
+            'g' => 'g|g',
+            'kg' => 'kg|kg',
+            'ml' => 'ml|ml',
+            'l' => 'l|l',
+            'pack' => 'pack|packs',
+            'bunch' => 'bunch|bunches',
+            'tbsp' => 'tbsp|tbsp',
+            'tsp' => 'tsp|tsp',
+        ],
+    ],
 ];

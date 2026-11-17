@@ -9,18 +9,18 @@ enum Preset: string
     case Grandparent = 'grandparent';
     case Guest = 'guest';
 
-    /** @return array<string, AccessLevel> keyed by Module value, all four modules present */
+    /** @return array<string, AccessLevel> keyed by Module value, every module present, in Module::cases() order */
     public function grants(): array
     {
-        $levels = match ($this) {
-            self::Parent => [AccessLevel::Edit, AccessLevel::Edit, AccessLevel::Edit, AccessLevel::None],
-            self::Child, self::Grandparent => [AccessLevel::Edit, AccessLevel::Edit, AccessLevel::None, AccessLevel::None],
-            self::Guest => [AccessLevel::View, AccessLevel::None, AccessLevel::None, AccessLevel::None],
+        $map = match ($this) {
+            self::Parent => ['todo' => AccessLevel::Edit, 'wishlist' => AccessLevel::Edit, 'finance' => AccessLevel::Edit, 'health' => AccessLevel::None, 'shopping' => AccessLevel::Edit, 'recipes' => AccessLevel::Edit],
+            self::Child, self::Grandparent => ['todo' => AccessLevel::Edit, 'wishlist' => AccessLevel::Edit, 'finance' => AccessLevel::None, 'health' => AccessLevel::None, 'shopping' => AccessLevel::Edit, 'recipes' => AccessLevel::Edit],
+            self::Guest => ['todo' => AccessLevel::View, 'wishlist' => AccessLevel::None, 'finance' => AccessLevel::None, 'health' => AccessLevel::None, 'shopping' => AccessLevel::View, 'recipes' => AccessLevel::View],
         };
 
         $grants = [];
-        foreach (Module::cases() as $i => $module) {
-            $grants[$module->value] = $levels[$i];
+        foreach (Module::cases() as $module) {
+            $grants[$module->value] = $map[$module->value] ?? AccessLevel::None;
         }
 
         return $grants;
