@@ -52,10 +52,10 @@ class ShoppingReminderHandler implements OutboxHandler
         $store = $list->store?->name;
 
         return [
-            'title' => trans('notifications.shopping_reminder.title', [], $locale),
+            'title' => trans('notifications.shopping_reminder_title', [], $locale),
             'body' => $store === null || $store === ''
-                ? trans('notifications.shopping_reminder.body_no_store', ['list' => $name], $locale)
-                : trans('notifications.shopping_reminder.body', ['list' => $name, 'store' => mb_strimwidth($store, 0, 60, '…')], $locale),
+                ? trans('notifications.shopping_reminder_body_no_store', ['list' => $name], $locale)
+                : trans('notifications.shopping_reminder_body', ['list' => $name, 'store' => mb_strimwidth($store, 0, 60, '…')], $locale),
             'url' => '/shopping/lists/'.$list->id,
         ];
     }

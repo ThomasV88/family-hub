@@ -20,9 +20,7 @@ return [
     'vaccination_body' => 'A vaccination for :person is due. Take a look at the record.',
     'vaccination_due_in' => 'in :count day|in :count days',
     'vaccination_action' => 'Open record',
-    'shopping_reminder' => [
-        'title' => 'Time to shop',
-        'body' => ':list at :store.',
-        'body_no_store' => ':list.',
-    ],
+    'shopping_reminder_title' => 'Time to shop',
+    'shopping_reminder_body' => ':list at :store.',
+    'shopping_reminder_body_no_store' => ':list.',
 ];

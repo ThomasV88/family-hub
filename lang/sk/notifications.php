@@ -20,9 +20,7 @@ return [
     'vaccination_body' => 'Očkovanie, :person: termín sa blíži. Pozrite si záznam.',
     'vaccination_due_in' => 'o :count deň|o :count dni|o :count dní',
     'vaccination_action' => 'Otvoriť záznam',
-    'shopping_reminder' => [
-        'title' => 'Čas na nákup',
-        'body' => ':list v obchode :store.',
-        'body_no_store' => ':list.',
-    ],
+    'shopping_reminder_title' => 'Čas na nákup',
+    'shopping_reminder_body' => ':list v obchode :store.',
+    'shopping_reminder_body_no_store' => ':list.',
 ];

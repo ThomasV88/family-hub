@@ -27,7 +27,8 @@ it('has identical keys in every locale', function (string $locale) {
         ['reminder_title', 'reminder_greeting', 'reminder_body', 'reminder_action', 'test_title',
             'gift_title', 'gift_title_family', 'gift_today', 'gift_in_days', 'gift_birthday', 'gift_nameday',
             'gift_christmas', 'gift_body', 'gift_body_family', 'gift_action',
-            'vaccination_title', 'vaccination_body', 'vaccination_due_in', 'vaccination_action']
+            'vaccination_title', 'vaccination_body', 'vaccination_due_in', 'vaccination_action',
+            'shopping_reminder_title', 'shopping_reminder_body', 'shopping_reminder_body_no_store']
     );
     foreach ($other as $key => $value) {
         expect(trim($value))->not->toBe('', $key);
