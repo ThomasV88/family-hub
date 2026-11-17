@@ -66,6 +66,8 @@ class StagingAudit extends Command
             // (health content) may sit in the database. started_by has no foreign key and ai_calls is append-only, so a
             // dangling id is a deleted synthetic user and is accepted; an existing non-synthetic user fails.
             ['medical_ai_extractions', "(started_by in {$real})"],
+            // Phase 13: the recognised full text of a document started by a real user. Same dangling-id rule.
+            ['medical_document_texts', "(started_by in {$real})"],
             ['ai_calls', "(started_by in {$real})"],
             // Phase 11: shopping data of a real user (names, lists, stores) must never reach staging. A list needs a
             // synthetic creator (the column is NOT NULL and RESTRICT, so a null cannot occur). As with finance, a null creator on

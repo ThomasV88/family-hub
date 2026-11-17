@@ -6,6 +6,7 @@ use App\Models\MedicalAiExtraction;
 use App\Models\MedicalDocument;
 use App\Models\MedicalSubject;
 use App\Models\User;
+use Tests\Support\DocumentTextFixtures;
 use Tests\Support\MedicalFixtures;
 
 beforeEach(function () {
@@ -88,4 +89,23 @@ it('accepts an AI call whose starter no longer exists', function () {
     AiCall::factory()->create(['started_by' => 999999]);
 
     $this->artisan('staging:audit')->assertExitCode(0);
+});
+
+it('fails on recognised text started by a real user and passes for a synthetic or vanished starter', function () {
+    $synthetic = User::factory()->create(['email' => 'a.1@example.test']);
+    $document = stagingAiDocument($synthetic);
+
+    DocumentTextFixtures::save($document, ['text'], startedBy: $synthetic->id);
+    $this->artisan('staging:audit')->assertExitCode(0);
+
+    // started_by has no foreign key: a vanished id is a deleted synthetic user and is accepted.
+    DocumentTextFixtures::save($document, ['text'], startedBy: 999999);
+    $this->artisan('staging:audit')->assertExitCode(0);
+
+    // A real user in the database fails the user rule too, so the text rule is told apart by its own line.
+    $real = User::factory()->create(['email' => 'user@real.sk']);
+    DocumentTextFixtures::save($document, ['text'], startedBy: $real->id);
+    $this->artisan('staging:audit')
+        ->expectsOutputToContain('non-synthetic medical_document_texts')
+        ->assertExitCode(1);
 });
