@@ -50,7 +50,7 @@ const remove = () => router.delete(`/health/people/${props.person.id}`);
 
 <template>
     <header class="person-header" data-testid="person-header">
-        <UiAvatar :name="person.name" :size="40" decorative />
+        <UiAvatar :name="person.name" :size="40" :user-id="person.photoUserId ?? null" decorative />
         <div class="person-header__main">
             <h2 class="person-header__name">{{ person.name }}</h2>
             <p v-if="ageLine" class="person-header__line">{{ ageLine }}</p>

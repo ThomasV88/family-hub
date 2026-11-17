@@ -121,6 +121,7 @@ class PersonPage
             'sex' => $subject->sex,
             'bloodType' => $subject->blood_type,
             'hasAccount' => $subject->user_id !== null,
+            'photoUserId' => $subject->user_id === null ? null : (int) $subject->user_id,
             'aiConsent' => (bool) $subject->ai_consent,
             'canEdit' => $this->subjects->levelFor($viewer, $subject) === AccessLevel::Edit,
             'permanentDelete' => Retention::canDeletePermanently($subject->created_at),
