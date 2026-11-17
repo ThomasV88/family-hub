@@ -7,7 +7,7 @@ use App\Medical\Specialty;
 /** The static extraction prompt. No per-run data: the document travels as attached images. */
 final class PromptBuilder
 {
-    private const ISSUE_PATTERN = '/^[a-z_]+(\[\d+\])?(\.[a-z_]+)?:[a-z_]+(:[a-z_]+)?$/D';
+    public const ISSUE_PATTERN = '/^[a-z_]+(\[\d+\])?(\.[a-z_]+)?:[a-z_]+(:[a-z_]+)?$/D';
 
     public const SEVERITIES = ['mild', 'moderate', 'severe', 'unknown'];
 

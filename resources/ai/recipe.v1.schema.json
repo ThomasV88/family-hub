@@ -1,0 +1,133 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "is_recipe",
+    "title",
+    "description",
+    "servings",
+    "prep_minutes",
+    "cook_minutes",
+    "categories",
+    "ingredients",
+    "steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "enum": [
+        1
+      ]
+    },
+    "is_recipe": {
+      "type": "boolean"
+    },
+    "title": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "servings": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "maximum": 99
+    },
+    "prep_minutes": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1440
+    },
+    "cook_minutes": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1440
+    },
+    "categories": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "string"
+      }
+    },
+    "ingredients": {
+      "type": "array",
+      "maxItems": 80,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "quantity",
+          "unit",
+          "note",
+          "original"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "unit": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "g",
+              "kg",
+              "ml",
+              "l",
+              "pcs",
+              "pack",
+              "bunch",
+              "tbsp",
+              "tsp",
+              null
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "original": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "maxItems": 60,
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

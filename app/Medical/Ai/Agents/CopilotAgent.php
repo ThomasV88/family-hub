@@ -131,6 +131,10 @@ final class CopilotAgent implements Agent
             if ($inspected['outcome']->ok) {
                 return new AgentOutcome(true, $inspected['outcome']->payload, $inspected['outcome']->entryCount, null, false, $duration, 'default');
             }
+            // A well-formed reply that says the page holds no recipe is final: repairing it would only waste a call.
+            if ($inspected['outcome']->failure === FailureCode::NoRecipe) {
+                return $this->failed(FailureCode::NoRecipe, $duration);
+            }
             $issues = array_map(fn (string $c) => str_contains($c, ':') ? $c : 'root:'.$c, $inspected['issues']);
         }
 

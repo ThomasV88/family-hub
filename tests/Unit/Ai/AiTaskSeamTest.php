@@ -7,6 +7,7 @@ use App\Medical\Ai\AiTask;
 use App\Medical\Ai\ExtractionOutcome;
 use App\Medical\Ai\FailureCode;
 use App\Medical\Ai\Work\WorkDir;
+use App\Recipes\Ai\RecipeTask;
 use Illuminate\Support\Str;
 use Tests\Support\FakeCodex;
 use Tests\Support\FakeCopilot;
@@ -135,4 +136,24 @@ it('gives up after the single repair call', function () {
     $out = (new CopilotAgent)->extract(new AgentInput($this->dir, [], null, new SeamStubTask($this->schema)));
 
     expect($out->ok)->toBeFalse()->and($out->failure)->toBe(FailureCode::InvalidOutput)->and(file_get_contents($this->counter))->toBe('2');
+});
+
+it('runs the recipe task through both agents; a no-recipe reply is final without a repair call', function () {
+    $recipe = json_encode(['schema_version' => 1, 'is_recipe' => true, 'title' => 'Soup', 'description' => null, 'servings' => 4, 'prep_minutes' => null, 'cook_minutes' => null,
+        'categories' => [], 'ingredients' => [['name' => 'Water', 'quantity' => 1, 'unit' => 'l', 'note' => null, 'original' => '1 l water']], 'steps' => ['Boil.']]);
+    $none = json_encode(['schema_version' => 1, 'is_recipe' => false, 'title' => null, 'description' => null, 'servings' => null, 'prep_minutes' => null, 'cook_minutes' => null,
+        'categories' => [], 'ingredients' => [], 'steps' => []]);
+
+    $codex = FakeCodex::succeeding($recipe);
+    $copilot = FakeCopilot::sequence([$none], $this->counter);
+    $this->scripts[] = $codex;
+    $this->scripts[] = $copilot;
+
+    config(['ai.codex.binary' => $codex]);
+    $a = (new CodexAgent)->extract(new AgentInput($this->dir, [], null, new RecipeTask('Soup page')));
+    config(['ai.copilot.binary' => $copilot]);
+    $b = (new CopilotAgent)->extract(new AgentInput($this->dir, [], null, new RecipeTask('Not a recipe')));
+
+    expect($a->ok)->toBeTrue()->and($a->entryCount)->toBe(1)->and($a->payload['title'])->toBe('Soup')
+        ->and($b->ok)->toBeFalse()->and($b->failure)->toBe(FailureCode::NoRecipe)->and(file_get_contents($this->counter))->toBe('1');
 });
