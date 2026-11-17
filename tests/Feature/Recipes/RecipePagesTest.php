@@ -20,7 +20,7 @@ it('lists only visible recipes with the main photo and the favourite flag', func
     app(RecipeStateService::class)->favourite($me, $shared->id, true);
 
     $response = $this->actingAs($me)->get('/recipes')->assertOk()->assertInertia(fn (Assert $p) => $p
-        ->component('Recipes/Index', false)
+        ->component('Recipes/Index')
         ->has('recipes', 2)
         ->where('hasMore', false)
         ->where('page', 1)
@@ -44,9 +44,9 @@ it('pages the overview 24 at a time and echoes the filters', function () {
         RecipeFixtures::sharedRecipe($me, ['title' => 'Soup number '.$i, 'title_key' => 'soup number '.$i, 'search_key' => 'soup number '.$i], 1, 1);
     }
 
-    $this->actingAs($me)->get('/recipes')->assertInertia(fn (Assert $p) => $p->component('Recipes/Index', false)->has('recipes', 24)->where('hasMore', true));
+    $this->actingAs($me)->get('/recipes')->assertInertia(fn (Assert $p) => $p->component('Recipes/Index')->has('recipes', 24)->where('hasMore', true));
     $this->actingAs($me)->get('/recipes?page=2&show=mine&q=%20soup%20')->assertInertia(fn (Assert $p) => $p
-        ->component('Recipes/Index', false)->has('recipes', 1)->where('hasMore', false)->where('page', 2)
+        ->component('Recipes/Index')->has('recipes', 1)->where('hasMore', false)->where('page', 2)
         ->where('filters.show', 'mine')->where('filters.q', 'soup'));
 });
 
@@ -57,7 +57,7 @@ it('filters by favourites, shows and refuses a bad show value', function () {
     RecipeFixtures::sharedRecipe($other);
     app(RecipeStateService::class)->favourite($me, $a->id, true);
 
-    $this->actingAs($me)->get('/recipes?favourites=1')->assertInertia(fn (Assert $p) => $p->component('Recipes/Index', false)->has('recipes', 1)->where('recipes.0.id', $a->id));
+    $this->actingAs($me)->get('/recipes?favourites=1')->assertInertia(fn (Assert $p) => $p->component('Recipes/Index')->has('recipes', 1)->where('recipes.0.id', $a->id));
     $this->actingAs($me)->get('/recipes?show=bogus')->assertSessionHasErrors('show');
 });
 
@@ -69,7 +69,7 @@ it('offers filter options from visible recipes only', function () {
     $secret = RecipeFixtures::privateRecipe($stranger);
     $secret->categories()->create(['name' => 'Secretcat', 'name_key' => 'secretcat', 'position' => 1]);
 
-    $this->actingAs($me)->get('/recipes')->assertInertia(fn (Assert $p) => $p->component('Recipes/Index', false)
+    $this->actingAs($me)->get('/recipes')->assertInertia(fn (Assert $p) => $p->component('Recipes/Index')
         ->has('filterOptions.categories', 1)->where('filterOptions.categories.0.name', 'Soup')->has('filterOptions.authors', 1));
 });
 

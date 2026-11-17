@@ -19,10 +19,11 @@
           ["Konto finansowe i jego transakcje", "Tylko członkowie, którym jest udostępnione", "Ci członkowie, jeśli mają Edycję w Finansach"],
           ["Dokumentacja zdrowotna jednej osoby", "Członkowie z dostępem do Zdrowia i dostępem do tej osoby", "Członkowie z Może zmieniać przy tej osobie"],
           ["Lista zakupów", "Jej twórca, osoba odpowiedzialna i osoby do niej dodane", "Twórca i osoba odpowiedzialna (ustawienia), osoby, które mogą dodawać produkty (produkty)"],
+          ["Przepis","Jego autor; udostępniony przepis: każdy z dostępem do Receptarza","Tylko jego autor. Administratorzy nie mają obejścia"],
           ["Ustawienia, członkowie, uprawnienia, dziennik zdarzeń, narzędzia AI", "Administratorzy", "Administratorzy"],
           ["Ta instrukcja", "Każdy zalogowany członek (przewodnik administratora tylko administratorzy)", "Nikt w aplikacji: jest jej częścią"]
         ] },
-        { "type": "p", "text": "Więcej dowiesz się w [Zadania](tasks#who-sees), [Wishlist](wishlist#surprise), [Finanse](finance#accounts), [Zakupy](shopping#overview), [Zdrowie](health#people-access) i [Przewodniku administratora](admin#permissions)." }
+        { "type": "p", "text": "Więcej dowiesz się w [Zadania](tasks#who-sees), [Wishlist](wishlist#surprise), [Finanse](finance#accounts), [Zakupy](shopping#overview), [Receptarz](recipes#overview), [Zdrowie](health#people-access) i [Przewodniku administratora](admin#permissions)." }
       ]
     },
     {

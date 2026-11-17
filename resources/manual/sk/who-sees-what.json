@@ -19,10 +19,11 @@
           ["Finančný účet a jeho transakcie", "Len členovia, ktorým je sprístupnený", "Títo členovia, ak majú Úpravy vo Financiách"],
           ["Zdravotný záznam jednej osoby", "Členovia s prístupom k Zdraviu a prístupom k tej osobe", "Členovia s Môže meniť pri tej osobe"],
           ["Nákupný zoznam", "Jeho tvorca, zodpovedná osoba a ľudia, ktorí do neho boli pridaní", "Tvorca a zodpovedná osoba (nastavenia), ľudia, ktorí smú pridávať položky (položky)"],
+          ["Recept","Jeho autor; zdieľaný recept: každý s prístupom k Receptáru","Len jeho autor. Správcovia nemajú obchádzku"],
           ["Nastavenia, členovia, oprávnenia, záznam aktivity, nástroje AI", "Správcovia", "Správcovia"],
           ["Tento manuál", "Každý prihlásený člen (príručku pre správcu len správcovia)", "Nikto v aplikácii: je súčasťou aplikácie"]
         ] },
-        { "type": "p", "text": "Viac sa dozviete v [Úlohy](tasks#who-sees), [Wishlist](wishlist#surprise), [Financie](finance#accounts), [Nákupy](shopping#overview), [Zdravie](health#people-access) a [Príručke pre správcu](admin#permissions)." }
+        { "type": "p", "text": "Viac sa dozviete v [Úlohy](tasks#who-sees), [Wishlist](wishlist#surprise), [Financie](finance#accounts), [Nákupy](shopping#overview), [Receptár](recipes#overview), [Zdravie](health#people-access) a [Príručke pre správcu](admin#permissions)." }
       ]
     },
     {
