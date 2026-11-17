@@ -4,10 +4,11 @@ namespace App\Models;
 
 use App\Access\Preset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Invitation extends Model
 {
-    protected $fillable = ['email', 'token_hash', 'preset', 'locale', 'invited_by', 'expires_at', 'accepted_at', 'revoked_at', 'mail_failed_at', 'accepted_user_id'];
+    protected $fillable = ['email', 'token_hash', 'preset', 'locale', 'invited_by', 'expires_at', 'accepted_at', 'revoked_at', 'mail_failed_at', 'accepted_user_id', 'user_id'];
 
     protected $hidden = ['token_hash'];
 
@@ -20,6 +21,12 @@ class Invitation extends Model
             'revoked_at' => 'datetime',
             'mail_failed_at' => 'datetime',
         ];
+    }
+
+    /** The child this invitation converts into a normal member, when it is a conversion. */
+    public function child(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public static function hashToken(string $plain): string

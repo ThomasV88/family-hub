@@ -54,6 +54,7 @@ enum AuditEvent: string
     case HelpTextChanged = 'help_text_changed';
     case ProfileChangedByOther = 'profile_changed_by_other';
     case ChildCreated = 'child_created';
+    case ChildConverted = 'child_converted';
 
     /** UI filter groups, in display order. */
     public const GROUPS = ['login', 'login_failed', 'invite', 'permission', 'session_revoked', 'health', 'finance', 'account', 'security'];
@@ -118,7 +119,7 @@ enum AuditEvent: string
             self::AiAgentSettingChanged, self::AiBulkRunChanged => 'health',
             self::FinanceRead, self::FinanceWrite, self::FinanceVisibilityChanged, self::FinanceAdminSelfAdded, self::FinanceCategoryChanged => 'finance',
             self::AccessDenied => $module === 'finance' ? 'finance' : 'health',
-            self::PasswordReset, self::AdminCreated, self::GoogleLinked, self::HelpTextChanged, self::ProfileChangedByOther, self::ChildCreated => 'account',
+            self::PasswordReset, self::AdminCreated, self::GoogleLinked, self::HelpTextChanged, self::ProfileChangedByOther, self::ChildCreated, self::ChildConverted => 'account',
             self::TwoFactorEnabled, self::TwoFactorDisabled, self::RecoveryCodesRegenerated, self::RecoveryCodeUsed,
             self::PasskeyAdded, self::PasskeyRenamed, self::PasskeyRemoved, self::SecondFactorFailed,
             self::ReauthConfirmed, self::SecondFactorReset, self::SecurityPolicyChanged => 'security',

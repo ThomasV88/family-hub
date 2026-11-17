@@ -8,6 +8,7 @@ use App\Audit\AuditLogger;
 use App\Models\Invitation;
 use App\Models\User;
 use App\Notifications\InviteNotification;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -22,7 +23,7 @@ class InviteService
     public function __construct(private readonly AuditLogger $audit) {}
 
     /** @return array{invitation: Invitation, token: string} */
-    public function create(User $admin, string $email, Preset $preset, string $locale): array
+    public function create(User $admin, string $email, Preset $preset, string $locale, ?int $childUserId = null): array
     {
         $email = mb_strtolower(trim($email));
 
@@ -32,7 +33,7 @@ class InviteService
 
         $token = Str::random(40);
 
-        $invitation = DB::transaction(function () use ($admin, $email, $preset, $locale, $token) {
+        $invitation = DB::transaction(function () use ($admin, $email, $preset, $locale, $token, $childUserId) {
             // lockForUpdate locks nothing when no open row exists, so serialize creates per email explicitly;
             // otherwise two concurrent creates both pass and the loser hits the invitations_one_open index (500).
             DB::select('select pg_advisory_xact_lock(hashtext(?))', ['invite:'.$email]);
@@ -44,7 +45,18 @@ class InviteService
                 $this->audit->record(AuditEvent::InviteRevoked, $admin, ['email' => $old->email, 'preset' => $old->preset->value]);
             }
 
+            if ($childUserId !== null) {
+                // One open conversion per child: an older invitation for another address is replaced.
+                $older = Invitation::query()->where('user_id', $childUserId)
+                    ->whereNull('accepted_at')->whereNull('revoked_at')->lockForUpdate()->get();
+                foreach ($older as $old) {
+                    $old->forceFill(['revoked_at' => now()])->save();
+                    $this->audit->record(AuditEvent::InviteRevoked, $admin, ['email' => $old->email, 'preset' => $old->preset->value]);
+                }
+            }
+
             $invitation = Invitation::create([
+                'user_id' => $childUserId,
                 'email' => $email,
                 'token_hash' => hash('sha256', $token),
                 'preset' => $preset->value,
@@ -133,20 +145,50 @@ class InviteService
      */
     public function accept(Invitation $invitation, array $attrs, ?string $googleId = null): User
     {
-        return DB::transaction(function () use ($invitation, $attrs, $googleId) {
-            $locked = Invitation::query()->lockForUpdate()->find($invitation->id);
-            if ($locked === null || $locked->state() !== 'valid') {
-                throw new InvalidInviteException;
-            }
-            if (User::query()->whereRaw('lower(email) = ?', [mb_strtolower($locked->email)])->exists()) {
-                throw new InvalidInviteException;
-            }
+        try {
+            return DB::transaction(fn () => $this->acceptLocked($invitation, $attrs, $googleId));
+        } catch (UniqueConstraintViolationException) {
+            // Two accepts for the same address raced; the unique index let only one through.
+            throw new InvalidInviteException;
+        }
+    }
 
+    /** @param  array{name: string, password?: string}  $attrs */
+    private function acceptLocked(Invitation $invitation, array $attrs, ?string $googleId): User
+    {
+        $locked = Invitation::query()->lockForUpdate()->find($invitation->id);
+        if ($locked === null || $locked->state() !== 'valid') {
+            throw new InvalidInviteException;
+        }
+        if (User::query()->whereRaw('lower(email) = ?', [mb_strtolower($locked->email)])->exists()) {
+            throw new InvalidInviteException;
+        }
+
+        $secret = Hash::make($googleId !== null ? Str::random(64) : (string) ($attrs['password'] ?? Str::random(64)));
+
+        if ($locked->user_id !== null) {
+            // Conversion of a child: the same users row gets an e-mail and may sign in; grants, wish list and links stay.
+            $user = User::query()->whereKey($locked->user_id)->lockForUpdate()->first();
+            if ($user === null || ! $user->sign_in_disabled || $user->email !== null) {
+                throw new InvalidInviteException;
+            }
+            $user->forceFill([
+                'name' => $attrs['name'],
+                'email' => mb_strtolower($locked->email),
+                'password' => $secret,
+                'locale' => $locked->locale,
+                'email_verified_at' => now(),
+                'google_id' => $googleId,
+                'password_set' => $googleId === null,
+                'sign_in_disabled' => false,
+            ])->save();
+            $this->audit->record(AuditEvent::ChildConverted, $user, [], $user);
+        } else {
             $user = new User;
             $user->forceFill([
                 'name' => $attrs['name'],
                 'email' => mb_strtolower($locked->email),
-                'password' => Hash::make($googleId !== null ? Str::random(64) : (string) ($attrs['password'] ?? Str::random(64))),
+                'password' => $secret,
                 'locale' => $locked->locale,
                 'email_verified_at' => now(),
                 'google_id' => $googleId,
@@ -158,12 +200,12 @@ class InviteService
             foreach ($locked->preset->grants() as $module => $level) {
                 $user->modulePermissions()->updateOrCreate(['module' => $module], ['level' => $level]);
             }
+        }
 
-            $locked->forceFill(['accepted_at' => now(), 'accepted_user_id' => $user->id])->save();
-            $this->audit->record(AuditEvent::InviteAccepted, $user, ['email' => $locked->email, 'preset' => $locked->preset->value]);
+        $locked->forceFill(['accepted_at' => now(), 'accepted_user_id' => $user->id])->save();
+        $this->audit->record(AuditEvent::InviteAccepted, $user, ['email' => $locked->email, 'preset' => $locked->preset->value]);
 
-            return $user;
-        });
+        return $user;
     }
 
     public static function link(string $token): string

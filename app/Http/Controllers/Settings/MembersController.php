@@ -33,6 +33,10 @@ class MembersController extends Controller
         // One grouped query for all passkey counts.
         $passkeyCounts = DB::table('passkeys')->selectRaw('user_id, count(*) as total')->groupBy('user_id')->pluck('total', 'user_id');
 
+        // Open conversion invitation per child (the admin already sees invitation e-mails), keyed by the child's user id.
+        $conversions = Invitation::query()->whereNotNull('user_id')->whereNull('accepted_at')->whereNull('revoked_at')
+            ->orderBy('id')->get()->keyBy('user_id');
+
         $names = User::query()->whereIn('id', $managerIds->flatten()->unique()->values())->pluck('name', 'id');
 
         // Explicit field mapping: never expose password, remember_token, google_id or other columns.
@@ -45,6 +49,11 @@ class MembersController extends Controller
             'email' => $member->email,
             'signInDisabled' => (bool) $member->sign_in_disabled,
             'isChild' => ! $member->canSignIn() && $member->email === null,
+            'invitation' => ($conversions->get($member->id)) ? [
+                'id' => $conversions->get($member->id)->id,
+                'email' => $conversions->get($member->id)->email,
+                'expiresAt' => $conversions->get($member->id)->expires_at->toIso8601String(),
+            ] : null,
             'photoVersion' => $member->photo_path !== null ? $member->photo_version : null,
             'managerNames' => collect($managerIds->get($member->id, []))->map(fn ($id) => $names[$id] ?? null)->filter()->values()->all(),
             'isAdmin' => (bool) $member->is_admin,

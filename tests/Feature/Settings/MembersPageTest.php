@@ -79,7 +79,7 @@ it('exposes no photo path or secret on any member row', function () {
         ->not->toContain('remember_token')->not->toContain('google_id')->not->toContain('"password"');
     $row = collect($props['members'])->firstWhere('id', $child->id);
     expect($row['photoVersion'])->toBe(3)->and(array_keys($row))->toEqualCanonicalizing([
-        'id', 'name', 'email', 'signInDisabled', 'isChild', 'photoVersion', 'managerNames', 'isAdmin', 'isSelf',
+        'id', 'name', 'email', 'signInDisabled', 'isChild', 'invitation', 'photoVersion', 'managerNames', 'isAdmin', 'isSelf',
         'access', 'wishlistManagerIds', 'security',
     ]);
 });
