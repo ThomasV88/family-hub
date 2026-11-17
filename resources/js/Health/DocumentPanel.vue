@@ -63,6 +63,7 @@ const visitOptions = computed(() => [
 ]);
 // A run for this document is on its way: the text section says so instead of showing nothing.
 const runActive = computed(() => ['queued', 'running', 'waiting'].includes(props.aiStatus?.statuses?.value?.[props.document?.id]?.status));
+const runTextSaved = computed(() => props.aiStatus?.statuses?.value?.[props.document?.id]?.textSaved === true);
 const attachedVisit = computed(() => props.visits.find((v) => v.id === props.document?.visitId) ?? null);
 // Images open the inline derivative; everything else opens the file route.
 const openUrl = computed(() => (props.document ? documentUrl(props.personId, props.document.id, props.document.kind === 'image' ? 'preview/view' : 'file') : ''));
@@ -156,7 +157,7 @@ const onEnter = (event) => { if (event.target?.tagName === 'INPUT') event.preven
                 :consent-on="consentOn"
                 @go-header="goToHeader"
             />
-            <RecognisedText :key="document.id" :person-id="personId" :document="document" :can-edit="canEdit" :reliability="textReliability" :run-active="runActive" />
+            <RecognisedText :key="document.id" :person-id="personId" :document="document" :can-edit="canEdit" :reliability="textReliability" :run-active="runActive" :text-saved="runTextSaved" />
 
             <form v-if="!readOnly" novalidate class="doc-panel__form" data-testid="document-form" @submit.prevent="save" @keydown.enter="onEnter">
                 <UiField :label="t('health.doc.title_field')" :error="errors.title">

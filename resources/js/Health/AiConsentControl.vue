@@ -16,6 +16,8 @@ const props = defineProps({
     personId: { type: String, required: true },
     value: { type: Boolean, default: false },
     canEdit: { type: Boolean, default: false },
+    // Recognised text can exist (full-text reading on or text already stored): turning AI off deletes it, so say so first.
+    purgesText: { type: Boolean, default: false },
 });
 const { t } = useI18n();
 const explainId = useId();
@@ -23,6 +25,8 @@ const checked = ref(props.value);
 const busy = ref(false);
 const failed = ref(false);
 const confirmOpen = ref(false);
+const offOpen = ref(false);
+const keepOn = ref(null);
 const keepOff = ref(null);
 
 watch(() => props.value, (v) => { checked.value = v; });
@@ -48,6 +52,12 @@ function toggle(next) {
         confirmOpen.value = true;
         return;
     }
+    if (props.purgesText) {
+        // keep the switch on until the member confirms what turning it off deletes
+        checked.value = true;
+        offOpen.value = true;
+        return;
+    }
     send(false);
 }
 
@@ -63,6 +73,15 @@ function confirm() {
 }
 function cancel() {
     confirmOpen.value = false;
+    checked.value = props.value;
+}
+function confirmOff() {
+    if (busy.value) return;
+    offOpen.value = false;
+    send(false);
+}
+function cancelOff() {
+    offOpen.value = false;
     checked.value = props.value;
 }
 </script>
@@ -92,6 +111,14 @@ function cancel() {
             <template #footer>
                 <UiButton ref="keepOff" variant="secondary" data-testid="ai-keep-off" @click="cancel">{{ t('health.ai.keep_off') }}</UiButton>
                 <UiButton variant="primary" data-testid="ai-allow" @click="confirm">{{ t('health.ai.allow') }}</UiButton>
+            </template>
+        </UiDialog>
+
+        <UiDialog :open="offOpen" :title="t('health.ai.off_title')" :initial-focus="() => keepOn" @update:open="(v) => { if (!v) cancelOff(); }">
+            <p class="ai-consent__body" data-testid="ai-off-purge">{{ t('health.ai.off_text_purge') }}</p>
+            <template #footer>
+                <UiButton ref="keepOn" variant="secondary" data-testid="ai-keep-on" @click="cancelOff">{{ t('health.ai.off_keep') }}</UiButton>
+                <UiButton variant="primary" data-testid="ai-turn-off" @click="confirmOff">{{ t('health.ai.off_confirm') }}</UiButton>
             </template>
         </UiDialog>
     </section>

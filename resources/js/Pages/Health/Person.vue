@@ -123,7 +123,7 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
             <template v-if="person">
                 <PersonSwitcher :people="people" :current-id="person.id" :can-create="canCreate" @add="openNew" />
                 <ArchivedPeople :people="archive.people" />
-                <PersonHeader :person="person" @add-visit="openNewVisit" @add-document="openNewDocument" @edit-person="openEditPerson" @open-archive="openArchive" />
+                <PersonHeader :person="person" :text-stored="Boolean(search.enabled)" @add-visit="openNewVisit" @add-document="openNewDocument" @edit-person="openEditPerson" @open-archive="openArchive" />
                 <UiAlert v-if="vaccinationAttention > 0" variant="warning" data-testid="vaccination-alert">
                     <strong>{{ t('health.vaccination.attention_title') }}</strong>
                     {{ t('health.vacc.attention', { n: vaccinationAttention }, vaccinationAttention) }}

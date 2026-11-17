@@ -2294,6 +2294,10 @@
             "confirm_body": "Dokumenty tej osoby zostaną wysłane do zewnętrznej firmy AI (dostawcy skonfigurowanego przez administratora rodziny), która może je przechowywać zgodnie z własnymi warunkami. Włącz to tylko wtedy, gdy ta osoba lub jej rodzic albo opiekun wyraża zgodę. Możesz to wyłączyć w dowolnym momencie.",
             "allow": "Zezwól na AI",
             "keep_off": "Zostaw AI wyłączone",
+            "off_title": "Wyłączyć AI dla tej osoby?",
+            "off_text_purge": "Tekst odczytany z dokumentów tej osoby również zostanie usunięty, więc dokumentów nie będzie już można znaleźć według słów w nich zawartych. Nazwy i tytuły nadal można przeszukiwać.",
+            "off_confirm": "Wyłącz AI",
+            "off_keep": "Zostaw AI włączone",
             "on_toast": "AI jest włączone dla tej osoby",
             "off_toast": "AI jest wyłączone dla tej osoby",
             "tag_on": "AI: włączone",
@@ -2324,7 +2328,11 @@
                 "try_again": "Spróbuj ponownie",
                 "provider_codex": "Wysyła ten dokument do OpenAI.",
                 "provider_both": "Wysyła ten dokument do OpenAI lub do GitHub, jeśli OpenAI jest niedostępne.",
-                "provider_copilot": "Wysyła ten dokument do GitHub."
+                "provider_copilot": "Wysyła ten dokument do GitHub.",
+                "notice_text_body": "Ten dokument opuści ten serwer i zostanie wysłany do OpenAI w celu odczytania. Wysyłany jest w dwóch krokach: najpierw obrazy stron, potem tekst z nich odczytany. OpenAI może przechowywać oba zgodnie z własnymi warunkami. Odczytany tekst jest zapisywany w bazie danych tej aplikacji, mogą w nim szukać członkowie, którzy mogą otworzyć dokument, i pozostaje do usunięcia dokumentu lub tekstu przez ciebie. Jest też w kopiach zapasowych do ich wygaśnięcia. Każdą sugestię sprawdzisz, zanim cokolwiek zostanie zapisane. To powiadomienie zobaczysz tylko raz.",
+                "provider_text_codex": "Wysyła ten dokument do OpenAI i zapisuje odczytany tekst tutaj.",
+                "provider_text_both": "Wysyła ten dokument do OpenAI lub do GitHub, jeśli OpenAI jest niedostępne, i zapisuje odczytany tekst tutaj.",
+                "provider_text_copilot": "Wysyła ten dokument do GitHub i zapisuje odczytany tekst tutaj."
             },
             "status": {
                 "queued": "Oczekuje na AI",
@@ -2355,7 +2363,13 @@
                 "no_agent_detail": "Obecnie żadne narzędzie AI nie jest zalogowane. Nic nie zostało wysłane. Spróbuj później lub dodaj dane ręcznie.",
                 "notice_required_detail": "Narzędzia AI zmieniły się od chwili, gdy zgodzono się na wysyłanie dokumentów. Nic nie zostało wysłane. Uruchom AI ponownie, aby zobaczyć zaktualizowane powiadomienie.",
                 "still_waiting": "Nadal oczekuje. Odśwież stronę, aby sprawdzić ponownie.",
-                "newer_waiting": "Nowsze uruchomienie oczekuje na limit AI, ponowna próba po {when}"
+                "newer_waiting": "Nowsze uruchomienie oczekuje na limit AI, ponowna próba po {when}",
+                "text_saved": "Tekst zapisany",
+                "text_saved_detail": "Tekst jest zapisany i można w nim szukać. Nie utworzono sugestii. Aby je dostać, naciśnij Uruchom AI.",
+                "text_saved_preparing": "Tekst jest zapisany. AI przygotowuje teraz na jego podstawie sugestie.",
+                "waiting_text_saved": "Tekst jest już zapisany.",
+                "failed_text_saved": "Rozpoznany tekst został zapisany.",
+                "announce_text_saved": "Tekst dokumentu został zapisany."
             },
             "review": {
                 "back_document": "Wróć do dokumentu",
@@ -2430,7 +2444,9 @@
                 "multi_title": "Wysłać ten dokument do OpenAI lub GitHub?",
                 "multi_body": "Ten dokument opuści ten serwer i zostanie wysłany do OpenAI lub do GitHub, jeśli OpenAI jest niedostępne, w celu odczytania. Mogą go przechowywać zgodnie z własnymi warunkami. Każdą sugestię sprawdzisz, zanim cokolwiek zostanie zapisane. To powiadomienie zobaczysz ponownie tylko wtedy, gdy zostanie dodana kolejna usługa.",
                 "github_title": "Wysłać ten dokument do GitHub?",
-                "github_body": "Ten dokument opuści ten serwer i zostanie wysłany do GitHub w celu odczytania. GitHub może go przechowywać zgodnie z własnymi warunkami. Każdą sugestię sprawdzisz, zanim cokolwiek zostanie zapisane. To powiadomienie zobaczysz ponownie tylko wtedy, gdy zostanie dodana kolejna usługa."
+                "github_body": "Ten dokument opuści ten serwer i zostanie wysłany do GitHub w celu odczytania. GitHub może go przechowywać zgodnie z własnymi warunkami. Każdą sugestię sprawdzisz, zanim cokolwiek zostanie zapisane. To powiadomienie zobaczysz ponownie tylko wtedy, gdy zostanie dodana kolejna usługa.",
+                "multi_text_body": "Ten dokument opuści ten serwer i zostanie wysłany do OpenAI lub do GitHub, jeśli OpenAI jest niedostępne, w celu odczytania. Wysyłany jest w dwóch krokach: najpierw obrazy stron, potem tekst z nich odczytany. Mogą przechowywać oba zgodnie z własnymi warunkami. Odczytany tekst jest zapisywany w bazie danych tej aplikacji, mogą w nim szukać członkowie, którzy mogą otworzyć dokument, i pozostaje do usunięcia dokumentu lub tekstu przez ciebie. Jest też w kopiach zapasowych do ich wygaśnięcia. Każdą sugestię sprawdzisz, zanim cokolwiek zostanie zapisane. To powiadomienie zobaczysz ponownie tylko wtedy, gdy zostanie dodana kolejna usługa.",
+                "github_text_body": "Ten dokument opuści ten serwer i zostanie wysłany do GitHub w celu odczytania. Wysyłany jest w dwóch krokach: najpierw obrazy stron, potem tekst z nich odczytany. GitHub może przechowywać oba zgodnie z własnymi warunkami. Odczytany tekst jest zapisywany w bazie danych tej aplikacji, mogą w nim szukać członkowie, którzy mogą otworzyć dokument, i pozostaje do usunięcia dokumentu lub tekstu przez ciebie. Jest też w kopiach zapasowych do ich wygaśnięcia. Każdą sugestię sprawdzisz, zanim cokolwiek zostanie zapisane. To powiadomienie zobaczysz ponownie tylko wtedy, gdy zostanie dodana kolejna usługa."
             }
         },
         "access": {

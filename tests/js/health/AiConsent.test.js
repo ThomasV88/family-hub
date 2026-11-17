@@ -100,3 +100,53 @@ describe('AiConsentControl', () => {
         }
     });
 });
+
+describe('AiConsentControl turn-off with stored text (13-09)', () => {
+    it('turns off at once when no recognised text can exist', async () => {
+        mountControl({ value: true });
+        await click(sw());
+        expect(router.patch).toHaveBeenCalledTimes(1);
+        expect(router.patch.mock.calls[0][1]).toEqual({ value: false });
+        expect(document.querySelector('[role="dialog"]')).toBeNull();
+    });
+
+    it('asks first and says the text is deleted; Keep AI on sends nothing and leaves the switch on', async () => {
+        mountControl({ value: true, purgesText: true });
+        await click(sw());
+        expect(router.patch).not.toHaveBeenCalled();
+        expect(document.querySelector('[role="dialog"]').textContent).toContain("The text read from this person's documents will also be deleted, so documents can no longer be found by the words inside them. Names and titles can still be searched.");
+        expect(document.activeElement?.textContent.trim()).toBe('Keep AI on');
+        await expectNoAxeViolations(document.body);
+        await click(document.querySelector('[data-testid="ai-keep-on"]'));
+        expect(router.patch).not.toHaveBeenCalled();
+        expect(sw().checked).toBe(true);
+        expect(document.querySelector('[role="dialog"]')).toBeNull();
+    });
+
+    it('sends value=false once on confirm', async () => {
+        mountControl({ value: true, purgesText: true });
+        await click(sw());
+        await click(document.querySelector('[data-testid="ai-turn-off"]'));
+        expect(router.patch).toHaveBeenCalledTimes(1);
+        expect(router.patch.mock.calls[0][1]).toEqual({ value: false });
+    });
+
+    it('does not show the purge sentence when turning AI on', async () => {
+        mountControl({ value: false, purgesText: true });
+        await click(sw());
+        expect(document.body.textContent).not.toContain('will also be deleted');
+        expect(document.body.textContent).toContain('Allow AI for this person?');
+    });
+
+    it('has the sentence in sk and pl too', async () => {
+        for (const [locale, word] of [['sk', 'odstráni'], ['pl', 'usunięty']]) {
+            mountControl({ value: true, purgesText: true }, locale);
+            await click(sw());
+            expect(document.querySelector('[data-testid="ai-off-purge"]').textContent).toContain(word);
+            expect(document.body.textContent).not.toMatch(/health\.ai\./);
+            current.unmount();
+            document.body.innerHTML = '';
+        }
+    });
+});
+

@@ -37,7 +37,11 @@ class AiRunController extends Controller
             return response()->json(['status' => 'queued', 'extractionId' => $result->extractionId], 202);
         }
 
-        return response()->json(array_filter(['reason' => $result->outcome, 'extractionId' => $result->extractionId, 'providers' => $result->providers], fn ($v) => $v !== null), 409);
+        // A notice that must be shown again also says whether it has to carry the statement about the stored text, so a
+        // dialog opened from a page that loaded before the switch was turned on is still the true one.
+        $textNotice = $result->outcome === 'notice_required' ? (bool) config('ai.ocr.enabled') : null;
+
+        return response()->json(array_filter(['reason' => $result->outcome, 'extractionId' => $result->extractionId, 'providers' => $result->providers, 'textNotice' => $textNotice], fn ($v) => $v !== null), 409);
     }
 
     public function cancel(Request $request, SubjectQuery $subjects, AiRunQuery $runs, string $person, string $extraction): JsonResponse

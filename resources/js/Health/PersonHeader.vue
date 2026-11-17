@@ -15,6 +15,8 @@ import HelpTip from '../Components/ui/HelpTip.vue';
 // Name, age line, blood type and the "No account" marker. Free text is interpolated, never rendered as HTML.
 const props = defineProps({
     person: { type: Object, required: true },
+    // The page's search.enabled: recognised text can exist, so turning AI consent off says it deletes it.
+    textStored: { type: Boolean, default: false },
 });
 const emit = defineEmits(['add-visit', 'add-document', 'edit-person', 'open-archive']);
 const removal = useRemoval('person', () => props.person);
@@ -72,7 +74,7 @@ const remove = () => router.delete(`/health/people/${props.person.id}`);
             <UiMenu :label="t('health.person.more_actions')" :items="menuItems" @select="onMenu" />
         </div>
         <p v-if="!person.canEdit" class="person-header__view-only">{{ t('health.view_only') }}</p>
-        <AiConsentControl :person-id="person.id" :value="!!person.aiConsent" :can-edit="!!person.canEdit" />
+        <AiConsentControl :person-id="person.id" :value="!!person.aiConsent" :can-edit="!!person.canEdit" :purges-text="textStored" />
         <UiConfirmDialog
             v-model:open="deleteOpen"
             :title="removal.title.value"

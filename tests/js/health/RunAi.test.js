@@ -565,3 +565,135 @@ describe('waiting for AI quota, provenance and providers', () => {
         }
     }
 });
+
+describe('two-step reading: text notice, provider lines and run states (13-09)', () => {
+    const TEXT_AI = { ...AI, textNotice: true };
+    const detail = () => $('[data-testid="ai-detail"]')?.textContent;
+    const extra = () => $('[data-testid="ai-detail-text"]')?.textContent;
+
+    it('shows the text provider lines only while full-text reading is on; the old lines stay otherwise', () => {
+        mountControl({ ai: { ...TEXT_AI, providers: ['codex'] } });
+        expect($('[data-testid="ai-sends"]').textContent).toBe('Sends this document to OpenAI and saves the text it reads here.');
+        wrapper.unmount();
+        mountControl({ ai: { ...TEXT_AI, providers: ['codex', 'copilot'] } });
+        expect($('[data-testid="ai-sends"]').textContent).toBe('Sends this document to OpenAI, or to GitHub if OpenAI is not available, and saves the text it reads here.');
+        wrapper.unmount();
+        mountControl({ ai: { ...TEXT_AI, providers: ['copilot'] } });
+        expect($('[data-testid="ai-sends"]').textContent).toBe('Sends this document to GitHub and saves the text it reads here.');
+        wrapper.unmount();
+        mountControl({ ai: { ...AI, textNotice: false } });
+        expect($('[data-testid="ai-sends"]').textContent).toBe('Sends this document to OpenAI.');
+    });
+
+    it('opens the text notice (two steps, stored, searchable, backups) in all three variants', async () => {
+        for (const [providers, marker] of [[['codex'], 'sent to OpenAI to be read'], [['codex', 'copilot'], 'or to GitHub if OpenAI is not available, to be read'], [['copilot'], 'sent to GitHub to be read']]) {
+            mountControl({ ai: { ...TEXT_AI, providers } });
+            $('[data-testid="ai-run"]').click();
+            await flush();
+            const text = $('[role="dialog"]').textContent;
+            expect(text).toContain(marker);
+            expect(text).toContain('two steps');
+            expect(text).toContain("saved in this app's database");
+            expect(text).toContain('searched by members who may open the document');
+            expect(text).toContain('in backups until they expire');
+            wrapper.unmount();
+            document.body.innerHTML = '';
+        }
+    });
+
+    it('keeps the old notice body while the feature is off', async () => {
+        mountControl({ ai: { ...AI, textNotice: false } });
+        $('[data-testid="ai-run"]').click();
+        await flush();
+        expect($('[role="dialog"]').textContent).not.toContain('two steps');
+        expect($('[role="dialog"]').textContent).toContain('OpenAI may keep it under its own terms');
+    });
+
+    it('a 409 notice_required that says textNotice turns the text notice on for a page that loaded before the switch', async () => {
+        fetchMock.mockResolvedValueOnce({ ok: false, status: 409, error: 'failed', data: { reason: 'notice_required', providers: ['codex'], textNotice: true } });
+        mountControl({ ai: { ...AI, noticeAcknowledged: true } });
+        $('[data-testid="ai-run"]').click();
+        await flush();
+        expect($('[role="dialog"]').textContent).toContain("saved in this app's database");
+        $('[data-testid="ai-notice-cancel"]').click();
+        await flush();
+        expect($('[data-testid="ai-sends"]').textContent).toContain('saves the text it reads here');
+    });
+
+    it('running with the text saved says so, and announces it once', async () => {
+        mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'running', mode: 'full', textSaved: false, readyExtractionId: null }) } });
+        expect(detail()).toBe('This usually takes a few minutes. You can leave this page.');
+        const region = $('[data-testid="ai-announce"]');
+        poller.statuses.value = { [DOC.id]: entry({ status: 'running', mode: 'full', textSaved: true, readyExtractionId: null }) };
+        await flush();
+        expect($('[data-testid="ai-status-tag"]').dataset.status).toBe('running');
+        expect(detail()).toBe('The text is saved. AI is now preparing suggestions from it.');
+        expect(region.textContent).toBe('The text of the document is saved.');
+        poller.statuses.value = { [DOC.id]: entry({ status: 'running', mode: 'full', textSaved: true, readyExtractionId: null, pagesRead: 1 }) };
+        await flush();
+        expect(region.textContent).toBe('The text of the document is saved.');
+    });
+
+    it('a text-only run never claims that suggestions are being prepared', () => {
+        mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'running', mode: 'text', textSaved: true, readyExtractionId: null }) } });
+        expect(detail()).toBe('This usually takes a few minutes. You can leave this page.');
+    });
+
+    it('waiting and failed runs with saved text add the already-saved lines; without it nothing is added', () => {
+        mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'waiting', availableAt: null, textSaved: true, readyExtractionId: null }) } });
+        expect(detail()).toContain('usage limit');
+        expect(extra()).toBe('The text is already saved.');
+        wrapper.unmount();
+        mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'failed', textSaved: true, readyExtractionId: null }) } });
+        expect(detail()).toContain('AI could not read this document');
+        expect(extra()).toBe('The recognised text was saved.');
+        wrapper.unmount();
+        mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'failed', textSaved: false, readyExtractionId: null }) } });
+        expect(extra()).toBeUndefined();
+    });
+
+    it('text_saved shows the neutral tag, the detail, the page line, Run AI and no Review button', async () => {
+        mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'text_saved', mode: 'text', textSaved: true, readyExtractionId: null, entryCount: null, pagesRead: 20, pagesTotal: 31 }) } });
+        const tag = $('[data-testid="ai-status-tag"]');
+        expect(tag.dataset.status).toBe('text_saved');
+        expect(tag.textContent).toBe('Text saved');
+        expect(detail()).toBe('The text is saved and searchable. No suggestions were made. Press Run AI to get suggestions.');
+        expect($('[data-testid="ai-pages"]').textContent).toContain('20');
+        expect($('[data-testid="ai-review"]')).toBeNull();
+        expect($('[data-testid="ai-cancel"]')).toBeNull();
+        expect($('[data-testid="ai-run"]').textContent.trim()).toBe('Run AI');
+        expect($('[data-testid="run-ai"]').getAttribute('aria-busy')).toBeNull();
+        await expectNoAxeViolations(document.body);
+    });
+
+    it('announces the end of a text-only run once', async () => {
+        mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'running', mode: 'text', textSaved: false, readyExtractionId: null }) } });
+        poller.statuses.value = { [DOC.id]: entry({ status: 'text_saved', mode: 'text', textSaved: true, readyExtractionId: null }) };
+        await flush();
+        expect($('[data-testid="ai-announce"]').textContent).toBe('The text of the document is saved.');
+    });
+
+    it('every state is free of raw language keys in en, sk and pl and has no HTML injection', async () => {
+        for (const locale of ['en', 'sk', 'pl']) {
+            for (const e of [
+                entry({ status: 'running', textSaved: true, mode: 'full', readyExtractionId: null }),
+                entry({ status: 'text_saved', textSaved: true, mode: 'text', readyExtractionId: null, pagesRead: 20, pagesTotal: 30 }),
+                entry({ status: 'waiting', textSaved: true, availableAt: null, readyExtractionId: null }),
+                entry({ status: 'failed', textSaved: true, readyExtractionId: null }),
+            ]) {
+                mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: e }, locale });
+                expect(document.body.textContent).not.toMatch(/health\.ai\./);
+                expect(document.body.innerHTML).not.toContain('<script');
+                wrapper.unmount();
+                document.body.innerHTML = '';
+            }
+            mountControl({ ai: TEXT_AI, locale });
+            $('[data-testid="ai-run"]').click();
+            await flush();
+            expect(document.body.textContent).not.toMatch(/health\.ai\./);
+            await expectNoAxeViolations(document.body);
+            wrapper.unmount();
+            document.body.innerHTML = '';
+        }
+    });
+});

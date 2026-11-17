@@ -801,3 +801,82 @@ describe('Bulk panel: privacy and wiring', () => {
         expect(page.indexOf('<BulkRegenPanel')).toBeGreaterThan(page.indexOf('role="status"'));
     });
 });
+
+describe('Bulk panel: acknowledgment of the stored-text notice (13-09)', () => {
+    const onPanel = (extra = {}) => ({ ...PANEL(), ocrEnabled: true, textNoticeAcknowledged: false, ...extra });
+    const START = '/settings/ai-agents/bulk';
+    const startCalls = () => fetchMock.mock.calls.filter((c) => c[0] === START);
+
+    it('shows the notice body in the Start confirm and sends textNotice while it was not acknowledged', async () => {
+        mountPanel({ bulk: onPanel() });
+        await doCheck();
+        await startBtn().trigger('click');
+        await flushPromises();
+        const notice = dialog().querySelector('[data-testid="bulk-confirm-notice"]');
+        expect(notice.textContent).toContain('two steps');
+        expect(notice.textContent).toContain("saved in this app's database");
+        fetchMock.mockResolvedValueOnce({ ok: true, status: 201, data: { panel: onPanel({ textNoticeAcknowledged: true, active: RUN() }) } });
+        dialogButton('Start bulk run').click();
+        await flushPromises();
+        expect(startCalls()[0][1].body).toEqual({ token: '11111111-1111-4111-8111-111111111111', acknowledged: true, providers: ['codex'], textNotice: true });
+    });
+
+    it('shows no notice and sends no textNotice once acknowledged, or while reading is off', async () => {
+        for (const bulk of [onPanel({ textNoticeAcknowledged: true }), { ...PANEL(), ocrEnabled: false }]) {
+            fetchMock.mockReset();
+            mountPanel({ bulk });
+            await doCheck();
+            await startBtn().trigger('click');
+            await flushPromises();
+            expect(dialog().querySelector('[data-testid="bulk-confirm-notice"]')).toBeNull();
+            fetchMock.mockResolvedValueOnce({ ok: true, status: 201, data: { panel: bulk } });
+            dialogButton('Start bulk run').click();
+            await flushPromises();
+            expect(startCalls()[0][1].body.textNotice).toBeUndefined();
+            current.unmount();
+            document.body.innerHTML = '';
+        }
+    });
+
+    it('uses the github and multi bodies for the frozen provider set', async () => {
+        for (const [providers, marker] of [[['copilot'], 'sent to GitHub to be read'], [['codex', 'copilot'], 'or to GitHub if OpenAI is not available']]) {
+            mountPanel({ bulk: onPanel(), providers });
+            await doCheck();
+            await startBtn().trigger('click');
+            await flushPromises();
+            expect(dialog().querySelector('[data-testid="bulk-confirm-notice"]').textContent).toContain(marker);
+            current.unmount();
+            document.body.innerHTML = '';
+        }
+    });
+
+    it('reopens the notice after a 409 notice_required and starts nothing', async () => {
+        mountPanel({ bulk: onPanel({ textNoticeAcknowledged: true }) });
+        await doCheck();
+        await startBtn().trigger('click');
+        await flushPromises();
+        expect(dialog().querySelector('[data-testid="bulk-confirm-notice"]')).toBeNull();
+        fetchMock.mockResolvedValueOnce({ ok: false, status: 409, error: 'failed', data: { reason: 'notice_required' } });
+        dialogButton('Start bulk run').click();
+        await flushPromises();
+        expect(dialog().querySelector('[data-testid="bulk-confirm-notice"]')).not.toBeNull();
+        expect(document.body.textContent).not.toContain('could not start');
+        fetchMock.mockResolvedValueOnce({ ok: true, status: 201, data: { panel: onPanel({ textNoticeAcknowledged: true, active: RUN() }) } });
+        dialogButton('Start bulk run').click();
+        await flushPromises();
+        expect(startCalls()[1][1].body.textNotice).toBe(true);
+    });
+
+    it('has the notice keys in en, sk and pl and no v-html in the touched components', () => {
+        for (const l of ['en', 'sk', 'pl']) {
+            const a = load(l).health.ai;
+            for (const v of [a.run.notice_text_body, a.notice.multi_text_body, a.notice.github_text_body, a.run.provider_text_codex, a.run.provider_text_both, a.run.provider_text_copilot, a.status.text_saved, a.status.text_saved_detail, a.status.text_saved_preparing, a.status.waiting_text_saved, a.status.failed_text_saved, a.status.announce_text_saved, a.off_title, a.off_text_purge, a.off_confirm, a.off_keep]) {
+                expect(typeof v).toBe('string');
+                expect(v.length).toBeGreaterThan(0);
+            }
+        }
+        for (const f of ['Health/Ai/AiStatusTag', 'Health/Ai/RunAiControl', 'Health/Ai/AiNoticeDialog', 'Health/Text/RecognisedText', 'Health/AiConsentControl', 'Health/PersonHeader', 'Settings/AiAgents/BulkRegenPanel']) {
+            expect(src(`resources/js/${f}.vue`)).not.toContain('v-html');
+        }
+    });
+});

@@ -67,7 +67,7 @@ describe('single runs', function () {
         txtNoticeAck($user);
 
         $this->actingAs($user)->postJson(txtNoticeUrl($person, $doc), [])
-            ->assertStatus(409)->assertJson(['reason' => 'notice_required', 'providers' => ['codex']]);
+            ->assertStatus(409)->assertJson(['reason' => 'notice_required', 'providers' => ['codex'], 'textNotice' => true]);
         expect(DB::table('medical_ai_extractions')->count())->toBe(0)->and(txtNoticeTextAt($user))->toBeNull();
 
         $this->actingAs($user)->postJson(txtNoticeUrl($person, $doc), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202);

@@ -26,6 +26,9 @@ const props = defineProps({
     reliability: { type: String, default: 'reliable' },
     // A run for this document is queued, running or waiting for quota.
     runActive: { type: Boolean, default: false },
+    // The newest run of this document has saved its text (the first batch is enough): the text it wrote is the one to
+    // show, so the earlier-text line goes away and the section appears even before the page data was reloaded.
+    textSaved: { type: Boolean, default: false },
 });
 const { t } = useI18n();
 const toast = useToast();
@@ -43,7 +46,8 @@ const removeError = ref(null);
 let seq = 0;
 
 const url = computed(() => `/health/people/${props.personId}/documents/${props.document.id}/text`);
-const hasText = computed(() => Boolean(props.document.hasText) && !removed.value);
+const hasText = computed(() => (Boolean(props.document.hasText) || props.textSaved) && !removed.value);
+const rereading = computed(() => props.runActive && !props.textSaved);
 const visible = computed(() => !gone.value && (hasText.value || props.runActive));
 const showDisclosure = computed(() => !gone.value && hasText.value);
 const pages = computed(() => data.value?.pages ?? []);
@@ -62,6 +66,13 @@ function drop() {
     loadError.value = null;
     removeError.value = null;
 }
+// A new run saved its text: show that one, also when the earlier text is open (a removed text can be read again).
+watch(() => props.textSaved, (now, before) => {
+    if (now && !before) {
+        removed.value = false;
+        if (expanded.value) load();
+    }
+});
 // Another document: the text goes with the old one.
 watch(() => props.document.id, () => { drop(); gone.value = false; removed.value = false; confirmOpen.value = false; });
 
@@ -154,7 +165,7 @@ const textLabel = computed(() => t('health.document_text.region_aria', { title: 
                     <UiTag v-if="partial" :icon="Layers" data-testid="rtext-tag-partial">{{ t('health.document_text.tag_partial', { n: pagesRead, total: pagesTotal }) }}</UiTag>
                 </span>
             </div>
-            <p v-if="runActive" class="rtext__muted" role="status" data-testid="rtext-rereading">{{ t('health.document_text.being_reread') }}</p>
+            <p v-if="rereading" class="rtext__muted" role="status" data-testid="rtext-rereading">{{ t('health.document_text.being_reread') }}</p>
 
             <div :id="ids.body" class="rtext__body" :hidden="!expanded" data-testid="rtext-body">
                 <template v-if="expanded">

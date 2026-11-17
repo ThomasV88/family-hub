@@ -2294,6 +2294,10 @@
             "confirm_body": "Documents of this person will be sent to an outside AI company (the provider your family admin has set up), which may keep them under its own terms. Only turn this on if this person, or their parent or guardian, agrees. You can turn it off at any time.",
             "allow": "Allow AI",
             "keep_off": "Keep AI off",
+            "off_title": "Turn AI off for this person?",
+            "off_text_purge": "The text read from this person's documents will also be deleted, so documents can no longer be found by the words inside them. Names and titles can still be searched.",
+            "off_confirm": "Turn AI off",
+            "off_keep": "Keep AI on",
             "on_toast": "AI is on for this person",
             "off_toast": "AI is off for this person",
             "tag_on": "AI: on",
@@ -2324,7 +2328,11 @@
                 "try_again": "Try again",
                 "provider_codex": "Sends this document to OpenAI.",
                 "provider_both": "Sends this document to OpenAI, or to GitHub if OpenAI is not available.",
-                "provider_copilot": "Sends this document to GitHub."
+                "provider_copilot": "Sends this document to GitHub.",
+                "notice_text_body": "This document will leave this server and be sent to OpenAI to be read. It is sent in two steps: first the pictures of the pages, then the text that was read from them. OpenAI may keep both under its own terms. The text that was read is saved in this app's database, can be searched by members who may open the document, and stays until the document is deleted or you remove the text. It is also in backups until they expire. You will check every suggestion before anything is saved. You will only see this notice once.",
+                "provider_text_codex": "Sends this document to OpenAI and saves the text it reads here.",
+                "provider_text_both": "Sends this document to OpenAI, or to GitHub if OpenAI is not available, and saves the text it reads here.",
+                "provider_text_copilot": "Sends this document to GitHub and saves the text it reads here."
             },
             "status": {
                 "queued": "Waiting for AI",
@@ -2355,7 +2363,13 @@
                 "no_agent_detail": "No AI tool is signed in right now. Nothing was sent. Try again later, or add the details by hand.",
                 "notice_required_detail": "The AI tools changed since you agreed to send documents. Nothing was sent. Run AI again to see the updated notice.",
                 "still_waiting": "Still waiting. Reload the page to check again.",
-                "newer_waiting": "A newer run is waiting for AI quota, retrying after {when}"
+                "newer_waiting": "A newer run is waiting for AI quota, retrying after {when}",
+                "text_saved": "Text saved",
+                "text_saved_detail": "The text is saved and searchable. No suggestions were made. Press Run AI to get suggestions.",
+                "text_saved_preparing": "The text is saved. AI is now preparing suggestions from it.",
+                "waiting_text_saved": "The text is already saved.",
+                "failed_text_saved": "The recognised text was saved.",
+                "announce_text_saved": "The text of the document is saved."
             },
             "review": {
                 "back_document": "Back to document",
@@ -2430,7 +2444,9 @@
                 "multi_title": "Send this document to OpenAI or GitHub?",
                 "multi_body": "This document will leave this server and be sent to OpenAI, or to GitHub if OpenAI is not available, to be read. They may keep it under their own terms. You will check every suggestion before anything is saved. You will see this notice again only if another service is added.",
                 "github_title": "Send this document to GitHub?",
-                "github_body": "This document will leave this server and be sent to GitHub to be read. GitHub may keep it under its own terms. You will check every suggestion before anything is saved. You will see this notice again only if another service is added."
+                "github_body": "This document will leave this server and be sent to GitHub to be read. GitHub may keep it under its own terms. You will check every suggestion before anything is saved. You will see this notice again only if another service is added.",
+                "multi_text_body": "This document will leave this server and be sent to OpenAI, or to GitHub if OpenAI is not available, to be read. It is sent in two steps: first the pictures of the pages, then the text that was read from them. They may keep both under their own terms. The text that was read is saved in this app's database, can be searched by members who may open the document, and stays until the document is deleted or you remove the text. It is also in backups until they expire. You will check every suggestion before anything is saved. You will see this notice again only if another service is added.",
+                "github_text_body": "This document will leave this server and be sent to GitHub to be read. It is sent in two steps: first the pictures of the pages, then the text that was read from them. GitHub may keep both under its own terms. The text that was read is saved in this app's database, can be searched by members who may open the document, and stays until the document is deleted or you remove the text. It is also in backups until they expire. You will check every suggestion before anything is saved. You will see this notice again only if another service is added."
             }
         },
         "access": {

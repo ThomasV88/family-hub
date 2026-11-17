@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Ban, Bot, Check, CircleX, Clock, Hourglass, Layers, Loader } from '@lucide/vue';
+import { Ban, Bot, Check, CircleX, Clock, FileText, Hourglass, Layers, Loader } from '@lucide/vue';
 import UiTag from '../../Components/ui/UiTag.vue';
 import { formatWhen, isPast } from './aiWhen.js';
 
@@ -35,6 +35,8 @@ const view = computed(() => {
             return props.entryCount === 0
                 ? { icon: Check, variant: 'neutral', text: t('health.ai.status.ready_empty') }
                 : { icon: Check, variant: 'success', text: t('health.ai.status.ready') };
+        // A text-only run (bulk "documents without recognised text"): the text is saved, no suggestions exist.
+        case 'text_saved': return { icon: FileText, variant: 'neutral', text: t('health.ai.status.text_saved') };
         case 'waiting':
             if (!props.availableAt) return { icon: Hourglass, variant: 'neutral', text: t('health.ai.status.waiting_short') };
             return waitingWhen.value

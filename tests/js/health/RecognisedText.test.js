@@ -339,6 +339,41 @@ describe('runs in progress', () => {
     });
 });
 
+describe('a new reading that has saved its text (13-09)', () => {
+    it('drops the earlier-text line once the active run has saved its text', async () => {
+        fetchMock.mockResolvedValue(ok(one));
+        mountText({ runActive: true, textSaved: false });
+        expect($('[data-testid="rtext-rereading"]')).not.toBeNull();
+        await wrapper.setProps({ textSaved: true });
+        await flush();
+        expect($('[data-testid="rtext-rereading"]')).toBeNull();
+    });
+
+    it('shows the section of a first run as soon as its text is saved and reloads an open text when it changes', async () => {
+        mountText({ document: { ...DOC, hasText: false }, runActive: true, textSaved: false });
+        expect($('[data-testid="rtext-being-read"]')).not.toBeNull();
+        fetchMock.mockResolvedValue(ok(one));
+        await wrapper.setProps({ textSaved: true });
+        await flush();
+        expect($('[data-testid="rtext-toggle"]')).not.toBeNull();
+        expect($('[data-testid="rtext-being-read"]')).toBeNull();
+        await expand();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('fetches the new text again when the earlier text is open while the new reading saves', async () => {
+        fetchMock.mockResolvedValue(ok(one));
+        mountText({ runActive: true, textSaved: false });
+        await expand();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        fetchMock.mockResolvedValue(ok(three));
+        await wrapper.setProps({ textSaved: true });
+        await flush();
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect($('[data-testid="rtext-text"]').textContent).toContain('Third page');
+    });
+});
+
 describe('document panel mount', () => {
     const poller = (statuses = {}) => ({ statuses: ref(statuses), available: ref(null), failedPolls: ref(0), stoppedLongWait: ref(false), stalled: ref(false), refresh: vi.fn(async () => {}), markQueued: vi.fn() });
     const mountPanel = (props = {}) => {

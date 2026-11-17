@@ -2294,6 +2294,10 @@
             "confirm_body": "Dokumenty tejto osoby sa odošlú externej AI spoločnosti (poskytovateľovi, ktorého nastavil správca rodiny), ktorá ich môže uchovávať podľa vlastných podmienok. Zapnite to, iba ak s tým táto osoba alebo jej rodič či zákonný zástupca súhlasí. Môžete to kedykoľvek vypnúť.",
             "allow": "Povoliť AI",
             "keep_off": "Ponechať AI vypnuté",
+            "off_title": "Vypnúť AI pre túto osobu?",
+            "off_text_purge": "Text prečítaný z dokumentov tejto osoby sa tiež odstráni, takže dokumenty sa už nedajú nájsť podľa slov v nich. Podľa názvov sa hľadať dá naďalej.",
+            "off_confirm": "Vypnúť AI",
+            "off_keep": "Ponechať AI zapnuté",
             "on_toast": "AI je pre túto osobu zapnuté",
             "off_toast": "AI je pre túto osobu vypnuté",
             "tag_on": "AI: zapnuté",
@@ -2324,7 +2328,11 @@
                 "try_again": "Skúsiť znova",
                 "provider_codex": "Odošle tento dokument spoločnosti OpenAI.",
                 "provider_both": "Odošle tento dokument spoločnosti OpenAI, alebo spoločnosti GitHub, ak OpenAI nie je dostupná.",
-                "provider_copilot": "Odošle tento dokument spoločnosti GitHub."
+                "provider_copilot": "Odošle tento dokument spoločnosti GitHub.",
+                "notice_text_body": "Tento dokument opustí tento server a odošle sa spoločnosti OpenAI na prečítanie. Odošle sa v dvoch krokoch: najprv obrázky strán, potom text, ktorý z nich bol prečítaný. OpenAI môže uchovať oboje podľa vlastných podmienok. Prečítaný text sa uloží do databázy tejto aplikácie, môžu v ňom hľadať členovia, ktorí môžu dokument otvoriť, a ostane, kým sa dokument neodstráni alebo text neodstránite. Je aj v zálohách, kým nevypršia. Každý návrh skontrolujete vy skôr, než sa čokoľvek uloží. Toto upozornenie uvidíte len raz.",
+                "provider_text_codex": "Odošle tento dokument spoločnosti OpenAI a prečítaný text uloží sem.",
+                "provider_text_both": "Odošle tento dokument spoločnosti OpenAI, alebo spoločnosti GitHub, ak OpenAI nie je dostupná, a prečítaný text uloží sem.",
+                "provider_text_copilot": "Odošle tento dokument spoločnosti GitHub a prečítaný text uloží sem."
             },
             "status": {
                 "queued": "Čaká na AI",
@@ -2355,7 +2363,13 @@
                 "no_agent_detail": "Momentálne nie je prihlásený žiadny nástroj AI. Nič sa neodoslalo. Skúste to neskôr alebo údaje pridajte ručne.",
                 "notice_required_detail": "Nástroje AI sa zmenili od chvíle, keď ste súhlasili s odosielaním dokumentov. Nič sa neodoslalo. Spustite AI znova a uvidíte aktualizované upozornenie.",
                 "still_waiting": "Stále čaká. Obnovte stránku a skontrolujte znova.",
-                "newer_waiting": "Novšie spustenie čaká na limit AI, ďalší pokus po {when}"
+                "newer_waiting": "Novšie spustenie čaká na limit AI, ďalší pokus po {when}",
+                "text_saved": "Text uložený",
+                "text_saved_detail": "Text je uložený a dá sa v ňom hľadať. Návrhy sa nevytvorili. Pre návrhy stlačte Spustiť AI.",
+                "text_saved_preparing": "Text je uložený. AI z neho teraz pripravuje návrhy.",
+                "waiting_text_saved": "Text je už uložený.",
+                "failed_text_saved": "Rozpoznaný text sa uložil.",
+                "announce_text_saved": "Text dokumentu je uložený."
             },
             "review": {
                 "back_document": "Späť na dokument",
@@ -2430,7 +2444,9 @@
                 "multi_title": "Odoslať tento dokument spoločnosti OpenAI alebo GitHub?",
                 "multi_body": "Tento dokument opustí tento server a odošle sa spoločnosti OpenAI, alebo spoločnosti GitHub, ak OpenAI nie je dostupná, na prečítanie. Môžu ho uchovať podľa vlastných podmienok. Každý návrh skontrolujete vy skôr, než sa čokoľvek uloží. Toto upozornenie uvidíte znova, len ak sa pridá ďalšia služba.",
                 "github_title": "Odoslať tento dokument spoločnosti GitHub?",
-                "github_body": "Tento dokument opustí tento server a odošle sa spoločnosti GitHub na prečítanie. GitHub ho môže uchovať podľa vlastných podmienok. Každý návrh skontrolujete vy skôr, než sa čokoľvek uloží. Toto upozornenie uvidíte znova, len ak sa pridá ďalšia služba."
+                "github_body": "Tento dokument opustí tento server a odošle sa spoločnosti GitHub na prečítanie. GitHub ho môže uchovať podľa vlastných podmienok. Každý návrh skontrolujete vy skôr, než sa čokoľvek uloží. Toto upozornenie uvidíte znova, len ak sa pridá ďalšia služba.",
+                "multi_text_body": "Tento dokument opustí tento server a odošle sa spoločnosti OpenAI, alebo spoločnosti GitHub, ak OpenAI nie je dostupná, na prečítanie. Odošle sa v dvoch krokoch: najprv obrázky strán, potom text, ktorý z nich bol prečítaný. Môžu uchovať oboje podľa vlastných podmienok. Prečítaný text sa uloží do databázy tejto aplikácie, môžu v ňom hľadať členovia, ktorí môžu dokument otvoriť, a ostane, kým sa dokument neodstráni alebo text neodstránite. Je aj v zálohách, kým nevypršia. Každý návrh skontrolujete vy skôr, než sa čokoľvek uloží. Toto upozornenie uvidíte znova, len ak sa pridá ďalšia služba.",
+                "github_text_body": "Tento dokument opustí tento server a odošle sa spoločnosti GitHub na prečítanie. Odošle sa v dvoch krokoch: najprv obrázky strán, potom text, ktorý z nich bol prečítaný. GitHub môže uchovať oboje podľa vlastných podmienok. Prečítaný text sa uloží do databázy tejto aplikácie, môžu v ňom hľadať členovia, ktorí môžu dokument otvoriť, a ostane, kým sa dokument neodstráni alebo text neodstránite. Je aj v zálohách, kým nevypršia. Každý návrh skontrolujete vy skôr, než sa čokoľvek uloží. Toto upozornenie uvidíte znova, len ak sa pridá ďalšia služba."
             }
         },
         "access": {

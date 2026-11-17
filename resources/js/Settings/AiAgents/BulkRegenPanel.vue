@@ -135,6 +135,17 @@ watch(() => props.providers, () => { providersLocal.value = null; });
 const effectiveProviders = computed(() => (Array.isArray(providersLocal.value) && providersLocal.value.length > 0 ? providersLocal.value : (props.providers ?? [])));
 // The set the confirm dialog named when it opened; Start sends exactly this.
 const shownProviders = ref([]);
+// Full-text reading on and this administrator has not yet acknowledged the statement about the stored text: the confirm
+// dialog carries it once and Start sends textNotice. A 409 notice_required (the server's answer wins) opens it again.
+const textAckLocal = ref(null);
+watch(() => status.panel.value?.textNoticeAcknowledged, () => { textAckLocal.value = null; });
+const needsTextNotice = computed(() => ocrEnabled.value && !(textAckLocal.value ?? status.panel.value?.textNoticeAcknowledged === true));
+const shownTextNotice = ref(false);
+const textNoticeKey = computed(() => {
+    const keys = shownProviders.value;
+    if (keys.includes('codex') && keys.includes('copilot')) return 'health.ai.notice.multi_text_body';
+    return keys.includes('copilot') ? 'health.ai.notice.github_text_body' : 'health.ai.run.notice_text_body';
+});
 const providerWords = computed(() => {
     const keys = effectiveProviders.value;
     const both = keys.includes('codex') && keys.includes('copilot');
@@ -230,6 +241,7 @@ function pressStart() {
         return;
     }
     shownProviders.value = [...effectiveProviders.value];
+    shownTextNotice.value = needsTextNotice.value;
     confirmOpen.value = true;
 }
 
@@ -238,7 +250,7 @@ async function start() {
     if (!ready.value || !result.value) return;
     starting.value = true;
     problem.value = '';
-    const response = await securityFetch(START_URL, { method: 'POST', body: { token: result.value.token, acknowledged: true, providers: [...shownProviders.value] }, replay: true });
+    const response = await securityFetch(START_URL, { method: 'POST', body: { token: result.value.token, acknowledged: true, providers: [...shownProviders.value], ...(shownTextNotice.value ? { textNotice: true } : {}) }, replay: true });
     starting.value = false;
     const data = response.data ?? {};
     if (response.ok && response.status === 201 && data.panel) {
@@ -257,10 +269,18 @@ async function start() {
         say(t('settings.ai_bulk.already_active'));
         return;
     }
+    if (response.status === 409 && data.reason === 'notice_required') {
+        // The statement about the stored text was not acknowledged yet: nothing was started; show it and ask again.
+        textAckLocal.value = false;
+        shownTextNotice.value = true;
+        confirmOpen.value = true;
+        return;
+    }
     if (response.status === 409 && data.reason === 'providers_changed') {
         // An agent was enabled or disabled after the dialog opened. Nothing was started; ask again with the current set.
         if (Array.isArray(data.providers) && data.providers.length > 0) providersLocal.value = data.providers;
         shownProviders.value = [...effectiveProviders.value];
+        shownTextNotice.value = needsTextNotice.value;
         confirmOpen.value = true;
         return;
     }
@@ -436,6 +456,7 @@ const problemText = computed(() => ({
 
             <UiDialog :open="confirmOpen" :title="t('settings.ai_bulk.confirm_title')" :initial-focus="() => safe" @update:open="(v) => (confirmOpen = v)">
                 <p class="bulk-dialog__body">{{ t('settings.ai_bulk.confirm_body', { n: eligible, providers: providerWords, cap: result?.cap ?? capValue, hour }, eligible) }}</p>
+                <p v-if="shownTextNotice" class="bulk-dialog__body bulk-dialog__notice" data-testid="bulk-confirm-notice">{{ t(textNoticeKey) }}</p>
                 <p v-if="confirmTextOnly" class="bulk-dialog__note" data-testid="bulk-confirm-no-text">{{ t('settings.ai_bulk.no_text_note') }}</p>
                 <p v-if="noAgentSignedIn" class="bulk-dialog__note">{{ t('settings.ai_bulk.no_agent_note') }}</p>
                 <template #footer>
@@ -493,6 +514,7 @@ const problemText = computed(() => ({
 .bulk__start :deep(.ui-button__label), .bulk__row :deep(.ui-button__label) { overflow-wrap: anywhere; }
 .bulk__reason { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 .bulk-dialog__body { margin: 0; font-size: var(--text-base); }
+.bulk-dialog__notice { margin-top: var(--space-3); }
 .bulk-dialog__note { margin: var(--space-3) 0 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 @media (prefers-reduced-motion: no-preference) {
     .bulk-result { transition: opacity 175ms; }
