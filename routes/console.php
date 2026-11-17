@@ -12,6 +12,7 @@ Artisan::command('inspire', function () {
 
 Schedule::job(new RecordHeartbeat('schedule'))->everyMinute()->name('record-heartbeat')->withoutOverlapping();
 Schedule::command('reminders:enqueue')->everyMinute()->name('reminders-enqueue')->withoutOverlapping();
+Schedule::command('shopping:enqueue-reminders')->everyMinute()->name('shopping-enqueue-reminders')->withoutOverlapping();
 Schedule::command('outbox:dispatch')->everyMinute()->name('outbox-dispatch')->withoutOverlapping();
 Schedule::command('outbox:prune')->daily()->name('outbox-prune');
 Schedule::command('occasions:enqueue')->hourly()->name('occasions-enqueue')->withoutOverlapping();
