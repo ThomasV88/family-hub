@@ -6,15 +6,21 @@ use App\Models\User;
 use App\Profile\ProfileAccess;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UpdateProfileNameRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Authorize before validating so someone who may not edit this person gets 403 whatever the body contains.
-        $target = User::query()->findOrFail((int) $this->route('user'));
+        // Authorize before validating. An unknown id and a person the caller may not edit are the same 404
+        // (like the view routes), so ids cannot be enumerated by status code.
+        $target = User::query()->find((int) $this->route('user'));
+        $actor = $this->user();
+        if ($target === null || $actor === null || ! app(ProfileAccess::class)->canEdit($actor, $target)) {
+            throw new NotFoundHttpException;
+        }
 
-        return $this->user() !== null && app(ProfileAccess::class)->canEdit($this->user(), $target);
+        return true;
     }
 
     protected function prepareForValidation(): void

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Storage;
 use Tests\Support\ImageFixtures;
 
 // The target is the parent member. Only the parent (self) may change their own photo; admin and everyone else
-// get 403 because an account that can sign in is never edited by someone else.
+// get a uniform 404 (same as an unknown id) because an account that can sign in is never edited by someone else.
 $parentTarget = fn (array $users) => ['user' => $users['parent']->id];
 
 $parentWithPhoto = function (array $users) {
@@ -32,14 +32,14 @@ return [
         ],
     ],
     // The matrix posts no file, so the parent reaches validation and is redirected back (302) with an error;
-    // everyone else is refused with 403 before validation. Real uploads are covered in ProfilePhotoTest.
+    // everyone else is refused with 404 before validation. Real uploads are covered in ProfilePhotoTest.
     'profile.photo.store' => [
         'method' => 'POST',
         'uri' => '/people/{user}/photo',
         'params' => $parentTarget,
         'expect' => [
-            'guest' => 302, 'admin' => 403, 'parent' => 302, 'child' => 403,
-            'grandparent' => 403, 'guestPreset' => 403, 'noGrants' => 403,
+            'guest' => 302, 'admin' => 404, 'parent' => 302, 'child' => 404,
+            'grandparent' => 404, 'guestPreset' => 404, 'noGrants' => 404,
         ],
     ],
     'profile.photo.destroy' => [
@@ -47,8 +47,8 @@ return [
         'uri' => '/people/{user}/photo',
         'params' => $parentTarget,
         'expect' => [
-            'guest' => 302, 'admin' => 403, 'parent' => 303, 'child' => 403,
-            'grandparent' => 403, 'guestPreset' => 403, 'noGrants' => 403,
+            'guest' => 302, 'admin' => 404, 'parent' => 303, 'child' => 404,
+            'grandparent' => 404, 'guestPreset' => 404, 'noGrants' => 404,
         ],
     ],
     'profile.show' => [
@@ -69,15 +69,15 @@ return [
             'grandparent' => 404, 'guestPreset' => 404, 'noGrants' => 404,
         ],
     ],
-    // Only the parent (self) may rename; everyone else is refused with 403 before validation.
+    // Only the parent (self) may rename; everyone else is refused with 404 before validation.
     'profile.name.update' => [
         'method' => 'PUT',
         'uri' => '/people/{user}/name',
         'params' => $parentTarget,
         'data' => ['name' => 'Renamed Parent'],
         'expect' => [
-            'guest' => 302, 'admin' => 403, 'parent' => 303, 'child' => 403,
-            'grandparent' => 403, 'guestPreset' => 403, 'noGrants' => 403,
+            'guest' => 302, 'admin' => 404, 'parent' => 303, 'child' => 404,
+            'grandparent' => 404, 'guestPreset' => 404, 'noGrants' => 404,
         ],
     ],
 ];

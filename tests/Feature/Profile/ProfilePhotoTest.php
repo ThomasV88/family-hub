@@ -46,10 +46,13 @@ it('re-encodes a self upload to fresh JPEGs without EXIF or GPS', function () {
     expect(AuditEntry::query()->where('event', 'profile_changed_by_other')->count())->toBe(0);
 });
 
-it('refuses an upload for someone else with 403 before the body is read, even when empty', function () {
-    $this->actingAs($this->other)->post("/people/{$this->parent->id}/photo", [])->assertForbidden();
-    $this->actingAs($this->other)->post("/people/{$this->child->id}/photo", ['photo' => jpegUpload(ImageFixtures::jpeg())])->assertForbidden();
-    $this->actingAs($this->other)->delete("/people/{$this->parent->id}/photo")->assertForbidden();
+it('refuses an upload for someone else with a uniform 404 before the body is read, even when empty', function () {
+    $this->actingAs($this->other)->post("/people/{$this->parent->id}/photo", [])->assertNotFound();
+    $this->actingAs($this->other)->post("/people/{$this->child->id}/photo", ['photo' => jpegUpload(ImageFixtures::jpeg())])->assertNotFound();
+    $this->actingAs($this->other)->delete("/people/{$this->parent->id}/photo")->assertNotFound();
+    // Same answer for an id that does not exist, so ids cannot be enumerated.
+    $this->actingAs($this->other)->post('/people/999999/photo', [])->assertNotFound();
+    $this->actingAs($this->other)->delete('/people/999999/photo')->assertNotFound();
     expect($this->child->fresh()->photo_path)->toBeNull();
 });
 

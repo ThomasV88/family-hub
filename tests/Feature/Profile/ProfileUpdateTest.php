@@ -76,8 +76,9 @@ it('applies the length limit only when the name changes', function () {
     expect($this->parent->fresh()->name)->toBe($long);
 });
 
-it('refuses renaming another adult', function () {
-    $this->actingAs($this->parent)->put("/people/{$this->other->id}/name", ['name' => 'Hacked'])->assertForbidden();
+it('refuses renaming another adult with the same 404 as an unknown id', function () {
+    $this->actingAs($this->parent)->put("/people/{$this->other->id}/name", ['name' => 'Hacked'])->assertNotFound();
+    $this->actingAs($this->parent)->put('/people/999999/name', ['name' => 'Hacked'])->assertNotFound();
 });
 
 it('lets an admin rename a child and audits it without the name text', function () {

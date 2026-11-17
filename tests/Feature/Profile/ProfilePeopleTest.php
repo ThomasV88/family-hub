@@ -71,7 +71,7 @@ it('lets the manager rename the child and change its photo', function () {
 });
 
 it('refuses an unrelated member the name and photo of the child', function () {
-    $this->actingAs($this->unrelated)->put("/people/{$this->child->id}/name", ['name' => 'Hacked'])->assertForbidden();
-    $this->actingAs($this->unrelated)->delete("/people/{$this->child->id}/photo")->assertForbidden();
+    $this->actingAs($this->unrelated)->put("/people/{$this->child->id}/name", ['name' => 'Hacked'])->assertNotFound();
+    $this->actingAs($this->unrelated)->delete("/people/{$this->child->id}/photo")->assertNotFound();
     expect($this->child->fresh()->name)->toBe('Kid');
 });

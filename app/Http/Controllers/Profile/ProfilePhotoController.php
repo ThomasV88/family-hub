@@ -84,8 +84,9 @@ class ProfilePhotoController extends Controller
 
     public function destroy(Request $request, int $user, ProfilePhotoStore $store, ProfileAccess $access, AuditLogger $audit): RedirectResponse
     {
-        $target = User::query()->findOrFail($user);
-        abort_unless($access->canEdit($request->user(), $target), 403);
+        // Unknown id and "not yours to edit" are the same 404, like the view routes.
+        $target = User::query()->find($user);
+        abort_if($target === null || ! $access->canEdit($request->user(), $target), 404);
 
         $store->remove($target);
         $this->auditIfOther($audit, $request->user(), $target);
