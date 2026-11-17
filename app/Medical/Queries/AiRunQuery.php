@@ -82,8 +82,9 @@ class AiRunQuery
      * 'notice_required' with the current set, so the dialog opens again with what is true now.
      *
      * @param  list<string>|null  $shownProviders
+     * @param  bool  $textNotice  the notice the member confirmed carried the statement about the stored text
      */
-    public function start(Viewer $viewer, MedicalSubject $subject, string $documentId, User $user, bool $acknowledged, ?array $shownProviders = null): StartResult
+    public function start(Viewer $viewer, MedicalSubject $subject, string $documentId, User $user, bool $acknowledged, ?array $shownProviders = null, bool $textNotice = false): StartResult
     {
         if (! $viewer->canEdit()) {
             return new StartResult('denied');
@@ -93,7 +94,7 @@ class AiRunQuery
         $raced = false;
 
         try {
-            return DB::transaction(function () use (&$raced, $viewer, $subject, $subjectId, $documentId, $user, $acknowledged, $shownProviders): StartResult {
+            return DB::transaction(function () use (&$raced, $viewer, $subject, $subjectId, $documentId, $user, $acknowledged, $shownProviders, $textNotice): StartResult {
                 $locked = Visibility::apply(
                     DB::table('medical_subjects')->where('id', $subjectId)->sharedLock(),
                     $viewer,
@@ -120,7 +121,9 @@ class AiRunQuery
                 DB::select("select pg_advisory_xact_lock_shared(hashtext('ai-agent-settings'))");
                 $enabledKeys = $this->agents->providers();
                 $acked = $this->noticeAcknowledged($viewer, $enabledKeys);
-                if (! $acked && (! $acknowledged || ! self::sameSet($shownProviders, $enabledKeys))) {
+                // While recognised text is stored the request must also say that the dialog showed the statement about it ($textNotice):
+                // an acknowledgment from a dialog that never showed it (the switch was turned on meanwhile) does not count.
+                if (! $acked && (! $acknowledged || ! self::sameSet($shownProviders, $enabledKeys) || (config('ai.ocr.enabled') && ! $textNotice))) {
                     return new StartResult('notice_required', null, array_values($enabledKeys));
                 }
                 $active = $this->activeId($viewer, $subjectId, $documentId);

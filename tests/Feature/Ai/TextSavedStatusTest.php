@@ -105,7 +105,7 @@ it('writes mode entries when the OCR switch is off and mode full when it is on',
 
     DB::table('medical_ai_extractions')->where('id', $id)->update(['status' => 'cancelled', 'cancel_reason' => 'user', 'finished_at' => now()->subHour()]);
     config(['ai.ocr.enabled' => true, 'ai.limits.document_cooldown_minutes' => 0]);
-    $id = (string) $this->actingAs($s['user'])->postJson($url, ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202)->json('extractionId');
+    $id = (string) $this->actingAs($s['user'])->postJson($url, ['acknowledged' => true, 'textNotice' => true, 'providers' => ['codex']])->assertStatus(202)->json('extractionId');
     expect(DB::table('medical_ai_extractions')->where('id', $id)->value('mode'))->toBe('full');
 });
 

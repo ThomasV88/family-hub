@@ -21,7 +21,7 @@ class AiRunController extends Controller
     public function run(AiRunRequest $request, AiRunQuery $runs, AiJobQuery $jobs, string $person, string $document): JsonResponse
     {
         $viewer = Viewer::for($request->user());
-        $result = $runs->start($viewer, $request->subject(), $document, $request->user(), $request->boolean('acknowledged'), $request->has('providers') ? array_values((array) $request->input('providers')) : null);
+        $result = $runs->start($viewer, $request->subject(), $document, $request->user(), $request->boolean('acknowledged'), $request->has('providers') ? array_values((array) $request->input('providers')) : null, $request->boolean('textNotice'));
         abort_if($result->outcome === 'denied', 403);
 
         if ($result->outcome === 'queued') {

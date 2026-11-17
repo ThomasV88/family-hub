@@ -70,12 +70,27 @@ describe('single runs', function () {
             ->assertStatus(409)->assertJson(['reason' => 'notice_required', 'providers' => ['codex'], 'textNotice' => true]);
         expect(DB::table('medical_ai_extractions')->count())->toBe(0)->and(txtNoticeTextAt($user))->toBeNull();
 
-        $this->actingAs($user)->postJson(txtNoticeUrl($person, $doc), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202);
+        $this->actingAs($user)->postJson(txtNoticeUrl($person, $doc), ['acknowledged' => true, 'textNotice' => true, 'providers' => ['codex']])->assertStatus(202);
         expect(DB::table('medical_ai_extractions')->sole()->mode)->toBe('full')->and(txtNoticeTextAt($user))->not->toBeNull();
 
         // The next run needs nothing more (a second document so the first run does not block it).
         $second = MedicalDocument::factory()->image()->create(['subject_id' => $person->id]);
         $this->actingAs($user)->postJson(txtNoticeUrl($person, $second), [])->assertStatus(202);
+    });
+
+    it('does not store the text acknowledgment for a dialog that never showed the statement', function () {
+        config(['ai.ocr.enabled' => true]);
+        [$user, $person, $doc] = txtNoticeSetup();
+        txtNoticeAck($user);
+
+        // Acknowledged and the right provider set, but without the textNotice claim (a dialog from before the switch).
+        $this->actingAs($user)->postJson(txtNoticeUrl($person, $doc), ['acknowledged' => true, 'providers' => ['codex']])
+            ->assertStatus(409)->assertJson(['reason' => 'notice_required', 'providers' => ['codex'], 'textNotice' => true]);
+        $this->actingAs($user)->postJson(txtNoticeUrl($person, $doc), ['acknowledged' => true, 'textNotice' => false, 'providers' => ['codex']])->assertStatus(409);
+        expect(DB::table('medical_ai_extractions')->count())->toBe(0)->and(txtNoticeTextAt($user))->toBeNull();
+
+        $this->actingAs($user)->postJson(txtNoticeUrl($person, $doc), ['acknowledged' => true, 'textNotice' => true, 'providers' => ['codex']])->assertStatus(202);
+        expect(txtNoticeTextAt($user))->not->toBeNull();
     });
 
     it('does not accept the acknowledgment without the shown provider set', function () {
@@ -91,7 +106,7 @@ describe('single runs', function () {
         config(['ai.ocr.enabled' => true]);
         [$user, $person, $doc] = txtNoticeSetup();
 
-        $this->actingAs($user)->postJson(txtNoticeUrl($person, $doc), ['acknowledged' => true, 'providers' => ['codex']])->assertStatus(202);
+        $this->actingAs($user)->postJson(txtNoticeUrl($person, $doc), ['acknowledged' => true, 'textNotice' => true, 'providers' => ['codex']])->assertStatus(202);
 
         $row = DB::table('ai_notice_acks')->where('user_id', $user->id)->first();
         expect($row->providers)->toBe('codex')->and($row->text_notice_acked_at)->not->toBeNull();
@@ -115,7 +130,7 @@ describe('single runs', function () {
         $this->actingAs($user)->postJson(txtNoticeUrl($person, $doc), [])
             ->assertStatus(409)->assertJson(['reason' => 'notice_required', 'providers' => ['codex', 'copilot']]);
 
-        $this->actingAs($user)->postJson(txtNoticeUrl($person, $doc), ['acknowledged' => true, 'providers' => ['codex', 'copilot']])->assertStatus(202);
+        $this->actingAs($user)->postJson(txtNoticeUrl($person, $doc), ['acknowledged' => true, 'textNotice' => true, 'providers' => ['codex', 'copilot']])->assertStatus(202);
         expect(DB::table('ai_notice_acks')->where('user_id', $user->id)->value('providers'))->toBe('codex,copilot');
         // The earlier text acknowledgment is kept, not re-asked and not required again.
         expect(txtNoticeTextAt($user))->not->toBeNull();

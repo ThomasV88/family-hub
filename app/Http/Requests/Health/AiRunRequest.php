@@ -43,6 +43,8 @@ class AiRunRequest extends FormRequest
             // The provider keys the member saw in the notice dialog; the server compares them with the enabled set.
             'providers' => ['sometimes', 'nullable', 'array', 'max:5'],
             'providers.*' => ['string', 'in:codex,copilot'],
+            // True only from the dialog that showed the statement about the stored text.
+            'textNotice' => ['sometimes', 'nullable', 'boolean'],
         ];
     }
 }
