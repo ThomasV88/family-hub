@@ -8,6 +8,7 @@ use App\Models\ShoppingList;
 use App\Models\ShoppingUnit;
 use App\Models\User;
 use App\Shopping\Queries\ListQuery;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -30,6 +31,10 @@ final class ItemService
             $list = $this->lockOpenForEdit($actor, $listId);
 
             $position = (int) ShoppingItem::query()->where('list_id', $list->id)->max('position');
+            $count = ShoppingItem::query()->where('list_id', $list->id)->count();
+            if ($count + count($items) > (int) config('shopping.items_per_list')) {
+                throw ValidationException::withMessages(['items' => 'shopping.error.items_limit']);
+            }
             $added = 0;
             $merged = [];
 
@@ -48,8 +53,14 @@ final class ItemService
                         ->where(fn ($q) => $unitId === null ? $q->whereNull('unit_id') : $q->where('unit_id', $unitId))
                         ->orderBy('position')->orderBy('id')->lockForUpdate()->first();
                     if ($existing !== null) {
-                        $sum = min((float) $existing->quantity + $quantity, (float) config('shopping.quantity_max'));
-                        $existing->forceFill(['quantity' => number_format($sum, 2, '.', '')])->save();
+                        $sum = (float) $existing->quantity + $quantity;
+                        if ($sum > (float) config('shopping.quantity_max')) {
+                            throw ValidationException::withMessages(["items.$index.quantity" => 'shopping.error.quantity_merge_too_large']);
+                        }
+                        $existing->forceFill([
+                            'quantity' => number_format($sum, 2, '.', ''),
+                            'note' => $this->mergeNote($existing->note, $note, "items.$index.note"),
+                        ])->save();
                         if (! in_array($catalog->name, $merged, true)) {
                             $merged[] = $catalog->name;
                         }
@@ -139,7 +150,15 @@ final class ItemService
             $unitId = $input['unit_id'] ?? null;
             $this->assertUnit($unitId, "items.$index.unit_id");
             $catalog = new ShoppingCatalogItem(['name' => $name, 'default_unit_id' => $unitId]);
-            $catalog->forceFill(['created_by' => $actor->id])->save();
+            $catalog->forceFill(['created_by' => $actor->id]);
+
+            try {
+                // A savepoint, so a lost race on the unique name key does not poison the surrounding transaction.
+                DB::transaction(fn () => $catalog->save());
+            } catch (UniqueConstraintViolationException) {
+                // Somebody saved the same name a moment ago: use their row.
+                return ShoppingCatalogItem::query()->where('name_key', NameKey::from($name))->firstOrFail();
+            }
 
             return $catalog;
         }
@@ -155,6 +174,23 @@ final class ItemService
         }
 
         return $name;
+    }
+
+    /** The new note is appended to the one already on the merged line (never dropped, never longer than the limit). */
+    private function mergeNote(?string $existing, ?string $new, string $key): ?string
+    {
+        if ($new === null || in_array($new, explode('; ', (string) $existing), true)) {
+            return $existing;
+        }
+        if ($existing === null) {
+            return $new;
+        }
+        $joined = $existing.'; '.$new;
+        if (mb_strlen($joined) > (int) config('shopping.name_max.note')) {
+            throw ValidationException::withMessages([$key => 'shopping.error.note_too_long']);
+        }
+
+        return $joined;
     }
 
     private function note(?string $note, string $key): ?string

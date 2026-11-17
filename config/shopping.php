@@ -21,6 +21,9 @@ return [
 
     'quantity_max' => 999.99,
     'items_per_add_request' => 50,
+    'items_per_list' => 500,
+    // At most this many people per role in the list settings.
+    'members_per_role' => 50,
 
     // E-mailing a list (research A1).
     'mail' => [

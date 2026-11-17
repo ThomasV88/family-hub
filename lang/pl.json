@@ -2686,7 +2686,15 @@
             "reminder_invalid": "Podaj prawidłową datę i godzinę.",
             "lock_empty": "Przed zablokowaniem dodaj co najmniej jeden produkt.",
             "finish_failed": "Nie udało się zakończyć zakupów. Nic się nie zmieniło. Spróbuj ponownie.",
-            "mark_failed": "Nie udało się zapisać. Spróbuj ponownie."
+            "mark_failed": "Nie udało się zapisać. Spróbuj ponownie.",
+            "lock_invalid": "Listy nie można teraz zablokować ani odblokować. Odśwież stronę i spróbuj ponownie.",
+            "state_invalid": "To oznaczenie nie jest dozwolone. Odśwież stronę i spróbuj ponownie.",
+            "quantity_invalid": "Podaj ilość większą niż 0 i mniejszą niż 1000.",
+            "quantity_merge_too_large": "Ten produkt jest już na liście, a obie ilości razem są zbyt duże.",
+            "items_limit": "Lista może zawierać najwyżej 500 produktów.",
+            "members_count": "Wybierz najwyżej 50 osób.",
+            "list_changed": "Listę zmieniła inna osoba. Została wczytana ponownie.",
+            "too_many_requests": "Zbyt wiele żądań. Poczekaj chwilę i spróbuj ponownie."
         },
         "overview": {
             "title": "Zakupy",

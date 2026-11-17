@@ -45,7 +45,7 @@
           "Nie je niečo v katalógu? Stlačte **Zadať vlastnú položku** (alebo počas hľadania riadok **Pridať \"...\" ako novú položku**), vyplňte názov, množstvo a jednotku a stlačte **Pridať do zoznamu**. Vaša vlastná položka sa do katalógu neuloží, kým nezaškrtnete **Uložiť aj do katalógu**, čo vidia len ľudia, ktorí spravujú katalóg.",
           "Dole stlačte **Pridať** (ukáže, koľko položiek ste vybrali). Všetky vybrané položky sa pridajú do zoznamu naraz."
         ] },
-        { "type": "p", "text": "Položka z katalógu, ktorá už v zozname je, nedostane druhý riadok. Zvýši sa jej množstvo a uvidíte \"Množstvo položky ... zmenené\". Takéto položky majú v okne štítok **V zozname**." },
+        { "type": "p", "text": "Položka z katalógu, ktorá už v zozname je, nedostane druhý riadok. Zvýši sa jej množstvo a uvidíte \"Množstvo položky ... zmenené\". Takéto položky majú v okne štítok **V zozname**. Poznámka, ktorú zadáte k tej istej položke, sa pridá k existujúcej poznámke. Ak by obe množstvá spolu dosiahli 1000 alebo viac, alebo by boli poznámky spolu príliš dlhé, nič sa nepridá a uvidíte správu. Zoznam môže obsahovať najviac 500 položiek." },
         { "type": "steps", "items": [
           "Položku zmeníte ťuknutím na jej riadok. Môžete zmeniť množstvo, jednotku a poznámku, a aj názov, ak ide o vašu vlastnú položku (ktorá nie je v katalógu).",
           "Položku odstránite tak, že ju otvoríte, stlačíte **Odstrániť položku** a potvrdíte. Položka sa odstráni pre všetkých, ktorí zoznam vidia."

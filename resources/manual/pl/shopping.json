@@ -45,7 +45,7 @@
           "Czegoś nie ma w katalogu? Naciśnij **Wpisz własny produkt** (albo podczas szukania wiersz **Dodaj \"...\" jako nowy produkt**), wpisz nazwę, ilość i jednostkę i naciśnij **Dodaj do listy**. Twój produkt nie trafi do katalogu, dopóki nie zaznaczysz **Zapisz też w katalogu**, co widzą tylko osoby zarządzające katalogiem.",
           "Na dole naciśnij **Dodaj** (pokazuje, ile produktów wybrano). Wszystkie wybrane produkty trafią na listę naraz."
         ] },
-        { "type": "p", "text": "Produkt z katalogu, który już jest na liście, nie dostaje drugiego wiersza. Zwiększa się jego ilość i zobaczysz \"Zmieniono ilość produktu ...\". Takie produkty mają w oknie znacznik **Na liście**." },
+        { "type": "p", "text": "Produkt z katalogu, który już jest na liście, nie dostaje drugiego wiersza. Zwiększa się jego ilość i zobaczysz \"Zmieniono ilość produktu ...\". Takie produkty mają w oknie znacznik **Na liście**. Notatka wpisana dla tego samego produktu jest dodawana do istniejącej notatki. Jeśli obie ilości razem osiągnęłyby 1000 lub więcej albo notatki razem byłyby zbyt długie, nic nie zostanie dodane i zobaczysz komunikat. Lista może zawierać najwyżej 500 produktów." },
         { "type": "steps", "items": [
           "Aby zmienić produkt, dotknij jego wiersza. Możesz zmienić ilość, jednostkę i notatkę, a także nazwę, jeśli to Twój własny produkt (spoza katalogu).",
           "Aby usunąć produkt, otwórz go, naciśnij **Usuń produkt** i potwierdź. Produkt zostanie usunięty dla wszystkich, którzy widzą listę."

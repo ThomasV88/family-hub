@@ -2686,7 +2686,15 @@
             "reminder_invalid": "Zadajte platný dátum a čas.",
             "lock_empty": "Pred uzamknutím pridajte aspoň jednu položku.",
             "finish_failed": "Nákup sa nepodarilo ukončiť. Nič sa nezmenilo. Skúste to znova.",
-            "mark_failed": "Nepodarilo sa uložiť. Skúste to znova."
+            "mark_failed": "Nepodarilo sa uložiť. Skúste to znova.",
+            "lock_invalid": "Zoznam sa teraz nedá uzamknúť ani odomknúť. Načítajte stránku znova a skúste to ešte raz.",
+            "state_invalid": "Toto označenie nie je povolené. Načítajte stránku znova a skúste to ešte raz.",
+            "quantity_invalid": "Zadajte množstvo väčšie ako 0 a menšie ako 1000.",
+            "quantity_merge_too_large": "Táto položka už na zozname je a obe množstvá spolu sú príliš veľké.",
+            "items_limit": "Zoznam môže obsahovať najviac 500 položiek.",
+            "members_count": "Vyberte najviac 50 ľudí.",
+            "list_changed": "Zoznam zmenil niekto iný. Načítal sa znova.",
+            "too_many_requests": "Príliš veľa požiadaviek. Chvíľu počkajte a skúste to znova."
         },
         "overview": {
             "title": "Nákupy",

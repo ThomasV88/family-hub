@@ -7,6 +7,7 @@ use App\Shopping\ItemService;
 use App\Shopping\ItemState;
 use App\Shopping\ListStatus;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 use Tests\Support\ShoppingFixtures as F;
 
 function items(): ItemService
@@ -53,15 +54,84 @@ it('merges the same catalog item with the same unit into the pending row and rep
         ->and(ShoppingItem::where('list_id', $list->id)->value('quantity'))->toBe('3.25');
 });
 
-it('caps a merged quantity at 999.99', function () {
+it('refuses a merge that would pass 999.99 and keeps the stored line', function () {
     $creator = F::user();
     $list = F::list($creator);
     $milk = ShoppingCatalogItem::factory()->create(['name' => 'Milk']);
 
     items()->add($creator, $list->id, [['catalog_item_id' => $milk->id, 'quantity' => '999']]);
-    items()->add($creator, $list->id, [['catalog_item_id' => $milk->id, 'quantity' => '500']]);
 
-    expect(ShoppingItem::where('list_id', $list->id)->value('quantity'))->toBe('999.99');
+    expect(F::errors(fn () => items()->add($creator, $list->id, [['catalog_item_id' => $milk->id, 'quantity' => '500']])))
+        ->toHaveKey('items.0.quantity')
+        ->and(ShoppingItem::where('list_id', $list->id)->value('quantity'))->toBe('999.00');
+});
+
+it('appends the note of a merged add instead of dropping it', function () {
+    $creator = F::user();
+    $list = F::list($creator);
+    $milk = ShoppingCatalogItem::factory()->create(['name' => 'Milk']);
+
+    items()->add($creator, $list->id, [['catalog_item_id' => $milk->id, 'quantity' => '1']]);
+    items()->add($creator, $list->id, [['catalog_item_id' => $milk->id, 'quantity' => '1', 'note' => 'lactose free']]);
+    expect(ShoppingItem::where('list_id', $list->id)->value('note'))->toBe('lactose free');
+
+    items()->add($creator, $list->id, [['catalog_item_id' => $milk->id, 'quantity' => '1', 'note' => 'semi-skimmed']]);
+    items()->add($creator, $list->id, [['catalog_item_id' => $milk->id, 'quantity' => '1', 'note' => 'semi-skimmed']]);
+
+    expect(ShoppingItem::where('list_id', $list->id)->value('note'))->toBe('lactose free; semi-skimmed')
+        ->and(ShoppingItem::where('list_id', $list->id)->count())->toBe(1);
+});
+
+it('refuses a merged note that would pass the note limit', function () {
+    $creator = F::user();
+    $list = F::list($creator);
+    $milk = ShoppingCatalogItem::factory()->create(['name' => 'Milk']);
+
+    items()->add($creator, $list->id, [['catalog_item_id' => $milk->id, 'note' => str_repeat('a', 150)]]);
+
+    expect(F::errors(fn () => items()->add($creator, $list->id, [['catalog_item_id' => $milk->id, 'note' => str_repeat('b', 60)]])))
+        ->toHaveKey('items.0.note');
+});
+
+it('does not fail when the same new catalog name is saved concurrently', function () {
+    $creator = F::user();
+    $list = F::list($creator);
+    $raced = false;
+    // Simulate the other request winning the race: its row is committed on another connection right before our insert.
+    ShoppingCatalogItem::creating(function (ShoppingCatalogItem $item) use (&$raced) {
+        if (! $raced) {
+            $raced = true;
+            DB::connectUsing('racer', config('database.connections.'.config('database.default')))
+                ->table('shopping_catalog_items')->insert(['name' => $item->name, 'name_key' => $item->name_key, 'created_at' => now(), 'updated_at' => now()]);
+        }
+    });
+
+    try {
+        $result = items()->add($creator, $list->id, [['name' => 'Rare spice', 'quantity' => '1', 'save_to_catalog' => true]]);
+
+        expect($result['added'])->toBe(1)
+            ->and(ShoppingCatalogItem::query()->where('name', 'Rare spice')->count())->toBe(1)
+            ->and(ShoppingItem::where('list_id', $list->id)->value('catalog_item_id'))->toBe(ShoppingCatalogItem::query()->where('name', 'Rare spice')->value('id'));
+    } finally {
+        // The racing row is committed on its own connection and is referenced by the item: end the test transaction first.
+        while (DB::transactionLevel() > 0) {
+            DB::rollBack();
+        }
+        DB::connection('racer')->table('shopping_catalog_items')->where('name', 'Rare spice')->delete();
+    }
+});
+
+it('refuses more items than a list may hold', function () {
+    $creator = F::user();
+    $list = F::list($creator);
+    config(['shopping.items_per_list' => 3]);
+    items()->add($creator, $list->id, [['name' => 'a'], ['name' => 'b']]);
+
+    expect(F::errors(fn () => items()->add($creator, $list->id, [['name' => 'c'], ['name' => 'd']])))->toHaveKey('items')
+        ->and(ShoppingItem::where('list_id', $list->id)->count())->toBe(2);
+
+    items()->add($creator, $list->id, [['name' => 'c']]);
+    expect(ShoppingItem::where('list_id', $list->id)->count())->toBe(3);
 });
 
 it('adds a new row for a different unit', function () {

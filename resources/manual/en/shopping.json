@@ -45,7 +45,7 @@
           "Something is not in the catalog? Press **Type your own item** (or, while you are searching, the line **Add \"...\" as a new item**), fill in the name, quantity and unit, and press **Add to list**. Your own item is not saved to the catalog unless you tick **Also save to catalog**, which only people who manage the catalog see.",
           "Press **Add** at the bottom (it shows how many items you picked). All selected items join the list at once."
         ] },
-        { "type": "p", "text": "An item from the catalog that is already on the list does not get a second row. Its quantity is raised instead, and you see \"Quantity of ... updated\". Such items carry the tag **On list** in the window." },
+        { "type": "p", "text": "An item from the catalog that is already on the list does not get a second row. Its quantity is raised instead, and you see \"Quantity of ... updated\". Such items carry the tag **On list** in the window. A note you type for the same item is added to the existing note. If the two quantities together would be 1000 or more, or the notes together would be too long, nothing is added and you see a message. A list can hold up to 500 items." },
         { "type": "steps", "items": [
           "To change an item, tap its row. You can change the quantity, the unit and the note, and the name too if it is your own item (one that is not in the catalog).",
           "To remove an item, open it, press **Remove item** and confirm. The item is removed for everyone who sees the list."

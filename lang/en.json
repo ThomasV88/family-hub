@@ -2686,7 +2686,15 @@
             "reminder_invalid": "Enter a valid date and time.",
             "lock_empty": "Add at least one item before you lock the list.",
             "finish_failed": "We could not finish the shopping. Nothing was changed. Try again.",
-            "mark_failed": "Could not save. Try again."
+            "mark_failed": "Could not save. Try again.",
+            "lock_invalid": "The list cannot be locked or unlocked now. Reload the page and try again.",
+            "state_invalid": "That mark is not allowed. Reload the page and try again.",
+            "quantity_invalid": "Enter a quantity above 0 and below 1000.",
+            "quantity_merge_too_large": "That item is already on the list and the two quantities together are too large.",
+            "items_limit": "A list can hold at most 500 items.",
+            "members_count": "Choose at most 50 people.",
+            "list_changed": "The list was changed by someone else. It has been reloaded.",
+            "too_many_requests": "Too many requests. Wait a moment and try again."
         },
         "overview": {
             "title": "Shopping",
