@@ -87,6 +87,17 @@ it('refuses invalid input and creates nothing', function (callable $payload) {
     'a child as parent' => [fn ($t) => ['name' => 'Ema', 'parent_ids' => [User::factory()->child()->withPreset(Preset::Child)->create()->id]]],
 ]);
 
+it('answers parent list shape errors with translation keys, never a raw validation key', function (callable $parents) {
+    $response = $this->actingAs($this->admin)->postJson('/settings/members/children', ['name' => 'Ema', 'parent_ids' => $parents($this)])->assertStatus(422);
+
+    foreach (collect($response->json('errors'))->flatten() as $message) {
+        expect($message)->toStartWith('settings.members.child.')->and($message)->not->toContain('validation.');
+    }
+})->with([
+    'not an integer' => [fn ($t) => ['abc']],
+    'duplicate' => [fn ($t) => [$t->parent->id, $t->parent->id]],
+]);
+
 it('refuses a child or an ineligible member as manager on a later change', function (callable $make) {
     $child = User::factory()->child()->withPreset(Preset::Child)->create();
     WishlistManager::factory()->create(['owner_id' => $child->id, 'manager_id' => $this->parent->id]);

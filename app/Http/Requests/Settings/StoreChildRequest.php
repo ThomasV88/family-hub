@@ -41,6 +41,8 @@ class StoreChildRequest extends FormRequest
             'name.not_regex' => 'profile.err_name_chars',
             'parent_ids.required' => 'settings.members.child.err_parent_required',
             'parent_ids.min' => 'settings.members.child.err_parent_required',
+            'parent_ids.*.integer' => 'settings.members.child.err_parent',
+            'parent_ids.*.distinct' => 'settings.members.child.err_parent',
         ];
     }
 
