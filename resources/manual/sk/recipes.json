@@ -1,0 +1,36 @@
+{
+  "id": "recipes",
+  "category": "modules",
+  "order": 36,
+  "title": "Receptár",
+  "summary": "Rodinný receptár: prezeranie a hľadanie receptov, ktoré smiete vidieť, filtre a obľúbené.",
+  "covers": [
+    "module:recipes"
+  ],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Stránka Receptár",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "**Receptár** je v ponuke vľavo (na telefóne v lište dole), ak vám k nemu správca dal prístup. Stránka ukazuje recepty, ktoré smiete vidieť, ako karty od najnovšieho. Karta ukazuje hlavnú fotku (alebo kuchársku čiapku, ak fotka nie je), názov, čas a počet porcií, štítok **Súkromný** alebo **Zdieľaný**, prvú kategóriu a pri receptoch iných členov meno autora. Recept otvoríte stlačením karty."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Mriežka ukazuje jednu, dve alebo najviac tri karty v riadku podľa šírky okna.",
+            "**Hľadať recepty** nájde recepty podľa názvu alebo suroviny. Nerozlišuje veľké písmená ani diakritiku, takže \"vajce\" nájde \"Vajcia\".",
+            "**Filtre** zúžia zoznam podľa kategórie, autora a suroviny a podľa **Všetky**, **Moje** alebo **Zdieľané so mnou**. Použité filtre sa ukážu ako štítky pod poľom hľadania. Štítok odstránite stlačením, všetky naraz tlačidlom **Zrušiť filtre**. Filtre zostávajú v adrese, takže **Späť** vráti rovnaký pohľad.",
+            "Srdce na karte označí recept ako obľúbený. **Obľúbené** vedľa poľa hľadania ukáže len recepty, ktoré ste označili. Obľúbené sú len vaše, nikto iný ich nevidí.",
+            "Zoznam ukazuje 24 receptov naraz. Ďalšie zobrazíte tlačidlom **Načítať ďalšie**."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Recept vidíte, ak ste ho napísali vy alebo ak ho autor zdieľal so všetkými, ktorí používajú Receptár. Recept, ktorý autor nechal súkromný, sa nikomu inému nezobrazí, ani správcovi. Recept nájdete v tabuľke v [kto čo vidí](who-sees-what#table)."
+        }
+      ]
+    }
+  ]
+}

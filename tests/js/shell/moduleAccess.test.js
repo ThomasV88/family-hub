@@ -19,12 +19,22 @@ describe('visibleModules', () => {
     });
 
     it('adds Shopping last, only for a view or edit grant', () => {
-        expect(MODULES.at(-1)).toMatchObject({ key: 'shopping', href: '/shopping', labelKey: 'nav.shopping' });
+        expect(MODULES.at(-2)).toMatchObject({ key: 'shopping', href: '/shopping', labelKey: 'nav.shopping' });
         expect(keys({ todo: 'edit', shopping: 'view' })).toEqual(['overview', 'tasks', 'shopping']);
         expect(keys({ shopping: 'edit' })).toEqual(['overview', 'shopping']);
         expect(keys({ todo: 'edit', shopping: 'none' })).toEqual(['overview', 'tasks']);
         expect(keys({ todo: 'edit' })).toEqual(['overview', 'tasks']);
         expect(keys({ todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'edit', shopping: 'edit' })).toEqual(['overview', 'tasks', 'wishlist', 'finances', 'health', 'shopping']);
+    });
+
+    it('adds Recipes after Shopping, for a view or edit grant only', () => {
+        expect(MODULES.map((m) => m.key).slice(-2)).toEqual(['shopping', 'recipes']);
+        expect(MODULES.at(-1)).toMatchObject({ key: 'recipes', href: '/recipes', labelKey: 'nav.recipes', titleKey: 'module.recipes' });
+        expect(keys({ recipes: 'view' })).toEqual(['overview', 'recipes']);
+        expect(keys({ recipes: 'edit', shopping: 'view' })).toEqual(['overview', 'shopping', 'recipes']);
+        expect(keys({ recipes: 'none' })).toEqual(['overview']);
+        expect(keys({ todo: 'edit' })).toEqual(['overview', 'tasks']);
+        expect(keys({ todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'edit', shopping: 'edit', recipes: 'edit' })).toHaveLength(7);
     });
 
     it('keeps only overview when access is missing or empty', () => {

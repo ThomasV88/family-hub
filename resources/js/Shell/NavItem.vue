@@ -18,6 +18,8 @@ const { t } = useI18n();
 const shell = useShell();
 const dense = computed(() => props.variant === 'bottom' && props.density !== 'normal');
 const tight = computed(() => props.variant === 'bottom' && props.density === 'tight');
+// At 7 or more items the labels cannot all fit whole: only the current item shows its label, the others are icon-only.
+const iconOnly = computed(() => tight.value && !props.current);
 
 function open(event) {
     shell.openComingSoon(props.module.key, event.currentTarget);
@@ -25,17 +27,18 @@ function open(event) {
 </script>
 
 <template>
-    <li class="nav-item">
+    <li :class="['nav-item', { 'nav-item--current': current }]">
         <component
             :is="module.href ? Link : 'button'"
             :href="module.href ?? undefined"
             :type="module.href ? undefined : 'button'"
             :aria-current="current ? 'page' : undefined"
+            :aria-label="iconOnly ? t(module.labelKey) : undefined"
             :class="['nav-item__link', `nav-item__link--${variant}`, { 'is-current': current, 'is-soon': !module.href, 'is-rail': rail, 'is-dense': dense, 'is-tight': tight }]"
             @click="module.href ? undefined : open($event)"
         >
             <component :is="module.icon" :size="dense ? 20 : 24" :stroke-width="1.75" aria-hidden="true" class="nav-item__icon" />
-            <span :class="['nav-item__label', { 'visually-hidden': rail }]" :title="variant === 'bottom' ? t(module.labelKey) : undefined">{{ t(module.labelKey) }}</span>
+            <span :class="['nav-item__label', { 'visually-hidden': rail || iconOnly }]" :title="variant === 'bottom' ? t(module.labelKey) : undefined">{{ t(module.labelKey) }}</span>
             <span v-if="rail" class="nav-item__tip" aria-hidden="true">{{ t(module.labelKey) }}</span>
         </component>
     </li>
@@ -85,6 +88,7 @@ function open(event) {
     gap: 2px;
     padding: var(--space-1);
     text-align: center;
+    min-width: 0;
 }
 .nav-item__link--bottom .nav-item__label {
     display: block;
@@ -98,9 +102,12 @@ function open(event) {
     word-break: normal;
     hyphens: manual;
 }
-.nav-item__link--bottom.is-dense { padding-inline: 2px; }
-.nav-item__link--bottom.is-dense .nav-item__label { font-size: var(--text-xs); letter-spacing: -0.01em; }
-.nav-item__link--bottom.is-tight .nav-item__label { font-size: 0.6875rem; }
+.nav-item__link--bottom.is-dense { padding-inline: 1px; }
+.nav-item__link--bottom.is-dense .nav-item__label { font-size: 0.6875rem; letter-spacing: -0.02em; }
+.nav-item__link--bottom.is-tight { padding-inline: 2px; }
+.nav-item__link--bottom.is-tight .nav-item__label { font-size: 0.6875rem; letter-spacing: -0.02em; }
+/* Current item at 7+: the whole label, never ellipsised. */
+.nav-item--current > .nav-item__link--bottom.is-tight .nav-item__label { overflow: visible; text-overflow: clip; }
 
 .nav-item__tip {
     position: absolute;

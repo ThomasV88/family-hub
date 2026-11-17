@@ -1,0 +1,36 @@
+{
+  "id": "recipes",
+  "category": "modules",
+  "order": 36,
+  "title": "Recipes",
+  "summary": "The family recipe book: browsing and searching the recipes you may see, the filters and favourites.",
+  "covers": [
+    "module:recipes"
+  ],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "The Recipes page",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "**Recipes** is in the menu on the left (on a phone, in the bar at the bottom) if your administrator gave you access to it. The page shows the recipes you may see as cards, newest first. A card shows the main photo (or a chef hat when there is none), the title, the time and the number of servings, a tag **Private** or **Shared**, the first category and, for recipes by other members, the name of the author. Press a card to open the recipe."
+        },
+        {
+          "type": "list",
+          "items": [
+            "The grid shows one, two or at most three cards in a row, depending on the width of the window.",
+            "**Search recipes** finds recipes by title or by an ingredient. It ignores capital letters and accents, so \"vajce\" finds \"Vajcia\".",
+            "**Filters** narrow the list by category, author and ingredient, and by **All**, **Mine** or **Shared with me**. The filters you use are shown as chips under the search box. Press a chip to remove it, or **Clear filters** to remove all of them. The filters stay in the address, so **Back** returns to the same view.",
+            "The heart on a card marks the recipe as your favourite. **Favourites** next to the search box shows only the recipes you marked. Favourites are yours alone; nobody else sees them.",
+            "The list shows 24 recipes at a time. Press **Load more** to see the next ones."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "You see a recipe if you wrote it or if its author shared it with everyone who uses Recipes. A recipe that its author kept private never appears for anyone else, not even for an administrator. A recipe shows in the table in [who can see what](who-sees-what#table)."
+        }
+      ]
+    }
+  ]
+}

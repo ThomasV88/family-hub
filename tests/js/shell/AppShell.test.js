@@ -133,6 +133,34 @@ describe('AppShell desktop', () => {
         expect(bar.find('a[href="/shopping"]').text()).toContain(messages.nav.shopping);
     });
 
+    it.each(['en', 'sk', 'pl'])('shows Recipes with a chef-hat icon in the sidebar and as the seventh phone bar item (%s)', async (locale) => {
+        const messages = loadMessages(locale);
+        mockProps = { locale, app: { name: 'Family Hub', env: 'production' }, auth: { access: { ...FULL_ACCESS, shopping: 'view', recipes: 'view' } } };
+        setWidth(1280);
+        mountShell({ locale, messages });
+        await nextTick();
+        const side = wrapper.find(`nav[aria-label="${messages.nav.main}"]`);
+        const item = side.findAll('li').at(6);
+        expect(item.find('a').attributes('href')).toBe('/recipes');
+        expect(item.text()).toBe(messages.nav.recipes);
+        expect(item.find('svg').exists()).toBe(true);
+        wrapper.unmount();
+        setWidth(390);
+        mountShell({ locale, messages });
+        await nextTick();
+        const bar = wrapper.find(`nav[aria-label="${messages.nav.main}"]`);
+        expect(bar.findAll('li')).toHaveLength(7);
+        expect(bar.find('a[href="/recipes"]').text()).toContain(messages.nav.recipes);
+    });
+
+    it('hides Recipes without a grant', async () => {
+        setWidth(1280);
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, auth: { access: { ...FULL_ACCESS, shopping: 'view', recipes: 'none' } } };
+        mountShell();
+        await nextTick();
+        expect(wrapper.find('a[href="/recipes"]').exists()).toBe(false);
+    });
+
     it('hides Shopping without a grant', async () => {
         setWidth(1280);
         mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' }, auth: { access: { ...FULL_ACCESS, shopping: 'none' } } };

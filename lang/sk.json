@@ -58,14 +58,16 @@
         "add_task": "Pridať úlohu",
         "style_guide": "Sprievodca štýlom",
         "manual": "Manuál",
-        "shopping": "Nákupy"
+        "shopping": "Nákupy",
+        "recipes": "Receptár"
     },
     "module": {
         "tasks": "Úlohy",
         "wishlist": "Wishlist",
         "finances": "Financie",
         "health": "Zdravie",
-        "shopping": "Nákupy"
+        "shopping": "Nákupy",
+        "recipes": "Receptár"
     },
     "dashboard": {
         "title": "Prehľad",
@@ -2919,6 +2921,67 @@
             "summary": "Zakúpené {bought} · Nedostupné {unavailable} · Zostáva {left}",
             "left": "Zostáva {n} položka | Zostávajú {n} položky | Zostáva {n} položiek",
             "all_done": "Všetko je označené"
+        }
+    },
+    "recipes": {
+        "overview": {
+            "title": "Receptár",
+            "new_recipe": "Nový recept",
+            "search_label": "Hľadať recepty",
+            "search_placeholder": "Názov alebo surovina",
+            "favourites": "Obľúbené",
+            "filters": "Filtre",
+            "filters_active": "Filtre (aktívne: {n})",
+            "clear_filters": "Zrušiť filtre",
+            "load_more": "Načítať ďalšie",
+            "loaded_more": "{n} ďalší recept načítaný | {n} ďalšie recepty načítané | {n} ďalšieho receptu načítané | {n} ďalších receptov načítaných",
+            "list_label": "Recepty",
+            "active_filters": "Použité filtre",
+            "empty_title": "Zatiaľ žiadne recepty",
+            "empty_body": "Ukladajte tu rodinné recepty, zadajte ich ručne alebo vložte odkaz a nechajte aplikáciu, aby ho prečítala.",
+            "nomatch_title": "Žiadny recept nevyhovuje",
+            "nomatch_body": "Skúste iné slovo alebo zrušte filtre.",
+            "nofav_title": "Zatiaľ žiadne obľúbené",
+            "nofav_body": "Klepnite na srdce pri recepte a nájdete ho tu rýchlo.",
+            "error_title": "Recepty sa nepodarilo načítať.",
+            "error_body": "Skontrolujte pripojenie a skúste to znova.",
+            "loading": "Načítavajú sa recepty"
+        },
+        "card": {
+            "favourite_add": "Pridať medzi obľúbené",
+            "favourite_remove": "Odstrániť z obľúbených",
+            "minutes": "{n} min",
+            "servings": "{n} porcia | {n} porcie | {n} porcie | {n} porcií",
+            "by": "od {name}",
+            "more_categories": "+{n}"
+        },
+        "filter": {
+            "category": "Kategória",
+            "author": "Autor",
+            "author_everyone": "Všetci",
+            "ingredient": "Surovina",
+            "show": "Zobraziť",
+            "show_all": "Všetky",
+            "show_mine": "Moje",
+            "show_shared": "Zdieľané so mnou",
+            "favourites": "Obľúbené",
+            "favourites_only": "Iba obľúbené",
+            "chip_category": "Kategória: {name}",
+            "chip_author": "Autor: {name}",
+            "chip_ingredient": "Surovina: {name}",
+            "remove": "Odstrániť filter: {label}",
+            "dialog_title": "Filtre",
+            "dialog_done": "Zobraziť recepty"
+        },
+        "visibility": {
+            "private": "Súkromný",
+            "shared": "Zdieľaný",
+            "label": "Kto tento recept vidí",
+            "option_private": "Iba ja",
+            "option_shared": "Všetci v rodine, ktorí používajú Receptár"
+        },
+        "toast": {
+            "favourite_failed": "Nepodarilo sa uložiť. Skúste to znova."
         }
     }
 }

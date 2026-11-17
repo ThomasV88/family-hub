@@ -58,14 +58,16 @@
         "add_task": "Dodaj zadanie",
         "style_guide": "Przewodnik stylu",
         "manual": "Instrukcja",
-        "shopping": "Zakupy"
+        "shopping": "Zakupy",
+        "recipes": "Receptarz"
     },
     "module": {
         "tasks": "Zadania",
         "wishlist": "Wishlist",
         "finances": "Finanse",
         "health": "Zdrowie",
-        "shopping": "Zakupy"
+        "shopping": "Zakupy",
+        "recipes": "Receptarz"
     },
     "dashboard": {
         "title": "Przegląd",
@@ -2919,6 +2921,67 @@
             "summary": "Kupione {bought} · Niedostępne {unavailable} · Zostało {left}",
             "left": "Został {n} produkt | Zostały {n} produkty | Zostało {n} produktów",
             "all_done": "Wszystko jest oznaczone"
+        }
+    },
+    "recipes": {
+        "overview": {
+            "title": "Receptarz",
+            "new_recipe": "Nowy przepis",
+            "search_label": "Szukaj przepisów",
+            "search_placeholder": "Nazwa lub składnik",
+            "favourites": "Ulubione",
+            "filters": "Filtry",
+            "filters_active": "Filtry (aktywne: {n})",
+            "clear_filters": "Wyczyść filtry",
+            "load_more": "Wczytaj więcej",
+            "loaded_more": "{n} kolejny przepis wczytany | {n} kolejne przepisy wczytane | {n} kolejnych przepisów wczytanych | {n} kolejnego przepisu wczytanego",
+            "list_label": "Przepisy",
+            "active_filters": "Aktywne filtry",
+            "empty_title": "Brak przepisów",
+            "empty_body": "Zapisuj tu rodzinne przepisy, wpisz je ręcznie lub wklej link, a aplikacja go odczyta.",
+            "nomatch_title": "Żaden przepis nie pasuje",
+            "nomatch_body": "Spróbuj innego słowa lub wyczyść filtry.",
+            "nofav_title": "Brak ulubionych",
+            "nofav_body": "Stuknij serce przy przepisie, aby szybko go tu znaleźć.",
+            "error_title": "Nie udało się wczytać przepisów.",
+            "error_body": "Sprawdź połączenie i spróbuj ponownie.",
+            "loading": "Wczytywanie przepisów"
+        },
+        "card": {
+            "favourite_add": "Dodaj do ulubionych",
+            "favourite_remove": "Usuń z ulubionych",
+            "minutes": "{n} min",
+            "servings": "{n} porcja | {n} porcje | {n} porcji | {n} porcji",
+            "by": "od {name}",
+            "more_categories": "+{n}"
+        },
+        "filter": {
+            "category": "Kategoria",
+            "author": "Autor",
+            "author_everyone": "Wszyscy",
+            "ingredient": "Składnik",
+            "show": "Pokaż",
+            "show_all": "Wszystkie",
+            "show_mine": "Moje",
+            "show_shared": "Udostępnione mi",
+            "favourites": "Ulubione",
+            "favourites_only": "Tylko ulubione",
+            "chip_category": "Kategoria: {name}",
+            "chip_author": "Autor: {name}",
+            "chip_ingredient": "Składnik: {name}",
+            "remove": "Usuń filtr: {label}",
+            "dialog_title": "Filtry",
+            "dialog_done": "Pokaż przepisy"
+        },
+        "visibility": {
+            "private": "Prywatny",
+            "shared": "Udostępniony",
+            "label": "Kto widzi ten przepis",
+            "option_private": "Tylko ja",
+            "option_shared": "Wszyscy w rodzinie korzystający z Receptarza"
+        },
+        "toast": {
+            "favourite_failed": "Nie udało się zapisać. Spróbuj ponownie."
         }
     }
 }

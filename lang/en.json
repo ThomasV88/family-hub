@@ -58,14 +58,16 @@
         "add_task": "Add task",
         "style_guide": "Style guide",
         "manual": "Manual",
-        "shopping": "Shopping"
+        "shopping": "Shopping",
+        "recipes": "Recipes"
     },
     "module": {
         "tasks": "To-do",
         "wishlist": "Wishlist",
         "finances": "Finances",
         "health": "Health",
-        "shopping": "Shopping"
+        "shopping": "Shopping",
+        "recipes": "Recipes"
     },
     "dashboard": {
         "title": "Overview",
@@ -2919,6 +2921,67 @@
             "summary": "Bought {bought} · Unavailable {unavailable} · Left {left}",
             "left": "{n} item left | {n} items left",
             "all_done": "Everything is marked"
+        }
+    },
+    "recipes": {
+        "overview": {
+            "title": "Recipes",
+            "new_recipe": "New recipe",
+            "search_label": "Search recipes",
+            "search_placeholder": "Title or ingredient",
+            "favourites": "Favourites",
+            "filters": "Filters",
+            "filters_active": "Filters ({n} active)",
+            "clear_filters": "Clear filters",
+            "load_more": "Load more",
+            "loaded_more": "{n} more recipe loaded | {n} more recipes loaded",
+            "list_label": "Recipes",
+            "active_filters": "Active filters",
+            "empty_title": "No recipes yet",
+            "empty_body": "Save your family recipes here, type them in or paste a link and let the app read it.",
+            "nomatch_title": "No recipe matches",
+            "nomatch_body": "Try a different word or clear the filters.",
+            "nofav_title": "No favourites yet",
+            "nofav_body": "Tap the heart on a recipe to find it here quickly.",
+            "error_title": "We could not load the recipes.",
+            "error_body": "Check your connection and try again.",
+            "loading": "Loading recipes"
+        },
+        "card": {
+            "favourite_add": "Add to favourites",
+            "favourite_remove": "Remove from favourites",
+            "minutes": "{n} min",
+            "servings": "{n} serving | {n} servings",
+            "by": "by {name}",
+            "more_categories": "+{n}"
+        },
+        "filter": {
+            "category": "Category",
+            "author": "Author",
+            "author_everyone": "Everyone",
+            "ingredient": "Ingredient",
+            "show": "Show",
+            "show_all": "All",
+            "show_mine": "Mine",
+            "show_shared": "Shared with me",
+            "favourites": "Favourites",
+            "favourites_only": "Favourites only",
+            "chip_category": "Category: {name}",
+            "chip_author": "Author: {name}",
+            "chip_ingredient": "Ingredient: {name}",
+            "remove": "Remove filter: {label}",
+            "dialog_title": "Filters",
+            "dialog_done": "Show recipes"
+        },
+        "visibility": {
+            "private": "Private",
+            "shared": "Shared",
+            "label": "Who can see this recipe",
+            "option_private": "Only me",
+            "option_shared": "Everyone in the family who uses Recipes"
+        },
+        "toast": {
+            "favourite_failed": "Could not save. Try again."
         }
     }
 }

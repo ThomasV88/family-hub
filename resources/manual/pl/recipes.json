@@ -1,0 +1,36 @@
+{
+  "id": "recipes",
+  "category": "modules",
+  "order": 36,
+  "title": "Receptarz",
+  "summary": "Rodzinny receptarz: przeglądanie i wyszukiwanie przepisów, które możesz widzieć, filtry i ulubione.",
+  "covers": [
+    "module:recipes"
+  ],
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Strona Receptarz",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "**Receptarz** jest w menu po lewej (na telefonie w pasku na dole), jeśli administrator dał ci do niego dostęp. Strona pokazuje przepisy, które możesz widzieć, jako karty od najnowszego. Karta pokazuje główne zdjęcie (albo czapkę kucharską, gdy zdjęcia nie ma), tytuł, czas i liczbę porcji, etykietę **Prywatny** lub **Udostępniony**, pierwszą kategorię, a przy przepisach innych członków imię autora. Przepis otworzysz, naciskając kartę."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Siatka pokazuje jedną, dwie lub najwyżej trzy karty w rzędzie, zależnie od szerokości okna.",
+            "**Szukaj przepisów** znajduje przepisy po tytule lub składniku. Nie rozróżnia wielkich liter ani znaków diakrytycznych, więc \"jajko\" znajdzie \"Jajka\".",
+            "**Filtry** zawężają listę według kategorii, autora i składnika oraz według **Wszystkie**, **Moje** lub **Udostępnione mi**. Używane filtry widać jako znaczniki pod polem wyszukiwania. Znacznik usuniesz, naciskając go, wszystkie naraz przyciskiem **Wyczyść filtry**. Filtry zostają w adresie, więc **Wstecz** wraca do tego samego widoku.",
+            "Serce na karcie oznacza przepis jako ulubiony. **Ulubione** obok pola wyszukiwania pokazuje tylko przepisy, które oznaczyłeś. Ulubione są tylko twoje, nikt inny ich nie widzi.",
+            "Lista pokazuje 24 przepisy naraz. Kolejne zobaczysz przyciskiem **Wczytaj więcej**."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Widzisz przepis, jeśli ty go napisałeś lub jeśli autor udostępnił go wszystkim korzystającym z Receptarza. Przepis, który autor zostawił prywatny, nie pojawia się nikomu innemu, nawet administratorowi. Przepis znajdziesz w tabeli w [kto co widzi](who-sees-what#table)."
+        }
+      ]
+    }
+  ]
+}
