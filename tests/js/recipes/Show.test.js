@@ -566,6 +566,12 @@ describe('Recipe detail: add to shopping list', () => {
         expect($('[data-testid="add-to-shopping-bar"]').exists()).toBe(false);
     });
 
+    it('says "by a former member" instead of an empty name when the author account is gone', () => {
+        mountPage({ recipe: { ...OTHER, author: { id: null, name: '', isMe: false } }, abilities: READER });
+        expect($('[data-testid="recipe-author"]').text()).toBe('by a former member');
+        expect($('[data-testid="author-only"]').text()).toBe('The author is no longer a member, so nobody can edit this recipe.');
+    });
+
     it('shows the button to a reader who may add to Shopping', async () => {
         mountPage({ recipe: OTHER, abilities: READER });
         expect($('[data-testid="add-to-shopping"]').exists()).toBe(true);

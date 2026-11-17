@@ -111,6 +111,15 @@ describe('Recipes overview cards', () => {
     });
 });
 
+describe('Author of a card', () => {
+    it('shows "by a former member" and no empty avatar when the author name is empty', () => {
+        mountPage({ recipes: [recipe(7, { author: { id: null, name: '', isMe: false } })] });
+        const by = cards()[0].find('[data-testid="recipe-author"]');
+        expect(by.text()).toBe('by a former member');
+        expect(by.find('.ui-avatar').exists()).toBe(false);
+    });
+});
+
 describe('Favourite toggle', () => {
     beforeEach(() => { fetchMock.mockReset(); });
 

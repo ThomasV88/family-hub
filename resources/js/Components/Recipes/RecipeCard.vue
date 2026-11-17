@@ -38,6 +38,8 @@ const meta = computed(() => {
 const firstCategory = computed(() => props.recipe.categories?.[0] ?? null);
 const moreCategories = computed(() => Math.max(0, (props.recipe.categories?.length ?? 0) - 1));
 const byOther = computed(() => props.recipe.author && !props.recipe.author.isMe);
+// The author account can be gone: no name is then shown as "by " with an empty avatar.
+const authorKnown = computed(() => (props.recipe.author?.name ?? '').trim() !== '');
 const authorFirst = computed(() => (props.recipe.author?.name ?? '').trim().split(/\s+/)[0] ?? '');
 const isShared = computed(() => props.recipe.visibility === 'shared');
 
@@ -76,8 +78,8 @@ function rollback(attempted) {
                 <span v-if="meta || byOther" class="recipe-card__meta">
                     <span v-if="meta">{{ meta }}</span>
                     <span v-if="byOther" class="recipe-card__by" data-testid="recipe-author">
-                        <UiAvatar :name="authorFirst || recipe.author.name" :user-id="recipe.author.id" :size="32" decorative />
-                        {{ t('recipes.card.by', { name: authorFirst }) }}
+                        <UiAvatar v-if="authorKnown" :name="authorFirst || recipe.author.name" :user-id="recipe.author.id" :size="32" decorative />
+                        {{ authorKnown ? t('recipes.card.by', { name: authorFirst }) : t('recipes.card.by_unknown') }}
                     </span>
                 </span>
                 <span class="recipe-card__tags">

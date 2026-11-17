@@ -2954,7 +2954,8 @@
             "minutes": "{n} min",
             "servings": "{n} porcia | {n} porcie | {n} porcie | {n} porcií",
             "by": "od {name}",
-            "more_categories": "+{n}"
+            "more_categories": "+{n}",
+            "by_unknown": "od bývalého člena"
         },
         "filter": {
             "category": "Kategória",
@@ -3143,7 +3144,8 @@
             "ingredients": "Suroviny",
             "steps": "Postup",
             "visibility_save": "Uložiť",
-            "visibility_cancel": "Zrušiť"
+            "visibility_cancel": "Zrušiť",
+            "only_author_unknown": "Autor už nie je členom, preto tento recept nikto nemôže upraviť."
         },
         "gallery": {
             "open": "Otvoriť fotku na celú obrazovku",

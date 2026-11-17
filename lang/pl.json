@@ -2954,7 +2954,8 @@
             "minutes": "{n} min",
             "servings": "{n} porcja | {n} porcje | {n} porcji | {n} porcji",
             "by": "od {name}",
-            "more_categories": "+{n}"
+            "more_categories": "+{n}",
+            "by_unknown": "od byłego członka"
         },
         "filter": {
             "category": "Kategoria",
@@ -3143,7 +3144,8 @@
             "ingredients": "Składniki",
             "steps": "Kroki",
             "visibility_save": "Zapisz",
-            "visibility_cancel": "Anuluj"
+            "visibility_cancel": "Anuluj",
+            "only_author_unknown": "Autor nie jest już członkiem, więc nikt nie może edytować tego przepisu."
         },
         "gallery": {
             "open": "Otwórz zdjęcie na pełnym ekranie",

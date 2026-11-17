@@ -2954,7 +2954,8 @@
             "minutes": "{n} min",
             "servings": "{n} serving | {n} servings",
             "by": "by {name}",
-            "more_categories": "+{n}"
+            "more_categories": "+{n}",
+            "by_unknown": "by a former member"
         },
         "filter": {
             "category": "Category",
@@ -3143,7 +3144,8 @@
             "ingredients": "Ingredients",
             "steps": "Steps",
             "visibility_save": "Save",
-            "visibility_cancel": "Cancel"
+            "visibility_cancel": "Cancel",
+            "only_author_unknown": "The author is no longer a member, so nobody can edit this recipe."
         },
         "gallery": {
             "open": "Open photo full screen",

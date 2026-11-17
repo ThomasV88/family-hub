@@ -116,6 +116,7 @@ const stepsDone = computed(() => (props.recipe?.steps ?? []).filter((s) => isDon
 
 // Author actions.
 const mine = computed(() => props.recipe?.author?.isMe === true);
+const authorKnown = computed(() => (props.recipe?.author?.name ?? '').trim() !== '');
 const canEdit = computed(() => props.abilities.edit === true);
 const canDelete = computed(() => props.abilities.delete === true);
 const canChangeVisibility = computed(() => props.abilities.changeVisibility === true);
@@ -285,9 +286,9 @@ function onMenu({ key }) {
                 </div>
                 <div class="rec-head__tags">
                     <UiTag :icon="shared ? Users : Lock" data-testid="visibility-tag">{{ shared ? t('recipes.visibility.shared') : t('recipes.visibility.private') }}</UiTag>
-                    <span v-if="!mine" class="rec-head__by" data-testid="recipe-author"><UiAvatar :name="recipe.author.name" :user-id="recipe.author.id" :size="32" decorative class="rec-head__avatar" />{{ t('recipes.card.by', { name: recipe.author.name }) }}</span>
+                    <span v-if="!mine" class="rec-head__by" data-testid="recipe-author"><UiAvatar v-if="authorKnown" :name="recipe.author.name" :user-id="recipe.author.id" :size="32" decorative class="rec-head__avatar" />{{ authorKnown ? t('recipes.card.by', { name: recipe.author.name }) : t('recipes.card.by_unknown') }}</span>
                 </div>
-                <p v-if="!mine" class="rec-head__readonly" data-testid="author-only">{{ t('recipes.detail.only_author', { name: recipe.author.name }) }}</p>
+                <p v-if="!mine" class="rec-head__readonly" data-testid="author-only">{{ authorKnown ? t('recipes.detail.only_author', { name: recipe.author.name }) : t('recipes.detail.only_author_unknown') }}</p>
 
                 <p class="rec-head__meta" data-testid="recipe-meta">
                     <span v-if="recipe.prepMinutes" class="rec-head__item"><Clock :size="16" :stroke-width="1.75" aria-hidden="true" />{{ t('recipes.detail.prep', { n: recipe.prepMinutes }) }}</span>
