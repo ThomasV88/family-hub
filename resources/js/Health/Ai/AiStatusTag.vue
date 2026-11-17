@@ -15,6 +15,8 @@ const props = defineProps({
     // whole status entry; the quota-timeout difference is the detail line, the tag stays the Phase 8 one.
     availableAt: { type: String, default: null },
     failureCode: { type: String, default: null },
+    // The recognised text of the run is saved: a failed run then only lacks the suggestions.
+    textSaved: { type: Boolean, default: false },
     now: { type: Date, default: null },
 });
 const { t, locale } = useI18n();
@@ -42,7 +44,7 @@ const view = computed(() => {
             return waitingWhen.value
                 ? { icon: Hourglass, variant: 'neutral', when: waitingWhen.value, before: whenParts.value[0], after: whenParts.value[1] }
                 : { icon: Hourglass, variant: 'neutral', text: t('health.ai.status.waiting_soon') };
-        case 'failed': return { icon: CircleX, variant: 'danger', text: t('health.ai.status.failed') };
+        case 'failed': return { icon: CircleX, variant: 'danger', text: t(`health.ai.status.${props.textSaved ? 'failed_suggestions' : 'failed'}`) };
         case 'cancelled':
             return props.cancelReason === 'consent'
                 ? { icon: Bot, variant: 'neutral', text: t('health.ai.status.cancelled_consent') }

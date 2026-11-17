@@ -64,13 +64,16 @@ const consentLocal = ref(null);
 const availableLocal = ref(null);
 const unsupportedLocal = ref(false);
 const ackLocal = ref(false);
+// Set by a 409 notice_required: the server wants the dialog again whatever the page-load prop said, until a send succeeds.
+const noticeForced = ref(false);
+watch(() => props.ai?.noticeAcknowledged, () => { noticeForced.value = false; ackLocal.value = false; });
 watch(() => props.consentOn, () => { consentLocal.value = null; });
 watch(() => props.ai?.available, () => { availableLocal.value = null; });
 
 const consent = computed(() => consentLocal.value ?? props.consentOn);
 const available = computed(() => availableLocal.value ?? (props.poller.available?.value ?? props.ai?.available ?? false));
 const unsupported = computed(() => unsupportedLocal.value);
-const acknowledged = computed(() => ackLocal.value || Boolean(props.ai?.noticeAcknowledged));
+const acknowledged = computed(() => !noticeForced.value && (ackLocal.value || Boolean(props.ai?.noticeAcknowledged)));
 
 // The one reason the button is dead, if any (HEIC cannot be fixed by consent, so it comes first).
 const blocked = computed(() => {
@@ -108,20 +111,21 @@ const detail = computed(() => {
         case 'ready': return readyCount.value ? t('health.ai.status.ready_detail', { n: readyCount.value }, readyCount.value) : '';
         case 'waiting': return t('health.ai.status.waiting_detail');
         case 'failed': {
-            const code = { quota_timeout: 'quota_timeout_detail', quota_exhausted: 'quota_exhausted_detail', no_agent: 'no_agent_detail', notice_required: 'notice_required_detail' }[entry.value?.failureCode];
-            return t(`health.ai.status.${code ?? 'failed_detail'}`);
+            // With the recognised text already saved, the line says that only the suggestions are missing (never "Nothing was saved").
+            const code = textSaved.value
+                ? { quota_timeout: 'quota_timeout_suggestions_detail', quota_exhausted: 'quota_exhausted_suggestions_detail' }[entry.value?.failureCode] ?? 'failed_suggestions_detail'
+                : { quota_timeout: 'quota_timeout_detail', quota_exhausted: 'quota_exhausted_detail', no_agent: 'no_agent_detail', notice_required: 'notice_required_detail' }[entry.value?.failureCode] ?? 'failed_detail';
+            return t(`health.ai.status.${code}`);
         }
-        case 'cancelled': return entry.value.cancelReason === 'consent' ? t('health.ai.status.consent_detail') : t('health.ai.status.cancelled_detail');
+        case 'cancelled':
+            if (entry.value.cancelReason === 'consent') return t(`health.ai.status.${textSaved.value ? 'consent_suggestions_detail' : 'consent_detail'}`);
+            return t(`health.ai.status.${textSaved.value ? 'cancelled_suggestions_detail' : 'cancelled_detail'}`);
         default: return '';
     }
 });
 
-// A second line while waiting for quota or after a failure: the text is kept, so say so.
-const extraDetail = computed(() => {
-    if (!textSaved.value) return '';
-    if (status.value === 'waiting') return t('health.ai.status.waiting_text_saved');
-    return status.value === 'failed' ? t('health.ai.status.failed_text_saved') : '';
-});
+// A second line while waiting for quota: the text is kept, so say so. (After a failure or a cancel the detail line itself says it.)
+const extraDetail = computed(() => (textSaved.value && status.value === 'waiting' ? t('health.ai.status.waiting_text_saved') : ''));
 
 function announce(text) {
     announcement.value = '';
@@ -149,7 +153,9 @@ watch(status, (next, previous) => {
         announce(at && !isPast(at) ? t('health.ai.status.waiting_announce', { when: formatWhen(at, appLocale.value) }) : t('health.ai.status.waiting_soon'));
         return;
     }
-    const key = { running: 'announce_running', ready: 'announce_ready', failed: 'announce_failed', cancelled: 'announce_cancelled' }[next];
+    // The text-saved announcement of the same poll wins over "AI is reading": it is said once and could not be repeated.
+    if (next === 'running' && textSaved.value && entry.value?.mode !== 'text') return;
+    const key = { running: 'announce_running', ready: 'announce_ready', failed: textSaved.value ? 'announce_failed_suggestions' : 'announce_failed', cancelled: 'announce_cancelled' }[next];
     if (key) announce(t(`health.ai.status.${key}`));
 });
 
@@ -183,15 +189,19 @@ function confirmNotice(shown) {
 }
 
 async function send(withAck, shown = null) {
+    if (busy.value) return;
     busy.value = true;
+    // textNotice is claimed only by the dialog that showed the statement about the stored text.
+    const body = withAck ? { acknowledged: true, providers: [...shown], ...(textNotice.value ? { textNotice: true } : {}) } : {};
     const result = await securityFetch(`/health/people/${props.personId}/documents/${props.document.id}/ai`, {
         method: 'POST',
-        body: withAck ? { acknowledged: true, providers: [...shown] } : {},
+        body,
         replay: true,
     });
     busy.value = false;
     if (result.ok) {
         ackLocal.value = true;
+        noticeForced.value = false;
         props.poller.markQueued(props.document.id, result.data?.extractionId ?? null);
         toast.show(t('health.ai.run.started_toast'));
         props.poller.refresh();
@@ -211,6 +221,7 @@ async function send(withAck, shown = null) {
             if (Array.isArray(result.data?.providers) && result.data.providers.length > 0) providersLocal.value = result.data.providers;
             if (typeof result.data?.textNotice === 'boolean') textLocal.value = result.data.textNotice;
             ackLocal.value = false;
+            noticeForced.value = true;
             noticeOpen.value = true;
             return;
         }
@@ -243,7 +254,7 @@ const pollFailed = computed(() => props.poller.failedPolls.value >= 3);
         <p class="visually-hidden" role="status" data-testid="ai-announce">{{ announcement }}</p>
 
         <div v-if="entry" class="run-ai__state">
-            <AiStatusTag :status="entry.status" :cancel-reason="entry.cancelReason" :entry-count="canRun ? readyCount : null" :available-at="availableAt" :failure-code="entry.failureCode ?? null" />
+            <AiStatusTag :status="entry.status" :cancel-reason="entry.cancelReason" :entry-count="canRun ? readyCount : null" :available-at="availableAt" :failure-code="entry.failureCode ?? null" :text-saved="textSaved" />
             <template v-if="canRun">
                 <p v-if="detail" class="run-ai__detail" data-testid="ai-detail">{{ detail }}</p>
                 <p v-if="extraDetail" class="run-ai__detail" data-testid="ai-detail-text">{{ extraDetail }}</p>

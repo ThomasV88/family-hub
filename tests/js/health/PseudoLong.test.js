@@ -112,7 +112,8 @@ describe.each(['sk', 'pl'])('Phase 13 Health screens with pseudo-long text (%s)'
         ['text_saved', { status: 'text_saved', mode: 'text', textSaved: true, pagesRead: 4, pagesTotal: 9 }, 'health.ai.status.text_saved_detail', null],
         ['running with the text saved', { status: 'running', textSaved: true }, 'health.ai.status.text_saved_preparing', null],
         ['waiting with the text saved', { status: 'waiting', textSaved: true, availableAt: new Date(Date.now() + 3 * 3600 * 1000).toISOString() }, null, 'health.ai.status.waiting_text_saved'],
-        ['failed with the text saved', { status: 'failed', textSaved: true }, 'health.ai.status.failed_detail', 'health.ai.status.failed_text_saved'],
+        ['failed with the text saved', { status: 'failed', textSaved: true }, 'health.ai.status.failed_suggestions_detail', null],
+        ['cancelled after the text was saved', { status: 'cancelled', textSaved: true }, 'health.ai.status.cancelled_suggestions_detail', null],
     ];
     it.each(CASES)('keeps the run detail lines whole: %s', async (_name, entry, detailKey, extraKey) => {
         const { messages } = mountLong(RunAiControl, {

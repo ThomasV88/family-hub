@@ -645,11 +645,35 @@ describe('two-step reading: text notice, provider lines and run states (13-09)',
         expect(extra()).toBe('The text is already saved.');
         wrapper.unmount();
         mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'failed', textSaved: true, readyExtractionId: null }) } });
-        expect(detail()).toContain('AI could not read this document');
-        expect(extra()).toBe('Only the suggestions are missing: the recognised text was saved and can be searched.');
+        expect(extra()).toBeUndefined();
         wrapper.unmount();
         mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'failed', textSaved: false, readyExtractionId: null }) } });
+        expect(detail()).toContain('Nothing was saved');
         expect(extra()).toBeUndefined();
+    });
+
+    it('with the text saved no line says "Nothing was saved": failed, quota, cancelled and consent say only the suggestions are missing', () => {
+        const lines = {};
+        for (const [name, e] of [
+            ['failed', { status: 'failed' }],
+            ['timeout', { status: 'failed', failureCode: 'quota_timeout' }],
+            ['exhausted', { status: 'failed', failureCode: 'quota_exhausted' }],
+            ['cancelled', { status: 'cancelled', cancelReason: 'user' }],
+            ['consent', { status: 'cancelled', cancelReason: 'consent' }],
+        ]) {
+            mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ ...e, textSaved: true, readyExtractionId: null }) } });
+            lines[name] = detail();
+            expect(detail()).not.toContain('Nothing was saved');
+            expect(detail()).toContain('No suggestions were saved');
+            expect(detail()).toContain('recognised text was saved');
+            if (e.status === 'failed') expect($('[data-testid="ai-status-tag"]').textContent).toBe('AI could not make suggestions');
+            wrapper.unmount();
+            document.body.innerHTML = '';
+        }
+        expect(new Set(Object.values(lines)).size).toBe(5);
+        // without saved text the old lines stay
+        mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'cancelled', cancelReason: 'user', textSaved: false, readyExtractionId: null }) } });
+        expect(detail()).toBe('The run was cancelled. Nothing was saved.');
     });
 
     it('text_saved shows the neutral tag, the detail, the page line, Run AI and no Review button', async () => {
@@ -680,6 +704,8 @@ describe('two-step reading: text notice, provider lines and run states (13-09)',
                 entry({ status: 'text_saved', textSaved: true, mode: 'text', readyExtractionId: null, pagesRead: 20, pagesTotal: 30 }),
                 entry({ status: 'waiting', textSaved: true, availableAt: null, readyExtractionId: null }),
                 entry({ status: 'failed', textSaved: true, readyExtractionId: null }),
+                entry({ status: 'cancelled', cancelReason: 'consent', textSaved: true, readyExtractionId: null }),
+                entry({ status: 'failed', failureCode: 'quota_exhausted', textSaved: true, readyExtractionId: null }),
             ]) {
                 mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: e }, locale });
                 expect(document.body.textContent).not.toMatch(/health\.ai\./);
@@ -695,5 +721,72 @@ describe('two-step reading: text notice, provider lines and run states (13-09)',
             wrapper.unmount();
             document.body.innerHTML = '';
         }
+    });
+});
+
+describe('review fixes: text notice claim, busy guard, forced notice, announcements (13 review)', () => {
+    const TEXT_AI = { ...AI, textNotice: true };
+
+    it('sends textNotice only from the dialog that showed the statement about the stored text', async () => {
+        fetchMock.mockResolvedValue({ ok: true, status: 202, data: { extractionId: 'ex9' } });
+        mountControl({ ai: TEXT_AI });
+        $('[data-testid="ai-run"]').click();
+        await flush();
+        $('[data-testid="ai-notice-confirm"]').click();
+        await flush();
+        expect(fetchMock.mock.calls[0][1].body).toEqual({ acknowledged: true, providers: ['codex'], textNotice: true });
+        wrapper.unmount();
+        document.body.innerHTML = '';
+        fetchMock.mockClear();
+        mountControl({ ai: { ...AI, textNotice: false } });
+        $('[data-testid="ai-run"]').click();
+        await flush();
+        $('[data-testid="ai-notice-confirm"]').click();
+        await flush();
+        expect(fetchMock.mock.calls[0][1].body).toEqual({ acknowledged: true, providers: ['codex'] });
+    });
+
+    it('sends one request for a fast double press of the confirm button', async () => {
+        let release;
+        fetchMock.mockImplementation(() => new Promise((resolve) => { release = () => resolve({ ok: true, status: 202, data: { extractionId: 'ex9' } }); }));
+        mountControl({ ai: TEXT_AI });
+        $('[data-testid="ai-run"]').click();
+        await flush();
+        const confirm = $('[data-testid="ai-notice-confirm"]');
+        confirm.click();
+        confirm.click();
+        await flush();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        release();
+        await flush();
+    });
+
+    it('opens the notice again at the next press after a 409 notice_required was cancelled, without a round trip first', async () => {
+        fetchMock.mockResolvedValueOnce({ ok: false, status: 409, error: 'failed', data: { reason: 'notice_required', providers: ['codex'], textNotice: true } });
+        mountControl({ ai: { ...AI, noticeAcknowledged: true } });
+        $('[data-testid="ai-run"]').click();
+        await flush();
+        expect($('[role="dialog"]')).not.toBeNull();
+        $('[data-testid="ai-notice-cancel"]').click();
+        await flush();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        $('[data-testid="ai-run"]').click();
+        await flush();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect($('[role="dialog"]').textContent).toContain("saved in this app's database");
+    });
+
+    it('announces "text saved" when a poll brings running and the saved text together, not "AI is reading"', async () => {
+        mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'queued', mode: 'full', textSaved: false, readyExtractionId: null }) } });
+        poller.statuses.value = { [DOC.id]: entry({ status: 'running', mode: 'full', textSaved: true, readyExtractionId: null }) };
+        await flush();
+        expect($('[data-testid="ai-announce"]').textContent).toBe('The text of the document is saved.');
+    });
+
+    it('announces a failed run after the text was saved without claiming it could not read the document', async () => {
+        mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'running', mode: 'full', textSaved: true, readyExtractionId: null }) } });
+        poller.statuses.value = { [DOC.id]: entry({ status: 'failed', mode: 'full', textSaved: true, readyExtractionId: null }) };
+        await flush();
+        expect($('[data-testid="ai-announce"]').textContent).toBe('AI could not make suggestions, but the text of the document is saved');
     });
 });
