@@ -8,7 +8,9 @@ use App\Models\User;
 use App\Recipes\Images\RecipeImageStore;
 use App\Recipes\Queries\RecipeQuery;
 use App\Shopping\NameKey;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -24,14 +26,18 @@ final class RecipeService
     ) {}
 
     /** @param array<string, mixed> $data */
-    public function create(User $actor, array $data): Recipe
+    public function create(User $actor, array $data, ?string $importId = null): Recipe
     {
         abort_unless($this->access->hasEdit($actor), 403);
         $clean = $this->normalise($data);
 
-        return DB::transaction(function () use ($actor, $clean, $data): Recipe {
+        return DB::transaction(function () use ($actor, $clean, $data, $importId): Recipe {
+            // A ready draft of this member is consumed by the save; a pruned, foreign or unknown one just means "manual".
+            $import = $importId !== null && Str::isUuid($importId)
+                ? DB::table('recipe_imports')->where('id', $importId)->where('user_id', $actor->id)->where('status', 'ready')->lockForUpdate()->value('id')
+                : null;
             $recipe = new Recipe;
-            $recipe->forceFill(['author_id' => $actor->id, 'created_via' => ($data['created_via'] ?? 'manual') === 'url' ? 'url' : 'manual']);
+            $recipe->forceFill(['author_id' => $actor->id, 'created_via' => $import !== null || ($data['created_via'] ?? 'manual') === 'url' ? 'url' : 'manual']);
             $this->fillHeader($recipe, $clean);
             $recipe->save();
 
@@ -42,6 +48,11 @@ final class RecipeService
                 $recipe->steps()->create(['position' => $i + 1, 'body' => $line['body']]);
             }
             $this->replaceCategories($recipe, $clean['categories']);
+            if ($import !== null) {
+                $now = Carbon::now();
+                DB::table('recipe_imports')->where('id', $import)->where('status', 'ready')
+                    ->update(['status' => 'used', 'payload' => null, 'updated_at' => $now]);
+            }
 
             return $recipe;
         });

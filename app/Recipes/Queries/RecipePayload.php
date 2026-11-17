@@ -10,6 +10,9 @@ use App\Models\RecipeIngredient;
 use App\Models\RecipePhoto;
 use App\Models\ShoppingUnit;
 use App\Models\User;
+use App\Recipes\Import\ImportReason;
+use App\Recipes\Import\RecipeImportQuery;
+use App\Recipes\Import\RecipeImportService;
 use App\Recipes\RecipeAccess;
 use App\Recipes\RecipeStateService;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +28,8 @@ final class RecipePayload
         private readonly RecipeAccess $access,
         private readonly RecipeStateService $state,
         private readonly AccessGate $gate,
+        private readonly RecipeImportService $imports,
+        private readonly RecipeImportQuery $importQuery,
     ) {}
 
     /**
@@ -58,6 +63,8 @@ final class RecipePayload
             'filters' => $filters,
             'filterOptions' => $this->query->filterOptions($user),
             'canCreate' => $this->access->hasEdit($user),
+            'import' => $this->imports->noticeState($user),
+            'drafts' => $this->drafts($user),
         ];
     }
 
@@ -101,7 +108,23 @@ final class RecipePayload
             ],
             'isShared' => $recipe !== null && $recipe->visibility->value === 'shared',
             'canAddToShopping' => $this->gate->allows($user, Module::Shopping, AccessLevel::Edit),
+            'import' => $this->imports->noticeState($user),
         ];
+    }
+
+    /**
+     * The member's own pending, ready and failed imports: id, status, host and a coarse reason, nothing else.
+     *
+     * @return list<array{id: string, status: string, host: string, reason: string|null}>
+     */
+    private function drafts(User $user): array
+    {
+        return array_map(fn (array $d) => [
+            'id' => $d['id'],
+            'status' => $d['status'],
+            'host' => $d['host'],
+            'reason' => $d['status'] === 'failed' ? ImportReason::for($d['failureCode']) : null,
+        ], $this->importQuery->draftsFor($user));
     }
 
     /** @return array<string, mixed> */

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Recipes;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Recipes\ImportNoticeRequest;
 use App\Http\Requests\Recipes\StartImportRequest;
+use App\Recipes\Import\ImportReason;
 use App\Recipes\Import\RecipeImportQuery;
 use App\Recipes\Import\RecipeImportService;
 use Illuminate\Http\JsonResponse;
@@ -17,25 +18,6 @@ use Illuminate\Http\Response;
  */
 class ImportController extends Controller
 {
-    /** failure_code => the coarse reason the UI gets. */
-    private const REASONS = [
-        'fetch_failed' => 'fetch',
-        'no_recipe' => 'no_recipe',
-        'invalid_output' => 'no_recipe',
-        'no_output' => 'no_recipe',
-        'output_too_large' => 'no_recipe',
-        'cli_error' => 'no_recipe',
-        'timeout' => 'no_recipe',
-        'idle_timeout' => 'no_recipe',
-        'worker_lost' => 'no_recipe',
-        'quota_exhausted' => 'unavailable',
-        'quota_timeout' => 'unavailable',
-        'no_agent' => 'unavailable',
-        'auth' => 'unavailable',
-        'notice_required' => 'unavailable',
-        'preflight' => 'unavailable',
-    ];
-
     public function notice(ImportNoticeRequest $request, RecipeImportService $service): JsonResponse|Response
     {
         $shown = array_values(array_map('strval', (array) $request->validated('providers')));
@@ -67,7 +49,7 @@ class ImportController extends Controller
         return response()->json([
             'id' => $row['id'],
             'status' => $row['status'],
-            'reason' => $row['status'] === 'failed' ? (self::REASONS[(string) $row['failureCode']] ?? 'unavailable') : null,
+            'reason' => $row['status'] === 'failed' ? ImportReason::for($row['failureCode']) : null,
             'host' => $row['host'],
             'textCut' => $row['textCut'],
         ]);
