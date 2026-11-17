@@ -53,3 +53,30 @@ describe('displayQuantity', () => {
         expect(displayQuantity('x', unit('g'), 'en')).toBe('');
     });
 });
+
+describe('friendly fractions after scaling (thirds, sixths, eighths snap to what they stand for)', () => {
+    const show = (stored, base, target, key = 'tsp', locale = 'en') => displayQuantity(scaleQuantity(stored, base, target), key ? unit(key) : null, locale, tFor(locale === 'sk' ? 'sk' : 'en'));
+
+    it.each([
+        [0.33, 1, 3, 'tsp', '1 tsp'], // 1/3 x 3 was "0.99 tsp"
+        [0.67, 1, 3, 'tbsp', '2 tbsp'], // 2/3 x 3 was "2.01 tbsp"
+        [0.33, 1, 12, 'tsp', '4 tsp'], // rounding drift of the stored 0.33 does not grow with the factor
+        [0.33, 1, 2, 'tsp', '2/3 tsp'],
+        [0.17, 1, 3, 'tsp', '1/2 tsp'], // 1/6 x 3
+        [0.83, 1, 6, null, '5'],
+        [0.13, 1, 2, 'tsp', '1/4 tsp'], // 1/8 x 2
+        [0.38, 1, 2, 'tbsp', '3/4 tbsp'], // 3/8 x 2
+        [0.88, 1, 1, 'tsp', '7/8 tsp'],
+        [0.33, 1, 3, 'pcs', '1 pcs'], // no fractions for pieces, but the whole number still snaps
+        [0.33, 1, 3, 'g', '1 g'],
+    ])('%s x %s -> %s %s = "%s"', (stored, base, target, key, expected) => {
+        expect(show(stored, base, target, key)).toBe(expected);
+    });
+
+    it('keeps real decimals and large numbers untouched', () => {
+        expect(show(0.36, 4, 4, 'tsp')).toBe('0.36 tsp');
+        expect(show(125, 4, 6, 'g')).toBe('187.5 g');
+        expect(show(250, 4, 5, 'g')).toBe('312.5 g');
+        expect(displayNumber(249.995, unit('g'), 'en')).toBe('250');
+    });
+});
