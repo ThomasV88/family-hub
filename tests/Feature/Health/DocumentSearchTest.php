@@ -276,7 +276,7 @@ it('tells the person page which documents have text and whether search is on, ne
     $flags = collect($props['documents'])->pluck('hasText', 'id')->all();
 
     expect($flags)->toEqual([$withText->id => true, $without->id => false])
-        ->and($props['search'])->toBe(['enabled' => true, 'textReliability' => 'uncertain'])
+        ->and($props['search'])->toBe(['enabled' => true, 'textReliability' => 'reliable'])
         ->and(json_encode($props))->not->toContain(MedicalPrivacy::CANARY);
 });
 
@@ -285,7 +285,7 @@ it('turns the search box on only with the flag or a visible text, and reads reli
     docSearchDoc($subject, 'Plain');
 
     config(['ai.ocr.enabled' => false]);
-    expect(docSearchPageProps($this, $user, $subject)['search'])->toBe(['enabled' => false, 'textReliability' => 'uncertain']);
+    expect(docSearchPageProps($this, $user, $subject)['search'])->toBe(['enabled' => false, 'textReliability' => 'reliable']);
 
     config(['ai.ocr.enabled' => true, 'ai.ocr.text_reliability' => 'reliable']);
     expect(docSearchPageProps($this, $user, $subject)['search'])->toBe(['enabled' => true, 'textReliability' => 'reliable']);

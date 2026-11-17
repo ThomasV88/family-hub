@@ -184,7 +184,7 @@ final class FakeCodex
             .'schema=; imgs=; prev=; for a in "$@"; do [ "$prev" = "--output-schema" ] && schema="$a"; [ "$prev" = "-i" ] && imgs="$a"; prev="$a"; done; cat >/dev/null; '
             .'sum=$(md5sum "$schema" | cut -d" " -f1); '
             .'if [ "$sum" = '.$transcription.' ]; then '
-            .'ni=0; [ -n "$imgs" ] && ni=$(printf %s "$imgs" | tr "," "\n" | wc -l); '
+            .'ni=0; [ -n "$imgs" ] && ni=$(printf "%s\\n" "$imgs" | tr "," "\n" | wc -l); '
             .'echo "T $ni" >> '.$lg.'; n=$(grep -c "^T " '.$lg.'); ';
         if (isset($options['fail_nth'])) {
             $fail = match ($options['fail_kind'] ?? 'invalid') {

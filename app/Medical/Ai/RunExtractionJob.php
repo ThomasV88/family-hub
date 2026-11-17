@@ -7,15 +7,20 @@ use App\Access\AccessLevel;
 use App\Access\Module;
 use App\Audit\AuditEvent;
 use App\Audit\AuditLogger;
+use App\Medical\Ai\Agents\Agent;
 use App\Medical\Ai\Agents\AgentInput;
+use App\Medical\Ai\Agents\AgentOutcome;
 use App\Medical\Ai\Agents\AgentRegistry;
+use App\Medical\Ai\Transcribe\TranscribeTask;
 use App\Medical\Ai\Work\WorkDir;
 use App\Medical\AiConsent;
 use App\Medical\Documents\HeicConverter;
 use App\Medical\Documents\MedicalDocumentStore;
 use App\Medical\Documents\PdfRasterizer;
+use App\Medical\Documents\Text\SaveOutcome;
 use App\Medical\Queries\AiJobQuery;
 use App\Medical\Queries\AiRunAudit;
+use App\Medical\Queries\DocumentTextStore;
 use App\Medical\Queries\SystemQuery;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -89,14 +94,13 @@ class RunExtractionJob implements ShouldQueue
     }
 
     /**
-     * @param  array{subject_id: string, document_id: string, started_by: int, bulk_run_id: ?string}  $claim
+     * @param  array{subject_id: string, document_id: string, started_by: int, bulk_run_id: ?string, mode: string}  $claim
      * @return 'succeeded'|'failed'|'cancelled'|'waiting'|null null when a finish call no longer applied (row closed elsewhere)
      */
     private function run(AiJobQuery $query, array $claim, ?WorkDir &$workDir): ?string
     {
         $id = $this->extractionId;
         $label = $this->modelLabel();
-        $bulk = $claim['bulk_run_id'] !== null;
 
         $why = $this->recheck($query, $claim);
         if ($why !== null) {
@@ -154,9 +158,148 @@ class RunExtractionJob implements ShouldQueue
 
         $registry = app(AgentRegistry::class);
         $health = new AgentHealth;
+        $deadline = time() + (int) config('ai.timeouts.job') - 30;
+        $mode = $claim['mode'] ?? 'entries';
+
+        $textPages = null;
+        $textTotal = null;
+        if ($mode !== 'entries') {
+            // Step 1: the text of the pages, stored after every validated batch.
+            $step = $this->transcribe($query, $registry, $health, $claim, $workDir, $images, $pagesTotal, $mode, $deadline);
+            if ($step['end']) {
+                return $step['status'];
+            }
+            if ($mode === 'text') {
+                $text = $query->savedText($id);
+                if ($text !== null && $query->finishTextSaved($id, $text['pagesRead'], $text['pagesTotal'], $step['agent'] ?? $registry->primary()->key(), $step['model'] ?? $label, $step['durationMs'])) {
+                    $this->safely(fn () => $health->recordSuccess($step['agent'] ?? $registry->primary()->key()));
+
+                    return 'succeeded';
+                }
+
+                return $query->finishCancelled($id, $query->abortReason($id) ?? 'user', $step['model'] ?? $label, $step['durationMs']) ? 'cancelled' : null;
+            }
+            $text = $query->savedText($id);
+            $textPages = $text['pagesRead'] ?? null;
+            $textTotal = $text['pagesTotal'] ?? null;
+        }
+
+        // The image-to-entries call: the whole run in mode entries, step 2 in mode full (until the entries are read from the text).
+        $r = $this->attempt($query, $registry, $health, $claim, $workDir, $images, $images, null, $deadline);
+        if ($r['kind'] === 'end') {
+            return $r['status'];
+        }
+        if ($r['kind'] === 'failed') {
+            return $query->finishFailed($id, $r['code'], $r['model'], $r['durationMs']) ? 'failed' : null;
+        }
+
+        $agent = $r['agent'];
+        $outcome = $r['outcome'];
+        $done = $query->finishReady($id, $outcome->payload, (int) $outcome->entryCount, $textPages ?? $pagesRead, $textTotal ?? $pagesTotal, $agent->key(), $outcome->model, $outcome->durationMs);
+        if ($done) {
+            $this->safely(fn () => $health->recordSuccess($agent->key()));
+
+            return 'succeeded';
+        }
+        // Closed by the bulk never-supersede-accepted guard.
+        if ($query->finishedAsDecided($id)) {
+            return 'cancelled';
+        }
+
+        // A cancel or a consent withdrawal landed after the last recheck: finish as cancelled, supersede nothing.
+        // finishCancelled is a no-op (null) when the row was closed elsewhere.
+        $why = $query->abortReason($id) ?? 'user';
+
+        return $query->finishCancelled($id, $why, $outcome->model, $outcome->durationMs) ? 'cancelled' : null;
+    }
+
+    /**
+     * Step 1: transcribes the page images in batches, stores the text read so far after every validated batch and stops
+     * early (partial text) when the time budget or a late failure says so. Pages this run already stored (a resume after
+     * a quota park) are skipped. 'end' is true when the run reached a terminal state or parked ('status' says which).
+     *
+     * @param  array{subject_id: string, document_id: string, started_by: int, bulk_run_id: ?string, mode?: string}  $claim
+     * @param  list<string>  $images
+     * @return array{end: bool, status: ?string, agent: ?string, model: ?string, durationMs: int}
+     */
+    private function transcribe(AiJobQuery $query, AgentRegistry $registry, AgentHealth $health, array $claim, WorkDir $workDir, array $images, int $pagesTotal, string $mode, int $deadline): array
+    {
+        $id = $this->extractionId;
+        $last = ['end' => false, 'status' => null, 'agent' => null, 'model' => null, 'durationMs' => 0];
+
+        $text = $query->savedText($id);
+        $pages = $text['pages'] ?? [];
+        $language = $text['language'] ?? null;
+        $target = min($pagesTotal, (int) config('ai.ocr.max_pages'), count($images));
+        $perCall = max(1, (int) config('ai.ocr.pages_per_call'));
+        $perPage = (float) config('ai.ocr.seconds_per_page');
+        $reserve = $mode === 'full' ? (int) config('ai.ocr.extract_reserve_seconds') : 0;
+
+        $offset = count($pages);
+        while ($offset < $target) {
+            $count = min($perCall, $target - $offset);
+            // With text already stored the next batch must fit the budget (and, in mode full, leave room for step 2).
+            if ($offset > 0 && $deadline - time() < $count * $perPage + $reserve) {
+                break;
+            }
+
+            $r = $this->attempt($query, $registry, $health, $claim, $workDir, $images, array_slice($images, $offset, $count), new TranscribeTask($count), $deadline);
+            if ($r['kind'] === 'end') {
+                return ['end' => true, 'status' => $r['status']] + $last;
+            }
+            if ($r['kind'] === 'failed') {
+                if ($offset === 0) {
+                    return ['end' => true, 'status' => $query->finishFailed($id, $r['code'], $r['model'], $r['durationMs']) ? 'failed' : null] + $last;
+                }
+                // Text is already stored: keep it, record the failed call and stop with a partial text.
+                $query->closeAttempt($id, 'failed', $r['code'], $r['model'], $r['durationMs']);
+                break;
+            }
+
+            $agent = $r['agent'];
+            $outcome = $r['outcome'];
+            $batchLanguage = $outcome->payload['language'] ?? null;
+            if ($batchLanguage !== null) {
+                $language = ($language === null || $language === $batchLanguage) ? $batchLanguage : 'mixed';
+            }
+            $pages = array_merge($pages, $outcome->payload['pages']);
+
+            // No catch here on purpose: a database error message carries the bound text. The job's outer catch is content-free.
+            $saved = app(DocumentTextStore::class)->save(
+                $claim['document_id'], $id, $claim['started_by'], $agent->key(), $outcome->model, $language, $pages, $pagesTotal, count($pages) === $pagesTotal,
+            );
+            if ($saved !== SaveOutcome::Saved) {
+                $why = $saved === SaveOutcome::ConsentOff ? 'consent' : 'access';
+
+                return ['end' => true, 'status' => $query->finishCancelled($id, $why, $outcome->model, $outcome->durationMs) ? 'cancelled' : null] + $last;
+            }
+            $query->closeStep($id, $outcome->model, $outcome->durationMs);
+            $this->safely(fn () => $health->recordSuccess($agent->key()));
+
+            $last = ['end' => false, 'status' => null, 'agent' => $agent->key(), 'model' => $outcome->model, 'durationMs' => $outcome->durationMs];
+            $offset += $count;
+        }
+
+        return $last;
+    }
+
+    /**
+     * One agent call with everything around it: provider filter, rechecks before and after, the abort loop, quota and
+     * auth fallback to the next agent and parking when none is left. $keep names the files that stay in the work dir
+     * (all page images), $send the images of this call. Never decides a success: the caller persists the result.
+     *
+     * @param  array{subject_id: string, document_id: string, started_by: int, bulk_run_id: ?string}  $claim
+     * @param  list<string>  $keep
+     * @param  list<string>  $send
+     * @return array{kind: 'ok', agent: Agent, outcome: AgentOutcome}|array{kind: 'failed', code: FailureCode, model: string, durationMs: int}|array{kind: 'end', status: ?string}
+     */
+    private function attempt(AiJobQuery $query, AgentRegistry $registry, AgentHealth $health, array $claim, WorkDir $workDir, array $keep, array $send, ?AiTask $task, int $deadline): array
+    {
+        $id = $this->extractionId;
+        $label = $this->modelLabel();
+        $bulk = $claim['bulk_run_id'] !== null;
         $tried = [];
         $lastCode = null;
-        $deadline = time() + (int) config('ai.timeouts.job') - 30;
 
         while (true) {
             // Re-read before every attempt: an interactive acknowledgment (or a settings change) made meanwhile counts.
@@ -170,17 +313,17 @@ class RunExtractionJob implements ShouldQueue
             // Consent, access and cancel are rechecked before each agent is started.
             $why = $this->recheck($query, $claim);
             if ($why !== null) {
-                return $query->finishCancelled($id, $why, $agent->modelLabel(), 0) ? 'cancelled' : null;
+                return ['kind' => 'end', 'status' => $query->finishCancelled($id, $why, $agent->modelLabel(), 0) ? 'cancelled' : null];
             }
             if ($deadline - time() < (int) config('ai.timeouts.min_call')) {
-                return $query->finishFailed($id, FailureCode::Timeout, $agent->modelLabel(), 0) ? 'failed' : null;
+                return ['kind' => 'failed', 'code' => FailureCode::Timeout, 'model' => $agent->modelLabel(), 'durationMs' => 0];
             }
 
             $query->beginAttempt($id, $agent->key(), $claim['bulk_run_id']);
-            $this->clearAttemptFiles($workDir, $images);
+            $this->clearAttemptFiles($workDir, $keep);
             $lastAccessCheck = microtime(true);
             $this->abortWhy = null;
-            $outcome = $agent->extract(new AgentInput($workDir, $images, $deadline), function () use ($query, $claim, $id, &$lastAccessCheck): bool {
+            $outcome = $agent->extract(new AgentInput($workDir, $send, $deadline, $task), function () use ($query, $claim, $id, &$lastAccessCheck): bool {
                 $why = $query->abortReason($id);
                 if ($why === null && microtime(true) - $lastAccessCheck >= self::ACCESS_RECHECK_SECONDS) {
                     $lastAccessCheck = microtime(true);
@@ -194,29 +337,14 @@ class RunExtractionJob implements ShouldQueue
             // The world may have changed while the CLI ran: a late result is discarded, never persisted.
             $why = $this->recheck($query, $claim);
             if ($why !== null) {
-                return $query->finishCancelled($id, $why, $outcome->model, $outcome->durationMs) ? 'cancelled' : null;
+                return ['kind' => 'end', 'status' => $query->finishCancelled($id, $why, $outcome->model, $outcome->durationMs) ? 'cancelled' : null];
             }
             if ($outcome->aborted) {
-                return $query->finishCancelled($id, $this->abortWhy ?? 'user', $outcome->model, $outcome->durationMs) ? 'cancelled' : null;
+                return ['kind' => 'end', 'status' => $query->finishCancelled($id, $this->abortWhy ?? 'user', $outcome->model, $outcome->durationMs) ? 'cancelled' : null];
             }
 
             if ($outcome->ok && $outcome->payload !== null) {
-                $done = $query->finishReady($id, $outcome->payload, (int) $outcome->entryCount, $pagesRead, $pagesTotal, $agent->key(), $outcome->model, $outcome->durationMs);
-                if ($done) {
-                    $this->safely(fn () => $health->recordSuccess($agent->key()));
-
-                    return 'succeeded';
-                }
-                // Closed by the bulk never-supersede-accepted guard.
-                if ($query->finishedAsDecided($id)) {
-                    return 'cancelled';
-                }
-
-                // A cancel or a consent withdrawal landed after the last recheck: finish as cancelled, supersede nothing.
-                // finishCancelled is a no-op (null) when the row was closed elsewhere.
-                $why = $query->abortReason($id) ?? 'user';
-
-                return $query->finishCancelled($id, $why, $outcome->model, $outcome->durationMs) ? 'cancelled' : null;
+                return ['kind' => 'ok', 'agent' => $agent, 'outcome' => $outcome];
             }
 
             $code = $outcome->failure ?? FailureCode::NoOutput;
@@ -225,15 +353,15 @@ class RunExtractionJob implements ShouldQueue
             } elseif ($code === FailureCode::Auth) {
                 $this->safely(fn () => $health->recordAuthFailure($agent->key()));
             } else {
-                // Every other failure is terminal: no loop.
-                return $query->finishFailed($id, $code, $outcome->model, $outcome->durationMs) ? 'failed' : null;
+                // Every other failure is terminal: no loop. The caller decides how the run ends.
+                return ['kind' => 'failed', 'code' => $code, 'model' => $outcome->model, 'durationMs' => $outcome->durationMs];
             }
             $query->closeAttempt($id, 'failed', $code, $outcome->model, $outcome->durationMs);
             $tried[] = $agent->key();
             $lastCode = $code;
         }
 
-        return $this->noCandidate($query, $registry, $claim, $bulk, $allowed, $lastCode, $label);
+        return ['kind' => 'end', 'status' => $this->noCandidate($query, $registry, $claim, $bulk, $allowed, $lastCode, $label)];
     }
 
     /**

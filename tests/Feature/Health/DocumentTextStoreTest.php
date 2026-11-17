@@ -96,7 +96,7 @@ it('propagates a database error without writing or logging the text', function (
     $logs = glob(storage_path('logs/*.log')) ?: [];
     $before = array_sum(array_map('filesize', $logs));
 
-    expect(fn () => app(DocumentTextStore::class)->save((string) $doc->id, null, 1, null, null, 'sk', [DocumentTextFixtures::CANARY], 60, false))
+    expect(fn () => app(DocumentTextStore::class)->save((string) $doc->id, null, 1, null, null, 'sk', [DocumentTextFixtures::CANARY], 0, false))
         ->toThrow(QueryException::class);
 
     expect(DB::table('medical_document_texts')->count())->toBe(0);
