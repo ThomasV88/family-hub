@@ -29,7 +29,7 @@ const props = defineProps({
     nameMax: { type: Number, default: NAME_MAX },
 });
 const page = usePage();
-const { t, locale } = useI18n();
+const { t, locale, te } = useI18n();
 
 const search = ref('');
 const open = ref(false);
@@ -63,7 +63,7 @@ const defaultUnitText = (item) => {
     return unit ? t('shopping.settings.default_unit', { unit: unitLabel(unit, 1, t, locale.value) }) : '';
 };
 
-const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
+const translate = (message) => (String(message).startsWith('shopping.') ? (te(message) ? t(message) : t('shopping.error.save_failed')) : String(message));
 const nameError = computed(() => (form.errors?.name ? translate(form.errors.name) : ''));
 const unitError = computed(() => (form.errors?.default_unit_id ? translate(form.errors.default_unit_id) : ''));
 const failed = computed(() => Boolean(nameError.value || unitError.value || saveError.value));

@@ -23,7 +23,7 @@ const props = defineProps({
     canManage: { type: Boolean, default: false },
     nameMax: { type: Number, default: 12 },
 });
-const { t, locale } = useI18n();
+const { t, locale, te } = useI18n();
 
 const open = ref(false);
 const editing = ref(null);
@@ -38,7 +38,7 @@ const custom = computed(() => props.units.filter((u) => !u.builtIn));
 const label = (unit) => unitLabel(unit, 1, t, locale.value);
 const initialFocus = () => firstInput.value?.$el?.querySelector?.('input') ?? null;
 
-const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
+const translate = (message) => (String(message).startsWith('shopping.') ? (te(message) ? t(message) : t('shopping.error.save_failed')) : String(message));
 const err = (field) => (form.errors?.[field] ? translate(form.errors[field]) : '');
 const saveError = ref('');
 const failed = computed(() => Boolean(err('name_en') || err('name_sk') || err('name_pl') || err('unit') || saveError.value));

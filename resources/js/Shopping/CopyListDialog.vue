@@ -19,7 +19,7 @@ const props = defineProps({
     nameMax: { type: Number, default: NAME_MAX },
 });
 const emit = defineEmits(['update:open']);
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const form = useForm({ name: '', keep: true });
 const nameInput = ref(null);
@@ -46,7 +46,7 @@ watch(
     { immediate: true },
 );
 
-const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
+const translate = (message) => (String(message).startsWith('shopping.') ? (te(message) ? t(message) : t('shopping.error.save_failed')) : String(message));
 const nameError = computed(() => (form.errors?.name ? translate(form.errors.name) : ''));
 const failed = computed(() => Boolean(nameError.value || form.errors?.keep || httpError.value));
 const keepError = computed(() => (form.errors?.keep ? translate(form.errors.keep) : ''));

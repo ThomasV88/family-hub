@@ -27,7 +27,7 @@ const props = defineProps({
     noteMax: { type: Number, default: NOTE_MAX },
 });
 const emit = defineEmits(['update:open']);
-const { t, locale } = useI18n();
+const { t, locale, te } = useI18n();
 
 const form = useForm({ name: '', quantity: '', unit_id: '', note: '' });
 const confirmOpen = ref(false);
@@ -61,7 +61,7 @@ watch(
 );
 
 const unitOptions = computed(() => props.units.map((u) => ({ value: String(u.id), label: unitLabel(u, 1, t, locale.value) })));
-const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
+const translate = (message) => (String(message).startsWith('shopping.') ? (te(message) ? t(message) : t('shopping.error.save_failed')) : String(message));
 const errorOf = (key) => (form.errors?.[key] ? translate(form.errors[key]) : '');
 const failed = computed(() => Object.keys(form.errors ?? {}).length > 0 || httpError.value !== '');
 const close = () => emit('update:open', false);

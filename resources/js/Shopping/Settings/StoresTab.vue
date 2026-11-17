@@ -24,7 +24,7 @@ const props = defineProps({
     nameMax: { type: Number, default: 60 },
 });
 const page = usePage();
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const open = ref(false);
 const editing = ref(null);
@@ -42,7 +42,7 @@ const form = useForm({ name: '' });
 
 const initialFocus = () => nameInput.value?.$el?.querySelector?.('input') ?? null;
 
-const translate = (message) => (message === 'shopping.settings.err_duplicate' ? t('shopping.settings.err_duplicate_store') : String(message).startsWith('shopping.') ? t(message) : String(message));
+const translate = (message) => (message === 'shopping.settings.err_duplicate' ? t('shopping.settings.err_duplicate_store') : String(message).startsWith('shopping.') ? (te(message) ? t(message) : t('shopping.error.save_failed')) : String(message));
 const nameError = computed(() => (form.errors?.name ? translate(form.errors.name) : ''));
 const failed = computed(() => Boolean(nameError.value || saveError.value));
 const targetId = computed(() => editing.value?.id ?? savedId.value);

@@ -21,7 +21,7 @@ const props = defineProps({
     list: { type: Object, default: null },
 });
 const emit = defineEmits(['update:open']);
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const form = useForm({ addresses: [] });
 const tokens = ref([]);
@@ -108,7 +108,7 @@ function removeToken(index) {
 
 const draftValid = computed(() => draft.value.trim() !== '' && draft.value.trim().split(/[\s,;]+/).every(isValid));
 const canSend = computed(() => (tokens.value.length > 0 || draftValid.value) && !sending.value);
-const translate = (message, params = {}) => (String(message).startsWith('shopping.') ? t(message, params) : String(message));
+const translate = (message, params = {}) => (String(message).startsWith('shopping.') ? (te(message) ? t(message, params) : t('shopping.error.save_failed')) : String(message));
 const fieldError = computed(() => draftError.value || (overflowed.value ? t('shopping.mail.err_too_many') : '') || serverErrors.value.list);
 const hint = computed(() => (full.value ? t('shopping.mail.hint_max') : ''));
 const close = () => emit('update:open', false);

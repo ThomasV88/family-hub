@@ -27,7 +27,7 @@ const props = defineProps({
     responsiblePushEnabled: { type: Boolean, default: null },
 });
 const emit = defineEmits(['update:open']);
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const localInput = (iso) => (iso ? String(iso).slice(0, 16) : '');
 const ids = (people) => people.map((p) => p.id);
@@ -117,7 +117,7 @@ const changed = computed(() => ({
 }));
 const dirty = computed(() => Object.values(changed.value).some(Boolean));
 
-const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
+const translate = (message) => (String(message).startsWith('shopping.') ? (te(message) ? t(message) : t('shopping.error.save_failed')) : String(message));
 const err = (key) => (form.errors?.[key] ? translate(form.errors[key]) : '');
 const reminderError = computed(() => err('remind_at'));
 const peopleError = computed(() => err('contributor_ids') || err('contributors') || err('viewer_ids') || err('viewers'));

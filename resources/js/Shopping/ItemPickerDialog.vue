@@ -33,7 +33,7 @@ const props = defineProps({
     maxItems: { type: Number, default: MAX_ITEMS },
 });
 const emit = defineEmits(['update:open']);
-const { t, locale } = useI18n();
+const { t, locale, te } = useI18n();
 
 const QUANTITY_MAX = 999.99;
 const form = useForm({ items: [] });
@@ -150,7 +150,7 @@ function submitOwn() {
     Object.assign(own, { open: false, name: '', quantity: '1', unitId: pcsId(), save: false, errors: {} });
 }
 
-const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
+const translate = (message) => (String(message).startsWith('shopping.') ? (te(message) ? t(message) : t('shopping.error.save_failed')) : String(message));
 const errorText = computed(() => {
     if (tooMany.value) return t('shopping.error.items_count');
     if (invalidCount.value > 0) return t('shopping.error.quantity');

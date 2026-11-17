@@ -205,3 +205,22 @@ describe('dialogs show every kind of failure', () => {
         expect(dialog().querySelector('[data-testid="picker-error"]').textContent).toContain('You are not allowed to do that on this list.');
     });
 });
+
+describe('messages without a translation', () => {
+    it('shows the generic text instead of a raw key', async () => {
+        mountIt(CopyListDialog, { open: true, list: { id: 5, name: 'Weekly' } });
+        await flushPromises();
+        form().errors = { name: 'shopping.error.does_not_exist' };
+        await flushPromises();
+        const text = dialog().querySelector('[data-testid="copy-failed"]').textContent;
+        expect(text).not.toContain('shopping.error.does_not_exist');
+        expect(text).toContain('Your changes were not saved.');
+    });
+
+    it('has a text for every key the server sends', () => {
+        const messages = loadMessages('en');
+        for (const key of ['lock_invalid', 'state_invalid', 'quantity_invalid', 'quantity_merge_too_large', 'items_limit', 'members_count', 'forbidden', 'list_changed', 'too_many_requests']) {
+            expect(messages.shopping.error[key], key).toBeTruthy();
+        }
+    });
+});

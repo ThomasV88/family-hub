@@ -22,7 +22,7 @@ const props = defineProps({
     nameMax: { type: Number, default: NAME_MAX },
 });
 const emit = defineEmits(['update:open']);
-const { t } = useI18n();
+const { t, te } = useI18n();
 const page = usePage();
 
 const form = useForm({ name: '', store_id: '', responsible_id: '' });
@@ -47,7 +47,7 @@ watch(
     { immediate: true },
 );
 
-const translate = (message) => (String(message).startsWith('shopping.') ? t(message) : String(message));
+const translate = (message) => (String(message).startsWith('shopping.') ? (te(message) ? t(message) : t('shopping.error.save_failed')) : String(message));
 const errorOf = (key) => (form.errors?.[key] ? translate(form.errors[key]) : '');
 const failed = computed(() => Boolean(errorOf('name') || errorOf('store_id') || errorOf('responsible_id') || httpError.value));
 const close = () => emit('update:open', false);

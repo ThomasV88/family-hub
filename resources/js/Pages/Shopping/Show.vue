@@ -40,7 +40,7 @@ const props = defineProps({
     candidates: { type: Object, default: null },
     responsiblePushEnabled: { type: Boolean, default: null },
 });
-const { t } = useI18n();
+const { t, te } = useI18n();
 const page = usePage();
 const toast = useToast();
 
@@ -106,7 +106,7 @@ function submitLock() {
     router.put(`/shopping/lists/${props.list.id}/lock`, { locked: lockDialog.value === 'lock' }, {
         preserveScroll: true,
         onSuccess: () => { lockDialog.value = null; },
-        onError: (errors) => { lockError.value = String(errors?.list ?? '').startsWith('shopping.') ? t(errors.list) : t('shopping.error.mark_failed'); },
+        onError: (errors) => { lockError.value = String(errors?.list ?? '').startsWith('shopping.') && te(errors.list) ? t(errors.list) : t('shopping.error.mark_failed'); },
         ...httpHandlers((key) => { lockError.value = t(key); }, 'shopping.error.mark_failed'),
         onFinish: () => { lockBusy.value = false; },
     });
