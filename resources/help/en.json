@@ -38,7 +38,7 @@
         "ai_agents": "AI agents",
         "home": "Overview page",
         "profile_page": "Profile settings page",
-        "members_child": "Members, Add child dialog"
+        "members_child": "Members, child dialog and panel"
     },
     "topics": {
         "tasks.visibility": {
@@ -272,6 +272,10 @@
         "members.child": {
             "title": "What is a child account?",
             "text": "A child account has no e-mail and cannot sign in, and it gets no mail or notifications. The parents you choose, and administrators, manage the name and photo, and the parents manage the wish list. Only members who can sign in and may edit the Wishlist can be chosen."
+        },
+        "members.convert": {
+            "title": "Why an e-mail for a child?",
+            "text": "The e-mail is where the invitation goes. When the child accepts it, this same account gets the e-mail and can sign in. Wish list, tasks, permissions and parents are kept. Until then the child cannot sign in, and revoking the invitation changes nothing."
         }
     }
 }

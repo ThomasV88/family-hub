@@ -54,6 +54,26 @@
       ]
     },
     {
+      "id": "child-convert",
+      "title": "Giving a child their own sign-in",
+      "blocks": [
+        { "type": "p", "text": "When a child grows up and needs their own sign-in, you do not create a second account. You invite the same person with an email, and everything the child had stays." },
+        { "type": "steps", "title": "Making a normal member", "items": [
+          "Open [Settings > Members and access](/settings/members).",
+          "Press **Manage** next to the child.",
+          "Under **Make a normal member**, type their **E-mail**.",
+          "Press **Send invitation**."
+        ] },
+        { "type": "list", "items": [
+          "The child keeps the wish list, tasks, permissions and parents. No second account is created.",
+          "Until the invitation is accepted the child **still cannot sign in**. The row shows **Invited** and the invitation appears in the list of invitations.",
+          "When the child accepts (with a password or Google), the same account gets the email and can sign in, and it becomes a normal member.",
+          "If you **revoke** the invitation, nothing changes for the child. An email that already belongs to a member is refused.",
+          "Sending the invitation needs a recent confirmation of your identity."
+        ] }
+      ]
+    },
+    {
       "id": "permissions",
       "title": "Permissions for each module",
       "blocks": [

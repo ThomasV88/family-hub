@@ -8,6 +8,7 @@ import PermissionsTab from './PermissionsTab.vue';
 import SessionsTab from './SessionsTab.vue';
 import MemberSecurityTab from './MemberSecurityTab.vue';
 import ChildProfileTab from './ChildProfileTab.vue';
+import ChildConvertCard from './ChildConvertCard.vue';
 import UiTag from '../ui/UiTag.vue';
 import UiAvatar from '../ui/UiAvatar.vue';
 import WishlistManagersTab from './WishlistManagersTab.vue';
@@ -66,12 +67,14 @@ function requestClose() {
             <span class="member-panel__tags">
                 <UiTag>{{ t('settings.members.child.tag_child') }}</UiTag>
                 <UiTag variant="warn">{{ t('settings.members.child.tag_no_signin') }}</UiTag>
+                <UiTag v-if="member.invitation" variant="success">{{ t('settings.members.convert.tag_invited') }}</UiTag>
             </span>
         </div>
         <p v-else class="member-panel__email">{{ member.email }}</p>
         <UiTabs v-model="tab" :tabs="tabs" :label="member.name">
             <template v-if="isChild" #panel-profile>
                 <ChildProfileTab :member="member" :photo-error="photoError" @dirty="profileDirty = $event" />
+                <ChildConvertCard :member="member" />
             </template>
             <template #panel-permissions>
                 <PermissionsTab :member="member" :presets="presets" @dirty="permissionsDirty = $event" />

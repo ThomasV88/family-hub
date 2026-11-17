@@ -143,6 +143,8 @@ function details(row) {
             return helpTextDetail(meta);
         case 'child_created':
             return t('audit.detail.child_created', { name });
+        case 'child_converted':
+            return t('audit.detail.child_converted', { name });
         case 'profile_changed_by_other':
             // The meta holds only which part changed (photo or name), never the name text.
             return t(`audit.detail.profile_changed_${['photo', 'name'].includes(meta.field) ? meta.field : 'other'}`, { name });

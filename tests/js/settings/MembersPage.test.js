@@ -204,6 +204,50 @@ describe('Children on the Members page', () => {
         expect(panel.textContent).toContain('The picture is larger than 5 MB.');
     });
 
+    it('shows the Make a normal member card on a child, posts the e-mail and hides it from adults', async () => {
+        mountPage({ members });
+        await manage('Ema').trigger('click');
+        const panel = document.body.querySelector('.ui-panel');
+        expect(panel.textContent).toContain('Make a normal member');
+        expect(panel.textContent).toContain('Send invitation');
+        expect(panel.querySelector('[data-testid=convert-pending]')).toBeNull();
+        const form = [...panel.querySelectorAll('form')].find((f) => f.textContent.includes('Send invitation'));
+        expect(form.querySelector('input[type=email]')).not.toBeNull();
+        await form.dispatchEvent(new Event('submit'));
+        await new Promise((r) => setTimeout(r));
+        current.unmount();
+        current = null;
+        document.body.innerHTML = '';
+
+        mountPage({ members });
+        await manage('Bob').trigger('click');
+        expect(document.body.querySelector('.ui-panel').textContent).not.toContain('Make a normal member');
+    });
+
+    it('marks a child with an open invitation as Invited and shows the pending address', async () => {
+        const invited = [...MEMBERS, { ...CHILD, invitation: { id: 9, email: 'ema@example.test', expiresAt: '2026-12-01T10:00:00Z' } }];
+        mountPage({ members: invited });
+        const row = current.findAll('li').find((li) => li.text().includes('Ema'));
+        expect(row.text()).toContain('Invited');
+        await row.find('button').trigger('click');
+        const panel = document.body.querySelector('.ui-panel');
+        expect(panel.querySelector('[data-testid=convert-pending]').textContent).toContain('Invitation sent to ema@example.test');
+    });
+
+    it.each(['en', 'sk', 'pl'])('has no axe violations for the convert card with a pending invitation in %s, light and dark', async (locale) => {
+        for (const theme of ['light', 'dark']) {
+            document.documentElement.dataset.theme = theme;
+            const invited = { ...CHILD, name: `Ema ${'Wŵ'.repeat(20)}`, invitation: { id: 9, email: `${'long'.repeat(12)}@example.test`, expiresAt: '2026-12-01T10:00:00Z' } };
+            mountPage({ locale, members: [...MEMBERS, invited], eligibleParents: [{ id: 2, name: 'Bob' }] });
+            await current.findAll('li').find((li) => li.text().includes('Ema')).find('button').trigger('click');
+            await expectNoAxeViolations(document.body);
+            current.unmount();
+            current = null;
+            document.body.innerHTML = '';
+        }
+        delete document.documentElement.dataset.theme;
+    });
+
     it.each(['en', 'sk', 'pl'])('has no axe violations for the child row and panel in %s, light and dark', async (locale) => {
         for (const theme of ['light', 'dark']) {
             document.documentElement.dataset.theme = theme;

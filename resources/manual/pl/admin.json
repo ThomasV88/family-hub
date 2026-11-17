@@ -54,6 +54,26 @@
       ]
     },
     {
+      "id": "child-convert",
+      "title": "Własne logowanie dla dziecka",
+      "blocks": [
+        { "type": "p", "text": "Gdy dziecko dorośnie i potrzebuje własnego logowania, nie tworzysz drugiego konta. Zapraszasz tę samą osobę e-mailem i wszystko, co dziecko miało, zostaje." },
+        { "type": "steps", "title": "Zrób zwykłym członkiem", "items": [
+          "Otwórz [Ustawienia > Członkowie i dostęp](/settings/members).",
+          "Naciśnij **Zarządzaj** przy dziecku.",
+          "W sekcji **Zrób zwykłym członkiem** wpisz jego **E-mail**.",
+          "Naciśnij **Wyślij zaproszenie**."
+        ] },
+        { "type": "list", "items": [
+          "Dziecko zachowuje listę życzeń, zadania, uprawnienia i rodziców. Drugie konto nie powstaje.",
+          "Dopóki zaproszenie nie zostanie przyjęte, dziecko **nadal nie może się zalogować**. Wiersz pokazuje **Zaproszony**, a zaproszenie jest na liście zaproszeń.",
+          "Gdy dziecko przyjmie zaproszenie (hasłem lub przez Google), to samo konto dostaje adres e-mail, może się zalogować i staje się zwykłym członkiem.",
+          "Jeśli **cofniesz** zaproszenie, dla dziecka nic się nie zmienia. Adres e-mail, który już należy do członka, zostanie odrzucony.",
+          "Wysłanie zaproszenia wymaga niedawnego potwierdzenia tożsamości."
+        ] }
+      ]
+    },
+    {
       "id": "permissions",
       "title": "Uprawnienia dla poszczególnych modułów",
       "blocks": [

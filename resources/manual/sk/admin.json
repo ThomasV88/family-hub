@@ -54,6 +54,26 @@
       ]
     },
     {
+      "id": "child-convert",
+      "title": "Vlastné prihlásenie pre dieťa",
+      "blocks": [
+        { "type": "p", "text": "Keď dieťa vyrastie a potrebuje vlastné prihlásenie, nevytvárate druhý účet. Pozvete tú istú osobu e-mailom a všetko, čo dieťa malo, zostane." },
+        { "type": "steps", "title": "Urobiť z neho bežného člena", "items": [
+          "Otvorte [Nastavenia > Členovia a prístup](/settings/members).",
+          "Stlačte **Spravovať** pri dieťati.",
+          "V časti **Urobiť z neho bežného člena** zadajte jeho **E-mail**.",
+          "Stlačte **Poslať pozvánku**."
+        ] },
+        { "type": "list", "items": [
+          "Dieťa si ponechá zoznam želaní, úlohy, oprávnenia aj rodičov. Druhý účet sa nevytvorí.",
+          "Kým sa pozvánka neprijme, dieťa sa **stále nemôže prihlásiť**. Riadok ukazuje **Pozvaný** a pozvánka sa zobrazí v zozname pozvánok.",
+          "Keď dieťa pozvánku prijme (heslom alebo cez Google), ten istý účet dostane e-mail, môže sa prihlásiť a stane sa bežným členom.",
+          "Ak pozvánku **zrušíte**, pre dieťa sa nič nezmení. E-mail, ktorý už patrí členovi, sa odmietne.",
+          "Odoslanie pozvánky vyžaduje nedávne potvrdenie vašej identity."
+        ] }
+      ]
+    },
+    {
       "id": "permissions",
       "title": "Oprávnenia pre jednotlivé moduly",
       "blocks": [

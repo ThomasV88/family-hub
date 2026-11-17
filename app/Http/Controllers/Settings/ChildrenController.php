@@ -37,12 +37,6 @@ class ChildrenController extends Controller
         );
 
         return back(303)
-            ->with('toast', ['key' => 'settings.members.convert.toast_sent', 'params' => ['email' => $result['invitation']->email]])
-            ->with('flash_data', ['invite' => [
-                'email' => $result['invitation']->email,
-                'link' => InviteService::link($result['token']),
-                'mailQueued' => true,
-                'rotated' => false,
-            ]]);
+            ->with('toast', ['key' => 'settings.members.convert.toast_sent', 'params' => ['email' => $result['invitation']->email]]);
     }
 }

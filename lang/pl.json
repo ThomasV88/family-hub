@@ -360,6 +360,18 @@
                 "panel_info": "Bez adresu e-mail, nie może się zalogować.",
                 "signin_switch": "Bezpośrednie logowanie wyłączone",
                 "signin_hint": "Wyłącza się, gdy zaprosisz je przez e-mail."
+            },
+            "convert": {
+                "title": "Zrób zwykłym członkiem",
+                "hint": "Zaproś go e-mailem. Zachowa listę życzeń, zadania, uprawnienia i rodziców. Dopóki nie przyjmie zaproszenia, nadal nie może się zalogować.",
+                "email": "E-mail",
+                "submit": "Wyślij zaproszenie",
+                "toast_sent": "Zaproszenie wysłane na {email}",
+                "err_email_taken": "Ten adres e-mail należy już do członka.",
+                "failed": "Zaproszenie nie zostało wysłane. Nic się nie zmieniło. Spróbuj ponownie.",
+                "tag_invited": "Zaproszony",
+                "pending": "Zaproszenie wysłane na {email}, ważne do {date}.",
+                "pending_more": "Możesz wysłać je ponownie na inny adres; starsze zaproszenie zostanie wtedy cofnięte."
             }
         },
         "role": {
@@ -790,7 +802,8 @@
             "profile_changed_photo": "Zmieniono zdjęcie osoby {name}",
             "profile_changed_name": "Zmieniono imię osoby {name}",
             "profile_changed_other": "Zmieniono profil osoby {name}",
-            "child_created": "Dodano dziecko {name}"
+            "child_created": "Dodano dziecko {name}",
+            "child_converted": "Dziecko {name} dostało logowanie (zaproszenie przyjęte)"
         },
         "page": "Strona {n} z {total}",
         "prev": "Poprzednia",

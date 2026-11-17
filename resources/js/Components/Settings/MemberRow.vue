@@ -31,6 +31,7 @@ const tint = ((props.member.id ?? 0) % 6) + 1;
             <span v-if="member.isChild" class="member-row__tags">
                 <UiTag>{{ t('settings.members.child.tag_child') }}</UiTag>
                 <UiTag variant="warn" :icon="UserLock">{{ t('settings.members.child.tag_no_signin') }}</UiTag>
+                <UiTag v-if="member.invitation" variant="success">{{ t('settings.members.convert.tag_invited') }}</UiTag>
             </span>
             <span v-else class="member-row__tags">
                 <UiTag>{{ member.isAdmin ? t('settings.role.admin') : t('settings.role.member') }}</UiTag>

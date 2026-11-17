@@ -360,6 +360,18 @@
                 "panel_info": "No e-mail, cannot sign in.",
                 "signin_switch": "Direct sign-in disabled",
                 "signin_hint": "Turns off when you invite them with an e-mail."
+            },
+            "convert": {
+                "title": "Make a normal member",
+                "hint": "Invite them with an e-mail. They keep their wish list, tasks, permissions and parents. Until they accept, they still cannot sign in.",
+                "email": "E-mail",
+                "submit": "Send invitation",
+                "toast_sent": "Invitation sent to {email}",
+                "err_email_taken": "This e-mail already belongs to a member.",
+                "failed": "The invitation was not sent. Nothing was changed. Try again.",
+                "tag_invited": "Invited",
+                "pending": "Invitation sent to {email}, valid until {date}.",
+                "pending_more": "You can send it again to another address; the older invitation is then withdrawn."
             }
         },
         "role": {
@@ -790,7 +802,8 @@
             "profile_changed_photo": "Changed the photo of {name}",
             "profile_changed_name": "Changed the name of {name}",
             "profile_changed_other": "Changed the profile of {name}",
-            "child_created": "Added the child {name}"
+            "child_created": "Added the child {name}",
+            "child_converted": "Gave the child {name} a sign-in (invitation accepted)"
         },
         "page": "Page {n} of {total}",
         "prev": "Previous",

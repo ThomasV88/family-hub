@@ -360,6 +360,18 @@
                 "panel_info": "Bez e-mailu, nemôže sa prihlásiť.",
                 "signin_switch": "Priame prihlásenie vypnuté",
                 "signin_hint": "Vypne sa, keď ho pozvete cez e-mail."
+            },
+            "convert": {
+                "title": "Urobiť z neho bežného člena",
+                "hint": "Pozvite ho e-mailom. Zostane mu zoznam želaní, úlohy, oprávnenia aj rodičia. Kým pozvánku neprijme, stále sa nemôže prihlásiť.",
+                "email": "E-mail",
+                "submit": "Poslať pozvánku",
+                "toast_sent": "Pozvánka odoslaná na {email}",
+                "err_email_taken": "Tento e-mail už patrí členovi.",
+                "failed": "Pozvánka sa neodoslala. Nič sa nezmenilo. Skúste to znova.",
+                "tag_invited": "Pozvaný",
+                "pending": "Pozvánka odoslaná na {email}, platí do {date}.",
+                "pending_more": "Môžete ju poslať znova na inú adresu; staršia pozvánka sa potom zruší."
             }
         },
         "role": {
@@ -790,7 +802,8 @@
             "profile_changed_photo": "Zmenená fotografia osoby {name}",
             "profile_changed_name": "Zmenené meno osoby {name}",
             "profile_changed_other": "Zmenený profil osoby {name}",
-            "child_created": "Pridal(a) dieťa {name}"
+            "child_created": "Pridal(a) dieťa {name}",
+            "child_converted": "Dieťa {name} dostalo prihlásenie (pozvánka prijatá)"
         },
         "page": "Strana {n} z {total}",
         "prev": "Predchádzajúca",

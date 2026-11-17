@@ -38,7 +38,7 @@
         "ai_agents": "AI agenti",
         "home": "Stránka Prehľad",
         "profile_page": "Stránka Nastavenia profilu",
-        "members_child": "Členovia, dialóg Pridať dieťa"
+        "members_child": "Členovia, dialóg a panel dieťaťa"
     },
     "topics": {
         "tasks.visibility": {
@@ -272,6 +272,10 @@
         "members.child": {
             "title": "Čo je detský účet?",
             "text": "Detský účet nemá e-mail, nemôže sa prihlásiť a nedostáva e-maily ani upozornenia. Meno a fotografiu spravujú vybraní rodičia a administrátori, zoznam želaní spravujú rodičia. Vybrať možno len členov, ktorí sa môžu prihlásiť a smú upravovať Zoznam želaní."
+        },
+        "members.convert": {
+            "title": "Načo e-mail pre dieťa?",
+            "text": "Na e-mail príde pozvánka. Keď ju dieťa prijme, ten istý účet dostane e-mail a môže sa prihlásiť. Zoznam želaní, úlohy, oprávnenia aj rodičia zostanú. Dovtedy sa dieťa prihlásiť nemôže a zrušenie pozvánky nič nezmení."
         }
     }
 }

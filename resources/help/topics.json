@@ -348,6 +348,12 @@
             "area": "settings",
             "screen": "members_child",
             "field": "child"
+        },
+        {
+            "key": "members.convert",
+            "area": "settings",
+            "screen": "members_child",
+            "field": "convert"
         }
     ]
 }
