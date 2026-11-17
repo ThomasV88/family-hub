@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/** Exactly the five module keys with an enum level; anything else (settings, is_admin) is rejected. */
+/** Exactly the six module keys with an enum level; anything else (settings, is_admin) is rejected. */
 class UpdatePermissionsRequest extends FormRequest
 {
     public function authorize(): bool

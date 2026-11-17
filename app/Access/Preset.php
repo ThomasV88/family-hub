@@ -13,9 +13,9 @@ enum Preset: string
     public function grants(): array
     {
         $map = match ($this) {
-            self::Parent => ['todo' => AccessLevel::Edit, 'wishlist' => AccessLevel::Edit, 'finance' => AccessLevel::Edit, 'health' => AccessLevel::None, 'shopping' => AccessLevel::Edit],
-            self::Child, self::Grandparent => ['todo' => AccessLevel::Edit, 'wishlist' => AccessLevel::Edit, 'finance' => AccessLevel::None, 'health' => AccessLevel::None, 'shopping' => AccessLevel::Edit],
-            self::Guest => ['todo' => AccessLevel::View, 'wishlist' => AccessLevel::None, 'finance' => AccessLevel::None, 'health' => AccessLevel::None, 'shopping' => AccessLevel::View],
+            self::Parent => ['todo' => AccessLevel::Edit, 'wishlist' => AccessLevel::Edit, 'finance' => AccessLevel::Edit, 'health' => AccessLevel::None, 'shopping' => AccessLevel::Edit, 'recipes' => AccessLevel::Edit],
+            self::Child, self::Grandparent => ['todo' => AccessLevel::Edit, 'wishlist' => AccessLevel::Edit, 'finance' => AccessLevel::None, 'health' => AccessLevel::None, 'shopping' => AccessLevel::Edit, 'recipes' => AccessLevel::Edit],
+            self::Guest => ['todo' => AccessLevel::View, 'wishlist' => AccessLevel::None, 'finance' => AccessLevel::None, 'health' => AccessLevel::None, 'shopping' => AccessLevel::View, 'recipes' => AccessLevel::View],
         };
 
         $grants = [];
