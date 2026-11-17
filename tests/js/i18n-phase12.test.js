@@ -79,3 +79,29 @@ describe('phase 12 locale parity (lang)', () => {
         for (const locale of LOCALES) expect(typeof lang[locale].recipes).toBe('object');
     });
 });
+
+describe('phase 12 manual and help (12-08)', () => {
+    const manual = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(readFileSync(`${root}/resources/manual/${l}/recipes.json`, 'utf8'))]));
+
+    it('has the adding, photos and sharing sections in the same order in every language', () => {
+        for (const locale of LOCALES) {
+            const ids = manual[locale].sections.map((s) => s.id);
+            expect({ locale, order: ['overview', 'adding', 'photos', 'sharing'].map((id) => ids.indexOf(id)) }).toEqual({ locale, order: [0, 1, 2, 3] });
+        }
+        for (const id of ['adding', 'photos', 'sharing']) {
+            const counts = LOCALES.map((l) => manual[l].sections.find((s) => s.id === id).blocks.map((b) => b.type).join(','));
+            expect(new Set(counts).size, `${id} block types differ between languages`).toBe(1);
+        }
+    });
+
+    it('registers the sharing help tip on the recipe form with a text in every language', () => {
+        const topics = JSON.parse(readFileSync(`${root}/resources/help/topics.json`, 'utf8')).topics;
+        expect(topics.find((t) => t.key === 'recipes.sharing')).toEqual({ key: 'recipes.sharing', area: 'recipes', screen: 'recipe_form', field: 'visibility' });
+        for (const locale of LOCALES) {
+            const help = JSON.parse(readFileSync(`${root}/resources/help/${locale}.json`, 'utf8'));
+            expect(help.areas.recipes?.trim()).toBeTruthy();
+            expect(help.screens.recipe_form?.trim()).toBeTruthy();
+            expect([...help.topics['recipes.sharing'].text].length).toBeLessThanOrEqual(400);
+        }
+    });
+});

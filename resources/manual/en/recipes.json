@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 36,
   "title": "Recipes",
-  "summary": "The family recipe book: browsing and searching the recipes you may see, the filters and favourites.",
+  "summary": "The family recipe book: adding and editing recipes with photos, who can see a recipe, browsing and searching the recipes you may see, the filters and favourites.",
   "covers": [
     "module:recipes"
   ],
@@ -29,6 +29,104 @@
         {
           "type": "p",
           "text": "You see a recipe if you wrote it or if its author shared it with everyone who uses Recipes. A recipe that its author kept private never appears for anyone else, not even for an administrator. A recipe shows in the table in [who can see what](who-sees-what#table)."
+        }
+      ]
+    },
+    {
+      "id": "adding",
+      "title": "Adding and editing a recipe",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "You can add a recipe if your administrator gave you permission to change **Recipes**. Without it you can read recipes but the button **New recipe** is not shown."
+        },
+        {
+          "type": "steps",
+          "title": "Adding a recipe by hand",
+          "items": [
+            "On the Recipes page press **New recipe**.",
+            "Optionally add photos (see Photos below).",
+            "Type the **Title**. It is required. You can also add a short **Description**.",
+            "Set the **Servings** (1 to 99): the quantities you enter are for this number of portions. Enter the **Preparation time** and **Cooking time** in minutes if you want; the total is shown under them.",
+            "Add up to 3 **Categories**. Start typing or pick a suggestion, then press Enter or type a comma. Suggestions are a ready-made set (Breakfast, Soup, Dessert and so on) and the categories the family already uses. The same category twice is refused, whatever the capital letters or accents.",
+            "Under **Ingredients** fill in **Quantity**, **Unit**, **Name** and, if you like, a **Note** such as \"chopped\". Press **Add ingredient**, or Enter in the name, for the next line.",
+            "Under **Steps** write one step per box and press **Add step** for the next.",
+            "Optionally add the **Source** (a web address) and choose **Who can see this recipe** (see Who can see a recipe).",
+            "Press **Save recipe**. You land on the recipe and see \"Recipe saved\"."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "A recipe needs a title, at least one ingredient and at least one step. If something is missing, the form shows what and moves to the first field that needs attention.",
+            "Limits: title 120 characters, description 1000, an ingredient name 120, an ingredient note 80, a step 1000; up to 80 ingredients and 60 steps; a category up to 30 characters.",
+            "The unit comes from the same list as the shopping lists (pcs, g, kg, ml, l, pack, bunch, tbsp, tsp and the units your administrator added), or **No unit**."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Quantities** accept a decimal comma or dot (\"0,5\"), fractions (\"1/2\", \"1 1/2\") and the signs ½ ¼ ¾ ⅓ ⅔. A quantity must be above 0 and at most 9999, with up to two decimals. Leave it empty for something \"to taste\"."
+        },
+        {
+          "type": "p",
+          "text": "**Pasting a list.** If you paste several lines into the name of an ingredient, for example a list copied from a web page, the form offers **Split into n ingredients**. It reads quantity, unit and name from each line (\"200 g flour\", \"2 ks eggs\", \"1/2 tsp salt\"). What it cannot read stays in the name, so check the new lines. Choose **Keep as one** to leave it as typed."
+        },
+        {
+          "type": "p",
+          "text": "**Changing the order.** Ingredients have a menu (three dots) with **Move up** and **Move down**; steps have buttons for the same. Removing an ingredient or a step shows **Undo** for a few seconds."
+        },
+        {
+          "type": "p",
+          "text": "**Editing.** Only the author edits a recipe. Open it and press **Edit**; the form is the same. The ingredients and steps you keep stay the same lines, so ticks that other members made while cooking stay in place for them; only the lines you remove lose their ticks. If you leave the form with changes that are not saved, you are asked first."
+        }
+      ]
+    },
+    {
+      "id": "photos",
+      "title": "Photos of a recipe",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "A recipe can have up to 10 photos. They must be JPG, PNG or WebP and up to 5 MB each. In the form press **Add photos**; you can choose several at once."
+        },
+        {
+          "type": "list",
+          "items": [
+            "The first photo is the **main** photo: the one on the recipe card. To use another one, open the menu (three dots) on its picture and choose **Make main**.",
+            "**Move earlier** and **Move later** change the order. **Remove** deletes a photo after you confirm.",
+            "When you create a recipe, the photos are uploaded when you press **Save recipe**. If one of them cannot be uploaded, the recipe is still saved and you are told; add the photo again by editing the recipe.",
+            "When you edit a recipe, adding, making main, moving and removing photos take effect at once, without **Save recipe**."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The app re-saves every photo and removes the information hidden in it, such as where it was taken. Photos are stored privately: only members who may see the recipe can see its photos."
+        }
+      ]
+    },
+    {
+      "id": "sharing",
+      "title": "Who can see a recipe",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Every recipe is either **Only me** or **Everyone in the family who uses Recipes**. A new recipe starts as **Only me**. You choose under **Who can see this recipe** in the form."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Only me**: only you see the recipe. Nobody else does, not even an administrator.",
+            "**Everyone in the family who uses Recipes**: other members who have access to Recipes can read it, cook from it and add it to a shopping list.",
+            "Only the author edits a recipe, changes its photos and visibility, or deletes it. Others cannot edit it."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Other members' notes, ticks and favourites on your recipe are their own: you never see them, and they never see yours. When you edit a shared recipe, their ticks stay on the ingredients and steps you keep."
+        },
+        {
+          "type": "warning",
+          "text": "If you make a shared recipe **private** again, you are asked first. Other members no longer see it. Their notes, ticks and favourites on it are kept but hidden, and they come back if you share the recipe again."
         }
       ]
     }

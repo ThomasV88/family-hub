@@ -7,7 +7,8 @@
         "health": "Zdravie",
         "account": "Účet a zabezpečenie",
         "settings": "Nastavenia (administrátori)",
-        "shopping": "Nákupy"
+        "shopping": "Nákupy",
+        "recipes": "Receptár"
     },
     "screens": {
         "task_panel": "Panel úlohy",
@@ -44,7 +45,8 @@
         "shopping_list_panel": "Panel nastavení nákupného zoznamu",
         "shopping_email": "Dialóg odoslania nákupného zoznamu e-mailom",
         "shopping_list": "Stránka nákupného zoznamu",
-        "shopping_finish": "Dialóg ukončenia nákupu"
+        "shopping_finish": "Dialóg ukončenia nákupu",
+        "recipe_form": "Formulár receptu"
     },
     "topics": {
         "tasks.visibility": {
@@ -314,6 +316,10 @@
         "shopping.carry_over": {
             "title": "Položky, ktoré sa nepodarilo zakúpiť",
             "text": "Položky označené ako Nedostupné môžu ísť do nového otvoreného zoznamu s názvom pôvodného a dodatkom „(nezakúpené)“, s rovnakým obchodom, zodpovednou osobou a prístupom a bez pripomienky. Ukončený zoznam sa tak či tak presunie do archívu a ostane iba na čítanie."
+        },
+        "recipes.sharing": {
+            "title": "Kto môže tento recept vidieť",
+            "text": "Voľbou Iba ja si recept necháte len pre seba. Voľbou Všetci v rodine, ktorí používajú Receptár, umožníte ostatným členom recept čítať, variť podľa neho a pridať ho do nákupu. Upravovať ho môžete vždy iba vy ako autor. Ak zdieľaný recept znova nastavíte ako súkromný, poznámky, odškrtnutia a obľúbené ostatných pri ňom ostanú zachované, ale skryté."
         }
     }
 }

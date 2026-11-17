@@ -402,6 +402,12 @@
             "area": "shopping",
             "screen": "shopping_finish",
             "field": "carry_over"
+        },
+        {
+            "key": "recipes.sharing",
+            "area": "recipes",
+            "screen": "recipe_form",
+            "field": "visibility"
         }
     ]
 }

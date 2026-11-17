@@ -3,7 +3,7 @@
   "category": "modules",
   "order": 36,
   "title": "Receptarz",
-  "summary": "Rodzinny receptarz: przeglądanie i wyszukiwanie przepisów, które możesz widzieć, filtry i ulubione.",
+  "summary": "Rodzinny receptarz: dodawanie i edycja przepisów ze zdjęciami, kto widzi przepis, przeglądanie i wyszukiwanie przepisów, które możesz widzieć, filtry i ulubione.",
   "covers": [
     "module:recipes"
   ],
@@ -29,6 +29,104 @@
         {
           "type": "p",
           "text": "Widzisz przepis, jeśli ty go napisałeś lub jeśli autor udostępnił go wszystkim korzystającym z Receptarza. Przepis, który autor zostawił prywatny, nie pojawia się nikomu innemu, nawet administratorowi. Przepis znajdziesz w tabeli w [kto co widzi](who-sees-what#table)."
+        }
+      ]
+    },
+    {
+      "id": "adding",
+      "title": "Dodawanie i edycja przepisu",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Przepis możesz dodać, jeśli administrator dał ci zgodę na zmiany w **Receptarzu**. Bez niej przepisy tylko czytasz, a przycisk **Nowy przepis** się nie pokazuje."
+        },
+        {
+          "type": "steps",
+          "title": "Dodawanie przepisu ręcznie",
+          "items": [
+            "Na stronie Receptarz naciśnij **Nowy przepis**.",
+            "Jeśli chcesz, dodaj zdjęcia (zobacz Zdjęcia poniżej).",
+            "Wpisz **Tytuł**. Jest wymagany. Możesz też dodać krótki **Opis**.",
+            "Ustaw **Porcje** (1 do 99): ilości, które wpiszesz, dotyczą tej liczby porcji. Jeśli chcesz, wpisz **Czas przygotowania** i **Czas gotowania** w minutach; suma pokaże się pod nimi.",
+            "Dodaj najwyżej 3 **Kategorie**. Zacznij pisać albo wybierz podpowiedź, a potem naciśnij Enter lub wpisz przecinek. Podpowiedzi to gotowy zestaw (Śniadanie, Zupa, Deser i tak dalej) oraz kategorie, których rodzina już używa. Tej samej kategorii nie dodasz dwa razy, niezależnie od wielkości liter i znaków diakrytycznych.",
+            "W części **Składniki** wpisz **Ilość**, **Jednostkę**, **Nazwę** i w razie potrzeby **Notatkę**, na przykład „posiekane”. Kolejny wiersz dodasz przyciskiem **Dodaj składnik** albo klawiszem Enter w nazwie.",
+            "W części **Kroki** wpisz jeden krok w jednym polu, a następny dodaj przyciskiem **Dodaj krok**.",
+            "Jeśli chcesz, dodaj **Źródło** (adres strony) i wybierz, **Kto może zobaczyć ten przepis** (zobacz Kto widzi przepis).",
+            "Naciśnij **Zapisz przepis**. Otworzy się przepis i zobaczysz „Przepis zapisany”."
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "Przepis potrzebuje tytułu, co najmniej jednego składnika i co najmniej jednego kroku. Jeśli czegoś brakuje, formularz mówi czego i przechodzi do pierwszego pola do poprawy.",
+            "Limity: tytuł 120 znaków, opis 1000, nazwa składnika 120, notatka do składnika 80, krok 1000; najwyżej 80 składników i 60 kroków; kategoria najwyżej 30 znaków.",
+            "Jednostka pochodzi z tej samej listy co listy zakupów (szt., g, kg, ml, l, opakowanie, pęczek, łyżka, łyżeczka i jednostki dodane przez administratora) albo **Bez jednostki**."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "**Ilości** możesz wpisać z przecinkiem lub kropką dziesiętną („0,5”), jako ułamki („1/2”, „1 1/2”) i znakami ½ ¼ ¾ ⅓ ⅔. Ilość musi być większa niż 0 i najwyżej 9999, z najwyżej dwoma miejscami po przecinku. Przy rzeczach „do smaku” zostaw pole puste."
+        },
+        {
+          "type": "p",
+          "text": "**Wklejanie listy.** Jeśli wkleisz kilka wierszy do nazwy składnika, na przykład listę skopiowaną ze strony internetowej, formularz zaproponuje **Podziel na n składników**. Z każdego wiersza odczyta ilość, jednostkę i nazwę („200 g mąki”, „2 szt. jajka”, „1/2 łyżeczki soli”). To, czego nie odczyta, zostaje w nazwie, więc sprawdź nowe wiersze. Wybierz **Zostaw jako jeden**, aby zostawić tekst tak, jak go wkleiłeś."
+        },
+        {
+          "type": "p",
+          "text": "**Zmiana kolejności.** Składniki mają menu (trzy kropki) z opcjami **Przesuń wyżej** i **Przesuń niżej**; kroki mają do tego przyciski. Po usunięciu składnika lub kroku na kilka sekund pojawia się **Cofnij**."
+        },
+        {
+          "type": "p",
+          "text": "**Edycja.** Przepis edytuje tylko jego autor. Otwórz go i naciśnij **Edytuj**; formularz jest ten sam. Składniki i kroki, które zostawisz, pozostają tymi samymi wierszami, więc odhaczenia, które inni członkowie zrobili podczas gotowania, zostają dla nich na miejscu; odhaczenia tracą tylko usunięte wiersze. Jeśli opuścisz formularz z niezapisanymi zmianami, najpierw o to zapyta."
+        }
+      ]
+    },
+    {
+      "id": "photos",
+      "title": "Zdjęcia przepisu",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Przepis może mieć najwyżej 10 zdjęć. Muszą być w formacie JPG, PNG lub WebP, każde do 5 MB. W formularzu naciśnij **Dodaj zdjęcia**; możesz wybrać kilka naraz."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Pierwsze zdjęcie jest **główne**: to, które widać na karcie przepisu. Aby użyć innego, otwórz menu (trzy kropki) przy jego obrazie i wybierz **Ustaw jako główne**.",
+            "**Przesuń wcześniej** i **Przesuń później** zmieniają kolejność. **Usuń** kasuje zdjęcie po potwierdzeniu.",
+            "Gdy tworzysz przepis, zdjęcia są przesyłane po naciśnięciu **Zapisz przepis**. Jeśli któregoś nie uda się przesłać, przepis i tak zostanie zapisany i dowiesz się o tym; zdjęcie dodasz ponownie przy edycji przepisu.",
+            "Gdy edytujesz przepis, dodanie, ustawienie jako głównego, przesunięcie i usunięcie zdjęć działa od razu, bez **Zapisz przepis**."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Aplikacja zapisuje każde zdjęcie na nowo i usuwa z niego ukryte informacje, na przykład miejsce zrobienia. Zdjęcia są przechowywane prywatnie: widzą je tylko członkowie, którzy mogą zobaczyć przepis."
+        }
+      ]
+    },
+    {
+      "id": "sharing",
+      "title": "Kto widzi przepis",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Każdy przepis jest albo **Tylko ja**, albo **Wszyscy w rodzinie korzystający z Receptarza**. Nowy przepis zaczyna jako **Tylko ja**. Wybierasz w formularzu przy **Kto może zobaczyć ten przepis**."
+        },
+        {
+          "type": "list",
+          "items": [
+            "**Tylko ja**: przepis widzisz tylko ty. Nikt inny, nawet administrator.",
+            "**Wszyscy w rodzinie korzystający z Receptarza**: pozostali członkowie, którzy mają dostęp do Receptarza, mogą go czytać, gotować według niego i dodawać do listy zakupów.",
+            "Tylko autor edytuje przepis, zmienia jego zdjęcia i widoczność lub go usuwa. Inni nie mogą go edytować."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Notatki, odhaczenia i ulubione innych członków przy twoim przepisie są ich własne: ty ich nigdy nie widzisz, a oni nigdy nie widzą twoich. Gdy edytujesz udostępniony przepis, ich odhaczenia zostają przy składnikach i krokach, które zostawisz."
+        },
+        {
+          "type": "warning",
+          "text": "Jeśli udostępniony przepis ponownie ustawisz jako **prywatny**, najpierw o to zapyta. Pozostali członkowie go nie zobaczą. Ich notatki, odhaczenia i ulubione przy nim zostaną zachowane, ale ukryte, i wrócą, jeśli znów udostępnisz przepis."
         }
       ]
     }

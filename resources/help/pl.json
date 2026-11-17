@@ -7,7 +7,8 @@
         "health": "Zdrowie",
         "account": "Konto i bezpieczeństwo",
         "settings": "Ustawienia (administratorzy)",
-        "shopping": "Zakupy"
+        "shopping": "Zakupy",
+        "recipes": "Receptarz"
     },
     "screens": {
         "task_panel": "Panel zadania",
@@ -44,7 +45,8 @@
         "shopping_list_panel": "Panel ustawień listy zakupów",
         "shopping_email": "Okno wysyłania listy zakupów e-mailem",
         "shopping_list": "Strona listy zakupów",
-        "shopping_finish": "Okno kończenia zakupów"
+        "shopping_finish": "Okno kończenia zakupów",
+        "recipe_form": "Formularz przepisu"
     },
     "topics": {
         "tasks.visibility": {
@@ -314,6 +316,10 @@
         "shopping.carry_over": {
             "title": "Produkty, których nie udało się kupić",
             "text": "Produkty oznaczone jako Niedostępne mogą trafić na nową otwartą listę o nazwie z dopiskiem „(niekupione)”, z tym samym sklepem, osobą odpowiedzialną i dostępem, bez przypomnienia. Zakończona lista w obu przypadkach trafia do archiwum i jest tylko do odczytu."
+        },
+        "recipes.sharing": {
+            "title": "Kto może zobaczyć ten przepis",
+            "text": "Wybierz Tylko ja, aby zostawić przepis dla siebie. Wybierz Wszyscy w rodzinie korzystający z Receptarza, aby inni mogli go czytać, gotować według niego i dodawać do zakupów. Edytować go możesz zawsze tylko ty jako autor. Jeśli udostępniony przepis znów ustawisz jako prywatny, notatki, odhaczenia i ulubione innych przy nim zostaną zachowane, ale ukryte."
         }
     }
 }

@@ -7,7 +7,8 @@
         "health": "Health",
         "account": "Account and security",
         "settings": "Settings (administrators)",
-        "shopping": "Shopping"
+        "shopping": "Shopping",
+        "recipes": "Recipes"
     },
     "screens": {
         "task_panel": "Task panel",
@@ -44,7 +45,8 @@
         "shopping_list_panel": "Shopping list settings panel",
         "shopping_email": "Shopping e-mail dialog",
         "shopping_list": "Shopping list page",
-        "shopping_finish": "Finish shopping dialog"
+        "shopping_finish": "Finish shopping dialog",
+        "recipe_form": "Recipe form"
     },
     "topics": {
         "tasks.visibility": {
@@ -314,6 +316,10 @@
         "shopping.carry_over": {
             "title": "Items that could not be bought",
             "text": "Items you mark Unavailable can go into a new open list named after this one with \"(unbought)\", with the same store, responsible person and access, and without the reminder. The finished list moves to the Archive either way and stays read-only."
+        },
+        "recipes.sharing": {
+            "title": "Who can see this recipe",
+            "text": "Choose Only me to keep the recipe to yourself. Choose Everyone in the family who uses Recipes to let other members read it, cook from it and add it to shopping. In both cases only you, as the author, can edit it. If you make a shared recipe private again, other members' notes, ticks and favourites on it are kept but hidden, and they return if you share it again."
         }
     }
 }

@@ -17,7 +17,9 @@ import StickyActionBar from '../../Shopping/StickyActionBar.vue';
 import { securityFetch } from '../../Security/securityFetch.js';
 import CategoryField from '../../Components/Recipes/CategoryField.vue';
 import IngredientRows from '../../Components/Recipes/IngredientRows.vue';
+import RecipePhotosField from '../../Components/Recipes/RecipePhotosField.vue';
 import StepRows from '../../Components/Recipes/StepRows.vue';
+import { uploadQueue } from '../../Components/Recipes/recipePhotosApi.js';
 import { failureKey, firstMessage, isGone } from '../../Components/Recipes/recipeFailure.js';
 import { formatQuantityInput, parseQuantity, quantityForRequest } from '../../Components/Recipes/quantityInput.js';
 
@@ -110,7 +112,9 @@ const snapshot = () => JSON.stringify({
     steps: form.steps.map(({ key, ...rest }) => rest),
 });
 const initial = snapshot();
-const dirty = computed(() => snapshot() !== initial);
+// Photos waiting for the first save (create mode only).
+const photoQueue = ref([]);
+const dirty = computed(() => snapshot() !== initial || photoQueue.value.length > 0);
 let allowNext = false;
 const leaveOpen = ref(false);
 let pendingVisit = null;
@@ -318,7 +322,12 @@ async function send(built) {
         return;
     }
     const id = response.data?.id;
-    showToast(t('recipes.toast.saved'));
+    // The recipe exists now. Photos that fail do not lose it: the member is told and can add them again in Edit.
+    const queue = photoQueue.value;
+    const main = queue.find((q) => q.isMain)?.key ?? queue[0]?.key;
+    const { failed: failedPhotos } = queue.length > 0 ? await uploadQueue(id, queue, main) : { failed: 0 };
+    showToast(failedPhotos > 0 ? t('recipes.photos.some_failed', { n: failedPhotos }, failedPhotos) : t('recipes.toast.saved'));
+    photoQueue.value = [];
     allowNext = true;
     router.visit(`/recipes/${id}`, { onFinish: () => { saving.value = false; } });
 }
@@ -349,6 +358,13 @@ const pageTitle = computed(() => t(editing.value ? 'recipes.form.title_edit' : '
 
             <form id="recipe-form" ref="formEl" class="rec-form__grid" novalidate @submit.prevent="submit">
                 <div class="rec-form__col">
+                    <div class="rec-form__block">
+                        <span class="rec-form__label">{{ t('recipes.photos.title') }}</span>
+                        <RecipePhotosField
+                            v-model:queue="photoQueue" :recipe-id="recipe?.id ?? null" :photos="recipe?.photos ?? []"
+                            :max="limits.photosMax" :max-bytes="limits.photoMaxBytes" :disabled="saving" @gone="failed(404)"
+                        />
+                    </div>
                     <UiField :label="t('recipes.form.title')" :error="errors.title ?? ''" required>
                         <UiInput :model-value="form.title" autocomplete="off" :maxlength="limits.titleMax" :disabled="saving" data-testid="title-input" @update:model-value="setField('title', $event)" />
                     </UiField>
