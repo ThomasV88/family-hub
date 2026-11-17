@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Settings;
 
+use App\Rules\EligibleWishlistManager;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -21,6 +22,7 @@ class UpdateWishlistManagersRequest extends FormRequest
             'manager_ids.*' => [
                 'integer', 'distinct', Rule::exists('users', 'id'),
                 Rule::notIn([(int) $this->route('user')]),
+                new EligibleWishlistManager,
             ],
         ];
     }
