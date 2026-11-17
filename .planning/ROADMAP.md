@@ -466,7 +466,7 @@ Plans:
 Conflict to resolve with the owner: issue #11 reverses the current design rule that the full text is not kept (see the AI data-flow explanation given on 2026-11-17 and the extraction prompt's rule against free-form transcription); this needs an explicit decision, a prompt/schema version bump and a migration plan.
 **Commit rule:** every commit that resolves part of #11 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
 
-**Plans:** 5 plans planned (13-01 to 13-05); 13-06 to 13-10 to be planned after the evaluation gate (13-02)
+**Plans:** 10 plans (13-01 to 13-05 done; 13-06 to 13-10 planned after the evaluation gate, decisions in `13-EVALUATION.md`)
 
 Plans:
 - [ ] 13-01-PLAN.md — Evaluation tooling: metrics (CER, WER, diacritics, numbers, search-term recall, entry F1), decision rule as code, GD pre-processing arms, Codex token counters, transcription schema and prompt, synthetic corpus ground truth and generator, guarded `ai:ocr-eval` harness (wave 1)
@@ -474,4 +474,8 @@ Plans:
 - [ ] 13-02-PLAN.md — Live evaluation run on staging as orchestrator checkpoint (real Codex, synthetic only, max 150 calls) and `13-EVALUATION.md` with the decisions block: the gate (wave 2)
 - [ ] 13-04-PLAN.md — Search backend: POST `/health/search` in one access-scoped statement, prefix and suffix-trim matching, `{text, hit}` snippets, recognised-text view and remove endpoints with audit event, person page flags, privacy differential and matrix (wave 2)
 - [ ] 13-05-PLAN.md — Search UI on the person page and the Recognised text section in the document panel, copy in en/sk/pl, help tips, manual sections `search` and `recognised-text` (wave 3)
-- [ ] 13-06 to 13-10 — to be planned after the evaluation gate (13-02): transcription step, extraction from text, bulk backfill (`no_text`), notice/consent/docs/seed, staging verification and release
+- [ ] 13-06-PLAN.md — Transcription step: run `mode` (entries, full, text) and status `text_saved` through every PHP status site, transcription task and strict batch validator, step 1 in the run job (no pre-processing, PDF 1800 px, 4 pages per call, at most 20 pages, text saved after each batch with a complete flag, resume after a quota park, text-only finish), timeouts unchanged, content-free failures (wave 4)
+- [ ] 13-07-PLAN.md — Extraction from the stored text: `ExtractFromTextTask` with a nonce-marked data block, prompt v2 (entries schema unchanged, no evidence field), reuse of a complete text without re-transcribing, resume order, leak checks (wave 5)
+- [ ] 13-08-PLAN.md — Bulk backfill scope `no_text`: text-only runs under every existing bulk guard, refused while `ai.ocr.enabled` is off, settings panel option, "Text only" history tag, copy and admin manual (wave 5)
+- [ ] 13-09-PLAN.md — Notice re-acknowledgment (`text_notice_acked_at`) for runs and bulk Start, three notice variants, run states and `text_saved` tag, consent turn-off purge sentence, manual `ai`/`search`/`recognised-text`/admin `backups` and the `health.ai_run`/`settings.ai_bulk` tips (wave 6)
+- [ ] 13-10-PLAN.md — Staging seed of recognised texts, ops notes and restore-drill line, locale parity, accessibility sweep, pseudo-long check, full gate (`Fixes #11`), staging verification with a real two-step run as orchestrator checkpoint (wave 7)
