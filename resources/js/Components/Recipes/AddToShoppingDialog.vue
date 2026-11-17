@@ -279,8 +279,13 @@ function body() {
         : { target: 'existing', list_id: Number(listId.value), items };
 }
 
+// A 409 says the chosen list was locked meanwhile: it is taken out of the choices (it cannot be added to any more) and the next
+// open list is selected. The target only moves to "existing" when it already was, so a new-list attempt keeps its form.
 async function focusList() {
-    target.value = 'existing';
+    if (target.value !== 'existing') return;
+    const lockedId = listId.value;
+    if (preview.value) preview.value = { ...preview.value, lists: (preview.value.lists ?? []).filter((l) => String(l.id) !== lockedId) };
+    listId.value = lists.value[0] ? String(lists.value[0].id) : '';
     await nextTick();
     listSelect.value?.focus?.();
 }

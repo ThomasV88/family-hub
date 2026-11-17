@@ -362,6 +362,24 @@ describe('AddToShoppingDialog: submitting', () => {
         expect(wrapper.emitted('update:open')).toBeUndefined();
     });
 
+    it('takes the locked list out of the choices on 409 and keeps a new-list attempt on "new list"', async () => {
+        await mountDialog();
+        fetchMock.mockImplementation(async (url, options = {}) => (options.method === 'POST' ? { ok: false, status: 409, error: 'failed', data: {} } : ok(preview())));
+        const options = () => [...$('[data-testid="list-select"]').options].map((o) => o.value);
+        const before = options();
+        const chosen = $('[data-testid="list-select"]').value;
+        await click($('[data-testid="target-existing"]'));
+        await click(submitButton());
+        expect(options()).not.toContain(chosen);
+        expect(options()).toHaveLength(before.length - 1);
+        expect($('[data-testid="list-select"]').value).not.toBe(chosen);
+
+        // A conflict on the new-list path does not flip the radio.
+        await click($('[data-testid="target-new"]'));
+        await click(submitButton());
+        expect($('[data-testid="target-new"]').checked).toBe(true);
+    });
+
     it('keeps the rows and says nothing was added on a server error', async () => {
         await mountDialog();
         await setValue(inRow(1, 'row-name'), 'Large eggs');
