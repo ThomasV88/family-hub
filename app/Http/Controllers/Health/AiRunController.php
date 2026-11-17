@@ -37,9 +37,9 @@ class AiRunController extends Controller
             return response()->json(['status' => 'queued', 'extractionId' => $result->extractionId], 202);
         }
 
-        // A notice that must be shown again also says whether it has to carry the statement about the stored text, so a
+        // A notice that must be shown again also says (only while the switch is on) that it has to carry the statement about the stored text, so a
         // dialog opened from a page that loaded before the switch was turned on is still the true one.
-        $textNotice = $result->outcome === 'notice_required' ? (bool) config('ai.ocr.enabled') : null;
+        $textNotice = $result->outcome === 'notice_required' && config('ai.ocr.enabled') ? true : null;
 
         return response()->json(array_filter(['reason' => $result->outcome, 'extractionId' => $result->extractionId, 'providers' => $result->providers, 'textNotice' => $textNotice], fn ($v) => $v !== null), 409);
     }
