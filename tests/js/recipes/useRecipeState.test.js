@@ -145,4 +145,41 @@ describe('useRecipeState', () => {
         await tick();
         expect(done).toBe(true);
     });
+
+    it('treats a reset as a barrier: a tick made after it is not merged into a mark queued before it', async () => {
+        const { request, calls } = deferredRequest();
+        const s = useRecipeState({ recipeId: 5, request });
+        s.mark('i:9', true); // in flight
+        s.mark('i:1', true); // waiting before the reset
+        const reset = s.reset();
+        s.mark('i:1', false); // after the reset: must stay behind it
+        s.mark('i:1', true);
+        for (let i = 0; i < 6 && calls.length > i; i++) {
+            calls[i].resolve(ok);
+            await tick();
+        }
+        await reset;
+        const order = calls.map((c) => `${c.init.method} ${c.url.replace('/recipes/5/', '')} ${JSON.stringify(c.init.body ?? null)}`);
+        expect(order).toEqual([
+            'PUT ingredients/9/tick {"ticked":true}',
+            'PUT ingredients/1/tick {"ticked":true}',
+            'DELETE progress null',
+            'PUT ingredients/1/tick {"ticked":true}',
+        ]);
+        expect(s.state('i:1')).toBe(true);
+    });
+
+    it('resyncs the confirmed state at once when idle and after the queue drains when busy', async () => {
+        const { request, calls } = deferredRequest();
+        const s = useRecipeState({ recipeId: 5, initial: { tickedIngredientIds: [1, 2], doneStepIds: [3], favourite: false }, request });
+        s.resync({ tickedIngredientIds: [2], doneStepIds: [], favourite: true });
+        expect([s.state('i:1'), s.state('i:2'), s.state('s:3'), s.state('fav')]).toEqual([false, true, false, true]);
+
+        s.mark('i:7', true);
+        s.resync({ tickedIngredientIds: [8], doneStepIds: [4], favourite: false });
+        expect(s.state('i:8')).toBe(false); // not yet: a write is in flight
+        calls[0].resolve(ok);
+        await tick();
+        expect([s.state('i:2'), s.state('i:8'), s.state('s:4'), s.state('fav'), s.state('i:7')]).toEqual([false, true, true, false, false]);
+    });
 });

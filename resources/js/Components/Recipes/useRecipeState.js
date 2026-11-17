@@ -9,7 +9,8 @@ import { securityFetch } from '../../Security/securityFetch.js';
  * mark. Every mark is an absolute target state (a retry or a late arrival cannot drift). A mark is shown at once (an override)
  * until its own last request settles; a failure rolls back only that row to the last state the server confirmed and calls
  * `onFail(key, status)`. A second tap on a row whose request is still waiting just replaces the waiting target; a tap on a row
- * whose request is in flight queues one more absolute state behind it.
+ * whose request is in flight queues one more absolute state behind it. A reset (any non-mark job) is a barrier: a tap made after
+ * it is never merged into a mark that waits before it, so it cannot be wiped by the reset.
  *
  * Keys: `i:{ingredientId}`, `s:{stepId}`, `fav`. initial = { tickedIngredientIds, doneStepIds, favourite }.
  * `request` is the JSON sender (securityFetch: { ok, status }); it is injectable for tests.
@@ -21,6 +22,7 @@ export function useRecipeState({ recipeId, initial = {}, onFail = () => {}, requ
     const queue = [];
     const waiting = [];
     let running = false;
+    let pendingResync = null;
 
     for (const id of initial.tickedIngredientIds ?? []) base[`i:${id}`] = true;
     for (const id of initial.doneStepIds ?? []) base[`s:${id}`] = true;
@@ -42,7 +44,32 @@ export function useRecipeState({ recipeId, initial = {}, onFail = () => {}, requ
 
     function release() {
         if (queue.length > 0 || running) return;
+        if (pendingResync) {
+            const next = pendingResync;
+            pendingResync = null;
+            seed(next);
+        }
         waiting.splice(0).forEach((resolve) => resolve());
+    }
+
+    function seed(next) {
+        for (const key of Object.keys(base)) delete base[key];
+        for (const id of next.tickedIngredientIds ?? []) base[`i:${id}`] = true;
+        for (const id of next.doneStepIds ?? []) base[`s:${id}`] = true;
+        base.fav = next.favourite === true;
+    }
+
+    /**
+     * Replaces the confirmed state with fresh server state (after a 403/409 reload). Applied at once when nothing is queued,
+     * otherwise as soon as the queue is idle, so a tap in flight is never overwritten by an older snapshot.
+     */
+    function resync(next) {
+        if (queue.length > 0 || running) {
+            pendingResync = next;
+
+            return;
+        }
+        seed(next);
     }
 
     async function pump() {
@@ -75,7 +102,16 @@ export function useRecipeState({ recipeId, initial = {}, onFail = () => {}, requ
     /** Show and queue an absolute state for a row (`i:{id}`, `s:{id}`, `fav`). */
     function mark(key, target) {
         overrides[key] = target;
-        const waitingJob = queue.find((j) => j.kind === 'mark' && j.key === key);
+        // Merge only into a waiting mark that sits AFTER the last non-mark job (a reset): searching from the end and
+        // stopping at the first send job keeps a tap made after a reset behind that reset.
+        let waitingJob = null;
+        for (let i = queue.length - 1; i >= 0; i--) {
+            if (queue[i].kind !== 'mark') break;
+            if (queue[i].key === key) {
+                waitingJob = queue[i];
+                break;
+            }
+        }
         if (waitingJob) {
             waitingJob.target = target;
             waitingJob.body = describe(key, target).body;
@@ -112,5 +148,5 @@ export function useRecipeState({ recipeId, initial = {}, onFail = () => {}, requ
         return new Promise((resolve) => { waiting.push(resolve); });
     }
 
-    return { state, mark, send, reset, busy, drained, overrides };
+    return { state, mark, send, reset, resync, busy, drained, overrides };
 }
