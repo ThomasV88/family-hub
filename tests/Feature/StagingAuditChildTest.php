@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\WishlistManager;
 use Database\Seeders\StagingSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +15,16 @@ afterEach(function () {
     app()['env'] = $this->originalEnv;
 });
 
+// A synthetic child carries the demo suffix and is managed only by synthetic (example.test) members.
+function demoChild(string $name = 'Dieťa (demo)', ?User $manager = null): User
+{
+    $child = User::factory()->child()->create(['name' => $name]);
+    $manager ??= User::factory()->create(['email' => 'demo.parent.'.$child->id.'@example.test']);
+    WishlistManager::factory()->create(['owner_id' => $child->id, 'manager_id' => $manager->id]);
+
+    return $child;
+}
+
 it('fails on a real child (no e-mail, no demo suffix)', function () {
     User::factory()->child()->create(['name' => 'Real Kid']);
 
@@ -21,13 +32,13 @@ it('fails on a real child (no e-mail, no demo suffix)', function () {
 });
 
 it('passes for a demo child', function () {
-    User::factory()->child()->create(['name' => 'Dieťa (demo)']);
+    demoChild();
 
     $this->artisan('staging:audit')->assertExitCode(0);
 });
 
 it('fails on a real child photo and passes on a synthetic child photo', function () {
-    $demo = User::factory()->child()->create(['name' => 'Dieťa (demo)']);
+    $demo = demoChild();
     $demo->forceFill(['photo_path' => 'wish-images/profile-photos/x.jpg'])->save();
     $this->artisan('staging:audit')->assertExitCode(0);
 
@@ -48,7 +59,7 @@ it('treats audit rows of a real child as real data', function () {
 it('purges synthetic children and their photo folders on reseed but never a real child', function () {
     Storage::fake('local');
     Storage::fake('medical');
-    $demo = User::factory()->child()->create(['name' => 'Dieťa (demo)']);
+    $demo = demoChild();
     $real = User::factory()->child()->create(['name' => 'Real Kid']);
     Storage::disk('local')->put("wish-images/profile-photos/{$demo->id}/photo.jpg", 'x');
     Storage::disk('local')->put("wish-images/profile-photos/{$real->id}/photo.jpg", 'x');
@@ -68,5 +79,28 @@ it('passes on the seeded data including its child and fails once a real child is
     $this->artisan('staging:audit')->assertExitCode(0);
 
     User::factory()->child()->create(['name' => 'Real Kid']);
+    $this->artisan('staging:audit')->expectsOutputToContain('non-synthetic users')->assertExitCode(1);
+});
+
+it('does not trust the name suffix: a real child named like a demo child is flagged and never purged', function () {
+    Storage::fake('local');
+    Storage::fake('medical');
+    $realParent = User::factory()->create(['email' => 'mama@gmail.example']);
+    $lookalike = demoChild('Anna (demo)', $realParent);
+    $unmanaged = User::factory()->child()->create(['name' => 'Bruno (demo)']);
+    Storage::disk('local')->put("wish-images/profile-photos/{$lookalike->id}/photo.jpg", 'x');
+
+    $this->artisan('staging:audit')->expectsOutputToContain('non-synthetic users')->assertExitCode(1);
+
+    (new StagingSeeder)->run();
+
+    expect(User::find($lookalike->id))->not->toBeNull()->and(User::find($unmanaged->id))->not->toBeNull();
+    Storage::disk('local')->assertExists("wish-images/profile-photos/{$lookalike->id}/photo.jpg");
+});
+
+it('treats a child with one synthetic and one real manager as real', function () {
+    $child = demoChild('Clara (demo)');
+    WishlistManager::factory()->create(['owner_id' => $child->id, 'manager_id' => User::factory()->create(['email' => 'real@gmail.example'])->id]);
+
     $this->artisan('staging:audit')->expectsOutputToContain('non-synthetic users')->assertExitCode(1);
 });

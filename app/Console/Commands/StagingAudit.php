@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\SyntheticChild;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -20,7 +21,8 @@ class StagingAudit extends Command
     protected function rules(): array
     {
         // A child has no e-mail (NULL), so NOT LIKE would be NULL and silently pass: the synthetic marker is explicit.
-        $synthetic = "(select id from users where email like '%@example.test' or (email is null and name like '% (demo)'))";
+        // The name suffix is user-editable text, so a child is only synthetic when all its managers are synthetic too.
+        $synthetic = "(select c.id from users c where c.email like '%@example.test' or ".SyntheticChild::condition('c').')';
         // Phase 5: staging must never hold real finance data. Rows created by a deleted (null) or non-synthetic user fail.
         // Null stays flagged: StagingSeeder deletes the rows of the synthetic users before it deletes them, so a null
         // creator can only be a real user who was deleted (real data) and never a reseeded synthetic one.

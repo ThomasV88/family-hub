@@ -11,6 +11,7 @@ use App\Audit\AuditLogger;
 use App\Medical\Documents\MedicalDocumentStore;
 use App\Models\User;
 use App\Profile\ProfilePhotoStore;
+use App\Support\SyntheticChild;
 use App\Wishlist\Catalog\ImageProcessor;
 use App\Wishlist\WishlistManagerSync;
 use Database\Seeders\Staging\AiProposalsSeeder;
@@ -49,12 +50,14 @@ class StagingSeeder extends Seeder
         $this->summary = [];
 
         DB::transaction(function () {
-            // Synthetic = example.test e-mail, or a child (no e-mail) with the demo suffix. Never a real child.
-            $synthetic = fn () => User::query()->where(fn ($q) => $q->where('email', 'like', '%@example.test')
-                ->orWhere(fn ($c) => $c->whereNull('email')->where('name', 'like', '% (demo)')));
-            $ids = $synthetic()->pluck('id')->all();
+            // Synthetic = example.test e-mail, or a child (no e-mail) with the demo suffix whose managers are all
+            // synthetic (the suffix alone is free text, see SyntheticChild). Never a real child. The ids are taken
+            // first and deleted by id, because deleteSyntheticOwnedRows removes the manager rows the rule reads.
+            $ids = User::query()->from('users as c')
+                ->whereRaw("(c.email like '%@example.test' or ".SyntheticChild::condition('c').')')
+                ->pluck('c.id')->all();
             $this->deleteSyntheticOwnedRows($ids);
-            $synthetic()->delete();
+            User::query()->whereIn('id', $ids)->delete();
             if ($ids !== []) {
                 DB::afterCommit(function () use ($ids) {
                     foreach ($ids as $id) {
