@@ -30,13 +30,14 @@ const form = useForm({ photo: null });
 const input = ref(null);
 const preview = ref(null);
 const confirming = ref(false);
+const removeError = ref('');
 const hintId = `photo-hint-${props.userId}`;
 
 const hasPhoto = computed(() => (props.deferred ? preview.value !== null : props.photoVersion !== null && props.photoVersion !== undefined));
 const size = computed(() => (props.compact ? 40 : 96));
 const src = computed(() => preview.value ?? (hasPhoto.value ? `/people/${props.userId}/photo/${props.compact ? 'thumb' : 'full'}?v=${props.photoVersion}` : null));
 const error = computed(() => {
-    const key = form.errors?.photo || props.externalError;
+    const key = form.errors?.photo || props.externalError || removeError.value;
     if (!key) return '';
 
     return String(key).startsWith('profile.') ? t(key) : String(key);
@@ -58,6 +59,7 @@ function onFile(event) {
     revokePreview();
     preview.value = URL.createObjectURL(file);
     form.clearErrors?.();
+    removeError.value = '';
     if (props.deferred) {
         emit('select', file);
         return;
@@ -81,7 +83,16 @@ function remove() {
         emit('clear');
         return;
     }
-    router.delete(`/people/${props.userId}/photo`, { preserveScroll: true });
+    removeError.value = '';
+    const failed = () => { removeError.value = 'profile.photo.err_write'; };
+    router.delete(`/people/${props.userId}/photo`, {
+        preserveScroll: true,
+        // A refused or failed removal (validation, 403/404/5xx or no network) must not look like nothing happened
+        // while the photo is still shown.
+        onError: failed,
+        onHttpException: failed,
+        onNetworkError: failed,
+    });
 }
 </script>
 

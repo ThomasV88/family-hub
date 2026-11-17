@@ -120,6 +120,18 @@ describe('ProfilePhotoEditor', () => {
         expect(del).toHaveBeenCalledWith('/people/4/photo', expect.objectContaining({ preserveScroll: true }));
     });
 
+    it.each(['onError', 'onHttpException', 'onNetworkError'])('shows an error when the removal fails (%s)', async (callback) => {
+        mountEditor({ photoVersion: 1 });
+        await wrapper.findAll('button')[1].trigger('click');
+        [...document.body.querySelectorAll('[role=dialog] button')].find((b) => b.textContent.trim() === 'Remove photo').click();
+        await flushPromises();
+        expect(wrapper.find('[data-testid=photo-error]').exists()).toBe(false);
+
+        del.mock.calls.at(-1)[1][callback]();
+        await flushPromises();
+        expect(wrapper.find('[data-testid=photo-error]').text()).toBe(loadMessages('en').profile.photo.err_write);
+    });
+
     it('keeps the photo when removal is declined', async () => {
         mountEditor({ photoVersion: 1 });
         await wrapper.findAll('button')[1].trigger('click');
