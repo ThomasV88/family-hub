@@ -395,6 +395,26 @@ const searchStates = {
     'Recognised text load failed': textState(null, '[data-testid="rtext-load-failed"]'),
 };
 Object.assign(states, searchStates);
+// 13-10: run states with saved text, the notice dialog text variants and the consent turn-off confirmation with the purge sentence.
+const TEXT_AI = { ...AI_RUN, noticeAcknowledged: true, textNotice: true };
+const textRun = (name, status, extra, target, ai = TEXT_AI) => [name, { ...runState({ [D1.id]: aiStatus(status, extra) }, { ai, target }), ai: true }];
+const phase13States = Object.fromEntries([
+    textRun('AI run text saved', 'text_saved', { mode: 'text', textSaved: true, pagesRead: 4, pagesTotal: 9 }, '[data-testid="ai-detail"]'),
+    textRun('AI run running with text saved', 'running', { textSaved: true }, '[data-testid="ai-detail"]'),
+    textRun('AI run waiting with text saved', 'waiting', { textSaved: true, availableAt: new Date(Date.now() + 3 * 3600 * 1000).toISOString() }, '[data-testid="ai-detail-text"]'),
+    textRun('AI run failed with text saved', 'failed', { textSaved: true }, '[data-testid="ai-detail-text"]'),
+    ['AI run text provider line', { ...runState({}, { ai: { ...TEXT_AI, providers: ['codex', 'copilot'] }, target: '[data-testid="ai-sends"]' }), ai: true }],
+    ['AI run text notice dialog', { ...runState({}, { ai: { ...AI_RUN, textNotice: true }, target: '[role="dialog"]', after: async () => { await click('[data-testid="ai-run"]'); } }), ai: true }],
+    ['AI notice dialog text variant', { component: AiNoticeDialog, props: () => ({ open: true, text: true }), target: '[data-testid="ai-notice-confirm"]', ai: true }],
+    ['AI notice dialog text variant multi', { component: AiNoticeDialog, props: () => ({ open: true, text: true, variant: 'multi' }), target: '[data-testid="ai-notice-confirm"]', ai: true }],
+    ['AI notice dialog text variant github', { component: AiNoticeDialog, props: () => ({ open: true, text: true, variant: 'github' }), target: '[data-testid="ai-notice-confirm"]', ai: true }],
+    ['AI consent turn-off confirmation with the purge sentence', {
+        component: AiConsentControl, props: () => ({ personId: ID, value: true, canEdit: true, purgesText: true }), target: '[data-testid="ai-off-purge"]',
+        after: async () => { await click('[data-testid="ai-switch"]'); }, ai: true,
+    }],
+]);
+Object.assign(states, phase13States);
+
 
 let current;
 afterEach(() => {

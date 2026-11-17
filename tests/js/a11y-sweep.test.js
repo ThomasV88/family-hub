@@ -7,6 +7,12 @@ import { mount } from '@vue/test-utils';
 import { createAppI18n } from '../../resources/js/i18n.js';
 
 let mockLocale = 'en';
+// Only the bulk panel sweep below sets a handler; every other page keeps the real securityFetch.
+const { bulkFetch } = vi.hoisted(() => ({ bulkFetch: { handler: null } }));
+vi.mock('../../resources/js/Security/securityFetch.js', async (importOriginal) => {
+    const actual = await importOriginal();
+    return { ...actual, securityFetch: (...args) => (bulkFetch.handler ? bulkFetch.handler(...args) : actual.securityFetch(...args)) };
+});
 vi.mock('@inertiajs/vue3', async () => {
     const { h, reactive } = await import('vue');
     return {
@@ -42,6 +48,7 @@ import RecipesShow from '../../resources/js/Pages/Recipes/Show.vue';
 import RecipesForm from '../../resources/js/Pages/Recipes/Form.vue';
 import { helpAreas, helpRows } from './helpers/help.js';
 import AppShell from '../../resources/js/Layouts/AppShell.vue';
+import BulkRegenPanel from '../../resources/js/Settings/AiAgents/BulkRegenPanel.vue';
 
 let wrapper;
 window.matchMedia = (q) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
@@ -282,6 +289,46 @@ describe('accessibility sweep', () => {
             slots: { default: '<h1>Title</h1>' },
             global: { plugins: [createAppI18n('en', pseudoLong(loadMessages('en')))] },
         });
+        await expectNoAxeViolations(wrapper.element);
+    });
+});
+
+// 13-10: the bulk panel with the "documents without recognised text" scope selected and its dry-run result (counts only).
+describe('accessibility sweep: AI bulk panel, scope no_text', () => {
+    const panelProps = {
+        bulk: { active: null, history: [], ocrEnabled: true, textNoticeAcknowledged: true },
+        bulkConfig: { defaultCap: 20, maxCap: 30, startHour: 2, timezone: 'Europe/Bratislava', validMinutes: 15 },
+        providers: ['codex'], agents: [{ key: 'codex', enabled: true, position: 1, health: { state: 'logged_in' } }],
+    };
+    const dry = { ok: true, status: 200, data: { token: '11111111-1111-4111-8111-111111111111', checkedAt: '2026-11-14T10:00:00+00:00', validMinutes: 15, counts: { eligible: 18, skipped_consent: 2, skipped_unsupported: 3, skipped_decided: 0, skipped_active: 1 } } };
+    afterEach(() => { bulkFetch.handler = null; });
+
+    const cases = [];
+    for (const locale of ['en', 'sk', 'pl']) for (const theme of ['light', 'dark']) for (const width of [390, 1280]) cases.push([locale, theme, width]);
+
+    it.each(cases)('is accessible after the check in %s, %s theme, %ipx', async (locale, theme, width) => {
+        mockLocale = locale;
+        document.documentElement.dataset.theme = theme;
+        window.innerWidth = width;
+        bulkFetch.handler = vi.fn(async () => dry);
+        wrapper = mountUi(BulkRegenPanel, { locale, props: panelProps });
+        await flushPromises();
+        await wrapper.find('[role="radio"][data-scope="no_text"]').trigger('click');
+        await wrapper.find('[data-control="check"]').trigger('click');
+        await flushPromises();
+        if (!wrapper.find('[data-testid="bulk-no-text-note"]').exists()) throw new Error('the dry-run result with the no_text note was not reached');
+        await expectNoAxeViolations(wrapper.element);
+    });
+
+    it.each(['sk', 'pl'])('is accessible after the check with +40% text at 360px in %s', async (locale) => {
+        mockLocale = locale;
+        window.innerWidth = 360;
+        bulkFetch.handler = vi.fn(async () => dry);
+        wrapper = mount(BulkRegenPanel, { props: panelProps, attachTo: document.body, global: { plugins: [createAppI18n(locale, pseudoLong(loadMessages(locale)))] } });
+        await flushPromises();
+        await wrapper.find('[role="radio"][data-scope="no_text"]').trigger('click');
+        await wrapper.find('[data-control="check"]').trigger('click');
+        await flushPromises();
         await expectNoAxeViolations(wrapper.element);
     });
 });

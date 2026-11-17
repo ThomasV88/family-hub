@@ -2368,7 +2368,7 @@
                 "text_saved_detail": "The text is saved and searchable. No suggestions were made. Press Run AI to get suggestions.",
                 "text_saved_preparing": "The text is saved. AI is now preparing suggestions from it.",
                 "waiting_text_saved": "The text is already saved.",
-                "failed_text_saved": "The recognised text was saved.",
+                "failed_text_saved": "Only the suggestions are missing: the recognised text was saved and can be searched.",
                 "announce_text_saved": "The text of the document is saved."
             },
             "review": {

@@ -138,3 +138,71 @@ describe('phase 13 sources (13-05)', () => {
         }
     });
 });
+
+// Phase 13 final parity (13-10): the keys of 13-08 and 13-09 and the help and manual files they touched.
+describe('phase 13 final parity: notice, run states, consent sentence, bulk no_text (13-08, 13-09)', () => {
+    const KEYS = [
+        'health.ai.run.notice_text_body', 'health.ai.run.provider_text_codex', 'health.ai.run.provider_text_both', 'health.ai.run.provider_text_copilot',
+        'health.ai.notice.multi_text_body', 'health.ai.notice.github_text_body',
+        'health.ai.status.text_saved', 'health.ai.status.text_saved_detail', 'health.ai.status.text_saved_preparing',
+        'health.ai.status.waiting_text_saved', 'health.ai.status.failed_text_saved', 'health.ai.status.announce_text_saved',
+        'health.ai.off_title', 'health.ai.off_text_purge', 'health.ai.off_confirm', 'health.ai.off_keep',
+        'settings.ai_bulk.scope_no_text', 'settings.ai_bulk.scope_no_text_hint', 'settings.ai_bulk.no_text_note',
+        'settings.ai_bulk.zero_eligible_no_text', 'settings.ai_bulk.history_text_only',
+        'audit.detail.medical_text_removed',
+    ];
+
+    it('every key exists and is non-empty in en, sk and pl, with the same placeholders', () => {
+        for (const key of KEYS) {
+            const base = placeholders(get(lang.en, key) ?? '');
+            for (const locale of LOCALES) {
+                const v = get(lang[locale], key);
+                expect({ locale, key, ok: typeof v === 'string' && v.trim() !== '' }).toEqual({ locale, key, ok: true });
+                expect({ locale, key, p: placeholders(v) }).toEqual({ locale, key, p: base });
+            }
+        }
+    });
+
+    it('sk and pl are not left in English', () => {
+        for (const key of KEYS) {
+            for (const locale of ['sk', 'pl']) expect({ locale, key, same: get(lang[locale], key) === get(lang.en, key) }).toEqual({ locale, key, same: false });
+        }
+    });
+
+    it('has no ICU plural strings among them (so no plural form count to check)', () => {
+        for (const key of KEYS) expect({ key, plural: get(lang.en, key).includes(' | ') }).toEqual({ key, plural: false });
+    });
+
+    it('keeps the failed run line consistent: the text line says only the suggestions are missing', () => {
+        expect(get(lang.en, 'health.ai.status.failed_text_saved')).toContain('Only the suggestions are missing');
+    });
+});
+
+describe('phase 13 final parity: help and manual (13-05, 13-08, 13-09)', () => {
+    const topics = read('resources/help/topics.json').topics;
+    const files = Object.fromEntries(LOCALES.map((l) => [l, read(`resources/help/${l}.json`)]));
+
+    it('registers and writes in every language the four Phase 13 help topics, each at most 400 characters', () => {
+        for (const key of ['health.search', 'health.document_text', 'health.ai_run', 'settings.ai_bulk']) {
+            expect(topics.find((t) => t.key === key), key).toBeTruthy();
+            for (const locale of LOCALES) {
+                const entry = files[locale].topics[key];
+                expect({ locale, key, ok: !!entry && entry.title.trim() !== '' && entry.text.trim() !== '' && [...entry.text].length <= 400 }).toEqual({ locale, key, ok: true });
+            }
+        }
+    });
+
+    it('keeps identical section ids in the same order in health.json and admin.json in en, sk and pl', () => {
+        for (const file of ['health', 'admin']) {
+            const ids = (l) => read(`resources/manual/${l}/${file}.json`).sections.map((s) => s.id);
+            for (const locale of ['sk', 'pl']) expect({ file, locale, ids: ids(locale) }).toEqual({ file, locale, ids: ids('en') });
+        }
+    });
+
+    it('keeps the same block shapes in the touched admin sections (backups, ai-agents) and the health ai section', () => {
+        const shape = (l, file, id) => read(`resources/manual/${l}/${file}.json`).sections.find((s) => s.id === id).blocks.map((b) => `${b.type}${b.items ? b.items.length : ''}`).join(',');
+        for (const [file, id] of [['admin', 'backups'], ['admin', 'ai-agents'], ['health', 'ai'], ['health', 'recognised-text']]) {
+            expect(new Set(LOCALES.map((l) => shape(l, file, id))).size, `${file}/${id}`).toBe(1);
+        }
+    });
+});

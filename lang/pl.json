@@ -2368,7 +2368,7 @@
                 "text_saved_detail": "Tekst jest zapisany i można w nim szukać. Nie utworzono sugestii. Aby je dostać, naciśnij Uruchom AI.",
                 "text_saved_preparing": "Tekst jest zapisany. AI przygotowuje teraz na jego podstawie sugestie.",
                 "waiting_text_saved": "Tekst jest już zapisany.",
-                "failed_text_saved": "Rozpoznany tekst został zapisany.",
+                "failed_text_saved": "Brakuje tylko propozycji: rozpoznany tekst został zapisany i można w nim wyszukiwać.",
                 "announce_text_saved": "Tekst dokumentu został zapisany."
             },
             "review": {

@@ -646,7 +646,7 @@ describe('two-step reading: text notice, provider lines and run states (13-09)',
         wrapper.unmount();
         mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'failed', textSaved: true, readyExtractionId: null }) } });
         expect(detail()).toContain('AI could not read this document');
-        expect(extra()).toBe('The recognised text was saved.');
+        expect(extra()).toBe('Only the suggestions are missing: the recognised text was saved and can be searched.');
         wrapper.unmount();
         mountControl({ ai: TEXT_AI, statuses: { [DOC.id]: entry({ status: 'failed', textSaved: false, readyExtractionId: null }) } });
         expect(extra()).toBeUndefined();

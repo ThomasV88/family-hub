@@ -2368,7 +2368,7 @@
                 "text_saved_detail": "Text je uložený a dá sa v ňom hľadať. Návrhy sa nevytvorili. Pre návrhy stlačte Spustiť AI.",
                 "text_saved_preparing": "Text je uložený. AI z neho teraz pripravuje návrhy.",
                 "waiting_text_saved": "Text je už uložený.",
-                "failed_text_saved": "Rozpoznaný text sa uložil.",
+                "failed_text_saved": "Chýbajú len návrhy: rozpoznaný text sa uložil a dá sa v ňom hľadať.",
                 "announce_text_saved": "Text dokumentu je uložený."
             },
             "review": {
