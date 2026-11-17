@@ -2672,7 +2672,13 @@
             "unit_unknown": "That unit no longer exists. Reload the page and try again.",
             "store_unknown": "That store no longer exists. Reload the page and try again.",
             "responsible_not_eligible": "That person cannot be responsible for a list.",
-            "copy_invalid": "Choose whether to keep the store, responsible person and access."
+            "copy_invalid": "Choose whether to keep the store, responsible person and access.",
+            "quantity": "Enter a quantity greater than 0.",
+            "save_failed": "Your changes were not saved. Check the highlighted fields and try again.",
+            "forbidden": "You are not allowed to do that on this list.",
+            "note_too_long": "The note is too long.",
+            "items_count": "Choose between 1 and 50 items.",
+            "catalog_unknown": "That catalog item no longer exists. Reload the page and try again."
         },
         "overview": {
             "title": "Shopping",
@@ -2731,7 +2737,49 @@
         },
         "toast": {
             "list_created": "List created",
-            "copied": "List copied"
+            "copied": "List copied",
+            "items_added": "{count} item added | {count} items added",
+            "quantity_updated": "Quantity of {name} updated",
+            "item_saved": "Item saved",
+            "item_removed": "Item removed",
+            "list_deleted": "List deleted"
+        },
+        "detail": {
+            "add_items": "Add items",
+            "more": "More actions",
+            "delete_list": "Delete list",
+            "reminder": "Reminder: {date}",
+            "empty_title": "This list is empty",
+            "empty_body": "Add items from the catalog or type your own.",
+            "items_label": "Items on the list",
+            "archived": "This shopping is finished. You can copy it into a new list.",
+            "locked_note": "This list is locked. Items cannot be changed.",
+            "state_bought": "Bought",
+            "state_unavailable": "Unavailable",
+            "edit_item": "Edit {name}",
+            "store": "Store: {name}"
+        },
+        "item": {
+            "edit_title": "Edit item",
+            "name": "Name",
+            "quantity": "Quantity",
+            "unit": "Unit",
+            "unit_none": "No unit",
+            "note": "Note",
+            "not_in_catalog": "Not in catalog",
+            "save": "Save item",
+            "cancel": "Cancel",
+            "remove": "Remove item",
+            "remove_title": "Remove {name} from this list?",
+            "remove_body": "The item is removed for everyone who can see the list.",
+            "remove_confirm": "Remove item",
+            "remove_cancel": "Keep item"
+        },
+        "delete": {
+            "title": "Delete “{name}”?",
+            "body": "The list and its items will be deleted for everyone. This cannot be undone.",
+            "confirm": "Delete list",
+            "cancel": "Keep list"
         }
     }
 }

@@ -15,11 +15,12 @@ class ItemController extends Controller
     {
         $result = $service->add($request->user(), $list, $request->validated()['items']);
 
-        return back(303)->with('toast', [
-            'key' => 'shopping.toast.items_added',
-            'params' => ['count' => $result['added'], 'merged' => implode(', ', $result['merged'])],
-            'merged' => $result['merged'],
-        ]);
+        // Only raised quantities: say so by name. Otherwise count the new rows (`count` selects the plural form in the UI).
+        $toast = $result['added'] === 0 && $result['merged'] !== []
+            ? ['key' => 'shopping.toast.quantity_updated', 'params' => ['name' => implode(', ', $result['merged'])]]
+            : ['key' => 'shopping.toast.items_added', 'params' => ['count' => $result['added'], 'merged' => implode(', ', $result['merged'])], 'count' => $result['added']];
+
+        return back(303)->with('toast', $toast + ['merged' => $result['merged']]);
     }
 
     public function update(UpdateItemRequest $request, int $list, int $item, ItemService $service): RedirectResponse

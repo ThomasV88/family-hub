@@ -2672,7 +2672,13 @@
             "unit_unknown": "Táto jednotka už neexistuje. Obnovte stránku a skúste to znova.",
             "store_unknown": "Tento obchod už neexistuje. Obnovte stránku a skúste to znova.",
             "responsible_not_eligible": "Táto osoba nemôže byť zodpovedná za zoznam.",
-            "copy_invalid": "Vyberte, či sa majú zachovať obchod, zodpovedná osoba a prístup."
+            "copy_invalid": "Vyberte, či sa majú zachovať obchod, zodpovedná osoba a prístup.",
+            "quantity": "Zadajte množstvo väčšie ako 0.",
+            "save_failed": "Zmeny sa neuložili. Skontrolujte zvýraznené polia a skúste to znova.",
+            "forbidden": "Na tomto zozname to nemôžete urobiť.",
+            "note_too_long": "Poznámka je príliš dlhá.",
+            "items_count": "Vyberte od 1 do 50 položiek.",
+            "catalog_unknown": "Táto položka katalógu už neexistuje. Obnovte stránku a skúste to znova."
         },
         "overview": {
             "title": "Nákupy",
@@ -2731,7 +2737,49 @@
         },
         "toast": {
             "list_created": "Zoznam bol vytvorený",
-            "copied": "Zoznam bol skopírovaný"
+            "copied": "Zoznam bol skopírovaný",
+            "items_added": "Pridaná {count} položka | Pridané {count} položky | Pridaných {count} položiek",
+            "quantity_updated": "Množstvo položky {name} zmenené",
+            "item_saved": "Položka uložená",
+            "item_removed": "Položka odstránená",
+            "list_deleted": "Zoznam odstránený"
+        },
+        "detail": {
+            "add_items": "Pridať položky",
+            "more": "Ďalšie akcie",
+            "delete_list": "Odstrániť zoznam",
+            "reminder": "Pripomienka: {date}",
+            "empty_title": "Tento zoznam je prázdny",
+            "empty_body": "Pridajte položky z katalógu alebo zadajte vlastné.",
+            "items_label": "Položky v zozname",
+            "archived": "Tento nákup je vybavený. Môžete ho skopírovať do nového zoznamu.",
+            "locked_note": "Tento zoznam je uzamknutý. Položky sa nedajú meniť.",
+            "state_bought": "Zakúpené",
+            "state_unavailable": "Nedostupné",
+            "edit_item": "Upraviť {name}",
+            "store": "Obchod: {name}"
+        },
+        "item": {
+            "edit_title": "Upraviť položku",
+            "name": "Názov",
+            "quantity": "Množstvo",
+            "unit": "Jednotka",
+            "unit_none": "Bez jednotky",
+            "note": "Poznámka",
+            "not_in_catalog": "Nie je v katalógu",
+            "save": "Uložiť položku",
+            "cancel": "Zrušiť",
+            "remove": "Odstrániť položku",
+            "remove_title": "Odstrániť položku {name} z tohto zoznamu?",
+            "remove_body": "Položka sa odstráni pre všetkých, ktorí zoznam vidia.",
+            "remove_confirm": "Odstrániť položku",
+            "remove_cancel": "Ponechať položku"
+        },
+        "delete": {
+            "title": "Odstrániť zoznam „{name}“?",
+            "body": "Zoznam a jeho položky sa odstránia pre všetkých. Nedá sa to vrátiť.",
+            "confirm": "Odstrániť zoznam",
+            "cancel": "Ponechať zoznam"
         }
     }
 }

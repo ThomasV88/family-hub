@@ -2672,7 +2672,13 @@
             "unit_unknown": "Ta jednostka już nie istnieje. Odśwież stronę i spróbuj ponownie.",
             "store_unknown": "Ten sklep już nie istnieje. Odśwież stronę i spróbuj ponownie.",
             "responsible_not_eligible": "Ta osoba nie może odpowiadać za listę.",
-            "copy_invalid": "Wybierz, czy zachować sklep, osobę odpowiedzialną i dostęp."
+            "copy_invalid": "Wybierz, czy zachować sklep, osobę odpowiedzialną i dostęp.",
+            "quantity": "Podaj ilość większą niż 0.",
+            "save_failed": "Zmiany nie zostały zapisane. Sprawdź zaznaczone pola i spróbuj ponownie.",
+            "forbidden": "Nie możesz tego zrobić na tej liście.",
+            "note_too_long": "Notatka jest zbyt długa.",
+            "items_count": "Wybierz od 1 do 50 produktów.",
+            "catalog_unknown": "Ten produkt z katalogu już nie istnieje. Odśwież stronę i spróbuj ponownie."
         },
         "overview": {
             "title": "Zakupy",
@@ -2731,7 +2737,49 @@
         },
         "toast": {
             "list_created": "Lista została utworzona",
-            "copied": "Lista została skopiowana"
+            "copied": "Lista została skopiowana",
+            "items_added": "Dodano {count} produkt | Dodano {count} produkty | Dodano {count} produktów",
+            "quantity_updated": "Zmieniono ilość produktu {name}",
+            "item_saved": "Produkt zapisany",
+            "item_removed": "Produkt usunięty",
+            "list_deleted": "Lista usunięta"
+        },
+        "detail": {
+            "add_items": "Dodaj produkty",
+            "more": "Więcej akcji",
+            "delete_list": "Usuń listę",
+            "reminder": "Przypomnienie: {date}",
+            "empty_title": "Ta lista jest pusta",
+            "empty_body": "Dodaj produkty z katalogu lub wpisz własne.",
+            "items_label": "Produkty na liście",
+            "archived": "Te zakupy są zakończone. Możesz skopiować je do nowej listy.",
+            "locked_note": "Ta lista jest zablokowana. Produktów nie można zmieniać.",
+            "state_bought": "Kupione",
+            "state_unavailable": "Niedostępne",
+            "edit_item": "Edytuj {name}",
+            "store": "Sklep: {name}"
+        },
+        "item": {
+            "edit_title": "Edytuj produkt",
+            "name": "Nazwa",
+            "quantity": "Ilość",
+            "unit": "Jednostka",
+            "unit_none": "Bez jednostki",
+            "note": "Notatka",
+            "not_in_catalog": "Spoza katalogu",
+            "save": "Zapisz produkt",
+            "cancel": "Anuluj",
+            "remove": "Usuń produkt",
+            "remove_title": "Usunąć {name} z tej listy?",
+            "remove_body": "Produkt zostanie usunięty dla wszystkich, którzy widzą listę.",
+            "remove_confirm": "Usuń produkt",
+            "remove_cancel": "Zachowaj produkt"
+        },
+        "delete": {
+            "title": "Usunąć listę „{name}”?",
+            "body": "Lista i jej produkty zostaną usunięte dla wszystkich. Tego nie można cofnąć.",
+            "confirm": "Usuń listę",
+            "cancel": "Zachowaj listę"
         }
     }
 }

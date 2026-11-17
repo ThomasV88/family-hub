@@ -92,7 +92,7 @@ it('builds the detail props for the responsible person', function () {
     PushSubscription::query()->create(['user_id' => $resp->id, 'endpoint' => 'https://push.example/x', 'endpoint_hash' => PushSubscription::hashEndpoint('https://push.example/x'), 'p256dh' => 'a', 'auth' => 'b']);
 
     $this->actingAs($resp)->get("/shopping/lists/{$list->id}")->assertOk()->assertInertia(fn (Assert $p) => $p
-        ->component('Shopping/Show', false)
+        ->component('Shopping/Show')
         ->where('list.id', $list->id)
         ->where('list.responsible.id', $resp->id)
         ->where('list.creator.id', $creator->id)

@@ -21,7 +21,7 @@ it('adds several items at once from the catalog and free text', function () {
     $this->actingAs($me)->post("/shopping/lists/{$list->id}/items", ['items' => [
         ['catalog_item_id' => $catalog->id, 'quantity' => '2'],
         ['name' => 'Soap', 'quantity' => '1,5', 'note' => 'blue', 'save_to_catalog' => true],
-    ]])->assertStatus(303)->assertSessionHas('toast.key', 'shopping.toast.items_added');
+    ]])->assertStatus(303)->assertSessionHas('toast.key', 'shopping.toast.items_added')->assertSessionHas('toast.count', 2);
 
     $items = ShoppingItem::query()->where('list_id', $list->id)->orderBy('position')->get();
     expect($items)->toHaveCount(2)
@@ -37,7 +37,7 @@ it('merges an already pending catalog item and reports it', function () {
     $payload = ['items' => [['catalog_item_id' => $catalog->id, 'quantity' => 1]]];
 
     $this->actingAs($me)->post("/shopping/lists/{$list->id}/items", $payload);
-    $this->actingAs($me)->post("/shopping/lists/{$list->id}/items", $payload)->assertSessionHas('toast.merged', ['Milk']);
+    $this->actingAs($me)->post("/shopping/lists/{$list->id}/items", $payload)->assertSessionHas('toast.merged', ['Milk'])->assertSessionHas('toast.key', 'shopping.toast.quantity_updated')->assertSessionHas('toast.params.name', 'Milk');
 
     expect(ShoppingItem::query()->where('list_id', $list->id)->count())->toBe(1)
         ->and((string) ShoppingItem::query()->where('list_id', $list->id)->value('quantity'))->toBe('2.00');
