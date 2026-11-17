@@ -41,7 +41,7 @@ provideField({ id: controlId, describedBy, invalid: computed(() => Boolean(props
         </label>
         <slot />
         <p v-if="hint" :id="hintId" class="ui-field__hint">{{ hint }}</p>
-        <p v-if="error" :id="errorId" class="ui-field__error">
+        <p v-if="error" :id="errorId" class="ui-field__error" aria-live="polite">
             <CircleAlert :size="16" :stroke-width="1.75" aria-hidden="true" />
             <span>{{ error }}</span>
         </p>

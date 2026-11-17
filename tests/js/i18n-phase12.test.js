@@ -13,11 +13,15 @@ function leaves(obj, prefix = '') {
 }
 
 // Later Phase 12 UI plans append their subtrees here.
-const SUBTREES = ['recipes.overview', 'recipes.card', 'recipes.filter', 'recipes.visibility', 'recipes.toast'];
+const SUBTREES = [
+    'recipes.overview', 'recipes.card', 'recipes.filter', 'recipes.visibility', 'recipes.toast',
+    // 12-08: form
+    'recipes.form', 'recipes.ingredient', 'recipes.step', 'recipes.category_starter', 'recipes.photos', 'recipes.image', 'recipes.error',
+];
 const KEYS = ['nav.recipes', 'module.recipes'];
 // Strings that are plural in en: the number of forms per locale (en 2, sk 4, pl 4).
 const FORMS = { en: 2, sk: 4, pl: 4 };
-const PLURALS = ['recipes.overview.loaded_more', 'recipes.card.servings'];
+const PLURALS = ['recipes.overview.loaded_more', 'recipes.card.servings', 'recipes.photos.some_failed'];
 
 describe('phase 12 locale parity (lang)', () => {
     for (const subtree of SUBTREES) {
@@ -63,6 +67,12 @@ describe('phase 12 locale parity (lang)', () => {
         for (const locale of LOCALES) {
             expect({ locale, forms: get(lang[locale], key).split(' | ').length }).toEqual({ locale, forms: FORMS[locale] });
         }
+    });
+
+    it('has a text for every starter category the server sends', () => {
+        const starter = readFileSync(`${root}/config/recipes.php`, 'utf8').match(/'starter_categories' => \[([^\]]*)\]/)[1].match(/'(\w+)'/g).map((k) => k.replaceAll("'", ''));
+        expect(starter.length).toBe(10);
+        for (const locale of LOCALES) for (const key of starter) expect({ locale, key, ok: Boolean(get(lang[locale], `recipes.category_starter.${key}`)) }).toEqual({ locale, key, ok: true });
     });
 
     it('has no top-level recipes key clash (the namespace is an object)', () => {

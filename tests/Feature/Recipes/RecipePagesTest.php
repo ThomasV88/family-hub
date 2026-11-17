@@ -105,10 +105,10 @@ it('gives the author edit abilities and the form props', function () {
     $this->actingAs($author)->get("/recipes/{$recipe->id}")->assertInertia(fn (Assert $p) => $p
         ->component('Recipes/Show', false)->where('abilities.edit', true)->where('abilities.changeVisibility', true));
     $this->actingAs($author)->get('/recipes/create')->assertOk()->assertInertia(fn (Assert $p) => $p
-        ->component('Recipes/Form', false)->where('recipe', null)->where('defaults.servings', 4)->where('defaults.visibility', 'private')
+        ->component('Recipes/Form')->where('recipe', null)->where('defaults.servings', 4)->where('defaults.visibility', 'private')
         ->has('starterCategories', 10)->has('units')->where('limits.titleMax', 120)->where('isShared', false));
     $this->actingAs($author)->get("/recipes/{$recipe->id}/edit")->assertOk()->assertInertia(fn (Assert $p) => $p
-        ->component('Recipes/Form', false)->where('recipe.id', $recipe->id)->where('isShared', true)->has('recipe.ingredients', 3));
+        ->component('Recipes/Form')->where('recipe.id', $recipe->id)->where('isShared', true)->has('recipe.ingredients', 3));
 });
 
 it('refuses the edit page to a visible non-author and hides a private recipe', function () {

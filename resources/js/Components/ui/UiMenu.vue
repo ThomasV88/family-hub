@@ -7,6 +7,9 @@ import UiButton from './UiButton.vue';
 const props = defineProps({
     label: { type: String, required: true },
     icon: { type: [Object, Function], default: null },
+    // Icon-only trigger: `label` is then only the accessible name (and the menu's name). Needs `icon`.
+    iconOnly: { type: Boolean, default: false },
+    triggerVariant: { type: String, default: 'secondary', validator: (v) => ['primary', 'secondary', 'ghost'].includes(v) },
     // { name, userId }: shown in the trigger instead of the icon (the icon stays the fallback).
     avatar: { type: Object, default: null },
     // { type: 'item', key, label, icon? } | { type: 'radio-group', key, label, value, options: [{ value, label }] }
@@ -89,8 +92,10 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick));
     <div ref="root" class="ui-menu">
         <UiButton
             ref="trigger"
-            variant="secondary"
+            :variant="triggerVariant"
             :icon="triggerIcon"
+            :icon-only="iconOnly && Boolean(triggerIcon)"
+            :label="iconOnly ? label : ''"
             aria-haspopup="menu"
             :aria-expanded="open ? 'true' : 'false'"
             :aria-controls="open ? `${uid}-menu` : undefined"
