@@ -239,3 +239,18 @@ it('keeps the extended AI status poll no-store and private while a run waits or 
         ->and($response->headers->get('ETag'))->toBeNull()
         ->and(collect($response->json('documents'))->pluck('status')->all())->toContain('waiting');
 });
+
+it('marks the document search answer, an empty answer and a validation error no-store and private', function () {
+    $ctx = MedicalPrivacy::scenario();
+    MedicalPrivacy::seedVisible($ctx);
+    MedicalPrivacy::seedHidden($ctx);
+
+    foreach (['match' => ['q' => 'paracetamol'], 'canary' => ['q' => MedicalPrivacy::CANARY], 'invalid' => ['q' => ''], 'malformed person' => ['q' => 'abc', 'person' => 'x']] as $label => $payload) {
+        app('auth')->forgetGuards();
+        $this->flushSession();
+        $response = $this->actingAs($ctx['viewer'])->postJson('/health/search', $payload);
+        $header = (string) $response->headers->get('Cache-Control');
+        expect(str_contains($header, 'no-store') && str_contains($header, 'private'))->toBeTrue("$label answered ".$response->getStatusCode()." with '$header'")
+            ->and($response->headers->get('ETag'))->toBeNull();
+    }
+});

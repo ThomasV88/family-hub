@@ -109,6 +109,15 @@ it('covers every record-id write route with hidden-vs-random parity and every he
         ->and(count($mutation))->toBeGreaterThanOrEqual(20);
 });
 
+it('keeps the read-only POST (the document search) out of the write checks and covers it with its own proof', function () {
+    $names = array_map(fn ($r) => $r->getName(), MedicalPrivacy::readPosts());
+    $writes = array_map(fn ($r) => $r->getName(), MedicalPrivacy::writes());
+
+    expect($names)->toBe(MedicalPrivacy::READ_ONLY_POSTS)->and($writes)->not->toContain('health.search')
+        ->and(EndpointMatrix::all())->toHaveKey('health.search')
+        ->and(array_key_exists('health.search', MedicalPrivacy::areas()['payloads']))->toBeTrue();
+});
+
 it('throws for a new health GET route with a parameter nobody provided', function () {
     $ctx = medLsScenario();
     Route::middleware(['web', 'access:module,health,view'])->get('/health/zz-unknown/{zzparam}', fn () => 'x')->name('health.zz_unknown');

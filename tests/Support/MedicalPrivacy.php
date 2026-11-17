@@ -169,13 +169,32 @@ class MedicalPrivacy
         return $out;
     }
 
-    /** @return list<LaravelRoute> every non-GET health route */
+    /**
+     * Health routes that use POST only to keep a query out of the URL: they read, so a view-only member may call them and
+     * they are not part of the write checks. Their hidden-versus-absent proof lives in DocumentSearchPrivacyTest.
+     */
+    public const READ_ONLY_POSTS = ['health.search'];
+
+    /** @return list<LaravelRoute> */
+    public static function readPosts(): array
+    {
+        $out = [];
+        foreach (Route::getRoutes() as $route) {
+            if (in_array($route->getName(), self::READ_ONLY_POSTS, true)) {
+                $out[] = $route;
+            }
+        }
+
+        return $out;
+    }
+
+    /** @return list<LaravelRoute> every non-GET health route that writes */
     public static function writes(): array
     {
         $out = [];
         foreach (Route::getRoutes() as $route) {
             $name = $route->getName();
-            if ($name !== null && self::isHealthName($name) && ! in_array('GET', $route->methods(), true)) {
+            if ($name !== null && self::isHealthName($name) && ! in_array('GET', $route->methods(), true) && ! in_array($name, self::READ_ONLY_POSTS, true)) {
                 $out[] = $route;
             }
         }

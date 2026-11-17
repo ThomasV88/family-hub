@@ -48,7 +48,7 @@ describe('props', function () {
         }
         expect($json)->not->toContain($attached->sha256)->not->toContain($loose->path)->not->toContain((string) $loose->thumb_path);
         $first = $response->viewData('page')['props']['documents'][0];
-        expect(array_keys($first))->toEqualCanonicalizing(['id', 'kind', 'title', 'visitId', 'uploadedOn', 'sizeBytes', 'permanentDelete']);
+        expect(array_keys($first))->toEqualCanonicalizing(['id', 'kind', 'title', 'visitId', 'uploadedOn', 'sizeBytes', 'permanentDelete', 'hasText']);
     });
 
     it('filters unattached documents into the timeline and keeps them out of specialty filters', function () {

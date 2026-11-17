@@ -7,6 +7,8 @@
  */
 const DOC_TEXT_ARCH_TABLE_ALLOWED = [
     'Medical/Queries/DocumentTextStore.php',
+    'Medical/Queries/DocumentTextQuery.php',
+    'Medical/Queries/DocumentSearchQuery.php',
     'Console/Commands/StagingAudit.php',
 ];
 
