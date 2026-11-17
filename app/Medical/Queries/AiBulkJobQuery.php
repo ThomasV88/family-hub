@@ -150,7 +150,7 @@ final class AiBulkJobQuery
         foreach ($items as $item) {
             $outcome = match (true) {
                 $item->ext_id === null => 'gone',
-                in_array($item->status, ['ready', 'superseded'], true) => 'read',
+                in_array($item->status, ['ready', 'superseded', 'text_saved'], true) => 'read',
                 $item->status === 'failed' => 'failed',
                 $item->status === 'cancelled' => $item->cancel_reason === 'decided' ? 'skipped' : 'cancelled',
                 default => null,

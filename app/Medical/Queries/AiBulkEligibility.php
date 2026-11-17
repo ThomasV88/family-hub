@@ -55,7 +55,7 @@ final class AiBulkEligibility
         if ($cooldown > 0) {
             $quota = "'".implode("','", self::QUOTA_FAILURES)."'";
             $coolSql = "AND NOT EXISTS (SELECT 1 FROM medical_ai_extractions c WHERE c.document_id = d.id AND c.finished_at > ?
-                          AND (c.status IN ('ready', 'superseded') OR (c.status = 'failed' AND c.failure_code IN ({$quota}))))";
+                          AND (c.status IN ('ready', 'superseded', 'text_saved') OR (c.status = 'failed' AND c.failure_code IN ({$quota}))))";
             $bindings[] = Carbon::now()->subMinutes($cooldown);
         }
 
@@ -96,7 +96,7 @@ final class AiBulkEligibility
     {
         return match ($scope) {
             'no_proposal' => "NOT EXISTS (SELECT 1 FROM medical_ai_extractions p WHERE p.document_id = d.id AND p.status IN ('ready', 'superseded'))",
-            'last_failed' => "(SELECT l.status FROM medical_ai_extractions l WHERE l.document_id = d.id AND l.status <> 'superseded' ORDER BY l.queued_at DESC, l.id DESC LIMIT 1) = 'failed'",
+            'last_failed' => "(SELECT l.status FROM medical_ai_extractions l WHERE l.document_id = d.id AND l.status <> 'superseded' AND l.mode <> 'text' ORDER BY l.queued_at DESC, l.id DESC LIMIT 1) = 'failed'",
             'all' => 'TRUE',
             default => throw new InvalidArgumentException('Unknown bulk scope.'),
         };

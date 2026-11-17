@@ -144,7 +144,21 @@ it('refuses to roll back while text exists and drops table and function when emp
 
 it('has the ocr config defaults', function () {
     expect(config('ai.ocr.enabled'))->toBeFalse()
-        ->and(config('ai.ocr.text_reliability'))->toBe('uncertain')
+        ->and(config('ai.ocr.text_reliability'))->toBe('reliable')
         ->and(config('ai.ocr.text_version'))->toBe(1)
         ->and(Str::of((string) config('ai.ocr.max_total_chars'))->toString())->toBe('200000');
+});
+
+it('accepts the real page count of a long document and refuses zero', function () {
+    $doc = docTextSchemaDoc();
+    DB::table('medical_document_texts')->insert(docTextSchemaRow($doc, 'x', ['pages_read' => 20, 'pages_total' => 120, 'complete' => false]));
+    expect((int) DB::table('medical_document_texts')->where('document_id', $doc->id)->value('pages_total'))->toBe(120);
+
+    $failed = false;
+    try {
+        DB::transaction(fn () => DB::table('medical_document_texts')->insert(docTextSchemaRow(docTextSchemaDoc(), 'x', ['pages_read' => 0, 'pages_total' => 0])));
+    } catch (QueryException) {
+        $failed = true;
+    }
+    expect($failed)->toBeTrue();
 });

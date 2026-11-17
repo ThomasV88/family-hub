@@ -3,12 +3,14 @@
 /**
  * Pins where the recognised document text may be named. The store is a Queries class (the repo's table-name and raw
  * database scans require it), so the list below holds paths relative to app/. Later plans extend it: 13-04 adds
- * DocumentSearchQuery and DocumentTextQuery, 13-06 the job side.
+ * DocumentSearchQuery and DocumentTextQuery, 13-06 the job side (AiJobQuery) and the status map (AiRunQuery).
  */
 const DOC_TEXT_ARCH_TABLE_ALLOWED = [
     'Medical/Queries/DocumentTextStore.php',
     'Medical/Queries/DocumentTextQuery.php',
     'Medical/Queries/DocumentSearchQuery.php',
+    'Medical/Queries/AiJobQuery.php',
+    'Medical/Queries/AiRunQuery.php',
     'Console/Commands/StagingAudit.php',
 ];
 
@@ -154,4 +156,30 @@ it('keeps the export code and the emergency card away from the text', function (
         ->and(docTextArchTableViolations($sources, []))->toBe([])
         ->and(docTextArchModelViolations($sources))->toBe([])
         ->and(docTextArchModelViolations(['Medical/Export/Exporter.php' => 'use App\Medical\Documents\Text\DocumentText;']))->toBe(['Medical/Export/Exporter.php']);
+});
+
+/**
+ * @param  array<string, string>  $sources
+ * @return list<string>
+ */
+function docTextArchPreprocessViolations(array $sources): array
+{
+    $allowed = ['Console/Commands/AiOcrEval.php'];
+    $bad = [];
+    foreach ($sources as $path => $src) {
+        if (in_array($path, $allowed, true) || str_starts_with($path, 'Medical/Ai/Eval/') || str_starts_with($path, 'Medical/Documents/Preprocess/')) {
+            continue;
+        }
+        if (str_contains($src, 'Preprocess\\')) {
+            $bad[] = $path;
+        }
+    }
+
+    return $bad;
+}
+
+it('keeps the pre-processing code out of everything but the evaluation', function () {
+    expect(docTextArchPreprocessViolations(docTextArchSources()))->toBe([])
+        ->and(docTextArchPreprocessViolations(['Medical/Ai/RunExtractionJob.php' => 'use App\\Medical\\Documents\\Preprocess\\DocumentPreprocessor;']))->toBe(['Medical/Ai/RunExtractionJob.php'])
+        ->and(docTextArchPreprocessViolations(['Medical/Ai/Eval/EvalRunner.php' => 'use App\\Medical\\Documents\\Preprocess\\DocumentPreprocessor;']))->toBe([]);
 });

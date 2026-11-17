@@ -138,6 +138,8 @@ class AiRunQuery
                         'subject_id' => $subjectId,
                         'document_id' => $documentId,
                         'status' => 'queued',
+                        // Behind the OCR switch a run reads the text first; with it off every run is the single call of before.
+                        'mode' => config('ai.ocr.enabled') ? 'full' : 'entries',
                         'agent' => $first->key(),
                         'model' => null,
                         'schema_version' => ExtractionSchema::SCHEMA_VERSION,
@@ -260,7 +262,12 @@ class AiRunQuery
                 ->where('status', '!=', 'superseded'),
             $viewer,
         )->orderByDesc('queued_at')->orderByDesc('id')
-            ->select(['id', 'document_id', 'status', 'cancel_reason', 'available_at', 'failure_code', 'agent', 'model', 'pages_read', 'pages_total', 'entry_count']);
+            ->select(['id', 'document_id', 'status', 'mode', 'cancel_reason', 'available_at', 'failure_code', 'agent', 'model', 'pages_read', 'pages_total', 'entry_count'])
+            // Whether this very run has saved text: a flag only, the text itself never leaves the text store.
+            ->selectSub(
+                DB::table('medical_document_texts')->selectRaw('1')->whereColumn('medical_document_texts.extraction_id', 'medical_ai_extractions.id')->limit(1),
+                'text_flag',
+            );
         if ($withCounts) {
             $query->selectSub(
                 DB::table('medical_ai_decisions')->selectRaw('count(*)')->whereColumn('medical_ai_decisions.extraction_id', 'medical_ai_extractions.id'),
@@ -269,12 +276,25 @@ class AiRunQuery
         }
         $rows = $query->get();
 
+        // A text-only run never hides a proposal: while the document has a ready run, text_saved rows are skipped.
+        $hasReady = [];
+        foreach ($rows as $row) {
+            if ($row->status === 'ready') {
+                $hasReady[(string) $row->document_id] = true;
+            }
+        }
+
         $map = [];
         foreach ($rows as $row) {
             $doc = (string) $row->document_id;
+            if (! isset($map[$doc]) && $row->status === 'text_saved' && isset($hasReady[$doc])) {
+                continue;
+            }
             if (! isset($map[$doc])) {
                 $map[$doc] = [
                     'status' => (string) $row->status,
+                    'mode' => (string) $row->mode,
+                    'textSaved' => $row->text_flag !== null,
                     'extractionId' => (string) $row->id,
                     'cancelReason' => $row->cancel_reason,
                     'pagesRead' => $row->pages_read === null ? null : (int) $row->pages_read,
@@ -327,7 +347,7 @@ class AiRunQuery
         return $cooldown > 0 && DB::table('medical_ai_extractions')
             ->where('document_id', $documentId)
             ->where('finished_at', '>', Carbon::now()->subMinutes($cooldown))
-            ->where(fn ($q) => $q->whereIn('status', ['ready', 'superseded'])
+            ->where(fn ($q) => $q->whereIn('status', ['ready', 'superseded', 'text_saved'])
                 // Only failures after the CLI really ran used quota; a lost worker, a bad file or a dispatch failure did not.
                 ->orWhere(fn ($f) => $f->where('status', 'failed')->whereIn('failure_code', self::QUOTA_FAILURES)))
             ->exists();
