@@ -393,10 +393,23 @@ Plans:
 Open decisions for discuss-phase: new module permission area, data model for catalog/units/stores, archive retention, e-mail content, notification preference integration, interaction with Phase 10 children as list members.
 **Commit rule:** every commit that resolves part of #8 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
 
-**Plans:** 0 plans
+**Plans:** 14 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 11 to break down)
+- [ ] 11-01-PLAN.md — Module `shopping` in the permission layer: keyed presets, CHECK re-add and backfill from todo, five-module permission save, admin manual (wave 1)
+- [ ] 11-02-PLAN.md — Schema and models: units (nine built-ins), stores, catalog, lists, members, items with CHECKs and the one-carry index; config; factories (wave 1)
+- [ ] 11-03-PLAN.md — Domain: ShoppingAccess, effective responsible fallback, member sync, list and item services, lock/mark/finish/carry-over/copy state machine (wave 2)
+- [ ] 11-04-PLAN.md — Catalog, stores, units backend and private images under wish-images/shopping/, sweeper, cache allowlist, nginx (wave 2)
+- [ ] 11-05-PLAN.md — List HTTP layer: routes, requests (decimal comma, reminder in family time zone), Inertia payloads, endpoint matrix, privacy differential (wave 3)
+- [ ] 11-06-PLAN.md — Settings > Shopping page (catalog, stores, units), Settings section, manual topic with settings coverage, help tips (wave 3)
+- [ ] 11-07-PLAN.md — E-mail a list: plain-text queued mail per address, max 5, per-user and per-address limits, audit without addresses (wave 3)
+- [ ] 11-08-PLAN.md — Reminder push to the effective responsible person through the outbox, scheduler and handler (wave 3)
+- [ ] 11-09-PLAN.md — Staging synthetic Shopping demo through production services, purge, staging:audit rules, ops docs (wave 3)
+- [ ] 11-10-PLAN.md — Navigation entry, overview with Open and Archive tabs, create and copy dialogs, module manual coverage (wave 4)
+- [ ] 11-11-PLAN.md — List detail in plan mode: header, items, catalog picker with pictures and free text, item edit, delete (wave 5)
+- [ ] 11-12-PLAN.md — List settings panel (people, reminder), e-mail dialog, audit label, notifications wording (wave 6)
+- [ ] 11-13-PLAN.md — Shopping mode: lock/unlock, Bought/Unavailable marks, finish with carry-over, archived state (wave 7)
+- [ ] 11-14-PLAN.md — Locale parity, a11y sweep, full gate (`Fixes #8`), staging browser verification as orchestrator checkpoint (wave 8)
 
 ### Phase 12: Recipe book section Receptár (issue #9)
 
