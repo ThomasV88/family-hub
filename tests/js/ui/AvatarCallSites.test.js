@@ -77,8 +77,8 @@ function vueFiles(dir) {
 }
 
 describe('source scan', () => {
-    // StyleGuide demo avatars are deliberately photo-less; MemberRow is wired by plan 10-05 (entry removed in 10-08).
-    const ALLOW = ['StyleGuide/Sections/40-Display.vue', 'Components/Settings/MemberRow.vue'];
+    // StyleGuide demo avatars are deliberately photo-less; every other UiAvatar must bind a member.
+    const ALLOW = ['StyleGuide/Sections/40-Display.vue'];
 
     it('every <UiAvatar> binds user-id or src', () => {
         const root = join(process.cwd(), 'resources/js');
