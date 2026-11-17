@@ -75,3 +75,15 @@ it('refuses an unrelated member the name and photo of the child', function () {
     $this->actingAs($this->unrelated)->delete("/people/{$this->child->id}/photo")->assertNotFound();
     expect($this->child->fresh()->name)->toBe('Kid');
 });
+
+it('tells a member who manages their own wish list, and never lists a child manager or a stranger', function () {
+    $converted = User::factory()->withPreset(Preset::Child)->create(['name' => 'Ema']);
+    WishlistManager::factory()->create(['owner_id' => $converted->id, 'manager_id' => $this->manager->id]);
+    WishlistManager::factory()->create(['owner_id' => $this->unrelated->id, 'manager_id' => $this->manager->id]);
+
+    $this->actingAs($converted)->get('/profile')->assertInertia(fn (Assert $p) => $p
+        ->where('wishlistManagers', [$this->manager->name]));
+    // The manager's own list has no managers; a child's page (another subject) carries no notice data at all.
+    $this->actingAs($this->manager)->get('/profile')->assertInertia(fn (Assert $p) => $p->where('wishlistManagers', []));
+    $this->actingAs($this->manager)->get("/profile/people/{$this->child->id}")->assertInertia(fn (Assert $p) => $p->missing('wishlistManagers'));
+});

@@ -69,7 +69,8 @@
           "Dopóki zaproszenie nie zostanie przyjęte, dziecko **nadal nie może się zalogować**. Wiersz pokazuje **Zaproszony**, a zaproszenie jest na liście zaproszeń.",
           "Gdy dziecko przyjmie zaproszenie (hasłem lub przez Google), to samo konto dostaje adres e-mail, może się zalogować i staje się zwykłym członkiem.",
           "Jeśli **cofniesz** zaproszenie, dla dziecka nic się nie zmienia. Adres e-mail, który już należy do członka, zostanie odrzucony.",
-          "Wysłanie zaproszenia wymaga niedawnego potwierdzenia tożsamości."
+          "Wysłanie zaproszenia wymaga niedawnego potwierdzenia tożsamości.",
+          "Rodzice, którzy zarządzali listą życzeń dziecka, **nadal nią zarządzają**, gdy dziecko zostanie członkiem. Nowy członek widzi, kto to jest, na swojej stronie **Ustawienia profilu**. Administrator może ich usunąć w sekcji [Zarządcy listy życzeń](admin#wishlist-managers)."
         ] }
       ]
     },

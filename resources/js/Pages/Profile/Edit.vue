@@ -19,6 +19,8 @@ const props = defineProps({
     nameMax: { type: Number, default: 60 },
     // Children whose wish list the viewer manages: [{ id, name, photoVersion|null }]
     managedPeople: { type: Array, default: () => [] },
+    // Names of the members who manage the viewer's own wish list
+    wishlistManagers: { type: Array, default: () => [] },
 });
 const { t } = useI18n();
 
@@ -75,6 +77,8 @@ function submit() {
                     </div>
                 </form>
             </UiCard>
+
+            <UiAlert v-if="subject.isSelf && wishlistManagers.length" variant="info" class="profile__alert" data-testid="managers-notice">{{ t('profile.people.managers_notice', { names: wishlistManagers.join(', ') }) }}</UiAlert>
 
             <UiCard v-if="subject.isSelf && managedPeople.length" :title="t('profile.people.card_title')" data-testid="people-card">
                 <p class="profile__hint">{{ t('profile.people.card_hint') }}</p>

@@ -858,7 +858,8 @@
             "card_hint": "Deti, ktorých zoznam želaní spravujete. Môžete zmeniť ich meno a fotografiu.",
             "edit": "Upraviť",
             "edit_aria": "Upraviť {name}",
-            "child_info": "Bez e-mailu, nemôže sa prihlásiť. Tento profil spravuje rodič alebo administrátor."
+            "child_info": "Bez e-mailu, nemôže sa prihlásiť. Tento profil spravuje rodič alebo administrátor.",
+            "managers_notice": "Ľudia uvedení tu spravujú váš zoznam želaní a môžu na ňom pridávať a upravovať priania: {names}. Administrátor to môže zmeniť v časti Správcovia zoznamu želaní."
         }
     },
     "account": {

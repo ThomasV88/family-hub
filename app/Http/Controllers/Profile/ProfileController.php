@@ -25,6 +25,11 @@ class ProfileController extends Controller
             'sections' => SettingsSections::for($user),
             'subject' => $this->subject($user, $user),
             'nameMax' => (int) config('profile.name_max'),
+            // Who manages the viewer's own wish list (the parents a converted child keeps): shown so nobody is managed unknowingly.
+            'wishlistManagers' => User::query()
+                ->whereIn('id', WishlistManager::query()->where('owner_id', $user->id)->select('manager_id'))
+                ->where('sign_in_disabled', false)->whereNotNull('email')
+                ->orderBy('name')->orderBy('id')->pluck('name')->values(),
             // Children whose wish list this member manages: the entry point to edit them without admin rights.
             'managedPeople' => User::query()
                 ->whereIn('id', WishlistManager::query()->where('manager_id', $user->id)->select('owner_id'))

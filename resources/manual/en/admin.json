@@ -69,7 +69,8 @@
           "Until the invitation is accepted the child **still cannot sign in**. The row shows **Invited** and the invitation appears in the list of invitations.",
           "When the child accepts (with a password or Google), the same account gets the email and can sign in, and it becomes a normal member.",
           "If you **revoke** the invitation, nothing changes for the child. An email that already belongs to a member is refused.",
-          "Sending the invitation needs a recent confirmation of your identity."
+          "Sending the invitation needs a recent confirmation of your identity.",
+          "The parents who managed the child's wish list **still manage it** after the child becomes a member. The new member sees who they are on their own **Profile settings** page. An administrator can remove them under [Wishlist managers](admin#wishlist-managers)."
         ] }
       ]
     },

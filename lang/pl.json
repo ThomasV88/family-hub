@@ -858,7 +858,8 @@
             "card_hint": "Dzieci, których listą życzeń zarządzasz. Możesz zmienić ich imię i zdjęcie.",
             "edit": "Edytuj",
             "edit_aria": "Edytuj: {name}",
-            "child_info": "Bez adresu e-mail, nie może się zalogować. Tym profilem zarządza rodzic lub administrator."
+            "child_info": "Bez adresu e-mail, nie może się zalogować. Tym profilem zarządza rodzic lub administrator.",
+            "managers_notice": "Osoby wymienione tutaj zarządzają Twoją listą życzeń i mogą dodawać oraz edytować na niej życzenia: {names}. Administrator może to zmienić w sekcji Zarządcy listy życzeń."
         }
     },
     "account": {

@@ -69,7 +69,8 @@
           "Kým sa pozvánka neprijme, dieťa sa **stále nemôže prihlásiť**. Riadok ukazuje **Pozvaný** a pozvánka sa zobrazí v zozname pozvánok.",
           "Keď dieťa pozvánku prijme (heslom alebo cez Google), ten istý účet dostane e-mail, môže sa prihlásiť a stane sa bežným členom.",
           "Ak pozvánku **zrušíte**, pre dieťa sa nič nezmení. E-mail, ktorý už patrí členovi, sa odmietne.",
-          "Odoslanie pozvánky vyžaduje nedávne potvrdenie vašej identity."
+          "Odoslanie pozvánky vyžaduje nedávne potvrdenie vašej identity.",
+          "Rodičia, ktorí spravovali zoznam želaní dieťaťa, ho **spravujú aj naďalej**, keď sa dieťa stane členom. Nový člen vidí, kto to je, na svojej stránke **Nastavenia profilu**. Administrátor ich môže odobrať v časti [Správcovia zoznamu želaní](admin#wishlist-managers)."
         ] }
       ]
     },

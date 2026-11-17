@@ -47,9 +47,9 @@ beforeEach(() => {
 });
 afterEach(() => { wrapper?.unmount(); wrapper = null; document.body.innerHTML = ''; });
 
-function mountPage({ locale = 'en', messages, subject = SUBJECT, managedPeople = [] } = {}) {
+function mountPage({ locale = 'en', messages, subject = SUBJECT, managedPeople = [], wishlistManagers = [] } = {}) {
     wrapper = mount(Edit, {
-        props: { sections: SECTIONS, subject, nameMax: 60, managedPeople },
+        props: { sections: SECTIONS, subject, nameMax: 60, managedPeople, wishlistManagers },
         attachTo: document.body,
         global: { plugins: [createAppI18n(locale, messages ?? loadMessages(locale))] },
     });
@@ -141,6 +141,31 @@ describe('Profile settings page', () => {
     });
 });
 
+describe('Who manages my wish list', () => {
+    it('names the members who manage the own wish list, in each language', () => {
+        for (const locale of ['en', 'sk', 'pl']) {
+            mountPage({ locale, wishlistManagers: ['Jana', 'Peter'] });
+            const note = wrapper.find('[data-testid=managers-notice]');
+            expect(note.exists()).toBe(true);
+            expect(note.text()).toContain('Jana, Peter');
+            wrapper.unmount();
+        }
+    });
+
+    it('shows nothing when nobody manages the list or when the page shows another person', () => {
+        mountPage();
+        expect(wrapper.find('[data-testid=managers-notice]').exists()).toBe(false);
+        wrapper.unmount();
+        mountPage({ subject: { id: 7, name: 'Ema', email: null, photoVersion: null, isSelf: false, isChild: true }, wishlistManagers: ['Jana'] });
+        expect(wrapper.find('[data-testid=managers-notice]').exists()).toBe(false);
+    });
+
+    it('has no axe violations with the notice', async () => {
+        mountPage({ wishlistManagers: ['Jana', 'Peter'] });
+        await expectNoAxeViolations(wrapper.element);
+    });
+});
+
 describe('People you manage and a child subject', () => {
     const PEOPLE = [{ id: 7, name: 'Ema', photoVersion: null }, { id: 8, name: 'Adam', photoVersion: 2 }];
     const CHILD = { id: 7, name: 'Ema', email: null, photoVersion: null, isSelf: false, isChild: true };
@@ -174,7 +199,7 @@ describe('People you manage and a child subject', () => {
     it.each(['en', 'sk', 'pl'])('has no axe violations in %s, light and dark', async (locale) => {
         for (const theme of ['light', 'dark']) {
             document.documentElement.dataset.theme = theme;
-            mountPage({ locale, managedPeople: PEOPLE });
+            mountPage({ locale, managedPeople: PEOPLE, wishlistManagers: ['Jana', 'Peter'] });
             await expectNoAxeViolations(wrapper.element);
             wrapper.unmount();
             mountPage({ locale, subject: CHILD });

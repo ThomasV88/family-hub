@@ -858,7 +858,8 @@
             "card_hint": "Children whose wish list you manage. You can change their name and photo.",
             "edit": "Edit",
             "edit_aria": "Edit {name}",
-            "child_info": "No e-mail, cannot sign in. A parent or administrator manages this profile."
+            "child_info": "No e-mail, cannot sign in. A parent or administrator manages this profile.",
+            "managers_notice": "The people listed here manage your wish list and can add and edit wishes on it: {names}. An administrator can change this under Wishlist managers."
         }
     },
     "account": {
