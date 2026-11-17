@@ -160,6 +160,8 @@ function details(row) {
         case 'medical_subject_created':
         case 'medical_subject_deleted':
         case 'medical_admin_self_added':
+        case 'medical_text_removed':
+            // Ids only in the meta; nothing but the fixed label is shown.
             return t(`audit.detail.${row.event}`);
         case 'shopping_list_mailed': {
             // Only the number of recipients is stored and shown, never an address.

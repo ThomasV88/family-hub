@@ -798,6 +798,7 @@
             "ai_bulk_run_changed_completed": "Masowe ponowne przetwarzanie AI zakończone: {scope}. Dokumenty: {count}",
             "medical_archived": "Zarchiwizowano w Zdrowiu",
             "medical_restored": "Przywrócono w Zdrowiu",
+            "medical_text_removed": "Usunięto rozpoznany tekst w Zdrowiu",
             "medical_type_person": "Osoba",
             "medical_type_visit": "Wizyta",
             "medical_type_medication": "Lek",

@@ -798,6 +798,7 @@
             "ai_bulk_run_changed_completed": "Hromadné opätovné spracovanie AI skončilo: {scope}. Dokumenty: {count}",
             "medical_archived": "Archivované v Zdraví",
             "medical_restored": "Obnovené v Zdraví",
+            "medical_text_removed": "Odstránený rozpoznaný text v Zdraví",
             "medical_type_person": "Osoba",
             "medical_type_visit": "Návšteva",
             "medical_type_medication": "Liek",

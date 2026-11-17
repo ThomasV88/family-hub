@@ -3,6 +3,9 @@
 namespace App\Medical\Queries;
 
 use App\Access\AccessLevel;
+use App\Access\Module;
+use App\Audit\AuditEvent;
+use App\Audit\AuditLogger;
 use App\Medical\Documents\Text\SaveOutcome;
 use App\Medical\Documents\Text\TextNormalizer;
 use App\Medical\Viewer;
@@ -22,6 +25,8 @@ use Illuminate\Support\Str;
 class DocumentTextStore
 {
     private const LANGUAGES = ['sk', 'pl', 'en', 'mixed', 'other'];
+
+    public function __construct(private readonly AuditLogger $audit) {}
 
     /**
      * Stores the text of a document, replacing an earlier one. Writes only while the person's AI consent is on and
@@ -96,6 +101,22 @@ class DocumentTextStore
             ->whereIn('subject_id', Visibility::subjectIds($viewer, AccessLevel::Edit))
             ->whereIn('document_id', fn ($q) => $q->select('id')->from('medical_documents')->where('subject_id', $subjectId)->whereNull('archived_at'))
             ->delete() > 0;
+    }
+
+    /**
+     * The request-side removal: remove() and the content-free audit row (ids only, never a title or any text) in one
+     * transaction, so a removal never goes unrecorded and a failed audit write removes nothing.
+     */
+    public function removeAudited(Viewer $viewer, string $subjectId, string $documentId): bool
+    {
+        return DB::transaction(function () use ($viewer, $subjectId, $documentId): bool {
+            if (! $this->remove($viewer, $subjectId, $documentId)) {
+                return false;
+            }
+            $this->audit->record(AuditEvent::MedicalTextRemoved, $viewer->user, ['subject' => $subjectId, 'record' => $documentId], null, Module::Health);
+
+            return true;
+        });
     }
 
     /** Deletes the text of every document of one person (consent withdrawn). Returns the number of rows removed. */

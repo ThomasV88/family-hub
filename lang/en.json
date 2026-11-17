@@ -798,6 +798,7 @@
             "ai_bulk_run_changed_completed": "A bulk AI re-generation finished: {scope}. Documents: {count}",
             "medical_archived": "Archived in Health",
             "medical_restored": "Restored in Health",
+            "medical_text_removed": "Removed recognised text in Health",
             "medical_type_person": "Person",
             "medical_type_visit": "Visit",
             "medical_type_medication": "Medication",

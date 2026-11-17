@@ -24,6 +24,7 @@ beforeEach(function () {
 const MED_LS_GET_INVENTORY = [
     'health.index', 'health.people.show', 'health.documents.preview', 'health.documents.file',
     'health.exports.show', 'health.exports.print', 'health.exports.download', 'health.emergency.show',
+    'health.documents.text',
 ];
 
 /** Write routes that carry a person id (and mostly a record id): each answers a hidden id exactly like a random one. */
@@ -34,6 +35,7 @@ const MED_LS_PARITY_INVENTORY = [
     'health.medications.store', 'health.medications.update', 'health.medications.destroy',
     'health.vaccinations.store', 'health.vaccinations.update', 'health.vaccinations.destroy', 'health.vaccinations.given',
     'health.documents.store', 'health.documents.update', 'health.documents.destroy',
+    'health.documents.text.destroy',
 ];
 
 /** @return array<string, mixed> */
@@ -104,7 +106,7 @@ it('covers every record-id write route with hidden-vs-random parity and every he
     }
 
     expect($parity)->toContain(...MED_LS_PARITY_INVENTORY)
-        ->and(count($parity))->toBeGreaterThanOrEqual(19)
+        ->and(count($parity))->toBeGreaterThanOrEqual(20)
         ->and(array_values(array_diff($mutation, $parity)))->toBe(['health.people.store']) // the only id-free write
         ->and(count($mutation))->toBeGreaterThanOrEqual(20);
 });
