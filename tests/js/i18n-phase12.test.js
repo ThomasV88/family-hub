@@ -173,3 +173,38 @@ describe('phase 12 import UI strings, help and manual (12-15)', () => {
         }
     });
 });
+
+describe('phase 12 final parity (12-17)', () => {
+    const manual = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(readFileSync(`${root}/resources/manual/${l}/recipes.json`, 'utf8'))]));
+    const HELP_KEYS = ['recipes.import', 'recipes.sharing', 'recipes.servings', 'recipes.progress', 'recipes.notes', 'recipes.shopping', 'recipes.cooking'];
+    const SECTIONS = ['overview', 'adding', 'import-from-link', 'photos', 'sharing', 'ingredients-servings', 'cooking', 'notes-favourites', 'shopping', 'deleting'];
+
+    it('has the AI calls recipe label, the navigation and permission strings in every language', () => {
+        for (const locale of LOCALES) {
+            for (const key of ['settings.ai_calls.kind_recipe', 'nav.recipes', 'module.recipes', 'permissions.module.recipes']) {
+                const v = get(lang[locale], key);
+                expect({ locale, key, ok: typeof v === 'string' && v.trim() !== '' }).toEqual({ locale, key, ok: true });
+            }
+        }
+    });
+
+    it('registers the seven help topics with a text of at most 400 characters in every language', () => {
+        const topics = JSON.parse(readFileSync(`${root}/resources/help/topics.json`, 'utf8')).topics.map((t) => t.key);
+        for (const key of HELP_KEYS) expect(topics, key).toContain(key);
+        for (const locale of LOCALES) {
+            const help = JSON.parse(readFileSync(`${root}/resources/help/${locale}.json`, 'utf8'));
+            for (const key of HELP_KEYS) {
+                const text = help.topics[key]?.text ?? '';
+                expect({ locale, key, ok: text.trim() !== '' && [...text].length <= 400 }).toEqual({ locale, key, ok: true });
+            }
+        }
+    });
+
+    it('has the manual sections in the same final order in en, sk and pl, with matching block shapes', () => {
+        for (const locale of LOCALES) expect({ locale, ids: manual[locale].sections.map((s) => s.id) }).toEqual({ locale, ids: SECTIONS });
+        for (const id of SECTIONS) {
+            const shapes = LOCALES.map((l) => manual[l].sections.find((s) => s.id === id).blocks.map((b) => `${b.type}${b.items ? b.items.length : ''}`).join(','));
+            expect(new Set(shapes).size, `${id} blocks differ between languages`).toBe(1);
+        }
+    });
+});
