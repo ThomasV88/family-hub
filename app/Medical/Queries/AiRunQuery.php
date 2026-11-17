@@ -45,8 +45,13 @@ class AiRunQuery
      */
     public function noticeAcknowledged(Viewer $viewer, ?array $enabled = null): bool
     {
-        $providers = DB::table('ai_notice_acks')->where('user_id', $viewer->userId())->value('providers');
+        $row = DB::table('ai_notice_acks')->where('user_id', $viewer->userId())->first(['providers', 'text_notice_acked_at']);
+        $providers = $row?->providers;
         if ($providers === null) {
+            return false;
+        }
+        // While recognised text is stored, the statement about the stored text must have been acknowledged too.
+        if (config('ai.ocr.enabled') && $row->text_notice_acked_at === null) {
             return false;
         }
         $acked = explode(',', (string) $providers);
@@ -172,11 +177,13 @@ class AiRunQuery
                 if (! $acked) {
                     $set = $enabledKeys;
                     sort($set);
-                    DB::table('ai_notice_acks')->upsert(
-                        [['user_id' => $viewer->userId(), 'acknowledged_at' => $now, 'providers' => implode(',', $set)]],
-                        ['user_id'],
-                        ['acknowledged_at', 'providers'],
-                    );
+                    $row = ['user_id' => $viewer->userId(), 'acknowledged_at' => $now, 'providers' => implode(',', $set)];
+                    $update = ['acknowledged_at', 'providers'];
+                    if (config('ai.ocr.enabled')) {
+                        $row['text_notice_acked_at'] = $now;
+                        $update[] = 'text_notice_acked_at';
+                    }
+                    DB::table('ai_notice_acks')->upsert([$row], ['user_id'], $update);
                 }
 
                 return new StartResult('queued', $id);

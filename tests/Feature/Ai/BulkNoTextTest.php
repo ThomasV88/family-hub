@@ -67,7 +67,7 @@ function bulkNoTextStart(User $admin, string $scope = 'no_text', int $cap = 5): 
     DB::table('ai_notice_acks')->upsert([['user_id' => $admin->id, 'providers' => implode(',', $providers), 'acknowledged_at' => now()]], ['user_id'], ['providers', 'acknowledged_at']);
     $dry = $q->dryRun($admin, $scope, $cap);
 
-    return isset($dry['token']) ? $q->start($admin, $dry['token'], true, $providers) : $dry;
+    return isset($dry['token']) ? $q->start($admin, $dry['token'], true, $providers, true) : $dry;
 }
 
 function bulkNoTextBin(object $test, string $script): void

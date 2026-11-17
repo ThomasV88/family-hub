@@ -100,7 +100,7 @@ class PersonPage
      * Whether Run AI may be offered and each document's AI state. Statuses only: no proposal content, and counts only
      * for members who can change the person.
      *
-     * @return array{canRun: bool, available: bool, providers: list<string>, noticeAcknowledged: bool, statuses: array<string, mixed>}
+     * @return array{canRun: bool, available: bool, providers: list<string>, noticeAcknowledged: bool, textNotice: bool, statuses: array<string, mixed>}
      */
     private function aiProps(Viewer $viewer, ?MedicalSubject $subject): array
     {
@@ -109,6 +109,8 @@ class PersonPage
             'available' => $this->aiRuns->available(),
             'providers' => $this->aiRuns->providers(),
             'noticeAcknowledged' => $this->aiRuns->noticeAcknowledged($viewer),
+            // Whether the notice must carry the statement about the stored recognised text.
+            'textNotice' => (bool) config('ai.ocr.enabled'),
             'statuses' => $subject === null ? (object) [] : (object) $this->aiRuns->statusMap($viewer, $subject),
         ];
     }
