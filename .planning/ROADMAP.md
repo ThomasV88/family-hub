@@ -429,10 +429,26 @@ Plans:
 Open decisions for discuss-phase: AI-from-URL needs the worker to fetch a web page (a new outbound path; Codex has web search disabled by design) and the provider data-use consent for recipes (non-medical); which suggested extras are in v1.
 **Commit rule:** every commit that resolves part of #9 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
 
-**Plans:** 0 plans
+**Plans:** 17 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 12 to break down)
+- [ ] 12-01-PLAN.md — Module `recipes` in the permission layer: enum, keyed presets, CHECK re-add and backfill from todo, six-module permission save, admin manual (wave 1)
+- [ ] 12-02-PLAN.md — Schema and models: recipes, categories, photos, ingredients (Shopping units), steps, per-member state tables; config with every limit; search key; fixtures (wave 1)
+- [ ] 12-03-PLAN.md — Domain: RecipeAccess, RecipeService with update-by-diff, RecipeStateService (absolute marks), RecipeQuery (search, filters, paging) (wave 2)
+- [ ] 12-04-PLAN.md — Photos backend: private store under wish-images/recipes/, JSON endpoints, image route, sweeper prefix, cache allowlist, nginx limit (wave 3)
+- [ ] 12-05-PLAN.md — HTTP layer: overview, detail, form props, CRUD, visibility and per-member state routes, endpoint matrix, privacy differential (wave 3)
+- [ ] 12-06-PLAN.md — Shopping bridge backend: catalog matching, eligible open lists, all-or-nothing commit through ListService and ItemService (wave 3)
+- [ ] 12-07-PLAN.md — Navigation entry with dense seven-item bottom bar, overview grid (max 3 per row) with search and filters, manual topic skeleton (wave 4)
+- [ ] 12-08-PLAN.md — Recipe form for create and edit with photos, categories, ingredients, steps, sharing; quantity and paste helpers; toast actions (wave 5)
+- [ ] 12-09-PLAN.md — Detail with per-member ticks and done steps, servings recalculation, notes, favourites, gallery, author actions, cooking mode with Wake Lock (wave 6)
+- [ ] 12-10-PLAN.md — Add to shopping list review dialog (new or open list, matches, merge hints) (wave 7)
+- [ ] 12-11-PLAN.md — AI foundation: AiTask seam on Codex and Copilot, recipe schema, prompts and validator, ai_calls kind, failure codes, arch rule (wave 4)
+- [ ] 12-12-PLAN.md — Page reducer: JSON-LD first, readable-text fallback, hidden-text stripping, charset and gzip guards, fetcher user agent (wave 4)
+- [ ] 12-13-PLAN.md — Import pipeline: recipe_imports, recipe notice column, start service with limits, fetch job in the worker container, ai-worker job with fail-fast (wave 5)
+- [ ] 12-14-PLAN.md — Import HTTP routes, overview flags and drafts, prefilled review form and used-on-save, reap and prune, leak canary (wave 6)
+- [ ] 12-15-PLAN.md — Import UI: new-recipe choice, URL dialog with one-time notice, progress and failures, draft rows, review mode, admin calls label, docs (wave 8)
+- [ ] 12-16-PLAN.md — Staging synthetic Recipes demo through production services, purge, staging:audit rules, ops docs (wave 6)
+- [ ] 12-17-PLAN.md — Locale parity, pseudo-long, a11y sweep, full gate (`Fixes #9`), staging browser verification with the real-AI URL check list as orchestrator checkpoint (wave 9)
 
 ### Phase 13: AI full-text OCR and document search (issue #11)
 
