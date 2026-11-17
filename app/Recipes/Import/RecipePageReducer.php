@@ -16,8 +16,20 @@ use Throwable;
 
 /**
  * Pure reduction of a fetched page to short, sanitised, labelled text for the recipe AI. No network, no
- * logging. The page is hostile data: nothing is executed or followed, hidden markup never reaches the text,
- * every size is capped and the text is normalised before it leaves this class.
+ * logging. The page is hostile data: nothing is executed or followed, every size is capped and the text is
+ * normalised before it leaves this class.
+ *
+ * What is and is not guaranteed about hidden content (this is a filter, not a security boundary):
+ * - Removed: elements with the `hidden` attribute, aria-hidden, a hidden-style class (hidden, d-none, sr-only, ...),
+ *   and inline styles that hide by display:none, visibility:hidden, font-size:0, opacity:0, a zero or clipped box
+ *   (height:0, max-height:0, width:0, clip, clip-path, scale(0)), or a far offscreen position (left, top, text-indent,
+ *   margin). JSON-LD blocks inside such an element are skipped as well.
+ * - NOT detectable: text hidden by colour (white on white), by an external or <style> stylesheet, by a script, by
+ *   overlap with another element, or by tiny but non-zero sizes. Such text reaches the model.
+ * - A JSON-LD block is hidden by nature and is read as it stands (strings are tag-stripped and capped: 500 characters
+ *   for the description, 300 per ingredient, 1000 elsewhere, 300 lines). Text in it reaches the model like any other.
+ * The real defences are elsewhere: the nonce markers around the page text, the tool-less read-only agent, the strict
+ * validation of the reply, and the review-before-save screen the member always sees.
  */
 final class RecipePageReducer
 {
@@ -43,7 +55,15 @@ final class RecipePageReducer
 
     private const DESCRIPTION_MAX = 500;
 
+    private const INGREDIENT_MAX = 300;
+
     private const NOISE = ['script', 'style', 'noscript', 'template', 'svg', 'iframe', 'form', 'nav', 'header', 'footer', 'aside', 'button', 'select'];
+
+    /** Matched against an inline style with all whitespace removed and lower-cased. */
+    private const HIDDEN_STYLE = '/display:none|visibility:hidden|font-size:0(?:px|pt|em|rem|%)?(?![\d.])|(?<![-\w])opacity:0(?![\d.])'
+        .'|(?<![-\w])(?:max-)?(?:height|width):0(?:px|pt|em|rem|%)?(?![\d.])'
+        .'|(?<![-\w])clip:rect\(0|clip-path:inset\((?:50|100)%|transform:scale\(0(?:,0)?\)'
+        .'|(?:left|right|top|bottom|text-indent):-\d{3,}/';
 
     private const HIDDEN_CLASSES = ['hidden', 'd-none', 'invisible', 'sr-only', 'visually-hidden', 'screen-reader-text'];
 
@@ -209,7 +229,7 @@ final class RecipePageReducer
         $fallback = null;
         $seen = 0;
         foreach ($scripts ?: [] as $script) {
-            if (strtolower(trim($script->getAttribute('type'))) !== 'application/ld+json') {
+            if (strtolower(trim($script->getAttribute('type'))) !== 'application/ld+json' || $this->insideHidden($script)) {
                 continue;
             }
             if (++$seen > self::MAX_SCRIPTS) {
@@ -358,7 +378,7 @@ final class RecipePageReducer
 
             return;
         }
-        $text = $this->scalarText($value);
+        $text = $this->scalarText($value, self::INGREDIENT_MAX);
         if ($text !== '') {
             $out[] = $text;
         }
@@ -424,6 +444,18 @@ final class RecipePageReducer
         }
     }
 
+    /** True when the node or one of its ancestors is hidden (see the class docblock for what that covers). */
+    private function insideHidden(DOMNode $node): bool
+    {
+        for ($n = $node->parentNode; $n instanceof DOMElement; $n = $n->parentNode) {
+            if ($this->isHidden($n)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private function isHidden(DOMElement $el): bool
     {
         if ($el->hasAttribute('hidden') || strtolower(trim($el->getAttribute('aria-hidden'))) === 'true') {
@@ -431,7 +463,7 @@ final class RecipePageReducer
         }
         if ($el->hasAttribute('style')) {
             $style = preg_replace('/\s+/', '', strtolower($el->getAttribute('style'))) ?? '';
-            if (preg_match('/display:none|visibility:hidden|font-size:0(?:px|pt|em|rem|%)?(?![\d.])|(?<![-\w])opacity:0(?![\d.])|(?:left|text-indent):-\d{3,}/', $style) === 1) {
+            if (preg_match(self::HIDDEN_STYLE, $style) === 1) {
                 return true;
             }
         }
