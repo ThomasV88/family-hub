@@ -10,6 +10,7 @@ use App\Push\PushSender;
 use App\Push\WebPushSender;
 use App\Recurrence\RecurrenceEngine;
 use App\Recurrence\RRuleRecurrenceEngine;
+use App\Shopping\Mail\ShoppingListMailer;
 use App\Support\RequestInput;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -47,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureRememberDuration();
         $this->configureLoginLimiter();
+        $this->configureShoppingMailLimiter();
     }
 
     /** Remember cookie lives 30 days (the framework default is 400 days). */
@@ -54,6 +56,20 @@ class AppServiceProvider extends ServiceProvider
     {
         Auth::resolved(function ($auth) {
             $auth->guard('web')->setRememberDuration(43200);
+        });
+    }
+
+    /** E-mailing a shopping list: per user per hour and per day; refusals are a translated 429 (key in the body). */
+    private function configureShoppingMailLimiter(): void
+    {
+        RateLimiter::for('shopping-mail', function (Request $request) {
+            $respond = fn (Request $r, array $headers) => ShoppingListMailer::limitResponse($headers);
+            $by = (string) ($request->user()?->id ?? $request->ip());
+
+            return [
+                Limit::perHour((int) config('shopping.mail.per_user_hour'))->by('shopping-mail-h:'.$by)->response($respond),
+                Limit::perDay((int) config('shopping.mail.per_user_day'))->by('shopping-mail-d:'.$by)->response($respond),
+            ];
         });
     }
 
