@@ -361,17 +361,17 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 Open decisions for discuss-phase: child-account data model and who manages it (guardian link); what happens when the child grows up and gets sign-in; whether profile photos use the same cache rules as wish images.
 **Commit rule:** every commit that resolves part of #7 and #6 carries `Fixes #N` for the issue it resolves (one trailer per issue). Source text: the issue bodies and comments on GitHub (owner-written). User documentation rule from CLAUDE.md applies (manual + help tips in sk/pl/en).
 
-**Plans:** 8 plans
+**Plans:** 8/8 plans complete
 
 Plans:
-- [ ] 10-01-PLAN.md — Data model: nullable e-mail, sign_in_disabled, photo columns, child CHECK invariant, canSignIn(), NULL-safe staging audit/seeder (wave 1)
-- [ ] 10-02-PLAN.md — Sign-in lockout on every session path, BlockDisabledSignIn middleware, no mail or reminders for children (wave 2)
-- [ ] 10-03-PLAN.md — Profile photo backend: private store under wish-images/profile-photos, access rules, ETag route, sweeper, nginx, avatars prop (wave 2)
-- [ ] 10-04-PLAN.md — Profile settings page, name edit, photo editor, UiAvatar photo, account menu item, help and manual (wave 3)
-- [ ] 10-05-PLAN.md — Admin creates a child, parents manage it, Members child UI, /profile/people/{user}, Wishlist proof (wave 4)
-- [ ] 10-07-PLAN.md — Avatars everywhere: remaining call sites, health photoUserId, SW guard; closes #7 (wave 4)
-- [ ] 10-06-PLAN.md — Convert a child to a member by invitation on the same users row; closes #6 (wave 5)
-- [ ] 10-08-PLAN.md — Staging synthetic child seed, ops docs, locale parity, full gate, staging browser verification and DB invariant (wave 6)
+- [x] 10-01-PLAN.md — Data model: nullable e-mail, sign_in_disabled, photo columns, child CHECK invariant, canSignIn(), NULL-safe staging audit/seeder (wave 1)
+- [x] 10-02-PLAN.md — Sign-in lockout on every session path, BlockDisabledSignIn middleware, no mail or reminders for children (wave 2)
+- [x] 10-03-PLAN.md — Profile photo backend: private store under wish-images/profile-photos, access rules, ETag route, sweeper, nginx, avatars prop (wave 2)
+- [x] 10-04-PLAN.md — Profile settings page, name edit, photo editor, UiAvatar photo, account menu item, help and manual (wave 3)
+- [x] 10-05-PLAN.md — Admin creates a child, parents manage it, Members child UI, /profile/people/{user}, Wishlist proof (wave 4)
+- [x] 10-07-PLAN.md — Avatars everywhere: remaining call sites, health photoUserId, SW guard; closes #7 (wave 4)
+- [x] 10-06-PLAN.md — Convert a child to a member by invitation on the same users row; closes #6 (wave 5)
+- [x] 10-08-PLAN.md — Staging synthetic child seed, ops docs, locale parity, full gate, staging browser verification and DB invariant (wave 6)
 
 ### Phase 11: Shopping lists section Nákupy (issue #8)
 
