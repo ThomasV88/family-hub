@@ -118,14 +118,12 @@ class AiRunQuery
                     return new StartResult('unavailable');
                 }
                 // Enabling or disabling a provider takes this lock exclusively, so the set below cannot change before commit.
-                DB::select("select pg_advisory_xact_lock_shared(hashtext('ai-agent-settings'))");
+                $needed = $this->acknowledgmentNeeded($viewer, $acknowledged, $shownProviders, $textNotice);
+                if ($needed !== null) {
+                    return new StartResult('notice_required', null, $needed);
+                }
                 $enabledKeys = $this->agents->providers();
                 $acked = $this->noticeAcknowledged($viewer, $enabledKeys);
-                // While recognised text is stored the request must also say that the dialog showed the statement about it ($textNotice):
-                // an acknowledgment from a dialog that never showed it (the switch was turned on meanwhile) does not count.
-                if (! $acked && (! $acknowledged || ! self::sameSet($shownProviders, $enabledKeys) || (config('ai.ocr.enabled') && ! $textNotice))) {
-                    return new StartResult('notice_required', null, array_values($enabledKeys));
-                }
                 $active = $this->activeId($viewer, $subjectId, $documentId);
                 if ($active !== null) {
                     return new StartResult('active', $active);
@@ -178,15 +176,7 @@ class AiRunQuery
                     'queued_at' => $now,
                 ]);
                 if (! $acked) {
-                    $set = $enabledKeys;
-                    sort($set);
-                    $row = ['user_id' => $viewer->userId(), 'acknowledged_at' => $now, 'providers' => implode(',', $set)];
-                    $update = ['acknowledged_at', 'providers'];
-                    if (config('ai.ocr.enabled')) {
-                        $row['text_notice_acked_at'] = $now;
-                        $update[] = 'text_notice_acked_at';
-                    }
-                    DB::table('ai_notice_acks')->upsert([$row], ['user_id'], $update);
+                    $this->recordAcknowledgment($viewer, $enabledKeys);
                 }
 
                 return new StartResult('queued', $id);
@@ -198,6 +188,50 @@ class AiRunQuery
 
             return new StartResult('active', $this->activeId($viewer, $subjectId, $documentId));
         }
+    }
+
+    /**
+     * The notice decision of start(), shared with the upload batch dialog. Takes the shared settings lock (a provider
+     * change takes it exclusively), so call it inside the transaction that goes on to act on the answer. Null when the
+     * member has acknowledged the enabled set, or confirmed it now ($acknowledged with the set they saw and, while
+     * recognised text is stored, the text statement); otherwise the enabled provider list for a notice_required answer.
+     *
+     * @param  list<string>|null  $shownProviders
+     * @return list<string>|null
+     */
+    public function acknowledgmentNeeded(Viewer $viewer, bool $acknowledged, ?array $shownProviders, bool $textNotice): ?array
+    {
+        DB::select("select pg_advisory_xact_lock_shared(hashtext('ai-agent-settings'))");
+        $enabledKeys = $this->agents->providers();
+        if ($this->noticeAcknowledged($viewer, $enabledKeys)) {
+            return null;
+        }
+        // While recognised text is stored the request must also say that the dialog showed the statement about it ($textNotice):
+        // an acknowledgment from a dialog that never showed it (the switch was turned on meanwhile) does not count.
+        if (! $acknowledged || ! self::sameSet($shownProviders, $enabledKeys) || (config('ai.ocr.enabled') && ! $textNotice)) {
+            return array_values($enabledKeys);
+        }
+
+        return null;
+    }
+
+    /**
+     * Stores the member's acknowledgment of the given enabled provider set (and of the text statement while it applies).
+     *
+     * @param  list<string>  $enabledKeys
+     */
+    public function recordAcknowledgment(Viewer $viewer, array $enabledKeys): void
+    {
+        $now = Carbon::now();
+        $set = $enabledKeys;
+        sort($set);
+        $row = ['user_id' => $viewer->userId(), 'acknowledged_at' => $now, 'providers' => implode(',', $set)];
+        $update = ['acknowledged_at', 'providers'];
+        if (config('ai.ocr.enabled')) {
+            $row['text_notice_acked_at'] = $now;
+            $update[] = 'text_notice_acked_at';
+        }
+        DB::table('ai_notice_acks')->upsert([$row], ['user_id'], $update);
     }
 
     /**
@@ -348,8 +382,8 @@ class AiRunQuery
         if ($active()->count() >= (int) config('ai.limits.max_active_global')) {
             return true;
         }
-        // Bulk rows do not use up the starter's personal limit; the global limit above still counts them.
-        if ($active()->whereNull('bulk_run_id')->where('started_by', $viewer->userId())->count() >= (int) config('ai.limits.max_active_per_user')) {
+        // Bulk and upload batch rows do not use up the starter's personal limit; the global limit above still counts them.
+        if ($active()->whereNull('bulk_run_id')->whereNull('upload_batch_id')->where('started_by', $viewer->userId())->count() >= (int) config('ai.limits.max_active_per_user')) {
             return true;
         }
         $cooldown = (int) config('ai.limits.document_cooldown_minutes');

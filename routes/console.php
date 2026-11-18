@@ -21,12 +21,14 @@ Schedule::command('wishlist:prune')->daily()->name('wishlist-prune');
 Schedule::command('queue:prune-failed --hours=72')->daily()->name('queue-prune-failed');
 Schedule::command('finance:prune-imports')->daily()->name('finance-prune-imports');
 Schedule::command('medical:prune-orphans')->daily()->name('medical-prune-orphans');
+Schedule::command('medical:expire-upload-batches')->hourly()->withoutOverlapping()->name('medical-expire-upload-batches');
 Schedule::command('medical:enqueue-reminders')->hourly()->withoutOverlapping()->name('medical-enqueue-reminders');
 
 // AI extraction maintenance (08-14): login health, stuck runs, 12-month call history.
 Schedule::job(new CheckLoginJob)->everyFiveMinutes()->name('ai-check-login');
 Schedule::command('ai:reap-stuck')->everyFiveMinutes()->withoutOverlapping()->name('ai-reap-stuck');
 Schedule::command('ai:resume-waiting')->everyMinute()->withoutOverlapping()->name('ai-resume-waiting');
+Schedule::command('ai:upload-batch-tick')->everyMinute()->withoutOverlapping()->name('ai-upload-batch-tick');
 Schedule::command('ai:bulk-tick')->everyFiveMinutes()->withoutOverlapping()->name('ai-bulk-tick');
 Schedule::command('ai:prune-calls')->daily()->name('ai-prune-calls');
 

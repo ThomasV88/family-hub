@@ -62,3 +62,14 @@ it('schedules the recipe import reaper every five minutes without overlapping an
     expect($reap->expression)->toBe('*/5 * * * *')->and($reap->command)->toContain('recipes:reap-imports')->and($reap->withoutOverlapping)->toBeTrue()
         ->and($prune->expression)->toBe('0 0 * * *')->and($prune->command)->toContain('recipes:prune-imports');
 });
+
+it('schedules the upload batch tick every minute and the expiry hourly, both without overlapping', function () {
+    $tick = aiScheduled('ai-upload-batch-tick');
+    $expire = aiScheduled('medical-expire-upload-batches');
+    expect($tick->expression)->toBe('* * * * *')
+        ->and($tick->command)->toContain('ai:upload-batch-tick')
+        ->and($tick->withoutOverlapping)->toBeTrue()
+        ->and($expire->expression)->toBe('0 * * * *')
+        ->and($expire->command)->toContain('medical:expire-upload-batches')
+        ->and($expire->withoutOverlapping)->toBeTrue();
+});

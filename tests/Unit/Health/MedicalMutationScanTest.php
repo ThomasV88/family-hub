@@ -19,6 +19,7 @@ const MD_MUT_ALLOWLIST = [
     'SystemQuery' => 'no viewer: system jobs touch ids and booleans only, never content (07-09, 07-12, 07-15)',
     'AiJobQuery' => 'ai-worker lifecycle columns, no viewer, after run-time re-verification',
     'AiBulkJobQuery' => 'ai-bulk scheduler and bulk cancel: queued extraction rows and lifecycle columns only, no viewer, no content (09-13)',
+    'UploadBatchJobQuery' => 'upload-batch scheduler, expiry and consent hook: queued extraction rows, lifecycle columns and removal of unfinished batch documents, no viewer, ids and counts only (15-03)',
 ];
 
 /**
@@ -184,12 +185,13 @@ const MD_STORE_USERS = [
     'Console/Commands/PruneMedicalOrphans.php',
     'Medical/Ai/RunExtractionJob.php',
     'Medical/Queries/AiReviewQuery.php',
+    'Medical/Queries/UploadBatchJobQuery.php',
 ];
 
 /** Store method => the only files that may call it (path relative to app/). */
 const MD_STORE_METHODS = [
     'put' => ['Http/Controllers/Health/DocumentController.php'],
-    'delete' => ['Http/Controllers/Health/DocumentController.php', 'Console/Commands/PruneMedicalOrphans.php'],
+    'delete' => ['Http/Controllers/Health/DocumentController.php', 'Console/Commands/PruneMedicalOrphans.php', 'Medical/Queries/UploadBatchJobQuery.php'],
     'deleteSubjectDirectory' => ['Medical/Queries/SubjectQuery.php', 'Console/Commands/PruneMedicalOrphans.php'],
     'absolutePath' => ['Http/Controllers/Health/DocumentController.php', 'Medical/Queries/AiReviewQuery.php'],
     'files' => ['Console/Commands/PruneMedicalOrphans.php'],
@@ -253,7 +255,7 @@ it('documents every allowlisted class with a reason and skips only by exact clas
     foreach (MD_MUT_ALLOWLIST as $class => $reason) {
         expect($reason)->not->toBe('');
     }
-    expect(array_keys(MD_MUT_ALLOWLIST))->toBe(['AdminSubjectQuery', 'SystemQuery', 'AiJobQuery', 'AiBulkJobQuery']);
+    expect(array_keys(MD_MUT_ALLOWLIST))->toBe(['AdminSubjectQuery', 'SystemQuery', 'AiJobQuery', 'AiBulkJobQuery', 'UploadBatchJobQuery']);
 
     $body = "{ DB::update('update medical_subject_members set level = 1'); }";
     expect(mdMutUnscoped("<?php class AdminSubjectQuery { public function a() $body }"))->toBe([])
