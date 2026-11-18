@@ -18,6 +18,16 @@ const MED_PARITY_CREATE_EXEMPT = [
     'health.people.store' => ['/^insert into "?medical_subjects"?\b/', '/^insert into "?medical_subject_members"?\b/'],
 ];
 
+/**
+ * Upload batch requests run UploadBatchJobQuery (the same class the scheduler uses, allowlisted in MedicalMutationScanTest: no viewer, ids
+ * and lifecycle columns only) after UploadBatchQuery proved the batch inside the viewer's scope in the same request. These statements are
+ * keyed by the batch id (and document id) the request just proved, never by a client id alone.
+ */
+const MED_PARITY_BATCH_JOB_EXEMPT = [
+    '/^delete from "?(medical_ai_extractions|medical_documents|medical_upload_batches|medical_upload_batch_items)"? where "(id|batch_id|upload_batch_id)" = \\?/',
+    '/^update "?(medical_ai_extractions|medical_documents|medical_upload_batches|medical_upload_batch_items)"?( as "\\w+")? set .*where ("\\w+"\\.)?"(id|batch_id|upload_batch_id)" = \\?/',
+];
+
 it('answers a write on a hidden record exactly like a write on a record that does not exist or is malformed', function () {
     $ctx = MedicalPrivacy::scenario();
     MedicalPrivacy::seedVisible($ctx);
@@ -87,7 +97,7 @@ it('issues only subject-scoped UPDATE, DELETE and INSERT statements from every h
             app('cache')->store()->flush();
             $this->flushSession();
             $this->actingAs($viewer)->call(MedicalPrivacy::method($route), $url, $payload);
-        }, MED_PARITY_CREATE_EXEMPT[$route->getName()] ?? []);
+        }, array_merge(MED_PARITY_CREATE_EXEMPT[$route->getName()] ?? [], str_starts_with((string) $route->getName(), 'health.batches.') ? MED_PARITY_BATCH_JOB_EXEMPT : []));
         $checked++;
     }
 

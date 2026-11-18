@@ -132,7 +132,7 @@ final class UploadBatchQuery
             if ($batch->status !== 'open') {
                 throw new DocumentRejected('batch_closed');
             }
-            $items = DB::table('medical_upload_batch_items')->where('batch_id', $batchId);
+            $items = $this->scopedItems($viewer, $subject, $batchId);
             if ((clone $items)->count() >= (int) config('medical.upload_batches.max_files')) {
                 throw new DocumentRejected('batch_full');
             }
@@ -154,7 +154,7 @@ final class UploadBatchQuery
                 'duplicate_of' => $duplicateOf === null ? null : (string) $duplicateOf,
                 'created_at' => $now, 'updated_at' => $now,
             ]);
-            DB::table('medical_upload_batches')->where('id', $batchId)->update(['acted_by' => $viewer->userId(), 'updated_at' => $now]);
+            $this->scopedBatches($viewer, $subject)->where('id', $batchId)->update(['acted_by' => $viewer->userId(), 'updated_at' => $now]);
 
             return ['itemId' => $itemId, 'documentId' => (string) $document->getKey(), 'duplicateOf' => $duplicateOf === null ? null : (string) $duplicateOf];
         });
@@ -190,7 +190,7 @@ final class UploadBatchQuery
 
         $currentProps = null;
         if ($current !== null) {
-            $row = DB::table('medical_upload_batch_items')->where('id', $current['id'])->where('batch_id', $batchId)->first(['adjustments', 'choices', 'extraction_id']);
+            $row = $this->scopedItems($viewer, $subject, $batchId)->where('id', $current['id'])->first(['adjustments', 'choices', 'extraction_id']);
             $review = null;
             $pageCount = null;
             if ($current['state'] === 'review' && $row->extraction_id !== null) {
@@ -229,6 +229,31 @@ final class UploadBatchQuery
     }
 
     /**
+     * The person's open batch for the person page: ids and counts only. Null for a View member or when none is open.
+     *
+     * @return array{id: string, total: int, done: int, expiresAt: string}|null
+     */
+    public function openFor(Viewer $viewer, MedicalSubject $subject): ?array
+    {
+        if (! $viewer->canEdit()) {
+            return null;
+        }
+        $batch = Visibility::apply(DB::table('medical_upload_batches')->where('subject_id', $subject->getKey())->where('status', 'open'), $viewer, 'subject_id', AccessLevel::Edit)
+            ->first(['id', 'expires_at']);
+        if ($batch === null) {
+            return null;
+        }
+        $items = $this->scopedItems($viewer, $subject, (string) $batch->id);
+
+        return [
+            'id' => (string) $batch->id,
+            'total' => (clone $items)->count(),
+            'done' => (clone $items)->where('state', 'done')->count(),
+            'expiresAt' => Carbon::parse($batch->expires_at)->toIso8601String(),
+        ];
+    }
+
+    /**
      * The polling payload: counts and items, never recognised text. Null outside the Edit scope.
      *
      * @return array<string, mixed>|null
@@ -257,7 +282,7 @@ final class UploadBatchQuery
             if ($this->item($batchId, $itemId, false) === null) {
                 return false;
             }
-            DB::table('medical_upload_batches')->where('id', $batchId)->update(['current_item_id' => $itemId, 'updated_at' => Carbon::now()]);
+            $this->scopedBatches($viewer, $subject)->where('id', $batchId)->update(['current_item_id' => $itemId, 'updated_at' => Carbon::now()]);
 
             return true;
         });
@@ -308,7 +333,7 @@ final class UploadBatchQuery
                 }
                 $clean[$key] = $one;
             }
-            DB::table('medical_upload_batch_items')->where('id', $itemId)->where('batch_id', $batchId)->update([
+            $this->scopedItems($viewer, $subject, $batchId)->where('id', $itemId)->update([
                 'choices' => json_encode((object) $clean), 'updated_at' => Carbon::now(),
             ]);
 
@@ -334,7 +359,7 @@ final class UploadBatchQuery
                 return null;
             }
             $adjustments = Adjustments::fromArray($values)->toArray();
-            DB::table('medical_upload_batch_items')->where('id', $itemId)->where('batch_id', $batchId)->update([
+            $this->scopedItems($viewer, $subject, $batchId)->where('id', $itemId)->update([
                 'adjustments' => json_encode($adjustments), 'updated_at' => Carbon::now(),
             ]);
 
@@ -384,11 +409,11 @@ final class UploadBatchQuery
 
             $this->jobs->cancelBatchRuns($batchId, $viewer->userId(), (string) $item->document_id);
             $now = Carbon::now();
-            DB::table('medical_upload_batch_items')->where('id', $itemId)->where('batch_id', $batchId)->update([
+            $this->scopedItems($viewer, $subject, $batchId)->where('id', $itemId)->update([
                 'state' => 'pending', 'choices' => '{}', 'rescan_count' => (int) $item->rescan_count + 1,
                 'rescan_requested_at' => $now, 'requested_by' => $viewer->userId(), 'updated_at' => $now,
             ]);
-            DB::table('medical_upload_batches')->where('id', $batchId)->update(['acted_by' => $viewer->userId(), 'updated_at' => $now]);
+            $this->scopedBatches($viewer, $subject)->where('id', $batchId)->update(['acted_by' => $viewer->userId(), 'updated_at' => $now]);
             $this->auditBatch($user, $subjectId, $batchId, 'rescan', (int) $item->rescan_count + 1);
 
             return ['result' => 'queued'];
@@ -465,14 +490,14 @@ final class UploadBatchQuery
             Visibility::apply(DB::table('medical_documents')->where('id', $documentId)->where('subject_id', $subjectId), $viewer, 'subject_id', AccessLevel::Edit)
                 ->update(['upload_batch_id' => null, 'updated_at' => Carbon::now()]);
             $now = Carbon::now();
-            DB::table('medical_upload_batch_items')->where('id', $itemId)->update(['state' => 'done', 'choices' => '{}', 'updated_at' => $now]);
+            $this->scopedItems($viewer, $subject, $batchId)->where('id', $itemId)->update(['state' => 'done', 'choices' => '{}', 'updated_at' => $now]);
 
             $next = $this->nextUnfinished($batchId, (int) $item->position);
             $changes = ['current_item_id' => $next, 'acted_by' => $viewer->userId(), 'updated_at' => $now];
             if ($next === null) {
                 $changes += ['status' => 'finished', 'finished_at' => $now];
             }
-            DB::table('medical_upload_batches')->where('id', $batchId)->update($changes);
+            $this->scopedBatches($viewer, $subject)->where('id', $batchId)->update($changes);
             // The audit meta has one count: the decided findings (each one has its own MedicalAiEntryDecided row, accepted or rejected).
             $this->auditBatch($user, $subjectId, $batchId, 'continued', $approved + $rejected);
 
@@ -514,8 +539,8 @@ final class UploadBatchQuery
             // The foreign keys cascade: the item and the document's AI rows.
             Visibility::apply(DB::table('medical_documents')->where('id', $documentId)->where('subject_id', $subjectId)->where('upload_batch_id', $batchId), $viewer, 'subject_id', AccessLevel::Edit)->delete();
             $now = Carbon::now();
-            DB::table('medical_upload_batches')->where('id', $batchId)->where('current_item_id', $itemId)->update(['current_item_id' => null]);
-            DB::table('medical_upload_batches')->where('id', $batchId)->update(['acted_by' => $viewer->userId(), 'updated_at' => $now]);
+            $this->scopedBatches($viewer, $subject)->where('id', $batchId)->where('current_item_id', $itemId)->update(['current_item_id' => null]);
+            $this->scopedBatches($viewer, $subject)->where('id', $batchId)->update(['acted_by' => $viewer->userId(), 'updated_at' => $now]);
             $this->auditBatch($user, $subjectId, $batchId, 'removed', 1);
 
             return true;
@@ -566,6 +591,13 @@ final class UploadBatchQuery
     private function scopedBatches(Viewer $viewer, MedicalSubject $subject): Builder
     {
         return Visibility::apply(DB::table('medical_upload_batches')->where('subject_id', $subject->getKey()), $viewer, 'subject_id', AccessLevel::Edit);
+    }
+
+    /** The items of one batch, inside the same membership scope as the batch (the subselect carries the predicate). */
+    private function scopedItems(Viewer $viewer, MedicalSubject $subject, string $batchId): Builder
+    {
+        return DB::table('medical_upload_batch_items')->where('batch_id', $batchId)
+            ->whereIn('batch_id', $this->scopedBatches($viewer, $subject)->where('id', $batchId)->select('id'));
     }
 
     private function openBatchId(Viewer $viewer, string $subjectId): ?string
