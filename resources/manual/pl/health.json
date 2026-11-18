@@ -70,7 +70,34 @@
           "Zdjęcia są zapisywane jako pomniejszona kopia, a miejsce i dane aparatu są z nich usuwane. Pliki PDF i HEIC są zapisywane bez zmian.",
           "Niektóre formaty zdjęć nie mają podglądu. Wtedy użyj **Pobierz dokument**, aby zobaczyć oryginał."
         ] },
-        { "type": "p", "text": "Dokument możesz otworzyć w nowej karcie albo pobrać z jego strony. Dokumenty nigdy nie są dostępne pod adresem, który mógłby otworzyć każdy: widzą je tylko członkowie z dostępem do osoby." }
+        { "type": "p", "text": "Dokument możesz otworzyć w nowej karcie albo pobrać z jego strony. Dokumenty nigdy nie są dostępne pod adresem, który mógłby otworzyć każdy: widzą je tylko członkowie z dostępem do osoby. Przy więcej niż 10 plikach zobacz [Wysyłanie wielu dokumentów naraz](health#bulk-upload)." }
+      ]
+    },
+    {
+      "id": "bulk-upload",
+      "title": "Wysyłanie wielu dokumentów naraz",
+      "blocks": [
+        { "type": "p", "text": "Gdy masz stos papierów, zeskanuj lub sfotografuj wszystko i dodaj jako jedną partię. AI czyta dokumenty jeden po drugim, a Ty sprawdzasz, co znalazła, przy jednym dokumencie naraz." },
+        { "type": "steps", "title": "Gdzie kliknąć", "items": [
+          "Otwórz osobę i naciśnij **Wgraj wiele dokumentów**. Ten przycisk widzą tylko członkowie, którzy mogą zmieniać dokumentację zdrowotną tej osoby.",
+          "Jeśli pojawi się informacja o AI, przeczytaj ją i potwierdź. Zgoda osoby na AI musi być włączona, tak jak przy **Uruchom AI**.",
+          "Wybierz pliki. Czytanie zaczyna się od pierwszego dokumentu, gdy pozostałe jeszcze się wysyłają.",
+          "Obserwuj listę: każdy dokument czeka, jest czytany przez AI, wstrzymany, gotowy, nieudany lub zakończony. Przeglądanie pierwszego gotowego dokumentu możesz zacząć od razu."
+        ] },
+        { "type": "steps", "title": "Przeglądanie każdego dokumentu", "items": [
+          "Porównaj wyniki z dokumentem. Przy każdym wyniku naciśnij **Zatwierdź** lub **Odrzuć**. Zatwierdzony wynik możesz przed kontynuacją edytować.",
+          "Naciśnij **Kontynuuj**. Zatwierdzone wyniki są zapisywane jako wpisy, a odrzucone usuwane. Wyniki, o których nie zdecydowałeś, zostają przy dokumencie, więc możesz je przejrzeć później, i otwiera się następny dokument.",
+          "Jeśli skan jest słaby, otwórz **Popraw skan**, zmień jasność, kontrast lub czarno-biały i naciśnij **Skanuj ponownie**. Dokument jest czytany jeszcze raz, a zaznaczenia zatwierdzenia i odrzucenia ustawione przy nim są kasowane bez pytania."
+        ] },
+        { "type": "list", "items": [
+          "Osoba ma naraz jedną niedokończoną partię. Partia liczy do 50 plików, każdy do 10 MB, w formacie PDF, JPG, PNG, WebP lub HEIC.",
+          "Niedokończone dokumenty liczą się do 200 dokumentów osoby, ale do czasu zakończenia nie pojawiają się wśród dokumentów osoby ani w wyszukiwaniu.",
+          "AI czyta jeden dokument naraz. Gdy limit AI się wyczerpie, status mówi wstrzymane do określonej godziny, a czytanie wznawia się samo.",
+          "Skanuj ponownie można 5 razy na dokument. Każde skanowanie to nowe uruchomienie AI i widać je w Ustawieniach, Wywołania AI (tylko administratorzy).",
+          "Jasność, kontrast i czarno-biały zmieniają tylko kopię wysyłaną do AI. Zapisany oryginał nigdy się nie zmienia. Ustawienia są zapamiętywane dla danego dokumentu.",
+          "Dokument, którego AI nie zdołała odczytać, możesz spróbować ponownie, zachować bez wyników (opcja tylko dla nieudanych dokumentów) lub usunąć z partii."
+        ] },
+        { "type": "p", "text": "Możesz zamknąć przeglądarkę i kontynuować później, na tym lub innym urządzeniu: partia pozostaje na stronie osoby. Niedokończona partia i jej niedokończone dokumenty są usuwane 30 dni po rozpoczęciu partii, z wyjątkiem dokumentu, który ma już przyjęte wyniki, ten zostaje; zakończone dokumenty i zapisane wpisy zostają zawsze. Zgoda osoby na AI i informacja o AI obowiązują tak jak przy **Uruchom AI**. Jeśli wyłączysz AI dla osoby, czekające i zakolejkowane czytanie jest anulowane, a rozpoznany tekst usuwany, ale dokumenty i Twoje decyzje zostają. Po ponownym włączeniu AI partia jest kontynuowana. Partię widzą i używają tylko członkowie, którzy mogą zmieniać dokumentację zdrowotną osoby, a jej działania trafiają do dziennika audytu." }
       ]
     },
     {

@@ -46,6 +46,13 @@ describe('manual covers the app', () => {
         }
     });
 
+    it('explains uploading many documents in the Health topic of every language, right after the documents section', () => {
+        for (const l of LOCALES) {
+            const ids = manual[l].health.sections.map((s) => s.id);
+            expect(ids.indexOf('bulk-upload'), `${l} health bulk-upload`).toBe(ids.indexOf('documents') + 1);
+        }
+    });
+
     it('has a topic for every module in the navigation', () => {
         const all = covered(false);
         for (const m of MODULES) expect(all.has(`module:${m.key}`), `no manual topic covers module "${m.key}"`).toBe(true);

@@ -70,7 +70,34 @@
           "Fotografie sa uložia ako zmenšená kópia a miesto a údaje o fotoaparáte sa z nich odstránia. Súbory PDF a HEIC sa uložia tak, ako sú.",
           "Niektoré formáty fotografií nemajú náhľad. Vtedy použite **Stiahnuť dokument**, aby ste videli originál."
         ] },
-        { "type": "p", "text": "Dokument môžete otvoriť na novej karte alebo ho stiahnuť zo stránky dokumentu. Dokumenty nie sú nikdy dostupné cez adresu, ktorú by mohol otvoriť ktokoľvek: vidieť ich môžu len členovia s prístupom k osobe." }
+        { "type": "p", "text": "Dokument môžete otvoriť na novej karte alebo ho stiahnuť zo stránky dokumentu. Dokumenty nie sú nikdy dostupné cez adresu, ktorú by mohol otvoriť ktokoľvek: vidieť ich môžu len členovia s prístupom k osobe. Pri viac ako 10 súboroch pozrite [Nahrávanie viacerých dokumentov naraz](health#bulk-upload)." }
+      ]
+    },
+    {
+      "id": "bulk-upload",
+      "title": "Nahrávanie viacerých dokumentov naraz",
+      "blocks": [
+        { "type": "p", "text": "Keď máte kopu papierov, naskenujte alebo odfoťte všetko a pridajte to ako jednu dávku. AI číta dokumenty jeden po druhom a vy kontrolujete, čo našla, vždy pri jednom dokumente." },
+        { "type": "steps", "title": "Kde kliknúť", "items": [
+          "Otvorte osobu a stlačte **Nahrať viac dokumentov**. Toto tlačidlo vidia iba členovia, ktorí môžu meniť zdravotné záznamy tej osoby.",
+          "Ak sa zobrazí upozornenie o AI, prečítajte si ho a potvrďte. Súhlas osoby s AI musí byť zapnutý, rovnako ako pri **Spustiť AI**.",
+          "Vyberte súbory. Čítanie začne pri prvom dokumente, kým sa ostatné ešte nahrávajú.",
+          "Sledujte zoznam: každý dokument čaká, číta ho AI, je pozastavený, pripravený, zlyhal alebo je hotový. S kontrolou prvého pripraveného dokumentu môžete začať hneď."
+        ] },
+        { "type": "steps", "title": "Kontrola každého dokumentu", "items": [
+          "Porovnajte nálezy s dokumentom. Pri každom náleze stlačte **Schváliť** alebo **Zamietnuť**. Schválený nález môžete pred pokračovaním upraviť.",
+          "Stlačte **Pokračovať**. Schválené nálezy sa uložia ako záznamy a zamietnuté sa zahodia. Nálezy, o ktorých ste nerozhodli, zostanú pri dokumente, takže ich môžete skontrolovať neskôr, a otvorí sa ďalší dokument.",
+          "Ak je sken zlý, otvorte **Zlepšiť sken**, upravte jas, kontrast alebo čiernobiely režim a stlačte **Skenovať znova**. Dokument sa prečíta znova a značky schválenia a zamietnutia, ktoré ste pri ňom nastavili, sa zrušia bez opýtania."
+        ] },
+        { "type": "list", "items": [
+          "Osoba má naraz jednu nedokončenú dávku. Dávka má najviac 50 súborov, každý do 10 MB, vo formáte PDF, JPG, PNG, WebP alebo HEIC.",
+          "Nedokončené dokumenty sa počítajú do 200 dokumentov osoby, ale kým nie sú dokončené, nezobrazujú sa medzi dokumentmi osoby ani vo vyhľadávaní.",
+          "AI číta jeden dokument naraz. Keď sa vyčerpá limit AI, stav hovorí pozastavené do určitého času a čítanie pokračuje samo.",
+          "Skenovať znova je možné 5-krát na dokument. Každé skenovanie je nový beh AI a zobrazí sa v Nastaveniach, Volania AI (iba administrátori).",
+          "Jas, kontrast a čiernobiely režim menia iba kópiu poslanú AI. Uložený originál sa nikdy nezmení. Nastavenia sa pre daný dokument pamätajú.",
+          "Dokument, ktorý AI nedokázala prečítať, môžete skúsiť znova, ponechať bez nálezov (ponúka sa iba pri zlyhaných dokumentoch) alebo odstrániť z dávky."
+        ] },
+        { "type": "p", "text": "Prehliadač môžete zavrieť a pokračovať neskôr, na tomto alebo inom zariadení: dávka zostáva na stránke osoby. Nedokončená dávka a jej nedokončené dokumenty sa zmažú 30 dní po začatí dávky, okrem dokumentu, ktorý už má prijaté nálezy, ten sa ponechá; dokončené dokumenty a uložené záznamy zostávajú vždy. Súhlas osoby s AI a upozornenie o AI platia rovnako ako pri **Spustiť AI**. Ak pre osobu vypnete AI, čakajúce a zaradené čítanie sa zruší a rozpoznaný text sa odstráni, ale dokumenty a vaše rozhodnutia zostanú. Keď AI znova zapnete, dávka pokračuje. Dávku vidia a používajú iba členovia, ktorí môžu meniť zdravotné záznamy osoby, a jej akcie sa zapisujú do denníka auditu." }
       ]
     },
     {
