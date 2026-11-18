@@ -15,6 +15,7 @@ import { securityFetch } from '../../Security/securityFetch.js';
 import { useFrameWidth } from '../../Shell/shellState.js';
 import { INTL_LOCALES } from '../../i18n.js';
 import { handleHealthRefusal } from '../../Health/healthRefusal.js';
+import BatchReview from '../../Health/Batch/BatchReview.vue';
 import BatchItemList from '../../Health/Batch/BatchItemList.vue';
 import BatchUploader from '../../Health/Batch/BatchUploader.vue';
 import { itemView } from '../../Health/Batch/batchState.js';
@@ -84,6 +85,12 @@ async function select(itemId) {
     error.value = true;
 }
 
+// A document was continued, re-scanned or removed: ask the server for the new state and the new current document.
+function changed() {
+    status.refresh();
+    router.reload({ only: RELOAD, preserveScroll: true });
+}
+
 const uploading = ref(false);
 function uploaded() {
     status.refresh();
@@ -144,11 +151,21 @@ async function remove() {
                     </UiCard>
                 </aside>
 
-                <!-- The review area (15-07 plugs the review, adjustments, re-scan and Continue controls in here). -->
+                <!-- The review area: the current document, its findings, adjustments, re-scan and Continue. -->
                 <section class="batch-page__review" :aria-labelledby="ids.review" data-testid="batch-review">
                     <h2 :id="ids.review" class="batch-page__heading">{{ t('health.batch.review_title') }}</h2>
                     <UiEmptyState v-if="liveItems.length === 0" :title="t('health.batch.empty')" data-testid="batch-empty" />
                     <p v-else-if="finished" class="batch-page__finished" role="status" data-testid="batch-finished">{{ t('health.batch.finished') }}</p>
+                    <BatchReview
+                        v-else-if="current && current.item.id === currentId"
+                        :key="current.item.id"
+                        :person-id="person.id"
+                        :batch-id="batch.id"
+                        :current="current"
+                        :limits="limits"
+                        :ai="ai"
+                        @changed="changed"
+                    />
                     <div v-else-if="currentItem" class="batch-page__current" data-testid="batch-current">
                         <p class="batch-page__current-title">{{ currentItem.title }}</p>
                         <p class="batch-page__current-state">{{ currentText }}</p>
