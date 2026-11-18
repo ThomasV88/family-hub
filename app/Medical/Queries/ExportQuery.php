@@ -83,7 +83,8 @@ class ExportQuery
      */
     public function documents(Viewer $viewer, MedicalSubject $subject, bool $includeUnverified, ?string $specialty = null): LazyCollection
     {
-        $query = Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey()), $viewer, 'subject_id', AccessLevel::Edit);
+        // Unfinished upload-batch documents are listed only on their batch page (Phase 15).
+        $query = Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey())->whereNull('upload_batch_id'), $viewer, 'subject_id', AccessLevel::Edit);
         if ($specialty !== null) {
             $visitIds = Visibility::apply(
                 DB::table('medical_visits')->select('id')->where('subject_id', $subject->getKey())->where('specialty_key', $specialty),

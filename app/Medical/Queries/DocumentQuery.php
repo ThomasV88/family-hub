@@ -24,9 +24,10 @@ class DocumentQuery
 {
     public function __construct(private readonly VisitQuery $visits) {}
 
+    /** Unfinished upload-batch documents are listed only on their batch page (Phase 15). */
     public function countForSubject(Viewer $viewer, MedicalSubject $subject): int
     {
-        return Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey()), $viewer)->count();
+        return Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey())->whereNull('upload_batch_id'), $viewer)->count();
     }
 
     /**
@@ -39,10 +40,14 @@ class DocumentQuery
         return Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey()), $viewer, 'subject_id', AccessLevel::View, ArchiveState::Any)->count();
     }
 
-    /** @return Collection<int, MedicalDocument> */
+    /**
+     * Unfinished upload-batch documents are listed only on their batch page (Phase 15).
+     *
+     * @return Collection<int, MedicalDocument>
+     */
     public function forSubject(Viewer $viewer, MedicalSubject $subject): Collection
     {
-        return Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey()), $viewer)
+        return Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey())->whereNull('upload_batch_id'), $viewer)
             ->orderByDesc('created_at')
             ->orderBy('id')
             ->get();
