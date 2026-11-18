@@ -270,8 +270,8 @@ it('reseeds and audits cleanly after synthetic users created finance, medical, A
 
     // everything the testers added is gone and the demo data is back exactly once
     expect(seededCounts())->toBe($baseline);
-    // append-only history stays (the testers' rows plus three more demo calls), and the audit accepts its dangling synthetic ids
-    expect(DB::table('ai_calls')->count())->toBe($calls + 3);
+    // append-only history stays (the testers' rows plus one more seed's demo calls), and the audit accepts its dangling synthetic ids
+    expect(DB::table('ai_calls')->count())->toBe($calls + $demoCalls);
     $this->artisan('staging:audit')->assertExitCode(0);
 });
 

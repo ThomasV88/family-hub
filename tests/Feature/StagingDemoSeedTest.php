@@ -104,8 +104,9 @@ it('fills every module within the expected ranges and measures the run', functio
         ->and($c['finance_import_batches'])->toBeBetween(1, 3)
         ->and($c['medical_subjects'])->toBeBetween(5, 6)
         ->and($c['medical_visits'])->toBeBetween(40, 80)
-        ->and($c['medical_documents'])->toBe(9)
-        ->and($c['medical_ai_extractions'])->toBe(4)
+        // Phase 15: five more documents and four more runs belong to the unfinished upload batch
+        ->and($c['medical_documents'])->toBe(14)
+        ->and($c['medical_ai_extractions'])->toBe(8)
         ->and($c['shopping_lists'])->toBe(8)
         ->and($c['shopping_catalog_items'])->toBeBetween(25, 35)
         ->and($c['shopping_stores'])->toBe(5)
@@ -311,13 +312,13 @@ it('keeps health private per person and seeds a full record for each', function 
         ->and($c->firstWhere('vaccine', 'MMR (2. dávka)')->status)->toBe('overdue');
 });
 
-it('stores nine synthetic documents (one archived) that can be read back, with PDFs of two, three and nine pages', function () {
+it('stores fourteen synthetic documents (one archived, five in the upload batch) that can be read back, with PDFs of two, three and nine pages', function () {
     demoSeed();
 
     $docs = DB::table('medical_documents')->get();
-    expect($docs)->toHaveCount(9)
+    expect($docs)->toHaveCount(14)
         ->and($docs->where('kind', 'pdf'))->toHaveCount(6)
-        ->and($docs->where('kind', 'image'))->toHaveCount(3);
+        ->and($docs->where('kind', 'image'))->toHaveCount(8);
     $disk = Storage::disk('medical');
     foreach ($docs as $doc) {
         expect($disk->exists($doc->path))->toBeTrue()
@@ -343,10 +344,11 @@ it('seeds AI proposals for review without any provider call, with accepted, veri
     $parent = demoUser('sk_sk.1');
     $viewer = MedicalViewer::for($parent);
 
-    $ready = MedicalAiExtraction::where('status', 'ready')->get();
+    // The upload batch runs (Phase 15) are checked in StagingUploadBatchSeedTest.
+    $ready = MedicalAiExtraction::where('status', 'ready')->whereNull('upload_batch_id')->get();
     expect($ready)->toHaveCount(2)
-        ->and(MedicalAiExtraction::where('status', 'failed')->count())->toBe(1)
-        ->and(MedicalAiExtraction::where('status', 'failed')->value('failure_code'))->toBe('invalid_output');
+        ->and(MedicalAiExtraction::where('status', 'failed')->whereNull('upload_batch_id')->count())->toBe(1)
+        ->and(MedicalAiExtraction::where('status', 'failed')->whereNull('upload_batch_id')->value('failure_code'))->toBe('invalid_output');
     foreach ($ready as $extraction) {
         $outcome = app(ExtractionValidator::class)->validate(json_encode($extraction->payload, JSON_UNESCAPED_UNICODE));
         expect($outcome->ok)->toBeTrue()
@@ -356,7 +358,7 @@ it('seeds AI proposals for review without any provider call, with accepted, veri
     }
 
     // content-free call rows: succeeded x2, failed x1
-    $calls = DB::table('ai_calls')->get();
+    $calls = DB::table('ai_calls')->whereIn('extraction_id', MedicalAiExtraction::whereNull('upload_batch_id')->select('id'))->get();
     expect($calls)->toHaveCount(3)
         ->and($calls->where('status', 'succeeded'))->toHaveCount(2)
         ->and($calls->where('status', 'failed'))->toHaveCount(1)
@@ -409,8 +411,8 @@ it('is idempotent: a second run leaves the same rows, no orphans and an audit th
     expect(demoCounts())->toBe($first)
         ->and(count(Storage::disk('medical')->allFiles()))->toBe($files)
         ->and($seconds)->toBeLessThan(60)
-        // append-only call history grows by the three demo calls per run; the audit accepts their dangling ids
-        ->and(DB::table('ai_calls')->count())->toBe($calls + 3);
+        // append-only call history grows by the demo calls of one seed (three proposals, four batch runs) per run; the audit accepts their dangling ids
+        ->and(DB::table('ai_calls')->count())->toBe($calls * 2);
 
     // no orphan: every owner of a demo row is one of the seven current users, and nothing points to a deleted person
     $ids = User::pluck('id')->all();
