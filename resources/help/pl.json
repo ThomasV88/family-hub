@@ -93,7 +93,7 @@
         },
         "wishlist.links": {
             "title": "Linki",
-            "text": "Sklepy lub strony, gdzie można kupić prezent, maksymalnie 5. Pomaga krótki opis, np. nazwa sklepu. Inni widzą je przy życzeniu."
+            "text": "Sklepy lub strony, gdzie można kupić prezent, maksymalnie 5. Wklejenie pierwszego linku uzupełnia puste pola tytułu i notatek z jego strony i znajduje obraz; Twój własny tekst nie jest zastępowany. Pomaga krótki opis. Inni widzą linki przy życzeniu."
         },
         "wishlist.received": {
             "title": "Oznacz jako otrzymane",

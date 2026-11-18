@@ -24,7 +24,7 @@
           "Stlačte **Uložiť želanie**."
         ] },
         { "type": "list", "items": [
-          "**Odkazy**: až 5 adries obchodov alebo stránok, každá s voliteľným popisom.",
+          "**Odkazy**: až 5 adries obchodov alebo stránok, každá s voliteľným popisom. Keď do nového priania vložíte prvý odkaz, prázdny **Názov** a **Poznámky** sa vyplnia z tej stránky a zobrazí sa obrázok. Obrázok sa pripojí pri uložení. Text, ktorý ste napísali sami, sa nikdy neprepíše a všetko môžete zmeniť. Ďalšie odkazy sa nečítajú. Ak sa niečo nepodarilo načítať, správa to pomenuje (obrázok, názov alebo popis) a ak je známe, aj prečo. Prvý odkaz načítate znova tlačidlom **Načítať znova z prvého odkazu**.",
           "**Cena** a **Mena**: približná cena pomáha ostatným plánovať.",
           "**Priorita**: **Hlavné želanie**, **Veľmi by ma potešilo** alebo **Bolo by fajn**.",
           "**Poznámky**: veľkosť, farba alebo čokoľvek iné.",

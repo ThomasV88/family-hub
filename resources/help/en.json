@@ -93,7 +93,7 @@
         },
         "wishlist.links": {
             "title": "Links",
-            "text": "Shops or pages where the gift can be bought, up to 5. A short label such as the shop name helps. Others see them on the wish."
+            "text": "Shops or pages where the gift can be bought, up to 5. Pasting the first link fills an empty title and notes from the page and finds a picture; your own text is never replaced. A short label helps. Others see the links on the wish."
         },
         "wishlist.received": {
             "title": "Mark as received",
