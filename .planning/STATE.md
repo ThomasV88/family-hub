@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Rebranding and bulk document upload
-status: Defining requirements
+status: milestone_ready_for_review
 last_updated: "2026-11-18T02:26:48.684Z"
 last_activity: 2026-11-18 — Milestone v1.1 started
 progress:
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-11-12)
 
 Phase: Not started (defining requirements)
 Plan: —
-Status: Defining requirements
+Status: Phases 14 and 15 done on develop (staging), awaiting owner review and PR to main
 Last activity: 2026-11-18 — Milestone v1.1 started
 
 ## Performance Metrics

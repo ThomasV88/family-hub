@@ -23,8 +23,8 @@ Family Hub is built as a vertical-slice MVP: each phase delivers a usable capabi
 
 ### Milestone v1.1 (started 2026-11-18)
 
-- [ ] **Phase 14: Rebranding (issue #13)** - FamilyHUB logo, favicons, PWA icons and brand colour tokens from the supplied brand kit
-- [ ] **Phase 15: Bulk medical document upload (issue #14)** - Resumable server-side batches with sequential AI processing, per-finding review, re-scan and AI-copy image adjustments
+- [x] **Phase 14: Rebranding (issue #13)** - FamilyHUB logo, favicons, PWA icons and brand colour tokens from the supplied brand kit
+- [x] **Phase 15: Bulk medical document upload (issue #14)** - Resumable server-side batches with sequential AI processing, per-finding review, re-scan and AI-copy image adjustments
 
 ## Phase Details
 
@@ -498,15 +498,15 @@ Plans:
 **Open point:** the brand guide PDF could not be rendered on this machine during milestone setup (no poppler). Read it (palette, minimum sizes, clear space) at the start of discuss/plan, and confirm whether the product name changes from "Family Hub" to "FamilyHUB".
 **Source:** brand kit attached to GitHub #13 (`FamilyHUB-brand-kit.zip`).
 **Commit rule:** commits that resolve part of #13 carry `Fixes #13`.
-**Plans:** 6 plans
+**Plans:** 6/6 plans complete
 
 Plans:
-- [ ] 14-01-PLAN.md — Brand guide reading and reconciliation, brand colour tokens with WCAG AA in light and dark (wave 1)
-- [ ] 14-02-PLAN.md — Kit favicon, apple-touch, PWA and maskable icons with cache-busting names, manifest, head and push icon (wave 1)
-- [ ] 14-03-PLAN.md — Theme-aware BrandLogo in top bar, auth pages, offline page and style guide (wave 2)
-- [ ] 14-04-PLAN.md — FamilyHUB name in SK/PL/EN strings, mail templates, app-name defaults and README (wave 1)
-- [ ] 14-05-PLAN.md — Manual rename and new-icon FAQ in SK/PL/EN, help coverage confirmed (wave 1)
-- [ ] 14-06-PLAN.md — Old-name guard test, production APP_NAME release note, full gate, staging verification checkpoint (wave 3)
+- [x] 14-01-PLAN.md — Brand guide reading and reconciliation, brand colour tokens with WCAG AA in light and dark (wave 1)
+- [x] 14-02-PLAN.md — Kit favicon, apple-touch, PWA and maskable icons with cache-busting names, manifest, head and push icon (wave 1)
+- [x] 14-03-PLAN.md — Theme-aware BrandLogo in top bar, auth pages, offline page and style guide (wave 2)
+- [x] 14-04-PLAN.md — FamilyHUB name in SK/PL/EN strings, mail templates, app-name defaults and README (wave 1)
+- [x] 14-05-PLAN.md — Manual rename and new-icon FAQ in SK/PL/EN, help coverage confirmed (wave 1)
+- [x] 14-06-PLAN.md — Old-name guard test, production APP_NAME release note, full gate, staging verification checkpoint (wave 3)
 
 ### Phase 15: Bulk medical document upload (issue #14)
 
@@ -521,15 +521,15 @@ Plans:
 5. Quota exhaustion pauses the batch and it resumes by itself; unfinished batches and files expire after 30 days; access follows the person's record rules, with consent, audit and no content in logs.
 **Owner decisions (2026-11-18):** one person per batch; batch stored server-side; "Continue" saves approved findings per document; originals are never changed by adjustments; 30-day auto-expiry.
 **Commit rule:** commits that resolve part of #14 carry `Fixes #14`. Reuse the Phase 9 bulk guards and the Phase 13 pre-processing evaluation results.
-**Plans:** 4/9 plans executed
+**Plans:** 9/9 plans complete (+ gap closure 15-10)
 
 Plans:
 - [x] 15-01-PLAN.md — Batch and item tables, extraction columns, limits; unfinished batch documents hidden from person page, search, export and bulk re-read
 - [x] 15-02-PLAN.md — AI-copy adjustments (brightness, contrast, black and white via GD, original untouched) and fresh re-read in the run job
 - [x] 15-03-PLAN.md — One-document-at-a-time batch tick, quota park and self-resume, consent-withdrawal hook, 30-day expiry with file deletion
 - [x] 15-04-PLAN.md — Member-side batch domain: create with consent and notice, upload, server-saved choices and adjustments, re-scan, Continue via the accept path
-- [ ] 15-05-PLAN.md — Batch routes and controller (uniform 403, throttles), upload into a batch through the document endpoint, person-page open-batch prop
-- [ ] 15-06-PLAN.md — Strings in en/sk/pl and audit labels, start control and banner on the person, batch uploader, live status list and resumable batch page
-- [ ] 15-07-PLAN.md — Review with persistent approve/reject, Continue, adjustment panel with live preview, re-scan and failed-document actions
-- [ ] 15-08-PLAN.md — Manual section bulk-upload and who-sees-what in SK/PL/EN, four help tips with registry and placement
-- [ ] 15-09-PLAN.md — Staging seed and audit, content-in-logs proof, a11y and pseudo-long, full gate (Fixes #14), staging verification with the real AI
+- [x] 15-05-PLAN.md — Batch routes and controller (uniform 403, throttles), upload into a batch through the document endpoint, person-page open-batch prop
+- [x] 15-06-PLAN.md — Strings in en/sk/pl and audit labels, start control and banner on the person, batch uploader, live status list and resumable batch page
+- [x] 15-07-PLAN.md — Review with persistent approve/reject, Continue, adjustment panel with live preview, re-scan and failed-document actions
+- [x] 15-08-PLAN.md — Manual section bulk-upload and who-sees-what in SK/PL/EN, four help tips with registry and placement
+- [x] 15-09-PLAN.md — Staging seed and audit, content-in-logs proof, a11y and pseudo-long, full gate (Fixes #14), staging verification with the real AI
