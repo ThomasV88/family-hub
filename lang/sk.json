@@ -1193,6 +1193,20 @@
             "err_upload": "Obrázok sa nepodarilo nahrať. Skúste to znova.",
             "err_load": "Načítanie obrázka sa nepodarilo spustiť. Skúste to znova."
         },
+        "preview": {
+            "loading": "Načítavam názov, popis a obrázok...",
+            "done_image_on_save": "Obrázok sa našiel. Pripojí sa pri uložení priania.",
+            "image_alt": "Obrázok nájdený na prvom odkaze",
+            "missing_intro": "Nepodarilo sa načítať: {list}.",
+            "missing_image": "obrázok",
+            "missing_title": "názov",
+            "missing_description": "popis",
+            "reason_timeout": "stránka odpovedala príliš dlho",
+            "reason_blocked": "adresa nie je povolená",
+            "reason_no_tags": "stránka ho neposkytuje",
+            "reason_unreachable": "stránka nie je dostupná",
+            "reload": "Načítať znova z prvého odkazu"
+        },
         "res": {
             "title": "Rezervácia",
             "free": "Zatiaľ to nikto nekupuje.",

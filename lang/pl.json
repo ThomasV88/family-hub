@@ -1193,6 +1193,20 @@
             "err_upload": "Nie udało się przesłać obrazu. Spróbuj ponownie.",
             "err_load": "Nie udało się rozpocząć pobierania obrazu. Spróbuj ponownie."
         },
+        "preview": {
+            "loading": "Wczytuję tytuł, opis i obraz...",
+            "done_image_on_save": "Znaleziono obraz. Zostanie dołączony po zapisaniu życzenia.",
+            "image_alt": "Obraz znaleziony w pierwszym linku",
+            "missing_intro": "Nie udało się wczytać: {list}.",
+            "missing_image": "obraz",
+            "missing_title": "tytuł",
+            "missing_description": "opis",
+            "reason_timeout": "strona odpowiadała zbyt długo",
+            "reason_blocked": "adres jest niedozwolony",
+            "reason_no_tags": "strona go nie udostępnia",
+            "reason_unreachable": "strona jest niedostępna",
+            "reload": "Wczytaj ponownie z pierwszego linku"
+        },
         "res": {
             "title": "Rezerwacja",
             "free": "Nikt jeszcze tego nie kupuje.",
