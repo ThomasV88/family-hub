@@ -186,12 +186,13 @@ const MD_STORE_USERS = [
     'Medical/Ai/RunExtractionJob.php',
     'Medical/Queries/AiReviewQuery.php',
     'Medical/Queries/UploadBatchJobQuery.php',
+    'Medical/Queries/UploadBatchQuery.php',
 ];
 
 /** Store method => the only files that may call it (path relative to app/). */
 const MD_STORE_METHODS = [
     'put' => ['Http/Controllers/Health/DocumentController.php'],
-    'delete' => ['Http/Controllers/Health/DocumentController.php', 'Console/Commands/PruneMedicalOrphans.php', 'Medical/Queries/UploadBatchJobQuery.php'],
+    'delete' => ['Http/Controllers/Health/DocumentController.php', 'Console/Commands/PruneMedicalOrphans.php', 'Medical/Queries/UploadBatchJobQuery.php', 'Medical/Queries/UploadBatchQuery.php'],
     'deleteSubjectDirectory' => ['Medical/Queries/SubjectQuery.php', 'Console/Commands/PruneMedicalOrphans.php'],
     'absolutePath' => ['Http/Controllers/Health/DocumentController.php', 'Medical/Queries/AiReviewQuery.php'],
     'files' => ['Console/Commands/PruneMedicalOrphans.php'],
