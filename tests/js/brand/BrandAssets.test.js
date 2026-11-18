@@ -63,13 +63,13 @@ describe('manifest, head and service worker wiring', () => {
         expect(vite).toContain("name: 'FamilyHUB'");
         const srcs = [...vite.matchAll(/src:\s*'([^']+)'/g)].map((m) => m[1]);
         expect(srcs.length).toBe(3);
-        for (const s of srcs) expect(existsSync(p('public', s))).toBe(true);
+        for (const s of srcs) expect(existsSync(p('public', s.replace(/^\//, '')))).toBe(true);
     });
 
     it('app.blade.php references existing icons and a versioned favicon', () => {
         const links = [...blade.matchAll(/href="(\/icons\/[^"]+)"/g)].map((m) => m[1]);
         expect(links.length).toBeGreaterThan(0);
-        for (const l of links) expect(existsSync(p('public', l))).toBe(true);
+        for (const l of links) expect(existsSync(p('public', l.replace(/^\//, '')))).toBe(true);
         expect(blade).toContain('favicon.ico?v=');
     });
 
