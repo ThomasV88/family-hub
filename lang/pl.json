@@ -1134,7 +1134,15 @@
             "show": "Otrzymane ({n})",
             "tag": "Otrzymane",
             "hide": "Ukryj otrzymane ({n})",
-            "mark": "Oznacz jako otrzymane"
+            "mark": "Oznacz jako otrzymane",
+            "restore": "Przenieś z powrotem na moją listę",
+            "confirm_title": "Oznaczyć jako otrzymane?",
+            "confirm_body": "Życzenie trafi do sekcji Otrzymane i nie będzie można go edytować. Możesz je później przywrócić.",
+            "confirm_action": "Oznacz jako otrzymane",
+            "restore_title": "Przenieść z powrotem na listę?",
+            "restore_body": "Życzenie wróci na aktywną listę i będzie można je znowu edytować.",
+            "restore_action": "Przenieś z powrotem",
+            "cancel": "Anuluj"
         },
         "shopping": {
             "title": "Twoje zakupy",
@@ -1256,6 +1264,7 @@
             "saved": "Zapisano życzenie",
             "deleted": "Usunięto życzenie",
             "received": "Życzenie oznaczono jako otrzymane",
+            "unreceived": "Życzenie przeniesiono z powrotem na listę",
             "reserved": "Prezent zarezerwowany",
             "unreserved": "Rezerwację anulowano",
             "cobuy_open": "Wspólny zakup otwarty",

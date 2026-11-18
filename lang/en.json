@@ -1134,7 +1134,15 @@
             "show": "Received ({n})",
             "tag": "Received",
             "hide": "Hide received ({n})",
-            "mark": "Mark as received"
+            "mark": "Mark as received",
+            "restore": "Move back to my list",
+            "confirm_title": "Mark as received?",
+            "confirm_body": "The wish moves to the Received section and can no longer be edited. You can move it back later.",
+            "confirm_action": "Mark as received",
+            "restore_title": "Move back to my list?",
+            "restore_body": "The wish returns to your active list and can be edited again.",
+            "restore_action": "Move back",
+            "cancel": "Cancel"
         },
         "shopping": {
             "title": "Your shopping",
@@ -1256,6 +1264,7 @@
             "saved": "Wish saved",
             "deleted": "Wish deleted",
             "received": "Wish marked as received",
+            "unreceived": "Wish moved back to your list",
             "reserved": "Gift reserved",
             "unreserved": "Reservation cancelled",
             "cobuy_open": "Co-buying opened",

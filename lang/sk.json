@@ -1134,7 +1134,15 @@
             "show": "Prijaté ({n})",
             "tag": "Prijaté",
             "hide": "Skryť prijaté ({n})",
-            "mark": "Označiť ako prijaté"
+            "mark": "Označiť ako prijaté",
+            "restore": "Vrátiť do môjho zoznamu",
+            "confirm_title": "Označiť ako prijaté?",
+            "confirm_body": "Želanie sa presunie do časti Prijaté a už sa nedá upravovať. Neskôr ho môžete vrátiť späť.",
+            "confirm_action": "Označiť ako prijaté",
+            "restore_title": "Vrátiť do zoznamu?",
+            "restore_body": "Želanie sa vráti do aktívneho zoznamu a opäť sa dá upravovať.",
+            "restore_action": "Vrátiť späť",
+            "cancel": "Zrušiť"
         },
         "shopping": {
             "title": "Váš nákup",
@@ -1256,6 +1264,7 @@
             "saved": "Želanie uložené",
             "deleted": "Želanie odstránené",
             "received": "Želanie označené ako prijaté",
+            "unreceived": "Želanie vrátené do vášho zoznamu",
             "reserved": "Darček rezervovaný",
             "unreserved": "Rezervácia zrušená",
             "cobuy_open": "Spoločný nákup otvorený",

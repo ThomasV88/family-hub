@@ -188,12 +188,45 @@ describe('OwnWishPanel edit mode', () => {
         expect(data.urls).toEqual([{ url: 'https://shop1.example/item', label: null }, { url: 'https://shop2.example/item', label: 'Outlet' }]);
     });
 
-    it('marks as received with a POST', async () => {
+    it('asks before marking as received and only posts after confirming', async () => {
         const w = mountPanel({ mode: 'edit', wish: EDIT });
         btn('Mark as received').click();
         await flushPromises();
-        expect(calls.post.mock.calls[0][0]).toBe('/wishlist/wishes/11/received');
+        expect(document.body.textContent).toContain('Mark as received?');
+        expect(calls.post).not.toHaveBeenCalled();
+        btn('Cancel').click();
+        await flushPromises();
+        expect(calls.post).not.toHaveBeenCalled();
         expect(w.emitted('close')).toBeUndefined();
+        btn('Mark as received').click();
+        await flushPromises();
+        const confirm = [...document.body.querySelectorAll('button')].filter((b) => b.textContent.trim() === 'Mark as received').pop();
+        confirm.click();
+        await flushPromises();
+        expect(calls.post).toHaveBeenCalledTimes(1);
+        expect(calls.post.mock.calls[0][0]).toBe('/wishlist/wishes/11/received');
+    });
+
+    it('has no Mark as received button in the create form', () => {
+        mountPanel({ mode: 'create' });
+        expect(btn('Mark as received')).toBeUndefined();
+        expect(btn('Move back to my list')).toBeUndefined();
+    });
+
+    it('moves a received wish back only after confirming', async () => {
+        mountPanel({ mode: 'edit', wish: { ...EDIT, received: true } });
+        btn('Move back to my list').click();
+        await flushPromises();
+        expect(calls.delete).not.toHaveBeenCalled();
+        btn('Cancel').click();
+        await flushPromises();
+        expect(calls.delete).not.toHaveBeenCalled();
+        btn('Move back to my list').click();
+        await flushPromises();
+        btn('Move back').click();
+        await flushPromises();
+        expect(calls.delete).toHaveBeenCalledTimes(1);
+        expect(calls.delete.mock.calls[0][0]).toBe('/wishlist/wishes/11/received');
     });
 
     it('confirms deletion with the wish title, focusing Keep wish, and then deletes', async () => {
@@ -212,6 +245,7 @@ describe('OwnWishPanel edit mode', () => {
         mountPanel({ mode: 'edit', wish: { ...EDIT, received: true } });
         expect(btn('Save wish')).toBeUndefined();
         expect(btn('Mark as received')).toBeUndefined();
+        expect(btn('Move back to my list')).toBeTruthy();
         expect(document.querySelector('fieldset.wish-panel__fields').disabled).toBe(true);
         expect(btn('Delete wish')).toBeTruthy();
     });

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
-import { Check, Link, RefreshCw, Trash2, Upload } from '@lucide/vue';
+import { Check, Link, RefreshCw, Trash2, Undo2, Upload } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import UiAlert from '../Components/ui/UiAlert.vue';
 import UiButton from '../Components/ui/UiButton.vue';
@@ -66,6 +66,8 @@ const links = ref(null);
 const prioRoot = ref(null);
 const discardOpen = ref(false);
 const deleteOpen = ref(false);
+const receiveOpen = ref(false);
+const restoreOpen = ref(false);
 let pendingAfterDiscard = null;
 
 const dirty = computed(() => JSON.stringify(form.value) !== snapshot.value);
@@ -153,8 +155,11 @@ function save() {
     else router.patch(`/wishlist/wishes/${props.wish.id}`, payload(), visitOptions(done));
 }
 
-function markReceived() {
+function confirmReceived() {
     router.post(`/wishlist/wishes/${props.wish.id}/received`, {}, visitOptions(() => emit('close')));
+}
+function confirmRestore() {
+    router.delete(`/wishlist/wishes/${props.wish.id}/received`, visitOptions(() => emit('close')));
 }
 function confirmDelete() {
     router.delete(`/wishlist/wishes/${props.wish.id}`, visitOptions(() => emit('close')));
@@ -407,7 +412,8 @@ defineExpose({ guard, dirty });
 
         <template #footer>
             <UiButton v-if="!creating" variant="ghost" :icon="Trash2" class="wish-panel__delete" @click="deleteOpen = true">{{ t('wishlist.delete.action') }}</UiButton>
-            <UiButton v-if="!creating && !received" variant="secondary" :icon="Check" @click="markReceived">{{ t('wishlist.received.mark') }}</UiButton>
+            <UiButton v-if="!creating && !received" variant="secondary" :icon="Check" @click="receiveOpen = true">{{ t('wishlist.received.mark') }}</UiButton>
+            <UiButton v-if="received" variant="secondary" :icon="Undo2" @click="restoreOpen = true">{{ t('wishlist.received.restore') }}</UiButton>
             <HelpTip v-if="!creating && !received" topic="wishlist.received" :label="t('wishlist.received.mark')" />
             <UiButton variant="secondary" @click="requestClose">{{ t('wishlist.close') }}</UiButton>
             <UiButton v-if="!received" variant="primary" :disabled="!canSave" :loading="processing" @click="save">{{ t('wishlist.save') }}</UiButton>
@@ -422,6 +428,22 @@ defineExpose({ guard, dirty });
         :cancel-label="t('wishlist.discard.keep')"
         @confirm="discard"
         @cancel="keepEditing"
+    />
+    <UiConfirmDialog
+        v-model:open="receiveOpen"
+        :title="t('wishlist.received.confirm_title')"
+        :body="t('wishlist.received.confirm_body')"
+        :confirm-label="t('wishlist.received.confirm_action')"
+        :cancel-label="t('wishlist.received.cancel')"
+        @confirm="confirmReceived"
+    />
+    <UiConfirmDialog
+        v-model:open="restoreOpen"
+        :title="t('wishlist.received.restore_title')"
+        :body="t('wishlist.received.restore_body')"
+        :confirm-label="t('wishlist.received.restore_action')"
+        :cancel-label="t('wishlist.received.cancel')"
+        @confirm="confirmRestore"
     />
     <UiConfirmDialog
         v-model:open="deleteOpen"
