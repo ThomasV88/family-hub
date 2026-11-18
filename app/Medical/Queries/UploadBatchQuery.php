@@ -299,7 +299,7 @@ final class UploadBatchQuery
                     $values = [];
                     foreach ($choice['values'] as $field => $value) {
                         if (in_array($field, $allowed, true) && (is_string($value) || is_int($value) || is_float($value))) {
-                            $values[$field] = mb_substr(trim((string) $value), 0, $max);
+                            $values[$field] = trim(mb_substr(trim((string) $value), 0, $max));
                         }
                     }
                     if ($values !== []) {
