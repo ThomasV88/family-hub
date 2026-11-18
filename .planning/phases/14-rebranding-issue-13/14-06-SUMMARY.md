@@ -43,3 +43,27 @@ Pending: staging checkpoint (steps 0-9), no push or server access done here.
 
 ## User documentation
 No user-visible change in this plan (manual changes are in 14-05).
+
+## Task 3: staging verification (2026-11-18)
+
+Staging ran image `sha-718736d` (CI run 44215571417: check and deploy success). Step 0 done by the orchestrator: `app.env` backed up as `app.env.pre-rebrand`, `APP_NAME="FamilyHUB"`, `app`/`worker`/`scheduler` recreated, `config('app.name')` prints FamilyHUB. The recreate left the staging nginx on the old app IP (502); fixed with `nginx -s reload` on the staging nginx only. A manual compose recreate needs `IMAGE_TAG` exported (deploy.sh does that).
+
+| Step | Result | Evidence |
+|---|---|---|
+| 1 | PASS | login, forgot-password, invite: colour logo in light, white in dark; server title FamilyHUB; new favicon links |
+| 2 | PASS | top bar logo in light, dark, System light, System dark; 403 page (demo child, /finance) shows it |
+| 3 | PASS | primary #a64b0b light, #f2963e dark, focus rings follow; axe wcag2a/2aa 0 violations on Login, Home, Settings in both themes |
+| 4 | PASS | manifest name FamilyHUB, 3 familyhub icons 200 image/png, favicon 200, old pwa-192 404 |
+| 5 | PASS | new SW precache 14 entries (7 familyhub, offline.html, 0 old, 0 health/finance); offline page shows logo |
+| 6 | PASS | invite mail en/sk/pl: FamilyHUB 5, "Family Hub" 0 |
+| 7 | PASS | manual en/sk/pl: 0 old name, install section and old-icon FAQ present |
+| 8 | PASS | 360 px sk/pl light/dark, 820 and 1280 en: no overlap or horizontal scroll |
+| 9 | PASS | production `app.env` still has `APP_NAME="Family Hub"` (count 1): release step pending |
+
+Items to judge (non-blocking):
+1. Inertia pages set their own tab titles after hydration (e.g. "Sign in"); the initial HTML title is FamilyHUB.
+2. Danger (#c4503f / #e0735f) versus primary hue gap is about 17-20 degrees: eyeball a danger button in the style guide.
+3. The light colour lockup (with brush stroke) looks small next to the white one at the same height.
+4. At 360 px the Add action is the existing floating "+" button, not in the top bar.
+
+Open points for the PR body: production `APP_NAME="FamilyHUB"` at release; SK and PL manual, help and string drafts need native review; iPhone and iPad users must re-add the app to see the new icon.
