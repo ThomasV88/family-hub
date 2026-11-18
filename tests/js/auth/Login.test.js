@@ -51,7 +51,8 @@ describe('Login page', () => {
         const w = current;
         expect(w.findAll('h1')).toHaveLength(1);
         expect(w.find('h1').text()).toBe('Sign in');
-        expect(w.text()).toContain('FamilyHUB');
+        expect(w.find('img[alt=FamilyHUB]').exists()).toBe(true);
+        expect(w.find('.auth-wordmark').exists()).toBe(false);
         const email = w.find('input[type=email]');
         expect(email.attributes('autocomplete')).toBe('username');
         expect(email.attributes('autofocus')).toBeDefined();

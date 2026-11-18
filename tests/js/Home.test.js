@@ -35,7 +35,8 @@ describe('Home page', () => {
         const wrapper = mountHome();
         expect(wrapper.find('[data-testid=home]').exists()).toBe(true);
         expect(wrapper.find('h1').text()).toBe('Overview');
-        expect(wrapper.find('header').text()).toContain('Family Hub');
+        expect(wrapper.find('header img').attributes('alt')).toBe('Family Hub');
+        expect(wrapper.find('header img').attributes('src')).toBe('/icons/familyhub-logo.svg');
         expect(wrapper.find('[data-testid=staging-banner]').exists()).toBe(true);
         expect(wrapper.find('[data-testid=staging-banner]').text()).toBe('Staging - synthetic data only');
     });
