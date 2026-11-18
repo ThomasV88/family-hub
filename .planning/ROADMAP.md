@@ -521,4 +521,15 @@ Plans:
 5. Quota exhaustion pauses the batch and it resumes by itself; unfinished batches and files expire after 30 days; access follows the person's record rules, with consent, audit and no content in logs.
 **Owner decisions (2026-11-18):** one person per batch; batch stored server-side; "Continue" saves approved findings per document; originals are never changed by adjustments; 30-day auto-expiry.
 **Commit rule:** commits that resolve part of #14 carry `Fixes #14`. Reuse the Phase 9 bulk guards and the Phase 13 pre-processing evaluation results.
-**Plans:** 0 plans
+**Plans:** 9 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Batch and item tables, extraction columns, limits; unfinished batch documents hidden from person page, search, export and bulk re-read
+- [ ] 15-02-PLAN.md — AI-copy adjustments (brightness, contrast, black and white via GD, original untouched) and fresh re-read in the run job
+- [ ] 15-03-PLAN.md — One-document-at-a-time batch tick, quota park and self-resume, consent-withdrawal hook, 30-day expiry with file deletion
+- [ ] 15-04-PLAN.md — Member-side batch domain: create with consent and notice, upload, server-saved choices and adjustments, re-scan, Continue via the accept path
+- [ ] 15-05-PLAN.md — Batch routes and controller (uniform 403, throttles), upload into a batch through the document endpoint, person-page open-batch prop
+- [ ] 15-06-PLAN.md — Strings in en/sk/pl and audit labels, start control and banner on the person, batch uploader, live status list and resumable batch page
+- [ ] 15-07-PLAN.md — Review with persistent approve/reject, Continue, adjustment panel with live preview, re-scan and failed-document actions
+- [ ] 15-08-PLAN.md — Manual section bulk-upload and who-sees-what in SK/PL/EN, four help tips with registry and placement
+- [ ] 15-09-PLAN.md — Staging seed and audit, content-in-logs proof, a11y and pseudo-long, full gate (Fixes #14), staging verification with the real AI
