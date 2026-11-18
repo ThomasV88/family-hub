@@ -7,7 +7,9 @@ import { useToast } from '../../Components/ui/useToast.js';
 import { securityFetch } from '../../Security/securityFetch.js';
 import { handleHealthRefusal } from '../healthRefusal.js';
 import DocumentPane from '../Ai/DocumentPane.vue';
+import AdjustmentPanel from './AdjustmentPanel.vue';
 import BatchEntry from './BatchEntry.vue';
+import BatchItemActions from './BatchItemActions.vue';
 
 // The review of the current document of a batch: the document next to its findings, Approve or Reject on every one,
 // and Continue. Everything shown comes from the server (page props and the answers of the choices route); nothing is
@@ -16,6 +18,8 @@ const props = defineProps({
     personId: { type: String, required: true },
     batchId: { type: String, required: true },
     current: { type: Object, required: true }, // {item, document, review, choices, adjustments}
+    limits: { type: Object, default: () => ({ maxRescans: 5 }) },
+    ai: { type: Object, default: () => ({}) },
 });
 const emit = defineEmits(['changed']);
 const { t, locale } = useI18n();
@@ -45,6 +49,7 @@ const undecided = computed(() => keys.value.length - approved.value - rejected.v
 const ready = computed(() => item.value.state === 'review' && extraction.value !== null);
 const noFindings = computed(() => ready.value && keys.value.length === 0);
 
+const filter = ref('');
 const busy = ref(false);
 const failed = ref(false);
 const notReady = ref(false);
@@ -98,13 +103,19 @@ async function proceed() {
         <div class="batch-review__layout">
             <div class="batch-review__doc" role="group" :aria-labelledby="ids.doc" data-testid="batch-doc">
                 <h3 :id="ids.doc" class="batch-review__heading">{{ current.document.title }}</h3>
-                <DocumentPane :person-id="personId" :document="current.document" />
-                <slot name="aside" />
+                <DocumentPane :person-id="personId" :document="current.document" :image-filter="filter" />
+                <AdjustmentPanel
+                    v-if="item.state !== 'done'"
+                    :person-id="personId"
+                    :batch-id="batchId"
+                    :item-id="item.id"
+                    :adjustments="current.adjustments"
+                    @update:filter="(v) => (filter = v)"
+                />
             </div>
 
             <div class="batch-review__entries" role="group" :aria-labelledby="ids.entries">
                 <h3 :id="ids.entries" class="batch-review__heading">{{ t('health.batch.review_title') }}</h3>
-                <slot name="state" />
                 <UiAlert v-if="!ready && item.state !== 'failed' && item.state !== 'done'" variant="info" data-testid="batch-not-ready">{{ t('health.batch.not_ready') }}</UiAlert>
                 <p v-else-if="noFindings" class="batch-review__none" data-testid="batch-no-findings">{{ t('health.batch.no_findings') }}</p>
 
@@ -138,7 +149,7 @@ async function proceed() {
 
                 <UiAlert v-if="notReady" variant="info" live data-testid="batch-continue-notready">{{ t('health.batch.not_ready') }}</UiAlert>
                 <UiAlert v-if="failed" variant="danger" live data-testid="batch-continue-failed">{{ t('health.ai.review.action_failed') }}</UiAlert>
-                <slot name="actions" :ready="ready" />
+                <BatchItemActions :person-id="personId" :batch-id="batchId" :item="item" :limits="limits" :ai="ai" @changed="emit('changed')" />
             </div>
         </div>
     </div>
