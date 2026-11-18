@@ -44,7 +44,7 @@ describe('AcceptInvite page', () => {
         mountPage();
         const w = current;
         expect(w.findAll('h1')).toHaveLength(1);
-        expect(w.find('h1').text()).toBe('Join your family on Family Hub');
+        expect(w.find('h1').text()).toBe('Join your family on FamilyHUB');
         expect(w.text()).toContain('You were invited as eva@example.test.');
         expect(w.find('input[type=email]').attributes('disabled')).toBeDefined();
         expect(w.find('input[type=email]').element.value).toBe('eva@example.test');

@@ -168,7 +168,7 @@ describe('print page', () => {
         }
         expect($('[data-testid="unverified-tag"]')).toBeNull();
         expect($('[data-testid="unverified-legend"]')).toBeNull();
-        expect($('[data-testid="export-footer"]').textContent).toMatch(/Generated .* from Family Hub/);
+        expect($('[data-testid="export-footer"]').textContent).toMatch(/Generated .* from FamilyHUB/);
         expect($('[data-testid="print-back"]').getAttribute('href')).toBe(`/health/people/${ID}`);
         expect($('[data-testid="print-back"]').textContent).toBe('Back to person');
         expect($('[data-testid="print-button"]').textContent).toBe('Print export');

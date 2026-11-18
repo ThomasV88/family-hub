@@ -178,7 +178,7 @@ describe('flash toast', () => {
         toasts.splice(0);
         mockProps = { app: { name: 'Family Hub', env: 'production' }, flash: { toast: { key: 'invite.accept.welcome', params: { name: 'Anna' } } } };
         mountHome();
-        expect(toasts.map((x) => x.message)).toEqual(['Welcome to Family Hub, Anna.']);
+        expect(toasts.map((x) => x.message)).toEqual(['Welcome to FamilyHUB, Anna.']);
         toasts.splice(0);
     });
 });
