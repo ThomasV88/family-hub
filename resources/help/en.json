@@ -97,7 +97,7 @@
         },
         "wishlist.received": {
             "title": "Mark as received",
-            "text": "Use it once you got the gift. The wish moves to the Received section of your list and can no longer be edited."
+            "text": "Use it once you got the gift. You are asked to confirm. The wish moves to the Received section and becomes read-only. Open it there and choose Move back to my list to undo."
         },
         "wishlist.shopping": {
             "title": "Shopping summary",

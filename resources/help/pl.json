@@ -97,7 +97,7 @@
         },
         "wishlist.received": {
             "title": "Oznacz jako otrzymane",
-            "text": "Użyj, gdy dostaniesz prezent. Życzenie trafia do sekcji Otrzymane na Twojej liście i nie można go już edytować."
+            "text": "Użyj, gdy dostaniesz prezent. Pojawi się prośba o potwierdzenie. Życzenie trafia do sekcji Otrzymane i jest tylko do odczytu. Cofniesz to tam przyciskiem Przenieś z powrotem na moją listę."
         },
         "wishlist.shopping": {
             "title": "Podsumowanie zakupów",

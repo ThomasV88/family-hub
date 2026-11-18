@@ -30,7 +30,7 @@
           "**Poznámky**: veľkosť, farba alebo čokoľvek iné.",
           "**Obrázok**: nahrajte obrázok JPEG, PNG alebo WebP do 5 MB, alebo stlačte **Načítať obrázok z odkazu** a vezmite ho zo stránky obchodu."
         ] },
-        { "type": "p", "text": "Keď darček dostanete, otvorte želanie a vyberte **Označiť ako prijaté**. Prijaté želania sa odsunú nabok. Stlačením **Prijaté** ich znova zobrazíte." }
+        { "type": "p", "text": "Keď darček dostanete, otvorte želanie a vyberte **Označiť ako prijaté** a potvrďte. Prijaté želania sa odsunú nabok. Stlačením **Prijaté** ich znova zobrazíte. Ak ste želanie označili omylom, otvorte ho v časti Prijaté, vyberte **Vrátiť do môjho zoznamu** a potvrďte: želanie je opäť aktívne a dá sa upravovať." }
       ]
     },
     {

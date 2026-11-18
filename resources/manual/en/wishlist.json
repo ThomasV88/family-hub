@@ -30,7 +30,7 @@
           "**Notes**: size, colour, or anything else.",
           "**Image**: upload a JPEG, PNG or WebP picture of up to 5 MB, or press **Load image from link** to take one from the shop page."
         ] },
-        { "type": "p", "text": "When you get a gift, open the wish and choose **Mark as received**. Received wishes move out of the way. Press **Show received** to see them again." }
+        { "type": "p", "text": "When you get a gift, open the wish and choose **Mark as received** and confirm. Received wishes move out of the way. Press **Show received** to see them again. If you marked a wish by mistake, open it in the Received section, choose **Move back to my list** and confirm: the wish is active and editable again." }
       ]
     },
     {

@@ -30,7 +30,7 @@
           "**Notatki**: rozmiar, kolor albo cokolwiek innego.",
           "**Obraz**: wgraj obraz JPEG, PNG lub WebP do 5 MB albo naciśnij **Pobierz obraz z linku**, aby wziąć go ze strony sklepu."
         ] },
-        { "type": "p", "text": "Gdy dostaniesz prezent, otwórz życzenie i wybierz **Oznacz jako otrzymane**. Otrzymane życzenia schodzą z drogi. Naciśnij **Otrzymane**, aby zobaczyć je znowu." }
+        { "type": "p", "text": "Gdy dostaniesz prezent, otwórz życzenie i wybierz **Oznacz jako otrzymane** i potwierdź. Otrzymane życzenia schodzą z drogi. Naciśnij **Otrzymane**, aby zobaczyć je znowu. Jeśli życzenie oznaczono przez pomyłkę, otwórz je w sekcji Otrzymane, wybierz **Przenieś z powrotem na moją listę** i potwierdź: życzenie jest znów aktywne i można je edytować." }
       ]
     },
     {

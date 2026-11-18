@@ -97,7 +97,7 @@
         },
         "wishlist.received": {
             "title": "Označiť ako dostané",
-            "text": "Použite, keď ste darček dostali. Želanie sa presunie do časti Dostané vo vašom zozname a už sa nedá upravovať."
+            "text": "Použite, keď ste darček dostali. Aplikácia požiada o potvrdenie. Želanie sa presunie do časti Prijaté a bude len na čítanie. Vrátite ho tam cez Vrátiť do môjho zoznamu."
         },
         "wishlist.shopping": {
             "title": "Nákupný súhrn",
