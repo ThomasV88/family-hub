@@ -119,9 +119,10 @@ describe('Phase 7 copy parity', () => {
     });
 
     // health.search.* and health.document_text.* (Phase 13) have their plural forms checked in i18n-phase13.test.js.
+    // health.batch.* (Phase 15) has its plural forms checked in i18n-phase15.test.js.
     it('detects exactly the ten plural keys among health.* strings', () => {
         const pipes = Object.entries(en)
-            .filter(([k, v]) => k.startsWith('health.') && !k.startsWith('health.ai.') && !k.startsWith('health.search.') && !k.startsWith('health.document_text.') && v.includes('|'))
+            .filter(([k, v]) => k.startsWith('health.') && !k.startsWith('health.ai.') && !k.startsWith('health.search.') && !k.startsWith('health.document_text.') && !k.startsWith('health.batch.') && v.includes('|'))
             .map(([k]) => k);
         expect(pipes.sort()).toEqual([...PLURALS].sort());
     });
