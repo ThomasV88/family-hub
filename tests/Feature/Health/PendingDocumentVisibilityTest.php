@@ -1,10 +1,10 @@
 <?php
 
 use App\Access\AccessLevel;
-use App\Medical\Viewer;
 use App\Medical\Queries\AiBulkEligibility;
 use App\Medical\Queries\DocumentQuery;
 use App\Medical\Queries\ExportQuery;
+use App\Medical\Viewer;
 use App\Models\MedicalDocument;
 use App\Models\MedicalSubject;
 use App\Models\User;

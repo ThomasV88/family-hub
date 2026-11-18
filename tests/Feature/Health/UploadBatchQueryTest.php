@@ -10,6 +10,7 @@ use App\Medical\Viewer;
 use App\Models\MedicalDocument;
 use App\Models\MedicalSubject;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -91,7 +92,7 @@ it('creates a batch with expiry, acknowledgment and one audit row, and returns t
 
     expect($r['result'])->toBe('created')
         ->and($row->status)->toBe('open')->and($row->created_by)->toBe($user->id)->and($row->acted_by)->toBe($user->id)
-        ->and(abs(\Carbon\Carbon::parse($row->expires_at)->diffInDays(now(), true) - 30))->toBeLessThan(1)
+        ->and(abs(Carbon::parse($row->expires_at)->diffInDays(now(), true) - 30))->toBeLessThan(1)
         ->and(DB::table('ai_notice_acks')->where('user_id', $user->id)->value('providers'))->toBe('codex')
         ->and(DB::table('audit_logs')->where('event', 'medical_upload_batch_changed')->count())->toBe(1);
 

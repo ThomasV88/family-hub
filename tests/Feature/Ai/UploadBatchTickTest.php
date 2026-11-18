@@ -5,7 +5,9 @@ use App\Medical\Ai\RunExtractionJob;
 use App\Medical\Ai\Work\WorkDir;
 use App\Medical\Batches\BatchKicker;
 use App\Medical\Queries\AiJobQuery;
+use App\Medical\Queries\AiRunQuery;
 use App\Medical\Queries\UploadBatchJobQuery;
+use App\Medical\Viewer;
 use App\Models\MedicalDocument;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -166,8 +168,8 @@ it('does not count batch runs toward the member personal active limit', function
 
     $mine = MedicalDocument::factory()->image()->forSubject($s['subject'])->create();
     Storage::disk('medical')->put($mine->path, 'jpeg-bytes');
-    $viewer = App\Medical\Viewer::for($s['user']);
-    $result = app(App\Medical\Queries\AiRunQuery::class)->start($viewer, $s['subject'], $mine->id, $s['user'], true, ['codex'], true);
+    $viewer = Viewer::for($s['user']);
+    $result = app(AiRunQuery::class)->start($viewer, $s['subject'], $mine->id, $s['user'], true, ['codex'], true);
 
     expect($result->outcome)->toBe('queued');
 });
@@ -240,8 +242,8 @@ it('fails the queued run when the dispatch throws', function () {
 
 it('has the pure helpers of the shared notice decision', function () {
     $s = ubTickBatch(1);
-    $viewer = App\Medical\Viewer::for($s['user']);
-    $runs = app(App\Medical\Queries\AiRunQuery::class);
+    $viewer = Viewer::for($s['user']);
+    $runs = app(AiRunQuery::class);
     DB::table('ai_notice_acks')->where('user_id', $s['user']->id)->delete();
     config(['ai.ocr.enabled' => false]);
 
