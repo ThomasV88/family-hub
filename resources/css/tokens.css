@@ -1,24 +1,24 @@
-/* Family Hub design tokens: the single source for every colour, space and size. */
+/* FamilyHUB design tokens: the single source for every colour, space and size. */
 :root {
   /* Colors (light) */
-  --color-bg: #fbfbfa;
+  --color-bg: #fffaf5;
   --color-surface: #ffffff;
-  --color-surface-2: #f4f4f2;
-  --color-border: #e8e8e5;
+  --color-surface-2: #f8f1ea;
+  --color-border: #ece3d9;
   --color-border-strong: #8a8a86;
   --color-text: #1f1f1d;
   --color-text-muted: #6b6b67;
-  --color-primary: #3b6ea8;
-  --color-primary-hover: #2f5c8f;
-  --color-primary-soft: #e8f0f8;
+  --color-primary: #a64b0b;
+  --color-primary-hover: #8c3f09;
+  --color-primary-soft: #fff4eb;
   --color-on-primary: #ffffff;
-  --color-accent: #c7893a; /* reserved, unused (one-accent rule) */
+  --color-accent: #f2963e; /* brand orange: logo-adjacent decoration and non-text fills only, never text or small controls */
   --color-danger: #b4432f;
   --color-danger-fill: #c4503f; /* non-text fills only */
   --color-success: #3d7a54;
   --color-warn-bg: #f6ecd9;
   --color-warn-text: #7f5614;
-  --color-focus: #3b6ea8;
+  --color-focus: #a64b0b;
   --avatar-1: #e3ebf3;
   --avatar-2: #e6efe7;
   --avatar-3: #f3e9dc;
@@ -82,17 +82,17 @@
   --color-border-strong: #6f6f6a;
   --color-text: #ececea;
   --color-text-muted: #9a9a95;
-  --color-primary: #7aa6d6;
-  --color-primary-hover: #93b6de;
-  --color-primary-soft: #26323f;
-  --color-on-primary: #0f1b27;
-  --color-accent: #d9a05a;
+  --color-primary: #f2963e;
+  --color-primary-hover: #f5a65c;
+  --color-primary-soft: #3b2a1c;
+  --color-on-primary: #1f1308;
+  --color-accent: #f2963e;
   --color-danger: #e0735f;
   --color-danger-fill: #e0735f;
   --color-success: #6fb088;
   --color-warn-bg: #3a3120;
   --color-warn-text: #d9a05a;
-  --color-focus: #93b6de;
+  --color-focus: #f5a65c;
   --avatar-1: #2c3a48;
   --avatar-2: #2d3d33;
   --avatar-3: #43392a;
@@ -115,17 +115,17 @@
     --color-border-strong: #6f6f6a;
     --color-text: #ececea;
     --color-text-muted: #9a9a95;
-    --color-primary: #7aa6d6;
-    --color-primary-hover: #93b6de;
-    --color-primary-soft: #26323f;
-    --color-on-primary: #0f1b27;
-    --color-accent: #d9a05a;
+    --color-primary: #f2963e;
+    --color-primary-hover: #f5a65c;
+    --color-primary-soft: #3b2a1c;
+    --color-on-primary: #1f1308;
+    --color-accent: #f2963e;
     --color-danger: #e0735f;
     --color-danger-fill: #e0735f;
     --color-success: #6fb088;
     --color-warn-bg: #3a3120;
     --color-warn-text: #d9a05a;
-    --color-focus: #93b6de;
+    --color-focus: #f5a65c;
     --avatar-1: #2c3a48;
     --avatar-2: #2d3d33;
     --avatar-3: #43392a;
