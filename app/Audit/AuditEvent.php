@@ -52,6 +52,7 @@ enum AuditEvent: string
     case MedicalTextRemoved = 'medical_text_removed';
     case AiAgentSettingChanged = 'ai_agent_setting_changed';
     case AiBulkRunChanged = 'ai_bulk_run_changed';
+    case MedicalUploadBatchChanged = 'medical_upload_batch_changed';
     case HelpTextChanged = 'help_text_changed';
     case ProfileChangedByOther = 'profile_changed_by_other';
     case ChildCreated = 'child_created';
@@ -98,6 +99,8 @@ enum AuditEvent: string
             self::MedicalTextRemoved => ['subject', 'record'],
             self::AiAgentSettingChanged => ['agent', 'field', 'value'],
             self::AiBulkRunChanged => ['action', 'scope', 'count'],
+            // Ids, the action and a count only: never a document title, file name or path.
+            self::MedicalUploadBatchChanged => ['subject', 'batch', 'action', 'count'],
             // The help key and the locale codes that changed; never the text itself.
             self::HelpTextChanged => ['key', 'locales'],
             // Which part of a child's profile someone else changed (photo or name); never the name text.
@@ -122,7 +125,7 @@ enum AuditEvent: string
             self::MedicalAdminSelfAdded, self::MedicalExported, self::MedicalConsentChanged,
             self::MedicalAiRunRequested, self::MedicalAiRunFinished, self::MedicalAiEntryDecided,
             self::MedicalArchived, self::MedicalRestored, self::MedicalTextRemoved,
-            self::AiAgentSettingChanged, self::AiBulkRunChanged => 'health',
+            self::AiAgentSettingChanged, self::AiBulkRunChanged, self::MedicalUploadBatchChanged => 'health',
             self::FinanceRead, self::FinanceWrite, self::FinanceVisibilityChanged, self::FinanceAdminSelfAdded, self::FinanceCategoryChanged => 'finance',
             self::AccessDenied => $module === 'finance' ? 'finance' : 'health',
             self::PasswordReset, self::AdminCreated, self::GoogleLinked, self::HelpTextChanged, self::ProfileChangedByOther, self::ChildCreated, self::ChildConverted, self::ShoppingListMailed => 'account',

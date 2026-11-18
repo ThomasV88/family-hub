@@ -25,6 +25,7 @@ use Database\Seeders\Staging\RecipesSeeder;
 use Database\Seeders\Staging\ShoppingSeeder;
 use Database\Seeders\Staging\StagingContext;
 use Database\Seeders\Staging\TasksSeeder;
+use Database\Seeders\Staging\UploadBatchSeeder;
 use Database\Seeders\Staging\WishlistSeeder;
 use Faker\Factory as FakerFactory;
 use Illuminate\Database\Seeder;
@@ -149,6 +150,7 @@ class StagingSeeder extends Seeder
         $this->summary['documents'] = count($documents);
         $this->summary['ai'] = (new AiProposalsSeeder)->seed($ctx, $health['subjects'], $documents);
         $this->summary['texts'] = (new DocumentTextsSeeder)->seed($ctx, $health['subjects'], $documents);
+        $this->summary['upload_batch'] = (new UploadBatchSeeder)->seed($ctx, $health['subjects']);
         $this->summary['shopping'] = (new ShoppingSeeder)->seed($ctx);
         $this->summary['recipes'] = (new RecipesSeeder)->seed($ctx);
         $this->summary['seconds'] = round(microtime(true) - $started, 2);
@@ -275,6 +277,8 @@ class StagingSeeder extends Seeder
 
         // Medical: a proposal started by a synthetic user, then the people it created (documents, visits, allergies,
         // medications, vaccinations, contacts, memberships, proposals cascade). A person linked to a real user is kept.
+        // Phase 15: batches of a synthetic user (also those of a kept person); their pending documents and items cascade.
+        DB::table('medical_upload_batches')->whereIn('created_by', $ids)->delete();
         DB::table('medical_ai_extractions')->whereIn('started_by', $ids)->delete();
         // Phase 13: recognised texts written for a synthetic user (also those of a kept person, which the cascade misses).
         DB::table('medical_document_texts')->whereIn('started_by', $ids)->delete();

@@ -123,7 +123,7 @@ describe('TwoFactorSetupDialog', () => {
         let blob;
         URL.createObjectURL = vi.fn((b) => { blob = b; return 'blob:x'; });
         URL.revokeObjectURL = vi.fn();
-        const anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () { expect(this.download).toBe('family-hub-recovery-codes.txt'); });
+        const anchorClick = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () { expect(this.download).toBe('familyhub-recovery-codes.txt'); });
         const addSpy = vi.spyOn(window, 'addEventListener');
 
         await mountDialog();
@@ -141,7 +141,7 @@ describe('TwoFactorSetupDialog', () => {
         expect(anchorClick).toHaveBeenCalled();
         expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:x');
         const text = await blob.text();
-        expect(text).toContain('Family Hub recovery codes');
+        expect(text).toContain('FamilyHUB recovery codes');
         expect(text).toContain('aaaa-1111');
         expect(text).not.toMatch(/@/);
 

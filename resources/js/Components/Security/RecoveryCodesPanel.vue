@@ -39,7 +39,7 @@ function download() {
     const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'family-hub-recovery-codes.txt';
+    link.download = 'familyhub-recovery-codes.txt';
     document.body.appendChild(link);
     link.click();
     link.remove();

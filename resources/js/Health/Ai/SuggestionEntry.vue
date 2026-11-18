@@ -11,6 +11,7 @@ import { useToast } from '../../Components/ui/useToast.js';
 import { securityFetch } from '../../Security/securityFetch.js';
 import { handleHealthRefusal } from '../healthRefusal.js';
 import EntryEditForm from './EntryEditForm.vue';
+import { TYPE_SECTION, entryRows, entryTitle } from './entryText.js';
 
 // One proposed entry. Everything the model wrote is rendered by text interpolation only (never HTML, never in a
 // toast). No optimistic UI: the server answer decides the state, a repeat answer simply shows the real state. Nothing
@@ -50,69 +51,13 @@ function onDirty(value) {
 }
 
 const TYPE_ICONS = { visit: Stethoscope, medication: Pill, allergy: ShieldAlert, vaccination: Syringe };
-const TYPE_SECTION = { visit: 'section_visits', medication: 'section_medications', allergy: 'section_allergies', vaccination: 'section_vaccinations' };
 const typeWord = computed(() => t(`health.ai.review.${TYPE_SECTION[props.entry.type]}`));
 
-const text = (value) => (typeof value === 'string' ? value.trim() : typeof value === 'number' ? String(value) : '');
 const fields = computed(() => props.entry.fields ?? {});
-
-function date(value) {
-    const raw = text(value);
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
-    if (!m) return raw;
-    return new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }).format(new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
-}
-function specialty(key) {
-    const k = text(key);
-    return k !== '' && te(`health.specialty.${k}`) ? t(`health.specialty.${k}`) : '';
-}
-const visitSpecialty = computed(() => {
-    const f = fields.value;
-    return f.specialty_key === 'other' && text(f.specialty_other) !== '' ? text(f.specialty_other) : specialty(f.specialty_key);
-});
-
-const title = computed(() => {
-    const f = fields.value;
-    switch (props.entry.type) {
-        case 'visit': return text(f.doctor) || visitSpecialty.value;
-        case 'medication': return text(f.name);
-        case 'allergy': return text(f.substance);
-        default: return text(f.vaccine);
-    }
-});
+const i18n = { t, te, get locale() { return locale.value; } };
+const title = computed(() => entryTitle(props.entry.type, fields.value, i18n));
 const shownTitle = computed(() => title.value || typeWord.value);
-
-// [label key, value] pairs of the non-empty fields, with the same labels as the Phase 7 forms.
-const rows = computed(() => {
-    const f = fields.value;
-    const list = [];
-    const add = (label, value) => { if (text(value) !== '') list.push({ label: t(label), value: text(value) }); };
-    switch (props.entry.type) {
-        case 'visit':
-            add('health.visit.date', date(f.visited_on));
-            add('health.visit.doctor', f.doctor);
-            add('health.visit.specialty', visitSpecialty.value);
-            add('health.visit.diagnosis', f.diagnosis);
-            add('health.visit.notes', f.notes);
-            break;
-        case 'medication':
-            add('health.medication.dose', f.dose);
-            add('health.medication.schedule', f.schedule);
-            add('health.medication.start', date(f.started_on));
-            add('health.medication.end', date(f.ended_on));
-            add('health.visit.notes', f.notes);
-            break;
-        case 'allergy':
-            add('health.allergy.reaction', f.reaction);
-            add('health.allergy.severity', te(`health.severity.${text(f.severity)}`) ? t(`health.severity.${text(f.severity)}`) : '');
-            break;
-        default:
-            add('health.vaccination.given_on', date(f.given_on));
-            add('health.vaccination.next_due', date(f.next_due_on));
-            add('health.visit.notes', f.notes);
-    }
-    return list;
-});
+const rows = computed(() => entryRows(props.entry.type, fields.value, i18n));
 
 const state = computed(() => props.entry.state);
 const tag = computed(() => {

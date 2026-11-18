@@ -138,6 +138,8 @@ class SubjectQuery
             // same transaction as the consent change.
             if (! $value) {
                 $this->texts->purgeForSubject($viewer, $id);
+                // Upload batches: AI work for the person stops and their documents wait as pending until consent is back.
+                app(UploadBatchJobQuery::class)->resetForConsent($id);
             }
 
             $this->audit->record(AuditEvent::MedicalConsentChanged, $viewer->user, ['subject' => $id, 'value' => $value ? 'on' : 'off'], null, Module::Health);

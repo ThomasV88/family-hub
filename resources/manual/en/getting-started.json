@@ -10,7 +10,7 @@
       "id": "invitation",
       "title": "Joining with an invitation",
       "blocks": [
-        { "type": "p", "text": "Family Hub is only for invited people. Your family administrator sends you an invitation by email, or gives you a link. The link works once and stops working after 7 days." },
+        { "type": "p", "text": "FamilyHUB is only for invited people. Your family administrator sends you an invitation by email, or gives you a link. The link works once and stops working after 7 days." },
         { "type": "steps", "items": [
           "Open the link from the invitation.",
           "Type your name.",
@@ -52,21 +52,21 @@
       "id": "install",
       "title": "Putting the app on your phone, tablet or computer",
       "blocks": [
-        { "type": "p", "text": "Family Hub can be installed like an app. It then opens in its own window and gets its own icon. Nothing is downloaded from an app store." },
+        { "type": "p", "text": "FamilyHUB can be installed like an app. It then opens in its own window and gets its own icon. Nothing is downloaded from an app store. Its icon is the FamilyHUB logo: an orange, red and blue letter F." },
         { "type": "p", "text": "**iPhone and iPad** (use Safari):" },
         { "type": "steps", "items": [
-          "Open Family Hub in Safari.",
+          "Open FamilyHUB in Safari.",
           "Tap the **Share** button.",
           "Choose **Add to Home Screen**, then **Add**.",
           "Open the new icon on your Home Screen."
         ] },
         { "type": "p", "text": "**Android** (use Chrome):" },
         { "type": "steps", "items": [
-          "Open Family Hub in Chrome.",
+          "Open FamilyHUB in Chrome.",
           "Tap the menu button (three dots).",
           "Choose **Install app** or **Add to Home screen**."
         ] },
-        { "type": "p", "text": "**Computer** (Chrome or Edge): look for the install icon at the right end of the address bar, or open the browser menu and choose **Install Family Hub**." },
+        { "type": "p", "text": "**Computer** (Chrome or Edge): look for the install icon at the right end of the address bar, or open the browser menu and choose **Install FamilyHUB**." },
         { "type": "tip", "text": "Menu names change a little between browser versions. If you cannot find the button, look for the word Install or Add to Home Screen." }
       ]
     },
@@ -81,7 +81,7 @@
           "For push, press **Enable push on this device** and allow notifications when your browser asks.",
           "Press **Send test notification** to check that it works."
         ] },
-        { "type": "warning", "text": "On iPhone and iPad, push only works after you add Family Hub to your Home Screen (see above) and open it from there." },
+        { "type": "warning", "text": "On iPhone and iPad, push only works after you add FamilyHUB to your Home Screen (see above) and open it from there." },
         { "type": "p", "text": "Push alerts show only a short title such as the task title, never your notes. If both switches are off you get no reminders. Each device needs its own **Enable push** step." }
       ]
     },

@@ -1,5 +1,5 @@
-# Family Hub
+# FamilyHUB
 
-Family Hub – a shared place for family organization.
+FamilyHUB – a shared place for family organization.
 
 > Project in its early stage. More details coming soon.

@@ -73,6 +73,15 @@ function bulkRunDetail(meta) {
     });
 }
 
+// Upload batch events record an opaque action and a count; anything outside the allowlist falls back to "created".
+const BATCH_ACTIONS = ['created', 'rescan', 'continued', 'removed', 'deleted', 'expired'];
+function uploadBatchDetail(meta) {
+    const action = BATCH_ACTIONS.includes(meta.action) ? meta.action : 'created';
+    return t(`audit.detail.medical_upload_batch_changed_${action}`, {
+        count: Number.isFinite(Number(meta.count)) ? String(Number(meta.count)) : '0',
+    });
+}
+
 // Help text edits record the topic key and the language codes, never the text; unknown codes print nothing.
 const HELP_LOCALES = ['sk', 'pl', 'en'];
 function helpTextDetail(meta) {
@@ -172,6 +181,8 @@ function details(row) {
             return agentSettingDetail(meta);
         case 'ai_bulk_run_changed':
             return bulkRunDetail(meta);
+        case 'medical_upload_batch_changed':
+            return uploadBatchDetail(meta);
         default:
             return t(`audit.detail.${row.event}`);
     }

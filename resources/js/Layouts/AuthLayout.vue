@@ -1,5 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
+import BrandLogo from '../Components/BrandLogo.vue';
 import UiCard from '../Components/ui/UiCard.vue';
 import LanguageSwitcher from '../Components/LanguageSwitcher.vue';
 import ThemeSwitch from '../Components/ThemeSwitch.vue';
@@ -18,7 +19,7 @@ const { t } = useI18n();
     <div class="auth-frame">
         <a href="#main-content" class="auth-skip">{{ t('nav.skip') }}</a>
         <main id="main-content" tabindex="-1" class="auth-main">
-            <p class="auth-wordmark">Family Hub</p>
+            <div class="auth-brand"><BrandLogo :alt="t('app.name')" :height="64" /></div>
             <UiCard class="auth-card">
                 <h1 class="auth-title">{{ title }}</h1>
                 <slot />
@@ -60,7 +61,7 @@ const { t } = useI18n();
 @media (min-width: 640px) {
     .auth-main { padding-block: var(--space-12); }
 }
-.auth-wordmark { margin: 0; font-size: var(--text-2xl); font-weight: 600; line-height: 1.25; text-align: center; }
+.auth-brand { display: flex; justify-content: center; margin-block: var(--space-4); }
 .auth-title { margin: 0 0 var(--space-4); font-size: var(--text-xl); font-weight: 600; line-height: 1.3; }
 .auth-footnote { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); text-align: center; }
 .auth-switches { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: var(--space-4); }

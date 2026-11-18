@@ -11,6 +11,7 @@ use App\Medical\Queries\DocumentQuery;
 use App\Medical\Queries\DocumentTextQuery;
 use App\Medical\Queries\MedicationQuery;
 use App\Medical\Queries\SubjectQuery;
+use App\Medical\Queries\UploadBatchQuery;
 use App\Medical\Queries\VaccinationQuery;
 use App\Medical\Queries\VisitQuery;
 use App\Models\MedicalAllergy;
@@ -37,7 +38,7 @@ class PersonPage
 
     private const WITH_ID = ['visit', 'allergy', 'medication', 'vaccination', 'document'];
 
-    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations, private readonly DocumentQuery $documents, private readonly ContactQuery $contacts, private readonly AiRunQuery $aiRuns, private readonly ArchiveQuery $archive, private readonly DocumentTextQuery $texts) {}
+    public function __construct(private readonly SubjectQuery $subjects, private readonly VisitQuery $visits, private readonly AllergyQuery $allergies, private readonly MedicationQuery $medications, private readonly VaccinationQuery $vaccinations, private readonly DocumentQuery $documents, private readonly ContactQuery $contacts, private readonly AiRunQuery $aiRuns, private readonly ArchiveQuery $archive, private readonly DocumentTextQuery $texts, private readonly UploadBatchQuery $uploadBatches) {}
 
     public function render(Viewer $viewer, ?MedicalSubject $subject, Request $request): Response
     {
@@ -57,7 +58,9 @@ class PersonPage
         return $this->visitProps($viewer, $subject, $request, $documents) + [
             'documents' => $documents,
             'unattachedDocumentIds' => array_values(array_column(array_filter($documents, fn (array $d) => $d['visitId'] === null), 'id')),
-            'limits' => ['maxMb' => intdiv((int) config('medical.document_max_bytes'), 1048576), 'filesAtOnce' => (int) config('medical.upload_batch_max')],
+            'limits' => ['maxMb' => intdiv((int) config('medical.document_max_bytes'), 1048576), 'filesAtOnce' => (int) config('medical.upload_batch_max'), 'batchMaxFiles' => (int) config('medical.upload_batches.max_files')],
+            // The person's open upload batch (Edit members only): ids and counts, so it can be resumed (D-02).
+            'openBatch' => $subject === null ? null : $this->uploadBatches->openFor($viewer, $subject),
             'allergies' => $this->allergyProps($viewer, $subject),
             'medications' => $this->medicationProps($viewer, $subject),
             'vaccinations' => $this->vaccinationProps($viewer, $subject),

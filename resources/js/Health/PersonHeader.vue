@@ -9,6 +9,7 @@ import UiConfirmDialog from '../Components/ui/UiConfirmDialog.vue';
 import UiMenu from '../Components/ui/UiMenu.vue';
 import UiTag from '../Components/ui/UiTag.vue';
 import AiConsentControl from './AiConsentControl.vue';
+import StartBatchControl from './Batch/StartBatchControl.vue';
 import { useRemoval } from './useRemoval.js';
 import HelpTip from '../Components/ui/HelpTip.vue';
 
@@ -17,6 +18,8 @@ const props = defineProps({
     person: { type: Object, required: true },
     // The page's search.enabled: recognised text can exist, so turning AI consent off says it deletes it.
     textStored: { type: Boolean, default: false },
+    // The page's `ai` prop (providers, notice state) for the batch start control.
+    ai: { type: Object, default: () => ({}) },
 });
 const emit = defineEmits(['add-visit', 'add-document', 'edit-person', 'open-archive']);
 const removal = useRemoval('person', () => props.person);
@@ -65,6 +68,7 @@ const remove = () => router.delete(`/health/people/${props.person.id}`);
             <template v-if="person.canEdit">
                 <UiButton variant="primary" :icon="Plus" class="person-header__edit-action" data-testid="header-add-visit" @click="emit('add-visit')">{{ t('health.visit.add') }}</UiButton>
                 <UiButton variant="secondary" :icon="Upload" class="person-header__edit-action" data-testid="header-add-document" @click="emit('add-document')">{{ t('health.doc.add') }}</UiButton>
+                <StartBatchControl :person-id="person.id" :ai="ai" />
                 <UiButton variant="secondary" :icon="FileDown" class="person-header__edit-action" :href="`/health/people/${person.id}/export`" data-testid="header-export">{{ t('health.export.title') }}</UiButton>
             </template>
             <UiButton variant="secondary" :icon="IdCard" :href="`/health/people/${person.id}/emergency-card`" data-testid="header-emergency">{{ t('health.emergency.title') }}</UiButton>

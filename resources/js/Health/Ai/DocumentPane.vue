@@ -13,6 +13,8 @@ import { documentUrl } from '../documentFormat.js';
 const props = defineProps({
     personId: { type: String, required: true },
     document: { type: Object, required: true },
+    // Optional CSS filter for the picture (batch review preview of the AI copy). Preview only, the stored file is never changed.
+    imageFilter: { type: String, default: '' },
 });
 const { t } = useI18n();
 
@@ -59,6 +61,7 @@ function retry() {
                         :src="src"
                         :alt="mode === 'pdf' ? t('health.ai.review.page_status', { n: page, total }) + ': ' + document.title : document.title"
                         class="doc-pane__img"
+                        :style="imageFilter ? { filter: imageFilter } : undefined"
                         data-testid="document-image"
                         @load="state = 'loaded'"
                         @error="state = 'failed'"

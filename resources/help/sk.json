@@ -51,7 +51,8 @@
         "recipe_shopping": "Pridanie do nákupu",
         "recipe_import": "Načítanie receptu z webovej stránky",
         "document_search": "Hľadanie v dokumentoch",
-        "document_text": "Rozpoznaný text dokumentu"
+        "document_text": "Rozpoznaný text dokumentu",
+        "upload_batch": "Hromadné nahrávanie"
     },
     "topics": {
         "tasks.visibility": {
@@ -357,6 +358,22 @@
         "health.document_text": {
             "title": "Rozpoznaný text",
             "text": "Text, ktorý AI prečítala z tohto dokumentu. Môže ho čítať a kopírovať každý, kto môže dokument otvoriť. Môže obsahovať chyby, preto keď na tom záleží, skontrolujte samotný dokument. Odstrániť ho môžu len tí, ktorí môžu upravovať. Zálohy uchovávajú kópiu, kým nevypršia."
+        },
+        "health.batch_start": {
+            "title": "Nahrať viac dokumentov",
+            "text": "Jedna otvorená dávka na osobu, najviac 50 súborov po 10 MB. AI číta jeden dokument naraz a začne už počas nahrávania. Dokumenty, ktoré nedokončíte, sa zmažú 30 dní po začatí dávky."
+        },
+        "health.batch_adjust": {
+            "title": "Zlepšiť sken",
+            "text": "Jas, kontrast a čiernobiely režim menia iba kópiu, ktorá sa pošle AI pri ďalšom opätovnom skenovaní. Uložený dokument sa nikdy nezmení. Nastavenia sa pre dokument pamätajú."
+        },
+        "health.batch_continue": {
+            "title": "Pokračovať",
+            "text": "Uloží schválené zistenia ako záznamy a zamietnuté zahodí. Zistenia, o ktorých ste nerozhodli, zostanú pri dokumente na neskoršiu kontrolu. Potom sa otvorí ďalší dokument."
+        },
+        "health.batch_rescan": {
+            "title": "Skenovať znova",
+            "text": "Prečíta dokument znova s aktuálnymi úpravami. Je to nový beh AI, povolený najviac 5-krát na dokument, a zruší značky schválenia a zamietnutia, ktoré ste pri dokumente nastavili."
         }
     }
 }

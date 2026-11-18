@@ -54,3 +54,27 @@ describe('dark blocks', () => {
         expect(media).toEqual(dark);
     });
 });
+
+describe('brand palette (Phase 14)', () => {
+    it('uses the FamilyHUB palette', () => {
+        expect(light['color-primary']).toBe('#a64b0b');
+        expect(light['color-accent']).toBe('#f2963e');
+        expect(light['color-primary-soft']).toBe('#fff4eb');
+        expect(dark['color-primary']).toBe('#f2963e');
+    });
+
+    it('light primary is AA on the light surface', () => {
+        expect(contrastRatio(light['color-primary'], light['color-surface'])).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('raw brand orange is never a light text or control colour', () => {
+        for (const k of ['primary', 'primary-hover', 'focus', 'text', 'text-muted', 'danger', 'success', 'warn-text', 'border-strong']) {
+            expect(light[`color-${k}`], k).not.toBe('#f2963e');
+        }
+    });
+
+    it('typography tokens are unchanged', () => {
+        expect(light['font-sans']).toBe("-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif");
+        expect(light['font-mono']).toBe("ui-monospace, 'JetBrains Mono', monospace");
+    });
+});

@@ -34,6 +34,7 @@ class StoreDocumentRequest extends FormRequest
             'file' => ['required', 'file', 'max:'.intdiv((int) config('medical.document_max_bytes'), 1024)],
             'title' => ['nullable', 'string', 'max:120', new ValidUtf8('health.error.load')],
             'visit_id' => ['nullable', 'string', 'max:64'],
+            'upload_batch_id' => ['nullable', 'string', 'max:64'],
         ];
     }
 
@@ -47,6 +48,8 @@ class StoreDocumentRequest extends FormRequest
             'file.max' => 'health.upload.err_size',
             'title.max' => 'health.error.load',
             'visit_id.max' => 'health.upload.err_visit',
+            'upload_batch_id.max' => 'health.batch.err_closed',
+            'upload_batch_id.string' => 'health.batch.err_closed',
         ];
     }
 

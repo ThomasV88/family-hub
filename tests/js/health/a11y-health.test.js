@@ -51,6 +51,13 @@ import TimelineList from '../../../resources/js/Health/TimelineList.vue';
 import SpecialtyFolder from '../../../resources/js/Health/SpecialtyFolder.vue';
 import DocumentSearch from '../../../resources/js/Health/Search/DocumentSearch.vue';
 import RecognisedText from '../../../resources/js/Health/Text/RecognisedText.vue';
+import UploadBatch from '../../../resources/js/Pages/Health/UploadBatch.vue';
+import BatchUploader from '../../../resources/js/Health/Batch/BatchUploader.vue';
+import BatchReview from '../../../resources/js/Health/Batch/BatchReview.vue';
+import AdjustmentPanel from '../../../resources/js/Health/Batch/AdjustmentPanel.vue';
+import BatchItemActions from '../../../resources/js/Health/Batch/BatchItemActions.vue';
+import OpenBatchBanner from '../../../resources/js/Health/Batch/OpenBatchBanner.vue';
+import StartBatchControl from '../../../resources/js/Health/Batch/StartBatchControl.vue';
 
 const ID = '11111111-1111-4111-8111-111111111111';
 const PERSON = { id: ID, name: 'Ada Novak', birthDate: '2015-03-04', ageYears: 11, sex: 'female', bloodType: 'A+', hasAccount: false, aiConsent: false, canEdit: true, notes: 'Notes', contacts: [] };
@@ -416,6 +423,81 @@ const phase13States = Object.fromEntries([
 ]);
 Object.assign(states, phase13States);
 
+// 15-09: the upload batch screens (Phase 15): the batch page with a document in every state, the uploader with a refused file,
+// the review with marks and an open edit form, the adjustment panel, the re-scan notice dialog, the remove and delete
+// confirmations, the person page banner and the start control.
+const BID = '22222222-2222-4222-8222-222222222222';
+const bItem = (n, state, over = {}) => ({ id: `item-${n}`, position: n, documentId: `doc-${n}`, title: `Document ${n} with a rather long title`, kind: 'pdf', state, rescanCount: 0, duplicateOf: null, ...over });
+const B_ITEMS = [
+    bItem(1, 'done'), bItem(2, 'review', { pending: 3 }), bItem(3, 'processing'), bItem(4, 'waiting'),
+    bItem(5, 'paused', { availableAt: '2099-01-01T10:30:00+00:00' }), bItem(6, 'failed', { failureCode: 'unknown' }),
+    bItem(7, 'stopped'), bItem(8, 'consent_off'), bItem(9, 'done', { duplicateOf: 'doc-1' }),
+];
+const bBatch = (items, over = {}) => ({
+    id: BID, status: 'open', expiresAt: '2026-12-03T10:00:00+00:00', currentItemId: 'item-2',
+    counts: { total: items.length, done: items.filter((i) => i.state === 'done').length, review: 0, processing: 0, failed: 0 }, ...over,
+});
+const B_AI = { available: true, providers: ['codex'], noticeAcknowledged: true, textNotice: false };
+const bCurrent = (item, over = {}) => ({
+    item, document: { id: item.documentId, kind: 'pdf', title: item.title, pageCount: 1 },
+    review: item.state === 'review'
+        ? { extraction: { sections: { visits: [{ key: 'visit-0', fields: { doctor: 'Dr Kova', visited_on: '2025-05-02', specialty_key: 'cardiology', diagnosis: 'Mild murmur' } }], medications: [{ key: 'medication-0', fields: { name: 'Ibuprofen', dose: '200 mg' } }], allergies: [], vaccinations: [] } }, provenance: null, specialties: ['cardiology'] }
+        : null,
+    choices: {}, adjustments: { brightness: 100, contrast: 100, bw: false }, ...over,
+});
+const batchPage = (items = B_ITEMS, over = {}) => ({
+    batch: bBatch(items), items, current: bCurrent(items.find((i) => i.id === 'item-2') ?? items[0] ?? bItem(1, 'review')), limits: { maxFiles: 50, maxMb: 10, maxRescans: 5 }, ai: B_AI,
+    person: { id: ID, name: 'Ada Novak', aiConsent: true }, ...over,
+});
+const batchPageState = (props, target, after) => ({ component: UploadBatch, props: () => batchPage(...props), target, after });
+const reviewOf = (over = {}) => ({ personId: ID, batchId: BID, current: bCurrent(bItem(2, 'review')), limits: { maxRescans: 5 }, ai: B_AI, ...over });
+const failedActions = { personId: ID, batchId: BID, item: bItem(6, 'failed', { failureCode: 'unreadable_document' }), limits: { maxRescans: 5 }, ai: B_AI };
+const pickFile = async (name) => {
+    const input = $('[data-testid="batch-input"]');
+    Object.defineProperty(input, 'files', { value: [new File([new Uint8Array(10)], name)], configurable: true });
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    for (let i = 0; i < 6; i += 1) { await Promise.resolve(); await nextTick(); }
+};
+const phase15States = {
+    'Batch page every state': batchPageState([B_ITEMS], '[data-testid="batch-items"]'),
+    'Batch page empty': batchPageState([[], { current: null, batch: bBatch([], { currentItemId: null }) }], '[data-testid="batch-empty"]'),
+    'Batch page finished': batchPageState([[bItem(1, 'done'), bItem(2, 'done')], { current: null, batch: bBatch([bItem(1, 'done'), bItem(2, 'done')], { currentItemId: null }) }], '[data-testid="batch-finished"]'),
+    'Batch page full with no uploader': batchPageState([B_ITEMS, { limits: { maxFiles: 9, maxMb: 10, maxRescans: 5 } }], '[data-testid="batch-items"]'),
+    'Batch page delete confirmation': batchPageState([B_ITEMS], '.ui-dialog', async () => {
+        await click([...document.querySelectorAll('[aria-haspopup="menu"]')].find((b) => b.closest('[data-testid="upload-batch-page"]')));
+        await click([...document.querySelectorAll('[role="menuitem"]')][0]);
+    }),
+    'Batch uploader idle': { component: BatchUploader, props: () => ({ personId: ID, batchId: BID, existing: 3, limits: { maxMb: 10, batchMaxFiles: 50 } }), target: '[data-testid="batch-input"]' },
+    'Batch uploader with a refused file': {
+        component: BatchUploader, props: () => ({ personId: ID, batchId: BID, existing: 3, limits: { maxMb: 10, batchMaxFiles: 50 } }),
+        target: '[data-testid="batch-queue"] [data-status="failed"]', after: async () => { await pickFile('virus.exe'); },
+    },
+    'Batch review with marks': { component: BatchReview, props: () => reviewOf({ current: bCurrent(bItem(2, 'review'), { choices: { 'visit-0': { decision: 'approve' }, 'medication-0': { decision: 'reject' } } }) }), target: '[data-testid="batch-entry"]' },
+    'Batch review with an open edit form': {
+        component: BatchReview, props: () => reviewOf({ current: bCurrent(bItem(2, 'review'), { choices: { 'visit-0': { decision: 'approve' } } }) }),
+        target: '[data-testid="edit-form-visit"]', after: async () => { await click('[data-testid="entry-edit"]'); },
+    },
+    'Batch review waiting for the reading': { component: BatchReview, props: () => reviewOf({ current: bCurrent(bItem(3, 'processing')) }), target: '[data-testid="item-actions"]' },
+    'Batch adjustment panel': { component: AdjustmentPanel, props: () => ({ personId: ID, batchId: BID, itemId: 'item-2', adjustments: { brightness: 120, contrast: 140, bw: true } }), target: '[data-testid="adjust-panel"]' },
+    'Batch adjustment panel disabled': { component: AdjustmentPanel, props: () => ({ personId: ID, batchId: BID, itemId: 'item-2', adjustments: {}, disabled: true }), target: '[data-testid="adjust-panel"]' },
+    'Batch failed item actions': { component: BatchItemActions, props: () => failedActions, target: '[data-testid="item-failed"]' },
+    'Batch re-scan limit reached': { component: BatchItemActions, props: () => ({ ...failedActions, item: bItem(2, 'review', { rescanCount: 5 }) }), target: '[data-testid="item-rescan-limit"]' },
+    'Batch re-scan notice dialog': {
+        component: BatchItemActions, props: () => ({ ...failedActions, item: bItem(2, 'review'), ai: { ...B_AI, noticeAcknowledged: false } }),
+        target: '[role="dialog"]', after: async () => { await click('[data-testid="item-rescan"]'); },
+    },
+    'Batch remove confirmation': { component: BatchItemActions, props: () => failedActions, target: '[role="dialog"]', after: async () => { await click('[data-testid="item-remove"]'); } },
+    'Person banner for an open batch': { component: OpenBatchBanner, props: () => ({ personId: ID, batch: { id: BID, done: 2, total: 9, expiresAt: '2026-12-03T10:00:00+00:00' } }), target: '[data-testid="open-batch-banner"]' },
+    'Person page with the open batch banner': personState({ openBatch: { id: BID, done: 2, total: 9, expiresAt: '2026-12-03T10:00:00+00:00' } }, '[data-testid="open-batch-banner"]'),
+    'Batch start control': { component: StartBatchControl, props: () => ({ personId: ID, ai: { providers: ['codex'], noticeAcknowledged: true } }), target: '[data-testid="header-add-batch"]' },
+    'Batch start notice dialog': {
+        component: StartBatchControl, props: () => ({ personId: ID, ai: { providers: ['codex'], noticeAcknowledged: false } }),
+        target: '[role="dialog"]', after: async () => { await click('[data-testid="header-add-batch"]'); },
+    },
+};
+for (const state of Object.values(phase15States)) state.ai = true;
+Object.assign(states, phase15States);
+
 
 let current;
 afterEach(() => {
@@ -545,5 +627,19 @@ describe('13-05 sources', () => {
                 expect(readFileSync(`${dir}/${file}`, 'utf8'), `${dir}/${file}`).not.toMatch(/v-html|localStorage|sessionStorage|indexedDB|caches\.|history\.|console\./);
             }
         }
+    });
+});
+
+describe('15-09 sources', () => {
+    it('has no v-html and no browser storage in the batch components', () => {
+        const files = [...readdirSync('resources/js/Health/Batch').map((f) => `resources/js/Health/Batch/${f}`), 'resources/js/Pages/Health/UploadBatch.vue'];
+        expect(files.length).toBeGreaterThanOrEqual(10);
+        for (const file of files) {
+            expect(readFileSync(file, 'utf8'), file).not.toMatch(/v-html|localStorage|sessionStorage|indexedDB|caches\.|console\./);
+        }
+    });
+
+    it('covers the batch screens in the sweep', () => {
+        expect(Object.keys(phase15States).length).toBeGreaterThanOrEqual(15);
     });
 });

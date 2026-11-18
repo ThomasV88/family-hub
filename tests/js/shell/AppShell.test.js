@@ -302,6 +302,15 @@ describe('AppShell access-aware navigation', () => {
 });
 
 describe('AppShell topbar Add task', () => {
+    it('shows the brand logo instead of the text name in the top bar', async () => {
+        setWidth(1280);
+        mockProps = { locale: 'en', app: { name: 'Family Hub', env: 'production' } };
+        mountShell();
+        await nextTick();
+        expect(wrapper.find('header img').attributes('alt')).toBe('Family Hub');
+        expect(wrapper.find('.topbar__name').exists()).toBe(false);
+    });
+
     it('shows Add task on desktop for editors and navigates to the create panel', async () => {
         setWidth(1280);
         visit.mockClear();

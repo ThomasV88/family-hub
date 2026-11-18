@@ -14,7 +14,7 @@ it('renders the Home Inertia component with the app name', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Home')
-            ->where('app.name', 'Family Hub')
+            ->where('app.name', 'FamilyHUB')
         );
 });
 

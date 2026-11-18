@@ -39,7 +39,8 @@ class DocumentSearchQuery
         }
         $page = max(1, min(50, $page));
 
-        $query = Visibility::apply(DB::table('medical_documents'), $viewer, 'medical_documents.subject_id')
+        // Unfinished upload-batch documents are listed only on their batch page (Phase 15).
+        $query = Visibility::apply(DB::table('medical_documents')->whereNull('medical_documents.upload_batch_id'), $viewer, 'medical_documents.subject_id')
             ->crossJoinSub(DB::query()->selectRaw($tsquery.' as q', $bindings), 'sq')
             ->join('medical_subjects', 'medical_subjects.id', '=', 'medical_documents.subject_id')
             ->leftJoin('medical_document_texts', function ($join) {

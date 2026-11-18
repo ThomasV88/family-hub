@@ -101,8 +101,10 @@ describe('phase 13 manual (13-05)', () => {
     it('has the same section ids in the same order in every language, with search and recognised-text right after documents', () => {
         for (const locale of LOCALES) {
             expect(ids(locale)).toEqual(ids('en'));
-            const at = ids(locale).indexOf('documents');
-            expect({ locale, next: ids(locale).slice(at + 1, at + 3) }).toEqual({ locale, next: ['search', 'recognised-text'] });
+            // Phase 15 added the bulk-upload section between documents and search.
+            const order = ids(locale).filter((id) => id !== 'bulk-upload');
+            const at = order.indexOf('documents');
+            expect({ locale, next: order.slice(at + 1, at + 3) }).toEqual({ locale, next: ['search', 'recognised-text'] });
         }
     });
 

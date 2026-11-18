@@ -18,6 +18,7 @@
           ["Who reserved a wish", "Everyone except the owner of the list", "The person who reserved it"],
           ["A finance account and its transactions", "Only the members it is shared with", "Those members, if they have Edit on Finances"],
           ["A health record of one person", "Members with Health access and access to that person", "Members with Can change on that person"],
+          ["An unfinished upload batch and its documents", "Only members who may change that person's health records", "Those members"],
           ["A shopping list", "Its creator, responsible person and the people added to it", "The creator and the responsible person (settings), people who may add items (items)"],
           ["A recipe","Its author; a shared recipe: everyone with access to Recipes","Only its author. Administrators have no bypass"],
           ["Settings, members, permissions, audit log, AI tools", "Administrators", "Administrators"],

@@ -8,6 +8,15 @@ A shared web app (responsive, installable as PWA) for an extended family to orga
 
 The whole family can track shared tasks together in one trusted place, with per-member, per-module permissions so private data (health, money) stays private.
 
+## Current Milestone: v1.1 Rebranding and bulk document upload
+
+**Goal:** Give the app its new FamilyHUB identity (GitHub #13) and let the owner upload many medical documents at once and review the AI results one by one, resumably (GitHub #14).
+
+**Target features:**
+- Rebranding from the supplied brand kit: logo, favicons, PWA icons and colour tokens (logo + icons + colours, typography unchanged)
+- Bulk medical document upload with sequential AI processing, per-finding approve/reject, "Continue", re-scan, and brightness/contrast/black-and-white adjustment applied to the AI copy only
+- Server-side resumable batches (one person per batch, 30-day auto-expiry, quota pause and resume)
+
 ## Requirements
 
 ### Validated
@@ -26,6 +35,9 @@ The whole family can track shared tasks together in one trusted place, with per-
 - [ ] **AI OCR of medical documents:** upload document, fill basic fields manually or let AI read it; AI returns data in an exact JSON structure via a prepared prompt, which is stored in the DB; bulk re-generation of past documents; handles agent usage limits (quota exhaustion, retry/fallback)
 - [ ] **Multi-agent AI backend:** supports multiple AI agents and model selection; v1 agents are Codex CLI (primary) and GitHub Copilot CLI (fallback); CLI subscription login is done once on the server, the settings screen picks agent order/model and shows login health; runs headless on the server using subscriptions, NOT per-token paid APIs (research outcome: Claude Code and Antigravity excluded from v1 on terms grounds, app does not store subscription tokens)
 - [ ] **Medical exports:** export by category (e.g. gastroenterology, internal medicine), or all at once, for doctor consultations and in an AI-friendly format
+
+- [ ] Rebranding from the FamilyHUB brand kit (#13), see REQUIREMENTS.md BRAND-*
+- [ ] Bulk upload and sequential review of medical documents (#14), see REQUIREMENTS.md BULK-*
 
 ### Out of Scope
 
@@ -80,4 +92,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-11-11 after initialization*
+*Last updated: 2026-11-18 after starting milestone v1.1*

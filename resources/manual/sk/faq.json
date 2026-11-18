@@ -70,7 +70,7 @@
       "id": "offline",
       "title": "Aplikácia hlási, že som offline",
       "blocks": [
-        { "type": "p", "text": "Family Hub potrebuje pripojenie, aby ukázal a uložil vaše údaje. Keď je zariadenie offline, objaví sa pruh. To, čo vidíte, nemusí byť aktuálne, a zmena sa nemusí uložiť, kým sa nepripojíte. Počkajte, kým pruh zmizne, a až potom sa na to spoliehajte." }
+        { "type": "p", "text": "FamilyHUB potrebuje pripojenie, aby ukázal a uložil vaše údaje. Keď je zariadenie offline, objaví sa pruh. To, čo vidíte, nemusí byť aktuálne, a zmena sa nemusí uložiť, kým sa nepripojíte. Počkajte, kým pruh zmizne, a až potom sa na to spoliehajte." }
       ]
     },
     {
@@ -78,6 +78,19 @@
       "title": "Správa hlási, že je dostupná nová verzia",
       "blocks": [
         { "type": "p", "text": "Stlačte **Načítať znova** v správe. Stránka sa spustí znova v najnovšej verzii. Najprv dopíšte a uložte, čo práve píšete." }
+      ]
+    },
+    {
+      "id": "old-icon",
+      "title": "Ikona aplikácie ešte ukazuje staré logo",
+      "blocks": [
+        { "type": "p", "text": "Po aktualizácii prehliadače ukazujú nové logo FamilyHUB, ale aplikácia, ktorá je už nainštalovaná v zariadení, si môže starú ikonu istý čas ponechať." },
+        { "type": "list", "items": [
+          "**Android:** ikona sa aktualizuje sama, zvyčajne do jedného dňa.",
+          "**iPhone a iPad:** podržte starú ikonu, odstráňte ju z plochy a potom aplikáciu znova pridajte zo Safari (pozrite **Aplikácia v telefóne, tablete alebo počítači**).",
+          "**Počítač:** ikona sa aktualizuje sama; ak nie, odinštalujte aplikáciu v ponuke prehliadača a nainštalujte ju znova."
+        ] },
+        { "type": "tip", "text": "Odstránenie ikony nič nezmaže. Údaje vašej rodiny zostávajú na serveri." }
       ]
     }
   ]

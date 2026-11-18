@@ -1,0 +1,15 @@
+Elaa — Launch-ready brand kit (FamilyHUB)
+
+COMMERCIAL USE
+Your Elaa download includes a license to use these exported assets for commercial projects tied to this logo. This README is informational and is not a substitute for legal advice.
+
+TRADEMARKS & UNIQUENESS
+Elaa does not guarantee that your name, icon, or combined mark is unique, available, or registrable. Similar icons may appear elsewhere (including icon libraries). Before you invest in trademarks or domains, search your jurisdiction’s trademark database (for example USPTO.gov in the United States) and consult a qualified attorney if you need certainty.
+
+BRAND KIT LAYOUT
+logo/          Primary SVG lockups (clean vectors)
+png/           Raster exports at common widths + a square social asset
+favicon/       ICO (16 & 32) and standard web/app icon PNGs
+brand-guide/   PDF brand guide
+
+Questions? Open your project in Elaa for the live editor and downloads.

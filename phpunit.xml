@@ -18,8 +18,8 @@
         </include>
     </source>
     <php>
-        <!-- The suite peaked at ~245 MiB (Phase 7, plan 07-06 probe); the limit is a test budget, not the web memory_limit. Raised from 256M to keep headroom while later plans add tests. -->
-        <ini name="memory_limit" value="512M"/>
+        <!-- The suite peaked at ~245 MiB (Phase 7, plan 07-06 probe); the limit is a test budget, not the web memory_limit. Raised from 256M to keep headroom while later plans add tests, and from 512M to 1024M in Phase 15 (a full serial run exhausted 512M in an unrelated test late in the run; the test passes alone, so it is accumulated suite memory, not that test). A -d memory_limit on the command line does not override this value. -->
+        <ini name="memory_limit" value="1024M"/>
         <env name="APP_ENV" value="testing" force="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
@@ -32,7 +32,7 @@
         <env name="DB_USERNAME" value="fh_owner" force="true"/>
         <env name="DB_PASSWORD" value="fh_owner_dev" force="true"/>
         <env name="DB_URL" value="" force="true"/>
-        <env name="APP_NAME" value="Family Hub" force="true"/>
+        <env name="APP_NAME" value="FamilyHUB" force="true"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync" force="true"/>
         <env name="SESSION_DRIVER" value="array" force="true"/>

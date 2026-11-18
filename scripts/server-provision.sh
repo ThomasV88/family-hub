@@ -140,7 +140,7 @@ if [ ! -s "$TARGET_DIR/app.env" ]; then
   DB_APP_PW="$(cat "$TARGET_DIR/secrets/db_app_password")"
   write_file app.env <<EOF
 # Laravel runtime for app, worker and scheduler. Runtime role fh_app only.
-APP_NAME="Family Hub"
+APP_NAME="FamilyHUB"
 # staging or production
 APP_ENV=$STACK_ENV
 APP_KEY=$APP_KEY_VALUE

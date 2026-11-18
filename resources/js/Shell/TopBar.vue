@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { PanelLeft, Plus } from '@lucide/vue';
+import BrandLogo from '../Components/BrandLogo.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import AccountMenu from './AccountMenu.vue';
 import { useShell } from './shellState.js';
@@ -29,7 +30,7 @@ const appName = computed(() => page.props.app?.name ?? t('app.name'));
             :aria-expanded="open ? 'true' : 'false'"
             @click="$emit('toggle')"
         />
-        <span class="topbar__name">{{ appName }}</span>
+        <BrandLogo class="topbar__logo" :alt="appName" :height="32" />
         <div class="topbar__end">
             <UiButton v-if="showToggle && canAdd" variant="primary" :icon="Plus" @click="shell.triggerAdd()">{{ addText }}</UiButton>
             <AccountMenu />
@@ -47,6 +48,6 @@ const appName = computed(() => page.props.app?.name ?? t('app.name'));
     background: var(--color-surface);
     border-block-end: 1px solid var(--color-border);
 }
-.topbar__name { font-size: var(--text-lg); font-weight: 600; overflow-wrap: anywhere; }
+.topbar__logo { display: inline-flex; align-items: center; min-width: 0; }
 .topbar__end { margin-inline-start: auto; display: flex; align-items: center; gap: var(--space-2); }
 </style>

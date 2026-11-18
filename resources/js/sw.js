@@ -25,7 +25,7 @@ self.addEventListener('push', (event) => {
     }
     if (!data || typeof data !== 'object') data = {};
 
-    const title = typeof data.title === 'string' && data.title !== '' ? data.title : 'Family Hub';
+    const title = typeof data.title === 'string' && data.title !== '' ? data.title : 'FamilyHUB';
     // Same-origin paths only: '/x' passes, '//x' and '/\\x' (which WHATWG parsing turns into a host) do not.
     let url = '/';
     if (typeof data.url === 'string' && data.url.startsWith('/') && !data.url.startsWith('//') && !data.url.includes('\\')) {
@@ -36,8 +36,8 @@ self.addEventListener('push', (event) => {
         }
     }
     const options = {
-        icon: '/icons/pwa-192x192.png',
-        badge: '/icons/pwa-192x192.png',
+        icon: '/icons/familyhub-192x192.png',
+        badge: '/icons/familyhub-192x192.png',
         data: { url },
     };
     if (typeof data.tag === 'string' && data.tag !== '') options.tag = data.tag;

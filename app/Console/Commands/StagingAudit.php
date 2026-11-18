@@ -69,6 +69,11 @@ class StagingAudit extends Command
             // Phase 13: the recognised full text of a document started by a real user. Same dangling-id rule.
             ['medical_document_texts', "(started_by in {$real})"],
             ['ai_calls', "(started_by in {$real})"],
+            // Phase 15: an upload batch holds titles of pending documents and the choices of a real member. A batch needs a
+            // synthetic creator (null means a real user who was deleted); the acting member and the member who requested a run
+            // may only be null or synthetic.
+            ['medical_upload_batches', "{$createdByReal} or (acted_by is not null and acted_by not in {$synthetic})"],
+            ['medical_upload_batch_items', "(requested_by is not null and requested_by not in {$synthetic})"],
             // Phase 11: shopping data of a real user (names, lists, stores) must never reach staging. A list needs a
             // synthetic creator (the column is NOT NULL and RESTRICT, so a null cannot occur). As with finance, a null creator on
             // an item, catalog item, store or custom unit stays flagged: it can only be a real user who was deleted (nullOnDelete).

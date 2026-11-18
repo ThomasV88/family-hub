@@ -70,7 +70,34 @@
           "Photos are saved as a resized copy, and the place and camera details in them are removed. PDF and HEIC files are saved as they are.",
           "Some photo formats have no preview. Then use **Download document** to see the original."
         ] },
-        { "type": "p", "text": "Open a document in a new tab or download it from its page. Documents are never reachable by an address that anyone can open: only members with access to the person can view them." }
+        { "type": "p", "text": "Open a document in a new tab or download it from its page. Documents are never reachable by an address that anyone can open: only members with access to the person can view them. For more than 10 files, see [Uploading many documents at once](health#bulk-upload)." }
+      ]
+    },
+    {
+      "id": "bulk-upload",
+      "title": "Uploading many documents at once",
+      "blocks": [
+        { "type": "p", "text": "When you have a pile of paper, scan or photograph it all and add it as one batch. The AI reads the documents one after another and you check what it found, one document at a time." },
+        { "type": "steps", "title": "Where to click", "items": [
+          "Open the person, then press **Upload many documents**. Only members who may change that person's health records see this button.",
+          "If the AI notice appears, read it and confirm. The person's AI consent must be on, as for **Run AI**.",
+          "Choose your files. Reading starts on the first document while the rest are still uploading.",
+          "Watch the list: each document is waiting, being read by the AI, paused, ready, failed or done. You can start reviewing the first ready document straight away."
+        ] },
+        { "type": "steps", "title": "Reviewing each document", "items": [
+          "Compare the findings with the document. Press **Approve** or **Reject** on each finding. You can edit an approved finding before you continue.",
+          "Press **Continue**. Approved findings are saved as records and rejected ones are discarded. Findings you have not decided stay on the document, so you can review them later, and the next document opens.",
+          "If the scan is poor, open **Improve the scan**, change brightness, contrast or black and white, and press **Scan again**. That reads the document again and clears the approve and reject marks you had set on it, without asking first."
+        ] },
+        { "type": "list", "items": [
+          "A person has one unfinished batch at a time. A batch holds up to 50 files, each up to 10 MB, in PDF, JPG, PNG, WebP or HEIC.",
+          "Unfinished documents count toward the person's 200 documents, but they do not appear in the person's documents or in search until they are finished.",
+          "The AI reads one document at a time. If the AI allowance is used up, the status says paused until a time, and reading continues by itself.",
+          "Scan again is allowed 5 times per document. Every scan is a new AI run and shows in Settings, AI calls (administrators only).",
+          "Brightness, contrast and black and white change only the copy sent to the AI. Your stored original is never changed. The settings are remembered for that document.",
+          "A document the AI could not read can be tried again, kept without findings (only offered for failed documents), or removed from the batch."
+        ] },
+        { "type": "p", "text": "You can close the browser and carry on later, on this or another device: the batch is still on the person's page. An unfinished batch and its unfinished documents are deleted 30 days after the batch was started, unless a document already has accepted findings, which is kept; finished documents and saved records always stay. The person's AI consent and the AI notice apply as for **Run AI**. If you turn AI off for the person, waiting and queued reading is cancelled and recognised text is removed, but the documents and the choices you made stay. When you turn AI on again, the batch continues. Only members who may change the person's health records can see and use a batch, and its actions are written to the audit log." }
       ]
     },
     {

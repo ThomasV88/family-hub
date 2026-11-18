@@ -5,7 +5,7 @@ return [
     'reminder_greeting' => 'Dobrý deň, :name,',
     'reminder_body' => 'Úloha „:title“ je splatná :date.',
     'reminder_action' => 'Otvoriť úlohu',
-    'test_title' => 'Skúšobné oznámenie z Family Hub',
+    'test_title' => 'Skúšobné oznámenie z FamilyHUB',
     'gift_title' => ':name: :occasion :when',
     'gift_title_family' => ':occasion :when',
     'gift_today' => 'dnes',

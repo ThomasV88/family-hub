@@ -24,9 +24,10 @@ class DocumentQuery
 {
     public function __construct(private readonly VisitQuery $visits) {}
 
+    /** Unfinished upload-batch documents are listed only on their batch page (Phase 15). */
     public function countForSubject(Viewer $viewer, MedicalSubject $subject): int
     {
-        return Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey()), $viewer)->count();
+        return Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey())->whereNull('upload_batch_id'), $viewer)->count();
     }
 
     /**
@@ -39,10 +40,14 @@ class DocumentQuery
         return Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey()), $viewer, 'subject_id', AccessLevel::View, ArchiveState::Any)->count();
     }
 
-    /** @return Collection<int, MedicalDocument> */
+    /**
+     * Unfinished upload-batch documents are listed only on their batch page (Phase 15).
+     *
+     * @return Collection<int, MedicalDocument>
+     */
     public function forSubject(Viewer $viewer, MedicalSubject $subject): Collection
     {
-        return Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey()), $viewer)
+        return Visibility::apply(MedicalDocument::query()->where('subject_id', $subject->getKey())->whereNull('upload_batch_id'), $viewer)
             ->orderByDesc('created_at')
             ->orderBy('id')
             ->get();
@@ -67,14 +72,15 @@ class DocumentQuery
      * pass the check together; the caller removes the already written files when this throws.
      *
      * @param  array<string, mixed>  $stored  the document store put() result
+     * @param  string|null  $uploadBatchId  marks the document as unfinished and part of an upload batch (Phase 15)
      *
      * @throws DocumentRejected limit_reached
      */
-    public function create(Viewer $viewer, MedicalSubject $subject, array $stored, string $title, ?string $visitId): MedicalDocument
+    public function create(Viewer $viewer, MedicalSubject $subject, array $stored, string $title, ?string $visitId, ?string $uploadBatchId = null): MedicalDocument
     {
         abort_unless($viewer->canEdit(), 403);
 
-        return DB::transaction(function () use ($viewer, $subject, $stored, $title, $visitId): MedicalDocument {
+        return DB::transaction(function () use ($viewer, $subject, $stored, $title, $visitId, $uploadBatchId): MedicalDocument {
             $allowed = Visibility::apply(DB::table('medical_subjects')->where('id', $subject->getKey())->lockForUpdate(), $viewer, 'id', AccessLevel::Edit)->first(['id']);
             abort_unless($allowed !== null, 403);
             if ($this->countStoredForSubject($viewer, $subject) >= (int) config('medical.max_documents_per_subject')) {
@@ -98,6 +104,7 @@ class DocumentQuery
                 'source' => 'manual',
                 'verified_at' => null,
                 'uploaded_by' => $viewer->userId(),
+                'upload_batch_id' => $uploadBatchId,
             ])->save();
 
             return $document;

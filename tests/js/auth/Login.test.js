@@ -51,7 +51,8 @@ describe('Login page', () => {
         const w = current;
         expect(w.findAll('h1')).toHaveLength(1);
         expect(w.find('h1').text()).toBe('Sign in');
-        expect(w.text()).toContain('Family Hub');
+        expect(w.find('img[alt=FamilyHUB]').exists()).toBe(true);
+        expect(w.find('.auth-wordmark').exists()).toBe(false);
         const email = w.find('input[type=email]');
         expect(email.attributes('autocomplete')).toBe('username');
         expect(email.attributes('autofocus')).toBeDefined();
@@ -60,7 +61,7 @@ describe('Login page', () => {
         expect(w.find('input[type=checkbox]').element.checked).toBe(false);
         expect(w.text()).toContain('Stay signed in for 30 days');
         expect(w.find('a[href="/forgot-password"]').text()).toBe('Forgot password?');
-        expect(w.text()).toContain('Family Hub is by invitation only');
+        expect(w.text()).toContain('FamilyHUB is by invitation only');
         expect(w.find('[data-testid=language-switcher]').exists()).toBe(true);
         expect(w.find('[data-testid=theme-switch]').exists()).toBe(true);
         expect(w.text()).not.toContain('Sign in with Google');

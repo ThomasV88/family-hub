@@ -51,7 +51,8 @@
         "recipe_shopping": "Dodawanie do zakupów",
         "recipe_import": "Wczytywanie przepisu ze strony",
         "document_search": "Wyszukiwanie w dokumentach",
-        "document_text": "Rozpoznany tekst dokumentu"
+        "document_text": "Rozpoznany tekst dokumentu",
+        "upload_batch": "Wysyłanie wielu dokumentów"
     },
     "topics": {
         "tasks.visibility": {
@@ -357,6 +358,22 @@
         "health.document_text": {
             "title": "Rozpoznany tekst",
             "text": "Tekst odczytany przez AI z tego dokumentu. Może go czytać i kopiować każdy, kto może otworzyć dokument. Może zawierać błędy, dlatego gdy to ważne, sprawdź sam dokument. Usunąć go mogą tylko osoby z prawem edycji. Kopie zapasowe przechowują kopię do czasu wygaśnięcia."
+        },
+        "health.batch_start": {
+            "title": "Wgraj wiele dokumentów",
+            "text": "Jedna otwarta partia na osobę, do 50 plików po 10 MB. AI czyta jeden dokument naraz i zaczyna już w trakcie wysyłania. Dokumenty, których nie dokończysz, są usuwane 30 dni po rozpoczęciu partii."
+        },
+        "health.batch_adjust": {
+            "title": "Popraw skan",
+            "text": "Jasność, kontrast i czerń-biel zmieniają tylko kopię wysyłaną do AI przy następnym ponownym skanowaniu. Zapisany dokument nigdy się nie zmienia. Ustawienia są zapamiętywane dla dokumentu."
+        },
+        "health.batch_continue": {
+            "title": "Kontynuuj",
+            "text": "Zapisuje zatwierdzone ustalenia jako wpisy, a odrzucone usuwa. Ustalenia, o których nie zdecydowałeś, zostają przy dokumencie do późniejszego przeglądu. Potem otwiera się następny dokument."
+        },
+        "health.batch_rescan": {
+            "title": "Skanuj ponownie",
+            "text": "Czyta dokument jeszcze raz z bieżącymi korektami. To nowe uruchomienie AI, dozwolone najwyżej 5 razy na dokument, i usuwa zaznaczenia zatwierdzenia i odrzucenia ustawione przy tym dokumencie."
         }
     }
 }

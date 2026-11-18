@@ -5,7 +5,7 @@ return [
     'reminder_greeting' => 'Hello :name,',
     'reminder_body' => '":title" is due :date.',
     'reminder_action' => 'Open the task',
-    'test_title' => 'Test notification from Family Hub',
+    'test_title' => 'Test notification from FamilyHUB',
     'gift_title' => ':name: :occasion :when',
     'gift_title_family' => ':occasion :when',
     'gift_today' => 'today',

@@ -7,12 +7,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Health\Concerns\FlashesRemoval;
 use App\Http\Requests\Health\StoreDocumentRequest;
 use App\Http\Requests\Health\UpdateDocumentRequest;
+use App\Medical\Batches\BatchKicker;
 use App\Medical\Documents\DocumentRejected;
 use App\Medical\Documents\MedicalDocumentStore;
 use App\Medical\Documents\PdfRasterizer;
 use App\Medical\Queries\ArchiveQuery;
 use App\Medical\Queries\DocumentQuery;
 use App\Medical\Queries\SubjectQuery;
+use App\Medical\Queries\UploadBatchQuery;
 use App\Medical\Viewer;
 use App\Models\MedicalDocument;
 use Illuminate\Http\JsonResponse;
@@ -36,16 +38,21 @@ class DocumentController extends Controller
         'limit_reached' => 'health.upload.err_limit',
         'write_failed' => 'health.upload.err_failed',
         'busy' => 'health.upload.err_failed',
+        'batch_full' => 'health.batch.err_full',
+        'duplicate' => 'health.batch.err_duplicate',
+        'batch_closed' => 'health.batch.err_closed',
     ];
 
-    public function store(StoreDocumentRequest $request, DocumentQuery $documents, MedicalDocumentStore $store): JsonResponse|RedirectResponse
+    public function store(StoreDocumentRequest $request, DocumentQuery $documents, MedicalDocumentStore $store, UploadBatchQuery $batches, BatchKicker $kicker): JsonResponse|RedirectResponse
     {
         $viewer = Viewer::for($request->user());
         $subject = $request->subject();
         $title = $request->filled('title') ? (string) $request->input('title') : $request->defaultTitle();
 
         // Refusals that need no file work come first: an unusable visit or a full record writes nothing.
-        $visitId = $documents->resolveVisit($viewer, $subject, $request->input('visit_id'));
+        $batchId = $request->filled('upload_batch_id') ? (string) $request->input('upload_batch_id') : null;
+        $visitId = $batchId === null ? $documents->resolveVisit($viewer, $subject, $request->input('visit_id')) : null;
+        $item = null;
 
         $stored = null;
         try {
@@ -59,7 +66,14 @@ class DocumentController extends Controller
             }
             $stored = $store->put((string) $subject->getKey(), $bytes);
             unset($bytes);
-            $document = $documents->create($viewer, $subject, $stored, $title, $visitId);
+            if ($batchId === null) {
+                $created = $documents->create($viewer, $subject, $stored, $title, $visitId);
+                $document = (object) ['id' => $created->getKey(), 'kind' => $created->kind, 'title' => $created->title];
+            } else {
+                // A batch that is not this person's, not open or not an id at all answers null: the same refusal as a closed one.
+                $item = $batches->addDocument($viewer, $subject, $batchId, $stored, $title, $request->user()) ?? throw new DocumentRejected('batch_closed');
+                $document = (object) ['id' => $item['documentId'], 'kind' => $stored['kind'], 'title' => $title];
+            }
         } catch (DocumentRejected $e) {
             // limit_reached can come from the locked re-check in create(), after the files were written.
             if ($stored !== null) {
@@ -74,8 +88,18 @@ class DocumentController extends Controller
             throw $e;
         }
 
+        if ($item !== null) {
+            // After commit: the first document starts without waiting for the next tick.
+            $kicker->kick($batchId);
+        }
+
         if ($request->expectsJson()) {
-            return response()->json(['document' => ['id' => $document->getKey(), 'kind' => $document->kind, 'title' => $document->title]], 201);
+            $payload = ['document' => ['id' => $document->id, 'kind' => $document->kind, 'title' => $document->title]];
+            if ($item !== null) {
+                $payload['item'] = ['id' => $item['itemId'], 'duplicateOf' => $item['duplicateOf']];
+            }
+
+            return response()->json($payload, 201);
         }
 
         return redirect()->route('health.people.show', ['person' => $subject->getKey()])

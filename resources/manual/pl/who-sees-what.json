@@ -18,6 +18,7 @@
           ["Kto zarezerwował życzenie", "Każdy poza właścicielem listy", "Osoba, która je zarezerwowała"],
           ["Konto finansowe i jego transakcje", "Tylko członkowie, którym jest udostępnione", "Ci członkowie, jeśli mają Edycję w Finansach"],
           ["Dokumentacja zdrowotna jednej osoby", "Członkowie z dostępem do Zdrowia i dostępem do tej osoby", "Członkowie z Może zmieniać przy tej osobie"],
+          ["Niedokończona partia wysyłania i jej dokumenty", "Tylko członkowie, którzy mogą zmieniać dokumentację zdrowotną tej osoby", "Ci członkowie"],
           ["Lista zakupów", "Jej twórca, osoba odpowiedzialna i osoby do niej dodane", "Twórca i osoba odpowiedzialna (ustawienia), osoby, które mogą dodawać produkty (produkty)"],
           ["Przepis","Jego autor; udostępniony przepis: każdy z dostępem do Receptarza","Tylko jego autor. Administratorzy nie mają obejścia"],
           ["Ustawienia, członkowie, uprawnienia, dziennik zdarzeń, narzędzia AI", "Administratorzy", "Administratorzy"],

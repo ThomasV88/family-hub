@@ -105,6 +105,23 @@ Texty vzniknú cez produkčné `DocumentTextStore` (rovnaké stráže ako pri sk
 - **Nové nasadenie:** texty sa zmažú spolu s osobami a dokumentmi, ktorým patrili, a `StagingSeeder` navyše maže riadky textov podľa používateľa, ktorý ich spustil, takže po opakovanom seedovaní je práve jeden text na seedovaný dokument.
 - **Audit:** `staging:audit` zlyhá, ak riadok `medical_document_texts` spustil skutočný (nesyntetický) používateľ. Skutočný rozpoznaný text sa na staging nikdy nesmie dostať.
 
+### Nahrávanie viacerých dokumentov naraz (`/health`, Fáza 15)
+Jedna nedokončená dávka pre osobu A (vlastný záznam rodiča `sk_sk.1`, súhlas s AI zapnutý). Vznikne cez produkčné služby (`UploadBatchQuery`, úložisko dokumentov, `saveChoices`, `continue`), nie ručným zápisom, okrem riadkov behov AI, ktoré sa zapisujú ako pri návrhoch z Fázy 8. Žiadne volanie poskytovateľa AI sa pri seedovaní nevykoná.
+
+| Poradie | Stav v dávke | Čo ukazuje |
+|---|---|---|
+| 1 | Hotové | dokument už pokračoval, je to bežný dokument osoby A s jednou prijatou alergiou "Penicilín (demo)" |
+| 2 | Na kontrolu | štyri nálezy; uložené voľby: návšteva prijatá s upravenou hodnotou ("upravené (demo)"), liek zamietnutý, dva bez rozhodnutia; je to aktuálny dokument dávky |
+| 3 | Zlyhalo | AI dokument neprečítala (`unreadable_document`): ponuka Skúsiť znova / Ponechať bez nálezov / Odstrániť |
+| 4 | Pozastavené | čaká na limit AI do času o tri hodiny dopredu, pokračuje samo |
+| 5 | Čaká | ešte neodoslané |
+
+- **Kto to vidí:** `sk_sk.1` (a každý člen s právom Edit na zdravie a na osobu A). Na stránke osoby je pruh "Unfinished upload" so stavom a dátumom vypršania; `sk_sk.2` a `pl_pl.3` (len čítanie) ho nevidia a adresa dávky im vráti stránku 403.
+- **Nálezy nesedia s obrázkami:** nálezy sú vymyslené a obrázky sú len generované tvary s nápisom "Batch scan N". Je to zámer, nejde o OCR.
+- **Dávka vyprší 30 dní po seedovaní** (hodinová úloha `medical:expire-upload-batches` zmaže nedokončené dokumenty a súbory); nové nasadenie so seedom dávku obnoví na nových 30 dní. Čakajúci a nedokončené dokumenty sa nezobrazujú v zozname dokumentov osoby, vo vyhľadávaní ani v exporte, kým neprejdú tlačidlom Continue.
+- **Pozastavený beh drží dávku:** kým je beh 4 aktívny (čaká), minútová úloha `ai:upload-batch-tick` nespustí dokument 5 (jeden dokument naraz). Keď čas o tri hodiny uplynie, `ai:resume-waiting` beh vráti do frontu a dávka pokračuje skutočným behom na syntetickom obrázku na prihlásení stagingu; ak to nechceš, dávku v tom čase zmaž alebo seeduj znova.
+- **Audit:** `staging:audit` zlyhá, ak `created_by` alebo `acted_by` dávky, alebo `requested_by` položky ukazuje na nesyntetického používateľa.
+
 ## Poznámky pre správu
 - Rozpoznaný text zo seedu je len vymyslený. Záložné snímky stagingu ho obsahujú tak isto ako ostatné demo údaje; skutočné zdravotné texty na staging nepatria (pozri `staging:audit`).
 - Súbory dokumentov sa pri novom nasadení zmažú spolu s osobami, ktorým patrili, aj archivovanými (zmazanie osôb ide podľa vlastníka, bez ohľadu na archív; po úspešnom dokončení seedovania); `medical:prune-orphans` je poistka pre prípadné zvyšky.

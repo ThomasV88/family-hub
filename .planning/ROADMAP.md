@@ -21,6 +21,11 @@ Family Hub is built as a vertical-slice MVP: each phase delivers a usable capabi
 - [ ] **Phase 8: AI Extraction Platform** - Codex-powered document extraction in a locked-down worker, saved as reviewable proposals with a call log
 - [ ] **Phase 9: Multi-Agent, Quota and Bulk Re-generation** - Agent order and model settings, Copilot fallback, quota handling and safe bulk re-generation
 
+### Milestone v1.1 (started 2026-11-18)
+
+- [x] **Phase 14: Rebranding (issue #13)** - FamilyHUB logo, favicons, PWA icons and brand colour tokens from the supplied brand kit
+- [x] **Phase 15: Bulk medical document upload (issue #14)** - Resumable server-side batches with sequential AI processing, per-finding review, re-scan and AI-copy image adjustments
+
 ## Phase Details
 
 ### Phase 1: Foundation and Infrastructure
@@ -479,3 +484,52 @@ Plans:
 - [x] 13-08-PLAN.md — Bulk backfill scope `no_text`: text-only runs under every existing bulk guard, refused while `ai.ocr.enabled` is off, settings panel option, "Text only" history tag, copy and admin manual (wave 5)
 - [x] 13-09-PLAN.md — Notice re-acknowledgment (`text_notice_acked_at`) for runs and bulk Start, three notice variants, run states and `text_saved` tag, consent turn-off purge sentence, manual `ai`/`search`/`recognised-text`/admin `backups` and the `health.ai_run`/`settings.ai_bulk` tips (wave 6)
 - [x] 13-10-PLAN.md — Staging seed of recognised texts, ops notes and restore-drill line, locale parity, accessibility sweep, pseudo-long check, full gate (`Fixes #11`), staging verification with a real two-step run as orchestrator checkpoint (wave 7)
+
+### Phase 14: Rebranding (issue #13)
+
+**Goal:** Replace the product identity with the FamilyHUB brand kit (GitHub #13): logo, favicons, PWA icons and colour tokens. Scope confirmed by the owner: logo + icons + colours, typography unchanged.
+**Requirements**: BRAND-01, BRAND-02, BRAND-03, BRAND-04
+**Depends on:** Phase 13
+**Success Criteria** (what must be TRUE):
+1. The new logo shows in the app shell, sign-in, invite acceptance and error/offline pages in light and dark theme (the brand kit has light, dark and mono variants).
+2. Favicons, apple-touch icon, PWA icons including maskable, and manifest use the kit assets; the service worker precache still builds and the build guard passes.
+3. Colour tokens follow the brand guide palette with WCAG AA contrast verified in both themes; the living style page and accessibility sweep pass.
+4. Name and wording are consistent in README, manual, help tips and mail templates in SK/PL/EN; user documentation rule from CLAUDE.md applies.
+**Open point:** the brand guide PDF could not be rendered on this machine during milestone setup (no poppler). Read it (palette, minimum sizes, clear space) at the start of discuss/plan, and confirm whether the product name changes from "Family Hub" to "FamilyHUB".
+**Source:** brand kit attached to GitHub #13 (`FamilyHUB-brand-kit.zip`).
+**Commit rule:** commits that resolve part of #13 carry `Fixes #13`.
+**Plans:** 6/6 plans complete
+
+Plans:
+- [x] 14-01-PLAN.md — Brand guide reading and reconciliation, brand colour tokens with WCAG AA in light and dark (wave 1)
+- [x] 14-02-PLAN.md — Kit favicon, apple-touch, PWA and maskable icons with cache-busting names, manifest, head and push icon (wave 1)
+- [x] 14-03-PLAN.md — Theme-aware BrandLogo in top bar, auth pages, offline page and style guide (wave 2)
+- [x] 14-04-PLAN.md — FamilyHUB name in SK/PL/EN strings, mail templates, app-name defaults and README (wave 1)
+- [x] 14-05-PLAN.md — Manual rename and new-icon FAQ in SK/PL/EN, help coverage confirmed (wave 1)
+- [x] 14-06-PLAN.md — Old-name guard test, production APP_NAME release note, full gate, staging verification checkpoint (wave 3)
+
+### Phase 15: Bulk medical document upload (issue #14)
+
+**Goal:** Let the owner upload many medical documents at once and review the AI results one by one, resumably (GitHub #14).
+**Requirements**: BULK-01, BULK-02, BULK-03, BULK-04, BULK-05, BULK-06, BULK-07, BULK-08, BULK-09
+**Depends on:** Phase 13 (AI platform, full-text OCR, bulk guards)
+**Success Criteria** (what must be TRUE):
+1. User uploads 20+ files as one batch for one person; the worker processes them one at a time with visible per-document status.
+2. After each document the user approves or rejects each finding; "Continue" saves approved findings and shows the next document; a re-scan can be requested.
+3. Brightness, contrast and black-and-white adjustments apply only to the copy sent to the AI; the stored original is unchanged; settings are remembered.
+4. Reloading the page or opening it on another device resumes the batch exactly where it stopped (processing state, adjustments, decisions).
+5. Quota exhaustion pauses the batch and it resumes by itself; unfinished batches and files expire after 30 days; access follows the person's record rules, with consent, audit and no content in logs.
+**Owner decisions (2026-11-18):** one person per batch; batch stored server-side; "Continue" saves approved findings per document; originals are never changed by adjustments; 30-day auto-expiry.
+**Commit rule:** commits that resolve part of #14 carry `Fixes #14`. Reuse the Phase 9 bulk guards and the Phase 13 pre-processing evaluation results.
+**Plans:** 9/9 plans complete (+ gap closure 15-10)
+
+Plans:
+- [x] 15-01-PLAN.md — Batch and item tables, extraction columns, limits; unfinished batch documents hidden from person page, search, export and bulk re-read
+- [x] 15-02-PLAN.md — AI-copy adjustments (brightness, contrast, black and white via GD, original untouched) and fresh re-read in the run job
+- [x] 15-03-PLAN.md — One-document-at-a-time batch tick, quota park and self-resume, consent-withdrawal hook, 30-day expiry with file deletion
+- [x] 15-04-PLAN.md — Member-side batch domain: create with consent and notice, upload, server-saved choices and adjustments, re-scan, Continue via the accept path
+- [x] 15-05-PLAN.md — Batch routes and controller (uniform 403, throttles), upload into a batch through the document endpoint, person-page open-batch prop
+- [x] 15-06-PLAN.md — Strings in en/sk/pl and audit labels, start control and banner on the person, batch uploader, live status list and resumable batch page
+- [x] 15-07-PLAN.md — Review with persistent approve/reject, Continue, adjustment panel with live preview, re-scan and failed-document actions
+- [x] 15-08-PLAN.md — Manual section bulk-upload and who-sees-what in SK/PL/EN, four help tips with registry and placement
+- [x] 15-09-PLAN.md — Staging seed and audit, content-in-logs proof, a11y and pseudo-long, full gate (Fixes #14), staging verification with the real AI

@@ -35,7 +35,8 @@ describe('Home page', () => {
         const wrapper = mountHome();
         expect(wrapper.find('[data-testid=home]').exists()).toBe(true);
         expect(wrapper.find('h1').text()).toBe('Overview');
-        expect(wrapper.find('header').text()).toContain('Family Hub');
+        expect(wrapper.find('header img').attributes('alt')).toBe('Family Hub');
+        expect(wrapper.find('header img').attributes('src')).toBe('/icons/familyhub-logo.svg');
         expect(wrapper.find('[data-testid=staging-banner]').exists()).toBe(true);
         expect(wrapper.find('[data-testid=staging-banner]').text()).toBe('Staging - synthetic data only');
     });
@@ -178,7 +179,7 @@ describe('flash toast', () => {
         toasts.splice(0);
         mockProps = { app: { name: 'Family Hub', env: 'production' }, flash: { toast: { key: 'invite.accept.welcome', params: { name: 'Anna' } } } };
         mountHome();
-        expect(toasts.map((x) => x.message)).toEqual(['Welcome to Family Hub, Anna.']);
+        expect(toasts.map((x) => x.message)).toEqual(['Welcome to FamilyHUB, Anna.']);
         toasts.splice(0);
     });
 });

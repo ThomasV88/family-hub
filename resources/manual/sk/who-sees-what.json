@@ -18,6 +18,7 @@
           ["Kto rezervoval želanie", "Každý okrem majiteľa zoznamu", "Ten, kto ho rezervoval"],
           ["Finančný účet a jeho transakcie", "Len členovia, ktorým je sprístupnený", "Títo členovia, ak majú Úpravy vo Financiách"],
           ["Zdravotný záznam jednej osoby", "Členovia s prístupom k Zdraviu a prístupom k tej osobe", "Členovia s Môže meniť pri tej osobe"],
+          ["Nedokončená dávka nahrávania a jej dokumenty", "Iba členovia, ktorí môžu meniť zdravotné záznamy tej osoby", "Títo členovia"],
           ["Nákupný zoznam", "Jeho tvorca, zodpovedná osoba a ľudia, ktorí do neho boli pridaní", "Tvorca a zodpovedná osoba (nastavenia), ľudia, ktorí smú pridávať položky (položky)"],
           ["Recept","Jeho autor; zdieľaný recept: každý s prístupom k Receptáru","Len jeho autor. Správcovia nemajú obchádzku"],
           ["Nastavenia, členovia, oprávnenia, záznam aktivity, nástroje AI", "Správcovia", "Správcovia"],

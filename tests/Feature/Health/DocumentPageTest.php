@@ -37,7 +37,7 @@ describe('props', function () {
 
         $response = $this->actingAs($user)->get("/health/people/{$person->id}")->assertOk();
         $response->assertInertia(fn ($page) => $page->has('documents', 2)
-            ->where('limits', ['maxMb' => 10, 'filesAtOnce' => 10])
+            ->where('limits', ['maxMb' => 10, 'filesAtOnce' => 10, 'batchMaxFiles' => 50])
             ->where('visits.0.documentCount', 1)
             ->where('unattachedDocumentIds', [(string) $loose->getKey()])
             ->where('timelineFilters', ['dentist', 'documents'])

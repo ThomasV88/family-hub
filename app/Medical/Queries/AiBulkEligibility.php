@@ -92,7 +92,8 @@ final class AiBulkEligibility
     /** Archived documents and documents of archived people are never eligible; the scope predicate narrows the rest. */
     private function scopePredicate(string $scope): string
     {
-        return 'd.archived_at IS NULL AND s.archived_at IS NULL AND ('.$this->scopeSql($scope).')';
+        // Unfinished upload-batch documents are listed only on their batch page (Phase 15).
+        return 'd.upload_batch_id IS NULL AND d.archived_at IS NULL AND s.archived_at IS NULL AND ('.$this->scopeSql($scope).')';
     }
 
     private function scopeSql(string $scope): string

@@ -49,6 +49,8 @@ class MedicalPrivacy
         'medical_ai_extractions', 'medical_ai_decisions',
         // Recognised document text (Phase 13): carries subject_id; every statement of the request side is Edit scoped.
         'medical_document_texts',
+        // Upload batches (Phase 15): the batch carries subject_id; items carry none and must join their batch.
+        'medical_upload_batches', 'medical_upload_batch_items',
     ];
 
     /** Every READ_TABLES table plus the membership table (settings writes are admin-only and tested in 07-07). */
@@ -56,6 +58,7 @@ class MedicalPrivacy
         'medical_subjects', 'medical_visits', 'medical_medications', 'medical_allergies',
         'medical_vaccinations', 'medical_contacts', 'medical_documents', 'medical_subject_members',
         'medical_ai_extractions', 'medical_ai_decisions', 'medical_document_texts',
+        'medical_upload_batches', 'medical_upload_batch_items',
     ];
 
     /**

@@ -17,6 +17,8 @@ Sketch sessions wrapped: 2026-11-12. Target stack: Laravel + Inertia + Vue (sket
 ## Overall Direction
 
 Neutral off-white palette with one blue accent (`themes/default.css`, light and dark). 8 to 12 px radii, 1 px borders, minimal shadows, controls at least 36 to 40 px high. Phone: bottom bar with 5 modules and a floating add button, panels as bottom sheets. iPad/desktop: toggleable sidebar (64 ↔ 232 px), detail panels docked on the right (wide) or overlay. Layouts respond to container width (container queries on frame and content), not only viewport. Short nav labels (Wishlist, Financie, Zdravie). Server-side enforced privacy: reservations hidden from the wish owner, restricted finance accounts, per-person medical access, AI per-person consent default off.
+
+Phase 14 (FamilyHUB rebrand) replaced the blue accent with the brand orange: tokens in resources/css/tokens.css, rationale in .planning/phases/14-rebranding-issue-13/14-BRAND-NOTES.md.
 </design_direction>
 
 <findings_index>
