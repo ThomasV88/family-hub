@@ -217,7 +217,7 @@ describe('Quick add', () => {
 describe('Todo board accessibility and safety', () => {
     it('renders titles as text only', () => {
         mountBoard({ props: { tasks: [task(1, { title: '<img src=x onerror=alert(1)>' })] } });
-        expect(current.find('img').exists()).toBe(false);
+        expect(current.find('img:not(.brand-logo__img)').exists()).toBe(false);
         expect(current.text()).toContain('<img src=x');
     });
 

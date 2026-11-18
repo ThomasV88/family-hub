@@ -134,7 +134,7 @@ describe('Overview page', () => {
 
     it('renders no v-html and keeps user content as text', () => {
         mountPage({ finance: finance({ currencies: ['EUR'], categories: [{ id: 'cat-groc', kind: 'expense', defaultKey: null, name: '<img src=x onerror=alert(1)>' }] }) });
-        expect(document.querySelector('img')).toBeNull();
+        expect(document.querySelector('img:not(.brand-logo__img)')).toBeNull();
         expect(text()).toContain('<img src=x onerror=alert(1)>');
     });
 

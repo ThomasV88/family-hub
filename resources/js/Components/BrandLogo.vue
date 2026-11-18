@@ -2,6 +2,10 @@
 // FamilyHUB logo: full-colour lockup in light theme, white mono lockup in dark theme.
 // Both images are rendered and CSS hides one (display: none also removes it from the
 // accessibility tree), so exactly one is exposed with the same text alternative.
+// Served from public/; bound dynamically so the Vue compiler does not try to bundle them.
+const LIGHT_SRC = '/icons/familyhub-logo.svg';
+const DARK_SRC = '/icons/familyhub-logo-dark.svg';
+
 defineProps({
     alt: { type: String, required: true },
     height: { type: Number, default: 32 },
@@ -10,8 +14,8 @@ defineProps({
 
 <template>
     <span class="brand-logo">
-        <img class="brand-logo__img brand-logo__img--light" src="/icons/familyhub-logo.svg" :alt="alt" :height="height" decoding="async">
-        <img class="brand-logo__img brand-logo__img--dark" src="/icons/familyhub-logo-dark.svg" :alt="alt" :height="height" decoding="async">
+        <img class="brand-logo__img brand-logo__img--light" :src="LIGHT_SRC" :alt="alt" :height="height" decoding="async">
+        <img class="brand-logo__img brand-logo__img--dark" :src="DARK_SRC" :alt="alt" :height="height" decoding="async">
     </span>
 </template>
 

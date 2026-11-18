@@ -145,7 +145,7 @@ describe('Recurring page', () => {
     it('renders recurring names as text only', () => {
         window.localStorage.setItem('fh-finance-recurring-view', 'list');
         mountPage({ recurring: recurring({ overdue: [occ('r1', '2026-03-01', { name: '<img src=x onerror=alert(1)>', status: 'overdue' })] }) });
-        expect(document.querySelector('img')).toBeNull();
+        expect(document.querySelector('img:not(.brand-logo__img)')).toBeNull();
         expect(document.body.textContent).toContain('<img src=x onerror=alert(1)>');
     });
 });
