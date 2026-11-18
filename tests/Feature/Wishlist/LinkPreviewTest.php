@@ -6,7 +6,9 @@ use App\Models\Wish;
 use App\Models\WishUrl;
 use App\Wishlist\Catalog\FetchLinkPreview;
 use App\Wishlist\Fetch\SafeFetcher;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Log\Events\MessageLogged;
@@ -64,7 +66,7 @@ it('reports only the missing piece', function () {
 it('maps an unreachable page and a timeout', function () {
     previewFetcher([new Response(500)]);
     expect(runPreview('https://shop.example/x')['failures']['title'])->toBe('unreachable');
-    previewFetcher([new GuzzleHttp\Exception\ConnectException('timed out', new GuzzleHttp\Psr7\Request('GET', 'https://shop.example/x'), null, ['errno' => 28])]);
+    previewFetcher([new ConnectException('timed out', new Request('GET', 'https://shop.example/x'), null, ['errno' => 28])]);
     expect(runPreview('https://shop.example/x', 't2')['failures']['title'])->toBeIn(['timeout', 'unreachable']);
 });
 
