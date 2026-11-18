@@ -31,7 +31,7 @@ class AiJobQuery
      * Moves a queued row to running (and its call row). Null when the row is gone or not queued: a redelivered job
      * finds nothing to do.
      *
-     * @return array{subject_id: string, document_id: string, started_by: int, bulk_run_id: ?string, mode: string}|null
+     * @return array{subject_id: string, document_id: string, started_by: int, bulk_run_id: ?string, mode: string, fresh_read: bool, adjustments: ?array}|null
      */
     public function claim(string $id): ?array
     {
@@ -42,7 +42,7 @@ class AiJobQuery
         return DB::transaction(function () use ($id) {
             $now = Carbon::now();
             $rows = DB::select(
-                "update medical_ai_extractions set status = 'running', started_at = ?, updated_at = ? where id = ? and status = 'queued' returning subject_id, document_id, started_by, bulk_run_id, mode",
+                "update medical_ai_extractions set status = 'running', started_at = ?, updated_at = ? where id = ? and status = 'queued' returning subject_id, document_id, started_by, bulk_run_id, mode, fresh_read, adjustments",
                 [$now, $now, $id],
             );
             if ($rows === []) {
@@ -57,6 +57,8 @@ class AiJobQuery
                 'started_by' => (int) $rows[0]->started_by,
                 'bulk_run_id' => $rows[0]->bulk_run_id === null ? null : (string) $rows[0]->bulk_run_id,
                 'mode' => (string) $rows[0]->mode,
+                'fresh_read' => (bool) $rows[0]->fresh_read,
+                'adjustments' => $rows[0]->adjustments === null ? null : json_decode((string) $rows[0]->adjustments, true),
             ];
         });
     }

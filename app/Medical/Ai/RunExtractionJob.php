@@ -15,6 +15,8 @@ use App\Medical\Ai\Transcribe\ExtractFromTextTask;
 use App\Medical\Ai\Transcribe\TranscribeTask;
 use App\Medical\Ai\Work\WorkDir;
 use App\Medical\AiConsent;
+use App\Medical\Documents\Adjustments;
+use App\Medical\Documents\AiCopyAdjuster;
 use App\Medical\Documents\HeicConverter;
 use App\Medical\Documents\MedicalDocumentStore;
 use App\Medical\Documents\PdfRasterizer;
@@ -98,7 +100,7 @@ class RunExtractionJob implements ShouldQueue
     }
 
     /**
-     * @param  array{subject_id: string, document_id: string, started_by: int, bulk_run_id: ?string, mode: string}  $claim
+     * @param  array{subject_id: string, document_id: string, started_by: int, bulk_run_id: ?string, mode: string, fresh_read?: bool, adjustments?: ?array}  $claim
      * @return 'succeeded'|'failed'|'cancelled'|'waiting'|null null when a finish call no longer applied (row closed elsewhere)
      */
     private function run(AiJobQuery $query, array $claim, ?WorkDir &$workDir): ?string
@@ -136,7 +138,8 @@ class RunExtractionJob implements ShouldQueue
         }
 
         // A full run on a document whose stored text is current and read up to the page cap does not read the pages again.
-        $reused = $mode === 'full' ? $this->reusableText($query, $id) : null;
+        // A re-scan (fresh_read) always reads the pages again.
+        $reused = ($mode === 'full' && ! ($claim['fresh_read'] ?? false)) ? $this->reusableText($query, $id) : null;
         if ($reused !== null && $reused['extractionId'] !== $id) {
             // Marks the text as this run's and re-checks consent and archive under the store's locks (no catch: the message carries the text).
             $saved = app(DocumentTextStore::class)->save(
@@ -187,6 +190,17 @@ class RunExtractionJob implements ShouldQueue
             $pagesTotal = $pages['total'];
         } else {
             return $query->finishFailed($id, FailureCode::UnsupportedDocument, $label, 0) ? 'failed' : null;
+        }
+
+        // The member's brightness, contrast and black-and-white settings change the copy sent to the AI only (work dir).
+        $adjustments = Adjustments::fromArray($claim['adjustments'] ?? null);
+        if (! $adjustments->isNeutral()) {
+            $adjuster = new AiCopyAdjuster;
+            foreach ($images as $name) {
+                if (! $adjuster->apply($workDir->file($name), $adjustments)) {
+                    return $query->finishFailed($id, FailureCode::UnreadableDocument, $label, 0) ? 'failed' : null;
+                }
+            }
         }
 
         $registry = app(AgentRegistry::class);
