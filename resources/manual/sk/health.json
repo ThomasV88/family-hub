@@ -12,6 +12,7 @@
       "blocks": [
         { "type": "p", "text": "Zdravie uchováva jeden záznam pre každú osobu. Osobou môže byť člen s účtom alebo niekto bez účtu, napríklad malé dieťa. Hore v Zdraví vyberte osobu a otvorí sa jej záznam." },
         { "type": "p", "text": "Aby ste osobu videli, potrebujete dve veci: prístup k Zdraviu vo svojich oprávneniach a prístup k tej osobe. Oboje dáva správca. Prístup k osobe je buď **Môže zobraziť** (čítať záznam a núdzovú kartu), alebo **Môže meniť** (aj upravovať, nahrávať, exportovať a rozhodovať o AI). Osoba, ku ktorej nemáte prístup, sa vám vôbec nezobrazí." },
+        { "type": "p", "text": "Vedľa mena osoby je tlačidlo s tromi bodkami. Otvorí ponuku osoby s položkami **Upraviť osobu**, **Archivované položky** a **Odstrániť osobu**. Vidíte ho, len ak môžete túto osobu meniť." },
         { "type": "steps", "title": "Pridanie osoby", "items": [
           "Stlačte **Pridať osobu**.",
           "Napíšte meno. Môžete pridať dátum narodenia, pohlavie, krvnú skupinu a poznámky.",

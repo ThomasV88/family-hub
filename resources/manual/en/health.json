@@ -12,6 +12,7 @@
       "blocks": [
         { "type": "p", "text": "Health keeps one record for each person. A person can be a member with an account, or someone without one, such as a young child. At the top of Health, choose a person to open their record." },
         { "type": "p", "text": "To see a person you need two things: Health access in your permissions, and access to that person. The administrator gives both. Access to a person is either **Can view** (read the record and the emergency card) or **Can change** (also edit, upload, export and decide about AI). A person you have no access to does not appear at all." },
+        { "type": "p", "text": "Next to the person's name there is a three-dots button. It opens the person's menu with **Edit person**, **Archived items** and **Delete person**. You see it only if you can change that person." },
         { "type": "steps", "title": "Adding a person", "items": [
           "Press **Add person**.",
           "Type the name. You can add a birth date, sex, blood type and notes.",
