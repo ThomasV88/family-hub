@@ -111,6 +111,7 @@ class WishlistPrivacy
         $providers = [
             'wish' => fn () => $ctx['wish']->id,
             'variant' => fn () => 'thumb',
+            'token' => fn () => str_repeat('a', 40),
             'member' => fn () => $ctx['owner']->id,
             'occasion' => fn () => self::occasionId($ctx['owner']),
         ];

@@ -85,3 +85,35 @@ it('survives deeply nested JSON-LD', function () {
     $shallow = str_repeat('[', 10).'{"@type":"Product","image":"https://s.example/ok.jpg"}'.str_repeat(']', 10);
     expect(MetaImageExtractor::candidates('<script type="application/ld+json">'.$shallow.'</script>', META_PAGE))->toBe(['https://s.example/ok.jpg']);
 });
+
+it('picks the title by priority and falls through empty values', function () {
+    $all = '<title>Plain</title><meta name="twitter:title" content="TW"><meta property="og:title" content="OG">'
+        .'<script type="application/ld+json">{"@type":"Product","name":"LD"}</script>';
+    expect(MetaImageExtractor::title($all))->toBe('OG');
+    expect(MetaImageExtractor::title('<title>Plain</title><meta name="twitter:title" content="TW"><script type="application/ld+json">{"@type":"Product","name":"LD"}</script>'))->toBe('TW');
+    expect(MetaImageExtractor::title('<title>Plain</title><script type="application/ld+json">{"@type":"Product","name":"LD"}</script>'))->toBe('LD');
+    expect(MetaImageExtractor::title('<meta property="og:title" content="  "><title>  Plain
+      title </title>'))->toBe('Plain title');
+    expect(MetaImageExtractor::title('<body>nothing</body>'))->toBeNull();
+});
+
+it('caps the title at 120 characters without cutting a multibyte character', function () {
+    $title = MetaImageExtractor::title('<title>'.str_repeat('Ž', 200).'</title>');
+    expect(mb_strlen($title))->toBe(120)->and(mb_check_encoding($title, 'UTF-8'))->toBeTrue();
+});
+
+it('picks the description by priority and strips tags', function () {
+    expect(MetaImageExtractor::description('<meta name="twitter:description" content="TW"><meta property="og:description" content="OG"><meta name="description" content="D">'))->toBe('D');
+    expect(MetaImageExtractor::description('<meta name="twitter:description" content="TW"><meta property="og:description" content="OG &lt;b&gt;x&lt;/b&gt;">'))->toBe('OG x');
+    expect(MetaImageExtractor::description('<meta name="twitter:description" content="TW">'))->toBe('TW');
+    expect(MetaImageExtractor::description('<script type="application/ld+json">{"@type":"Product","description":"LD"}</script>'))->toBe('LD');
+    expect(MetaImageExtractor::description('<p>none</p>'))->toBeNull();
+    expect(mb_strlen(MetaImageExtractor::description('<meta name="description" content="'.str_repeat('a', 3000).'">')))->toBe(2000);
+});
+
+it('falls back to the first large img only when no other candidate exists', function () {
+    $html = '<img src="/small.jpg" width="50" height="50"><img src="/big.jpg" width="640">';
+    expect(MetaImageExtractor::candidates($html, META_PAGE))->toBe(['https://shop.example/big.jpg']);
+    expect(MetaImageExtractor::candidates('<meta property="og:image" content="https://s.example/og.jpg">'.$html, META_PAGE))->toBe(['https://s.example/og.jpg']);
+    expect(MetaImageExtractor::candidates('<img src="/small.jpg" width="50">', META_PAGE))->toBe([]);
+});

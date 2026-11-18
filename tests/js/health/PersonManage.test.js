@@ -61,7 +61,14 @@ describe('header actions', () => {
         expect(exportLink.textContent.trim()).toBe('Export records');
         expect(exportLink.getAttribute('href')).toBe(`/health/people/${ID}/export`);
         const trigger = [...document.querySelectorAll('[data-testid="header-menu"] button')][0];
-        expect(trigger.textContent.trim()).toBe('More actions for this person');
+        expect(trigger.getAttribute('aria-label')).toBe('More actions for this person');
+        expect(trigger.textContent.trim()).toBe('');
+        expect(trigger.closest('.ui-menu').getAttribute('title')).toBe('More actions for this person');
+        const row = trigger.closest('.person-header__title-row');
+        expect(row).not.toBeNull();
+        expect(row.querySelector('h2')).not.toBeNull();
+        const labelled = [...document.querySelectorAll('[data-testid="person-header"] button')].filter((b) => b.getAttribute('aria-label') === 'More actions for this person' || b.textContent.trim() === 'More actions for this person');
+        expect(labelled).toEqual([trigger]);
         trigger.click();
         await nextTick();
         expect([...document.querySelectorAll('[role="menuitem"]')].map((i) => i.textContent.trim())).toEqual(['Edit person', 'Archived items', 'Delete person']);

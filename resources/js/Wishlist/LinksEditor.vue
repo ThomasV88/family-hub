@@ -15,7 +15,7 @@ const props = defineProps({
     // Messages from the server by row index, shown until the row is edited.
     serverErrors: { type: Object, default: () => ({}) },
 });
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'first-url']);
 const { t } = useI18n();
 
 const touched = ref({});
@@ -43,6 +43,17 @@ function rowError(index) {
     return props.serverErrors[index] ?? '';
 }
 const touch = (index) => { touched.value = { ...touched.value, [index]: true }; };
+// Only the first row can start an autofill; the parent decides whether it is still allowed to.
+function leave(index) {
+    touch(index);
+    if (index === 0) announce();
+}
+function announce() {
+    const url = props.modelValue[0]?.url?.trim() ?? '';
+    if (url !== '' && isHttpUrl(url)) emit('first-url', url);
+}
+// A pasted address is complete the moment it lands; wait one tick for v-model to carry it.
+const pasted = (index) => { if (index === 0) nextTick(announce); };
 
 // Parent calls this on save: marks every row touched and reports whether all non-blank URLs are valid.
 function validateAll() {
@@ -59,7 +70,7 @@ defineExpose({ validateAll });
         <div v-for="(row, index) in modelValue" :key="index" class="links__row">
             <div class="links__fields">
                 <UiField :label="`${t('wishlist.field.link_url')} ${index + 1}`" :error="rowError(index)">
-                    <UiInput :model-value="row.url" type="url" inputmode="url" placeholder="https://" autocomplete="off" @update:model-value="update(index, { url: $event })" @blur="touch(index)" />
+                    <UiInput :model-value="row.url" type="url" inputmode="url" placeholder="https://" autocomplete="off" @update:model-value="update(index, { url: $event })" @blur="leave(index)" @paste="pasted(index)" />
                 </UiField>
                 <UiField :label="`${t('wishlist.field.link_label')} ${index + 1}`">
                     <UiInput :model-value="row.label" :placeholder="t('wishlist.field.link_label_ph')" autocomplete="off" @update:model-value="update(index, { label: $event })" />

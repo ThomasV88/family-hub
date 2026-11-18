@@ -12,6 +12,7 @@
       "blocks": [
         { "type": "p", "text": "Zdrowie przechowuje jedną dokumentację dla każdej osoby. Osobą może być członek z kontem albo ktoś bez konta, na przykład małe dziecko. Na górze Zdrowia wybierz osobę, aby otworzyć jej dokumentację." },
         { "type": "p", "text": "Aby zobaczyć osobę, potrzebujesz dwóch rzeczy: dostępu do Zdrowia w swoich uprawnieniach oraz dostępu do tej osoby. Oba daje administrator. Dostęp do osoby to albo **Może przeglądać** (czytać dokumentację i kartę awaryjną), albo **Może zmieniać** (także edytować, wgrywać, eksportować i decydować o AI). Osoba, do której nie masz dostępu, w ogóle się nie pojawia." },
+        { "type": "p", "text": "Obok imienia osoby znajduje się przycisk z trzema kropkami. Otwiera menu osoby z pozycjami **Edytuj osobę**, **Zarchiwizowane elementy** i **Usuń osobę**. Widzisz go tylko wtedy, gdy możesz zmieniać tę osobę." },
         { "type": "steps", "title": "Dodawanie osoby", "items": [
           "Naciśnij **Dodaj osobę**.",
           "Wpisz imię. Możesz dodać datę urodzenia, płeć, grupę krwi i notatki.",

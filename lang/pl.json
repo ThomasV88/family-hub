@@ -1134,7 +1134,15 @@
             "show": "Otrzymane ({n})",
             "tag": "Otrzymane",
             "hide": "Ukryj otrzymane ({n})",
-            "mark": "Oznacz jako otrzymane"
+            "mark": "Oznacz jako otrzymane",
+            "restore": "Przenieś z powrotem na moją listę",
+            "confirm_title": "Oznaczyć jako otrzymane?",
+            "confirm_body": "Życzenie trafi do sekcji Otrzymane i nie będzie można go edytować. Możesz je później przywrócić.",
+            "confirm_action": "Oznacz jako otrzymane",
+            "restore_title": "Przenieść z powrotem na listę?",
+            "restore_body": "Życzenie wróci na aktywną listę i będzie można je znowu edytować.",
+            "restore_action": "Przenieś z powrotem",
+            "cancel": "Anuluj"
         },
         "shopping": {
             "title": "Twoje zakupy",
@@ -1193,6 +1201,20 @@
             "err_upload": "Nie udało się przesłać obrazu. Spróbuj ponownie.",
             "err_load": "Nie udało się rozpocząć pobierania obrazu. Spróbuj ponownie."
         },
+        "preview": {
+            "loading": "Wczytuję tytuł, opis i obraz...",
+            "done_image_on_save": "Znaleziono obraz. Zostanie dołączony po zapisaniu życzenia.",
+            "image_alt": "Obraz znaleziony w pierwszym linku",
+            "missing_intro": "Nie udało się wczytać: {list}.",
+            "missing_image": "obraz",
+            "missing_title": "tytuł",
+            "missing_description": "opis",
+            "reason_timeout": "strona odpowiadała zbyt długo",
+            "reason_blocked": "adres jest niedozwolony",
+            "reason_no_tags": "strona go nie udostępnia",
+            "reason_unreachable": "strona jest niedostępna",
+            "reload": "Wczytaj ponownie z pierwszego linku"
+        },
         "res": {
             "title": "Rezerwacja",
             "free": "Nikt jeszcze tego nie kupuje.",
@@ -1242,6 +1264,7 @@
             "saved": "Zapisano życzenie",
             "deleted": "Usunięto życzenie",
             "received": "Życzenie oznaczono jako otrzymane",
+            "unreceived": "Życzenie przeniesiono z powrotem na listę",
             "reserved": "Prezent zarezerwowany",
             "unreserved": "Rezerwację anulowano",
             "cobuy_open": "Wspólny zakup otwarty",
@@ -2302,7 +2325,7 @@
         },
         "ai": {
             "label": "Zezwól AI na czytanie dokumentów tej osoby",
-            "explain": "Domyślnie wyłączone. Po włączeniu dokumenty tej osoby są wysyłane do zewnętrznej firmy AI (dostawcy skonfigurowanego przez administratora rodziny), która może je przechowywać zgodnie z własnymi warunkami. Każdą propozycję sprawdzasz, zanim zostanie zapisana. Wyłączenie zachowuje zapisane wpisy, ale usuwa tekst odczytany przez AI z dokumentów tej osoby.",
+            "explain": "Po włączeniu dokumenty tej osoby są wysyłane do zewnętrznej firmy AI.",
             "confirm_title": "Zezwolić na AI dla tej osoby?",
             "confirm_body": "Dokumenty tej osoby zostaną wysłane do zewnętrznej firmy AI (dostawcy skonfigurowanego przez administratora rodziny), która może je przechowywać zgodnie z własnymi warunkami. Włącz to tylko wtedy, gdy ta osoba lub jej rodzic albo opiekun wyraża zgodę. Możesz to wyłączyć w dowolnym momencie.",
             "allow": "Zezwól na AI",

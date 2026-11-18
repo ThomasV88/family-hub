@@ -90,3 +90,34 @@ it('leaves reservation rows in place when a reserved wish is marked received', f
         ->and(WishReservation::query()->count())->toBe(1)
         ->and(WishContribution::query()->count())->toBe(2);
 });
+
+it('moves a received wish back with a toast and keeps reservation rows and privacy through mark and restore', function () {
+    $ctx = WishlistPrivacy::scenario();
+    WishlistPrivacy::seedReservationWithCoBuy($ctx['wish'], $ctx['giver'], $ctx['giver2']);
+    $id = $ctx['wish']->id;
+    expect($ctx['wish']->fresh()->received_at)->toBeNull();
+
+    $this->actingAs($ctx['owner'])->post("/wishlist/wishes/$id/received")->assertStatus(303);
+    expect($ctx['wish']->fresh()->received_at)->not->toBeNull();
+
+    $this->actingAs($ctx['owner'])->delete("/wishlist/wishes/$id/received")
+        ->assertStatus(303)
+        ->assertSessionHas('toast.key', 'wishlist.toast.unreceived');
+
+    expect($ctx['wish']->fresh()->received_at)->toBeNull()
+        ->and(WishReservation::query()->count())->toBe(1)
+        ->and(WishContribution::query()->count())->toBe(2);
+
+    $page = $this->actingAs($ctx['owner'])->get('/wishlist')->assertOk();
+    $list = json_encode($page->viewData('page')['props']['list'] ?? []);
+    expect($list)->not->toContain(WishlistPrivacy::CANARY_NAME)->not->toContain('7777')->not->toContain('reservation');
+});
+
+it('forbids a member who cannot edit the list from marking or restoring', function () {
+    $ctx = WishlistPrivacy::scenario();
+    $id = $ctx['wish']->id;
+
+    $this->actingAs($ctx['giver'])->post("/wishlist/wishes/$id/received")->assertForbidden();
+    $this->actingAs($ctx['giver'])->delete("/wishlist/wishes/$id/received")->assertForbidden();
+    expect($ctx['wish']->fresh()->received_at)->toBeNull();
+});

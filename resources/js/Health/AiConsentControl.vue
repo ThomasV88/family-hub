@@ -89,18 +89,20 @@ function cancelOff() {
 <template>
     <section class="ai-consent" data-testid="ai-consent">
         <template v-if="canEdit">
-            <UiSwitch
-                :model-value="checked"
-                :disabled="busy"
-                :aria-busy="busy ? 'true' : undefined"
-                :aria-describedby="explainId"
-                data-testid="ai-switch"
-                @update:model-value="toggle"
-                @change="syncDom"
-            >
-                <Bot :size="16" :stroke-width="1.75" aria-hidden="true" /> {{ t('health.ai.label') }}
-            </UiSwitch>
-            <HelpTip topic="health.ai_consent" :label="t('health.ai.label')" />
+            <div class="ai-consent__row">
+                <UiSwitch
+                    :model-value="checked"
+                    :disabled="busy"
+                    :aria-busy="busy ? 'true' : undefined"
+                    :aria-describedby="explainId"
+                    data-testid="ai-switch"
+                    @update:model-value="toggle"
+                    @change="syncDom"
+                >
+                    <Bot :size="16" :stroke-width="1.75" aria-hidden="true" /> {{ t('health.ai.label') }}
+                </UiSwitch>
+                <HelpTip topic="health.ai_consent" :label="t('health.ai.label')" />
+            </div>
         </template>
         <UiTag v-else :variant="value ? 'success' : 'neutral'" :icon="Bot" data-testid="ai-tag">{{ value ? t('health.ai.tag_on') : t('health.ai.tag_off') }}</UiTag>
         <p :id="explainId" class="ai-consent__text">{{ t('health.ai.explain') }}</p>
@@ -126,6 +128,7 @@ function cancelOff() {
 
 <style scoped>
 .ai-consent { flex-basis: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); }
+.ai-consent__row { display: flex; align-items: center; gap: var(--space-2); flex-wrap: nowrap; }
 .ai-consent__text { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); max-width: 64ch; }
 .ai-consent__body { margin: 0; font-size: var(--text-base); }
 </style>

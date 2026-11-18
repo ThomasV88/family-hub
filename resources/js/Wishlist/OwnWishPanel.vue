@@ -1,7 +1,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
-import { Check, Link, Trash2, Upload } from '@lucide/vue';
+import { Check, Link, RefreshCw, Trash2, Undo2, Upload } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import UiAlert from '../Components/ui/UiAlert.vue';
 import UiButton from '../Components/ui/UiButton.vue';
@@ -14,7 +14,8 @@ import UiSelect from '../Components/ui/UiSelect.vue';
 import UiTextarea from '../Components/ui/UiTextarea.vue';
 import LinksEditor from './LinksEditor.vue';
 import WishImage from './WishImage.vue';
-import { isValidPrice, normalizePrice } from './money.js';
+import { isHttpUrl, isValidPrice, normalizePrice } from './money.js';
+import { useLinkPreview } from './linkPreview.js';
 import HelpTip from '../Components/ui/HelpTip.vue';
 
 // Create and edit form for the owner and designated managers. Props are the wish and the list owner only.
@@ -65,6 +66,8 @@ const links = ref(null);
 const prioRoot = ref(null);
 const discardOpen = ref(false);
 const deleteOpen = ref(false);
+const receiveOpen = ref(false);
+const restoreOpen = ref(false);
 let pendingAfterDiscard = null;
 
 const dirty = computed(() => JSON.stringify(form.value) !== snapshot.value);
@@ -152,8 +155,11 @@ function save() {
     else router.patch(`/wishlist/wishes/${props.wish.id}`, payload(), visitOptions(done));
 }
 
-function markReceived() {
+function confirmReceived() {
     router.post(`/wishlist/wishes/${props.wish.id}/received`, {}, visitOptions(() => emit('close')));
+}
+function confirmRestore() {
+    router.delete(`/wishlist/wishes/${props.wish.id}/received`, visitOptions(() => emit('close')));
 }
 function confirmDelete() {
     router.delete(`/wishlist/wishes/${props.wish.id}`, visitOptions(() => emit('close')));
@@ -299,6 +305,37 @@ watch(() => props.open && imageStatus.value === 'pending', (active) => {
 watch(() => props.wish?.id, () => { imageError.value = ''; uploadFile.value = null; });
 onBeforeUnmount(stopPolling);
 
+// Autofill from the first link. Runs by itself only when the wish had no link on open; an existing link needs the button.
+const { status: previewStatus, ran: previewRan, thumbUrl: previewThumb, missing: previewMissing, start: startPreview, reset: resetPreview } = useLinkPreview(form);
+const autoPreview = ref(true);
+watch(() => [props.open, props.mode, props.wish?.id], () => {
+    resetPreview();
+    autoPreview.value = initial().urls.length === 0;
+}, { immediate: true });
+const firstUrl = computed(() => {
+    const url = form.value.urls[0]?.url?.trim() ?? '';
+    return isHttpUrl(url) ? url : '';
+});
+const canReloadPreview = computed(() => !received.value && firstUrl.value !== '' && previewStatus.value !== 'loading' && (!autoPreview.value || previewRan.value));
+const previewImageNote = computed(() => (previewStatus.value === 'done' && !previewMissing.value.some((m) => m.field === 'image') ? t('wishlist.preview.done_image_on_save') : ''));
+const previewMissingNote = computed(() => {
+    if (previewMissing.value.length === 0) return '';
+    const list = previewMissing.value.map(({ field, reason }) => {
+        const name = t(`wishlist.preview.missing_${field}`);
+        return ['timeout', 'blocked', 'no_tags', 'unreachable'].includes(reason) ? `${name} (${t(`wishlist.preview.reason_${reason}`)})` : name;
+    }).join(', ');
+    return t('wishlist.preview.missing_intro', { list });
+});
+function onFirstUrl(url) {
+    if (!autoPreview.value || previewRan.value || received.value) return;
+    startPreview(url);
+}
+function reloadPreview() {
+    startPreview(firstUrl.value);
+    // The saved wish also gets its picture refreshed, unless one was uploaded by hand.
+    if (!creating.value && hasLinks.value && imageStatus.value !== 'pending' && props.wish?.image?.source !== 'uploaded') loadFromLink();
+}
+
 defineExpose({ guard, dirty });
 </script>
 
@@ -326,7 +363,18 @@ defineExpose({ guard, dirty });
                         </div>
                     </div>
 
-                    <LinksEditor ref="links" v-model="form.urls" :server-errors="linkErrors" />
+                    <LinksEditor ref="links" v-model="form.urls" :server-errors="linkErrors" @first-url="onFirstUrl" />
+                    <div v-if="previewStatus !== 'idle' || canReloadPreview" class="wish-panel__block" data-testid="link-preview">
+                        <div role="status" class="wish-panel__block">
+                            <p v-if="previewStatus === 'loading'" class="wish-panel__hint" data-testid="preview-loading">{{ t('wishlist.preview.loading') }}</p>
+                            <img v-if="previewThumb" :src="previewThumb" :alt="t('wishlist.preview.image_alt')" class="wish-panel__preview" data-testid="preview-image" />
+                            <p v-if="previewImageNote" class="wish-panel__hint" data-testid="preview-image-note">{{ previewImageNote }}</p>
+                            <p v-if="previewMissingNote" class="wish-panel__hint" data-testid="preview-missing">{{ previewMissingNote }}</p>
+                        </div>
+                        <div v-if="canReloadPreview">
+                            <UiButton variant="secondary" size="sm" :icon="RefreshCw" @click="reloadPreview">{{ t('wishlist.preview.reload') }}</UiButton>
+                        </div>
+                    </div>
 
                     <div class="wish-panel__price">
                         <UiField :label="t('wishlist.field.price')" :hint="t('wishlist.field.price_hint')" :error="errors.price" class="wish-panel__amount">
@@ -364,7 +412,8 @@ defineExpose({ guard, dirty });
 
         <template #footer>
             <UiButton v-if="!creating" variant="ghost" :icon="Trash2" class="wish-panel__delete" @click="deleteOpen = true">{{ t('wishlist.delete.action') }}</UiButton>
-            <UiButton v-if="!creating && !received" variant="secondary" :icon="Check" @click="markReceived">{{ t('wishlist.received.mark') }}</UiButton>
+            <UiButton v-if="!creating && !received" variant="secondary" :icon="Check" @click="receiveOpen = true">{{ t('wishlist.received.mark') }}</UiButton>
+            <UiButton v-if="received" variant="secondary" :icon="Undo2" @click="restoreOpen = true">{{ t('wishlist.received.restore') }}</UiButton>
             <HelpTip v-if="!creating && !received" topic="wishlist.received" :label="t('wishlist.received.mark')" />
             <UiButton variant="secondary" @click="requestClose">{{ t('wishlist.close') }}</UiButton>
             <UiButton v-if="!received" variant="primary" :disabled="!canSave" :loading="processing" @click="save">{{ t('wishlist.save') }}</UiButton>
@@ -379,6 +428,22 @@ defineExpose({ guard, dirty });
         :cancel-label="t('wishlist.discard.keep')"
         @confirm="discard"
         @cancel="keepEditing"
+    />
+    <UiConfirmDialog
+        v-model:open="receiveOpen"
+        :title="t('wishlist.received.confirm_title')"
+        :body="t('wishlist.received.confirm_body')"
+        :confirm-label="t('wishlist.received.confirm_action')"
+        :cancel-label="t('wishlist.received.cancel')"
+        @confirm="confirmReceived"
+    />
+    <UiConfirmDialog
+        v-model:open="restoreOpen"
+        :title="t('wishlist.received.restore_title')"
+        :body="t('wishlist.received.restore_body')"
+        :confirm-label="t('wishlist.received.restore_action')"
+        :cancel-label="t('wishlist.received.cancel')"
+        @confirm="confirmRestore"
     />
     <UiConfirmDialog
         v-model:open="deleteOpen"
@@ -397,6 +462,7 @@ defineExpose({ guard, dirty });
 .wish-panel__block { display: flex; flex-direction: column; gap: var(--space-2); }
 .wish-panel__image-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .wish-panel__hint { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
+.wish-panel__preview { align-self: flex-start; max-width: 160px; max-height: 160px; border-radius: var(--radius-lg); object-fit: cover; }
 .wish-panel__label { font-size: var(--text-sm); font-weight: 600; line-height: 1.4; }
 .wish-panel__priority { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .wish-panel__price { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-3); }

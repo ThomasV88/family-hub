@@ -19,18 +19,10 @@ final class MetaImageExtractor
     /** @return list<string> absolute http(s) URLs in priority order, deduplicated, at most 5 */
     public static function candidates(string $html, string $baseUrl): array
     {
-        $html = substr($html, 0, self::MAX_HTML);
-        if ($html === '') {
+        $xp = self::load($html);
+        if ($xp === null) {
             return [];
         }
-        $html = self::toUtf8($html);
-
-        $previous = libxml_use_internal_errors(true);
-        $doc = new DOMDocument;
-        $doc->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
-        libxml_clear_errors();
-        libxml_use_internal_errors($previous);
-        $xp = new DOMXPath($doc);
 
         $raw = [];
         foreach ([['property', 'og:image:secure_url'], ['property', 'og:image'], ['name', 'twitter:image'], ['name', 'twitter:image:src'],
@@ -45,6 +37,10 @@ final class MetaImageExtractor
         }
         foreach (self::jsonLdImages($xp) as $value) {
             $raw[] = $value;
+        }
+
+        if ($raw === [] || count(array_filter($raw, fn ($v) => $v !== '')) === 0) {
+            $raw[] = self::largeImg($xp);
         }
 
         $out = [];
@@ -62,6 +58,133 @@ final class MetaImageExtractor
         }
 
         return $out;
+    }
+
+    /** Page title: og:title, twitter:title, JSON-LD Product name, then the title element. Plain text, at most title_max. */
+    public static function title(string $html): ?string
+    {
+        $xp = self::load($html);
+        if ($xp === null) {
+            return null;
+        }
+        $options = [
+            ...self::metaContents($xp, 'property', 'og:title'),
+            ...self::metaContents($xp, 'name', 'og:title'),
+            ...self::metaContents($xp, 'name', 'twitter:title'),
+            ...self::metaContents($xp, 'property', 'twitter:title'),
+            ...self::jsonLdText($xp, 'name'),
+            ...self::titleElement($xp),
+        ];
+
+        return self::firstText($options, self::limit('title_max', 120));
+    }
+
+    /** Page description: meta description and og:description first, then twitter and JSON-LD. Plain text, at most notes_max. */
+    public static function description(string $html): ?string
+    {
+        $xp = self::load($html);
+        if ($xp === null) {
+            return null;
+        }
+        $options = [
+            ...self::metaContents($xp, 'name', 'description'),
+            ...self::metaContents($xp, 'property', 'og:description'),
+            ...self::metaContents($xp, 'name', 'og:description'),
+            ...self::metaContents($xp, 'name', 'twitter:description'),
+            ...self::metaContents($xp, 'property', 'twitter:description'),
+            ...self::jsonLdText($xp, 'description'),
+        ];
+
+        return self::firstText($options, self::limit('notes_max', 2000));
+    }
+
+    /** The configured cap, or the default when no application container is booted (plain unit tests). */
+    private static function limit(string $key, int $default): int
+    {
+        return function_exists('app') && app()->bound('config') ? (int) config('wishlist.'.$key, $default) : $default;
+    }
+
+    private static function load(string $html): ?DOMXPath
+    {
+        $html = substr($html, 0, self::MAX_HTML);
+        if ($html === '') {
+            return null;
+        }
+        $html = self::toUtf8($html);
+
+        $previous = libxml_use_internal_errors(true);
+        $doc = new DOMDocument;
+        $doc->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        return new DOMXPath($doc);
+    }
+
+    /** @param  list<string>  $options */
+    private static function firstText(array $options, int $max): ?string
+    {
+        foreach ($options as $option) {
+            $text = trim((string) preg_replace('/\s+/u', ' ', strip_tags(html_entity_decode($option, ENT_QUOTES | ENT_HTML5, 'UTF-8'))));
+            if ($text !== '') {
+                return mb_substr($text, 0, $max);
+            }
+        }
+
+        return null;
+    }
+
+    /** @return list<string> */
+    private static function titleElement(DOMXPath $xp): array
+    {
+        $values = [];
+        foreach ($xp->query('//title') ?: [] as $node) {
+            $values[] = $node->textContent;
+        }
+
+        return $values;
+    }
+
+    /** @return list<string> */
+    private static function jsonLdText(DOMXPath $xp, string $key): array
+    {
+        $values = [];
+        foreach ($xp->query('//script['.sprintf(self::LOWER, '@type')."='application/ld+json']") ?: [] as $script) {
+            $data = json_decode($script->textContent, true, self::JSON_DEPTH);
+            if (! is_array($data)) {
+                continue;
+            }
+            $queue = [[$data, 0]];
+            for ($i = 0; $i < count($queue) && $i < 5000; $i++) {
+                [$node, $depth] = $queue[$i];
+                if (self::isProduct($node) && isset($node[$key]) && is_string($node[$key])) {
+                    $values[] = $node[$key];
+                }
+                if ($depth < self::JSON_DEPTH) {
+                    foreach ($node as $child) {
+                        if (is_array($child)) {
+                            $queue[] = [$child, $depth + 1];
+                        }
+                    }
+                }
+            }
+        }
+
+        return $values;
+    }
+
+    /** First img with a width or height attribute of at least 200, as a last-resort picture. */
+    private static function largeImg(DOMXPath $xp): string
+    {
+        foreach ($xp->query('//img[@src]') ?: [] as $img) {
+            foreach (['width', 'height'] as $attr) {
+                if ((int) $img->getAttribute($attr) >= 200) {
+                    return trim($img->getAttribute('src'));
+                }
+            }
+        }
+
+        return '';
     }
 
     private static function toUtf8(string $html): string

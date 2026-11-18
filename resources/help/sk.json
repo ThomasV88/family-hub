@@ -93,11 +93,11 @@
         },
         "wishlist.links": {
             "title": "Odkazy",
-            "text": "Obchody alebo stránky, kde sa darček dá kúpiť, najviac 5. Pomôže krátky popis, napríklad názov obchodu. Ostatní ich uvidia pri želaní."
+            "text": "Obchody alebo stránky, kde sa darček dá kúpiť, najviac 5. Vložením prvého odkazu sa z jeho stránky vyplní prázdny názov a poznámky a nájde sa obrázok; váš vlastný text sa nenahradí. Pomôže krátky popis. Ostatní odkazy uvidia pri želaní."
         },
         "wishlist.received": {
             "title": "Označiť ako dostané",
-            "text": "Použite, keď ste darček dostali. Želanie sa presunie do časti Dostané vo vašom zozname a už sa nedá upravovať."
+            "text": "Použite, keď ste darček dostali. Aplikácia požiada o potvrdenie. Želanie sa presunie do časti Prijaté a bude len na čítanie. Vrátite ho tam cez Vrátiť do môjho zoznamu."
         },
         "wishlist.shopping": {
             "title": "Nákupný súhrn",
@@ -209,7 +209,7 @@
         },
         "health.ai_consent": {
             "title": "AI pre túto osobu",
-            "text": "Predvolene vypnuté. Keď je zapnuté, dokumenty tejto osoby možno poslať externej AI firme, ktorá navrhne záznamy. Každý návrh skontrolujete, kým sa uloží. Vypnutie zastaví nové behy. Ak má osoba rozpoznaný text, najprv sa vás opýta a potom sa zmaže."
+            "text": "Predvolene vypnuté. Každý návrh skontrolujete, kým sa uloží. Vypnutie ponechá uložené záznamy, ale vymaže text, ktorý AI prečítala z dokumentov tejto osoby (najprv sa vás opýta)."
         },
         "health.ai_run": {
             "title": "Spustiť AI",

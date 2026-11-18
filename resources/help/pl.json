@@ -93,11 +93,11 @@
         },
         "wishlist.links": {
             "title": "Linki",
-            "text": "Sklepy lub strony, gdzie można kupić prezent, maksymalnie 5. Pomaga krótki opis, np. nazwa sklepu. Inni widzą je przy życzeniu."
+            "text": "Sklepy lub strony, gdzie można kupić prezent, maksymalnie 5. Wklejenie pierwszego linku uzupełnia puste pola tytułu i notatek z jego strony i znajduje obraz; Twój własny tekst nie jest zastępowany. Pomaga krótki opis. Inni widzą linki przy życzeniu."
         },
         "wishlist.received": {
             "title": "Oznacz jako otrzymane",
-            "text": "Użyj, gdy dostaniesz prezent. Życzenie trafia do sekcji Otrzymane na Twojej liście i nie można go już edytować."
+            "text": "Użyj, gdy dostaniesz prezent. Pojawi się prośba o potwierdzenie. Życzenie trafia do sekcji Otrzymane i jest tylko do odczytu. Cofniesz to tam przyciskiem Przenieś z powrotem na moją listę."
         },
         "wishlist.shopping": {
             "title": "Podsumowanie zakupów",
@@ -209,7 +209,7 @@
         },
         "health.ai_consent": {
             "title": "AI dla tej osoby",
-            "text": "Domyślnie wyłączone. Gdy włączone, dokumenty tej osoby można wysłać do zewnętrznej firmy AI, która zaproponuje wpisy. Każdą propozycję sprawdzasz przed zapisem. Wyłączenie zatrzymuje nowe uruchomienia. Jeśli osoba ma rozpoznany tekst, najpierw zostaniesz zapytany, a potem zostanie on usunięty."
+            "text": "Domyślnie wyłączone. Każdą propozycję sprawdzasz przed zapisem. Wyłączenie zachowuje zapisane wpisy, ale usuwa tekst odczytany przez AI z dokumentów tej osoby (najpierw zostaniesz zapytany)."
         },
         "health.ai_run": {
             "title": "Uruchom AI",

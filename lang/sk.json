@@ -1134,7 +1134,15 @@
             "show": "Prijaté ({n})",
             "tag": "Prijaté",
             "hide": "Skryť prijaté ({n})",
-            "mark": "Označiť ako prijaté"
+            "mark": "Označiť ako prijaté",
+            "restore": "Vrátiť do môjho zoznamu",
+            "confirm_title": "Označiť ako prijaté?",
+            "confirm_body": "Želanie sa presunie do časti Prijaté a už sa nedá upravovať. Neskôr ho môžete vrátiť späť.",
+            "confirm_action": "Označiť ako prijaté",
+            "restore_title": "Vrátiť do zoznamu?",
+            "restore_body": "Želanie sa vráti do aktívneho zoznamu a opäť sa dá upravovať.",
+            "restore_action": "Vrátiť späť",
+            "cancel": "Zrušiť"
         },
         "shopping": {
             "title": "Váš nákup",
@@ -1193,6 +1201,20 @@
             "err_upload": "Obrázok sa nepodarilo nahrať. Skúste to znova.",
             "err_load": "Načítanie obrázka sa nepodarilo spustiť. Skúste to znova."
         },
+        "preview": {
+            "loading": "Načítavam názov, popis a obrázok...",
+            "done_image_on_save": "Obrázok sa našiel. Pripojí sa pri uložení priania.",
+            "image_alt": "Obrázok nájdený na prvom odkaze",
+            "missing_intro": "Nepodarilo sa načítať: {list}.",
+            "missing_image": "obrázok",
+            "missing_title": "názov",
+            "missing_description": "popis",
+            "reason_timeout": "stránka odpovedala príliš dlho",
+            "reason_blocked": "adresa nie je povolená",
+            "reason_no_tags": "stránka ho neposkytuje",
+            "reason_unreachable": "stránka nie je dostupná",
+            "reload": "Načítať znova z prvého odkazu"
+        },
         "res": {
             "title": "Rezervácia",
             "free": "Zatiaľ to nikto nekupuje.",
@@ -1242,6 +1264,7 @@
             "saved": "Želanie uložené",
             "deleted": "Želanie odstránené",
             "received": "Želanie označené ako prijaté",
+            "unreceived": "Želanie vrátené do vášho zoznamu",
             "reserved": "Darček rezervovaný",
             "unreserved": "Rezervácia zrušená",
             "cobuy_open": "Spoločný nákup otvorený",
@@ -2302,7 +2325,7 @@
         },
         "ai": {
             "label": "Povoliť AI čítať dokumenty tejto osoby",
-            "explain": "Predvolene vypnuté. Keď je zapnuté, dokumenty tejto osoby sa odosielajú externej AI spoločnosti (poskytovateľovi, ktorého nastavil správca rodiny), ktorá ich môže uchovávať podľa vlastných podmienok. Každý návrh skontrolujete skôr, než sa uloží. Vypnutie ponechá uložené záznamy, ale vymaže text, ktorý AI prečítala z dokumentov tejto osoby.",
+            "explain": "Keď je zapnuté, dokumenty tejto osoby sa odosielajú externej AI spoločnosti.",
             "confirm_title": "Povoliť AI pre túto osobu?",
             "confirm_body": "Dokumenty tejto osoby sa odošlú externej AI spoločnosti (poskytovateľovi, ktorého nastavil správca rodiny), ktorá ich môže uchovávať podľa vlastných podmienok. Zapnite to, iba ak s tým táto osoba alebo jej rodič či zákonný zástupca súhlasí. Môžete to kedykoľvek vypnúť.",
             "allow": "Povoliť AI",

@@ -1134,7 +1134,15 @@
             "show": "Received ({n})",
             "tag": "Received",
             "hide": "Hide received ({n})",
-            "mark": "Mark as received"
+            "mark": "Mark as received",
+            "restore": "Move back to my list",
+            "confirm_title": "Mark as received?",
+            "confirm_body": "The wish moves to the Received section and can no longer be edited. You can move it back later.",
+            "confirm_action": "Mark as received",
+            "restore_title": "Move back to my list?",
+            "restore_body": "The wish returns to your active list and can be edited again.",
+            "restore_action": "Move back",
+            "cancel": "Cancel"
         },
         "shopping": {
             "title": "Your shopping",
@@ -1193,6 +1201,20 @@
             "err_upload": "We could not upload the image. Try again.",
             "err_load": "We could not start loading the image. Try again."
         },
+        "preview": {
+            "loading": "Loading title, description and image...",
+            "done_image_on_save": "A picture was found. It will be attached when you save the wish.",
+            "image_alt": "Picture found on the first link",
+            "missing_intro": "We could not load: {list}.",
+            "missing_image": "image",
+            "missing_title": "title",
+            "missing_description": "description",
+            "reason_timeout": "the page took too long",
+            "reason_blocked": "the address is not allowed",
+            "reason_no_tags": "the page does not provide it",
+            "reason_unreachable": "the page could not be reached",
+            "reload": "Reload from first link"
+        },
         "res": {
             "title": "Reservation",
             "free": "Nobody is buying this yet.",
@@ -1242,6 +1264,7 @@
             "saved": "Wish saved",
             "deleted": "Wish deleted",
             "received": "Wish marked as received",
+            "unreceived": "Wish moved back to your list",
             "reserved": "Gift reserved",
             "unreserved": "Reservation cancelled",
             "cobuy_open": "Co-buying opened",
@@ -2302,7 +2325,7 @@
         },
         "ai": {
             "label": "Allow AI to read documents of this person",
-            "explain": "Off by default. When on, documents of this person are sent to an outside AI company (the provider your family admin has set up), which may keep them under its own terms. You check every suggestion before it is saved. Turning this off keeps saved entries but deletes the text the AI read from this person's documents.",
+            "explain": "When on, this person's documents are sent to an outside AI company.",
             "confirm_title": "Allow AI for this person?",
             "confirm_body": "Documents of this person will be sent to an outside AI company (the provider your family admin has set up), which may keep them under its own terms. Only turn this on if this person, or their parent or guardian, agrees. You can turn it off at any time.",
             "allow": "Allow AI",

@@ -30,6 +30,6 @@ class ReceivedController extends Controller
 
         $service->unmarkReceived($user, $model);
 
-        return back(303);
+        return back(303)->with('toast', ['key' => 'wishlist.toast.unreceived']);
     }
 }

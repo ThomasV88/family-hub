@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
-import { Archive, FileDown, IdCard, Pencil, Plus, Trash2, Upload, UserX } from '@lucide/vue';
+import { Archive, Ellipsis, FileDown, IdCard, Pencil, Plus, Trash2, Upload, UserX } from '@lucide/vue';
 import UiAvatar from '../Components/ui/UiAvatar.vue';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiConfirmDialog from '../Components/ui/UiConfirmDialog.vue';
@@ -57,7 +57,12 @@ const remove = () => router.delete(`/health/people/${props.person.id}`);
     <header class="person-header" data-testid="person-header">
         <UiAvatar :name="person.name" :size="40" :user-id="person.photoUserId ?? null" decorative />
         <div class="person-header__main">
-            <h2 class="person-header__name">{{ person.name }}</h2>
+            <div class="person-header__title-row">
+                <h2 class="person-header__name">{{ person.name }}</h2>
+                <div v-if="person.canEdit" class="person-header__menu" data-testid="header-menu">
+                    <UiMenu :label="t('health.person.more_actions')" :title="t('health.person.more_actions')" :icon="Ellipsis" :items="menuItems" icon-only @select="onMenu" />
+                </div>
+            </div>
             <p v-if="ageLine" class="person-header__line">{{ ageLine }}</p>
         </div>
         <div class="person-header__tags">
@@ -73,9 +78,6 @@ const remove = () => router.delete(`/health/people/${props.person.id}`);
             </template>
             <UiButton variant="secondary" :icon="IdCard" :href="`/health/people/${person.id}/emergency-card`" data-testid="header-emergency">{{ t('health.emergency.title') }}</UiButton>
             <HelpTip topic="health.emergency_card" :label="t('health.emergency.title')" />
-        </div>
-        <div v-if="person.canEdit" class="person-header__menu" data-testid="header-menu">
-            <UiMenu :label="t('health.person.more_actions')" :items="menuItems" @select="onMenu" />
         </div>
         <p v-if="!person.canEdit" class="person-header__view-only">{{ t('health.view_only') }}</p>
         <AiConsentControl :person-id="person.id" :value="!!person.aiConsent" :can-edit="!!person.canEdit" :purges-text="textStored" />
@@ -93,12 +95,12 @@ const remove = () => router.delete(`/health/people/${props.person.id}`);
 <style scoped>
 .person-header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
 .person-header__main { min-width: 0; }
-.person-header__name { margin: 0; font-size: var(--text-xl); font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
+.person-header__name { margin: 0; font-size: var(--text-xl); font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; min-width: 0; }
+.person-header__title-row { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
 .person-header__line { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 .person-header__tags { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .person-header__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-inline-start: auto; }
 .person-header__menu { flex: none; }
-.person-header__actions + .person-header__menu { margin-inline-start: 0; }
 @container (max-width: 640px) { .person-header__edit-action { display: none; } }
 .person-header__view-only { flex-basis: 100%; margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
 </style>
