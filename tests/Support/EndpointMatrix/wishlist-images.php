@@ -52,4 +52,35 @@ return [
         'params' => $parentWish,
         'expect' => $ownerOnlyWrite,
     ],
+
+    // Link preview (issue #16): needs wishlist edit access. The matrix posts no URL, so an allowed role is bounced back
+    // with a validation error (302); a poll or thumbnail of an unknown token is a uniform 404 for allowed roles
+    // (a token is bound to the user who asked); everyone else is refused with 403 before the controller runs.
+    'wishlist.link-preview.start' => [
+        'method' => 'POST',
+        'uri' => '/wishlist/link-preview',
+        'params' => fn () => [],
+        'expect' => [
+            'guest' => 302, 'admin' => 403, 'parent' => 302, 'child' => 302,
+            'grandparent' => 302, 'guestPreset' => 403, 'noGrants' => 403,
+        ],
+    ],
+    'wishlist.link-preview.show' => [
+        'method' => 'GET',
+        'uri' => '/wishlist/link-preview/{token}',
+        'params' => fn () => ['token' => str_repeat('a', 40)],
+        'expect' => [
+            'guest' => 302, 'admin' => 403, 'parent' => 404, 'child' => 404,
+            'grandparent' => 404, 'guestPreset' => 403, 'noGrants' => 403,
+        ],
+    ],
+    'wishlist.link-preview.image' => [
+        'method' => 'GET',
+        'uri' => '/wishlist/link-preview/{token}/image',
+        'params' => fn () => ['token' => str_repeat('a', 40)],
+        'expect' => [
+            'guest' => 302, 'admin' => 403, 'parent' => 404, 'child' => 404,
+            'grandparent' => 404, 'guestPreset' => 403, 'noGrants' => 403,
+        ],
+    ],
 ];
