@@ -129,7 +129,11 @@
         "pass": "Vyhovuje",
         "fail": "Nevyhovuje",
         "minimum": "minimum {min}:1",
+        "brand_light": "Logo na svetlom pozadí",
+        "brand_dark": "Logo na tmavom pozadí",
+        "brand_mark": "Znak",
         "section": {
+            "brand": "Značka",
             "tokens": "Tokeny",
             "colors": "Farby",
             "typography": "Typografia",

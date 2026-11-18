@@ -129,7 +129,11 @@
         "pass": "Zgodne",
         "fail": "Niezgodne",
         "minimum": "minimum {min}:1",
+        "brand_light": "Logo na jasnym tle",
+        "brand_dark": "Logo na ciemnym tle",
+        "brand_mark": "Znak",
         "section": {
+            "brand": "Marka",
             "tokens": "Tokeny",
             "colors": "Kolory",
             "typography": "Typografia",

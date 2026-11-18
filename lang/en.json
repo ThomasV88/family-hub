@@ -129,7 +129,11 @@
         "pass": "Pass",
         "fail": "Fail",
         "minimum": "minimum {min}:1",
+        "brand_light": "Logo on light background",
+        "brand_dark": "Logo on dark background",
+        "brand_mark": "Mark",
         "section": {
+            "brand": "Brand",
             "tokens": "Tokens",
             "colors": "Colours",
             "typography": "Typography",
