@@ -70,7 +70,7 @@
       "id": "offline",
       "title": "Aplikacja pokazuje, że jestem offline",
       "blocks": [
-        { "type": "p", "text": "Family Hub potrzebuje połączenia, aby pokazać i zapisać Twoje dane. Gdy urządzenie jest offline, pojawia się pasek. To, co widzisz, może być nieaktualne, a zmiana może nie zostać zapisana, dopóki nie wrócisz online. Poczekaj, aż pasek zniknie, zanim na tym polegasz." }
+        { "type": "p", "text": "FamilyHUB potrzebuje połączenia, aby pokazać i zapisać Twoje dane. Gdy urządzenie jest offline, pojawia się pasek. To, co widzisz, może być nieaktualne, a zmiana może nie zostać zapisana, dopóki nie wrócisz online. Poczekaj, aż pasek zniknie, zanim na tym polegasz." }
       ]
     },
     {
@@ -78,6 +78,19 @@
       "title": "Komunikat informuje, że dostępna jest nowa wersja",
       "blocks": [
         { "type": "p", "text": "Naciśnij **Załaduj ponownie** w komunikacie. Strona uruchomi się od nowa w najnowszej wersji. Najpierw dokończ i zapisz to, co właśnie piszesz." }
+      ]
+    },
+    {
+      "id": "old-icon",
+      "title": "Ikona aplikacji nadal pokazuje stare logo",
+      "blocks": [
+        { "type": "p", "text": "Po aktualizacji przeglądarki pokazują nowe logo FamilyHUB, ale aplikacja już zainstalowana na urządzeniu może przez jakiś czas zachować starą ikonę." },
+        { "type": "list", "items": [
+          "**Android:** ikona aktualizuje się sama, zwykle w ciągu doby.",
+          "**iPhone i iPad:** przytrzymaj starą ikonę, usuń ją z ekranu początkowego, a potem dodaj aplikację ponownie z Safari (patrz **Aplikacja w telefonie, tablecie lub komputerze**).",
+          "**Komputer:** ikona aktualizuje się sama; jeśli nie, odinstaluj aplikację z menu przeglądarki i zainstaluj ją ponownie."
+        ] },
+        { "type": "tip", "text": "Usunięcie ikony niczego nie kasuje. Dane Twojej rodziny zostają na serwerze." }
       ]
     }
   ]

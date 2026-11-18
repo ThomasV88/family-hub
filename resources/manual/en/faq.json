@@ -70,7 +70,7 @@
       "id": "offline",
       "title": "The app says I am offline",
       "blocks": [
-        { "type": "p", "text": "Family Hub needs a connection to show and save your data. When your device is offline, a banner appears. Your changes are not saved until you are back online, so wait for the banner to disappear before you rely on a change." }
+        { "type": "p", "text": "FamilyHUB needs a connection to show and save your data. When your device is offline, a banner appears. Your changes are not saved until you are back online, so wait for the banner to disappear before you rely on a change." }
       ]
     },
     {
@@ -78,6 +78,19 @@
       "title": "A message says a new version is available",
       "blocks": [
         { "type": "p", "text": "Press **Reload** in the message. The page restarts with the newest version. Finish what you are typing and save it first." }
+      ]
+    },
+    {
+      "id": "old-icon",
+      "title": "The app icon still shows the old logo",
+      "blocks": [
+        { "type": "p", "text": "After the update, browsers show the new FamilyHUB logo, but an app that is already installed on a device can keep its old icon for a while." },
+        { "type": "list", "items": [
+          "**Android:** the icon updates by itself, usually within a day.",
+          "**iPhone and iPad:** press and hold the old icon, remove it from the Home Screen, then add the app again from Safari (see **Putting the app on your phone, tablet or computer**).",
+          "**Computer:** the icon updates by itself; if not, uninstall the app from the browser menu and install it again."
+        ] },
+        { "type": "tip", "text": "Removing the icon does not delete anything. Your family's data stays on the server." }
       ]
     }
   ]

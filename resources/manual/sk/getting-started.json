@@ -10,7 +10,7 @@
       "id": "invitation",
       "title": "Pripojenie cez pozvánku",
       "blocks": [
-        { "type": "p", "text": "Family Hub je len pre pozvaných ľudí. Správca rodiny vám pošle pozvánku e-mailom alebo vám dá odkaz. Odkaz funguje len raz a po 7 dňoch prestane platiť." },
+        { "type": "p", "text": "FamilyHUB je len pre pozvaných ľudí. Správca rodiny vám pošle pozvánku e-mailom alebo vám dá odkaz. Odkaz funguje len raz a po 7 dňoch prestane platiť." },
         { "type": "steps", "items": [
           "Otvorte odkaz z pozvánky.",
           "Napíšte svoje meno.",
@@ -52,21 +52,21 @@
       "id": "install",
       "title": "Aplikácia v telefóne, tablete alebo počítači",
       "blocks": [
-        { "type": "p", "text": "Family Hub si môžete nainštalovať ako aplikáciu. Potom sa otvára vo vlastnom okne a má vlastnú ikonu. Nič sa nesťahuje z obchodu s aplikáciami." },
+        { "type": "p", "text": "FamilyHUB si môžete nainštalovať ako aplikáciu. Potom sa otvára vo vlastnom okne a má vlastnú ikonu. Nič sa nesťahuje z obchodu s aplikáciami. Jej ikona je logo FamilyHUB: oranžové, červené a modré písmeno F." },
         { "type": "p", "text": "**iPhone a iPad** (použite Safari):" },
         { "type": "steps", "items": [
-          "Otvorte Family Hub v Safari.",
+          "Otvorte FamilyHUB v Safari.",
           "Ťuknite na tlačidlo **Zdieľať**.",
           "Vyberte **Pridať na plochu** a potom **Pridať**.",
           "Otvorte novú ikonu na ploche."
         ] },
         { "type": "p", "text": "**Android** (použite Chrome):" },
         { "type": "steps", "items": [
-          "Otvorte Family Hub v Chrome.",
+          "Otvorte FamilyHUB v Chrome.",
           "Ťuknite na tlačidlo ponuky (tri bodky).",
           "Vyberte **Inštalovať aplikáciu** alebo **Pridať na plochu**."
         ] },
-        { "type": "p", "text": "**Počítač** (Chrome alebo Edge): hľadajte ikonu inštalácie na pravom konci adresného riadka, alebo otvorte ponuku prehliadača a vyberte **Inštalovať Family Hub**." },
+        { "type": "p", "text": "**Počítač** (Chrome alebo Edge): hľadajte ikonu inštalácie na pravom konci adresného riadka, alebo otvorte ponuku prehliadača a vyberte **Inštalovať FamilyHUB**." },
         { "type": "tip", "text": "Názvy v ponuke sa medzi verziami prehliadačov mierne líšia. Ak tlačidlo nenájdete, hľadajte slová Inštalovať alebo Pridať na plochu." }
       ]
     },
@@ -81,7 +81,7 @@
           "Pri push stlačte **Zapnúť push na tomto zariadení** a povoľte oznámenia, keď sa prehliadač opýta.",
           "Stlačte **Poslať skúšobné oznámenie** a overte, že to funguje."
         ] },
-        { "type": "warning", "text": "Na iPhone a iPade push funguje, až keď si Family Hub pridáte na plochu (pozrite vyššie) a otvoríte ho odtiaľ." },
+        { "type": "warning", "text": "Na iPhone a iPade push funguje, až keď si FamilyHUB pridáte na plochu (pozrite vyššie) a otvoríte ho odtiaľ." },
         { "type": "p", "text": "Push oznámenia ukazujú len krátky titulok, napríklad názov úlohy, nikdy poznámky. Ak sú oba spínače vypnuté, nedostávate žiadne pripomienky. Každé zariadenie potrebuje vlastný krok **Zapnúť push**." }
       ]
     },
