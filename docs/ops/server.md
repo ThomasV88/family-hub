@@ -208,6 +208,10 @@ reports "login expired" once the health check exists). Never set `OPENAI_API_KEY
 
 The green "?" tips keep their texts in the table `help_texts` (one row per topic key of `resources/help/topics.json`, a text per language, a per-language "edited by an administrator" marker). `deploy.sh` runs `php artisan help:sync` in a one-shot `app` container right after the migration, on staging and production, with the runtime role (the table needs only read and write, which the default privileges of `fh_owner` already grant; no migrate profile). It is idempotent: it inserts keys that are missing, refreshes the default text and the placement of every language an administrator has NOT edited, keeps edited texts and only reports orphan keys (in the table, no longer in the registry); it never deletes. A failure is logged as a warning and does not stop the release: the app falls back to the registry default whenever a row or text is missing. Run it by hand with `docker compose run --rm --no-deps -T app php artisan help:sync`. `staging:seed` calls it too. See `.planning/v1.0-ISSUE-4-NOTES.md`.
 
+### Product name (Phase 14, FamilyHUB)
+
+The app name comes from `APP_NAME` in each stack's `app.env` (top bar alt text, page title, mail header and footer, default From name). `server-provision.sh` writes `app.env` only when it is missing and `deploy.sh` never edits it, so existing stacks keep the old name until the operator changes it. Before or at the production release of Phase 14: back up `/opt/family-hub/app.env` as `app.env.pre-rebrand`, set `APP_NAME="FamilyHUB"` (and `MAIL_FROM_NAME="FamilyHUB"` only if that key exists; change nothing else, print nothing), then the release deploy recreates the containers. Staging is changed during Phase 14 verification. Internal names (directories, compose projects, `fh_*` roles, `fh-*` aliases) stay unchanged.
+
 ## Two-step verification and re-authentication
 
 Phase 6. Values live in each stack's `.env` / `app.env`; this section records meaning and procedure only, never a value.
