@@ -252,3 +252,9 @@ Every change that adds, changes or removes user-visible behaviour (a feature, a 
 5. List the touched `resources/manual/` files in the plan's `files_modified` and in the summary, or write "no user-visible change" with the reason.
 
 Do not mark a task done without checking this. Details: `.planning/v1.0-ISSUE-3-NOTES.md`.
+
+## Issue tracking (mandatory)
+
+Every bug or feature the owner gives in interactive mode that is not already in GitHub is recorded automatically as a GitHub issue before work starts: `gh issue create` with label `bug` or `enhancement`, a Slovak title and a body that quotes the owner's request. Issues that already exist (picked up with `gh issue list`) are not duplicated.
+
+Commits that resolve an issue carry `Fixes #N`. When the fix is implemented, close the issue with a comment that names the commit and where it is deployed (staging or production).
