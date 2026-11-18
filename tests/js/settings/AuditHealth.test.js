@@ -23,6 +23,7 @@ const Events = [
     { id: 11, event: 'medical_archived', meta: { subject: SUBJECT, type: 'document', record: DOCUMENT } },
     { id: 12, event: 'medical_restored', meta: { subject: SUBJECT, type: 'person' } },
     { id: 13, event: 'medical_text_removed', meta: { subject: SUBJECT, record: DOCUMENT } },
+    { id: 14, event: 'medical_upload_batch_changed', meta: { subject: SUBJECT, batch: DOCUMENT, action: 'continued', count: 3 } },
 ].map((e) => ({ ...base, ...e }));
 
 let current;
@@ -42,6 +43,7 @@ describe('Audit table medical rows', () => {
             'Exported health records: One specialty: Data file (JSON)', 'Changed the AI setting for a person in Health: AI turned on',
             'Started an AI run on a document in Health', 'An AI run on a document in Health finished', 'Decided on an AI suggestion in Health',
             'Archived in Health: Document', 'Restored in Health: Person', 'Removed recognised text in Health',
+            'Finished a document in an upload batch in Health. Decisions: 3',
         ]) expect(text).toContain(expected);
     });
 
