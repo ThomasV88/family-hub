@@ -5,7 +5,7 @@ return [
     'reminder_greeting' => 'Cześć :name,',
     'reminder_body' => 'Zadanie „:title” ma termin :date.',
     'reminder_action' => 'Otwórz zadanie',
-    'test_title' => 'Powiadomienie testowe z Family Hub',
+    'test_title' => 'Powiadomienie testowe z FamilyHUB',
     'gift_title' => ':name: :occasion :when',
     'gift_title_family' => ':occasion :when',
     'gift_today' => 'dziś',

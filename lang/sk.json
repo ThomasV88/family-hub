@@ -1,12 +1,12 @@
 {
     "app": {
-        "name": "Family Hub"
+        "name": "FamilyHUB"
     },
     "banner": {
         "staging": "Testovacie prostredie - iba vymyslené údaje"
     },
     "home": {
-        "title": "Family Hub",
+        "title": "FamilyHUB",
         "intro": "Jedno dôveryhodné miesto pre každodenný život vašej rodiny.",
         "status_title": "Stav systému",
         "last_check": "Posledná kontrola na pozadí: {time}",
@@ -236,7 +236,7 @@
         "forgot_link": "Zabudnuté heslo?",
         "show_password": "Zobraziť heslo",
         "hide_password": "Skryť heslo",
-        "invite_only": "Family Hub je len na pozvánku. Požiadajte správcu rodiny o pozvánku.",
+        "invite_only": "FamilyHUB je len na pozvánku. Požiadajte správcu rodiny o pozvánku.",
         "back_to_login": "Späť na prihlásenie",
         "error": {
             "failed": "E-mail alebo heslo nie je správne. Skontrolujte ich a skúste to znova.",
@@ -271,7 +271,7 @@
     },
     "invite": {
         "accept": {
-            "title": "Pripojte sa k rodine vo Family Hub",
+            "title": "Pripojte sa k rodine vo FamilyHUB",
             "body": "Pozvánka bola poslaná na {email}.",
             "name": "Meno",
             "password_hint": "Aspoň 12 znakov. Dobre funguje aj dlhá veta.",
@@ -279,7 +279,7 @@
             "google": "Pokračovať cez Google",
             "google_hint": "Použite účet Google pre {email}.",
             "google_mismatch": "Tento účet Google používa iný e-mail. Použite účet Google pre {email}.",
-            "welcome": "Vitajte vo Family Hub, {name}.",
+            "welcome": "Vitajte vo FamilyHUB, {name}.",
             "error": {
                 "name_required": "Zadajte svoje meno.",
                 "password_short": "Použite aspoň 12 znakov.",
@@ -1089,7 +1089,7 @@
         "unsupported": "Tento prehliadač nepodporuje push oznámenia. E-mail stále funguje.",
         "denied": "Oznámenia sú pre túto stránku zablokované. Povoľte ich v nastaveniach prehliadača a skúste to znova.",
         "ios_title": "Nainštalujte aplikáciu, aby push fungoval na iPhone a iPade",
-        "ios_body": "Na iPhone a iPade push funguje až po pridaní Family Hub na plochu. Klepnite na Zdieľať, vyberte Pridať na plochu a potom otvorte aplikáciu odtiaľ.",
+        "ios_body": "Na iPhone a iPade push funguje až po pridaní FamilyHUB na plochu. Klepnite na Zdieľať, vyberte Pridať na plochu a potom otvorte aplikáciu odtiaľ.",
         "push_unavailable": "Push na tomto serveri zatiaľ nie je nastavený. E-mail stále funguje.",
         "enable_failed": "Push sa nepodarilo zapnúť. Skúste to znova.",
         "gifts_title": "Pripomienky darčekov",
@@ -1814,7 +1814,7 @@
             "list_label": "Kódy na obnovenie",
             "copied": "Kódy na obnovenie skopírované",
             "ack": "Tieto kódy mám uložené na bezpečnom mieste",
-            "file_title": "Kódy na obnovenie Family Hub",
+            "file_title": "Kódy na obnovenie FamilyHUB",
             "remaining": "Zostáva {n} kód na obnovenie | Zostávajú {n} kódy na obnovenie | Zostáva {n} kódu na obnovenie | Zostáva {n} kódov na obnovenie",
             "none_left": "Nezostali žiadne kódy na obnovenie",
             "low": "Dochádzajú. Vytvorte si čoskoro nové.",
@@ -2266,7 +2266,7 @@
             "downloaded": "Export stiahnutý",
             "print": "Tlačiť export",
             "print_title": "Zdravotné záznamy",
-            "generated": "Vytvorené {date} z Family Hub",
+            "generated": "Vytvorené {date} z FamilyHUB",
             "unverified": "Neoverené",
             "unverified_legend": "Položky označené ako Neoverené navrhla AI a človek ich zatiaľ nepotvrdil.",
             "section_visits": "Návštevy",
@@ -2612,7 +2612,7 @@
     },
     "manual": {
         "title": "Manuál",
-        "intro": "Všetko o Family Hub, vysvetlené jednoducho. Vyhľadávajte, alebo vyberte tému zo zoznamu.",
+        "intro": "Všetko o FamilyHUB, vysvetlené jednoducho. Vyhľadávajte, alebo vyberte tému zo zoznamu.",
         "search_label": "Hľadať v manuáli",
         "search_placeholder": "Napríklad: pripomienka",
         "clear_search": "Vymazať hľadanie",

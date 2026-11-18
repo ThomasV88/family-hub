@@ -1,12 +1,12 @@
 {
     "app": {
-        "name": "Family Hub"
+        "name": "FamilyHUB"
     },
     "banner": {
         "staging": "Staging - synthetic data only"
     },
     "home": {
-        "title": "Family Hub",
+        "title": "FamilyHUB",
         "intro": "One trusted place for your family's everyday life.",
         "status_title": "System status",
         "last_check": "Last background check: {time}",
@@ -236,7 +236,7 @@
         "forgot_link": "Forgot password?",
         "show_password": "Show password",
         "hide_password": "Hide password",
-        "invite_only": "Family Hub is by invitation only. Ask your family admin for an invite.",
+        "invite_only": "FamilyHUB is by invitation only. Ask your family admin for an invite.",
         "back_to_login": "Back to sign in",
         "error": {
             "failed": "Email or password is not correct. Check them and try again.",
@@ -271,7 +271,7 @@
     },
     "invite": {
         "accept": {
-            "title": "Join your family on Family Hub",
+            "title": "Join your family on FamilyHUB",
             "body": "You were invited as {email}.",
             "name": "Name",
             "password_hint": "At least 12 characters. A long sentence works well.",
@@ -279,7 +279,7 @@
             "google": "Continue with Google",
             "google_hint": "Use the Google account for {email}.",
             "google_mismatch": "That Google account uses a different email. Use the Google account for {email}.",
-            "welcome": "Welcome to Family Hub, {name}.",
+            "welcome": "Welcome to FamilyHUB, {name}.",
             "error": {
                 "name_required": "Enter your name.",
                 "password_short": "Use at least 12 characters.",
@@ -1089,7 +1089,7 @@
         "unsupported": "This browser does not support push notifications. Email still works.",
         "denied": "Notifications are blocked for this site. Allow them in your browser settings, then try again.",
         "ios_title": "Install the app to get push on iPhone and iPad",
-        "ios_body": "On iPhone and iPad, push works only after you add Family Hub to your Home Screen. Tap Share, choose Add to Home Screen, then open the app from there.",
+        "ios_body": "On iPhone and iPad, push works only after you add FamilyHUB to your Home Screen. Tap Share, choose Add to Home Screen, then open the app from there.",
         "push_unavailable": "Push is not set up on this server yet. Email still works.",
         "enable_failed": "We could not turn on push. Try again.",
         "gifts_title": "Gift reminders",
@@ -1814,7 +1814,7 @@
             "list_label": "Recovery codes",
             "copied": "Recovery codes copied",
             "ack": "I have saved these codes somewhere safe",
-            "file_title": "Family Hub recovery codes",
+            "file_title": "FamilyHUB recovery codes",
             "remaining": "{n} recovery code left | {n} recovery codes left",
             "none_left": "No recovery codes left",
             "low": "Running low. Create new codes soon.",
@@ -2266,7 +2266,7 @@
             "downloaded": "Export downloaded",
             "print": "Print export",
             "print_title": "Health records",
-            "generated": "Generated {date} from Family Hub",
+            "generated": "Generated {date} from FamilyHUB",
             "unverified": "Unverified",
             "unverified_legend": "Items marked Unverified were suggested by AI and have not been confirmed by a person.",
             "section_visits": "Visits",
@@ -2612,7 +2612,7 @@
     },
     "manual": {
         "title": "Manual",
-        "intro": "Everything about Family Hub, explained in plain words. Search, or choose a topic from the list.",
+        "intro": "Everything about FamilyHUB, explained in plain words. Search, or choose a topic from the list.",
         "search_label": "Search the manual",
         "search_placeholder": "For example: reminder",
         "clear_search": "Clear search",

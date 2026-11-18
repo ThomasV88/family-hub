@@ -1,12 +1,12 @@
 {
     "app": {
-        "name": "Family Hub"
+        "name": "FamilyHUB"
     },
     "banner": {
         "staging": "Środowisko testowe - tylko fikcyjne dane"
     },
     "home": {
-        "title": "Family Hub",
+        "title": "FamilyHUB",
         "intro": "Jedno zaufane miejsce na codzienne sprawy Twojej rodziny.",
         "status_title": "Stan systemu",
         "last_check": "Ostatnie sprawdzenie w tle: {time}",
@@ -236,7 +236,7 @@
         "forgot_link": "Nie pamiętasz hasła?",
         "show_password": "Pokaż hasło",
         "hide_password": "Ukryj hasło",
-        "invite_only": "Family Hub działa tylko na zaproszenie. Poproś administratora rodziny o zaproszenie.",
+        "invite_only": "FamilyHUB działa tylko na zaproszenie. Poproś administratora rodziny o zaproszenie.",
         "back_to_login": "Wróć do logowania",
         "error": {
             "failed": "E-mail lub hasło są nieprawidłowe. Sprawdź je i spróbuj ponownie.",
@@ -271,7 +271,7 @@
     },
     "invite": {
         "accept": {
-            "title": "Dołącz do rodziny w Family Hub",
+            "title": "Dołącz do rodziny w FamilyHUB",
             "body": "Zaproszenie dotyczy adresu {email}.",
             "name": "Imię",
             "password_hint": "Co najmniej 12 znaków. Dobrze sprawdza się długie zdanie.",
@@ -279,7 +279,7 @@
             "google": "Kontynuuj przez Google",
             "google_hint": "Użyj konta Google dla {email}.",
             "google_mismatch": "To konto Google używa innego adresu e-mail. Użyj konta Google dla {email}.",
-            "welcome": "Witaj w Family Hub, {name}.",
+            "welcome": "Witaj w FamilyHUB, {name}.",
             "error": {
                 "name_required": "Wpisz swoje imię.",
                 "password_short": "Użyj co najmniej 12 znaków.",
@@ -1089,7 +1089,7 @@
         "unsupported": "Ta przeglądarka nie obsługuje powiadomień push. E-mail nadal działa.",
         "denied": "Powiadomienia są zablokowane dla tej witryny. Zezwól na nie w ustawieniach przeglądarki i spróbuj ponownie.",
         "ios_title": "Zainstaluj aplikację, aby otrzymywać push na iPhonie i iPadzie",
-        "ios_body": "Na iPhonie i iPadzie push działa dopiero po dodaniu Family Hub do ekranu początkowego. Dotknij Udostępnij, wybierz Dodaj do ekranu początkowego i otwórz aplikację stamtąd.",
+        "ios_body": "Na iPhonie i iPadzie push działa dopiero po dodaniu FamilyHUB do ekranu początkowego. Dotknij Udostępnij, wybierz Dodaj do ekranu początkowego i otwórz aplikację stamtąd.",
         "push_unavailable": "Push nie jest jeszcze skonfigurowany na tym serwerze. E-mail nadal działa.",
         "enable_failed": "Nie udało się włączyć push. Spróbuj ponownie.",
         "gifts_title": "Przypomnienia o prezentach",
@@ -1814,7 +1814,7 @@
             "list_label": "Kody odzyskiwania",
             "copied": "Skopiowano kody odzyskiwania",
             "ack": "Te kody mam zapisane w bezpiecznym miejscu",
-            "file_title": "Kody odzyskiwania Family Hub",
+            "file_title": "Kody odzyskiwania FamilyHUB",
             "remaining": "Pozostał {n} kod odzyskiwania | Pozostały {n} kody odzyskiwania | Pozostało {n} kodów odzyskiwania | Pozostało {n} kodu odzyskiwania",
             "none_left": "Brak kodów odzyskiwania",
             "low": "Kończą się. Utwórz wkrótce nowe.",
@@ -2266,7 +2266,7 @@
             "downloaded": "Eksport pobrany",
             "print": "Drukuj eksport",
             "print_title": "Dokumentacja medyczna",
-            "generated": "Wygenerowano {date} z Family Hub",
+            "generated": "Wygenerowano {date} z FamilyHUB",
             "unverified": "Niezweryfikowane",
             "unverified_legend": "Pozycje oznaczone jako Niezweryfikowane zaproponowała AI i żadna osoba ich jeszcze nie potwierdziła.",
             "section_visits": "Wizyty",
@@ -2612,7 +2612,7 @@
     },
     "manual": {
         "title": "Instrukcja",
-        "intro": "Wszystko o Family Hub, wyjaśnione prostymi słowami. Skorzystaj z wyszukiwarki albo wybierz temat z listy.",
+        "intro": "Wszystko o FamilyHUB, wyjaśnione prostymi słowami. Skorzystaj z wyszukiwarki albo wybierz temat z listy.",
         "search_label": "Szukaj w instrukcji",
         "search_placeholder": "Na przykład: przypomnienie",
         "clear_search": "Wyczyść wyszukiwanie",
