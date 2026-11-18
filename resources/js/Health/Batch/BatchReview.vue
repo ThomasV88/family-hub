@@ -2,6 +2,7 @@
 import { computed, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import UiAlert from '../../Components/ui/UiAlert.vue';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import { useToast } from '../../Components/ui/useToast.js';
 import { securityFetch } from '../../Security/securityFetch.js';
@@ -144,6 +145,7 @@ async function proceed() {
                         <p class="batch-review__counts" data-testid="batch-counts">{{ t('health.batch.approved') }}: {{ approved }} · {{ t('health.batch.rejected') }}: {{ rejected }}</p>
                         <p class="batch-review__hint">{{ t('health.batch.continue_hint') }}</p>
                         <UiButton variant="primary" :loading="busy" :disabled="busy" data-testid="batch-continue" @click="proceed">{{ t('health.batch.continue') }}</UiButton>
+                        <HelpTip topic="health.batch_continue" :label="t('health.batch.continue')" />
                     </div>
                 </template>
 

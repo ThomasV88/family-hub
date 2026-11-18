@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, useId, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import UiAlert from '../../Components/ui/UiAlert.vue';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import UiSwitch from '../../Components/ui/UiSwitch.vue';
 import { securityFetch } from '../../Security/securityFetch.js';
@@ -86,7 +87,10 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="adjust" role="group" :aria-labelledby="ids.note + '-title'" data-testid="adjust-panel">
-        <h4 :id="ids.note + '-title'" class="adjust__title">{{ t('health.batch.adjust_title') }}</h4>
+        <div class="adjust__head">
+            <h4 :id="ids.note + '-title'" class="adjust__title">{{ t('health.batch.adjust_title') }}</h4>
+            <HelpTip topic="health.batch_adjust" :label="t('health.batch.adjust_title')" />
+        </div>
         <div class="adjust__row">
             <label :for="ids.brightness" class="adjust__label">{{ t('health.batch.brightness') }}</label>
             <input
@@ -130,6 +134,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .adjust { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); }
+.adjust__head { display: flex; align-items: center; gap: var(--space-2); }
 .adjust__title { margin: 0; font-size: var(--text-base); font-weight: 600; }
 .adjust__row { display: grid; grid-template-columns: minmax(6rem, 9rem) minmax(0, 1fr) 4rem; align-items: center; gap: var(--space-2); }
 .adjust__label { font-weight: 600; }

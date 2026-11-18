@@ -456,6 +456,30 @@
             "area": "health",
             "screen": "document_text",
             "field": "recognised_text"
+        },
+        {
+            "key": "health.batch_start",
+            "area": "health",
+            "screen": "upload_batch",
+            "field": "start"
+        },
+        {
+            "key": "health.batch_adjust",
+            "area": "health",
+            "screen": "upload_batch",
+            "field": "adjust"
+        },
+        {
+            "key": "health.batch_continue",
+            "area": "health",
+            "screen": "upload_batch",
+            "field": "continue"
+        },
+        {
+            "key": "health.batch_rescan",
+            "area": "health",
+            "screen": "upload_batch",
+            "field": "rescan"
         }
     ]
 }

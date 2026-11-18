@@ -51,7 +51,8 @@
         "recipe_shopping": "Add to shopping",
         "recipe_import": "Reading a recipe from a web page",
         "document_search": "Document search",
-        "document_text": "Recognised text of a document"
+        "document_text": "Recognised text of a document",
+        "upload_batch": "Upload batch"
     },
     "topics": {
         "tasks.visibility": {
@@ -357,6 +358,22 @@
         "health.document_text": {
             "title": "Recognised text",
             "text": "The text AI read from this document. Everyone who may open the document can read and copy it. It can contain errors, so check the document itself when it matters. Editors can remove it. Backups keep a copy until they expire."
+        },
+        "health.batch_start": {
+            "title": "Upload many documents",
+            "text": "One open batch per person, up to 50 files of up to 10 MB each. The AI reads one document at a time and starts while you are still uploading. Documents you do not finish are deleted 30 days after the batch was started."
+        },
+        "health.batch_adjust": {
+            "title": "Improve the scan",
+            "text": "Brightness, contrast and black and white change only the copy sent to the AI on the next scan again. Your stored document is never changed. The settings are remembered for this document."
+        },
+        "health.batch_continue": {
+            "title": "Continue",
+            "text": "Saves the findings you approved as records and discards the rejected ones. Findings you have not decided stay on the document for later review. Then the next document opens."
+        },
+        "health.batch_rescan": {
+            "title": "Scan again",
+            "text": "Reads the document again with the current adjustments. It is a new AI run, allowed at most 5 times per document, and it clears the approve and reject marks you set on that document."
         }
     }
 }

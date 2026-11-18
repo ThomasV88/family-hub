@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { RefreshCw, Trash2 } from '@lucide/vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import UiConfirmDialog from '../../Components/ui/UiConfirmDialog.vue';
 import { useToast } from '../../Components/ui/useToast.js';
@@ -147,6 +148,7 @@ async function remove() {
                 data-testid="item-rescan"
                 @click="rescan"
             >{{ failedItem ? t('health.ai.run.try_again') : t('health.batch.rescan') }}</UiButton>
+            <HelpTip topic="health.batch_rescan" :label="t('health.batch.rescan')" />
             <p class="item-actions__hint" data-testid="item-rescan-hint">{{ t('health.batch.rescan_hint') }}</p>
             <p v-if="limitReached" class="item-actions__limit" role="status" data-testid="item-rescan-limit">{{ t('health.batch.rescan_limit', { count: maxRescans }) }}</p>
             <p v-else class="item-actions__hint" data-testid="item-rescan-left">{{ t('health.batch.rescan_left', { count: left }) }}</p>

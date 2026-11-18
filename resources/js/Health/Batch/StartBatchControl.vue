@@ -4,6 +4,7 @@ import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { Files } from '@lucide/vue';
 import UiAlert from '../../Components/ui/UiAlert.vue';
+import HelpTip from '../../Components/ui/HelpTip.vue';
 import UiButton from '../../Components/ui/UiButton.vue';
 import { securityFetch } from '../../Security/securityFetch.js';
 import { handleHealthRefusal } from '../healthRefusal.js';
@@ -86,6 +87,7 @@ async function send(withAck, shown = null) {
 <template>
     <div class="start-batch">
         <UiButton variant="secondary" :icon="Files" :loading="busy" class="person-header__edit-action" data-testid="header-add-batch" @click="begin">{{ t('health.batch.start') }}</UiButton>
+        <HelpTip topic="health.batch_start" :label="t('health.batch.start')" />
         <UiAlert v-if="alertKey" variant="info" live class="start-batch__alert" data-testid="batch-start-alert">{{ t(`health.batch.${alertKey}`) }}</UiAlert>
         <UiAlert v-if="failed" variant="danger" live class="start-batch__alert" data-testid="batch-start-failed">{{ t('health.ai.run.queue_failed') }}</UiAlert>
         <AiNoticeDialog :open="noticeOpen" :variant="variant" :providers="providers" :text="textNotice" @confirm="confirmNotice" @cancel="noticeOpen = false" />
