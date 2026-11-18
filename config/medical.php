@@ -16,6 +16,8 @@ return [
     'image_decode_budget_bytes' => 106000000,
     'max_documents_per_subject' => 200,
     'upload_batch_max' => 10,
+    // Resumable AI upload batches (Phase 15): 50 files covers the issue's "at least 20"; the 5 re-scans per document protect the subscription quota.
+    'upload_batches' => ['max_files' => 50, 'expire_days' => 30, 'max_rescans' => 5, 'max_choice_value_chars' => 2000],
     'max_contacts' => 3,
     // Visits, medications, allergies and vaccinations together, enforced on the AI accept path under the person lock.
     'max_records_per_subject' => 1000,
