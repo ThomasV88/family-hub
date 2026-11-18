@@ -88,22 +88,22 @@ Milestone v1.1 (started 2026-11-18). Source: GitHub issues #13 and #14, owner sc
 
 ### Rebranding (#13)
 
-- [ ] **BRAND-01**: The FamilyHUB logo replaces the old mark everywhere the product identity is shown (app shell, sign-in, invite acceptance, error and offline pages) in light and dark theme
-- [ ] **BRAND-02**: Favicons, apple-touch icon, PWA icons (including maskable) and the web manifest use the brand kit assets
-- [ ] **BRAND-03**: Colour tokens follow the brand palette from the brand guide, keeping WCAG AA contrast in light and dark theme; typography is unchanged
-- [ ] **BRAND-04**: Product name, README, manual, help tips and mail templates use the new name consistently in SK, PL and EN
+- [x] **BRAND-01**: The FamilyHUB logo replaces the old mark everywhere the product identity is shown (app shell, sign-in, invite acceptance, error and offline pages) in light and dark theme
+- [x] **BRAND-02**: Favicons, apple-touch icon, PWA icons (including maskable) and the web manifest use the brand kit assets
+- [x] **BRAND-03**: Colour tokens follow the brand palette from the brand guide, keeping WCAG AA contrast in light and dark theme; typography is unchanged
+- [x] **BRAND-04**: Product name, README, manual, help tips and mail templates use the new name consistently in SK, PL and EN
 
 ### Bulk document upload (#14)
 
 - [x] **BULK-01**: User can select many files (at least 20) and upload them as one batch for one person
-- [ ] **BULK-02**: The batch is processed by AI one document at a time; progress and per-document status are visible
-- [ ] **BULK-03**: When the AI quota is exhausted the batch pauses and resumes by itself, without losing finished work
+- [x] **BULK-02**: The batch is processed by AI one document at a time; progress and per-document status are visible
+- [x] **BULK-03**: When the AI quota is exhausted the batch pauses and resumes by itself, without losing finished work
 - [x] **BULK-04**: After each document the user sees the recognised content and can approve or reject each finding; "Continue" saves the approved findings to the records, discards rejected ones and shows the next document
 - [x] **BULK-05**: User can request a re-scan of a document
 - [x] **BULK-06**: Before re-sending, user can adjust brightness and contrast and switch to black and white; adjustments apply only to the copy sent to the AI, the stored original is never changed, and the settings are remembered
 - [x] **BULK-07**: A batch survives page reload, closed browser and another device: processing state, adjustments and approve/reject decisions are kept on the server
 - [x] **BULK-08**: Batch access is limited to the owner and to people who may see that person's records; AI processing needs the existing consent and notice; unfinished batches and their files expire after 30 days; actions are audited and no content is logged
-- [ ] **BULK-09**: Manual and contextual help describe the feature in SK, PL and EN
+- [x] **BULK-09**: Manual and contextual help describe the feature in SK, PL and EN
 
 ## v2 Requirements
 
@@ -200,19 +200,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AI-05 | Phase 9 | Pending |
 | AI-06 | Phase 9 | Pending |
 | AI-07 | Phase 9 | Pending |
-| BRAND-01 | Phase 14 | Pending |
-| BRAND-02 | Phase 14 | Pending |
-| BRAND-03 | Phase 14 | Pending |
-| BRAND-04 | Phase 14 | Pending |
+| BRAND-01 | Phase 14 | Complete |
+| BRAND-02 | Phase 14 | Complete |
+| BRAND-03 | Phase 14 | Complete |
+| BRAND-04 | Phase 14 | Complete |
 | BULK-01 | Phase 15 | Complete |
-| BULK-02 | Phase 15 | Pending |
-| BULK-03 | Phase 15 | Pending |
+| BULK-02 | Phase 15 | Complete |
+| BULK-03 | Phase 15 | Complete |
 | BULK-04 | Phase 15 | Complete |
 | BULK-05 | Phase 15 | Complete |
 | BULK-06 | Phase 15 | Complete |
 | BULK-07 | Phase 15 | Complete |
 | BULK-08 | Phase 15 | Complete |
-| BULK-09 | Phase 15 | Pending |
+| BULK-09 | Phase 15 | Complete |
 
 **Coverage:**
 - v1 requirements: 54 total (v1.1: 13 more, all mapped to phases 14-15)

@@ -128,3 +128,18 @@ Precondition: `develop` contains this phase's HEAD (05cee10 plus the summary com
 None.
 
 ## Self-Check: PASSED
+
+## Task 3: staging verification (2026-11-18, develop d3bb73d, then da96fae)
+
+Result: steps 1-4, 6-17 PASS; step 5 PARTIAL (the AI returned only 2 findings per synthetic page, so the "2 approved, 1 rejected, 1 undecided" mix and the undecided-reviewable check were not exercised; Continue returned 422 "Specialty is missing" until a specialty was picked, then saved 1 and discarded 1). Highlights: 22 files uploaded, fake.jpg, 12.6 MB image and duplicate refused; max 1 active extraction per batch (live polling and SQL); first three ready states about one per minute; marks and edit survive reload and show in a second browser context; stored original sha256 identical before and after an adjusted re-scan; re-scan count 5 to 4; consent off paused reading, on resumed within 10 s; delete batch kept finished documents; view-only member gets no button and a 403; 360 px sk/pl/en light/dark without overflow; zero matches of document text in logs, ai-work, codex dir, ai_calls, audit_logs, failed_jobs; schedule entries present; staging:audit OK.
+
+Real AI use in that run: 9 documents, 18 successful calls (above the planned budget of about 5; the orchestrator's cap was exceeded by the helper). No usage limit was hit, so no live quota pause/resume was observed (only the seeded paused item).
+
+Defects found and fixed in gap closure 15-10 (commit da96fae), then re-verified on staging:
+1. Refused-file rows wrapped per character: PASS at 360/820/1280 px.
+2. Review panel did not show findings until reload after a document turned ready: PASS (first read and a re-scan, page never reloaded; 4 more AI calls).
+3. Console 403 after Delete batch: PASS.
+
+Observation: a re-scan requested on a seeded document stays queued while another item of the same batch is paused on quota (one document at a time per batch). By design; consider showing a hint in a later iteration.
+
+Open points for the PR body: SK and PL drafts for native review (manual bulk-upload, who-sees-what row, four help tips, lang health.batch.*, audit labels); production APP_NAME release step from Phase 14; local `public/build/assets` is root-owned (EACCES on local build, CI build fine).
