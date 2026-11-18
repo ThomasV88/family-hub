@@ -21,6 +21,11 @@ Family Hub is built as a vertical-slice MVP: each phase delivers a usable capabi
 - [ ] **Phase 8: AI Extraction Platform** - Codex-powered document extraction in a locked-down worker, saved as reviewable proposals with a call log
 - [ ] **Phase 9: Multi-Agent, Quota and Bulk Re-generation** - Agent order and model settings, Copilot fallback, quota handling and safe bulk re-generation
 
+### Milestone v1.1 (started 2026-11-18)
+
+- [ ] **Phase 14: Rebranding (issue #13)** - FamilyHUB logo, favicons, PWA icons and brand colour tokens from the supplied brand kit
+- [ ] **Phase 15: Bulk medical document upload (issue #14)** - Resumable server-side batches with sequential AI processing, per-finding review, re-scan and AI-copy image adjustments
+
 ## Phase Details
 
 ### Phase 1: Foundation and Infrastructure
@@ -479,3 +484,33 @@ Plans:
 - [x] 13-08-PLAN.md — Bulk backfill scope `no_text`: text-only runs under every existing bulk guard, refused while `ai.ocr.enabled` is off, settings panel option, "Text only" history tag, copy and admin manual (wave 5)
 - [x] 13-09-PLAN.md — Notice re-acknowledgment (`text_notice_acked_at`) for runs and bulk Start, three notice variants, run states and `text_saved` tag, consent turn-off purge sentence, manual `ai`/`search`/`recognised-text`/admin `backups` and the `health.ai_run`/`settings.ai_bulk` tips (wave 6)
 - [x] 13-10-PLAN.md — Staging seed of recognised texts, ops notes and restore-drill line, locale parity, accessibility sweep, pseudo-long check, full gate (`Fixes #11`), staging verification with a real two-step run as orchestrator checkpoint (wave 7)
+
+### Phase 14: Rebranding (issue #13)
+
+**Goal:** Replace the product identity with the FamilyHUB brand kit (GitHub #13): logo, favicons, PWA icons and colour tokens. Scope confirmed by the owner: logo + icons + colours, typography unchanged.
+**Requirements**: BRAND-01, BRAND-02, BRAND-03, BRAND-04
+**Depends on:** Phase 13
+**Success Criteria** (what must be TRUE):
+1. The new logo shows in the app shell, sign-in, invite acceptance and error/offline pages in light and dark theme (the brand kit has light, dark and mono variants).
+2. Favicons, apple-touch icon, PWA icons including maskable, and manifest use the kit assets; the service worker precache still builds and the build guard passes.
+3. Colour tokens follow the brand guide palette with WCAG AA contrast verified in both themes; the living style page and accessibility sweep pass.
+4. Name and wording are consistent in README, manual, help tips and mail templates in SK/PL/EN; user documentation rule from CLAUDE.md applies.
+**Open point:** the brand guide PDF could not be rendered on this machine during milestone setup (no poppler). Read it (palette, minimum sizes, clear space) at the start of discuss/plan, and confirm whether the product name changes from "Family Hub" to "FamilyHUB".
+**Source:** brand kit attached to GitHub #13 (`FamilyHUB-brand-kit.zip`).
+**Commit rule:** commits that resolve part of #13 carry `Fixes #13`.
+**Plans:** 0 plans
+
+### Phase 15: Bulk medical document upload (issue #14)
+
+**Goal:** Let the owner upload many medical documents at once and review the AI results one by one, resumably (GitHub #14).
+**Requirements**: BULK-01, BULK-02, BULK-03, BULK-04, BULK-05, BULK-06, BULK-07, BULK-08, BULK-09
+**Depends on:** Phase 13 (AI platform, full-text OCR, bulk guards)
+**Success Criteria** (what must be TRUE):
+1. User uploads 20+ files as one batch for one person; the worker processes them one at a time with visible per-document status.
+2. After each document the user approves or rejects each finding; "Continue" saves approved findings and shows the next document; a re-scan can be requested.
+3. Brightness, contrast and black-and-white adjustments apply only to the copy sent to the AI; the stored original is unchanged; settings are remembered.
+4. Reloading the page or opening it on another device resumes the batch exactly where it stopped (processing state, adjustments, decisions).
+5. Quota exhaustion pauses the batch and it resumes by itself; unfinished batches and files expire after 30 days; access follows the person's record rules, with consent, audit and no content in logs.
+**Owner decisions (2026-11-18):** one person per batch; batch stored server-side; "Continue" saves approved findings per document; originals are never changed by adjustments; 30-day auto-expiry.
+**Commit rule:** commits that resolve part of #14 carry `Fixes #14`. Reuse the Phase 9 bulk guards and the Phase 13 pre-processing evaluation results.
+**Plans:** 0 plans
