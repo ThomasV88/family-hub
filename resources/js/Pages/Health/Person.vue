@@ -16,6 +16,7 @@ import AllergyPanel from '../../Health/AllergyPanel.vue';
 import MedicationList from '../../Health/MedicationList.vue';
 import MedicationPanel from '../../Health/MedicationPanel.vue';
 import PersonHeader from '../../Health/PersonHeader.vue';
+import OpenBatchBanner from '../../Health/Batch/OpenBatchBanner.vue';
 import PersonPanel from '../../Health/PersonPanel.vue';
 import PersonSwitcher from '../../Health/PersonSwitcher.vue';
 import SpecialtyFolder from '../../Health/SpecialtyFolder.vue';
@@ -52,6 +53,7 @@ const props = defineProps({
     ai: { type: Object, default: () => ({ canRun: false, available: false, noticeAcknowledged: false, statuses: {} }) },
     archive: { type: Object, default: () => ({ items: [], people: [] }) },
     search: { type: Object, default: () => ({ enabled: false, textReliability: 'reliable' }) },
+    openBatch: { type: Object, default: null },
 });
 const { t } = useI18n();
 
@@ -141,7 +143,8 @@ const folderVisits = (folder) => props.visits.filter((v) => folder.visitIds.incl
             <template v-if="person">
                 <PersonSwitcher :people="people" :current-id="person.id" :can-create="canCreate" @add="openNew" />
                 <ArchivedPeople :people="archive.people" />
-                <PersonHeader :person="person" :text-stored="personHasText" @add-visit="openNewVisit" @add-document="openNewDocument" @edit-person="openEditPerson" @open-archive="openArchive" />
+                <PersonHeader :person="person" :text-stored="personHasText" :ai="ai" @add-visit="openNewVisit" @add-document="openNewDocument" @edit-person="openEditPerson" @open-archive="openArchive" />
+                <OpenBatchBanner v-if="openBatch && person.canEdit" :person-id="person.id" :batch="openBatch" />
                 <UiAlert v-if="vaccinationAttention > 0" variant="warning" data-testid="vaccination-alert">
                     <strong>{{ t('health.vaccination.attention_title') }}</strong>
                     {{ t('health.vacc.attention', { n: vaccinationAttention }, vaccinationAttention) }}
