@@ -18,6 +18,9 @@ export function useBatchStatus(personId, batchId, initial) {
     let timer = null;
     let inflight = false;
     let disposed = false;
+    // Set while the batch is being deleted: no new poll is scheduled and the answer of one in flight (a 403 or 404 once the
+    // batch is gone) is ignored.
+    let halted = false;
 
     const anyBusy = () => items.value.some(isBusy);
     const anyPaused = () => items.value.some(isPaused);
@@ -25,18 +28,18 @@ export function useBatchStatus(personId, batchId, initial) {
 
     function schedule() {
         clear();
-        if (disposed || (typeof document !== 'undefined' && document.hidden)) return;
+        if (disposed || halted || (typeof document !== 'undefined' && document.hidden)) return;
         if (!anyBusy() && !anyPaused()) return;
         timer = setTimeout(poll, anyBusy() ? FAST : SLOW);
     }
 
     async function poll() {
         timer = null;
-        if (inflight || disposed) return;
+        if (inflight || disposed || halted) return;
         inflight = true;
         const result = await securityFetch(`/health/people/${toValue(personId)}/upload-batches/${toValue(batchId)}/status`, { cache: 'no-store' });
         inflight = false;
-        if (disposed) return;
+        if (disposed || halted) return;
         if (result.ok) {
             failedPolls.value = 0;
             if (Array.isArray(result.data?.items)) items.value = result.data.items;
@@ -56,7 +59,11 @@ export function useBatchStatus(personId, batchId, initial) {
         if (timer === null) schedule();
     }
 
+    function halt() { halted = true; clear(); }
+    function resume() { halted = false; schedule(); }
+
     function onVisibility() {
+        if (halted) return;
         if (document.hidden) { clear(); return; }
         if (anyBusy() || anyPaused()) { clear(); poll(); }
     }
@@ -79,5 +86,5 @@ export function useBatchStatus(personId, batchId, initial) {
     }
     if (getCurrentScope()) onScopeDispose(dispose);
 
-    return { batch, items, failedPolls, refresh, dispose };
+    return { batch, items, failedPolls, refresh, halt, resume, dispose };
 }

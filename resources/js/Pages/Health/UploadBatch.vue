@@ -62,13 +62,20 @@ const currentText = computed(() => {
     return view.plural === null ? t(view.labelKey, view.params) : t(view.labelKey, view.params, view.plural);
 });
 
-// When the polled state of the current document differs from the one the page props were rendered with, ask the server
-// for fresh page props (the review area reads them). Only the three props, no full navigation.
+// When what was polled about the current document differs from what the page props were rendered with (no current document
+// yet, another document, or another state), ask the server for fresh page props (the review area reads them). Only the
+// three props, no full navigation. The watch is on the mismatch itself, so it also fires when the first document of an
+// empty batch becomes current, and again if an earlier reload answered with an older state than the poll.
 const RELOAD = ['batch', 'items', 'current'];
-watch(() => currentItem.value?.state, (next) => {
-    if (next && props.current?.item && props.current.item.id === currentItem.value.id && props.current.item.state !== next) {
-        router.reload({ only: RELOAD, preserveScroll: true });
-    }
+const stale = computed(() => {
+    const polled = currentItem.value;
+    if (!polled) return false;
+    const rendered = props.current?.item;
+    return !rendered || rendered.id !== polled.id || rendered.state !== polled.state;
+});
+const polledKey = computed(() => (currentItem.value ? `${currentItem.value.id}:${currentItem.value.state}` : ''));
+watch([stale, polledKey], ([isStale]) => {
+    if (isStale && !removing) router.reload({ only: RELOAD, preserveScroll: true });
 });
 
 const error = ref(false);
@@ -96,16 +103,21 @@ function uploaded() {
     status.refresh();
 }
 
+let removing = false;
 const deleteOpen = ref(false);
 const menuItems = computed(() => [{ type: 'item', key: 'delete', label: t('health.batch.delete'), icon: Trash2 }]);
 const onMenu = ({ key }) => { if (key === 'delete') deleteOpen.value = true; };
 async function remove() {
     error.value = false;
+    removing = true;
+    status.halt();
     const result = await securityFetch(`/health/people/${props.person.id}/upload-batches/${props.batch.id}`, { method: 'DELETE', replay: true });
     if (result.ok) {
         router.visit(personUrl.value);
         return;
     }
+    removing = false;
+    status.resume();
     if (result.status === 423 && handleHealthRefusal(result.error)) return;
     error.value = true;
 }

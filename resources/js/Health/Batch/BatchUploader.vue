@@ -224,9 +224,11 @@ function leave() {
                     <UiProgress v-if="item.status === 'uploading' || item.status === 'done'" :value="Math.round(item.progress * 100)" :label="item.file.name" />
                     <span role="status" class="batch-uploader__status">{{ statusText(item) }}</span>
                     <p v-if="item.status === 'failed'" role="alert" class="batch-uploader__error">{{ item.error }}</p>
+                    <div v-if="item.status === 'failed' || item.status === 'waiting'" class="batch-uploader__actions">
+                        <UiButton v-if="item.status === 'failed' && item.retry" variant="secondary" size="sm" data-testid="batch-retry" @click="retry(item)">{{ t('health.batch.retry') }}</UiButton>
+                        <UiButton v-else variant="ghost" size="sm" data-testid="batch-dismiss" @click="dismiss(item)">{{ t('health.batch.remove_file') }}</UiButton>
+                    </div>
                 </div>
-                <UiButton v-if="item.status === 'failed' && item.retry" variant="secondary" size="sm" data-testid="batch-retry" @click="retry(item)">{{ t('health.batch.retry') }}</UiButton>
-                <UiButton v-else-if="item.status === 'failed' || item.status === 'waiting'" variant="ghost" size="sm" data-testid="batch-dismiss" @click="dismiss(item)">{{ t('health.batch.remove_file') }}</UiButton>
             </li>
         </ul>
 
@@ -248,7 +250,8 @@ function leave() {
 .batch-uploader__row { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
 .batch-uploader__icon { flex: none; margin-top: 2px; }
 .batch-uploader__main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
-.batch-uploader__name { font-weight: 600; overflow-wrap: anywhere; }
+.batch-uploader__name { font-weight: 600; min-width: 0; overflow-wrap: break-word; word-break: normal; }
+.batch-uploader__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); align-self: flex-start; }
 .batch-uploader__size, .batch-uploader__status { font-size: var(--text-sm); color: var(--color-text-muted); }
-.batch-uploader__error { margin: 0; font-size: var(--text-sm); color: var(--color-danger); }
+.batch-uploader__error { margin: 0; min-width: 0; overflow-wrap: break-word; font-size: var(--text-sm); color: var(--color-danger); }
 </style>

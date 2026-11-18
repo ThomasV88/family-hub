@@ -90,6 +90,18 @@ describe('batch uploader', () => {
         expect(wrapper.text()).toContain('larger than 10 MB');
     });
 
+    it('keeps the action button under the name and the error, not beside the name', async () => {
+        upload.mockResolvedValue({ ok: true, status: 201, data: {} });
+        mountIt();
+        await pick([file('fake.jpg'), file('a.exe')]);
+        const rejected = rows().filter((r) => r.find('[data-testid="batch-dismiss"]').exists());
+        expect(rejected.length).toBeGreaterThan(0);
+        for (const row of rejected) {
+            const main = row.find('.batch-uploader__main');
+            expect(main.element.contains(row.find('[data-testid="batch-dismiss"]').element)).toBe(true);
+        }
+    });
+
     it('maps the duplicate, full and closed refusals to their own text without a retry button', async () => {
         for (const [key, text] of [['health.batch.err_duplicate', 'This file is already in the batch'], ['health.batch.err_full', 'This batch already has 3 documents'], ['health.batch.err_closed', 'finished or no longer available']]) {
             upload.mockResolvedValueOnce({ ok: false, status: 422, error: 'validation', data: { errors: { file: [key] } } });

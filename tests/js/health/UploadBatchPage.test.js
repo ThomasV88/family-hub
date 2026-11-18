@@ -267,4 +267,57 @@ describe('upload batch page: live status', () => {
         await vi.advanceTimersByTimeAsync(5100);
         expect(router.reload).toHaveBeenCalledWith(expect.objectContaining({ only: ['batch', 'items', 'current'] }));
     });
+
+    const docOf = (n) => ({ id: `doc-${n}`, kind: 'pdf', title: `Document ${n}`, pageCount: null });
+
+    it('asks for fresh page data when the first document of an empty batch becomes current (no current props yet)', async () => {
+        const before = [it_(1, 'processing')];
+        const after = [it_(1, 'review', { pending: 2 })];
+        fetchMock.mockResolvedValue(answer(after));
+        mountPage({ items: before, batch: batchOf(before, { currentItemId: 'item-1' }), current: null });
+        await vi.advanceTimersByTimeAsync(5100);
+        expect(router.reload).toHaveBeenCalledWith(expect.objectContaining({ only: ['batch', 'items', 'current'] }));
+    });
+
+    it('asks for fresh page data when the current document is another one than the rendered props', async () => {
+        const items = [it_(1, 'done'), it_(2, 'processing')];
+        const after = [it_(1, 'done'), it_(2, 'review', { pending: 1 })];
+        fetchMock.mockResolvedValue({ ok: true, status: 200, data: { batch: batchOf(after, { currentItemId: 'item-2' }), items: after } });
+        mountPage({ items, batch: batchOf(items, { currentItemId: 'item-2' }), current: { item: items[0], document: docOf(1), review: null, choices: {}, adjustments: {} } });
+        await vi.advanceTimersByTimeAsync(5100);
+        expect(router.reload).toHaveBeenCalledWith(expect.objectContaining({ only: ['batch', 'items', 'current'] }));
+    });
+
+    it('shows the review once the page props follow the poll', async () => {
+        const before = [it_(1, 'processing')];
+        const after = [it_(1, 'review', { pending: 2 })];
+        fetchMock.mockResolvedValue(answer(after));
+        mountPage({ items: before, batch: batchOf(before, { currentItemId: 'item-1' }), current: null });
+        await vi.advanceTimersByTimeAsync(5100);
+        expect(router.reload).toHaveBeenCalledTimes(1);
+        await wrapper.setProps({ items: after, batch: batchOf(after, { currentItemId: 'item-1' }), current: { item: after[0], document: docOf(1), review: null, choices: {}, adjustments: {} } });
+        expect($('[data-testid="batch-current"]')).toBeNull();
+    });
+
+    it('stops polling and ignores a late 403 once Delete batch was requested', async () => {
+        const busy = [it_(1, 'processing')];
+        let late;
+        fetchMock.mockImplementation((url, opts) => {
+            if (opts?.method === 'DELETE') return Promise.resolve({ ok: true, status: 200, data: {} });
+            return new Promise((resolve) => { late = resolve; });
+        });
+        mountPage({ items: busy, batch: batchOf(busy, { currentItemId: 'item-1' }), current: { item: busy[0], document: docOf(1), review: null, choices: {}, adjustments: {} } });
+        await vi.advanceTimersByTimeAsync(5100);
+        $$('[aria-haspopup="menu"]').find((b) => b.closest('[data-testid="upload-batch-page"]')).click();
+        await flushPromises();
+        [...document.querySelectorAll('[role="menuitem"]')].find((e) => e.textContent.includes('Delete batch')).click();
+        await flushPromises();
+        [...document.querySelectorAll('button')].filter((b) => b.textContent.trim() === 'Delete batch').pop().click();
+        await flushPromises();
+        late({ ok: false, status: 403, error: 'forbidden', data: {} });
+        await vi.advanceTimersByTimeAsync(70000);
+        const polls = fetchMock.mock.calls.filter((c) => String(c[0]).endsWith('/status'));
+        expect(polls).toHaveLength(1);
+        expect($('[data-testid="batch-poll-failed"]')).toBeNull();
+    });
 });
