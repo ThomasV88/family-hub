@@ -28,6 +28,12 @@ import RunAiControl from '../../../resources/js/Health/Ai/RunAiControl.vue';
 import AiNoticeDialog from '../../../resources/js/Health/Ai/AiNoticeDialog.vue';
 import AiConsentControl from '../../../resources/js/Health/AiConsentControl.vue';
 import BulkRegenPanel from '../../../resources/js/Settings/AiAgents/BulkRegenPanel.vue';
+import UploadBatch from '../../../resources/js/Pages/Health/UploadBatch.vue';
+import BatchUploader from '../../../resources/js/Health/Batch/BatchUploader.vue';
+import BatchReview from '../../../resources/js/Health/Batch/BatchReview.vue';
+import BatchItemActions from '../../../resources/js/Health/Batch/BatchItemActions.vue';
+import AdjustmentPanel from '../../../resources/js/Health/Batch/AdjustmentPanel.vue';
+import OpenBatchBanner from '../../../resources/js/Health/Batch/OpenBatchBanner.vue';
 
 const ID = '11111111-1111-4111-8111-111111111111';
 const PERSON = { id: ID, name: 'Ada Novak', canEdit: true };
@@ -185,5 +191,115 @@ describe('Phase 13 long-string sources', () => {
         }
         expect(clamps).toEqual(['resources/js/Health/Search/SearchSnippet.vue']);
         expect(readFileSync('resources/js/Health/Search/SearchSnippet.vue', 'utf8')).toMatch(/line-clamp:\s*3/);
+    });
+});
+
+// 15-09: the upload batch screens (Phase 15) with +40 percent strings at phone width.
+const BID = '22222222-2222-4222-8222-222222222222';
+const bItem = (n, state, over = {}) => ({ id: `item-${n}`, position: n, documentId: `doc-${n}`, title: `Document ${n} with a rather long title`, kind: 'pdf', state, rescanCount: 0, duplicateOf: null, ...over });
+const B_ITEMS = [
+    bItem(1, 'done'), bItem(2, 'review', { pending: 3 }), bItem(3, 'processing'), bItem(4, 'waiting'),
+    bItem(5, 'paused', { availableAt: '2099-01-01T10:30:00+00:00' }), bItem(6, 'failed', { failureCode: 'unknown' }),
+    bItem(7, 'stopped'), bItem(8, 'consent_off'), bItem(9, 'done', { duplicateOf: 'doc-1' }),
+];
+const B_AI = { available: true, providers: ['codex'], noticeAcknowledged: true, textNotice: false };
+const bCurrent = (item, over = {}) => ({
+    item, document: { id: item.documentId, kind: 'pdf', title: item.title, pageCount: 1 },
+    review: item.state === 'review'
+        ? { extraction: { sections: { visits: [{ key: 'visit-0', fields: { doctor: 'Dr Kova', visited_on: '2025-05-02', specialty_key: 'cardiology', diagnosis: 'Mild murmur' } }], medications: [{ key: 'medication-0', fields: { name: 'Ibuprofen', dose: '200 mg' } }], allergies: [], vaccinations: [] } }, provenance: null, specialties: ['cardiology'] }
+        : null,
+    choices: {}, adjustments: { brightness: 100, contrast: 100, bw: false }, ...over,
+});
+
+describe.each(['sk', 'pl'])('Phase 15 upload batch screens with pseudo-long text (%s)', (locale) => {
+    it('keeps the batch page header, progress, expiry, every item title and status tag whole', async () => {
+        const { messages } = mountLong(UploadBatch, {
+            batch: { id: BID, status: 'open', expiresAt: '2026-12-03T10:00:00+00:00', currentItemId: 'item-2', counts: { total: 9, done: 2, review: 1, processing: 4, failed: 2 } },
+            items: B_ITEMS, current: bCurrent(B_ITEMS[1]), limits: { maxFiles: 50, maxMb: 10, maxRescans: 5 }, ai: B_AI, person: { id: ID, name: 'Ada Novak', aiConsent: true },
+        }, locale);
+        await settle();
+        const rows = [...document.querySelectorAll('[data-testid="batch-item"]')];
+        expect(rows).toHaveLength(9);
+        B_ITEMS.forEach((item, i) => expect(rows[i].textContent).toContain(item.title));
+        const tags = [...document.querySelectorAll('[data-testid="batch-item-state"]')].map((n) => n.textContent.trim());
+        expect(tags).toHaveLength(9);
+        for (const tag of tags) expect(tag).toContain('ŵ');
+        expect(text('[data-testid="batch-expires"]').length).toBeGreaterThan(20);
+        expect(text('[data-testid="batch-progress"]')).toContain('2');
+        expect(text('[data-testid="batch-item-duplicate"]')).toBe(get(messages, 'health.batch.already_stored').replace(/\s+/g, ' ').trim());
+        expect(noWrapButtons()).toHaveLength(0);
+        expect(clamped()).toEqual([]);
+    });
+
+    it('keeps the uploader hint and the refusal reason of a file whole', async () => {
+        const { messages } = mountLong(BatchUploader, { personId: ID, batchId: BID, existing: 3, limits: { maxMb: 10, batchMaxFiles: 50 } }, locale);
+        const input = $('[data-testid="batch-input"]');
+        Object.defineProperty(input, 'files', { value: [new File([new Uint8Array(10)], 'virus.exe')], configurable: true });
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        await settle();
+        const row = $('[data-testid="batch-queue"] [data-status="failed"]');
+        expect(row.textContent).toContain('virus.exe');
+        expect(row.textContent.replace(/\s+/g, ' ').length).toBeGreaterThan('virus.exe'.length + 20);
+        expect(noWrapButtons()).toHaveLength(0);
+        expect(clamped()).toEqual([]);
+        expect(messages.health.batch).toBeTruthy();
+    });
+
+    it('keeps the entry cards and the Continue bar with all three counts whole', async () => {
+        const { messages } = mountLong(BatchReview, {
+            personId: ID, batchId: BID, limits: { maxRescans: 5 }, ai: B_AI,
+            current: bCurrent(bItem(2, 'review'), { choices: { 'visit-0': { decision: 'approve' }, 'medication-0': { decision: 'reject' } } }),
+        }, locale);
+        await settle();
+        expect(document.querySelectorAll('[data-testid="batch-entry"]')).toHaveLength(2);
+        const counts = text('[data-testid="batch-counts"]');
+        expect(counts).toContain(get(messages, 'health.batch.approved'));
+        expect(counts).toContain(get(messages, 'health.batch.rejected'));
+        expect(text('[data-testid="batch-continue"]')).toBe(get(messages, 'health.batch.continue').replace(/\s+/g, ' ').trim());
+        expect(text('[data-testid="batch-continue-bar"]')).toContain(get(messages, 'health.batch.continue_hint').replace(/\s+/g, ' ').trim());
+        expect(noWrapButtons()).toHaveLength(0);
+        expect(clamped()).toEqual([]);
+    });
+
+    it('keeps the adjustment labels and the note whole', async () => {
+        const { messages } = mountLong(AdjustmentPanel, { personId: ID, batchId: BID, itemId: 'item-2', adjustments: { brightness: 120, contrast: 140, bw: true } }, locale);
+        await settle();
+        expect(text('[data-testid="adjust-note"]')).toBe(get(messages, 'health.batch.adjust_note').replace(/\s+/g, ' ').trim());
+        expect(text('[data-testid="adjust-panel"]')).toContain(get(messages, 'health.batch.black_white'));
+        expect(text('[data-testid="adjust-reset"]')).toBe(get(messages, 'health.batch.adjust_reset').replace(/\s+/g, ' ').trim());
+        expect(noWrapButtons()).toHaveLength(0);
+        expect(clamped()).toEqual([]);
+    });
+
+    it('keeps the failed-document actions whole and wrapping', async () => {
+        const { messages } = mountLong(BatchItemActions, { personId: ID, batchId: BID, item: bItem(6, 'failed', { failureCode: 'unreadable_document' }), limits: { maxRescans: 5 }, ai: B_AI }, locale);
+        await settle();
+        expect(text('[data-testid="item-failed"]')).toBe(get(messages, 'health.batch.failed_hint').replace(/\s+/g, ' ').trim());
+        expect(text('[data-testid="item-keep"]')).toBe(get(messages, 'health.batch.keep_without').replace(/\s+/g, ' ').trim());
+        expect(text('[data-testid="item-remove"]')).toBe(get(messages, 'health.batch.remove_doc').replace(/\s+/g, ' ').trim());
+        expect(text('[data-testid="item-rescan-hint"]')).toBe(get(messages, 'health.batch.rescan_hint').replace(/\s+/g, ' ').trim());
+        expect(noWrapButtons()).toHaveLength(0);
+        expect(clamped()).toEqual([]);
+    });
+
+    it('keeps the person page banner whole', async () => {
+        const { messages } = mountLong(OpenBatchBanner, { personId: ID, batch: { id: BID, done: 2, total: 9, expiresAt: '2026-12-03T10:00:00+00:00' } }, locale);
+        await settle();
+        expect(text('[data-testid="open-batch-link"]')).toBe(get(messages, 'health.batch.open_banner_action').replace(/\s+/g, ' ').trim());
+        expect(text('[data-testid="open-batch-banner"]')).toContain(get(messages, 'health.batch.open_banner_title').replace(/\s+/g, ' ').trim());
+        expect(noWrapButtons()).toHaveLength(0);
+        expect(clamped()).toEqual([]);
+    });
+});
+
+describe('Phase 15 long-string and source scan', () => {
+    const files = readdirSync('resources/js/Health/Batch').filter((f) => f.endsWith('.vue')).map((f) => `resources/js/Health/Batch/${f}`).concat('resources/js/Pages/Health/UploadBatch.vue');
+
+    it('has no ellipsis, nowrap, line clamp or v-html on the batch screens', () => {
+        expect(files.length).toBeGreaterThanOrEqual(9);
+        for (const file of files) {
+            const src = readFileSync(file, 'utf8');
+            expect(src, file).not.toMatch(/text-overflow:\s*ellipsis|white-space:\s*nowrap|whitespace-nowrap|\btruncate\b|line-clamp|v-html/);
+        }
     });
 });

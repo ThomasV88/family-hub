@@ -16,6 +16,8 @@ arch('medical models are used only by the medical layers and factories')
         'App\Http\Requests\Health',
         'App\Models',
         'Database\Factories',
+        // the synthetic upload batch of the staging seed addresses its person (15-09)
+        'Database\Seeders\Staging\UploadBatchSeeder',
         'Tests',
     ]);
 
@@ -39,6 +41,8 @@ arch('medical queries are used only by the medical layers')
         // the staging seed writes its synthetic recognised texts through the production DocumentTextStore (13-10); the one
         // seeder class that does, nothing else under Database\Seeders
         'Database\Seeders\Staging\DocumentTextsSeeder',
+        // and its synthetic upload batch through the production UploadBatchQuery (15-09), likewise the only other one
+        'Database\Seeders\Staging\UploadBatchSeeder',
         'Tests',
     ]);
 
