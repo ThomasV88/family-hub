@@ -95,14 +95,14 @@ Milestone v1.1 (started 2026-11-18). Source: GitHub issues #13 and #14, owner sc
 
 ### Bulk document upload (#14)
 
-- [ ] **BULK-01**: User can select many files (at least 20) and upload them as one batch for one person
+- [x] **BULK-01**: User can select many files (at least 20) and upload them as one batch for one person
 - [ ] **BULK-02**: The batch is processed by AI one document at a time; progress and per-document status are visible
 - [ ] **BULK-03**: When the AI quota is exhausted the batch pauses and resumes by itself, without losing finished work
-- [ ] **BULK-04**: After each document the user sees the recognised content and can approve or reject each finding; "Continue" saves the approved findings to the records, discards rejected ones and shows the next document
-- [ ] **BULK-05**: User can request a re-scan of a document
-- [ ] **BULK-06**: Before re-sending, user can adjust brightness and contrast and switch to black and white; adjustments apply only to the copy sent to the AI, the stored original is never changed, and the settings are remembered
-- [ ] **BULK-07**: A batch survives page reload, closed browser and another device: processing state, adjustments and approve/reject decisions are kept on the server
-- [ ] **BULK-08**: Batch access is limited to the owner and to people who may see that person's records; AI processing needs the existing consent and notice; unfinished batches and their files expire after 30 days; actions are audited and no content is logged
+- [x] **BULK-04**: After each document the user sees the recognised content and can approve or reject each finding; "Continue" saves the approved findings to the records, discards rejected ones and shows the next document
+- [x] **BULK-05**: User can request a re-scan of a document
+- [x] **BULK-06**: Before re-sending, user can adjust brightness and contrast and switch to black and white; adjustments apply only to the copy sent to the AI, the stored original is never changed, and the settings are remembered
+- [x] **BULK-07**: A batch survives page reload, closed browser and another device: processing state, adjustments and approve/reject decisions are kept on the server
+- [x] **BULK-08**: Batch access is limited to the owner and to people who may see that person's records; AI processing needs the existing consent and notice; unfinished batches and their files expire after 30 days; actions are audited and no content is logged
 - [ ] **BULK-09**: Manual and contextual help describe the feature in SK, PL and EN
 
 ## v2 Requirements
@@ -204,14 +204,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRAND-02 | Phase 14 | Pending |
 | BRAND-03 | Phase 14 | Pending |
 | BRAND-04 | Phase 14 | Pending |
-| BULK-01 | Phase 15 | Pending |
+| BULK-01 | Phase 15 | Complete |
 | BULK-02 | Phase 15 | Pending |
 | BULK-03 | Phase 15 | Pending |
-| BULK-04 | Phase 15 | Pending |
-| BULK-05 | Phase 15 | Pending |
-| BULK-06 | Phase 15 | Pending |
-| BULK-07 | Phase 15 | Pending |
-| BULK-08 | Phase 15 | Pending |
+| BULK-04 | Phase 15 | Complete |
+| BULK-05 | Phase 15 | Complete |
+| BULK-06 | Phase 15 | Complete |
+| BULK-07 | Phase 15 | Complete |
+| BULK-08 | Phase 15 | Complete |
 | BULK-09 | Phase 15 | Pending |
 
 **Coverage:**
