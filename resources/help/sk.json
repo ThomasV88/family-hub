@@ -209,7 +209,7 @@
         },
         "health.ai_consent": {
             "title": "AI pre túto osobu",
-            "text": "Predvolene vypnuté. Keď je zapnuté, dokumenty tejto osoby možno poslať externej AI firme, ktorá navrhne záznamy. Každý návrh skontrolujete, kým sa uloží. Vypnutie zastaví nové behy. Ak má osoba rozpoznaný text, najprv sa vás opýta a potom sa zmaže."
+            "text": "Predvolene vypnuté. Každý návrh skontrolujete, kým sa uloží. Vypnutie ponechá uložené záznamy, ale vymaže text, ktorý AI prečítala z dokumentov tejto osoby (najprv sa vás opýta)."
         },
         "health.ai_run": {
             "title": "Spustiť AI",

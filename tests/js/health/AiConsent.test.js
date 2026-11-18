@@ -25,7 +25,7 @@ describe('AiConsentControl', () => {
         expect(document.body.textContent).toContain('Allow AI to read documents of this person');
         expect(document.body.textContent).not.toContain('AI reading is not available yet');
         const text = document.getElementById(sw().getAttribute('aria-describedby'));
-        expect(text.textContent).toContain('Off by default');
+        expect(text.textContent).toContain('outside AI company');
         expect(sw().checked).toBe(false);
         await expectNoAxeViolations(document.body);
     });
@@ -87,7 +87,7 @@ describe('AiConsentControl', () => {
         current.unmount();
         mountControl({ canEdit: false, value: false });
         expect(document.querySelector('[data-testid="ai-tag"]').textContent.trim()).toBe('AI: off');
-        expect(document.body.textContent).toContain('Off by default');
+        expect(document.body.textContent).toContain('outside AI company');
         await expectNoAxeViolations(document.body);
     });
 

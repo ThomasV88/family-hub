@@ -209,7 +209,7 @@
         },
         "health.ai_consent": {
             "title": "AI for this person",
-            "text": "Off by default. When on, documents of this person can be sent to an outside AI company to suggest entries. You check every suggestion before it is saved. Turning it off stops new runs. If the person has recognised text, you are asked first and that text is deleted."
+            "text": "Off by default. Every suggestion is checked by you before it is saved. Turning it off keeps saved entries but deletes the text the AI read from this person's documents (you are asked first)."
         },
         "health.ai_run": {
             "title": "Run AI",
