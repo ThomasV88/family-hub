@@ -498,7 +498,15 @@ Plans:
 **Open point:** the brand guide PDF could not be rendered on this machine during milestone setup (no poppler). Read it (palette, minimum sizes, clear space) at the start of discuss/plan, and confirm whether the product name changes from "Family Hub" to "FamilyHUB".
 **Source:** brand kit attached to GitHub #13 (`FamilyHUB-brand-kit.zip`).
 **Commit rule:** commits that resolve part of #13 carry `Fixes #13`.
-**Plans:** 0 plans
+**Plans:** 6 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — Brand guide reading and reconciliation, brand colour tokens with WCAG AA in light and dark (wave 1)
+- [ ] 14-02-PLAN.md — Kit favicon, apple-touch, PWA and maskable icons with cache-busting names, manifest, head and push icon (wave 1)
+- [ ] 14-03-PLAN.md — Theme-aware BrandLogo in top bar, auth pages, offline page and style guide (wave 2)
+- [ ] 14-04-PLAN.md — FamilyHUB name in SK/PL/EN strings, mail templates, app-name defaults and README (wave 1)
+- [ ] 14-05-PLAN.md — Manual rename and new-icon FAQ in SK/PL/EN, help coverage confirmed (wave 1)
+- [ ] 14-06-PLAN.md — Old-name guard test, production APP_NAME release note, full gate, staging verification checkpoint (wave 3)
 
 ### Phase 15: Bulk medical document upload (issue #14)
 
