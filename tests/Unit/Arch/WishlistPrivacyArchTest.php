@@ -13,6 +13,9 @@ arch('owner side is blind to reservations')
         'App\Models\Wish',
         'App\Models\WishUrl',
         'App\Models\WishlistManager',
+        'App\Wishlist\Groups',
+        'App\Models\WishlistGroup',
+        'App\Models\WishlistGroupMember',
     ])
     ->not->toUse([
         'App\Models\WishReservation',
