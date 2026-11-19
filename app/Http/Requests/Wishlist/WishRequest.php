@@ -65,9 +65,10 @@ class WishRequest extends FormRequest
             'urls.*.label' => ['nullable', 'string', 'max:100'],
         ];
 
-        // owner_id is accepted on create only; on update it is never read.
+        // owner_id and group_id are accepted on create only (never together); on update they are never read.
         if ($this->isMethod('POST')) {
-            $rules['owner_id'] = ['sometimes', 'nullable', 'integer'];
+            $rules['owner_id'] = ['sometimes', 'nullable', 'integer', 'prohibits:group_id'];
+            $rules['group_id'] = ['sometimes', 'nullable', 'integer', 'prohibits:owner_id'];
         }
 
         return $rules;

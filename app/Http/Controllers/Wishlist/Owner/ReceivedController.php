@@ -15,7 +15,7 @@ class ReceivedController extends Controller
     {
         $user = $request->user();
         $model = Wish::query()->findOrFail($wish);
-        abort_unless($access->canEditList($user, $model->owner_id), 403);
+        abort_unless($access->canEditWish($user, $model), 403);
 
         $service->markReceived($user, $model);
 
@@ -26,7 +26,7 @@ class ReceivedController extends Controller
     {
         $user = $request->user();
         $model = Wish::query()->findOrFail($wish);
-        abort_unless($access->canEditList($user, $model->owner_id), 403);
+        abort_unless($access->canEditWish($user, $model), 403);
 
         $service->unmarkReceived($user, $model);
 
