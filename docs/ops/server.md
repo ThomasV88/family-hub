@@ -109,6 +109,11 @@ Recipe photos (Phase 12) live in the same `uploads` volume under `wish-images/re
 - Medical image processing (owner decision WR-12, 2026-11-15): an uploaded image is re-encoded to a JPEG with its longest edge at
   most 3600 px (was 2400) at quality 90 (was 82), plus a 480 px thumbnail. EXIF and GPS are stripped and the original is not kept
   (PDF and HEIC are stored unchanged; for AI a HEIC is converted in the job work dir only, see the `ai-worker` service below). Settings: `config/medical.php` `image_full_px`, `image_jpeg_quality`, `image_thumb_px`.
+  Memory limit (issue #23): the production PHP `memory_limit` in `docker/app/php-prod.ini` was raised from 128M to 256M. The image-decode
+  measurements below and the caps in `config/wishlist.php` and `config/medical.php` were sized under 128M and are unchanged. `memory_limit` is a
+  per-process ceiling, so the compose `mem_limit` defaults (`app` 256m, `worker` 160m, overridable with `MEM_APP` and `MEM_WORKER` in the stack
+  `.env`) must stay above the peak a process can now reach; otherwise a runaway process is OOM-killed together with its container instead of
+  failing with a PHP memory error. Check these values on the server before relying on the higher limit.
   The wishlist keeps 1280 px at quality 82. Decode memory (GD, measured in a PHP 8.4 process with `memory_limit=128M`, the
   production value, by `tests/Support/medical-image-memory-probe.php`): the source bitmap and the resized copy are alive together,
   about 4.4 bytes per pixel each. A 4032 x 3024 (12 MP) photo peaks at 89.5 MiB above the 24 MiB framework baseline, 112 MiB in
