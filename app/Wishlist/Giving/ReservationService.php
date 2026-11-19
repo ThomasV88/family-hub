@@ -23,12 +23,12 @@ final class ReservationService
      */
     public function reserve(User $giver, Wish $wish): ?User
     {
-        $this->guard->assertGiver(ViewerContext::for($giver), $wish->owner_id);
+        $this->guard->assertGiverOfWish(ViewerContext::for($giver), $wish);
         abort_if($wish->received_at !== null, 409);
 
         try {
             DB::transaction(function () use ($giver, $wish) {
-                $this->guard->assertStillGiver($giver, $wish->owner_id);
+                $this->guard->assertStillGiverOfWish($giver, $wish);
                 $reservation = new WishReservation;
                 $reservation->forceFill(['wish_id' => $wish->id, 'user_id' => $giver->id, 'cobuy_state' => 'none'])->save();
                 WishContribution::query()->create(['reservation_id' => $reservation->id, 'user_id' => $giver->id, 'amount_minor' => null]);
@@ -51,7 +51,7 @@ final class ReservationService
     /** Organizer only; the reservation and every contribution to it go away. */
     public function cancel(User $giver, Wish $wish): void
     {
-        $this->guard->assertGiver(ViewerContext::for($giver), $wish->owner_id);
+        $this->guard->assertGiverOfWish(ViewerContext::for($giver), $wish);
 
         DB::transaction(function () use ($giver, $wish) {
             $reservation = WishReservation::query()->where('wish_id', $wish->id)->lockForUpdate()->first();
