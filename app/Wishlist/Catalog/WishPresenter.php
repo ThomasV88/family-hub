@@ -12,7 +12,7 @@ final class WishPresenter
     /** @return array<string, mixed> */
     public function present(Wish $wish): array
     {
-        return [
+        $presented = [
             'id' => $wish->id,
             'title' => $wish->title,
             'notes' => $wish->notes,
@@ -35,6 +35,14 @@ final class WishPresenter
             ],
             'received' => $wish->received_at !== null,
         ];
+
+        // Group wishes only: who marked it received. Personal wishes keep the exact key set they always had.
+        if ($wish->group_id !== null) {
+            $by = $wish->receivedBy;
+            $presented['received_by'] = $by === null ? null : ['id' => $by->id, 'name' => $by->name];
+        }
+
+        return $presented;
     }
 
     /** Only for a ready image; the version suffix changes with every new file so browsers refetch. */

@@ -6,10 +6,15 @@ use App\Access\Preset;
 use App\Models\User;
 use App\Models\Wish;
 use App\Models\WishlistGroup;
+use App\Wishlist\Catalog\ListPage;
+use App\Wishlist\Catalog\WishPresenter;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Support\ImageFixtures;
 
 describe('group wish crud', function () {
@@ -106,5 +111,74 @@ describe('group wish crud', function () {
         $this->actingAs($this->b)->get("/wishlist/wishes/{$sharedWish->id}/image/thumb")->assertOk();
         $this->actingAs($this->a)->get("/wishlist/wishes/{$received->id}/image/thumb")->assertOk();
         $this->actingAs($this->outsider)->get("/wishlist/wishes/{$received->id}/image/thumb")->assertNotFound();
+    });
+});
+
+describe('list props', function () {
+    beforeEach(function () {
+        $this->a = User::factory()->withPreset(Preset::Parent)->create(['name' => 'Anna']);
+        $this->b = User::factory()->withPreset(Preset::Parent)->create(['name' => 'Boris']);
+        $this->outsider = User::factory()->withPreset(Preset::Parent)->create();
+        $this->gifts = WishlistGroup::factory()->withMembers([$this->a, $this->b])->create(['name' => 'Couple']);
+        $this->shared = WishlistGroup::factory()->shared()->withMembers([$this->a, $this->b])->create(['name' => 'Home']);
+        $this->page = fn (WishlistGroup $g, User $u, array $query = []) => app(ListPage::class)
+            ->groupProps($g, $u, Request::create('/wishlist', 'GET', $query));
+    });
+
+    it('builds the member view of a gifts group', function () {
+        $active = Wish::factory()->forGroup($this->gifts)->create();
+        $done = Wish::factory()->forGroup($this->gifts)->create(['received_at' => now()]);
+        $done->forceFill(['received_by_id' => $this->b->id])->save();
+
+        $props = ($this->page)($this->gifts, $this->a);
+        expect($props['list']['kind'])->toBe('group')
+            ->and($props['list']['owner'])->toBe(['id' => null, 'name' => 'Couple'])
+            ->and($props['list']['group'])->toBe(['id' => $this->gifts->id, 'name' => 'Couple', 'mode' => 'gifts', 'is_member' => true, 'can_manage' => true,
+                'members' => [['id' => $this->a->id, 'name' => 'Anna'], ['id' => $this->b->id, 'name' => 'Boris']]])
+            ->and($props['list']['viewer_is_recipient'])->toBeTrue()
+            ->and($props['list']['viewer_is_manager'])->toBeFalse()
+            ->and($props['list']['can_edit'])->toBeTrue()
+            ->and(array_column($props['list']['wishes'], 'id'))->toBe([$active->id])
+            ->and($props['list']['received'][0]['received_by'])->toBe(['id' => $this->b->id, 'name' => 'Boris'])
+            ->and($props['list']['wishes'][0])->toHaveKey('received_by');
+    });
+
+    it('builds the giver view of a gifts group without received', function () {
+        Wish::factory()->forGroup($this->gifts)->create(['received_at' => now()]);
+        $props = ($this->page)($this->gifts, $this->outsider);
+        expect($props['list']['viewer_is_recipient'])->toBeFalse()
+            ->and($props['list']['can_edit'])->toBeFalse()
+            ->and($props['list']['group']['is_member'])->toBeFalse()
+            ->and($props['list'])->not->toHaveKey('received');
+    });
+
+    it('builds the member view of a shared group', function () {
+        $props = ($this->page)($this->shared, $this->a);
+        expect($props['list']['viewer_is_recipient'])->toBeFalse()
+            ->and($props['list']['can_edit'])->toBeTrue()
+            ->and($props['list'])->toHaveKey('received');
+    });
+
+    it('validates the selected wish', function () {
+        $done = Wish::factory()->forGroup($this->gifts)->create(['received_at' => now()]);
+        $active = Wish::factory()->forGroup($this->gifts)->create();
+
+        expect(($this->page)($this->gifts, $this->a, ['wish' => 'new'])['selected'])->toBe('new')
+            ->and(($this->page)($this->gifts, $this->a, ['wish' => (string) $done->id])['selected'])->toBe($done->id)
+            ->and(($this->page)($this->gifts, $this->outsider, ['wish' => (string) $active->id])['selected'])->toBe($active->id);
+        expect(fn () => ($this->page)($this->gifts, $this->outsider, ['wish' => 'new']))->toThrow(HttpException::class);
+        expect(fn () => ($this->page)($this->gifts, $this->outsider, ['wish' => (string) $done->id]))->toThrow(HttpException::class);
+    });
+
+    it('keeps personal wish keys unchanged and runs no reservation SQL', function () {
+        $personal = Wish::factory()->create(['owner_id' => $this->a->id]);
+        expect(array_keys(app(WishPresenter::class)->present($personal)))->not->toContain('received_by');
+        Wish::factory()->forGroup($this->gifts)->create();
+
+        DB::enableQueryLog();
+        ($this->page)($this->gifts, $this->a);
+        $sql = implode(' ', array_column(DB::getQueryLog(), 'query'));
+        DB::disableQueryLog();
+        expect($sql)->not->toContain('wish_reservations')->not->toContain('wish_contributions');
     });
 });
