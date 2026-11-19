@@ -547,7 +547,15 @@ Plans:
 5. Manual and contextual help in SK/PL/EN describe group wishlists and both modes; staging verification with synthetic data.
 **Owner decisions (2026-11-20):** purpose is both modes via a per-list switch; creator and invited members manage the group (any member with wishlist edit access can create one); in hidden mode nobody in the group sees who reserved what.
 **Commit rule:** commits that resolve part of #25 carry `Fixes #25` on the final one. User documentation rule from CLAUDE.md applies.
-**Plans:** 0 plans
+**Plans:** 9 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 16 to break down)
+- [ ] 16-01-PLAN.md — Data model (groups, members, wish owner XOR group) and group access rules
+- [ ] 16-02-PLAN.md — Group management routes (create, rename, mode switch, members, leave, delete) with reservation purges
+- [ ] 16-03-PLAN.md — Group wishes on the owner side (CRUD, received with name, images) and reservation-blind group props
+- [ ] 16-04-PLAN.md — Giving side per mode, ?group= page branch, shopping summary
+- [ ] 16-05-PLAN.md — Privacy proofs for group lists and no-regression proof for personal, children and managed lists
+- [ ] 16-06-PLAN.md — Group chips and panel UI, texts and help tips in SK/PL/EN
+- [ ] 16-07-PLAN.md — Group list views per mode and group entries in Your shopping
+- [ ] 16-08-PLAN.md — Manual (wishlist, who sees what, FAQ) in SK/PL/EN
+- [ ] 16-09-PLAN.md — Staging seed and audit, a11y and full gate (Fixes #25), staging verification checkpoint
