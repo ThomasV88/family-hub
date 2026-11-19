@@ -8,7 +8,7 @@ return [
     'notes_max' => 2000,
     'size_notes_max' => 200,
     'upload_max_kb' => 5120,
-    'fetch_html_max_bytes' => 524288,
+    'fetch_html_max_bytes' => 5242880,
     'fetch_image_max_bytes' => 5242880,
     // Lowered from 16 MP for the 128M production memory_limit (see plan 04-07 memory budget).
     'image_max_pixels' => 13000000,

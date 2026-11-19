@@ -116,3 +116,20 @@ it('refuses users without wishlist edit, bad urls, and throttles at 15 a minute'
     }
     $this->actingAs($this->parent)->postJson('/wishlist/link-preview', ['url' => 'https://shop.example/a'])->assertStatus(429);
 });
+
+it('reads a large shop page above the old 512 kB cap (issue #22)', function () {
+    $page = '<html><head><title>Mop</title><meta name="description" content="A robot mop"><meta property="og:image" content="https://cdn.example/p.jpg"></head><body>'
+        .str_repeat('<p>filler text for a heavy shop page</p>', 25000).'</body></html>';
+    expect(strlen($page))->toBeGreaterThan(524288)->and(strlen($page))->toBeLessThan(5242880);
+    previewFetcher([new Response(200, [], $page), new Response(200, [], ImageFixtures::jpeg(800, 600))]);
+    $r = runPreview('https://shop.example/mop');
+    expect($r)->title->toBe('Mop')->description->toBe('A robot mop')->image->toBeTrue()->failures->toBe([]);
+});
+
+it('still refuses a page above the new 5 MB cap (reported as unreachable, issue #22)', function () {
+    $page = '<html><head><title>Huge</title></head><body>'.str_repeat('x', 5242880 + 1024).'</body></html>';
+    previewFetcher([new Response(200, ['Content-Length' => (string) strlen($page)], $page)]);
+    $r = runPreview('https://shop.example/huge');
+    // The preview maps every fetch failure other than timeout and blocked to "unreachable"; the too_large reason itself is covered in SafeFetcherSocketTest.
+    expect($r['failures'])->toEqual(['title' => 'unreachable', 'description' => 'unreachable', 'image' => 'unreachable']);
+});
