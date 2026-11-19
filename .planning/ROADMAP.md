@@ -533,3 +533,21 @@ Plans:
 - [x] 15-07-PLAN.md — Review with persistent approve/reject, Continue, adjustment panel with live preview, re-scan and failed-document actions
 - [x] 15-08-PLAN.md — Manual section bulk-upload and who-sees-what in SK/PL/EN, four help tips with registry and placement
 - [x] 15-09-PLAN.md — Staging seed and audit, content-in-logs proof, a11y and pseudo-long, full gate (Fixes #14), staging verification with the real AI
+
+### Phase 16: Group wishlists (issue #25)
+
+**Goal:** A group wishlist: one wishlist shared by several members (for example the owner and the spouse), with a per-list mode switch (hidden reservations for gifts from others, or open reservations for shared purchases), created and managed by its creator and invited members (GitHub #25).
+**Requirements**: WLG-01, WLG-02, WLG-03, WLG-04, WLG-05, WLG-06
+**Depends on:** Phase 15
+**Success Criteria** (what must be TRUE):
+1. A member with wishlist edit access creates a group wishlist and invites other members; every member of the group can add, edit and remove its wishes and manage the group members.
+2. Mode "gifts from others" (hidden reservations): non-members reserve and buy for the group like for a normal list; no group member can see who reserved what, nor whether a wish was reserved by someone else beyond what a normal recipient sees today.
+3. Mode "shared purchases" (open reservations): every member of the group sees reservations and the bought state with the name of who did it.
+4. Server-side enforcement with a role-by-endpoint matrix test: a non-member cannot read or change a group list, a member cannot see hidden reservations in "gifts from others" mode, existing personal wishlists, children lists and managers behave exactly as before.
+5. Manual and contextual help in SK/PL/EN describe group wishlists and both modes; staging verification with synthetic data.
+**Owner decisions (2026-11-20):** purpose is both modes via a per-list switch; creator and invited members manage the group (any member with wishlist edit access can create one); in hidden mode nobody in the group sees who reserved what.
+**Commit rule:** commits that resolve part of #25 carry `Fixes #25` on the final one. User documentation rule from CLAUDE.md applies.
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 16 to break down)

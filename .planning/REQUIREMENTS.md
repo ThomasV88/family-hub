@@ -105,6 +105,15 @@ Milestone v1.1 (started 2026-11-18). Source: GitHub issues #13 and #14, owner sc
 - [x] **BULK-08**: Batch access is limited to the owner and to people who may see that person's records; AI processing needs the existing consent and notice; unfinished batches and their files expire after 30 days; actions are audited and no content is logged
 - [x] **BULK-09**: Manual and contextual help describe the feature in SK, PL and EN
 
+### Group wishlists (#25)
+
+- [ ] **WLG-01**: A member with wishlist edit access can create a group wishlist and invite other members to it
+- [ ] **WLG-02**: Every member of a group can add, edit and remove its wishes and manage its members
+- [ ] **WLG-03**: A group list has a mode: "gifts from others" (hidden reservations) or "shared purchases" (open reservations)
+- [ ] **WLG-04**: In "gifts from others" mode no group member can see who reserved or bought what; non-members reserve as for a normal list
+- [ ] **WLG-05**: In "shared purchases" mode every member sees reservations and the bought state with names
+- [ ] **WLG-06**: Access is enforced server-side (non-members have no access) and existing personal lists and children lists are unchanged; manual and help in SK, PL and EN
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -213,6 +222,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BULK-07 | Phase 15 | Complete |
 | BULK-08 | Phase 15 | Complete |
 | BULK-09 | Phase 15 | Complete |
+| WLG-01 | Phase 16 | Pending |
+| WLG-02 | Phase 16 | Pending |
+| WLG-03 | Phase 16 | Pending |
+| WLG-04 | Phase 16 | Pending |
+| WLG-05 | Phase 16 | Pending |
+| WLG-06 | Phase 16 | Pending |
 
 **Coverage:**
 - v1 requirements: 54 total (v1.1: 13 more, all mapped to phases 14-15)
