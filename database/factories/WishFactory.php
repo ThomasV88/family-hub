@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\User;
 use App\Models\Wish;
+use App\Models\WishlistGroup;
 use App\Wishlist\WishPriority;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,6 +24,11 @@ class WishFactory extends Factory
             'price_currency' => 'EUR',
             'priority' => WishPriority::Love,
         ];
+    }
+
+    public function forGroup(WishlistGroup $group): static
+    {
+        return $this->state(fn () => ['owner_id' => null, 'group_id' => $group->id]);
     }
 
     public function received(): static
