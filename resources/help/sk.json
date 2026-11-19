@@ -52,7 +52,8 @@
         "recipe_import": "Načítanie receptu z webovej stránky",
         "document_search": "Hľadanie v dokumentoch",
         "document_text": "Rozpoznaný text dokumentu",
-        "upload_batch": "Hromadné nahrávanie"
+        "upload_batch": "Hromadné nahrávanie",
+        "group_panel": "Panel spoločného zoznamu"
     },
     "topics": {
         "tasks.visibility": {
@@ -77,7 +78,7 @@
         },
         "wishlist.reservation": {
             "title": "Rezervácia",
-            "text": "Rezervujte darček, aby ho nekúpil aj niekto iný. Kto rezervoval, vidia všetci okrem osoby, ktorej je to želanie; tá to nikdy neuvidí."
+            "text": "Rezervujte darček, aby ho nekúpil aj niekto iný. Rezerváciu vidí každý okrem osoby, ktorej želanie to je. Na spoločnom zozname v režime Darčeky od ostatných ju nevidí nikto zo skupiny, v režime Spoločné nákupy ju vidia všetci v skupine."
         },
         "wishlist.cobuy": {
             "title": "Spoločný nákup",
@@ -374,6 +375,14 @@
         "health.batch_rescan": {
             "title": "Skenovať znova",
             "text": "Prečíta dokument znova s aktuálnymi úpravami. Je to nový beh AI, povolený najviac 5-krát na dokument, a zruší značky schválenia a zamietnutia, ktoré ste pri dokumente nastavili."
+        },
+        "wishlist.group_mode": {
+            "title": "Režim spoločného zoznamu",
+            "text": "Darčeky od ostatných: ostatní rezervujú darčeky a nikto zo skupiny nevidí, čo je rezervované ani kým. Spoločné nákupy: zoznam vidí iba skupina a každý vidí, kto čo rezervoval alebo kúpil. Zmena režimu zruší všetky rezervácie na zozname."
+        },
+        "wishlist.group_members": {
+            "title": "Členovia spoločného zoznamu",
+            "text": "Členovia sú členovia rodiny s oprávnením upravovať Zoznam želaní. Každý člen môže pridávať želania a spravovať zoznam. Člen odstránený zo zoznamu Darčeky od ostatných potom vidí jeho rezervácie ako každý iný darca."
         }
     }
 }

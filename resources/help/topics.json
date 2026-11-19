@@ -68,6 +68,18 @@
             "field": "received"
         },
         {
+            "key": "wishlist.group_mode",
+            "area": "wishlist",
+            "screen": "group_panel",
+            "field": "mode"
+        },
+        {
+            "key": "wishlist.group_members",
+            "area": "wishlist",
+            "screen": "group_panel",
+            "field": "members"
+        },
+        {
             "key": "wishlist.shopping",
             "area": "wishlist",
             "screen": "wishlist_page",

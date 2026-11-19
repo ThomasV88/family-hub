@@ -52,7 +52,8 @@
         "recipe_import": "Reading a recipe from a web page",
         "document_search": "Document search",
         "document_text": "Recognised text of a document",
-        "upload_batch": "Upload batch"
+        "upload_batch": "Upload batch",
+        "group_panel": "Group list panel"
     },
     "topics": {
         "tasks.visibility": {
@@ -77,7 +78,7 @@
         },
         "wishlist.reservation": {
             "title": "Reservation",
-            "text": "Reserve a gift so nobody else buys it too. Everyone except the person whose wish it is can see who reserved it; that person never sees it."
+            "text": "Reserve a gift so nobody else buys it too. Everyone except the person whose wish it is can see who reserved it. On a group list in Gifts from others mode nobody in the group sees it; in Shared purchases mode everyone in the group does."
         },
         "wishlist.cobuy": {
             "title": "Co-buying",
@@ -374,6 +375,14 @@
         "health.batch_rescan": {
             "title": "Scan again",
             "text": "Reads the document again with the current adjustments. It is a new AI run, allowed at most 5 times per document, and it clears the approve and reject marks you set on that document."
+        },
+        "wishlist.group_mode": {
+            "title": "Group list mode",
+            "text": "Gifts from others: others reserve gifts, and nobody in the group sees what is reserved or by whom. Shared purchases: only the group sees the list and everyone sees who reserved or bought what. Switching the mode cancels all reservations on the list."
+        },
+        "wishlist.group_members": {
+            "title": "Group list members",
+            "text": "Members are family members with Wishlist edit access. Every member can add wishes and manage the list. A member removed from a Gifts from others list can afterwards see its reservations like any other giver."
         }
     }
 }
