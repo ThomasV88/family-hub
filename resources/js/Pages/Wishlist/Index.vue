@@ -5,6 +5,8 @@ import { useI18n } from 'vue-i18n';
 import AppShell from '../../Layouts/AppShell.vue';
 import GiftListView from '../../Wishlist/GiftListView.vue';
 import GiftWishPanel from '../../Wishlist/GiftWishPanel.vue';
+import GroupChips from '../../Wishlist/GroupChips.vue';
+import GroupPanel from '../../Wishlist/GroupPanel.vue';
 import OwnListView from '../../Wishlist/OwnListView.vue';
 import OwnWishPanel from '../../Wishlist/OwnWishPanel.vue';
 import OccasionStrip from '../../Wishlist/OccasionStrip.vue';
@@ -15,6 +17,9 @@ const props = defineProps({
     members: { type: Array, default: () => [] },
     list: { type: Object, required: true },
     occasions: { type: Array, default: () => [] },
+    // [{ id, name, mode, is_member }] group lists the viewer may open; group_candidates: people who can be added ([] without Wishlist edit)
+    groups: { type: Array, default: () => [] },
+    group_candidates: { type: Array, default: () => [] },
     // null | 'new' | wish id (server-validated; it mirrors ?wish= in the URL)
     selected: { default: null },
 });
@@ -43,17 +48,42 @@ const panelOpen = computed(() => panelMode.value !== null && !closing.value);
 watch(panelMode, (mode) => { if (mode === null) closing.value = false; });
 
 const panel = ref(null);
-const guarded = (fn) => (panel.value ? panel.value.guard(fn) : fn());
+const groupPanelRef = ref(null);
+// null | 'create' | 'edit'; mutually exclusive with the wish panels
+const groupPanel = ref(null);
+const groupPanelOpen = computed(() => groupPanel.value !== null && (groupPanel.value === 'create' || props.list.group != null));
+const canCreateGroup = computed(() => props.group_candidates.length > 0);
+const selectedGroupId = computed(() => props.list.group?.id ?? null);
+const guarded = (fn) => {
+    const inner = () => (groupPanelRef.value ? groupPanelRef.value.guard(fn) : fn());
+    return panel.value ? panel.value.guard(inner) : inner();
+};
 
 // ?member= is omitted for the viewer's own list.
 function navigate(wish = null) {
     const params = {};
-    if (ownerId.value !== viewerId.value) params.member = ownerId.value;
+    if (props.list.group) params.group = props.list.group.id;
+    else if (ownerId.value !== viewerId.value) params.member = ownerId.value;
     if (wish !== null) params.wish = wish;
     router.get('/wishlist', params, { preserveState: true, preserveScroll: true, replace: true, onFinish: () => { if (wish === null) closing.value = false; } });
 }
 const openWish = (id) => guarded(() => navigate(id));
 const openCreate = () => guarded(() => navigate('new'));
+// The group panel replaces an open wish panel (after the unsaved-changes check on both).
+function openGroupPanel(mode) {
+    guarded(() => {
+        groupPanel.value = mode;
+        if (panelMode.value !== null) navigate();
+    });
+}
+const openGroupCreate = () => openGroupPanel('create');
+// 16-07's list header emits this to open the settings of the group list on screen.
+const openGroupManage = () => { if (props.list.group) openGroupPanel('edit'); };
+const closeGroupPanel = () => { groupPanel.value = null; };
+watch(panelMode, (mode) => { if (mode !== null) groupPanel.value = null; });
+watch(selectedGroupId, (id, before) => { if (id !== before && groupPanel.value === 'edit') groupPanel.value = null; });
+defineExpose({ openGroupManage });
+
 function closePanel() {
     closing.value = true;
     navigate();
@@ -69,12 +99,14 @@ function closePanel() {
                 <OwnListView v-if="recipient" :list="list" :selected-id="Number.isInteger(selected) ? selected : null" @open="openWish" @add="openCreate">
                     <template #context>
                         <PersonChips :members="members" :selected-id="ownerId" :guard="guarded" />
+                        <GroupChips :groups="groups" :selected-id="selectedGroupId" :can-create="canCreateGroup" :guard="guarded" @create="openGroupCreate" />
                         <OccasionStrip :occasions="occasions" />
                     </template>
                 </OwnListView>
                 <GiftListView v-else :list="list" :selected-id="Number.isInteger(selected) ? selected : null" @open="openWish">
                     <template #context>
                         <PersonChips :members="members" :selected-id="ownerId" :guard="guarded" />
+                        <GroupChips :groups="groups" :selected-id="selectedGroupId" :can-create="canCreateGroup" :guard="guarded" @create="openGroupCreate" />
                         <OccasionStrip :occasions="occasions" />
                     </template>
                 </GiftListView>
@@ -91,6 +123,15 @@ function closePanel() {
                 @close="closePanel"
             />
             <GiftWishPanel v-else :open="panelOpen" :wish="selectedWish" @close="closePanel" />
+            <GroupPanel
+                ref="groupPanelRef"
+                :open="groupPanelOpen"
+                :mode="groupPanel === 'edit' ? 'edit' : 'create'"
+                :group="groupPanel === 'edit' ? list.group : null"
+                :candidates="group_candidates"
+                :viewer-id="viewerId"
+                @close="closeGroupPanel"
+            />
         </div>
     </AppShell>
 </template>
