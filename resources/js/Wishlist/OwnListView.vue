@@ -47,7 +47,7 @@ const receivedOpen = ref(false);
         <slot name="context" />
 
         <UiAlert v-if="managing" variant="info" class="list-view__block">{{ t('wishlist.banner.managing', { name }) }}</UiAlert>
-        <UiAlert v-else-if="!dismissed" variant="info" dismissible class="list-view__block" @dismiss="dismissBanner">{{ t('wishlist.banner.own') }}</UiAlert>
+        <UiAlert v-else-if="!dismissed && !list.group" variant="info" dismissible class="list-view__block" @dismiss="dismissBanner">{{ t('wishlist.banner.own') }}</UiAlert>
         <p v-if="!list.can_edit" class="list-view__hint">{{ t('wishlist.viewonly') }}</p>
 
         <UiEmptyState v-if="empty" :title="t('wishlist.empty_own.title')" :body="t('wishlist.empty_own.body')" :heading-level="2">

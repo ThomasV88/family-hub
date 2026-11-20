@@ -154,6 +154,18 @@ describe('edit', () => {
         expect(calls.delete).toHaveBeenCalledWith('/wishlist/groups/9/membership', expect.any(Object));
     });
 
+    it('shows the last-member message inline when the server refuses the leave', async () => {
+        mountPanel({ mode: 'edit', group: GROUP });
+        btn('Leave this list').click();
+        await flushPromises();
+        btn('Leave list').click();
+        await flushPromises();
+        calls.delete.mock.calls[0][1].onError({ member_ids: 'wishlist.group.error.last_member' });
+        await flushPromises();
+        expect(document.body.textContent).toContain('You are the last member. Delete the list instead.');
+        expect(document.body.textContent).not.toContain('We could not save the list');
+    });
+
     it('deletes after a confirmation that names the list', async () => {
         mountPanel({ mode: 'edit', group: GROUP });
         btn('Delete list').click();

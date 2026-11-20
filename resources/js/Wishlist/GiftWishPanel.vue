@@ -40,7 +40,7 @@ const label = (link) => (link.label && link.label.trim() !== '' ? link.label : l
                 <UiTag :icon="wish.priority === 'top' ? Star : null">{{ t(`wishlist.priority.${wish.priority}`) }}</UiTag>
             </div>
 
-            <ReservationBox :wish="wish" :owner-name="list.owner?.name ?? ''" :can-reserve="list.viewer_can_reserve === true" />
+            <ReservationBox :wish="wish" :owner-name="list.owner?.name ?? ''" :can-reserve="list.viewer_can_reserve === true" :show-owner-hint="!list.group" />
 
             <section v-if="urls.length" class="gift-panel__section">
                 <h4 class="gift-panel__heading">{{ t('wishlist.field.links') }}</h4>

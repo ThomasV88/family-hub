@@ -109,7 +109,9 @@ final class GroupService
         return DB::transaction(function () use ($actor, $group) {
             $locked = $this->lock($group);
             abort_unless($this->access->isMember($actor, $locked), 403);
-            abort_if(count($this->access->memberIds($locked)) <= 1, 409);
+            if (count($this->access->memberIds($locked)) <= 1) {
+                throw ValidationException::withMessages(['member_ids' => 'wishlist.group.error.last_member']);
+            }
 
             WishlistGroupMember::query()->where('group_id', $locked->id)->where('user_id', $actor->id)->delete();
 

@@ -139,7 +139,7 @@ describe('service', function () {
         $group = grpMgmtGroup([$this->a, $this->b], GroupMode::Shared);
 
         expect(grpMgmtService()->leave($this->a, $group))->toBe(GroupMode::Shared)->and(grpMgmtIds($group))->toBe([$this->b->id]);
-        expect(fn () => grpMgmtService()->leave($this->b, $group))->toThrow(HttpException::class)
+        expect(fn () => grpMgmtService()->leave($this->b, $group))->toThrow(ValidationException::class)
             ->and(fn () => grpMgmtService()->leave($this->c, $group))->toThrow(HttpException::class);
     });
 
@@ -282,7 +282,9 @@ describe('routes', function () {
             ->assertStatus(303)->assertRedirect('/wishlist')->assertSessionHas('toast.key', 'wishlist.toast.group_left');
         expect(grpMgmtIds($group))->toBe([$this->b->id])->and(grpMgmtReserved($group))->toBe(0);
 
-        $this->actingAs($this->b)->delete('/wishlist/groups/'.$group->id.'/membership')->assertStatus(409);
+        $this->actingAs($this->b)->delete('/wishlist/groups/'.$group->id.'/membership')
+            ->assertSessionHasErrors(['member_ids' => 'wishlist.group.error.last_member']);
+        expect(grpMgmtIds($group))->toBe([$this->b->id])->and(WishlistGroup::query()->whereKey($group->id)->exists())->toBeTrue();
     });
 
     it('deletes a group', function () {
