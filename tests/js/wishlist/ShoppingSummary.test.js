@@ -95,6 +95,16 @@ describe('ShoppingSummary', () => {
         expect(w.text().match(/Your share/g)).toHaveLength(1);
     });
 
+    it('shows group sections under the group name, links to the group list and keeps keys apart from persons', async () => {
+        respond({ groups: [
+            { owner: { id: 3, name: 'Zora' }, items: [{ wish_id: 21, title: 'Scarf', price: null, currency: 'EUR', cobuy_state: 'none', is_organizer: true, my_amount: null }] },
+            { owner: { id: null, name: 'Grandma 80' }, group: { id: 3, name: 'Grandma 80' }, items: [{ wish_id: 51, title: 'Garden chair', price: null, currency: 'EUR', cobuy_state: 'none', is_organizer: true, my_amount: null }] },
+        ] });
+        const w = await mountSummary();
+        expect(w.findAll('.shopping__owner').map((h) => h.text())).toEqual(['Zora', 'Group list: Grandma 80']);
+        expect(w.findAll('a').map((a) => a.attributes('href'))).toEqual(['/wishlist?member=3&wish=21', '/wishlist?group=3&wish=51']);
+    });
+
     for (const locale of ['en', 'sk', 'pl']) {
         for (const theme of ['light', 'dark']) {
             it(`is axe clean expanded in ${locale} ${theme}`, async () => {
