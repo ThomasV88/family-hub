@@ -5,12 +5,14 @@ import { useI18n } from 'vue-i18n';
 import AppShell from '../../Layouts/AppShell.vue';
 import GiftListView from '../../Wishlist/GiftListView.vue';
 import GiftWishPanel from '../../Wishlist/GiftWishPanel.vue';
+import GroupHeader from '../../Wishlist/GroupHeader.vue';
 import GroupChips from '../../Wishlist/GroupChips.vue';
 import GroupPanel from '../../Wishlist/GroupPanel.vue';
 import OwnListView from '../../Wishlist/OwnListView.vue';
 import OwnWishPanel from '../../Wishlist/OwnWishPanel.vue';
 import OccasionStrip from '../../Wishlist/OccasionStrip.vue';
 import PersonChips from '../../Wishlist/PersonChips.vue';
+import SharedListView from '../../Wishlist/SharedListView.vue';
 import ShellAdd from '../../Wishlist/ShellAdd.vue';
 
 const props = defineProps({
@@ -31,8 +33,15 @@ const managing = computed(() => props.list.viewer_is_manager === true);
 const ownerId = computed(() => props.list.owner.id);
 const ownerName = computed(() => props.list.owner.name);
 const viewerId = computed(() => props.members.find((m) => m.is_viewer)?.id ?? null);
-const canAdd = computed(() => recipient.value && props.list.can_edit === true);
-const addLabel = computed(() => (managing.value ? t('wishlist.add_for', { name: ownerName.value }) : t('wishlist.add')));
+// A shared-mode group list is shown to its members with reservation data (and may be edited by them); everyone else
+// who is not on the recipient side gets the giver view.
+const group = computed(() => props.list.group ?? null);
+const sharedMember = computed(() => !recipient.value && group.value?.mode === 'shared' && group.value.is_member === true);
+const ownSide = computed(() => recipient.value || sharedMember.value);
+const canAdd = computed(() => ownSide.value && props.list.can_edit === true);
+const addLabel = computed(() => (group.value ? t('wishlist.group.add', { name: group.value.name }) : managing.value ? t('wishlist.add_for', { name: ownerName.value }) : t('wishlist.add')));
+// Shared members open a wish read-only (with reservations); Edit wish switches this to its id.
+const editingWishId = ref(null);
 
 const allWishes = computed(() => [...(props.list.wishes ?? []), ...(props.list.received ?? [])]);
 const selectedWish = computed(() => (Number.isInteger(props.selected) ? (allWishes.value.find((w) => w.id === props.selected) ?? null) : null));
@@ -41,11 +50,18 @@ const panelMode = computed(() => {
         if (props.selected === 'new') return canAdd.value ? 'create' : null;
         return selectedWish.value ? 'edit' : null;
     }
+    if (sharedMember.value) {
+        if (props.selected === 'new') return canAdd.value ? 'create' : null;
+        if (!selectedWish.value) return null;
+        return editingWishId.value === selectedWish.value.id && props.list.can_edit === true ? 'edit' : 'gift';
+    }
     return selectedWish.value ? 'gift' : null;
 });
 const closing = ref(false);
 const panelOpen = computed(() => panelMode.value !== null && !closing.value);
-watch(panelMode, (mode) => { if (mode === null) closing.value = false; });
+watch(panelMode, (mode) => { if (mode === null) { closing.value = false; editingWishId.value = null; } });
+const ownPanelOpen = computed(() => panelOpen.value && (panelMode.value === 'create' || panelMode.value === 'edit'));
+const giftPanelOpen = computed(() => panelOpen.value && panelMode.value === 'gift');
 
 const panel = ref(null);
 const groupPanelRef = ref(null);
@@ -101,8 +117,17 @@ function closePanel() {
                         <PersonChips :members="members" :selected-id="ownerId" :guard="guarded" />
                         <GroupChips :groups="groups" :selected-id="selectedGroupId" :can-create="canCreateGroup" :guard="guarded" @create="openGroupCreate" />
                         <OccasionStrip :occasions="occasions" />
+                        <GroupHeader v-if="group" :list="list" @manage="openGroupManage" />
                     </template>
                 </OwnListView>
+                <SharedListView v-else-if="sharedMember" :list="list" :selected-id="Number.isInteger(selected) ? selected : null" @open="openWish" @add="openCreate">
+                    <template #context>
+                        <PersonChips :members="members" :selected-id="ownerId" :guard="guarded" />
+                        <GroupChips :groups="groups" :selected-id="selectedGroupId" :can-create="canCreateGroup" :guard="guarded" @create="openGroupCreate" />
+                        <OccasionStrip :occasions="occasions" />
+                        <GroupHeader :list="list" @manage="openGroupManage" />
+                    </template>
+                </SharedListView>
                 <GiftListView v-else :list="list" :selected-id="Number.isInteger(selected) ? selected : null" @open="openWish">
                     <template #context>
                         <PersonChips :members="members" :selected-id="ownerId" :guard="guarded" />
@@ -112,17 +137,18 @@ function closePanel() {
                 </GiftListView>
             </div>
             <OwnWishPanel
-                v-if="recipient"
+                v-if="ownSide"
                 ref="panel"
-                :open="panelOpen"
+                :open="ownPanelOpen"
                 :mode="panelMode === 'create' ? 'create' : 'edit'"
                 :wish="panelMode === 'edit' ? selectedWish : null"
-                :owner-id="ownerId"
+                :owner-id="group ? null : ownerId"
+                :group-id="group ? group.id : null"
                 :owner-name="ownerName"
                 :managing="managing"
                 @close="closePanel"
             />
-            <GiftWishPanel v-else :open="panelOpen" :wish="selectedWish" @close="closePanel" />
+            <GiftWishPanel v-if="!recipient" :open="giftPanelOpen" :wish="selectedWish" :editable="sharedMember && list.can_edit === true" @edit="editingWishId = $event" @close="closePanel" />
             <GroupPanel
                 ref="groupPanelRef"
                 :open="groupPanelOpen"
