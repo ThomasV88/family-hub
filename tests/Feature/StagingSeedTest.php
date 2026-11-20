@@ -18,6 +18,8 @@ use App\Models\ShoppingUnit;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Wish;
+use App\Wishlist\Groups\GroupMode;
+use App\Wishlist\Groups\GroupService;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
@@ -202,6 +204,9 @@ function synthRows(User $user): void
         'started_by' => $user->id, 'agent' => 'codex', 'attempt' => 1, 'status' => 'failed', 'queued_at' => now()]);
     Task::factory()->create(['creator_id' => $user->id]);
     Wish::factory()->create(['owner_id' => $user->id]);
+    // Phase 16: a tester's group list with a wish (the group wish restricts the group, so the purge must remove both)
+    $group = app(GroupService::class)->create($user, "Tester group {$user->id}", GroupMode::Shared, []);
+    (new Wish)->forceFill(['group_id' => $group->id, 'created_by_id' => $user->id, 'title' => 'Tester group wish'])->save();
     $list = ShoppingList::factory()->create(['creator_id' => $user->id]);
     ShoppingItem::factory()->create(['list_id' => $list->id, 'created_by' => $user->id]);
     $catalog = new ShoppingCatalogItem(['name' => "Tester item {$user->id}"]);
@@ -244,7 +249,7 @@ it('reseeds and audits cleanly after the synthetic admin produced audit rows (li
 /** Row counts of every table the seed or the purge touches (ai_calls and audit_logs are append-only and excluded). */
 function seededCounts(): array
 {
-    $tables = ['tasks', 'task_members', 'wishes', 'wish_urls', 'wish_reservations', 'wish_contributions', 'wish_occasions', 'wishlist_managers',
+    $tables = ['tasks', 'task_members', 'wishes', 'wish_urls', 'wish_reservations', 'wish_contributions', 'wish_occasions', 'wishlist_managers', 'wishlist_groups', 'wishlist_group_members',
         'finance_accounts', 'finance_account_members', 'finance_transactions', 'finance_recurring', 'finance_recurring_matches', 'finance_budgets',
         'finance_import_profiles', 'finance_import_batches', 'finance_import_rows', 'medical_subjects', 'medical_subject_members', 'medical_visits',
         'medical_medications', 'medical_allergies', 'medical_vaccinations', 'medical_contacts', 'medical_documents', 'medical_ai_extractions',
@@ -360,3 +365,35 @@ it('audit flags started_by of a live real user but accepts a dangling one', func
     $row($real->id);
     $this->artisan('staging:audit')->expectsOutputToContain("non-synthetic {$table}")->assertExitCode(1);
 })->with(['ai_calls', 'medical_ai_extractions']);
+
+it('reseeding twice leaves exactly the two demo group lists and the audit passes', function () {
+    setEnv('staging');
+    $this->artisan('staging:seed --force')->assertExitCode(0);
+    $this->artisan('staging:seed --force')->assertExitCode(0);
+
+    expect(DB::table('wishlist_groups')->count())->toBe(2)
+        ->and(DB::table('wishlist_group_members')->count())->toBe(4)
+        ->and(DB::table('wishes')->whereNotNull('group_id')->count())->toBe(6)
+        ->and(DB::table('wishes')->whereRaw('(owner_id is null) = (group_id is null)')->count())->toBe(0);
+    $this->artisan('staging:audit')->assertExitCode(0);
+});
+
+it('audit fails for a group list or membership of a real user and a reseed keeps a group with a real member', function () {
+    setEnv('staging');
+    $this->artisan('staging:seed --force')->assertExitCode(0);
+    $real = User::factory()->create(['email' => 'real@gmail.com', 'name' => 'Real Person']);
+    $synth = User::where('email', 'admin@example.test')->first();
+
+    $orphan = DB::table('wishlist_groups')->insertGetId(['name' => 'Real group', 'mode' => 'gifts', 'created_by_id' => $real->id, 'created_at' => now(), 'updated_at' => now()]);
+    $this->artisan('staging:audit')->expectsOutputToContain('non-synthetic wishlist_groups')->assertExitCode(1);
+    DB::table('wishlist_groups')->where('id', $orphan)->update(['created_by_id' => $synth->id]);
+    // the real user row itself keeps the audit failing, so only the group rules are checked here
+    $this->artisan('staging:audit')->doesntExpectOutputToContain('non-synthetic wishlist_groups')->assertExitCode(1);
+
+    DB::table('wishlist_group_members')->insert(['group_id' => $orphan, 'user_id' => $real->id, 'added_by_id' => $synth->id, 'created_at' => now(), 'updated_at' => now()]);
+    $this->artisan('staging:audit')->expectsOutputToContain('non-synthetic wishlist_group_members')->assertExitCode(1);
+
+    $this->artisan('staging:seed --force')->assertExitCode(0);
+    expect(DB::table('wishlist_groups')->where('id', $orphan)->exists())->toBeTrue()
+        ->and(DB::table('wishlist_groups')->count())->toBe(3);
+});

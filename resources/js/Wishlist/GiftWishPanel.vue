@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import { ExternalLink, Star } from '@lucide/vue';
+import { ExternalLink, Pencil, Star } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import UiButton from '../Components/ui/UiButton.vue';
 import UiDetailPanel from '../Components/ui/UiDetailPanel.vue';
@@ -14,8 +14,10 @@ import { formatMoney } from './money.js';
 const props = defineProps({
     open: { type: Boolean, default: false },
     wish: { type: Object, default: null },
+    // Shared-mode group members may also edit the wish (cosmetic; the server decides).
+    editable: { type: Boolean, default: false },
 });
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'edit']);
 const { t, locale } = useI18n();
 const page = usePage();
 const list = computed(() => page.props?.list ?? {});
@@ -38,7 +40,7 @@ const label = (link) => (link.label && link.label.trim() !== '' ? link.label : l
                 <UiTag :icon="wish.priority === 'top' ? Star : null">{{ t(`wishlist.priority.${wish.priority}`) }}</UiTag>
             </div>
 
-            <ReservationBox :wish="wish" :owner-name="list.owner?.name ?? ''" :can-reserve="list.viewer_can_reserve === true" />
+            <ReservationBox :wish="wish" :owner-name="list.owner?.name ?? ''" :can-reserve="list.viewer_can_reserve === true" :show-owner-hint="!list.group" />
 
             <section v-if="urls.length" class="gift-panel__section">
                 <h4 class="gift-panel__heading">{{ t('wishlist.field.links') }}</h4>
@@ -62,6 +64,7 @@ const label = (link) => (link.label && link.label.trim() !== '' ? link.label : l
         </div>
 
         <template #footer>
+            <UiButton v-if="editable && wish" variant="secondary" :icon="Pencil" @click="emit('edit', wish.id)">{{ t('wishlist.group.edit_wish') }}</UiButton>
             <UiButton variant="secondary" @click="emit('close')">{{ t('wishlist.close') }}</UiButton>
         </template>
     </UiDetailPanel>

@@ -19,11 +19,11 @@ final class CoBuyService
 
     public function open(User $giver, Wish $wish): void
     {
-        $this->guard->assertGiver(ViewerContext::for($giver), $wish->owner_id);
+        $this->guard->assertGiverOfWish(ViewerContext::for($giver), $wish);
         abort_if($wish->received_at !== null, 409);
 
         DB::transaction(function () use ($giver, $wish) {
-            $this->guard->assertStillGiver($giver, $wish->owner_id);
+            $this->guard->assertStillGiverOfWish($giver, $wish);
             $reservation = $this->lock($wish);
             abort_unless($reservation->user_id === $giver->id, 403);
             abort_unless(in_array($reservation->cobuy_state, ['none', 'closed'], true), 409);
@@ -33,7 +33,7 @@ final class CoBuyService
 
     public function close(User $giver, Wish $wish): void
     {
-        $this->guard->assertGiver(ViewerContext::for($giver), $wish->owner_id);
+        $this->guard->assertGiverOfWish(ViewerContext::for($giver), $wish);
 
         DB::transaction(function () use ($giver, $wish) {
             $reservation = $this->lock($wish);
@@ -46,11 +46,11 @@ final class CoBuyService
     /** Join an open co-buy or change the share; the organizer may only change their own share. */
     public function contribute(User $giver, Wish $wish, ?int $amountMinor): void
     {
-        $this->guard->assertGiver(ViewerContext::for($giver), $wish->owner_id);
+        $this->guard->assertGiverOfWish(ViewerContext::for($giver), $wish);
         abort_if($wish->received_at !== null, 409);
 
         DB::transaction(function () use ($giver, $wish, $amountMinor) {
-            $this->guard->assertStillGiver($giver, $wish->owner_id);
+            $this->guard->assertStillGiverOfWish($giver, $wish);
             $reservation = $this->lock($wish);
             abort_unless($reservation->cobuy_state === 'open', 409);
 
@@ -66,7 +66,7 @@ final class CoBuyService
 
     public function leave(User $giver, Wish $wish): void
     {
-        $this->guard->assertGiver(ViewerContext::for($giver), $wish->owner_id);
+        $this->guard->assertGiverOfWish(ViewerContext::for($giver), $wish);
 
         DB::transaction(function () use ($giver, $wish) {
             $reservation = $this->lock($wish);

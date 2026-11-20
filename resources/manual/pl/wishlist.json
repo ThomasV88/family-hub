@@ -10,7 +10,7 @@
       "id": "lists",
       "title": "Jak znaleźć listy",
       "blocks": [
-        { "type": "p", "text": "Na górze strony Wishlist jest rząd przycisków, po jednym dla każdej osoby. Wybierz osobę, aby otworzyć jej listę. Twój przycisk ma przy imieniu (Ty). Każdy, kto ma dostęp do Wishlist, widzi wszystkie listy." }
+        { "type": "p", "text": "Na górze strony Wishlist jest rząd przycisków, po jednym dla każdej osoby. Wybierz osobę, aby otworzyć jej listę. Twój przycisk ma przy imieniu (Ty). Każdy, kto ma dostęp do Wishlist, widzi wszystkie listy. Pod przyciskami osób jest drugi rząd **Listy wspólne** z listami, które należą do kilku osób (zobacz [Listy wspólne](#group-lists))." }
       ]
     },
     {
@@ -44,15 +44,43 @@
           "Chcesz podzielić koszt? Naciśnij **Otwórz na wspólny zakup**. Inne osoby mogą wtedy nacisnąć **Dołącz do zakupu** i, jeśli chcą, wpisać swój udział.",
           "Naciśnij **Zamknij wspólny zakup**, gdy grupa jest kompletna. Każdy, kto dołączył, może nacisnąć **Opuść wspólny zakup**."
         ] },
-        { "type": "p", "text": "Lista **Twoje zakupy** pokazuje prezenty, które zarezerwowałeś, i ile zobowiązałeś się zapłacić." },
+        { "type": "p", "text": "Lista **Twoje zakupy** pokazuje prezenty, które zarezerwowałeś, i ile zobowiązałeś się zapłacić. Prezenty zarezerwowane na liście wspólnej pojawiają się tam pod nazwą tej listy." },
         { "type": "tip", "text": "Jeśli dwie osoby spróbują zarezerwować ten sam prezent w tym samym momencie, wygrywa pierwsza, a druga zobaczy krótki komunikat. Nic się nie psuje." }
+      ]
+    },
+    {
+      "id": "group-lists",
+      "title": "Listy wspólne",
+      "blocks": [
+        { "type": "p", "text": "Lista wspólna to jedna lista dla kilku osób, na przykład dla pary, która chce razem zbierać rzeczy. Listy wspólne są w rzędzie **Listy wspólne** pod przyciskami osób. Utworzyć ją może każdy, kto ma Edycję w Wishlist. Członkami mogą być tylko członkowie rodziny, którzy mogą się zalogować i mają Edycję w Wishlist." },
+        { "type": "steps", "title": "Tworzenie listy wspólnej", "items": [
+          "Naciśnij **Nowa lista wspólna**.",
+          "Wpisz nazwę (najwyżej 80 znaków).",
+          "Wybierz tryb: **Prezenty od innych** lub **Wspólne zakupy**.",
+          "Zaznacz członków. Ty zawsze jesteś członkiem.",
+          "Naciśnij **Utwórz listę**."
+        ] },
+        { "type": "p", "text": "Członkowie są dodawani bezpośrednio. Nikt nie musi niczego potwierdzać. Oba tryby działają tak:" },
+        { "type": "list", "items": [
+          "**Prezenty od innych**: grupa jest tą, która dostaje prezenty. Reszta rodziny rezerwuje i kupuje dla listy, a nikt z grupy nie widzi, co jest zarezerwowane ani przez kogo, dokładnie jak na Twojej własnej liście.",
+          "**Wspólne zakupy**: listę widzi tylko grupa. Każdy w niej widzi, kto co zarezerwował lub kupił, a członkowie mogą rezerwować i kupować razem."
+        ] },
+        { "type": "p", "text": "Każdy członek może dodawać, edytować i usuwać życzenia. Życzenia oznaczone jako otrzymane pokazują, kto je oznaczył. Otwórz listę i naciśnij **Zarządzaj listą**, aby zmienić jej nazwę, członków lub tryb. Może to zrobić każdy członek." },
+        { "type": "list", "items": [
+          "**Zmiana trybu**: zostaniesz poproszony o potwierdzenie, bo wszystkie rezerwacje na liście zostaną anulowane i nikt nie dowie się, co było zarezerwowane.",
+          "**Opuść tę listę**: nie widzisz już tej listy. Jeśli to lista Wspólne zakupy, Twoje rezerwacje na niej zostaną anulowane. Ostatni członek nie może opuścić listy i musi ją usunąć.",
+          "**Usuń listę**: lista, wszystkie jej życzenia i ich obrazy zostaną usunięte, a rezerwacje na niej anulowane. Tej operacji nie można cofnąć.",
+          "**Limity**: najwyżej 12 członków na liście i najwyżej 10 list wspólnych na osobę."
+        ] },
+        { "type": "tip", "text": "Osoba usunięta z listy Prezenty od innych albo ta, która ją opuści, staje się zwykłym darczyńcą i może wtedy widzieć jej rezerwacje, jak usunięty zarządca wishlisty. Osoba dodana do listy Prezenty od innych traci na niej własne rezerwacje, aby nic jej się nie zdradziło." },
+        { "type": "p", "text": "Listy wspólne nie mają własnych okazji. Urodziny i imieniny pozostają osobiste." }
       ]
     },
     {
       "id": "surprise",
       "title": "Dlaczego nigdy nie widzisz, kto zarezerwował Twoje życzenia",
       "blocks": [
-        { "type": "p", "text": "To celowe, aby prezenty pozostały niespodzianką. Na własnej liście nie widzisz, czy życzenie jest zarezerwowane, kto je zarezerwował ani kto dołączył do wspólnego zakupu. Wszyscy inni to widzą. Aplikacja nigdy też nie wysyła Ci przypomnień o Twoich własnych urodzinach czy imieninach." }
+        { "type": "p", "text": "To celowe, aby prezenty pozostały niespodzianką. Na własnej liście nie widzisz, czy życzenie jest zarezerwowane, kto je zarezerwował ani kto dołączył do wspólnego zakupu. Wszyscy inni to widzą. To samo dotyczy członków listy wspólnej w trybie Prezenty od innych (zobacz [Listy wspólne](#group-lists)). Aplikacja nigdy też nie wysyła Ci przypomnień o Twoich własnych urodzinach czy imieninach." }
       ]
     },
     {

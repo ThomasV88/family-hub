@@ -10,7 +10,7 @@
       "id": "lists",
       "title": "Ako nájsť zoznamy",
       "blocks": [
-        { "type": "p", "text": "Hore na stránke Wishlist je rad tlačidiel, jedno pre každého človeka. Vyberte osobu a otvorí sa jej zoznam. Vaše vlastné tlačidlo má pri mene (Vy). Každý, kto má prístup k Wishlistu, vidí všetky zoznamy." }
+        { "type": "p", "text": "Hore na stránke Wishlist je rad tlačidiel, jedno pre každého človeka. Vyberte osobu a otvorí sa jej zoznam. Vaše vlastné tlačidlo má pri mene (Vy). Každý, kto má prístup k Wishlistu, vidí všetky zoznamy. Pod tlačidlami osôb je druhý rad **Spoločné zoznamy** so zoznamami, ktoré patria viacerým ľuďom (pozrite [Spoločné zoznamy](#group-lists))." }
       ]
     },
     {
@@ -44,15 +44,43 @@
           "Chcete sa o cenu podeliť? Stlačte **Otvoriť pre spoločný nákup**. Ďalší ľudia môžu stlačiť **Pripojiť sa k nákupu** a podľa chuti napísať svoj podiel.",
           "Keď je skupina úplná, stlačte **Uzavrieť spoločný nákup**. Každý, kto sa pripojil, môže stlačiť **Odísť zo spoločného nákupu**."
         ] },
-        { "type": "p", "text": "Zoznam **Váš nákup** ukazuje darčeky, ktoré ste rezervovali, a koľko ste sa zaviazali zaplatiť." },
+        { "type": "p", "text": "Zoznam **Váš nákup** ukazuje darčeky, ktoré ste rezervovali, a koľko ste sa zaviazali zaplatiť. Darčeky, ktoré ste rezervovali v spoločnom zozname, sa tam zobrazia pod názvom tohto zoznamu." },
         { "type": "tip", "text": "Ak sa dvaja ľudia pokúsia rezervovať ten istý darček v tom istom okamihu, vyhrá prvý a druhý uvidí krátku správu. Nič sa nepokazí." }
+      ]
+    },
+    {
+      "id": "group-lists",
+      "title": "Spoločné zoznamy",
+      "blocks": [
+        { "type": "p", "text": "Spoločný zoznam je jeden zoznam pre viacerých ľudí, napríklad pre pár, ktorý si chce veci zbierať spolu. Spoločné zoznamy sa zobrazujú v rade **Spoločné zoznamy** pod tlačidlami osôb. Vytvoriť ho môže každý, kto má Úpravy vo Wishliste. Členmi môžu byť iba členovia rodiny, ktorí sa môžu prihlásiť a majú Úpravy vo Wishliste." },
+        { "type": "steps", "title": "Vytvorenie spoločného zoznamu", "items": [
+          "Stlačte **Nový spoločný zoznam**.",
+          "Napíšte názov (najviac 80 znakov).",
+          "Vyberte režim: **Darčeky od ostatných** alebo **Spoločné nákupy**.",
+          "Zaškrtnite členov. Vy ste členom vždy.",
+          "Stlačte **Vytvoriť zoznam**."
+        ] },
+        { "type": "p", "text": "Členovia sa pridávajú priamo. Nikto nemusí nič potvrdzovať. Oba režimy fungujú takto:" },
+        { "type": "list", "items": [
+          "**Darčeky od ostatných**: skupina je tá, ktorá darčeky dostáva. Zvyšok rodiny rezervuje a kupuje pre zoznam a nikto zo skupiny nevidí, čo je rezervované ani kým, presne ako vo vašom vlastnom zozname.",
+          "**Spoločné nákupy**: zoznam vidí iba skupina. Každý v nej vidí, kto čo rezervoval alebo kúpil, a členovia môžu rezervovať a kupovať spolu."
+        ] },
+        { "type": "p", "text": "Každý člen môže pridávať, upravovať a odstraňovať želania. Želania označené ako dostané ukazujú, kto ich označil. Otvorte zoznam a stlačte **Spravovať zoznam**, aby ste ho premenovali, zmenili členov alebo režim. Môže to urobiť každý člen." },
+        { "type": "list", "items": [
+          "**Zmena režimu**: požiada sa o potvrdenie, pretože sa zrušia všetky rezervácie na zozname a nikomu sa nepovie, čo bolo rezervované.",
+          "**Opustiť tento zoznam**: zoznam už neuvidíte. Ak ide o zoznam Spoločné nákupy, vaše rezervácie na ňom sa zrušia. Posledný člen zoznam opustiť nemôže a musí ho namiesto toho zmazať.",
+          "**Zmazať zoznam**: zoznam, všetky jeho želania a ich obrázky sa zmažú a rezervácie na ňom sa zrušia. Túto akciu nemožno vrátiť.",
+          "**Limity**: najviac 12 členov v zozname a najviac 10 spoločných zoznamov na osobu."
+        ] },
+        { "type": "tip", "text": "Kto je odstránený zo zoznamu Darčeky od ostatných alebo ho opustí, stane sa bežným darcom a potom vidí jeho rezervácie, ako odstránený správca wishlistu. Kto je do zoznamu Darčeky od ostatných pridaný, stratí na ňom vlastné rezervácie, aby sa mu nič neprezradilo." },
+        { "type": "p", "text": "Spoločné zoznamy nemajú vlastné príležitosti. Narodeniny a meniny ostávajú osobné." }
       ]
     },
     {
       "id": "surprise",
       "title": "Prečo nikdy nevidíte, kto rezervoval vaše vlastné želania",
       "blocks": [
-        { "type": "p", "text": "Je to zámer, aby darčeky ostali prekvapením. Vo svojom zozname nevidíte, či je želanie rezervované, kto ho rezervoval ani kto sa pripojil k spoločnému nákupu. Všetci ostatní to vidia. Aplikácia vám tiež nikdy neposiela pripomienky na vaše vlastné narodeniny alebo meniny." }
+        { "type": "p", "text": "Je to zámer, aby darčeky ostali prekvapením. Vo svojom zozname nevidíte, či je želanie rezervované, kto ho rezervoval ani kto sa pripojil k spoločnému nákupu. Všetci ostatní to vidia. To isté platí pre členov spoločného zoznamu v režime Darčeky od ostatných (pozrite [Spoločné zoznamy](#group-lists)). Aplikácia vám tiež nikdy neposiela pripomienky na vaše vlastné narodeniny alebo meniny." }
       ]
     },
     {

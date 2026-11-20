@@ -7,8 +7,10 @@ use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\User;
 use App\Models\Wish;
 use App\Models\WishContribution;
+use App\Models\WishlistGroup;
 use App\Models\WishlistManager;
 use App\Models\WishReservation;
+use App\Wishlist\Groups\GroupMode;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route as LaravelRoute;
 use Illuminate\Support\Facades\Route;
@@ -89,6 +91,33 @@ class WishlistPrivacy
         ];
     }
 
+    /**
+     * Group lists: memberA and memberB belong to the group, the canary giver is an outsider (eligible giver of a
+     * gifts group, excluded from a shared one). 'owner' aliases memberA so the generic providers keep working.
+     *
+     * @return array{owner: User, memberA: User, memberB: User, giver: User, giver2: User, group: WishlistGroup, wish: Wish, twin: Wish}
+     */
+    public static function groupScenario(GroupMode $mode): array
+    {
+        $memberA = User::factory()->withPreset(Preset::Parent)->create(['name' => 'Ada Member']);
+        $memberB = User::factory()->withPreset(Preset::Parent)->create(['name' => 'Bert Member']);
+        $giver = User::factory()->withPreset(Preset::Child)->create(['name' => self::CANARY_NAME]);
+        $giver2 = User::factory()->withPreset(Preset::Grandparent)->create(['name' => 'Gita Giver']);
+        $factory = WishlistGroup::factory()->withMembers([$memberA, $memberB]);
+        $group = ($mode === GroupMode::Shared ? $factory->shared() : $factory)->create(['name' => 'Canary group']);
+
+        return [
+            'owner' => $memberA,
+            'memberA' => $memberA,
+            'memberB' => $memberB,
+            'giver' => $giver,
+            'giver2' => $giver2,
+            'group' => $group,
+            'wish' => Wish::factory()->forGroup($group)->create(['title' => 'Group wish']),
+            'twin' => Wish::factory()->forGroup($group)->create(['title' => 'Group twin']),
+        ];
+    }
+
     /** A reservation by the canary giver, co-buy open, plus a second giver's 7777.00 share. */
     public static function seedReservationWithCoBuy(Wish $wish, User $giver, User $giver2): WishReservation
     {
@@ -114,6 +143,7 @@ class WishlistPrivacy
             'token' => fn () => str_repeat('a', 40),
             'member' => fn () => $ctx['owner']->id,
             'occasion' => fn () => self::occasionId($ctx['owner']),
+            'group' => fn () => $ctx['group']->id ?? WishlistGroup::factory()->create(['created_by_id' => $ctx['owner']->id])->id,
         ];
         $params = [];
         foreach ($route->parameterNames() as $name) {
@@ -150,12 +180,20 @@ class WishlistPrivacy
         }
         $member = $ctx['owner']->id;
 
-        return [
+        $urls = [
             $url,
             $url.'?member='.$member,
             $url.'?member='.$member.'&wish='.$ctx['wish']->id,
             $url.'?member='.$member.'&available=1',
         ];
+        if (isset($ctx['group'])) {
+            $group = $ctx['group']->id;
+            $urls[] = $url.'?group='.$group;
+            $urls[] = $url.'?group='.$group.'&wish='.$ctx['wish']->id;
+            $urls[] = $url.'?group='.$group.'&available=1';
+        }
+
+        return $urls;
     }
 
     /**

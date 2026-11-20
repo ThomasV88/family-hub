@@ -24,7 +24,9 @@ const props = defineProps({
     // 'create' | 'edit'
     mode: { type: String, default: 'edit' },
     wish: { type: Object, default: null },
-    ownerId: { type: Number, required: true },
+    ownerId: { type: Number, default: null },
+    // Group list: the wish is created with group_id instead of owner_id.
+    groupId: { type: Number, default: null },
     ownerName: { type: String, default: '' },
     managing: { type: Boolean, default: false },
 });
@@ -36,7 +38,7 @@ const PRIORITIES = ['top', 'love', 'nice'];
 
 const creating = computed(() => props.mode === 'create' || !props.wish);
 const received = computed(() => !creating.value && props.wish?.received === true);
-const heading = computed(() => (creating.value ? (props.managing ? t('wishlist.panel.new_for', { name: props.ownerName }) : t('wishlist.panel.new')) : t('wishlist.panel.edit')));
+const heading = computed(() => (creating.value ? (props.groupId !== null ? t('wishlist.group.add', { name: props.ownerName }) : props.managing ? t('wishlist.panel.new_for', { name: props.ownerName }) : t('wishlist.panel.new')) : t('wishlist.panel.edit')));
 
 function initial() {
     const w = props.wish;
@@ -94,7 +96,7 @@ watch(() => props.open, async (open) => {
 function payload() {
     const f = form.value;
     return {
-        ...(creating.value ? { owner_id: props.ownerId } : {}),
+        ...(creating.value ? (props.groupId !== null ? { group_id: props.groupId } : { owner_id: props.ownerId }) : {}),
         title: f.title.trim(),
         notes: f.notes.trim() === '' ? null : f.notes,
         price: f.price.trim() === '' ? null : normalizePrice(f.price),
@@ -345,6 +347,8 @@ defineExpose({ guard, dirty });
             <form novalidate @submit.prevent="save" @keydown.enter="onEnter">
                 <UiAlert v-if="serverError" variant="danger" live class="wish-panel__alert">{{ t('wishlist.error.save_failed') }}</UiAlert>
 
+                <p v-if="received && wish?.received_by?.name" class="wish-panel__received-by" data-testid="received-by">{{ t('wishlist.group.received_by', { name: wish.received_by.name }) }}</p>
+
                 <fieldset class="wish-panel__fields" :disabled="received">
                     <UiField :label="t('wishlist.field.title')" required :error="errors.title">
                         <UiInput ref="titleField" v-model="form.title" maxlength="120" autocomplete="off" />
@@ -457,6 +461,7 @@ defineExpose({ guard, dirty });
 
 <style scoped>
 .wish-panel__alert { margin-bottom: var(--space-4); }
+.wish-panel__received-by { margin: 0 0 var(--space-4); font-size: var(--text-sm); color: var(--color-text-muted); overflow-wrap: anywhere; }
 .wish-panel__fields { min-width: 0; margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: var(--space-4); }
 .wish-panel__fields:disabled { opacity: 0.85; }
 .wish-panel__block { display: flex; flex-direction: column; gap: var(--space-2); }

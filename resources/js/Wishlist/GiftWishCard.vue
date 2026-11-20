@@ -34,7 +34,7 @@ const status = computed(() => {
         <span class="wish-card__body">
             <span class="wish-card__title">{{ wish.title }}</span>
             <span v-if="price" class="wish-card__price">{{ price }}</span>
-            <span class="wish-card__status" data-testid="card-status"><UiTag :variant="status.variant" :icon="status.icon" :class="{ 'is-strong': status.strong }">{{ status.text }}</UiTag></span>
+            <span v-if="!wish.received" class="wish-card__status" data-testid="card-status"><UiTag :variant="status.variant" :icon="status.icon" :class="{ 'is-strong': status.strong }">{{ status.text }}</UiTag></span>
             <span v-if="linkCount >= 1 || isTop || wish.received" class="wish-card__meta">
                 <span v-if="linkCount >= 1" class="wish-card__links"><Link :size="20" :stroke-width="1.75" aria-hidden="true" />{{ t('wishlist.card.links', { n: linkCount }, linkCount) }}</span>
                 <UiTag v-if="isTop" :icon="Star">{{ t('wishlist.priority.top') }}</UiTag>

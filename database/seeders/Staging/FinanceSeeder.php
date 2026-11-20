@@ -241,7 +241,7 @@ final class FinanceSeeder
         $t = $this->ctx->today;
         $m = $t->startOfMonth();
         $candidate = $this->d($m, $day);
-        if ($candidate > $t->format('Y-m-d')) {
+        if ($candidate >= $t->format('Y-m-d')) {
             $candidate = $this->d($m->subMonthNoOverflow(), $day);
         }
 

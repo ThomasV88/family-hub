@@ -10,7 +10,7 @@
       "id": "lists",
       "title": "Finding the lists",
       "blocks": [
-        { "type": "p", "text": "At the top of the Wishlist page there is a row of buttons, one for each person. Choose a person to open their list. Your own button says (You). Everyone with access to the Wishlist can see every list." }
+        { "type": "p", "text": "At the top of the Wishlist page there is a row of buttons, one for each person. Choose a person to open their list. Your own button says (You). Everyone with access to the Wishlist can see every list. Under the person buttons, a second row called **Group lists** holds the lists that belong to several people (see [Group lists](#group-lists))." }
       ]
     },
     {
@@ -44,15 +44,43 @@
           "Want to share the cost? Press **Open for co-buying**. Other people can then press **Join co-buy** and, if they like, type their share.",
           "Press **Close co-buying** when the group is complete. Anyone who joined can press **Leave co-buy**."
         ] },
-        { "type": "p", "text": "The list **Your shopping** shows the gifts you reserved and how much you promised to pay." },
+        { "type": "p", "text": "The list **Your shopping** shows the gifts you reserved and how much you promised to pay. Gifts you reserved on a group list appear there under the name of that list." },
         { "type": "tip", "text": "If two people try to reserve the same gift at the same moment, the first one wins and the other sees a short message. Nothing breaks." }
+      ]
+    },
+    {
+      "id": "group-lists",
+      "title": "Group lists",
+      "blocks": [
+        { "type": "p", "text": "A group list is one list for several people, for example a couple who want to collect things together. Group lists appear in the **Group lists** row under the person buttons. Anyone with Edit on the Wishlist can create one. Only family members who can sign in and have Edit on the Wishlist can be members." },
+        { "type": "steps", "title": "Creating a group list", "items": [
+          "Press **New group list**.",
+          "Type a name (up to 80 characters).",
+          "Choose the mode: **Gifts from others** or **Shared purchases**.",
+          "Tick the members. You are always a member.",
+          "Press **Create list**."
+        ] },
+        { "type": "p", "text": "Members are added directly. Nobody has to accept. The two modes work like this:" },
+        { "type": "list", "items": [
+          "**Gifts from others**: the group is the one receiving gifts. The rest of the family reserves and buys for the list, and nobody in the group sees what is reserved or by whom, exactly like your own list.",
+          "**Shared purchases**: only the group sees the list. Everyone in it sees who reserved or bought what, and the members can reserve and buy together."
+        ] },
+        { "type": "p", "text": "Every member can add, edit and remove wishes. Wishes marked as received show who marked them. Open the list and press **Manage list** to rename it, change the members or change the mode. Every member can do this." },
+        { "type": "list", "items": [
+          "**Changing the mode**: you are asked to confirm, because all reservations on the list are cancelled and nobody is told what was reserved.",
+          "**Leave this list**: you no longer see the list. If it is a Shared purchases list, your reservations on it are cancelled. The last member cannot leave and must delete the list instead.",
+          "**Delete list**: the list, all its wishes and their pictures are deleted, and the reservations on it are cancelled. This cannot be undone.",
+          "**Limits**: up to 12 members on a list and up to 10 group lists per person."
+        ] },
+        { "type": "tip", "text": "Someone who is removed from a Gifts from others list, or leaves it, becomes an ordinary giver and can then see its reservations, like a removed wishlist manager. Someone who is added to a Gifts from others list loses their own reservations on it, so that nothing is revealed to them." },
+        { "type": "p", "text": "Group lists have no occasions of their own. Birthdays and name days stay personal." }
       ]
     },
     {
       "id": "surprise",
       "title": "Why you never see who reserved your own wishes",
       "blocks": [
-        { "type": "p", "text": "This is on purpose, so gifts stay a surprise. On your own list you cannot see whether a wish is reserved, who reserved it, or who is co-buying. Everyone else can. The app also never sends you reminders about your own birthday or name day." }
+        { "type": "p", "text": "This is on purpose, so gifts stay a surprise. On your own list you cannot see whether a wish is reserved, who reserved it, or who is co-buying. Everyone else can. The same applies to the members of a Gifts from others group list (see [Group lists](#group-lists)). The app also never sends you reminders about your own birthday or name day." }
       ]
     },
     {

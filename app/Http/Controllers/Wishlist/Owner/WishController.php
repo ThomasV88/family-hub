@@ -15,6 +15,17 @@ class WishController extends Controller
     public function store(WishRequest $request, WishService $service, WishAccess $access): RedirectResponse
     {
         $user = $request->user();
+        $groupId = $request->validated('group_id');
+        if ($groupId !== null) {
+            $groupId = (int) $groupId;
+            abort_unless($access->canEditGroup($user, $groupId), 403);
+
+            $wish = $service->createForGroup($user, $groupId, $request->validated());
+
+            return redirect()->route('wishlist.index', ['group' => $groupId], 303)
+                ->with('flash_data', ['wishId' => $wish->id])
+                ->with('toast', ['key' => 'wishlist.toast.saved']);
+        }
         $owner = (int) ($request->validated('owner_id') ?? $user->id);
         abort_unless($access->canEditList($user, $owner), 403);
 
@@ -29,7 +40,7 @@ class WishController extends Controller
     {
         $user = $request->user();
         $model = Wish::query()->findOrFail($wish);
-        abort_unless($access->canEditList($user, $model->owner_id), 403);
+        abort_unless($access->canEditWish($user, $model), 403);
 
         $service->update($user, $model, $request->validated());
 
@@ -40,11 +51,13 @@ class WishController extends Controller
     {
         $user = $request->user();
         $model = Wish::query()->findOrFail($wish);
-        abort_unless($access->canEditList($user, $model->owner_id), 403);
+        abort_unless($access->canEditWish($user, $model), 403);
 
         $service->delete($user, $model);
 
-        return redirect()->route('wishlist.index', ['member' => $model->owner_id], 303)
+        $target = $model->group_id !== null ? ['group' => $model->group_id] : ['member' => $model->owner_id];
+
+        return redirect()->route('wishlist.index', $target, 303)
             ->with('toast', ['key' => 'wishlist.toast.deleted']);
     }
 }

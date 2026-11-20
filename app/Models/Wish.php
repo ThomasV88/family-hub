@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Deliberately blind to reservations: no relation, no counter, no appended attribute.
- * owner_id, created_by_id, image_* and received_at are set with forceFill by services.
+ * owner_id, group_id, created_by_id, received_by_id, image_* and received_at are set with forceFill by services.
  */
 class Wish extends Model
 {
@@ -33,6 +33,16 @@ class Wish extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(WishlistGroup::class, 'group_id');
+    }
+
+    public function receivedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'received_by_id');
     }
 
     public function createdBy(): BelongsTo

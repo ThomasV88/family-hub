@@ -50,7 +50,7 @@
       "id": "wish-reserved",
       "title": "Why can I not see who reserved my wish?",
       "blocks": [
-        { "type": "p", "text": "To keep gifts a surprise. See [Why you never see who reserved your own wishes](wishlist#surprise)." }
+        { "type": "p", "text": "To keep gifts a surprise. See [Why you never see who reserved your own wishes](wishlist#surprise). The same goes for a group list in the Gifts from others mode: its members do not see reservations either. See [Group lists](wishlist#group-lists)." }
       ]
     },
     {

@@ -22,4 +22,8 @@ return [
     'default_lead_days' => [14, 3],
     'reservation_retention_days' => 30,
     'strip_days' => 60,
+    // Group lists (issue #25).
+    'group_name_max' => 80,
+    'group_max_members' => 12,
+    'group_max_per_user' => 10,
 ];

@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Wishlist\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Wishlist\UploadWishImageRequest;
+use App\Models\User;
 use App\Models\Wish;
+use App\Models\WishlistGroup;
 use App\Wishlist\Catalog\FetchWishImage;
 use App\Wishlist\Catalog\ImageProcessor;
 use App\Wishlist\Catalog\ImageRejected;
 use App\Wishlist\Catalog\WishImageStore;
 use App\Wishlist\Catalog\WishImageWriteFailed;
+use App\Wishlist\Groups\GroupAccess;
 use App\Wishlist\ViewerContext;
 use App\Wishlist\WishAccess;
 use App\Wishlist\WishlistMembers;
@@ -28,9 +31,7 @@ class WishImageController extends Controller
         // Same visibility as the list: owner must be a visible list for this viewer, and received wishes are
         // recipient-side only. Every refusal is the same 404 as an unknown id or a missing image.
         $viewer = $request->user();
-        abort_if($model === null
-            || ! in_array($model->owner_id, $members->ids($viewer), true)
-            || ($model->received_at !== null && ! ViewerContext::for($viewer)->isRecipientSideOf($model->owner_id)), 404);
+        abort_if($model === null || ! $this->canSee($viewer, $model, $members), 404);
         $path = $variant === 'thumb' ? $model->thumb_path : ($variant === 'full' ? $model->image_path : null);
         $disk = Storage::disk('local');
         abort_if($path === null || $model->image_status !== 'ready' || ! $disk->exists($path), 404);
@@ -97,10 +98,25 @@ class WishImageController extends Controller
         return back(303);
     }
 
+    private function canSee(User $viewer, Wish $model, WishlistMembers $members): bool
+    {
+        if ($model->group_id !== null) {
+            $group = WishlistGroup::query()->find($model->group_id);
+            $groups = app(GroupAccess::class);
+
+            return $group !== null
+                && $groups->canView($viewer, $group)
+                && ($model->received_at === null || $groups->isMember($viewer, $group));
+        }
+
+        return in_array($model->owner_id, $members->ids($viewer), true)
+            && ($model->received_at === null || ViewerContext::for($viewer)->isRecipientSideOf($model->owner_id));
+    }
+
     private function editable(Request $request, int $wish, WishAccess $access): Wish
     {
         $model = Wish::query()->findOrFail($wish);
-        abort_unless($access->canEditList($request->user(), $model->owner_id), 403);
+        abort_unless($access->canEditWish($request->user(), $model), 403);
 
         return $model;
     }

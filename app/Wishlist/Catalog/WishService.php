@@ -19,10 +19,27 @@ final class WishService
     {
         $this->authorize($actor, $ownerId);
 
+        return $this->insert($actor, ['owner_id' => $ownerId], $data);
+    }
+
+    /** @param  array<string, mixed>  $data  validated input */
+    public function createForGroup(User $actor, int $groupId, array $data): Wish
+    {
+        abort_unless($this->access->canEditGroup($actor, $groupId), 403);
+
+        return $this->insert($actor, ['owner_id' => null, 'group_id' => $groupId], $data);
+    }
+
+    /**
+     * @param  array<string, int|null>  $owner  ['owner_id' => X] or ['owner_id' => null, 'group_id' => Y]
+     * @param  array<string, mixed>  $data
+     */
+    private function insert(User $actor, array $owner, array $data): Wish
+    {
         $fetch = false;
-        $wish = DB::transaction(function () use ($actor, $ownerId, $data, &$fetch) {
+        $wish = DB::transaction(function () use ($actor, $owner, $data, &$fetch) {
             $wish = new Wish($this->fields($data) + ['price_currency' => config('wishlist.default_currency'), 'priority' => WishPriority::Love]);
-            $wish->forceFill(['owner_id' => $ownerId, 'created_by_id' => $actor->id]);
+            $wish->forceFill($owner + ['created_by_id' => $actor->id]);
             $wish->save();
             $fetch = $this->replaceUrls($wish, $data['urls'] ?? []) && $this->markPendingForFetch($wish);
 
@@ -36,7 +53,7 @@ final class WishService
     /** @param  array<string, mixed>  $data  validated input */
     public function update(User $actor, Wish $wish, array $data): Wish
     {
-        $this->authorize($actor, $wish->owner_id);
+        $this->authorizeWish($actor, $wish);
 
         $fetch = false;
         $wish = DB::transaction(function () use ($wish, $data, &$fetch) {
@@ -54,7 +71,7 @@ final class WishService
 
     public function delete(User $actor, Wish $wish): void
     {
-        $this->authorize($actor, $wish->owner_id);
+        $this->authorizeWish($actor, $wish);
 
         $this->images->remove($wish);
         DB::transaction(fn () => $wish->delete());
@@ -62,10 +79,14 @@ final class WishService
 
     public function markReceived(User $actor, Wish $wish): Wish
     {
-        $this->authorize($actor, $wish->owner_id);
+        $this->authorizeWish($actor, $wish);
 
-        return DB::transaction(function () use ($wish) {
-            $wish->forceFill(['received_at' => $wish->received_at ?? now()])->save();
+        return DB::transaction(function () use ($actor, $wish) {
+            $wish->forceFill(['received_at' => $wish->received_at ?? now()]);
+            if ($wish->group_id !== null) {
+                $wish->forceFill(['received_by_id' => $wish->received_by_id ?? $actor->id]);
+            }
+            $wish->save();
 
             return $wish;
         });
@@ -73,13 +94,22 @@ final class WishService
 
     public function unmarkReceived(User $actor, Wish $wish): Wish
     {
-        $this->authorize($actor, $wish->owner_id);
+        $this->authorizeWish($actor, $wish);
 
         return DB::transaction(function () use ($wish) {
-            $wish->forceFill(['received_at' => null])->save();
+            $wish->forceFill(['received_at' => null]);
+            if ($wish->group_id !== null) {
+                $wish->forceFill(['received_by_id' => null]);
+            }
+            $wish->save();
 
             return $wish;
         });
+    }
+
+    private function authorizeWish(User $actor, Wish $wish): void
+    {
+        abort_unless($this->access->canEditWish($actor, $wish), 403);
     }
 
     private function authorize(User $actor, int $ownerId): void

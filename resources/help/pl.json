@@ -52,7 +52,8 @@
         "recipe_import": "Wczytywanie przepisu ze strony",
         "document_search": "Wyszukiwanie w dokumentach",
         "document_text": "Rozpoznany tekst dokumentu",
-        "upload_batch": "Wysyłanie wielu dokumentów"
+        "upload_batch": "Wysyłanie wielu dokumentów",
+        "group_panel": "Panel listy wspólnej"
     },
     "topics": {
         "tasks.visibility": {
@@ -77,7 +78,7 @@
         },
         "wishlist.reservation": {
             "title": "Rezerwacja",
-            "text": "Zarezerwuj prezent, aby nikt inny go nie kupił. Kto zarezerwował, widzą wszyscy poza osobą, której to życzenie; ona nigdy tego nie zobaczy."
+            "text": "Zarezerwuj prezent, aby nikt inny go nie kupił. Rezerwację widzą wszyscy poza osobą, której to życzenie. Na liście wspólnej w trybie Prezenty od innych nie widzi jej nikt z grupy, w trybie Wspólne zakupy widzą ją wszyscy w grupie."
         },
         "wishlist.cobuy": {
             "title": "Wspólny zakup",
@@ -374,6 +375,14 @@
         "health.batch_rescan": {
             "title": "Skanuj ponownie",
             "text": "Czyta dokument jeszcze raz z bieżącymi korektami. To nowe uruchomienie AI, dozwolone najwyżej 5 razy na dokument, i usuwa zaznaczenia zatwierdzenia i odrzucenia ustawione przy tym dokumencie."
+        },
+        "wishlist.group_mode": {
+            "title": "Tryb listy wspólnej",
+            "text": "Prezenty od innych: inni rezerwują prezenty, a nikt z grupy nie widzi, co jest zarezerwowane ani przez kogo. Wspólne zakupy: listę widzi tylko grupa, a każdy widzi, kto co zarezerwował lub kupił. Zmiana trybu anuluje wszystkie rezerwacje na liście."
+        },
+        "wishlist.group_members": {
+            "title": "Członkowie listy wspólnej",
+            "text": "Członkowie to członkowie rodziny z uprawnieniem do edycji Listy życzeń. Każdy członek może dodawać życzenia i zarządzać listą. Członek usunięty z listy Prezenty od innych widzi potem jej rezerwacje jak każdy inny darczyńca."
         }
     }
 }

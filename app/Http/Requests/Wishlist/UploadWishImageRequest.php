@@ -13,7 +13,7 @@ class UploadWishImageRequest extends FormRequest
         // Authorize before validating so a non-owner gets 403 whatever the body contains.
         $wish = Wish::query()->findOrFail((int) $this->route('wish'));
 
-        return app(WishAccess::class)->canEditList($this->user(), $wish->owner_id);
+        return app(WishAccess::class)->canEditWish($this->user(), $wish);
     }
 
     /** @return array<string, mixed> */

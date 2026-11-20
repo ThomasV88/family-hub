@@ -33,7 +33,9 @@ onMounted(async () => {
 
 const visible = computed(() => groups.value.length > 0);
 const money = (value, currency) => formatMoney(value, currency, locale.value);
-const href = (owner, item) => `/wishlist?member=${owner.id}&wish=${item.wish_id}`;
+const sectionKey = (section) => (section.group ? `g${section.group.id}` : `p${section.owner.id}`);
+const sectionName = (section) => (section.group ? t('wishlist.group.shopping_group', { name: section.group.name }) : section.owner.name);
+const href = (section, item) => (section.group ? `/wishlist?group=${section.group.id}&wish=${item.wish_id}` : `/wishlist?member=${section.owner.id}&wish=${item.wish_id}`);
 const share = (item) => (item.cobuy_state && item.cobuy_state !== 'none' && item.my_amount ? t('wishlist.shopping.share', { amount: money(item.my_amount, item.currency) }) : '');
 </script>
 
@@ -47,11 +49,11 @@ const share = (item) => (item.cobuy_state && item.cobuy_state !== 'none' && item
             <UiButton variant="ghost" size="sm" :aria-expanded="expanded ? 'true' : 'false'" :aria-controls="regionId" @click="expanded = !expanded">{{ expanded ? t('wishlist.shopping.hide') : t('wishlist.shopping.show') }}</UiButton>
         </div>
         <div v-show="expanded" :id="regionId" class="shopping__body">
-            <section v-for="group in groups" :key="group.owner.id" class="shopping__group">
-                <h4 class="shopping__owner">{{ group.owner.name }}</h4>
+            <section v-for="group in groups" :key="sectionKey(group)" class="shopping__group">
+                <h4 class="shopping__owner">{{ sectionName(group) }}</h4>
                 <ul class="shopping__items">
                     <li v-for="item in group.items" :key="item.wish_id" class="shopping__item">
-                        <Link :href="href(group.owner, item)" class="shopping__link">{{ item.title }}</Link>
+                        <Link :href="href(group, item)" class="shopping__link">{{ item.title }}</Link>
                         <span v-if="money(item.price, item.currency)" class="shopping__meta">{{ money(item.price, item.currency) }}</span>
                         <span v-if="share(item)" class="shopping__meta">{{ share(item) }}</span>
                     </li>

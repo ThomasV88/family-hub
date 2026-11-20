@@ -15,6 +15,8 @@ const props = defineProps({
     wish: { type: Object, required: true },
     ownerName: { type: String, default: '' },
     canReserve: { type: Boolean, default: false },
+    // The "your name is hidden from the recipient" hint describes a personal list only; a group list is its own recipient.
+    showOwnerHint: { type: Boolean, default: true },
 });
 const { t } = useI18n();
 const page = usePage();
@@ -83,7 +85,7 @@ function cancel() {
             <UiAlert v-if="failed" variant="danger" live data-testid="res-error">{{ t('wishlist.res.error') }}</UiAlert>
 
             <p class="res__text">{{ sentence }}</p>
-            <p v-if="!r && ownerName" class="res__hint">{{ t('wishlist.res.free_hint', { name: ownerName }) }}</p>
+            <p v-if="!r && ownerName && showOwnerHint" class="res__hint">{{ t('wishlist.res.free_hint', { name: ownerName }) }}</p>
 
             <ContributorList v-if="showContributors" :reservation="r" :price="wish.price" :currency="wish.currency" />
 
