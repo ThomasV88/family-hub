@@ -39,6 +39,13 @@ Predvolené oprávnenia (Rodič, Dieťa, Starý rodič, Hosť) zostávajú. Demo
 - **Darované:** "Robot kuchenny" v zozname starého rodiča je už označený ako dostaný (pred asi 12 dňami), rezervácia sa ešte drží, kým ju neprečistí denná údržba.
 - **Príležitosti:** narodeniny členov v rôznych vzdialenostiach (jedny o 20 dní, jedny pred 30 dňami), mená dní (slovenský a poľský kalendár), Vianoce a Silvester pre celú rodinu, jednorazové "Rodinný zraz" čoskoro a "Promócia" v minulosti.
 
+#### Spoločné zoznamy
+Dva vymyslené skupinové zoznamy vznikajú cez produkčnú službu `GroupService` (členovia `sk_sk.1` a `en_gb.5`), každý s tromi prianiami, bez odkazov a obrázkov.
+- **"Spoločný zoznam rodičov (demo)"** (režim Darčeky od ostatných): `sk_sk.1` aj `en_gb.5` vidia zoznam ako vlastný, bez rezervácií, mien a spoločných kúpí. `pl_pl.3` (nečlen) vidí rezerváciu prianí "Víkendový pobyt vo dvojici" a otvorený spoločný nákup (príspevok `sk_sk.2`); môže rezervovať ďalšie prianie.
+- **"Do domácnosti (demo)"** (režim Spoločné nákupy): členovia vidia mená, "Sada hrncov z nerezu" rezervoval `en_gb.5`, "Robotický vysávač" je dostaný a označil ho `sk_sk.1`. `sk_sk.2` (nečlen) dostane na tomto zozname 403 a zoznam nemá medzi záložkami.
+- **Prepnutie režimu:** ako člen otvor "Spravovať zoznam", prepni režim; potvrdenie povie, že sa všetky rezervácie zrušia. Po potvrdení zoznam nemá žiadnu rezerváciu. Skúšaj na vlastnom zozname vytvorenom cez "Nový skupinový zoznam", nie na seedovaných.
+- Pri ďalšom nasadení sa skupiny s výlučne vymyslenými členmi aj s prianiami zmažú a vytvoria nanovo; skupina so skutočným členom ostáva (audit ju označí). `staging:audit` kontroluje `wishlist_groups` a `wishlist_group_members`.
+
 ### Nákupné zoznamy (`/shopping`)
 Všetko vzniká cez produkčné služby (rovnaké pravidlá ako v aplikácii). Katalóg má 30 bežných vecí (Mlieko, Chlieb, Vajcia, Zemiaky, Jablká a ďalšie) s predvolenou jednotkou a vygenerovaným obrázkom, päť vymyslených obchodov ("Demo Market", "Zelený košík", "Potraviny Pri Dube", "Drogéria Lúka", "Mini Obchod Ráno") s vygenerovaným logom (farebné tvary, žiadny text ani skutočná značka) a jedna vlastná jednotka "plechovka" (en can, pl puszka). Zodpovedná osoba zoznamu je tá, ktorá ho vie zamknúť a uzavrieť.
 - **"Týždenný nákup"** (rodič `sk_sk.1` je zodpovedný, otvorený, obchod Demo Market): 9 položiek z katalógu aj voľným textom, desatinné množstvá (0,75 kg jabĺk s poznámkou), prispievatelia `sk_sk.2` a `pl_pl.3`, čitateľ hosť `pl_pl.4`, pripomienka zajtra o 18:00 (podľa časovej zóny rodiny, ešte neodoslaná).

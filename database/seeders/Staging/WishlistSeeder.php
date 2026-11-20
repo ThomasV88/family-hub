@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\Wish;
 use App\Models\WishlistManager;
 use App\Models\WishOccasion;
+use App\Wishlist\Groups\GroupMode;
+use App\Wishlist\Groups\GroupService;
 use App\Wishlist\Occasions\NameDayCalendar;
 use App\Wishlist\WishPriority;
 use Carbon\CarbonImmutable;
@@ -48,6 +50,68 @@ final class WishlistSeeder
         ]);
 
         return ['wishes' => $wishes, 'reservations' => $reservations, 'contributions' => $contributions, 'occasions' => $occasions];
+    }
+
+    /**
+     * Phase 16: one synthetic group list per mode, created through GroupService (members parent1 and parent2).
+     * Gifts from others: a reservation and an open co-buy by non-members (grandparent, child1). Shared purchases: a
+     * reservation by a member (parent2) and a wish received with its name (parent1). Wishes carry no links (no fetch).
+     *
+     * @return array{groups: int, wishes: int}
+     */
+    public function seedGroups(StagingContext $ctx): array
+    {
+        $this->ctx = $ctx;
+        $service = app(GroupService::class);
+        $p1 = $ctx->user('parent1');
+        $p2 = $ctx->user('parent2');
+        $wishes = 0;
+
+        $gifts = $service->create($p1, 'Spoločný zoznam rodičov (demo)', GroupMode::Gifts, [$p2->id]);
+        $ids = [];
+        foreach ([['Víkendový pobyt vo dvojici', 280, 'top', 30, null], ['Set na grilovanie', 90, 'love', 20, null], ['Hrnčiarsky kurz pre dvoch', 120, 'nice', 10, null]] as $i => [$title, $price, $priority, $daysAgo, $received]) {
+            $ids[$i] = $this->groupWish($gifts->id, $i % 2 === 0 ? $p1 : $p2, $title, $price, $priority, $daysAgo, $received, null);
+            $wishes++;
+        }
+        $at = $ctx->at(-4, 18);
+        $reservationId = DB::table('wish_reservations')->insertGetId([
+            'wish_id' => $ids[0], 'user_id' => $ctx->user('grandparent')->id, 'cobuy_state' => 'open', 'created_at' => $at, 'updated_at' => $at,
+        ]);
+        foreach ([['grandparent', 20000], ['child1', 3000]] as [$role, $minor]) {
+            DB::table('wish_contributions')->insert([
+                'reservation_id' => $reservationId, 'user_id' => $ctx->user($role)->id, 'amount_minor' => $minor, 'created_at' => $at, 'updated_at' => $at,
+            ]);
+        }
+
+        $shared = $service->create($p1, 'Do domácnosti (demo)', GroupMode::Shared, [$p2->id]);
+        $ids = [];
+        foreach ([['Nový kávovar', 199, 'top', 25, null], ['Sada hrncov z nerezu', 149, 'love', 15, null], ['Robotický vysávač', 329, 'love', 90, $p1]] as $i => [$title, $price, $priority, $daysAgo, $by]) {
+            $ids[$i] = $this->groupWish($shared->id, $i % 2 === 0 ? $p2 : $p1, $title, $price, $priority, $daysAgo, $by === null ? null : 8, $by);
+            $wishes++;
+        }
+        $at = $ctx->at(-3, 19);
+        $reservationId = DB::table('wish_reservations')->insertGetId([
+            'wish_id' => $ids[1], 'user_id' => $p2->id, 'cobuy_state' => 'none', 'created_at' => $at, 'updated_at' => $at,
+        ]);
+        DB::table('wish_contributions')->insert([
+            'reservation_id' => $reservationId, 'user_id' => $p2->id, 'amount_minor' => null, 'created_at' => $at, 'updated_at' => $at,
+        ]);
+
+        return ['groups' => 2, 'wishes' => $wishes];
+    }
+
+    private function groupWish(int $groupId, User $creator, string $title, int $price, string $priority, int $daysAgo, ?int $receivedDaysAgo, ?User $receivedBy): int
+    {
+        $wish = new Wish;
+        $wish->forceFill([
+            'owner_id' => null, 'group_id' => $groupId, 'created_by_id' => $creator->id, 'title' => $title,
+            'price_minor' => $price * 100, 'price_currency' => 'EUR', 'priority' => WishPriority::fromKey($priority),
+            'received_at' => $receivedDaysAgo === null ? null : $this->ctx->at(-$receivedDaysAgo, 15),
+            'received_by_id' => $receivedBy?->id,
+            'created_at' => $this->ctx->at(-$daysAgo, 10), 'updated_at' => $this->ctx->at(-$daysAgo, 10),
+        ])->save();
+
+        return $wish->id;
     }
 
     /**

@@ -31,6 +31,7 @@ use App\Models\ShoppingStore;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Wish;
+use App\Models\WishlistGroup;
 use App\Models\WishReservation;
 use App\Shopping\ItemState;
 use App\Shopping\ListStatus;
@@ -76,7 +77,7 @@ function demoSubject(string $name): MedicalSubject
 /** Every table that the seed fills or the purge touches, except the append-only ai_calls and audit_logs. */
 function demoCounts(): array
 {
-    $tables = ['tasks', 'task_members', 'wishes', 'wish_urls', 'wish_reservations', 'wish_contributions', 'wish_occasions', 'wishlist_managers',
+    $tables = ['tasks', 'task_members', 'wishes', 'wish_urls', 'wish_reservations', 'wish_contributions', 'wish_occasions', 'wishlist_managers', 'wishlist_groups', 'wishlist_group_members',
         'finance_accounts', 'finance_account_members', 'finance_transactions', 'finance_recurring', 'finance_recurring_matches', 'finance_budgets',
         'finance_import_profiles', 'finance_import_batches', 'finance_import_rows', 'medical_subjects', 'medical_subject_members', 'medical_visits',
         'medical_medications', 'medical_allergies', 'medical_vaccinations', 'medical_contacts', 'medical_documents', 'medical_ai_extractions',
@@ -200,6 +201,41 @@ it('seeds five to twelve wishes per member, occasions, and keeps reservations aw
     $mine = collect($giverView['list']['wishes'])->firstWhere('title', 'LEGO Technic Bugatti');
     expect($mine['reservation']['organizer']['name'])->toBe($buyer->name)
         ->and($mine['reservation']['is_mine'])->toBeTrue();
+});
+
+it('seeds one synthetic group list per mode through GroupService and keeps reservations hidden from gifts-list members', function () {
+    demoSeed();
+    $p1 = demoUser('sk_sk.1');
+    $p2 = demoUser('en_gb.5');
+    $grandparent = demoUser('pl_pl.3');
+    $child = demoUser('sk_sk.2');
+
+    $gifts = WishlistGroup::where('name', 'Spoločný zoznam rodičov (demo)')->firstOrFail();
+    $shared = WishlistGroup::where('name', 'Do domácnosti (demo)')->firstOrFail();
+    expect(WishlistGroup::count())->toBe(2)
+        ->and($gifts->mode->value)->toBe('gifts')
+        ->and($shared->mode->value)->toBe('shared')
+        ->and(DB::table('wishlist_group_members')->where('group_id', $gifts->id)->pluck('user_id')->sort()->values()->all())->toBe(collect([$p1->id, $p2->id])->sort()->values()->all())
+        ->and(DB::table('wishlist_group_members')->where('group_id', $shared->id)->count())->toBe(2)
+        ->and(Wish::where('group_id', $gifts->id)->count())->toBe(3)
+        ->and(Wish::where('group_id', $shared->id)->count())->toBe(3)
+        ->and(DB::table('wishes')->whereRaw('(owner_id is null) = (group_id is null)')->count())->toBe(0)
+        ->and(Wish::where('group_id', $shared->id)->whereNotNull('received_at')->value('received_by_id'))->toBe($p1->id);
+    $reservations = fn (WishlistGroup $g) => DB::table('wish_reservations as r')->join('wishes as w', 'w.id', '=', 'r.wish_id')->where('w.group_id', $g->id);
+    expect((clone $reservations($gifts))->where('r.cobuy_state', 'open')->where('r.user_id', $grandparent->id)->count())->toBe(1)
+        ->and((clone $reservations($shared))->where('r.user_id', $p2->id)->count())->toBe(1);
+
+    $props = fn (User $viewer, WishlistGroup $g) => test()->actingAs($viewer)->get('/wishlist?group='.$g->id)->assertOk()->viewData('page')['props'];
+    $memberView = json_encode($props($p1, $gifts)['list'], JSON_UNESCAPED_UNICODE);
+    expect($memberView)->toContain('Víkendový pobyt vo dvojici')
+        ->and($memberView)->not->toContain('reservation')
+        ->and($memberView)->not->toContain($grandparent->name)
+        ->and($memberView)->not->toContain('cobuy');
+    $giverView = json_encode($props($grandparent, $gifts)['list'], JSON_UNESCAPED_UNICODE);
+    expect($giverView)->toContain('reservation')->and($giverView)->toContain($grandparent->name);
+    $sharedView = json_encode($props($p1, $shared)['list'], JSON_UNESCAPED_UNICODE);
+    expect($sharedView)->toContain($p2->name);
+    test()->actingAs($child)->get('/wishlist?group='.$shared->id)->assertForbidden();
 });
 
 it('keeps finance private per account and exact in minor units', function () {

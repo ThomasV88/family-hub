@@ -93,6 +93,10 @@ class StagingAudit extends Command
             ['recipe_ingredient_ticks', "(user_id not in {$synthetic})"],
             ['recipe_step_done', "(user_id not in {$synthetic})"],
             ['recipe_imports', "(user_id not in {$synthetic})"],
+            // Phase 16: group wishlists. A group needs a synthetic creator (null means a real user who was deleted); a member
+            // and the person who added them may only be synthetic (added_by may be null after a deletion).
+            ['wishlist_groups', "(created_by_id is null or created_by_id not in {$synthetic})"],
+            ['wishlist_group_members', "(user_id not in {$synthetic}) or (added_by_id is not null and added_by_id not in {$synthetic})"],
         ];
     }
 

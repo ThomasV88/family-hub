@@ -143,6 +143,7 @@ class StagingSeeder extends Seeder
         $this->summary['tasks'] = (new TasksSeeder)->seed($ctx);
         $this->summary['wishlist'] = (new WishlistSeeder)->seed($ctx);
         $this->summary['child_wishes'] = (new WishlistSeeder)->seedChild($child, $today);
+        $this->summary['wishlist_groups'] = (new WishlistSeeder)->seedGroups($ctx);
         $this->summary['finance'] = (new FinanceSeeder)->seed($ctx);
         $health = (new HealthSeeder)->seed($ctx);
         $this->summary['health'] = $health['counts'];
@@ -264,6 +265,15 @@ class StagingSeeder extends Seeder
 
         // Wishlist: wishes.owner_id is RESTRICT. urls, reservations and contributions cascade. Family-wide occasions
         // (no owner) made by a synthetic user are removed too; an occasion owned by a real user stays.
+        // Phase 16: group lists. A group whose members are all synthetic goes with its wishes (wishes.group_id is RESTRICT);
+        // a group with any real member keeps its rows and only the synthetic memberships are removed.
+        $syntheticGroups = DB::table('wishlist_groups')->whereNotExists(
+            fn ($q) => $q->select(DB::raw(1))->from('wishlist_group_members')
+                ->whereColumn('wishlist_group_members.group_id', 'wishlist_groups.id')->whereNotIn('wishlist_group_members.user_id', $ids)
+        )->pluck('id')->all();
+        DB::table('wishes')->whereIn('group_id', $syntheticGroups)->delete();
+        DB::table('wishlist_groups')->whereIn('id', $syntheticGroups)->delete();
+        DB::table('wishlist_group_members')->whereIn('user_id', $ids)->delete();
         DB::table('wishes')->whereIn('owner_id', $ids)->delete();
         DB::table('wish_occasions')->whereIn('created_by_id', $ids)
             ->where(fn ($q) => $q->whereNull('owner_id')->orWhereIn('owner_id', $ids))->delete();
