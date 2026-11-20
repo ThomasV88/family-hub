@@ -8,7 +8,7 @@ import { createAppI18n } from '../../resources/js/i18n.js';
 
 let mockLocale = 'en';
 // Only the bulk panel sweep below sets a handler; every other page keeps the real securityFetch.
-const { bulkFetch } = vi.hoisted(() => ({ bulkFetch: { handler: null } }));
+const { bulkFetch, wishState } = vi.hoisted(() => ({ bulkFetch: { handler: null }, wishState: { list: null } }));
 vi.mock('../../resources/js/Security/securityFetch.js', async (importOriginal) => {
     const actual = await importOriginal();
     return { ...actual, securityFetch: (...args) => (bulkFetch.handler ? bulkFetch.handler(...args) : actual.securityFetch(...args)) };
@@ -17,7 +17,9 @@ vi.mock('@inertiajs/vue3', async () => {
     const { h, reactive } = await import('vue');
     return {
         usePage: () => ({
+            url: '/wishlist',
             props: {
+                list: wishState.list,
                 locale: mockLocale,
                 app: { name: 'Family Hub', env: 'local' },
                 auth: { user: { id: 1, name: 'Mira', isAdmin: true }, access: { todo: 'edit', wishlist: 'edit', finance: 'edit', health: 'edit', shopping: 'edit', recipes: 'edit' } },
@@ -49,6 +51,10 @@ import RecipesForm from '../../resources/js/Pages/Recipes/Form.vue';
 import { helpAreas, helpRows } from './helpers/help.js';
 import AppShell from '../../resources/js/Layouts/AppShell.vue';
 import BulkRegenPanel from '../../resources/js/Settings/AiAgents/BulkRegenPanel.vue';
+import WishlistIndex from '../../resources/js/Pages/Wishlist/Index.vue';
+import GroupPanel from '../../resources/js/Wishlist/GroupPanel.vue';
+import { MEMBERS } from './wishlist/fixtures.js';
+import { giftsMemberList, sharedMemberList, giftsNonMemberList } from './wishlist/groupFixtures.js';
 
 let wrapper;
 window.matchMedia = (q) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
@@ -335,5 +341,76 @@ describe('accessibility sweep: AI bulk panel, scope no_text', () => {
         await wrapper.find('[data-control="check"]').trigger('click');
         await flushPromises();
         await expectNoAxeViolations(wrapper.element);
+    });
+});
+
+// 16-09: group wishlists. Every group screen in all languages, both themes, phone and desktop width, plus +40% text at 320 px.
+describe('accessibility sweep: group wishlists (Phase 16)', () => {
+    const GROUPS = [{ id: 7, name: 'Grandma 80', mode: 'gifts', is_member: true }];
+    const CANDIDATES = [{ id: 2, name: 'Mira' }, { id: 1, name: 'Adam' }, { id: 3, name: 'Zora' }];
+    const GROUP = { id: 7, name: 'Grandma 80', mode: 'gifts', is_member: true, can_manage: true, members: [{ id: 1, name: 'Adam' }, { id: 2, name: 'Mira' }] };
+    const click = (messages, key) => [...document.body.querySelectorAll('button')].filter((b) => b.textContent.trim() === messages.wishlist.group[key]).pop().click();
+
+    const indexState = (list, selected = null) => async (messages, locale) => {
+        wishState.list = list;
+        globalThis.fetch = vi.fn(async () => ({ ok: true, json: async () => ({ groups: [] }) }));
+        wrapper = mount(WishlistIndex, {
+            props: { members: MEMBERS, selected, list, groups: GROUPS, group_candidates: CANDIDATES },
+            attachTo: document.body, global: { plugins: [createAppI18n(locale, messages)] },
+        });
+        await flushPromises();
+    };
+    const panelState = (props, then) => async (messages, locale) => {
+        wrapper = mount(GroupPanel, {
+            props: { open: true, mode: 'create', group: null, candidates: CANDIDATES, viewerId: 2, ...props },
+            attachTo: document.body, global: { plugins: [createAppI18n(locale, messages)] },
+        });
+        await flushPromises();
+        if (then) {
+            await then(messages);
+            await flushPromises();
+        }
+    };
+    const states = {
+        'gifts-member list': indexState(giftsMemberList()),
+        'shared-member list with a reservation': indexState(sharedMemberList()),
+        'shared-member open reservation box': indexState(sharedMemberList(), 44),
+        'gifts non-member list': indexState(giftsNonMemberList()),
+        'group panel (create)': panelState({}),
+        'group panel (edit)': panelState({ mode: 'edit', group: GROUP }),
+        'group panel mode confirmation': panelState({ mode: 'edit', group: GROUP }, async (m) => {
+            document.body.querySelectorAll('input[type="radio"]')[1].click();
+            await flushPromises();
+            click(m, 'save');
+        }),
+        'group panel leave confirmation': panelState({ mode: 'edit', group: GROUP }, (m) => click(m, 'leave')),
+        'group panel delete confirmation': panelState({ mode: 'edit', group: GROUP }, (m) => click(m, 'delete')),
+    };
+
+    const cases = [];
+    for (const name of Object.keys(states))
+        for (const locale of ['en', 'sk', 'pl'])
+            for (const theme of ['light', 'dark'])
+                for (const width of [360, 1280]) cases.push([name, locale, theme, width]);
+
+    afterEach(() => {
+        wishState.list = null;
+        delete globalThis.fetch;
+        document.body.innerHTML = '';
+    });
+
+    it.each(cases)('%s in %s, %s theme, %ipx has no axe violations', async (name, locale, theme, width) => {
+        mockLocale = locale;
+        document.documentElement.dataset.theme = theme;
+        window.innerWidth = width;
+        await states[name](loadMessages(locale), locale);
+        await expectNoAxeViolations(document.body);
+    });
+
+    it.each(Object.keys(states).flatMap((name) => ['sk', 'pl'].map((locale) => [name, locale])))('%s with +40%% text at 320px (%s) has no axe violations', async (name, locale) => {
+        mockLocale = locale;
+        window.innerWidth = 320;
+        await states[name](pseudoLong(loadMessages(locale)), locale);
+        await expectNoAxeViolations(document.body);
     });
 });
