@@ -16,6 +16,9 @@
           ["Úloha pre Vybraných členov", "Tvorca a ľudia, ktorých vybral", "Členovia s Úpravami v Úlohách, ktorí ju vidia"],
           ["Zoznam želaní", "Každý, kto má prístup k Wishlistu", "Majiteľ a správcovia, ktorých vybral správca"],
           ["Kto rezervoval želanie", "Každý okrem majiteľa zoznamu", "Ten, kto ho rezervoval"],
+          ["Spoločný zoznam (Darčeky od ostatných)", "Každý s prístupom k Wishlistu", "Jeho členovia s Úpravami vo Wishliste"],
+          ["Spoločný zoznam (Spoločné nákupy)", "Iba jeho členovia", "Jeho členovia s Úpravami vo Wishliste"],
+          ["Kto rezervoval želanie v spoločnom zozname", "Darčeky od ostatných: každý okrem členov skupiny. Spoločné nákupy: členovia skupiny", "Ten, kto ho rezervoval"],
           ["Finančný účet a jeho transakcie", "Len členovia, ktorým je sprístupnený", "Títo členovia, ak majú Úpravy vo Financiách"],
           ["Zdravotný záznam jednej osoby", "Členovia s prístupom k Zdraviu a prístupom k tej osobe", "Členovia s Môže meniť pri tej osobe"],
           ["Nedokončená dávka nahrávania a jej dokumenty", "Iba členovia, ktorí môžu meniť zdravotné záznamy tej osoby", "Títo členovia"],
@@ -24,7 +27,7 @@
           ["Nastavenia, členovia, oprávnenia, záznam aktivity, nástroje AI", "Správcovia", "Správcovia"],
           ["Tento manuál", "Každý prihlásený člen (príručku pre správcu len správcovia)", "Nikto v aplikácii: je súčasťou aplikácie"]
         ] },
-        { "type": "p", "text": "Viac sa dozviete v [Úlohy](tasks#who-sees), [Wishlist](wishlist#surprise), [Financie](finance#accounts), [Nákupy](shopping#overview), [Receptár](recipes#overview), [Zdravie](health#people-access) a [Príručke pre správcu](admin#permissions)." }
+        { "type": "p", "text": "Viac sa dozviete v [Úlohy](tasks#who-sees), [Wishlist](wishlist#surprise), [Spoločné zoznamy](wishlist#group-lists), [Financie](finance#accounts), [Nákupy](shopping#overview), [Receptár](recipes#overview), [Zdravie](health#people-access) a [Príručke pre správcu](admin#permissions)." }
       ]
     },
     {

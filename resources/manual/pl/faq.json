@@ -50,7 +50,7 @@
       "id": "wish-reserved",
       "title": "Dlaczego nie widzę, kto zarezerwował moje życzenie?",
       "blocks": [
-        { "type": "p", "text": "Aby prezenty pozostały niespodzianką. Zobacz [Dlaczego nigdy nie widzisz, kto zarezerwował Twoje życzenia](wishlist#surprise)." }
+        { "type": "p", "text": "Aby prezenty pozostały niespodzianką. Zobacz [Dlaczego nigdy nie widzisz, kto zarezerwował Twoje życzenia](wishlist#surprise). To samo dotyczy listy wspólnej w trybie Prezenty od innych: jej członkowie też nie widzą rezerwacji. Zobacz [Listy wspólne](wishlist#group-lists)." }
       ]
     },
     {

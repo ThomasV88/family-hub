@@ -16,6 +16,9 @@
           ["Zadanie dla Wybranych członków", "Twórca i osoby, które wskazał", "Członkowie z Edycją w Zadaniach, którzy je widzą"],
           ["Lista życzeń", "Każdy, kto ma dostęp do Wishlist", "Właściciel i opiekunowie wybrani przez administratora"],
           ["Kto zarezerwował życzenie", "Każdy poza właścicielem listy", "Osoba, która je zarezerwowała"],
+          ["Lista wspólna (Prezenty od innych)", "Każdy z dostępem do Wishlist", "Jej członkowie z Edycją w Wishlist"],
+          ["Lista wspólna (Wspólne zakupy)", "Tylko jej członkowie", "Jej członkowie z Edycją w Wishlist"],
+          ["Kto zarezerwował życzenie na liście wspólnej", "Prezenty od innych: każdy poza członkami grupy. Wspólne zakupy: członkowie grupy", "Osoba, która je zarezerwowała"],
           ["Konto finansowe i jego transakcje", "Tylko członkowie, którym jest udostępnione", "Ci członkowie, jeśli mają Edycję w Finansach"],
           ["Dokumentacja zdrowotna jednej osoby", "Członkowie z dostępem do Zdrowia i dostępem do tej osoby", "Członkowie z Może zmieniać przy tej osobie"],
           ["Niedokończona partia wysyłania i jej dokumenty", "Tylko członkowie, którzy mogą zmieniać dokumentację zdrowotną tej osoby", "Ci członkowie"],
@@ -24,7 +27,7 @@
           ["Ustawienia, członkowie, uprawnienia, dziennik zdarzeń, narzędzia AI", "Administratorzy", "Administratorzy"],
           ["Ta instrukcja", "Każdy zalogowany członek (przewodnik administratora tylko administratorzy)", "Nikt w aplikacji: jest jej częścią"]
         ] },
-        { "type": "p", "text": "Więcej dowiesz się w [Zadania](tasks#who-sees), [Wishlist](wishlist#surprise), [Finanse](finance#accounts), [Zakupy](shopping#overview), [Receptarz](recipes#overview), [Zdrowie](health#people-access) i [Przewodniku administratora](admin#permissions)." }
+        { "type": "p", "text": "Więcej dowiesz się w [Zadania](tasks#who-sees), [Wishlist](wishlist#surprise), [Listy wspólne](wishlist#group-lists), [Finanse](finance#accounts), [Zakupy](shopping#overview), [Receptarz](recipes#overview), [Zdrowie](health#people-access) i [Przewodniku administratora](admin#permissions)." }
       ]
     },
     {

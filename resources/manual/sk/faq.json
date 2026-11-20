@@ -50,7 +50,7 @@
       "id": "wish-reserved",
       "title": "Prečo nevidím, kto rezervoval moje želanie?",
       "blocks": [
-        { "type": "p", "text": "Aby darčeky ostali prekvapením. Pozrite [Prečo nikdy nevidíte, kto rezervoval vaše vlastné želania](wishlist#surprise)." }
+        { "type": "p", "text": "Aby darčeky ostali prekvapením. Pozrite [Prečo nikdy nevidíte, kto rezervoval vaše vlastné želania](wishlist#surprise). To isté platí pre spoločný zoznam v režime Darčeky od ostatných: ani jeho členovia rezervácie nevidia. Pozrite [Spoločné zoznamy](wishlist#group-lists)." }
       ]
     },
     {
