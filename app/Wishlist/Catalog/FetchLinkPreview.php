@@ -90,6 +90,8 @@ final class FetchLinkPreview implements ShouldQueue
         return match ($e->reason) {
             'timeout' => 'timeout',
             'blocked_address', 'bad_url' => 'blocked',
+            'http_blocked' => 'http_blocked',
+            'too_large' => 'too_large',
             default => 'unreachable',
         };
     }

@@ -70,6 +70,22 @@ it('maps an unreachable page and a timeout', function () {
     expect(runPreview('https://shop.example/x', 't2')['failures']['title'])->toBeIn(['timeout', 'unreachable']);
 });
 
+it('reports a blocking shop (401, 403, 429) as http_blocked for every field', function (int $status) {
+    previewFetcher([new Response($status, [], 'Just a moment')]);
+    expect(runPreview('https://shop.example/x')['failures'])->toEqual(['title' => 'http_blocked', 'description' => 'http_blocked', 'image' => 'http_blocked']);
+})->with([401, 403, 429]);
+
+it('logs only the reason code for a blocked shop', function () {
+    $logged = [];
+    Event::listen(MessageLogged::class, function (MessageLogged $e) use (&$logged) {
+        $logged[] = $e->message.' '.json_encode($e->context);
+    });
+    previewFetcher([new Response(403, [], 'Just a moment')]);
+    runPreview('https://shop.example/secret-path');
+    $text = implode("\n", $logged);
+    expect($text)->toContain('http_blocked')->not->toContain('shop.example')->not->toContain('secret-path')->not->toContain('Just a moment');
+});
+
 it('refuses loopback and metadata addresses as blocked without sending a request', function (string $url) {
     $mock = previewFetcher([new Response(200, [], FULL_PAGE)]);
     expect(runPreview($url)['failures']['title'])->toBe('blocked')->and($mock->count())->toBe(1);
@@ -126,10 +142,9 @@ it('reads a large shop page above the old 512 kB cap (issue #22)', function () {
     expect($r)->title->toBe('Mop')->description->toBe('A robot mop')->image->toBeTrue()->failures->toBe([]);
 });
 
-it('still refuses a page above the new 5 MB cap (reported as unreachable, issue #22)', function () {
+it('still refuses a page above the new 5 MB cap and reports it as too_large (issue #22)', function () {
     $page = '<html><head><title>Huge</title></head><body>'.str_repeat('x', 5242880 + 1024).'</body></html>';
     previewFetcher([new Response(200, ['Content-Length' => (string) strlen($page)], $page)]);
     $r = runPreview('https://shop.example/huge');
-    // The preview maps every fetch failure other than timeout and blocked to "unreachable"; the too_large reason itself is covered in SafeFetcherSocketTest.
-    expect($r['failures'])->toEqual(['title' => 'unreachable', 'description' => 'unreachable', 'image' => 'unreachable']);
+    expect($r['failures'])->toEqual(['title' => 'too_large', 'description' => 'too_large', 'image' => 'too_large']);
 });

@@ -5,7 +5,7 @@ namespace App\Wishlist\Fetch;
 /** What a first link yielded: plain-text title and description, whether a picture was found, and per-field failure codes. */
 final class PagePreview
 {
-    /** @param  array<string, string>  $failures  field (image|title|description) => timeout|blocked|no_tags|unreachable */
+    /** @param  array<string, string>  $failures  field (image|title|description) => timeout|blocked|http_blocked|too_large|no_tags|unreachable */
     public function __construct(
         public readonly ?string $title,
         public readonly ?string $description,

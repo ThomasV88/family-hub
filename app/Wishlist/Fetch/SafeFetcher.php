@@ -64,6 +64,11 @@ final class SafeFetcher
                 continue;
             }
 
+            // Unauthorised, forbidden and rate-limited are reported distinctly; nothing tries to get around them.
+            if (in_array($status, [401, 403, 429], true)) {
+                throw new FetchFailed('http_blocked');
+            }
+
             if ($status !== 200) {
                 throw new FetchFailed('http_status');
             }
