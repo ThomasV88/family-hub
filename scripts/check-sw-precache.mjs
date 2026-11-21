@@ -9,6 +9,8 @@ const ALLOW = [
 ];
 /** Authenticated medical and finance screens must never be precached, whatever the allowlist says. */
 const FORBIDDEN_URL = /(^|\/)(health|finance)(\/|$|\?)/i;
+/** The share target carries a shared link in its query string; it must never be precached. */
+const FORBIDDEN_SHARE = /(^|\/)wishlist\/share/i;
 const FORBIDDEN = ['registerRoute', 'runtimeCaching', 'NetworkFirst', 'StaleWhileRevalidate', 'CacheFirst', 'cache.put', 'caches.open'];
 
 export function checkPrecache({ swSource, swBuilt }) {
@@ -21,6 +23,7 @@ export function checkPrecache({ swSource, swBuilt }) {
     if (urls.length === 0) violations.push('no precache urls found in built worker');
     urls.forEach((url, i) => {
         if (FORBIDDEN_URL.test(url)) violations.push(`health or finance url in precache: ${raw[i]}`);
+        if (FORBIDDEN_SHARE.test(url)) violations.push(`share target url in precache: ${raw[i]}`);
         if (!ALLOW.some((re) => re.test(url))) violations.push(`precache url outside allowlist: ${raw[i]}`);
     });
     return { ok: violations.length === 0, urls, violations };

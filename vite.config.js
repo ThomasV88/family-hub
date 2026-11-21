@@ -29,6 +29,8 @@ export default defineConfig({
                 display: 'standalone',
                 theme_color: '#ffffff',
                 background_color: '#fffaf5',
+                // Android Chrome share sheet; GET so no service-worker POST handling is needed. See ShareTargetController.
+                share_target: { action: '/wishlist/share', method: 'GET', params: { title: 'title', text: 'text', url: 'url' } },
                 icons: [
                     { src: '/icons/familyhub-192x192.png', sizes: '192x192', type: 'image/png' },
                     { src: '/icons/familyhub-512x512.png', sizes: '512x512', type: 'image/png' },

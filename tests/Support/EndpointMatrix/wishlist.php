@@ -19,6 +19,14 @@ return [
             'grandparent' => 200, 'guestPreset' => 403, 'noGrants' => 403,
         ],
     ],
+    'wishlist.share' => [
+        'method' => 'GET',
+        'uri' => '/wishlist/share?url=https%3A%2F%2Fshop.example%2Fp',
+        'expect' => [
+            'guest' => 302, 'admin' => 403, 'parent' => 302, 'child' => 302,
+            'grandparent' => 302, 'guestPreset' => 403, 'noGrants' => 403,
+        ],
+    ],
     'wishlist.wishes.store' => [
         'method' => 'POST',
         'uri' => '/wishlist/wishes',

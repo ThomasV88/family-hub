@@ -2,6 +2,7 @@ import { precacheAndRoute, cleanupOutdatedCaches, matchPrecache } from 'workbox-
 
 // Precache-only worker (FOUND-03): hashed build assets, icons and the offline page.
 // Pages, Inertia JSON and API responses are never cached here.
+// Share-target navigations (/wishlist/share?...) are network-only like every other page and must stay out of any cache.
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
