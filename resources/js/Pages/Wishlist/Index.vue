@@ -24,6 +24,8 @@ const props = defineProps({
     group_candidates: { type: Array, default: () => [] },
     // null | 'new' | wish id (server-validated; it mirrors ?wish= in the URL)
     selected: { default: null },
+    // { title, url } flashed once by the share-target route (GET /wishlist/share); null otherwise
+    share_prefill: { default: null },
 });
 const { t } = useI18n();
 
@@ -38,6 +40,8 @@ const viewerId = computed(() => props.members.find((m) => m.is_viewer)?.id ?? nu
 const group = computed(() => props.list.group ?? null);
 const sharedMember = computed(() => !recipient.value && group.value?.mode === 'shared' && group.value.is_member === true);
 const ownSide = computed(() => recipient.value || sharedMember.value);
+// A shared link prefills the create form of the viewer's OWN list only (never a group list or someone else's list).
+const ownPrefill = computed(() => (props.share_prefill && props.selected === 'new' && recipient.value && !managing.value && !group.value ? props.share_prefill : null));
 const canAdd = computed(() => ownSide.value && props.list.can_edit === true);
 const addLabel = computed(() => (group.value ? t('wishlist.group.add', { name: group.value.name }) : managing.value ? t('wishlist.add_for', { name: ownerName.value }) : t('wishlist.add')));
 // Shared members open a wish read-only (with reservations); Edit wish switches this to its id.
@@ -146,6 +150,7 @@ function closePanel() {
                 :group-id="group ? group.id : null"
                 :owner-name="ownerName"
                 :managing="managing"
+                :prefill="ownPrefill"
                 @close="closePanel"
             />
             <GiftWishPanel v-if="!recipient" :open="giftPanelOpen" :wish="selectedWish" :editable="sharedMember && list.can_edit === true" @edit="editingWishId = $event" @close="closePanel" />

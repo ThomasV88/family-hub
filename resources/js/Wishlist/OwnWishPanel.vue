@@ -29,6 +29,8 @@ const props = defineProps({
     groupId: { type: Number, default: null },
     ownerName: { type: String, default: '' },
     managing: { type: Boolean, default: false },
+    // { title, url } from the share target; applied once when the create form opens, never saved by itself
+    prefill: { type: Object, default: null },
 });
 const emit = defineEmits(['close']);
 const { t } = useI18n();
@@ -313,6 +315,22 @@ const autoPreview = ref(true);
 watch(() => [props.open, props.mode, props.wish?.id], () => {
     resetPreview();
     autoPreview.value = initial().urls.length === 0;
+}, { immediate: true });
+// Share target: fill an empty title and first link once per opening; the form stays dirty and nothing is saved until the user presses Save.
+let prefillApplied = false;
+watch(() => [props.open, props.mode, props.prefill], () => {
+    if (!props.open) {
+        prefillApplied = false;
+        return;
+    }
+    if (prefillApplied || !creating.value || !props.prefill) return;
+    prefillApplied = true;
+    const { title, url } = props.prefill;
+    if (typeof title === 'string' && title !== '' && form.value.title.trim() === '') form.value.title = title.slice(0, 120);
+    if (typeof url === 'string' && isHttpUrl(url) && form.value.urls.length === 0) {
+        form.value.urls = [{ url, label: '' }];
+        onFirstUrl(url);
+    }
 }, { immediate: true });
 const firstUrl = computed(() => {
     const url = form.value.urls[0]?.url?.trim() ?? '';
