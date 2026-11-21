@@ -90,11 +90,11 @@
         },
         "wishlist.image": {
             "title": "Wish image",
-            "text": "A picture makes the wish easier to spot. Upload a JPEG, PNG or WebP up to 5 MB, or let the app look for a picture on the first link you added."
+            "text": "A picture makes the wish easier to spot. Upload a JPEG, PNG or WebP up to 5 MB, or let the app look for a picture on the first link you added. If a shop blocks that, upload the picture yourself (after the first save)."
         },
         "wishlist.links": {
             "title": "Links",
-            "text": "Shops or pages where the gift can be bought, up to 5. Pasting the first link fills an empty title and notes from the page and finds a picture; your own text is never replaced. A short label helps. Others see the links on the wish."
+            "text": "Shops or pages where the gift can be bought, up to 5. Pasting the first link fills an empty title and notes from the page and finds a picture, unless the shop blocks automatic loading; your own text is never replaced. A short label helps. Others see the links on the wish."
         },
         "wishlist.received": {
             "title": "Mark as received",

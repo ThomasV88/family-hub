@@ -24,7 +24,7 @@
           "Press **Save wish**."
         ] },
         { "type": "list", "items": [
-          "**Links**: up to 5 addresses of shops or pages, each with an optional label. When you paste the first link into a new wish, an empty **Title** and **Notes** are filled in from that page and the picture is shown. The picture is attached when you save. Text you typed yourself is never overwritten, and you can change anything. Later links are not read. If something could not be loaded, a message names it (image, title or description) and, when known, why. To read the first link again, press **Reload from first link**.",
+          "**Links**: up to 5 addresses of shops or pages, each with an optional label. When you paste the first link into a new wish, an empty **Title** and **Notes** are filled in from that page and the picture is shown. The picture is attached when you save. Text you typed yourself is never overwritten, and you can change anything. Later links are not read. If something could not be loaded, a message names it (image, title or description) and, when known, why. If a shop blocks automatic loading, the form says so and offers **Upload image** right under the message (for a new wish, save it first and upload from its edit panel); a page that is too large is reported as too large. To read the first link again, press **Reload from first link**.",
           "**Price** and **Currency**: a rough price helps others plan.",
           "**Priority**: **Top wish**, **Would love** or **Nice to have**.",
           "**Notes**: size, colour, or anything else.",
