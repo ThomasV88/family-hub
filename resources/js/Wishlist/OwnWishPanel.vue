@@ -320,8 +320,17 @@ const firstUrl = computed(() => {
 });
 const canReloadPreview = computed(() => !received.value && firstUrl.value !== '' && previewStatus.value !== 'loading' && (!autoPreview.value || previewRan.value));
 const previewImageNote = computed(() => (previewStatus.value === 'done' && !previewMissing.value.some((m) => m.field === 'image') ? t('wishlist.preview.done_image_on_save') : ''));
+// A shop that blocks automatic loading (or a page that is too large) fails every field with one reason; it gets its own message.
+const previewBlockReason = computed(() => {
+    const reasons = previewMissing.value.map((m) => m.reason);
+    if (reasons.includes('http_blocked')) return 'http_blocked';
+    if (reasons.includes('too_large')) return 'too_large';
+    return '';
+});
+const previewBlockNote = computed(() => (previewBlockReason.value === 'http_blocked' ? t('wishlist.preview.blocked_site') : previewBlockReason.value === 'too_large' ? t('wishlist.preview.too_large') : ''));
+const previewImageMissing = computed(() => previewMissing.value.some((m) => m.field === 'image'));
 const previewMissingNote = computed(() => {
-    if (previewMissing.value.length === 0) return '';
+    if (previewMissing.value.length === 0 || previewBlockReason.value !== '') return '';
     const list = previewMissing.value.map(({ field, reason }) => {
         const name = t(`wishlist.preview.missing_${field}`);
         return ['timeout', 'blocked', 'no_tags', 'unreachable'].includes(reason) ? `${name} (${t(`wishlist.preview.reason_${reason}`)})` : name;
@@ -374,6 +383,11 @@ defineExpose({ guard, dirty });
                             <img v-if="previewThumb" :src="previewThumb" :alt="t('wishlist.preview.image_alt')" class="wish-panel__preview" data-testid="preview-image" />
                             <p v-if="previewImageNote" class="wish-panel__hint" data-testid="preview-image-note">{{ previewImageNote }}</p>
                             <p v-if="previewMissingNote" class="wish-panel__hint" data-testid="preview-missing">{{ previewMissingNote }}</p>
+                            <p v-if="previewBlockNote" class="wish-panel__hint" data-testid="preview-blocked">{{ previewBlockNote }}</p>
+                            <div v-if="previewBlockNote && previewImageMissing && canUpload">
+                                <UiButton variant="secondary" size="sm" :icon="Upload" data-testid="preview-upload" @click="pickImage">{{ t('wishlist.image.upload') }}</UiButton>
+                            </div>
+                            <p v-else-if="previewBlockNote && previewImageMissing && creating && !received" class="wish-panel__hint" data-testid="preview-save-first">{{ t('wishlist.preview.save_then_upload') }}</p>
                         </div>
                         <div v-if="canReloadPreview">
                             <UiButton variant="secondary" size="sm" :icon="RefreshCw" @click="reloadPreview">{{ t('wishlist.preview.reload') }}</UiButton>

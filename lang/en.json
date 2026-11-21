@@ -1213,6 +1213,9 @@
             "reason_blocked": "the address is not allowed",
             "reason_no_tags": "the page does not provide it",
             "reason_unreachable": "the page could not be reached",
+            "blocked_site": "The site blocks automatic loading. Upload the image yourself.",
+            "too_large": "The page is too large to read automatically.",
+            "save_then_upload": "Save the gift first, then upload the image from its edit panel.",
             "reload": "Reload from first link"
         },
         "res": {
