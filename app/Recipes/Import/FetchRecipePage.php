@@ -50,7 +50,9 @@ final class FetchRecipePage implements ShouldBeUnique, ShouldQueue
             $fetcher = app()->make(SafeFetcher::class, ['userAgent' => (string) config('recipes.import.user_agent')]);
             $page = $fetcher->get((string) $row->url, (int) config('recipes.import.html_max_bytes'), 'html');
         } catch (FetchFailed $e) {
-            $imports->failFetching($this->importId, in_array($e->reason, self::FETCH_REASONS, true) ? $e->reason : 'network');
+            // SafeFetcher tells a blocking shop apart (wishlist); recipe import keeps its single http_status reason.
+            $reason = $e->reason === 'http_blocked' ? 'http_status' : $e->reason;
+            $imports->failFetching($this->importId, in_array($reason, self::FETCH_REASONS, true) ? $reason : 'network');
 
             return;
         }

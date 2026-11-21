@@ -32,7 +32,9 @@ class ListController extends Controller
                 'id' => $g->id, 'name' => $g->name, 'mode' => $g->mode->value, 'is_member' => $groups->isMember($viewer, $g),
             ])->values()->all())
             ->with('group_candidates', fn () => $gate->allows($viewer, Module::Wishlist, AccessLevel::Edit) ? $groups->candidates($viewer) : [])
-            ->with('occasions', fn () => $occasions->strip());
+            ->with('occasions', fn () => $occasions->strip())
+            // flashed by the share-target route; present on that one render only
+            ->with('share_prefill', fn () => $request->session()->get('wishlist.share'));
 
         $requestedGroup = $request->query('group');
         if ($requestedGroup !== null) {

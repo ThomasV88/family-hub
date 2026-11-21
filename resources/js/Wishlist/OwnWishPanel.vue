@@ -29,6 +29,8 @@ const props = defineProps({
     groupId: { type: Number, default: null },
     ownerName: { type: String, default: '' },
     managing: { type: Boolean, default: false },
+    // { title, url } from the share target; applied once when the create form opens, never saved by itself
+    prefill: { type: Object, default: null },
 });
 const emit = defineEmits(['close']);
 const { t } = useI18n();
@@ -314,14 +316,39 @@ watch(() => [props.open, props.mode, props.wish?.id], () => {
     resetPreview();
     autoPreview.value = initial().urls.length === 0;
 }, { immediate: true });
+// Share target: fill an empty title and first link once per opening; the form stays dirty and nothing is saved until the user presses Save.
+let prefillApplied = false;
+watch(() => [props.open, props.mode, props.prefill], () => {
+    if (!props.open) {
+        prefillApplied = false;
+        return;
+    }
+    if (prefillApplied || !creating.value || !props.prefill) return;
+    prefillApplied = true;
+    const { title, url } = props.prefill;
+    if (typeof title === 'string' && title !== '' && form.value.title.trim() === '') form.value.title = title.slice(0, 120);
+    if (typeof url === 'string' && isHttpUrl(url) && form.value.urls.length === 0) {
+        form.value.urls = [{ url, label: '' }];
+        onFirstUrl(url);
+    }
+}, { immediate: true });
 const firstUrl = computed(() => {
     const url = form.value.urls[0]?.url?.trim() ?? '';
     return isHttpUrl(url) ? url : '';
 });
 const canReloadPreview = computed(() => !received.value && firstUrl.value !== '' && previewStatus.value !== 'loading' && (!autoPreview.value || previewRan.value));
 const previewImageNote = computed(() => (previewStatus.value === 'done' && !previewMissing.value.some((m) => m.field === 'image') ? t('wishlist.preview.done_image_on_save') : ''));
+// A shop that blocks automatic loading (or a page that is too large) fails every field with one reason; it gets its own message.
+const previewBlockReason = computed(() => {
+    const reasons = previewMissing.value.map((m) => m.reason);
+    if (reasons.includes('http_blocked')) return 'http_blocked';
+    if (reasons.includes('too_large')) return 'too_large';
+    return '';
+});
+const previewBlockNote = computed(() => (previewBlockReason.value === 'http_blocked' ? t('wishlist.preview.blocked_site') : previewBlockReason.value === 'too_large' ? t('wishlist.preview.too_large') : ''));
+const previewImageMissing = computed(() => previewMissing.value.some((m) => m.field === 'image'));
 const previewMissingNote = computed(() => {
-    if (previewMissing.value.length === 0) return '';
+    if (previewMissing.value.length === 0 || previewBlockReason.value !== '') return '';
     const list = previewMissing.value.map(({ field, reason }) => {
         const name = t(`wishlist.preview.missing_${field}`);
         return ['timeout', 'blocked', 'no_tags', 'unreachable'].includes(reason) ? `${name} (${t(`wishlist.preview.reason_${reason}`)})` : name;
@@ -374,6 +401,11 @@ defineExpose({ guard, dirty });
                             <img v-if="previewThumb" :src="previewThumb" :alt="t('wishlist.preview.image_alt')" class="wish-panel__preview" data-testid="preview-image" />
                             <p v-if="previewImageNote" class="wish-panel__hint" data-testid="preview-image-note">{{ previewImageNote }}</p>
                             <p v-if="previewMissingNote" class="wish-panel__hint" data-testid="preview-missing">{{ previewMissingNote }}</p>
+                            <p v-if="previewBlockNote" class="wish-panel__hint" data-testid="preview-blocked">{{ previewBlockNote }}</p>
+                            <div v-if="previewBlockNote && previewImageMissing && canUpload">
+                                <UiButton variant="secondary" size="sm" :icon="Upload" data-testid="preview-upload" @click="pickImage">{{ t('wishlist.image.upload') }}</UiButton>
+                            </div>
+                            <p v-else-if="previewBlockNote && previewImageMissing && creating && !received" class="wish-panel__hint" data-testid="preview-save-first">{{ t('wishlist.preview.save_then_upload') }}</p>
                         </div>
                         <div v-if="canReloadPreview">
                             <UiButton variant="secondary" size="sm" :icon="RefreshCw" @click="reloadPreview">{{ t('wishlist.preview.reload') }}</UiButton>

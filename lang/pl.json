@@ -1213,6 +1213,9 @@
             "reason_blocked": "adres jest niedozwolony",
             "reason_no_tags": "strona go nie udostępnia",
             "reason_unreachable": "strona jest niedostępna",
+            "blocked_site": "Strona blokuje automatyczne ładowanie. Prześlij obraz samodzielnie.",
+            "too_large": "Strona jest zbyt duża, by wczytać ją automatycznie.",
+            "save_then_upload": "Najpierw zapisz prezent, a potem prześlij obraz w jego panelu edycji.",
             "reload": "Wczytaj ponownie z pierwszego linku"
         },
         "res": {

@@ -24,13 +24,31 @@
           "Naciśnij **Zapisz życzenie**."
         ] },
         { "type": "list", "items": [
-          "**Linki**: do 5 adresów sklepów lub stron, każdy z opcjonalnym opisem. Gdy wkleisz pierwszy link do nowego życzenia, puste **Tytuł** i **Notatki** zostaną uzupełnione z tej strony i pojawi się obraz. Obraz zostanie dołączony przy zapisie. Tekst wpisany przez Ciebie nigdy nie jest nadpisywany i wszystko możesz zmienić. Kolejne linki nie są odczytywane. Jeśli czegoś nie udało się wczytać, komunikat to nazwie (obraz, tytuł lub opis) i, gdy wiadomo, dlaczego. Aby odczytać pierwszy link ponownie, naciśnij **Wczytaj ponownie z pierwszego linku**.",
+          "**Linki**: do 5 adresów sklepów lub stron, każdy z opcjonalnym opisem. Gdy wkleisz pierwszy link do nowego życzenia, puste **Tytuł** i **Notatki** zostaną uzupełnione z tej strony i pojawi się obraz. Obraz zostanie dołączony przy zapisie. Tekst wpisany przez Ciebie nigdy nie jest nadpisywany i wszystko możesz zmienić. Kolejne linki nie są odczytywane. Jeśli czegoś nie udało się wczytać, komunikat to nazwie (obraz, tytuł lub opis) i, gdy wiadomo, dlaczego. Jeśli sklep blokuje automatyczne ładowanie, formularz to powie i tuż pod komunikatem zaproponuje **Prześlij obraz** (przy nowym życzeniu najpierw je zapisz i prześlij obraz w panelu edycji); zbyt duża strona jest zgłaszana jako zbyt duża. Aby odczytać pierwszy link ponownie, naciśnij **Wczytaj ponownie z pierwszego linku**.",
           "**Cena** i **Waluta**: przybliżona cena pomaga innym planować.",
           "**Priorytet**: **Największe marzenie**, **Bardzo by mnie ucieszyło** albo **Byłoby miło**.",
           "**Notatki**: rozmiar, kolor albo cokolwiek innego.",
           "**Obraz**: wgraj obraz JPEG, PNG lub WebP do 5 MB albo naciśnij **Pobierz obraz z linku**, aby wziąć go ze strony sklepu."
         ] },
         { "type": "p", "text": "Gdy dostaniesz prezent, otwórz życzenie i wybierz **Oznacz jako otrzymane** i potwierdź. Otrzymane życzenia schodzą z drogi. Naciśnij **Otrzymane**, aby zobaczyć je znowu. Jeśli życzenie oznaczono przez pomyłkę, otwórz je w sekcji Otrzymane, wybierz **Przenieś z powrotem na moją listę** i potwierdź: życzenie jest znów aktywne i można je edytować." }
+      ]
+    },
+    {
+      "id": "share-from-phone",
+      "title": "Udostępnianie produktu z telefonu",
+      "blocks": [
+        { "type": "steps", "title": "W co stuknąć", "items": [
+          "Otwórz stronę produktu w przeglądarce w telefonie.",
+          "Użyj polecenia przeglądarki **Udostępnij** i wybierz **FamilyHUB**.",
+          "Formularz nowego życzenia otworzy się na Twojej liście z już wypełnionym linkiem i tytułem, a obraz zostanie wyszukany tak jak po wklejeniu linku.",
+          "Sprawdź go i naciśnij **Zapisz życzenie**."
+        ] },
+        { "type": "list", "items": [
+          "Nic nie zostanie zapisane, dopóki nie naciśniesz **Zapisz życzenie**. Zamknięcie formularza odrzuca udostępniony link.",
+          "Działa na Androidzie w Chrome, gdy FamilyHUB jest zainstalowany na ekranie głównym. Jeśli FamilyHUB nie ma na liście Udostępnij, usuń aplikację i zainstaluj ją ponownie, bo pozycja Udostępnij jest dodawana przy instalacji aplikacji.",
+          "iPhone i iPad (Safari) nie potrafią udostępniać do zainstalowanych aplikacji internetowych. Tam skopiuj link, otwórz **Dodaj życzenie** i wklej go w **Linki**.",
+          "Listy grupowe nie są celem udostępniania: życzenie zawsze trafia na Twoją własną listę. Stamtąd możesz je dalej edytować jak zwykle."
+        ] }
       ]
     },
     {

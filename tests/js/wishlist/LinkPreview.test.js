@@ -131,6 +131,44 @@ describe('link preview autofill', () => {
         expect(document.body.querySelector('[data-testid="preview-image-note"]')).toBeNull();
     });
 
+    it('says the shop blocks loading and tells a new wish to save first, without an upload button', async () => {
+        answer = { status: 'done', title: null, description: null, image: false, failures: { title: 'http_blocked', description: 'http_blocked', image: 'http_blocked' } };
+        mountPanel();
+        await flushPromises();
+        await addLink('https://shop.example/lamp');
+        await settle();
+        expect(document.body.querySelector('[data-testid="preview-blocked"]').textContent).toBe('The site blocks automatic loading. Upload the image yourself.');
+        expect(document.body.querySelector('[data-testid="preview-save-first"]').textContent).toBe('Save the gift first, then upload the image from its edit panel.');
+        expect(document.body.querySelector('[data-testid="preview-upload"]')).toBeNull();
+        expect(document.body.querySelector('[data-testid="preview-missing"]')).toBeNull();
+    });
+
+    it('offers an Upload image button under the blocked message when editing, and it opens the file picker', async () => {
+        answer = { status: 'done', title: null, description: null, image: false, failures: { title: 'http_blocked', description: 'http_blocked', image: 'http_blocked' } };
+        mountPanel({ mode: 'edit', wish: wish(11, { title: 'Blue backpack', urls: [link(1)] }) });
+        await flushPromises();
+        const picker = document.body.querySelector('[data-testid="image-input"]');
+        const clicked = vi.fn();
+        picker.click = clicked;
+        btn('Reload from first link').click();
+        await settle();
+        expect(document.body.querySelector('[data-testid="preview-blocked"]').textContent).toContain('blocks automatic loading');
+        expect(document.body.querySelector('[data-testid="preview-save-first"]')).toBeNull();
+        document.body.querySelector('[data-testid="preview-upload"]').click();
+        expect(clicked).toHaveBeenCalled();
+    });
+
+    it('says the page is too large and not that the shop blocks it', async () => {
+        answer = { status: 'done', title: null, description: null, image: false, failures: { title: 'too_large', description: 'too_large', image: 'too_large' } };
+        mountPanel();
+        await flushPromises();
+        await addLink('https://shop.example/lamp');
+        await settle();
+        const text = document.body.querySelector('[data-testid="preview-blocked"]').textContent;
+        expect(text).toBe('The page is too large to read automatically.');
+        expect(text).not.toContain('blocks');
+    });
+
     it('does nothing automatically for a wish that already has links, and the Reload button fetches', async () => {
         mountPanel({ mode: 'edit', wish: wish(11, { title: 'Blue backpack', urls: [link(1)] }) });
         await flushPromises();

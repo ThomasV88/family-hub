@@ -1213,6 +1213,9 @@
             "reason_blocked": "adresa nie je povolená",
             "reason_no_tags": "stránka ho neposkytuje",
             "reason_unreachable": "stránka nie je dostupná",
+            "blocked_site": "Stránka blokuje automatické načítanie. Nahraj obrázok sám.",
+            "too_large": "Stránka je príliš veľká na automatické načítanie.",
+            "save_then_upload": "Najprv ulož darček, potom nahraj obrázok v jeho paneli úprav.",
             "reload": "Načítať znova z prvého odkazu"
         },
         "res": {

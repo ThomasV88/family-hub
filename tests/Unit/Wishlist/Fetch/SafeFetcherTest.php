@@ -163,6 +163,11 @@ it('fails on non-200 statuses and oversize bodies', function () {
         ->and(fetchReasonOf(fn () => fetchTestFetcher($dns, [new Response(200, [], str_repeat('x', 101))])->get('http://a.example/', 100, 'html')))->toBe('too_large');
 });
 
+it('reports 401, 403 and 429 as http_blocked while other errors stay http_status', function (int $status, string $reason) {
+    $dns = ['a.example' => ['93.184.216.34']];
+    expect(fetchReasonOf(fn () => fetchTestFetcher($dns, [new Response($status)])->get('http://a.example/', 10, 'html')))->toBe($reason);
+})->with([[401, 'http_blocked'], [403, 'http_blocked'], [429, 'http_blocked'], [404, 'http_status'], [500, 'http_status']]);
+
 it('resolves references per RFC 3986', function (string $base, string $ref, ?string $expected) {
     expect(UrlResolver::resolve($base, $ref))->toBe($expected);
 })->with([
