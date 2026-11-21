@@ -34,6 +34,24 @@
       ]
     },
     {
+      "id": "share-from-phone",
+      "title": "Zdieľanie produktu z telefónu",
+      "blocks": [
+        { "type": "steps", "title": "Na čo klepnúť", "items": [
+          "Otvorte stránku produktu v prehliadači v telefóne.",
+          "Použite príkaz prehliadača **Zdieľať** a vyberte **FamilyHUB**.",
+          "Formulár nového želania sa otvorí na vašom zozname s už vyplneným odkazom a názvom a obrázok sa vyhľadá ako pri vložení odkazu.",
+          "Skontrolujte ho a stlačte **Uložiť želanie**."
+        ] },
+        { "type": "list", "items": [
+          "Nič sa neuloží, kým nestlačíte **Uložiť želanie**. Zatvorením formulára zdieľaný odkaz zahodíte.",
+          "Funguje na Androide v prehliadači Chrome, keď je FamilyHUB nainštalovaný na domovskej obrazovke. Ak FamilyHUB v zozname Zdieľať chýba, aplikáciu odstráňte a raz ju nainštalujte znova, pretože položka Zdieľať sa pridáva pri inštalácii aplikácie.",
+          "iPhone a iPad (Safari) nevedia zdieľať do nainštalovaných webových aplikácií. Tam skopírujte odkaz, otvorte **Pridať želanie** a vložte ho do **Odkazov**.",
+          "Skupinové zoznamy nie sú cieľom zdieľania: želanie vždy ide na váš vlastný zoznam. Odtiaľ ho môžete ďalej upravovať ako zvyčajne."
+        ] }
+      ]
+    },
+    {
       "id": "reserve",
       "title": "Rezervácia darčeka a spoločný nákup",
       "blocks": [

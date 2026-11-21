@@ -34,6 +34,24 @@
       ]
     },
     {
+      "id": "share-from-phone",
+      "title": "Sharing a product from your phone",
+      "blocks": [
+        { "type": "steps", "title": "Where to tap", "items": [
+          "Open the product page in your phone's browser.",
+          "Use the browser's **Share** command and choose **FamilyHUB**.",
+          "The new wish form opens on your own list with the link and the title already filled in, and the picture is looked up as when you paste a link.",
+          "Check it and press **Save wish**."
+        ] },
+        { "type": "list", "items": [
+          "Nothing is saved until you press **Save wish**. Close the form to throw the shared link away.",
+          "It works on Android with Chrome, after FamilyHUB has been installed on the home screen. If FamilyHUB is missing from the Share list, remove the app and install it again once, because the Share entry is added when the app is installed.",
+          "iPhone and iPad (Safari) cannot share to installed web apps. There, copy the link, open **Add wish** and paste it into **Links**.",
+          "Group lists are not a share target: the wish always goes to your own list. You can move on from there as usual."
+        ] }
+      ]
+    },
+    {
       "id": "reserve",
       "title": "Reserving a gift and buying together",
       "blocks": [

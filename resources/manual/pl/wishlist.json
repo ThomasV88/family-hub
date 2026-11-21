@@ -34,6 +34,24 @@
       ]
     },
     {
+      "id": "share-from-phone",
+      "title": "Udostępnianie produktu z telefonu",
+      "blocks": [
+        { "type": "steps", "title": "W co stuknąć", "items": [
+          "Otwórz stronę produktu w przeglądarce w telefonie.",
+          "Użyj polecenia przeglądarki **Udostępnij** i wybierz **FamilyHUB**.",
+          "Formularz nowego życzenia otworzy się na Twojej liście z już wypełnionym linkiem i tytułem, a obraz zostanie wyszukany tak jak po wklejeniu linku.",
+          "Sprawdź go i naciśnij **Zapisz życzenie**."
+        ] },
+        { "type": "list", "items": [
+          "Nic nie zostanie zapisane, dopóki nie naciśniesz **Zapisz życzenie**. Zamknięcie formularza odrzuca udostępniony link.",
+          "Działa na Androidzie w Chrome, gdy FamilyHUB jest zainstalowany na ekranie głównym. Jeśli FamilyHUB nie ma na liście Udostępnij, usuń aplikację i zainstaluj ją ponownie, bo pozycja Udostępnij jest dodawana przy instalacji aplikacji.",
+          "iPhone i iPad (Safari) nie potrafią udostępniać do zainstalowanych aplikacji internetowych. Tam skopiuj link, otwórz **Dodaj życzenie** i wklej go w **Linki**.",
+          "Listy grupowe nie są celem udostępniania: życzenie zawsze trafia na Twoją własną listę. Stamtąd możesz je dalej edytować jak zwykle."
+        ] }
+      ]
+    },
+    {
       "id": "reserve",
       "title": "Rezerwowanie prezentu i wspólny zakup",
       "blocks": [
